@@ -1,3 +1,34 @@
+# 0.7.0
+
+## Layout pipeline
+
+The layout-skip check now uses value equality on constraints instead of
+`identical()`, and every core mutation path marks layout explicitly. Apps
+get strictly fewer redundant relayouts than 0.6.0 (which effectively
+re-laid out the full tree every frame), while content updates render
+reliably.
+
+## Bug Fixes
+- **Overlay/Stack positioning**: Mark parent dirty when applying Positioned parent data, including the copy-in-place path used inside Overlay/Navigator (fixes overlay children frozen at stale positions)
+- **Padding/Align**: Convert RenderPadding and RenderPositionedBox to compare-and-mark setters so padding/alignment changes re-layout (fixes stale layout when constraints are unchanged)
+- **Child reorder**: Mark layout when moving render children, so reordering const/keyed children in Row/Column/Stack takes effect
+- **ListView/LayoutBuilder**: Always mark layout in update() — a stable (hoisted) builder reading mutated state now re-renders instead of pinning stale content
+- **ListView**: Evict stale separator cache entries when itemCount shrinks
+- **Element slots**: Propagate slot changes for identity-equal components, so reordering const children updates paint order
+- **Ticker**: Skip tail reschedule when onTick stops and restarts the ticker (fixes orphaned frame callbacks with AnimationController status listeners)
+- **Selection**: Notify listeners on selection drag state mutations so list viewports repaint selection bands
+
+## New APIs
+- **EdgeInsets**: Value equality (`==`/`hashCode`), matching Flutter semantics
+
+## Performance
+- **Render pipeline**: markNeedsLayout/markNeedsPaint are idempotent — already-dirty nodes short-circuit instead of re-walking to the root
+
+## Example
+- Interactive `relayout_fixes_demo.dart` exercising the layout-mark paths, with an e2e smoke test
+
+---
+
 # 0.6.0
 
 ## New Features
