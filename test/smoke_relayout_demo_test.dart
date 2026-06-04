@@ -36,8 +36,9 @@ void main() {
       // told apart from the ─ panel borders.
       int dividerWidth() {
         final text = tester.terminalState.getText();
-        return RegExp(r'═+').allMatches(text).fold(
-            0, (max, m) => m.end - m.start > max ? m.end - m.start : max);
+        return RegExp(r'═+')
+            .allMatches(text)
+            .fold(0, (max, m) => m.end - m.start > max ? m.end - m.start : max);
       }
 
       final wideDivider = dividerWidth();
@@ -72,8 +73,8 @@ void main() {
       await tester.pump();
       expect(tester.terminalState.containsText('item 0 -> counter=1'), isTrue,
           reason: 'hoisted ListView itemBuilder must see counter=1 on [h]');
-      expect(
-          tester.terminalState.containsText('LayoutBuilder -> counter=1'), isTrue,
+      expect(tester.terminalState.containsText('LayoutBuilder -> counter=1'),
+          isTrue,
           reason: 'hoisted LayoutBuilder builder must see counter=1 on [h]');
     }, size: const Size(80, 26));
   });

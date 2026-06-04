@@ -157,13 +157,16 @@ class _RelayoutFixesDemoState extends State<RelayoutFixesDemo> {
               '[a] Align ${_alignmentNames[_alignStep]}',
               Align(
                 alignment: _alignments[_alignStep],
-                child:
-                    const Text('@@', style: TextStyle(color: Color(0xFF00FFAA))),
+                child: const Text('@@',
+                    style: TextStyle(color: Color(0xFF00FFAA))),
               ),
             ),
             _panel(
               '[s] Swap order=${_aFirst ? "A,B" : "B,A"}',
-              Row(children: _aFirst ? const [_childA, _childB] : const [_childB, _childA]),
+              Row(
+                  children: _aFirst
+                      ? const [_childA, _childB]
+                      : const [_childB, _childA]),
               height: 7,
             ),
           ]),
