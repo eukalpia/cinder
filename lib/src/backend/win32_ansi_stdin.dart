@@ -19,6 +19,11 @@ class Win32AnsiStdin extends Stream<List<int>> implements Stdin {
       StreamController<List<int>>.broadcast();
   bool _running = false;
   int _lastButtonState = 0;
+  // Buffered high surrogate (0xD800-0xDBFF) from a previous IME key event,
+  // waiting for its matching low surrogate. Used to reassemble non-BMP
+  // characters (e.g. emoji, supplementary-plane CJK) into a single 4-byte
+  // UTF-8 sequence across two consecutive KEY_EVENT_RECORDs.
+  int? _pendingHighSurrogate;
 
   /// Factory constructor - returns singleton instance
   factory Win32AnsiStdin() {
@@ -245,13 +250,42 @@ class Win32AnsiStdin extends Stream<List<int>> implements Stdin {
         return shiftPressed ? [0x1b, 0x5b, 0x5a] : [0x09]; // Shift+Tab or Tab
     }
 
-    // Printable characters
+    // Discard any orphaned high surrogate from a previous IME commit
+    // unless this event is its matching low surrogate. Captured into a
+    // local so the high-surrogate branch below can decide whether to
+    // re-buffer or consume.
+    final bufferedHighSurrogate = _pendingHighSurrogate;
+    _pendingHighSurrogate = null;
+
+    // Printable ASCII
     if (char >= 32 && char < 127) {
       return [char];
     }
-    // Extended characters (UTF-16)
+
+    // Non-ASCII: KEY_EVENT_RECORD.uChar holds a single UTF-16 code unit.
+    // The downstream InputParser decodes as UTF-8 (1/2/3/4-byte sequences
+    // by leading byte), so we must convert here. This is what carries
+    // IME-committed CJK / other non-ASCII characters into the framework.
     if (char > 127) {
-      return String.fromCharCode(char).codeUnits;
+      // High surrogate (0xD800-0xDBFF): the first half of a surrogate
+      // pair for a non-BMP code point. Buffer and wait for the low
+      // surrogate to arrive in the next key event.
+      if (char >= 0xD800 && char <= 0xDBFF) {
+        _pendingHighSurrogate = char;
+        return [];
+      }
+      // Low surrogate (0xDC00-0xDFFF): second half of the pair. Combine
+      // with the buffered high surrogate and emit a 4-byte UTF-8
+      // sequence for the full code point. Drop if the high half is
+      // missing (orphan).
+      if (char >= 0xDC00 && char <= 0xDFFF) {
+        if (bufferedHighSurrogate == null) return [];
+        return utf8.encode(String.fromCharCodes([bufferedHighSurrogate, char]));
+      }
+      // Single BMP code unit. Most CJK ideographs (including 你 = U+4F60,
+      // 中 = U+4E2D, 好 = U+597D) live in the BMP, so this is the hot
+      // path for typical Chinese IME input.
+      return utf8.encode(String.fromCharCode(char));
     }
 
     return [];
