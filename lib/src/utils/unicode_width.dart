@@ -1,5 +1,7 @@
 import 'package:characters/characters.dart';
 
+import '../third_party/xterm_pure.dart/src/utils/unicode_v11.dart';
+
 /// Utility class for handling Unicode character display width in terminals
 ///
 /// This implementation handles the display width of Unicode characters,
@@ -73,82 +75,67 @@ class UnicodeWidth {
 
   /// Calculate the display width of a single rune/codepoint
   static int runeWidth(int rune) {
-    // Tab character has special handling - it takes up 1 column minimum
+    // Tab: at least 1 column.
     if (rune == 0x09) {
       return 1;
     }
 
-    // Control characters (0x00-0x1F, 0x7F-0x9F) except tab
-    if ((rune >= 0x00 && rune <= 0x1F) || (rune >= 0x7F && rune <= 0x9F)) {
+    // Zero-width: combining marks, ZWJ, variation selectors. These
+    // stack on top of a base character and never advance the cursor.
+    if (_isZeroWidth(rune)) {
       return 0;
     }
 
-    // Combining marks (0x0300-0x036F, and others)
+    // General Punctuation (0x2010-0x205F). Most characters here are
+    // East Asian Ambiguous (A) - em dash, smart quotes, ellipsis,
+    // primes, single angle quotes, reversed question/exclamation
+    // marks, etc. - and the bundled wcwidth table returns 1 for
+    // Ambiguous. CJK text renders them as full-width, so we treat
+    // the whole block as wide here.
+    if (rune >= 0x2010 && rune <= 0x205F) {
+      return 2;
+    }
+
+    // Delegate to the Unicode 11 East Asian Width property table
+    // (bundled with the xterm_pure dependency). One lookup covers
+    // every CJK ideograph range, kana, hangul, fullwidth/halfwidth
+    // forms, CJK Symbols and Punctuation (《, 》, 「, 」, ...),
+    // Kangxi radicals, compatibility ideographs, etc. - replacing
+    // the hand-maintained range whitelist.
+    final width = unicodeV11.wcwidth(rune);
+
+    // Some characters are visually 2 cells (emoji presentation) but
+    // the East Asian Width property classifies them as Narrow or
+    // Neutral - regional indicators 0x1F1E6-0x1F1FF, certain
+    // Dingbats/Misc Symbols, etc. Layer an emoji allowlist on top
+    // to bump them to 2.
+    if (width == 1 && _isEmoji(rune)) {
+      return 2;
+    }
+
+    return width;
+  }
+
+  /// Check if a rune is always zero-width regardless of context
+  /// (combining marks, ZWJ, variation selectors).
+  static bool _isZeroWidth(int rune) {
+    // Combining marks
     if ((rune >= 0x0300 && rune <= 0x036F) ||
         (rune >= 0x1AB0 && rune <= 0x1AFF) ||
         (rune >= 0x1DC0 && rune <= 0x1DFF) ||
         (rune >= 0x20D0 && rune <= 0x20FF) ||
         (rune >= 0xFE20 && rune <= 0xFE2F)) {
-      return 0;
+      return true;
     }
-
     // Zero-width joiner and non-joiner
     if (rune == 0x200D || rune == 0x200C) {
-      return 0;
+      return true;
     }
-
     // Variation selectors
     if ((rune >= 0xFE00 && rune <= 0xFE0F) ||
         (rune >= 0xE0100 && rune <= 0xE01EF)) {
-      return 0;
-    }
-
-    // Wide characters - CJK ideographs, Hiragana, Katakana
-    if (_isWideCharacter(rune)) {
-      return 2;
-    }
-
-    // Emoji detection
-    if (_isEmoji(rune)) {
-      return 2;
-    }
-
-    // Default to 1 column width for regular characters
-    return 1;
-  }
-
-  /// Check if a rune represents a wide character (CJK, etc.)
-  static bool _isWideCharacter(int rune) {
-    // CJK Unified Ideographs
-    if ((rune >= 0x4E00 && rune <= 0x9FFF) ||
-        (rune >= 0x3400 && rune <= 0x4DBF) ||
-        (rune >= 0x20000 && rune <= 0x2A6DF) ||
-        (rune >= 0x2A700 && rune <= 0x2B73F) ||
-        (rune >= 0x2B740 && rune <= 0x2B81F) ||
-        (rune >= 0x2B820 && rune <= 0x2CEAF)) {
       return true;
     }
-
-    // Hiragana and Katakana
-    if ((rune >= 0x3040 && rune <= 0x309F) ||
-        (rune >= 0x30A0 && rune <= 0x30FF)) {
-      return true;
-    }
-
-    // Full-width Latin characters
-    if (rune >= 0xFF01 && rune <= 0xFF60) {
-      return true;
-    }
-
-    // Hangul
-    if ((rune >= 0xAC00 && rune <= 0xD7AF) ||
-        (rune >= 0x1100 && rune <= 0x11FF) ||
-        (rune >= 0x3130 && rune <= 0x318F) ||
-        (rune >= 0xA960 && rune <= 0xA97F) ||
-        (rune >= 0xD7B0 && rune <= 0xD7FF)) {
-      return true;
-    }
-
     return false;
   }
 
