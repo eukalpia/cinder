@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
@@ -222,6 +223,15 @@ class RenderSelectionArea extends RenderMouseRegion {
   /// Focus (current drag position) selectable and char index.
   _SelectionPosition? _focus;
 
+  // Edge auto-scroll while dragging near a scroll viewport boundary.
+  static const double _edgeScrollThreshold = 1.0;
+  static const double _edgeScrollDelta = 1.0;
+  bool _edgeAutoScrolling = false;
+  Offset? _edgeScrollLocalPosition;
+
+  /// Tracks pointer motion after the cursor leaves this region mid-drag.
+  StreamSubscription<MouseEvent>? _externalDragSubscription;
+
   // Cache invalidation
 
   void _invalidateSelectablesCache() {
@@ -256,6 +266,13 @@ class RenderSelectionArea extends RenderMouseRegion {
     _updateSelectionAnnotation();
   }
 
+  @override
+  void detach() {
+    _stopExternalDragTracking();
+    _stopEdgeAutoScroll();
+    super.detach();
+  }
+
   MouseTrackerAnnotation? _selectionAnnotation;
 
   @override
@@ -268,6 +285,7 @@ class RenderSelectionArea extends RenderMouseRegion {
   void _updateSelectionAnnotation() {
     _selectionAnnotation = MouseTrackerAnnotation(
       onEnter: (event) {
+        _stopExternalDragTracking();
         if (event.button == MouseButton.left) {
           final leftDown = event.pressed || event.isPrimaryButtonDown;
           if (leftDown && !_isLeftButtonPressed) {
@@ -279,9 +297,17 @@ class RenderSelectionArea extends RenderMouseRegion {
         }
       },
       onExit: (event) {
+        if (_isDragging && event.isPrimaryButtonDown) {
+          final clamped = _clampPointerPosition(
+            Offset(event.x.toDouble(), event.y.toDouble()),
+          );
+          _edgeScrollLocalPosition = clamped;
+          _updateDragSelectionAt(clamped);
+          _updateEdgeAutoScroll(clamped);
+          _startExternalDragTracking();
+          return;
+        }
         if (_isDragging) {
-          // End drag when leaving the region. Otherwise a subsequent release
-          // outside this region may never be dispatched back here.
           _isLeftButtonPressed = false;
           _handlePointerUp(event);
           return;
@@ -373,6 +399,11 @@ class RenderSelectionArea extends RenderMouseRegion {
     if (!_isDragging) return;
 
     final localPos = Offset(event.x.toDouble(), event.y.toDouble());
+    _updateDragSelectionAt(localPos);
+    _updateEdgeAutoScroll(localPos);
+  }
+
+  void _updateDragSelectionAt(Offset localPos) {
     _cachedSelectables = _collectSelectables(this);
     if (_cachedSelectables.isEmpty) return;
     _contextLists = _buildContextLists(_cachedSelectables);
@@ -471,7 +502,274 @@ class RenderSelectionArea extends RenderMouseRegion {
       _updateSelectionRangeForViewport(entries, contextKey, _anchor!, _focus!);
     }
 
+    final overscrollDirection = _edgeScrollDirectionAt(localPos);
+    if (overscrollDirection != 0) {
+      _extendFocusForOverscroll(localPos, overscrollDirection);
+    }
+
     _notifySelectionChanged();
+  }
+
+  void _updateEdgeAutoScroll(Offset localPos) {
+    _edgeScrollLocalPosition = localPos;
+    if (!_isDragging) {
+      _stopEdgeAutoScroll();
+      return;
+    }
+
+    if (_edgeScrollDirectionAt(localPos) == 0) {
+      _stopEdgeAutoScroll();
+      return;
+    }
+
+    if (!_edgeAutoScrolling) {
+      _edgeAutoScrolling = true;
+      _edgeScrollTick();
+    }
+  }
+
+  void _edgeScrollTick() {
+    if (!_edgeAutoScrolling || !_isDragging) {
+      _stopEdgeAutoScroll();
+      return;
+    }
+
+    final localPos = _edgeScrollLocalPosition;
+    if (localPos == null) {
+      _stopEdgeAutoScroll();
+      return;
+    }
+
+    final direction = _edgeScrollDirectionAt(localPos);
+    if (direction == 0) {
+      _stopEdgeAutoScroll();
+      return;
+    }
+
+    final viewport = _primaryScrollViewport();
+    if (viewport == null || !_scrollViewport(viewport, direction)) {
+      _stopEdgeAutoScroll();
+      return;
+    }
+
+    _invalidateSelectablesCache();
+    _updateDragSelectionAt(localPos);
+    _extendFocusForOverscroll(localPos, direction);
+    _schedulePostFrameSelectionUpdate(_mouseEventAt(localPos));
+
+    SchedulerBinding.instance.scheduleFrameCallback((_) => _edgeScrollTick());
+  }
+
+  /// When the pointer has overscrolled past the viewport edge, snap focus to
+  /// the boundary row so selection continues to grow as content scrolls in.
+  void _extendFocusForOverscroll(Offset terminalPos, int direction) {
+    if (_anchor == null || _focus == null) return;
+
+    final viewport = _primaryScrollViewport();
+    if (viewport is! RenderListViewport) return;
+
+    final contextKey = _anchor!.context;
+    if (contextKey != viewport) return;
+
+    final entries = _contextLists[contextKey];
+    if (entries == null || entries.isEmpty) return;
+
+    final vpOffset = _globalPaintOffsetOf(viewport);
+    final vpTop = vpOffset.dy;
+    final vpBottom = vpOffset.dy + viewport.size.height;
+    final overscrolledAbove = terminalPos.dy < vpTop;
+    final overscrolledBelow = terminalPos.dy >= vpBottom;
+
+    if (direction < 0 && overscrolledAbove) {
+      final first = entries.first;
+      _focus = _SelectionPosition(
+        context: contextKey,
+        selectableId: first.id,
+        offset: 0,
+        orderIndex: entries.indexOf(first),
+      );
+    } else if (direction > 0 && overscrolledBelow) {
+      final last = entries.last;
+      _focus = _SelectionPosition(
+        context: contextKey,
+        selectableId: last.id,
+        offset: last.selectable.selectableText.length,
+        orderIndex: entries.indexOf(last),
+      );
+    } else {
+      return;
+    }
+
+    _updateSelectionRanges(entries, _anchor!, _focus!);
+    _updateSelectionRangeForViewport(entries, contextKey, _anchor!, _focus!);
+    _notifySelectionChanged();
+  }
+
+  void _stopEdgeAutoScroll() {
+    _edgeAutoScrolling = false;
+    _edgeScrollLocalPosition = null;
+  }
+
+  void _startExternalDragTracking() {
+    if (_externalDragSubscription != null) return;
+    final binding = NoctermBinding.instance;
+    if (binding is! TerminalBinding) return;
+    _externalDragSubscription =
+        binding.mouseEvents.listen(_handleExternalMouseEvent);
+  }
+
+  void _stopExternalDragTracking() {
+    _externalDragSubscription?.cancel();
+    _externalDragSubscription = null;
+  }
+
+  void _handleExternalMouseEvent(MouseEvent event) {
+    if (!_isDragging) {
+      _stopExternalDragTracking();
+      return;
+    }
+
+    if (event.button == MouseButton.wheelUp ||
+        event.button == MouseButton.wheelDown) {
+      if (event.isPrimaryButtonDown) {
+        final clamped = _clampPointerPosition(
+          Offset(event.x.toDouble(), event.y.toDouble()),
+        );
+        _updateDragSelectionAt(clamped);
+        _schedulePostFrameSelectionUpdate(event);
+      }
+      return;
+    }
+
+    if (event.button != MouseButton.left) return;
+
+    if (!event.isMotion && !event.pressed) {
+      _isLeftButtonPressed = false;
+      final clamped = _clampPointerPosition(
+        Offset(event.x.toDouble(), event.y.toDouble()),
+      );
+      _handlePointerUp(_mouseEventAt(clamped));
+      return;
+    }
+
+    if (event.isPrimaryButtonDown) {
+      _isLeftButtonPressed = true;
+      final clamped = _clampPointerPosition(
+        Offset(event.x.toDouble(), event.y.toDouble()),
+      );
+      _edgeScrollLocalPosition = clamped;
+      _updateDragSelectionAt(clamped);
+      _updateEdgeAutoScroll(clamped);
+    }
+  }
+
+  Offset _clampPointerPosition(Offset pos) {
+    final bounds = _selectionAreaBounds();
+    final right = bounds.right <= bounds.left ? bounds.left : bounds.right - 1;
+    final bottom = bounds.bottom <= bounds.top ? bounds.top : bounds.bottom - 1;
+    return Offset(
+      pos.dx.clamp(bounds.left, right),
+      pos.dy.clamp(bounds.top, bottom),
+    );
+  }
+
+  MouseEvent _mouseEventAt(Offset localPos) {
+    return MouseEvent(
+      button: MouseButton.left,
+      x: localPos.dx.round(),
+      y: localPos.dy.round(),
+      pressed: true,
+      isMotion: true,
+      buttons: const {MouseButton.left},
+    );
+  }
+
+  /// Mouse event coordinates are terminal-global, not local to this region.
+  RenderObject? _primaryScrollViewport() {
+    RenderObject? found;
+    void visit(RenderObject node) {
+      node.visitChildren(visit);
+      if (node is RenderListViewport || node is RenderSingleChildViewport) {
+        found = node;
+      }
+    }
+
+    visitChildren(visit);
+    return found;
+  }
+
+  int _edgeScrollDirectionAt(Offset terminalPos) {
+    final viewport = _primaryScrollViewport();
+    if (viewport == null || !viewport.hasSize) return 0;
+
+    final direction = _edgeScrollDirectionFor(terminalPos, viewport);
+    if (direction != 0) return direction;
+
+    // Pointer overscrolled outside the viewport (e.g. into padding/header)
+    // but drag is still active — keep scrolling from the selection bounds.
+    final area = _selectionAreaBounds();
+    if (terminalPos.dy <= area.top + _edgeScrollThreshold) {
+      return -1;
+    }
+    if (terminalPos.dy >= area.bottom - _edgeScrollThreshold - 1) {
+      return 1;
+    }
+    return 0;
+  }
+
+  int _edgeScrollDirectionFor(Offset terminalPos, RenderObject viewport) {
+    if (!viewport.hasSize) return 0;
+
+    final offset = _globalPaintOffsetOf(viewport);
+    final top = offset.dy;
+    final bottom = offset.dy + viewport.size.height;
+
+    if (terminalPos.dy <= top + _edgeScrollThreshold) {
+      return -1;
+    }
+    if (terminalPos.dy >= bottom - _edgeScrollThreshold - 1) {
+      return 1;
+    }
+    return 0;
+  }
+
+  bool _scrollViewport(RenderObject viewport, int direction) {
+    final ScrollController controller;
+    final bool reverse;
+    final Axis scrollDirection;
+
+    if (viewport is RenderListViewport) {
+      controller = viewport.controller;
+      reverse = viewport.reverse;
+      scrollDirection = viewport.scrollDirection;
+    } else if (viewport is RenderSingleChildViewport) {
+      controller = viewport.controller;
+      reverse = false;
+      scrollDirection = viewport.scrollDirection;
+    } else {
+      return false;
+    }
+
+    if (scrollDirection != Axis.vertical) return false;
+
+    if (direction < 0) {
+      if (reverse) {
+        if (controller.offset >= controller.maxScrollExtent) return false;
+        controller.scrollDown(_edgeScrollDelta);
+      } else {
+        if (controller.offset <= controller.minScrollExtent) return false;
+        controller.scrollUp(_edgeScrollDelta);
+      }
+    } else {
+      if (reverse) {
+        if (controller.offset <= controller.minScrollExtent) return false;
+        controller.scrollUp(_edgeScrollDelta);
+      } else {
+        if (controller.offset >= controller.maxScrollExtent) return false;
+        controller.scrollDown(_edgeScrollDelta);
+      }
+    }
+    return true;
   }
 
   void _updateSelectionRangeForViewport(
@@ -492,6 +790,8 @@ class RenderSelectionArea extends RenderMouseRegion {
   }
 
   void _handlePointerUp(MouseEvent event) {
+    _stopExternalDragTracking();
+    _stopEdgeAutoScroll();
     if (_isDragging) {
       _handlePointerMove(event);
       onDragEnded?.call();
