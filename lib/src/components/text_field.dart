@@ -1375,6 +1375,65 @@ class RenderTextField extends RenderObject with MouseTrackerAnnotationProvider {
     _targetVisualColumn = null;
   }
 
+  /// Returns the terminal screen coordinates (column, row) of the text cursor,
+  /// or null if the cursor position cannot be determined or the field is not focused.
+  ///
+  /// This is used by the binding layer to position the physical terminal cursor
+  /// so that IME (Input Method Editor) composition windows (e.g. Chinese Pinyin)
+  /// appear at the correct location instead of flickering across the screen
+  /// during differential rendering.
+  ///
+  /// The position is returned even when the cursor is in its blink-off phase
+  /// so the IME window stays anchored at the correct location.
+  Offset? getImeCursorPosition() {
+    if (!_isFocused || _layoutResult == null) {
+      return null;
+    }
+
+    final lines = _layoutResult!.lines;
+
+    if (_text.isEmpty && _placeholder == null) {
+      // Empty field - cursor at beginning
+      final globalOffset = _globalPaintOffset;
+      return Offset(globalOffset.dx, globalOffset.dy);
+    }
+
+    // Find which line the cursor is on (same logic as _paintCursor)
+    int charCount = 0;
+    for (int i = 0; i < lines.length; i++) {
+      final line = lines[i];
+      final lineLength = line.length;
+
+      if (charCount + lineLength >= _selection.extentOffset ||
+          i == lines.length - 1) {
+        final positionInLine =
+            (_selection.extentOffset - charCount).clamp(0, lineLength);
+
+        // Calculate visual position using Unicode width
+        final textBeforeCursor = line.substring(0, positionInLine);
+        final visualColumn = UnicodeWidth.stringWidth(textBeforeCursor);
+
+        // Combine global offset with cursor position within the field
+        final globalOffset = _globalPaintOffset;
+        return Offset(
+          globalOffset.dx + visualColumn,
+          globalOffset.dy + i,
+        );
+      }
+
+      charCount += lineLength;
+      if (i < lines.length - 1) {
+        final textSoFar =
+            _text.substring(0, math.min(charCount, _text.length));
+        if (textSoFar.endsWith('\n')) {
+          charCount++;
+        }
+      }
+    }
+
+    return null;
+  }
+
   // --- Mouse interaction ---
 
   @override
