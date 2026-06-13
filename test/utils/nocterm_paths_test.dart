@@ -11,7 +11,14 @@ void main() {
 
     setUp(() {
       previousCwd = Directory.current;
-      tempRoot = Directory.systemTemp.createTempSync('nocterm_paths_test_');
+      // Resolve symlinks up front: macOS maps /tmp -> /private/tmp (and
+      // /var -> /private/var), but getProjectDirectory() reads
+      // Directory.current.path, which the OS canonicalizes. Without this the
+      // expected paths keep the symlink prefix and the actual paths don't,
+      // so every assertion fails on macOS (Linux CI has no such symlink).
+      tempRoot = Directory(Directory.systemTemp
+          .createTempSync('nocterm_paths_test_')
+          .resolveSymbolicLinksSync());
     });
 
     tearDown(() {
