@@ -1,3 +1,28 @@
+# 0.8.0
+
+## Bug Fixes
+- **IME composition (Windows/CJK)**: Emit each rendered frame in a single pipe write so the terminal never anchors the IME composition window to a transient streaming cell — fixes IME window flickering across the screen during chat/log streaming
+- **IME cursor**: Stabilize IME cursor position to prevent Chinese input flickering
+- **TextField cursor**: Correct cursor position with multiple consecutive newlines
+- **Windows input**: Restore `ENABLE_PROCESSED_INPUT` so Ctrl+C generates SIGINT
+- **Windows input**: Cap the input loop wait so timers and signals fire reliably
+- **Win32 input**: Encode `KEY_EVENT_RECORD.uChar` as UTF-8 for correct IME input
+- **Win32 mouse**: Forward bare mouse motion as SGR button 35 so hover works
+- **Character width**: Keep East Asian Ambiguous punctuation single-width
+- **Selection**: Edge auto-scroll during selection drag in scroll views
+- **Terminal shutdown**: Stop sending DECRDA query on TUI shutdown
+- **Project paths**: Terminate `getProjectDirectory` walk at Windows drive roots
+- **TextField**: Use `InputDecoration` instead of `BoxDecoration`
+
+## Refactoring
+- **Character width**: Delegate CJK classification to the xterm wcwidth table
+
+## Chores
+- **CI**: Bump GitHub Actions to node24-compatible majors
+- Strengthen the test suite with additional matchers, audit fixes, and gap coverage
+
+---
+
 # 0.7.0
 
 ## Layout pipeline
