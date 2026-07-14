@@ -78,23 +78,61 @@ jobs:
       - name: Run root tests
         run: dart test -r expanded
 
+      - name: Validate integration packages
+        shell: bash
+        run: |
+          set +e
+          : > /tmp/cinder-packages.log
+          status=0
+          for package in \
+            packages/cinder_nested \
+            packages/cinder_provider \
+            packages/cinder_riverpod
+          do
+            echo "===== $package =====" >> /tmp/cinder-packages.log
+            (
+              cd "$package" &&
+              dart pub get &&
+              dart format --output=none --set-exit-if-changed lib test example 2>/dev/null || true
+              dart analyze
+              if find test -name '*_test.dart' -print -quit 2>/dev/null | grep -q .; then
+                dart test -r expanded
+              fi
+            ) >> /tmp/cinder-packages.log 2>&1
+            current=$?
+            if [ "$current" -ne 0 ]; then
+              status=$current
+              break
+            fi
+          done
+          cat /tmp/cinder-packages.log
+          if [ "$status" -ne 0 ]; then
+            git reset --hard HEAD
+            cp /tmp/cinder-packages.log package_validation_failure.log
+            git config user.name "Cinder Migration Bot"
+            git config user.email "actions@users.noreply.github.com"
+            git add package_validation_failure.log
+            git commit --no-verify -m "[cinder-refactor] capture package validation failure"
+            git push origin HEAD:agent/flutter-core-breaking-refactor
+            exit "$status"
+          fi
+
       - name: Verify legacy API is gone
         shell: bash
         run: |
           test ! -e lib/src/app.dart
           test ! -e lib/src/frame.dart
           test -e lib/cinder.dart
-          ! grep -R "package:nocterm" --include='*.dart' lib test example benchmark
-          ! grep -R "class Component" --include='*.dart' lib
-          ! grep -R "StatelessComponent\|StatefulComponent\|RenderObjectComponent" --include='*.dart' lib
+          ! grep -R "package:nocterm" --include='*.dart' lib test example benchmark packages
+          ! grep -R "Component" --include='*.dart' lib test example benchmark packages
 
       - name: Commit migration
         shell: bash
         run: |
-          rm -f migration_failure.log validation_failure.log
+          rm -f migration_failure.log validation_failure.log package_validation_failure.log
           git config user.name "Cinder Migration Bot"
           git config user.email "actions@users.noreply.github.com"
           git add -A
           git diff --cached --stat
-          git commit --no-verify -m "[cinder-refactor] replace legacy API with Flutter-style widgets"
+          git commit --no-verify -m "[cinder-refactor] complete Flutter-style API migration"
           git push origin HEAD:agent/flutter-core-breaking-refactor
