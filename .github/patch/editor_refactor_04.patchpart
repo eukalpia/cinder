@@ -1,0 +1,530 @@
+{
+     if (_allChildrenSet.add(renderObject)) {
+@@ -767,6 +781,10 @@
+     parentData.layoutOffset = layoutOffset;
+     parentData.extent = childExtent;
+     parentData.index = index;
++    _currentLayoutOffsets[index] = (layoutOffset, childExtent);
++    if (!hasSeparators) {
++      _lazyExtentIndex?.updateExtent(index, childExtent);
++    }
+ 
+     return renderObject;
+   }
+@@ -791,6 +809,7 @@
+     sepParentData.layoutOffset = layoutOffset;
+     sepParentData.extent = separatorExtent;
+     sepParentData.index = -index - 1;
++    _currentLayoutOffsets[-index - 1] = (layoutOffset, separatorExtent);
+ 
+     return separatorRenderObject;
+   }
+@@ -804,28 +823,26 @@
+       return (index, index * itemExtent!);
+     }
+ 
+-    if (_allChildren.isEmpty) {
+-      return (0, 0.0);
++    final extentIndex = _lazyExtentIndex;
++    if (!hasSeparators && extentIndex != null && extentIndex.isNotEmpty) {
++      final index = extentIndex.indexAtOffset(scrollOffset);
++      return (index, extentIndex.offsetOfIndex(index));
+     }
+ 
+-    // Find the child closest to (but not past) the scroll offset
+-    int bestIndex = 0;
+-    double bestOffset = 0.0;
+-
+-    for (final child in _allChildren) {
+-      final parentData = child.renderObject.parentData as ListViewParentData?;
+-      if (parentData?.layoutOffset == null || parentData?.index == null) {
+-        continue;
+-      }
+-
+-      final offset = parentData!.layoutOffset!;
+-      final index = parentData.index!;
++    if (_previousLayoutOffsets.isEmpty) return (0, 0.0);
++
++    // Separator/unknown-count fallback scans only the previous cached window,
++    // never the complete history.
++    var bestIndex = 0;
++    var bestOffset = 0.0;
++    for (final entry in _previousLayoutOffsets.entries) {
++      if (entry.key < 0) continue;
++      final offset = entry.value.$1;
+       if (offset <= scrollOffset && offset >= bestOffset) {
+-        bestIndex = index;
++        bestIndex = entry.key;
+         bestOffset = offset;
+       }
+     }
+-
+     return (bestIndex, bestOffset);
+   }
+ 
+@@ -834,6 +851,7 @@
+     _visibleChildren.clear();
+     _allChildren.clear();
+     _allChildrenSet.clear();
++    _currentLayoutOffsets.clear();
+ 
+     if (_element == null) {
+       size = constraints.constrain(Size.zero);
+@@ -861,6 +879,7 @@
+     // Build visible children
+     final widget = _element!.widget;
+     final itemCount = widget.itemCount;
++    _syncLazyExtentIndex(itemCount);
+ 
+     // Child constraints
+     final childConstraints = scrollDirection == Axis.vertical
+@@ -924,6 +943,10 @@
+       );
+     }
+ 
++    _previousLayoutOffsets
++      ..clear()
++      ..addAll(_currentLayoutOffsets);
++
+     // Reset the child update flag after layout completes
+     _element?.layoutComplete();
+ 
+@@ -934,6 +957,26 @@
+     );
+   }
+ 
++
++  void _syncLazyExtentIndex(int? itemCount) {
++    if (!_lazy || hasSeparators || itemCount == null) {
++      _lazyExtentIndex = null;
++      _lazyExtentItemCount = null;
++      return;
++    }
++
++    final estimate = itemExtent ?? _averageItemExtent ?? 1.0;
++    _lazyExtentIndex ??= ExtentIndex<int>(estimatedExtent: estimate);
++    if (_lazyExtentItemCount != itemCount) {
++      _lazyExtentIndex!.syncItems(
++        List<int>.generate(itemCount, (index) => index, growable: false),
++      );
++      _lazyExtentItemCount = itemCount;
++    } else if (itemExtent == null && _averageItemExtent != null) {
++      _lazyExtentIndex!.estimatedExtent = _averageItemExtent!;
++    }
++  }
++
+   void _updateChildOffsets({
+     required EdgeInsets effectivePadding,
+     required double viewportExtent,
+@@ -1078,6 +1121,9 @@
+           return extent;
+         }
+       }
++      if (!hasSeparators && _lazyExtentIndex != null) {
++        return _lazyExtentIndex!.totalExtent;
++      }
+       // Fall back to estimate based on average
+       if (_averageItemExtent != null) {
+         double extent = _averageItemExtent! * itemCount;
+--- a/lib/src/components/scroll_controller.dart
++++ b/lib/src/components/scroll_controller.dart
+@@ -84,6 +84,19 @@
+     }
+   }
+ 
++  /// Corrects the scroll position during layout without notifying listeners.
++  ///
++  /// Scrollable render objects use this to preserve a content anchor when
++  /// items are inserted or when a previously estimated item changes extent.
++  void correctTo(double value) {
++    _offset = value.clamp(minScrollExtent, maxScrollExtent);
++  }
++
++  /// Applies a silent layout-time correction to the current offset.
++  void correctBy(double correction) {
++    correctTo(_offset + correction);
++  }
++
+   /// Jumps the scroll position to the given value.
+   void jumpTo(double value) {
+     _offset = value.clamp(minScrollExtent, maxScrollExtent);
+--- a/lib/src/components/text_field.dart
++++ b/lib/src/components/text_field.dart
+@@ -11,38 +11,175 @@
+ import '../text/selection_utils.dart' as selection_utils;
+ import 'text_field/cursor_movement.dart';
+ 
+-/// Controls the text being edited.
+-class TextEditingController {
+-  TextEditingController({String? text})
+-      : _text = text ?? '',
+-        _selection = TextSelection.collapsed(offset: text?.length ?? 0);
++/// A complete text editing value containing both text and selection.
++class TextEditingValue {
++  const TextEditingValue({
++    required this.text,
++    required this.selection,
++  });
++
++  const TextEditingValue.empty()
++      : text = '',
++        selection = const TextSelection.collapsed(offset: 0);
++
++  final String text;
++  final TextSelection selection;
++
++  TextEditingValue copyWith({String? text, TextSelection? selection}) {
++    return TextEditingValue(
++      text: text ?? this.text,
++      selection: selection ?? this.selection,
++    );
++  }
++
++  @override
++  bool operator ==(Object other) {
++    return identical(this, other) ||
++        other is TextEditingValue &&
++            other.text == text &&
++            other.selection == selection;
++  }
++
++  @override
++  int get hashCode => Object.hash(text, selection);
++}
++
++/// Text selection representation.
++class TextSelection {
++  const TextSelection({
++    required this.baseOffset,
++    required this.extentOffset,
++  });
++
++  const TextSelection.collapsed({required int offset})
++      : baseOffset = offset,
++        extentOffset = offset;
++
++  final int baseOffset;
++  final int extentOffset;
++
++  bool get isCollapsed => baseOffset == extentOffset;
++  int get start => math.min(baseOffset, extentOffset);
++  int get end => math.max(baseOffset, extentOffset);
++
++  TextSelection copyWith({int? baseOffset, int? extentOffset}) {
++    return TextSelection(
++      baseOffset: baseOffset ?? this.baseOffset,
++      extentOffset: extentOffset ?? this.extentOffset,
++    );
++  }
+ 
+-  String _text;
+-  TextSelection _selection;
++  @override
++  bool operator ==(Object other) {
++    if (identical(this, other)) return true;
++    return other is TextSelection &&
++        other.baseOffset == baseOffset &&
++        other.extentOffset == extentOffset;
++  }
++
++  @override
++  int get hashCode => Object.hash(baseOffset, extentOffset);
++}
++
++/// Controls the text being edited and owns its undo/redo history.
++class TextEditingController {
++  TextEditingController({
++    String? text,
++    this.historyLimit = 100,
++  }) : _value = TextEditingValue(
++          text: text ?? '',
++          selection: TextSelection.collapsed(offset: text?.length ?? 0),
++        );
++
++  TextEditingValue _value;
++  final List<TextEditingValue> _undoStack = <TextEditingValue>[];
++  final List<TextEditingValue> _redoStack = <TextEditingValue>[];
+   final _listeners = <VoidCallback>[];
+ 
++  /// Maximum number of text mutations retained for undo.
++  final int historyLimit;
++
++  TextEditingValue get value => _value;
++  set value(TextEditingValue newValue) => setValue(newValue);
++
+   /// The current text being edited.
+-  String get text => _text;
++  String get text => _value.text;
+   set text(String newText) {
+-    if (_text != newText) {
+-      _text = newText;
+-      _selection = TextSelection.collapsed(offset: newText.length);
+-      notifyListeners();
+-    }
++    setValue(TextEditingValue(
++      text: newText,
++      selection: TextSelection.collapsed(offset: newText.length),
++    ));
+   }
+ 
+   /// The current selection.
+-  TextSelection get selection => _selection;
++  TextSelection get selection => _value.selection;
+   set selection(TextSelection newSelection) {
+-    if (_selection != newSelection) {
+-      _selection = newSelection;
+-      notifyListeners();
++    setValue(_value.copyWith(selection: newSelection), recordHistory: false);
++  }
++
++  bool get canUndo => _undoStack.isNotEmpty;
++  bool get canRedo => _redoStack.isNotEmpty;
++
++  /// Atomically updates text and selection.
++  ///
++  /// Selection-only changes are never added to undo history. Text changes are
++  /// recorded unless [recordHistory] is false (useful for restoring drafts).
++  void setValue(
++    TextEditingValue newValue, {
++    bool recordHistory = true,
++  }) {
++    final normalized = _normalize(newValue);
++    if (normalized == _value) return;
++
++    final textChanged = normalized.text != _value.text;
++    if (recordHistory && textChanged && historyLimit > 0) {
++      _undoStack.add(_value);
++      if (_undoStack.length > historyLimit) {
++        _undoStack.removeAt(0);
++      }
++      _redoStack.clear();
+     }
++
++    _value = normalized;
++    notifyListeners();
++  }
++
++  TextEditingValue _normalize(TextEditingValue candidate) {
++    final length = candidate.text.length;
++    return candidate.copyWith(
++      selection: TextSelection(
++        baseOffset: candidate.selection.baseOffset.clamp(0, length),
++        extentOffset: candidate.selection.extentOffset.clamp(0, length),
++      ),
++    );
++  }
++
++  bool undo() {
++    if (_undoStack.isEmpty) return false;
++    final previous = _undoStack.removeLast();
++    _redoStack.add(_value);
++    _value = _normalize(previous);
++    notifyListeners();
++    return true;
++  }
++
++  bool redo() {
++    if (_redoStack.isEmpty) return false;
++    final next = _redoStack.removeLast();
++    _undoStack.add(_value);
++    _value = _normalize(next);
++    notifyListeners();
++    return true;
++  }
++
++  void clearHistory() {
++    _undoStack.clear();
++    _redoStack.clear();
+   }
+ 
+   /// Clear the text.
+   void clear() {
+-    text = '';
++    value = const TextEditingValue.empty();
+   }
+ 
+   /// Add a listener.
+@@ -57,7 +194,7 @@
+ 
+   /// Notify all listeners.
+   void notifyListeners() {
+-    for (final listener in _listeners) {
++    for (final listener in List<VoidCallback>.of(_listeners)) {
+       listener();
+     }
+   }
+@@ -65,44 +202,54 @@
+   /// Dispose of the controller.
+   void dispose() {
+     _listeners.clear();
++    clearHistory();
+   }
+ }
+ 
+-/// Text selection representation.
+-class TextSelection {
+-  const TextSelection({
+-    required this.baseOffset,
+-    required this.extentOffset,
+-  });
++/// Persistence contract for per-conversation text drafts.
++abstract class TextDraftStore {
++  const TextDraftStore();
++
++  TextEditingValue? read(Object key);
++  void write(Object key, TextEditingValue value);
++  void remove(Object key);
++}
+ 
+-  const TextSelection.collapsed({required int offset})
+-      : baseOffset = offset,
+-        extentOffset = offset;
++/// In-memory draft store suitable for chat tabs and workspace panes.
++class MemoryTextDraftStore extends TextDraftStore {
++  MemoryTextDraftStore();
+ 
+-  final int baseOffset;
+-  final int extentOffset;
++  final Map<Object, TextEditingValue> _drafts = <Object, TextEditingValue>{};
+ 
+-  bool get isCollapsed => baseOffset == extentOffset;
+-  int get start => math.min(baseOffset, extentOffset);
+-  int get end => math.max(baseOffset, extentOffset);
++  @override
++  TextEditingValue? read(Object key) => _drafts[key];
+ 
+-  TextSelection copyWith({int? baseOffset, int? extentOffset}) {
+-    return TextSelection(
+-      baseOffset: baseOffset ?? this.baseOffset,
+-      extentOffset: extentOffset ?? this.extentOffset,
+-    );
++  @override
++  void write(Object key, TextEditingValue value) {
++    _drafts[key] = value;
+   }
+ 
+   @override
+-  bool operator ==(Object other) {
+-    if (identical(this, other)) return true;
+-    return other is TextSelection &&
+-        other.baseOffset == baseOffset &&
+-        other.extentOffset == extentOffset;
++  void remove(Object key) {
++    _drafts.remove(key);
+   }
+ 
+-  @override
+-  int get hashCode => Object.hash(baseOffset, extentOffset);
++  void clear() => _drafts.clear();
++}
++
++/// Determines which Enter chord submits a [TextField].
++enum TextFieldSubmitMode {
++  /// Plain Enter submits. Shift+Enter inserts a newline in multiline fields.
++  enter,
++
++  /// Ctrl+Enter or Meta+Enter submits. Plain Enter inserts a newline.
++  controlOrMetaEnter,
++
++  /// Shift+Enter submits. Plain Enter inserts a newline.
++  shiftEnter,
++
++  /// Enter never submits and inserts a newline when multiline.
++  never,
+ }
+ 
+ /// A Material Design text field for terminal UI.
+@@ -128,7 +275,13 @@
+     this.onEditingComplete,
+     this.onSubmitted,
+     this.onPaste,
++    this.onEditorKeyEvent,
++    this.onAppKeyEvent,
+     this.onKeyEvent,
++    this.submitMode = TextFieldSubmitMode.enter,
++    this.draftKey,
++    this.draftStore,
++    this.clearDraftOnSubmit = false,
+     this.enabled = true,
+     this.cursorColor,
+     this.cursorStyle = CursorStyle.block,
+@@ -171,11 +324,27 @@
+   /// Return `false` or null to proceed with default insertion.
+   final bool Function(String pastedText)? onPaste;
+ 
+-  /// Callback invoked when a key event occurs, before TextField processes it.
+-  /// Return `true` to indicate the event was handled (TextField will skip processing).
+-  /// Return `false` to let TextField handle the event normally.
+-  /// This allows parent widgets to intercept keys like arrow up/down for custom handling.
++  /// Editor-level interception invoked before Cinder's built-in editing intents.
++  final bool Function(KeyboardEvent event)? onEditorKeyEvent;
++
++  /// Application shortcut handler invoked only after editor shortcuts decline.
++  final bool Function(KeyboardEvent event)? onAppKeyEvent;
++
++  /// Backwards-compatible alias for [onAppKeyEvent].
+   final bool Function(KeyboardEvent event)? onKeyEvent;
++
++  /// Configures the Enter chord used for submit/send.
++  final TextFieldSubmitMode submitMode;
++
++  /// Stable conversation/document identifier used for draft persistence.
++  final Object? draftKey;
++
++  /// Store used to persist and restore [draftKey].
++  final TextDraftStore? draftStore;
++
++  /// Removes the persisted draft after a successful submit callback.
++  final bool clearDraftOnSubmit;
++
+   final bool enabled;
+ 
+   /// The color of the text cursor.
+@@ -207,6 +376,7 @@
+   Timer? _cursorTimer;
+   bool _cursorVisible = true;
+   int _viewOffset = 0; // For horizontal scrolling
++  bool _restoringDraft = false;
+ 
+   // Reference to the render object for cursor movement
+   RenderTextField? _renderTextField;
+@@ -254,13 +424,8 @@
+     super.initState();
+     _initFocusNode();
+ 
+-    if (widget.controller == null) {
+-      _controller = TextEditingController();
+-      _controllerIsInternal = true;
+-    } else {
+-      _controller = widget.controller!;
+-    }
+-
++    _attachController(widget.controller);
++    _restoreDraft(widget.draftStore, widget.draftKey);
+     _controller.addListener(_handleControllerChanged);
+ 
+     if (_hasFocus && widget.showCursor) {
+@@ -268,6 +433,38 @@
+     }
+   }
+ 
++  void _attachController(TextEditingController? controller) {
++    _controllerIsInternal = controller == null;
++    _controller = controller ?? TextEditingController();
++  }
++
++  void _persistDraft(TextDraftStore? store, Object? key) {
++    if (_restoringDraft || store == null || key == null) return;
++    store.write(key, _controller.value);
++  }
++
++  void _restoreDraft(
++    TextDraftStore? store,
++    Object? key, {
++    bool clearWhenMissing = false,
++  }) {
++    if (store == null || key == null) return;
++    final draft = store.read(key);
++    if (draft == null && !clearWhenMissing) return;
++    _restoringDraft = true;
++    _controlle
