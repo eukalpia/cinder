@@ -1,0 +1,3 @@
+Warning: Package resolution error when reading "analysis_options.yaml" file:
+Failed to resolve package URI "package:flutter_lints/flutter.yaml" in include at "/home/runner/work/cinder/cinder/packages/cinder_web/analysis_options.yaml".
+Formatted 505 files (0 changed) in 0.83 seconds.
