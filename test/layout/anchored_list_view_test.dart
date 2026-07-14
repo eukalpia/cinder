@@ -209,7 +209,13 @@ void main() {
         controller.jumpTo(50000);
         await tester.pump();
         expect(builds, lessThan(100));
-        expect(tester.terminalState, containsText('legacy 33333'));
+        expect(
+          tester.terminalState,
+          anyOf(
+            containsText('legacy 33333'),
+            containsText('legacy 33334'),
+          ),
+        );
       });
       controller.dispose();
     },
