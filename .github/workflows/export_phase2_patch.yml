@@ -1,0 +1,29 @@
+name: Export Renderer V2 Phase 2 patch
+
+on:
+  pull_request:
+    branches: [dev]
+    paths:
+      - '.github/workflows/export_phase2_patch.yml'
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: feature/renderer-v2-layers
+      - name: Decode patch
+        run: |
+          python3 - <<'PY'
+          import base64, gzip
+          from pathlib import Path
+          src = Path('.github/phase2_payload/patch.gz.b64')
+          Path('/tmp/renderer-v2-phase2.patch').write_bytes(
+              gzip.decompress(base64.b64decode(src.read_text()))
+          )
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: renderer-v2-phase2-patch
+          path: /tmp/renderer-v2-phase2.patch
