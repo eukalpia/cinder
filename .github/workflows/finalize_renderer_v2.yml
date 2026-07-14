@@ -14,6 +14,7 @@ concurrency:
   group: finalize-renderer-v2
   cancel-in-progress: true
 
+# One-shot full validation before removing finalization infrastructure.
 jobs:
   finalize:
     runs-on: ubuntu-latest
