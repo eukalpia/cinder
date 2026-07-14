@@ -1,4 +1,4 @@
-name: Ship validated Renderer V2
+name: Clean Renderer V2 artifacts
 
 on:
   pull_request:
@@ -10,44 +10,47 @@ permissions:
   contents: write
 
 jobs:
-  ship:
+  cleanup:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           ref: dev
           fetch-depth: 0
-      - uses: dart-lang/setup-dart@v1
-        with:
-          sdk: stable
-      - name: Apply validated Renderer V2
-        run: python3 .github/scripts/finalize_renderer_v2.py
-      - name: Format production targets
-        run: |
-          dart format \
-            lib/src/buffer.dart \
-            lib/src/rendering/frame_diff.dart \
-            lib/src/framework/terminal_canvas.dart \
-            lib/src/binding/terminal_binding.dart \
-            lib/src/utils/escape_codes.dart \
-            test/rendering/buffer_v2_test.dart \
-            test/rendering/frame_diff_test.dart \
-            benchmark/renderer_v2_benchmark.dart
-      - name: Keep workflow cleanup for the GitHub API commit
+      - name: Remove temporary non-workflow artifacts
         shell: bash
         run: |
-          # GitHub's Actions token cannot create commits that modify workflow
-          # files. Restore .github exactly, then commit only the already
-          # validated production implementation, tests, benchmark, and docs.
-          git restore --source=HEAD --staged --worktree .github
-      - name: Commit production Renderer V2
+          rm -f \
+            .github/scripts/apply_renderer_v2.py \
+            .github/scripts/finalize_renderer_v2.py \
+            .github/scripts/fix_focus_runtime.py \
+            .github/renderer_v2_cleanup_manifest.tmp \
+            .github/cleanup-placeholder.txt \
+            .github/atomic-cleanup-instructions.txt \
+            .github/do-not-keep.tmp \
+            renderer_v2_error.log \
+            integration_package_error.log \
+            cinder_riverpod_analyzer.log \
+            tool/ci_trigger.txt
+          rm -rf ci_diagnostics
+      - name: Commit cleanup
         run: |
-          git config user.name "Cinder Renderer Bot"
+          git config user.name "Cinder Cleanup Bot"
           git config user.email "actions@users.noreply.github.com"
-          git add README.md lib test benchmark packages
+          git add -A -- \
+            .github/scripts \
+            .github/renderer_v2_cleanup_manifest.tmp \
+            .github/cleanup-placeholder.txt \
+            .github/atomic-cleanup-instructions.txt \
+            .github/do-not-keep.tmp \
+            renderer_v2_error.log \
+            integration_package_error.log \
+            cinder_riverpod_analyzer.log \
+            tool/ci_trigger.txt \
+            ci_diagnostics
           if git diff --cached --quiet; then
-            echo "No production changes to commit."
+            echo "No temporary artifacts remain."
             exit 0
           fi
-          git commit --no-verify -m "perf!: ship validated Renderer V2 pipeline"
+          git commit --no-verify -m "chore: remove Renderer V2 diagnostics"
           git push origin HEAD:dev
