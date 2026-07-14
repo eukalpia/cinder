@@ -1,5 +1,8 @@
+// Riverpod 3 keeps the listenable type hierarchy internal.
+// ignore_for_file: implementation_imports, invalid_use_of_internal_member
+
 import 'package:cinder/cinder.dart';
-import 'package:riverpod/riverpod.dart';
+import 'package:riverpod/src/internals.dart';
 
 import 'framework.dart';
 

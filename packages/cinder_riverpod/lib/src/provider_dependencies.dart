@@ -1,5 +1,8 @@
+// Riverpod 3 keeps the listenable type hierarchy internal.
+// ignore_for_file: implementation_imports, invalid_use_of_internal_member
+
 import 'package:cinder/cinder.dart';
-import 'package:riverpod/riverpod.dart';
+import 'package:riverpod/src/internals.dart';
 
 /// Manages provider subscriptions for a single element.
 ///
@@ -33,18 +36,14 @@ class ProviderDependencies {
       if (_oldWatchers.containsKey(provider)) {
         _watchers[provider] = _oldWatchers.remove(provider)!;
       } else {
-        final subscription = container.listen<T>(
-          provider,
-          (previous, next) {
-            if (_watchers.containsKey(provider) ||
-                _oldWatchers.containsKey(provider)) {
-              if (dependent.mounted) {
-                dependent.markNeedsBuild();
-              }
+        final subscription = container.listen<T>(provider, (previous, next) {
+          if (_watchers.containsKey(provider) ||
+              _oldWatchers.containsKey(provider)) {
+            if (dependent.mounted) {
+              dependent.markNeedsBuild();
             }
-          },
-          fireImmediately: false,
-        );
+          }
+        }, fireImmediately: false);
         _watchers[provider] = subscription;
       }
     }

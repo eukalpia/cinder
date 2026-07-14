@@ -7,6 +7,7 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:cinder/cinder.dart';
+import 'package:meta/meta.dart';
 import 'package:riverpod/src/internals.dart';
 
 import 'provider_dependencies.dart';
@@ -43,12 +44,16 @@ class ProviderScope extends StatefulWidget {
     _InheritedProviderScope? scope;
 
     if (listen) {
-      scope =
-          context.dependOnInheritedWidgetOfExactType<_InheritedProviderScope>();
-    } else {
       scope = context
-          .getElementForInheritedWidgetOfExactType<_InheritedProviderScope>()
-          ?.widget as _InheritedProviderScope?;
+          .dependOnInheritedWidgetOfExactType<_InheritedProviderScope>();
+    } else {
+      scope =
+          context
+                  .getElementForInheritedWidgetOfExactType<
+                    _InheritedProviderScope
+                  >()
+                  ?.widget
+              as _InheritedProviderScope?;
     }
 
     if (scope == null) {
@@ -89,9 +94,13 @@ class _ProviderScopeState extends State<ProviderScope> {
   var _overridesDirty = false;
 
   ProviderContainer? _nearestParent() {
-    final inherited = context
-        .getElementForInheritedWidgetOfExactType<_InheritedProviderScope>()
-        ?.widget as _InheritedProviderScope?;
+    final inherited =
+        context
+                .getElementForInheritedWidgetOfExactType<
+                  _InheritedProviderScope
+                >()
+                ?.widget
+            as _InheritedProviderScope?;
     return inherited?.container;
   }
 
@@ -243,12 +252,12 @@ class _InheritedProviderScope extends InheritedWidget {
 /// cross-library context extension. It is hidden from the package barrel.
 @internal
 class ProviderScopeElement extends InheritedElement {
-  ProviderScopeElement(InheritedWidget super.widget);
+  ProviderScopeElement(super.widget);
 
-  @override
-  _InheritedProviderScope get widget => super.widget as _InheritedProviderScope;
+  _InheritedProviderScope get _scopeWidget =>
+      super.widget as _InheritedProviderScope;
 
-  ProviderContainer get container => widget.container;
+  ProviderContainer get container => _scopeWidget.container;
 
   final _dependents = HashMap<Element, ProviderDependencies>();
 
