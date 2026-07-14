@@ -75,9 +75,7 @@ class FocusManager {
   }
 
   bool _canRequestFocus(FocusNode node) {
-    return node.attached &&
-        node.canRequestFocus &&
-        _ancestorsAllowFocus(node);
+    return node.attached && node.canRequestFocus && _ancestorsAllowFocus(node);
   }
 
   List<FocusNode> _traversableNodes({FocusScopeNode? scope}) {
@@ -396,9 +394,7 @@ class Focus extends StatefulWidget {
 
   /// Returns the nearest focus node, or null when no [Focus] exists.
   static FocusNode? maybeOf(BuildContext context) {
-    return context
-        .dependOnInheritedWidgetOfExactType<_FocusMarker>()
-        ?.node;
+    return context.dependOnInheritedWidgetOfExactType<_FocusMarker>()?.node;
   }
 
   @override
@@ -431,7 +427,8 @@ class _FocusState extends State<Focus> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final nextScope = FocusScope.maybeOf(context) ?? FocusManager.instance.rootScope;
+    final nextScope =
+        FocusScope.maybeOf(context) ?? FocusManager.instance.rootScope;
     if (!identical(nextScope, _scope) || !_node.attached) {
       _scope = nextScope;
       _node.attach(FocusManager.instance, nextScope);
@@ -482,9 +479,7 @@ class _FocusState extends State<Focus> {
 
   bool _handleKeyEvent(KeyboardEvent event) {
     if (event.logicalKey == LogicalKey.tab) {
-      return event.isShiftPressed
-          ? _node.previousFocus()
-          : _node.nextFocus();
+      return event.isShiftPressed ? _node.previousFocus() : _node.nextFocus();
     }
     return widget.onKeyEvent?.call(event) ??
         _node.onKeyEvent?.call(event) ??
@@ -591,7 +586,8 @@ class _FocusScopeState extends State<FocusScope> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final nextParent = FocusScope.maybeOf(context) ?? FocusManager.instance.rootScope;
+    final nextParent =
+        FocusScope.maybeOf(context) ?? FocusManager.instance.rootScope;
     if (!identical(nextParent, _node) &&
         (!identical(nextParent, _parentScope) || !_node.attached)) {
       _parentScope = nextParent;

@@ -86,7 +86,8 @@ void main() {
     second.dispose();
   });
 
-  test('skipTraversal is skipped but explicit focus remains available', () async {
+  test('skipTraversal is skipped but explicit focus remains available',
+      () async {
     final first = FocusNode(debugLabel: 'first');
     final skipped = FocusNode(debugLabel: 'skipped', skipTraversal: true);
     final last = FocusNode(debugLabel: 'last');
