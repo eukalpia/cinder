@@ -207,7 +207,7 @@ class _GestureDetectorState extends State<GestureDetector> {
       final sequence = entry.value;
       final previous = sequence.lastPosition ?? sequence.downPosition;
       final delta = position - previous;
-      if (delta == Offset.zero) continue;
+      if (delta.dx == 0 && delta.dy == 0) continue;
 
       if (!sequence.dragging) {
         sequence.dragging = true;
@@ -379,6 +379,14 @@ class _RenderGestureDetector extends RenderMouseRegion {
     final target = Set<MouseButton>.of(event.buttons)
       ..remove(MouseButton.wheelUp)
       ..remove(MouseButton.wheelDown);
+
+    if (event.pressed &&
+        event.button != MouseButton.wheelUp &&
+        event.button != MouseButton.wheelDown) {
+      target.add(event.button);
+    } else if (!event.pressed) {
+      target.remove(event.button);
+    }
 
     for (final button in target.difference(_pressedButtons)) {
       _onPointerDown(
