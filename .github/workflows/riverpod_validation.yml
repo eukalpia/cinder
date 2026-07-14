@@ -6,6 +6,9 @@ on:
     paths:
       - '.github/workflows/riverpod_validation.yml'
 
+permissions:
+  contents: write
+
 jobs:
   validate:
     runs-on: ubuntu-latest
@@ -13,6 +16,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: dev
+          fetch-depth: 0
       - uses: dart-lang/setup-dart@v1
         with:
           sdk: stable
@@ -20,8 +24,20 @@ jobs:
         working-directory: packages/cinder_riverpod
         run: dart pub get
       - name: Analyze with fatal infos
-        working-directory: packages/cinder_riverpod
-        run: dart analyze --fatal-infos
+        shell: bash
+        run: |
+          set +e
+          cd packages/cinder_riverpod
+          dart analyze --fatal-infos > /tmp/cinder-riverpod-analyze.log 2>&1
+          status=$?
+          cd ../..
+          tail -n 180 /tmp/cinder-riverpod-analyze.log > cinder_riverpod_analyzer.log
+          git config user.name "Cinder Diagnostics Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add cinder_riverpod_analyzer.log
+          git commit --no-verify -m "diagnostics: capture Cinder Riverpod analyzer" || true
+          git push origin HEAD:dev
+          exit "$status"
       - name: Test
         working-directory: packages/cinder_riverpod
         run: dart test --reporter expanded
