@@ -1,85 +1,76 @@
+import 'dart:async';
 import 'dart:collection';
 
-import 'package:meta/meta.dart';
 import 'package:cinder/cinder.dart';
-import 'package:riverpod/riverpod.dart';
+import 'package:meta/meta.dart';
+import 'package:riverpod/src/internals.dart';
 
 import 'provider_dependencies.dart';
 
 /// A widget that stores the state of providers.
 ///
-/// This widget is necessary to use any provider-related functionality.
-/// It should be placed at the root of the widget tree:
-///
-/// ```dart
-/// runApp(
-///   ProviderScope(
-///     child: MyApp(),
-///   ),
-/// );
-/// ```
+/// Place this at the root of the Cinder widget tree.
 class ProviderScope extends StatefulWidget {
   const ProviderScope({
     super.key,
     this.parent,
     this.overrides = const [],
     this.observers,
+    this.retry,
     required this.child,
   });
 
-  /// The parent container if this is a nested scope
+  /// Optional explicit parent container.
+  ///
+  /// When omitted, Cinder uses the nearest ancestor [ProviderScope].
   final ProviderContainer? parent;
-
-  /// Overrides for providers in this scope
   final List<Override> overrides;
-
-  /// Observers for provider state changes
   final List<ProviderObserver>? observers;
-
-  /// The child widget
+  final Retry? retry;
   final Widget child;
 
   @override
   State<ProviderScope> createState() => _ProviderScopeState();
 
-  /// Returns the [ProviderContainer] of the closest [ProviderScope] ancestor.
   static ProviderContainer containerOf(
     BuildContext context, {
     bool listen = true,
   }) {
-    UncontrolledProviderScope? scope;
+    _InheritedProviderScope? scope;
 
     if (listen) {
       scope = context
-          .dependOnInheritedWidgetOfExactType<UncontrolledProviderScope>();
+          .dependOnInheritedWidgetOfExactType<_InheritedProviderScope>();
     } else {
-      scope =
-          context.findAncestorWidgetOfExactType<UncontrolledProviderScope>();
+      scope = context
+          .getElementForInheritedWidgetOfExactType<_InheritedProviderScope>()
+          ?.widget as _InheritedProviderScope?;
     }
 
     if (scope == null) {
       throw StateError(
-        'ProviderScope not found. Make sure to wrap your app with a ProviderScope.',
+        'ProviderScope not found. Wrap the Cinder app with ProviderScope.',
       );
     }
 
     return scope.container;
   }
 
-  /// Returns the [_UncontrolledProviderScopeElement] of the closest [ProviderScope] ancestor.
   @internal
-  static _UncontrolledProviderScopeElement scopeElementOf(
-      BuildContext context) {
-    // Find the InheritedElement for UncontrolledProviderScope
-    // Use the built-in getElementForInheritedWidgetOfExactType which uses the
-    // properly maintained _inheritedElements map, rather than walking the parent chain.
-    final InheritedElement? element =
-        context.getElementForInheritedWidgetOfExactType<
-            UncontrolledProviderScope>();
+  static _InheritedProviderScopeElement scopeElementOf(
+    BuildContext context, {
+    bool listen = true,
+  }) {
+    if (listen) {
+      context.dependOnInheritedWidgetOfExactType<_InheritedProviderScope>();
+    }
 
-    if (element == null || element is! _UncontrolledProviderScopeElement) {
+    final element = context
+        .getElementForInheritedWidgetOfExactType<_InheritedProviderScope>();
+
+    if (element is! _InheritedProviderScopeElement) {
       throw StateError(
-        'ProviderScope not found. Make sure to wrap your app with a ProviderScope.',
+        'ProviderScope not found. Wrap the Cinder app with ProviderScope.',
       );
     }
 
@@ -89,15 +80,54 @@ class ProviderScope extends StatefulWidget {
 
 class _ProviderScopeState extends State<ProviderScope> {
   late final ProviderContainer _container;
+  late final ProviderContainer? _parent;
+  var _overridesDirty = false;
+
+  ProviderContainer? _nearestParent() {
+    final inherited = context
+        .getElementForInheritedWidgetOfExactType<_InheritedProviderScope>()
+        ?.widget as _InheritedProviderScope?;
+    return inherited?.container;
+  }
 
   @override
   void initState() {
     super.initState();
-
+    _parent = widget.parent ?? _nearestParent();
     _container = ProviderContainer(
-      parent: widget.parent,
+      parent: _parent,
       overrides: widget.overrides,
       observers: widget.observers,
+      retry: widget.retry,
+    );
+  }
+
+  @override
+  void didUpdateWidget(ProviderScope oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    final nextParent = widget.parent ?? _nearestParent();
+    if (!identical(nextParent, _parent)) {
+      throw UnsupportedError(
+        'ProviderScope cannot change its parent container after mounting.',
+      );
+    }
+
+    if (!identical(widget.overrides, oldWidget.overrides)) {
+      _overridesDirty = true;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_overridesDirty) {
+      _overridesDirty = false;
+      _container.updateOverrides(widget.overrides);
+    }
+
+    return UncontrolledProviderScope(
+      container: _container,
+      child: widget.child,
     );
   }
 
@@ -106,55 +136,125 @@ class _ProviderScopeState extends State<ProviderScope> {
     _container.dispose();
     super.dispose();
   }
+}
+
+/// Exposes an existing [ProviderContainer] to a Cinder widget subtree.
+///
+/// Unlike [ProviderScope], this widget does not dispose [container].
+class UncontrolledProviderScope extends StatefulWidget {
+  const UncontrolledProviderScope({
+    super.key,
+    required this.container,
+    required this.child,
+  });
+
+  final ProviderContainer container;
+  final Widget child;
+
+  @override
+  State<UncontrolledProviderScope> createState() =>
+      _UncontrolledProviderScopeState();
+}
+
+/// Synchronizes Riverpod's deferred refresh work with Cinder frames.
+class _UncontrolledProviderScopeState
+    extends State<UncontrolledProviderScope> implements Vsync {
+  Task? _pendingTask;
+  Timer? _disposeTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.container.scheduler.flutterVsyncs.add(this);
+  }
+
+  @override
+  void didUpdateWidget(UncontrolledProviderScope oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!identical(oldWidget.container, widget.container)) {
+      oldWidget.container.scheduler.flutterVsyncs.remove(this);
+      widget.container.scheduler.flutterVsyncs.add(this);
+    }
+  }
+
+  void _flushPendingTask() {
+    final task = _pendingTask;
+    _pendingTask = null;
+    task?.call();
+  }
+
+  @override
+  void Function()? scheduleRefresh(Task task) {
+    _pendingTask = task;
+    if (mounted) {
+      setState(() {});
+    }
+
+    return () {
+      if (identical(_pendingTask, task)) {
+        _pendingTask = null;
+      }
+    };
+  }
+
+  @override
+  void Function()? scheduleDispose(Task task) {
+    _disposeTimer?.cancel();
+    final timer = Timer.run(task.call);
+    _disposeTimer = timer;
+    return timer.cancel;
+  }
 
   @override
   Widget build(BuildContext context) {
-    return UncontrolledProviderScope(
-      container: _container,
+    _flushPendingTask();
+    return _InheritedProviderScope(
+      container: widget.container,
       child: widget.child,
     );
   }
+
+  @override
+  void dispose() {
+    _disposeTimer?.cancel();
+    _disposeTimer = null;
+    _pendingTask = null;
+    widget.container.scheduler.flutterVsyncs.remove(this);
+    super.dispose();
+  }
 }
 
-/// An [InheritedWidget] that exposes a [ProviderContainer] to its descendants.
-///
-/// This is the internal implementation used by [ProviderScope].
 @internal
-class UncontrolledProviderScope extends InheritedWidget {
-  const UncontrolledProviderScope({
-    super.key,
+class _InheritedProviderScope extends InheritedWidget {
+  const _InheritedProviderScope({
     required this.container,
     required super.child,
   });
 
-  /// The container that holds all provider state
   final ProviderContainer container;
 
   @override
-  bool updateShouldNotify(UncontrolledProviderScope oldWidget) {
-    return container != oldWidget.container;
+  bool updateShouldNotify(_InheritedProviderScope oldWidget) {
+    return !identical(container, oldWidget.container);
   }
 
   @override
-  _UncontrolledProviderScopeElement createElement() {
-    return _UncontrolledProviderScopeElement(this);
+  _InheritedProviderScopeElement createElement() {
+    return _InheritedProviderScopeElement(this);
   }
 }
 
-/// Element for [UncontrolledProviderScope] that manages provider dependencies.
-class _UncontrolledProviderScopeElement extends InheritedElement {
-  _UncontrolledProviderScopeElement(UncontrolledProviderScope super.widget);
+class _InheritedProviderScopeElement extends InheritedElement {
+  _InheritedProviderScopeElement(_InheritedProviderScope super.widget);
 
   @override
-  UncontrolledProviderScope get widget =>
-      super.widget as UncontrolledProviderScope;
+  _InheritedProviderScope get widget =>
+      super.widget as _InheritedProviderScope;
 
   ProviderContainer get container => widget.container;
 
-  /// Map of dependent elements to their provider dependencies
   final _dependents = HashMap<Element, ProviderDependencies>();
 
-  /// Get or create dependencies for a dependent element
   ProviderDependencies getDependencies(Element dependent) {
     return _dependents.putIfAbsent(
       dependent,
@@ -165,40 +265,25 @@ class _UncontrolledProviderScopeElement extends InheritedElement {
   @override
   void updateDependencies(Element dependent, Object? aspect) {
     super.updateDependencies(dependent, aspect);
-
-    // When a dependency is registered, ensure we have a ProviderDependencies for it
-    // This happens when an element calls dependOnInheritedWidgetOfExactType
     getDependencies(dependent);
   }
 
   @override
   void notifyDependent(InheritedWidget oldWidget, Element dependent) {
-    // Called when this InheritedElement changes and needs to notify dependents
-    // First, let the dependent's provider dependencies know it's about to rebuild
-    final dependencies = _dependents[dependent];
-    if (dependencies != null) {
-      dependencies.didRebuildDependent();
-    }
-
+    _dependents[dependent]?.didRebuildDependent();
     super.notifyDependent(oldWidget, dependent);
   }
 
-  /// Remove dependencies for a dependent element
   void removeDependencies(Element dependent) {
-    final dependencies = _dependents.remove(dependent);
-    if (dependencies != null) {
-      dependencies.deactivateDependent();
-    }
+    _dependents.remove(dependent)?.deactivateDependent();
   }
 
   @override
   void unmount() {
-    // Clean up all dependencies when this element is unmounted
     for (final dependencies in _dependents.values) {
       dependencies.deactivateDependent();
     }
     _dependents.clear();
-
     super.unmount();
   }
 }
