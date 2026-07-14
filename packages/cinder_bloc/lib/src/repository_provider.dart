@@ -49,7 +49,7 @@ class RepositoryProvider<T> extends SingleChildStatelessWidget {
 
     return Provider<T>(
       create: _create!,
-      dispose: _dispose == null ? null : (_, value) => _dispose(value),
+      dispose: _dispose == null ? null : (_, value) => _dispose!(value),
       lazy: lazy,
       child: child,
     );
@@ -59,8 +59,8 @@ class RepositoryProvider<T> extends SingleChildStatelessWidget {
 /// Merges multiple repository providers into one widget tree.
 class MultiRepositoryProvider extends MultiProvider {
   MultiRepositoryProvider({
-    super.key,
+    Key? key,
     required List<SingleChildWidget> providers,
     required Widget child,
-  }) : super(providers: providers, child: child);
+  }) : super(key: key, providers: providers, child: child);
 }
