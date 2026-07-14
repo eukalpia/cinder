@@ -84,6 +84,19 @@ class ScrollController extends ChangeNotifier {
     }
   }
 
+  /// Corrects the scroll position during layout without notifying listeners.
+  ///
+  /// Scrollable render objects use this to preserve a content anchor when
+  /// items are inserted or when a previously estimated item changes extent.
+  void correctTo(double value) {
+    _offset = value.clamp(minScrollExtent, maxScrollExtent);
+  }
+
+  /// Applies a silent layout-time correction to the current offset.
+  void correctBy(double correction) {
+    correctTo(_offset + correction);
+  }
+
   /// Jumps the scroll position to the given value.
   void jumpTo(double value) {
     _offset = value.clamp(minScrollExtent, maxScrollExtent);

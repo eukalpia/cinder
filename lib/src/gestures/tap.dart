@@ -45,6 +45,8 @@ class TapGestureRecognizer extends GestureRecognizer {
       final details = TapDownDetails(
         globalPosition: Offset(event.x.toDouble(), event.y.toDouble()),
         localPosition: localPosition,
+        button: event.button,
+        buttons: event.buttons,
       );
       onTapDown?.call(details);
       _sentTapDown = true;
@@ -72,6 +74,8 @@ class TapGestureRecognizer extends GestureRecognizer {
       final details = TapUpDetails(
         globalPosition: Offset(event.x.toDouble(), event.y.toDouble()),
         localPosition: localPosition,
+        button: event.button,
+        buttons: event.buttons,
       );
       onTapUp?.call(details);
     }

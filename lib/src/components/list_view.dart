@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:cinder/cinder.dart';
 import 'package:cinder/src/framework/terminal_canvas.dart';
 
+import '../rendering/extent_index.dart';
 import '../rendering/scrollable_render_object.dart';
 import 'selection_state.dart';
 
@@ -735,9 +736,22 @@ class RenderListViewport extends RenderObject with ScrollableRenderObjectMixin {
   int _firstBuiltIndex = 0;
   int _lastBuiltIndex = 0;
 
-  /// Tracks the average item extent for estimating total scroll extent
+  /// Tracks the average item extent for estimating total scroll extent.
   double? _averageItemExtent;
   double? _lastPaintedScrollOffset;
+
+  /// Persistent variable-extent index used by finite lazy lists.
+  ///
+  /// This survives render-object eviction, unlike [_allChildren], and gives
+  /// O(log n) offset-to-index lookup after the item-count sync.
+  ExtentIndex<int>? _lazyExtentIndex;
+  int? _lazyExtentItemCount;
+
+  /// One-layout fallback for separators and unknown-length lists.
+  final Map<int, (double, double)> _previousLayoutOffsets =
+      <int, (double, double)>{};
+  final Map<int, (double, double)> _currentLayoutOffsets =
+      <int, (double, double)>{};
 
   /// Adds a child to [_allChildren], skipping duplicates.
   void _addToAllChildren(RenderObject renderObject) {
@@ -767,6 +781,10 @@ class RenderListViewport extends RenderObject with ScrollableRenderObjectMixin {
     parentData.layoutOffset = layoutOffset;
     parentData.extent = childExtent;
     parentData.index = index;
+    _currentLayoutOffsets[index] = (layoutOffset, childExtent);
+    if (!hasSeparators) {
+      _lazyExtentIndex?.updateExtent(index, childExtent);
+    }
 
     return renderObject;
   }
@@ -791,6 +809,7 @@ class RenderListViewport extends RenderObject with ScrollableRenderObjectMixin {
     sepParentData.layoutOffset = layoutOffset;
     sepParentData.extent = separatorExtent;
     sepParentData.index = -index - 1;
+    _currentLayoutOffsets[-index - 1] = (layoutOffset, separatorExtent);
 
     return separatorRenderObject;
   }
@@ -804,28 +823,26 @@ class RenderListViewport extends RenderObject with ScrollableRenderObjectMixin {
       return (index, index * itemExtent!);
     }
 
-    if (_allChildren.isEmpty) {
-      return (0, 0.0);
+    final extentIndex = _lazyExtentIndex;
+    if (!hasSeparators && extentIndex != null && extentIndex.isNotEmpty) {
+      final index = extentIndex.indexAtOffset(scrollOffset);
+      return (index, extentIndex.offsetOfIndex(index));
     }
 
-    // Find the child closest to (but not past) the scroll offset
-    int bestIndex = 0;
-    double bestOffset = 0.0;
+    if (_previousLayoutOffsets.isEmpty) return (0, 0.0);
 
-    for (final child in _allChildren) {
-      final parentData = child.renderObject.parentData as ListViewParentData?;
-      if (parentData?.layoutOffset == null || parentData?.index == null) {
-        continue;
-      }
-
-      final offset = parentData!.layoutOffset!;
-      final index = parentData.index!;
+    // Separator/unknown-count fallback scans only the previous cached window,
+    // never the complete history.
+    var bestIndex = 0;
+    var bestOffset = 0.0;
+    for (final entry in _previousLayoutOffsets.entries) {
+      if (entry.key < 0) continue;
+      final offset = entry.value.$1;
       if (offset <= scrollOffset && offset >= bestOffset) {
-        bestIndex = index;
+        bestIndex = entry.key;
         bestOffset = offset;
       }
     }
-
     return (bestIndex, bestOffset);
   }
 
@@ -834,6 +851,7 @@ class RenderListViewport extends RenderObject with ScrollableRenderObjectMixin {
     _visibleChildren.clear();
     _allChildren.clear();
     _allChildrenSet.clear();
+    _currentLayoutOffsets.clear();
 
     if (_element == null) {
       size = constraints.constrain(Size.zero);
@@ -861,6 +879,7 @@ class RenderListViewport extends RenderObject with ScrollableRenderObjectMixin {
     // Build visible children
     final widget = _element!.widget;
     final itemCount = widget.itemCount;
+    _syncLazyExtentIndex(itemCount);
 
     // Child constraints
     final childConstraints = scrollDirection == Axis.vertical
@@ -924,6 +943,10 @@ class RenderListViewport extends RenderObject with ScrollableRenderObjectMixin {
       );
     }
 
+    _previousLayoutOffsets
+      ..clear()
+      ..addAll(_currentLayoutOffsets);
+
     // Reset the child update flag after layout completes
     _element?.layoutComplete();
 
@@ -932,6 +955,26 @@ class RenderListViewport extends RenderObject with ScrollableRenderObjectMixin {
       effectivePadding: effectivePadding,
       viewportExtent: viewportExtent,
     );
+  }
+
+
+  void _syncLazyExtentIndex(int? itemCount) {
+    if (!_lazy || hasSeparators || itemCount == null) {
+      _lazyExtentIndex = null;
+      _lazyExtentItemCount = null;
+      return;
+    }
+
+    final estimate = itemExtent ?? _averageItemExtent ?? 1.0;
+    _lazyExtentIndex ??= ExtentIndex<int>(estimatedExtent: estimate);
+    if (_lazyExtentItemCount != itemCount) {
+      _lazyExtentIndex!.syncItems(
+        List<int>.generate(itemCount, (index) => index, growable: false),
+      );
+      _lazyExtentItemCount = itemCount;
+    } else if (itemExtent == null && _averageItemExtent != null) {
+      _lazyExtentIndex!.estimatedExtent = _averageItemExtent!;
+    }
   }
 
   void _updateChildOffsets({
@@ -1077,6 +1120,9 @@ class RenderListViewport extends RenderObject with ScrollableRenderObjectMixin {
           }
           return extent;
         }
+      }
+      if (!hasSeparators && _lazyExtentIndex != null) {
+        return _lazyExtentIndex!.totalExtent;
       }
       // Fall back to estimate based on average
       if (_averageItemExtent != null) {

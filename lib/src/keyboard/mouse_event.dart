@@ -30,6 +30,32 @@ class MouseEvent {
   /// Whether the primary (left) button is currently held down.
   bool get isPrimaryButtonDown => buttons.contains(MouseButton.left);
 
+  /// Whether the secondary (right) button is currently held down.
+  bool get isSecondaryButtonDown => buttons.contains(MouseButton.right);
+
+  /// Whether the middle button is currently held down.
+  bool get isMiddleButtonDown => buttons.contains(MouseButton.middle);
+
+  bool isButtonDown(MouseButton value) => buttons.contains(value);
+
+  MouseEvent copyWith({
+    MouseButton? button,
+    int? x,
+    int? y,
+    bool? pressed,
+    bool? isMotion,
+    Set<MouseButton>? buttons,
+  }) {
+    return MouseEvent(
+      button: button ?? this.button,
+      x: x ?? this.x,
+      y: y ?? this.y,
+      pressed: pressed ?? this.pressed,
+      isMotion: isMotion ?? this.isMotion,
+      buttons: buttons ?? this.buttons,
+    );
+  }
+
   @override
   String toString() =>
       'MouseEvent($button at $x,$y pressed=$pressed${isMotion ? ' (motion)' : ''}${buttons.isNotEmpty ? ' buttons=$buttons' : ''})';

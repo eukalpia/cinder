@@ -30,6 +30,7 @@ export 'src/components/scroll_controller.dart';
 export 'src/components/auto_scroll_controller.dart';
 export 'src/components/single_child_scroll_view.dart';
 export 'src/components/list_view.dart';
+export 'src/components/anchored_list_view.dart';
 export 'src/components/text_field.dart';
 export 'src/components/terminal_xterm.dart';
 export 'cinder_test.dart';
@@ -62,6 +63,7 @@ export 'src/components/value_listenable_builder.dart';
 // Mouse and Gesture Support
 export 'src/components/mouse_region.dart';
 export 'src/components/gesture_detector.dart';
+export 'src/components/context_menu.dart';
 export 'src/gestures/events.dart';
 export 'src/gestures/hit_test.dart';
 export 'src/gestures/recognizer.dart';

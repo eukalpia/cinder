@@ -1,35 +1,13 @@
 import '../framework/framework.dart';
-import '../keyboard/mouse_event.dart';
 import '../gestures/events.dart';
 import '../gestures/hit_test.dart';
-import '../gestures/tap.dart';
 import '../gestures/long_press.dart';
+import '../gestures/tap.dart';
+import '../keyboard/mouse_event.dart';
 import '../rendering/mouse_tracker.dart';
 import 'package:cinder/src/rendering/mouse_region.dart';
 
-/// A widget that detects gestures.
-///
-/// Attempts to recognize gestures that correspond to its non-null callbacks.
-///
-/// If this widget has a child, it defers to that child for sizing behavior.
-/// If it does not have a child, it grows to fit the parent instead.
-///
-/// By default, [GestureDetector] uses [HitTestBehavior.deferToChild] for
-/// determining hit test behavior.
-///
-/// Example:
-/// ```dart
-/// GestureDetector(
-///   onTap: () => print('Tapped!'),
-///   onDoubleTap: () => print('Double tapped!'),
-///   onLongPress: () => print('Long pressed!'),
-///   child: Container(
-///     width: 20,
-///     height: 5,
-///     child: Text('Click me'),
-///   ),
-/// )
-/// ```
+/// Detects taps, button-specific taps, and button-aware drag gestures.
 class GestureDetector extends StatefulWidget {
   const GestureDetector({
     super.key,
@@ -38,6 +16,18 @@ class GestureDetector extends StatefulWidget {
     this.onTapUp,
     this.onTapCancel,
     this.onDoubleTap,
+    this.onSecondaryTap,
+    this.onSecondaryTapDown,
+    this.onSecondaryTapUp,
+    this.onMiddleTap,
+    this.onMiddleTapDown,
+    this.onMiddleTapUp,
+    this.onDragStart,
+    this.onDragUpdate,
+    this.onDragEnd,
+    this.onPointerDown,
+    this.onPointerMove,
+    this.onPointerUp,
     this.onLongPress,
     this.onLongPressStart,
     this.onLongPressEnd,
@@ -45,44 +35,55 @@ class GestureDetector extends StatefulWidget {
     this.child,
   });
 
-  /// Called when a tap occurs.
   final GestureTapCallback? onTap;
-
-  /// Called when a tap down has been detected.
   final GestureTapDownCallback? onTapDown;
-
-  /// Called when a tap up has been detected.
   final GestureTapUpCallback? onTapUp;
-
-  /// Called when a tap has been cancelled.
   final GestureTapCancelCallback? onTapCancel;
-
-  /// Called when a double tap occurs.
   final GestureTapCallback? onDoubleTap;
 
-  /// Called when a long press is detected.
+  final GestureTapCallback? onSecondaryTap;
+  final GestureTapDownCallback? onSecondaryTapDown;
+  final GestureTapUpCallback? onSecondaryTapUp;
+  final GestureTapCallback? onMiddleTap;
+  final GestureTapDownCallback? onMiddleTapDown;
+  final GestureTapUpCallback? onMiddleTapUp;
+
+  /// Button-aware drag callbacks. They work for left, middle, and right drag.
+  final GestureDragStartCallback? onDragStart;
+  final GestureDragUpdateCallback? onDragUpdate;
+  final GestureDragEndCallback? onDragEnd;
+
+  /// Raw pointer callbacks with the complete currently-held button set.
+  final GesturePointerCallback? onPointerDown;
+  final GesturePointerCallback? onPointerMove;
+  final GesturePointerCallback? onPointerUp;
+
   final GestureLongPressCallback? onLongPress;
-
-  /// Called when a long press starts.
   final GestureLongPressStartCallback? onLongPressStart;
-
-  /// Called when a long press ends.
   final GestureLongPressEndCallback? onLongPressEnd;
-
-  /// How to behave during hit testing.
   final HitTestBehavior behavior;
-
-  /// The child widget.
   final Widget? child;
 
   @override
   State<GestureDetector> createState() => _GestureDetectorState();
 }
 
+class _PointerSequence {
+  _PointerSequence(this.downPosition);
+
+  final Offset downPosition;
+  Offset? lastPosition;
+  bool dragging = false;
+}
+
 class _GestureDetectorState extends State<GestureDetector> {
   TapGestureRecognizer? _tapRecognizer;
   DoubleTapGestureRecognizer? _doubleTapRecognizer;
   LongPressGestureRecognizer? _longPressRecognizer;
+  final Map<MouseButton, _PointerSequence> _sequences =
+      <MouseButton, _PointerSequence>{};
+
+  static const double _tapSlop = 2.0;
 
   @override
   void initState() {
@@ -105,7 +106,6 @@ class _GestureDetectorState extends State<GestureDetector> {
   }
 
   void _syncRecognizers() {
-    // Tap recognizer
     if (widget.onTap != null ||
         widget.onTapDown != null ||
         widget.onTapUp != null ||
@@ -121,7 +121,6 @@ class _GestureDetectorState extends State<GestureDetector> {
       _tapRecognizer = null;
     }
 
-    // Double tap recognizer
     if (widget.onDoubleTap != null) {
       _doubleTapRecognizer ??= DoubleTapGestureRecognizer();
       _doubleTapRecognizer!.onDoubleTap = widget.onDoubleTap;
@@ -130,7 +129,6 @@ class _GestureDetectorState extends State<GestureDetector> {
       _doubleTapRecognizer = null;
     }
 
-    // Long press recognizer
     if (widget.onLongPress != null ||
         widget.onLongPressStart != null ||
         widget.onLongPressEnd != null) {
@@ -145,37 +143,134 @@ class _GestureDetectorState extends State<GestureDetector> {
     }
   }
 
-  void _handlePointerDown(MouseEvent event) {
-    // Convert global position to local
-    final localPosition = Offset(event.x.toDouble(), event.y.toDouble());
+  Offset _position(MouseEvent event) =>
+      Offset(event.x.toDouble(), event.y.toDouble());
 
-    // Add pointer to recognizers
-    _tapRecognizer?.addPointer(event, localPosition);
-    _doubleTapRecognizer?.addPointer(event, localPosition);
-    _longPressRecognizer?.addPointer(event, localPosition);
+  TapDownDetails _tapDownDetails(MouseEvent event, Offset position) {
+    return TapDownDetails(
+      globalPosition: position,
+      localPosition: position,
+      button: event.button,
+      buttons: event.buttons,
+    );
   }
 
-  void _handlePointerUp(MouseEvent event) {
-    final localPosition = Offset(event.x.toDouble(), event.y.toDouble());
+  TapUpDetails _tapUpDetails(MouseEvent event, Offset position) {
+    return TapUpDetails(
+      globalPosition: position,
+      localPosition: position,
+      button: event.button,
+      buttons: event.buttons,
+    );
+  }
 
-    // Notify recognizers
-    _tapRecognizer?.handlePointerUp(event, localPosition);
-    _doubleTapRecognizer?.handlePointerUp(event, localPosition);
-    _longPressRecognizer?.handlePointerUp(event, localPosition);
+  void _handlePointerDown(MouseEvent event) {
+    if (event.button == MouseButton.wheelUp ||
+        event.button == MouseButton.wheelDown) {
+      return;
+    }
+    final position = _position(event);
+    _sequences[event.button] = _PointerSequence(position)
+      ..lastPosition = position;
+    widget.onPointerDown?.call(event);
+
+    switch (event.button) {
+      case MouseButton.left:
+        _tapRecognizer?.addPointer(event, position);
+        _doubleTapRecognizer?.addPointer(event, position);
+        _longPressRecognizer?.addPointer(event, position);
+        break;
+      case MouseButton.right:
+        widget.onSecondaryTapDown?.call(_tapDownDetails(event, position));
+        break;
+      case MouseButton.middle:
+        widget.onMiddleTapDown?.call(_tapDownDetails(event, position));
+        break;
+      case MouseButton.wheelUp:
+      case MouseButton.wheelDown:
+        break;
+    }
   }
 
   void _handlePointerMove(MouseEvent event) {
-    final localPosition = Offset(event.x.toDouble(), event.y.toDouble());
+    final position = _position(event);
+    widget.onPointerMove?.call(event);
 
-    // Notify recognizers
-    _tapRecognizer?.handlePointerMove(event, localPosition);
-    _doubleTapRecognizer?.handlePointerMove(event, localPosition);
-    _longPressRecognizer?.handlePointerMove(event, localPosition);
+    final primary = _sequences[MouseButton.left];
+    if (primary != null) {
+      _tapRecognizer?.handlePointerMove(event, position);
+      _doubleTapRecognizer?.handlePointerMove(event, position);
+      _longPressRecognizer?.handlePointerMove(event, position);
+    }
+
+    for (final entry in _sequences.entries.toList(growable: false)) {
+      final sequence = entry.value;
+      final previous = sequence.lastPosition ?? sequence.downPosition;
+      final delta = position - previous;
+      if (delta == Offset.zero) continue;
+
+      if (!sequence.dragging) {
+        sequence.dragging = true;
+        widget.onDragStart?.call(DragStartDetails(
+          globalPosition: position,
+          localPosition: position,
+          button: entry.key,
+          buttons: event.buttons,
+        ));
+      }
+      widget.onDragUpdate?.call(DragUpdateDetails(
+        globalPosition: position,
+        localPosition: position,
+        delta: delta,
+        button: entry.key,
+        buttons: event.buttons,
+      ));
+      sequence.lastPosition = position;
+    }
+  }
+
+  void _handlePointerUp(MouseEvent event) {
+    final position = _position(event);
+    final sequence = _sequences.remove(event.button);
+    widget.onPointerUp?.call(event);
+
+    if (sequence?.dragging ?? false) {
+      widget.onDragEnd?.call(DragEndDetails(
+        globalPosition: position,
+        localPosition: position,
+        button: event.button,
+        buttons: event.buttons,
+      ));
+    }
+
+    switch (event.button) {
+      case MouseButton.left:
+        _tapRecognizer?.handlePointerUp(event, position);
+        _doubleTapRecognizer?.handlePointerUp(event, position);
+        _longPressRecognizer?.handlePointerUp(event, position);
+        break;
+      case MouseButton.right:
+        widget.onSecondaryTapUp?.call(_tapUpDetails(event, position));
+        if (_isTap(sequence, position)) widget.onSecondaryTap?.call();
+        break;
+      case MouseButton.middle:
+        widget.onMiddleTapUp?.call(_tapUpDetails(event, position));
+        if (_isTap(sequence, position)) widget.onMiddleTap?.call();
+        break;
+      case MouseButton.wheelUp:
+      case MouseButton.wheelDown:
+        break;
+    }
+  }
+
+  bool _isTap(_PointerSequence? sequence, Offset position) {
+    if (sequence == null || sequence.dragging) return false;
+    return (position.dx - sequence.downPosition.dx).abs() <= _tapSlop &&
+        (position.dy - sequence.downPosition.dy).abs() <= _tapSlop;
   }
 
   @override
   Widget build(BuildContext context) {
-    // Use MouseRegion to capture mouse events
     return _GestureDetectorMouseRegion(
       onPointerDown: _handlePointerDown,
       onPointerUp: _handlePointerUp,
@@ -186,7 +281,6 @@ class _GestureDetectorState extends State<GestureDetector> {
   }
 }
 
-/// Internal widget that wraps the child and handles mouse events.
 class _GestureDetectorMouseRegion extends SingleChildRenderObjectWidget {
   const _GestureDetectorMouseRegion({
     required this.onPointerDown,
@@ -213,7 +307,9 @@ class _GestureDetectorMouseRegion extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(
-      BuildContext context, _RenderGestureDetector renderObject) {
+    BuildContext context,
+    _RenderGestureDetector renderObject,
+  ) {
     renderObject
       ..onPointerDown = onPointerDown
       ..onPointerUp = onPointerUp
@@ -222,7 +318,6 @@ class _GestureDetectorMouseRegion extends SingleChildRenderObjectWidget {
   }
 }
 
-/// Render object for GestureDetector that tracks mouse events.
 class _RenderGestureDetector extends RenderMouseRegion {
   _RenderGestureDetector({
     required void Function(MouseEvent) onPointerDown,
@@ -233,12 +328,7 @@ class _RenderGestureDetector extends RenderMouseRegion {
         _onPointerUp = onPointerUp,
         _onPointerMove = onPointerMove,
         _behavior = behavior,
-        super(
-          onEnter: null,
-          onExit: null,
-          onHover: null,
-          opaque: behavior == HitTestBehavior.opaque,
-        );
+        super(opaque: behavior == HitTestBehavior.opaque);
 
   void Function(MouseEvent) _onPointerDown;
   void Function(MouseEvent) get onPointerDown => _onPointerDown;
@@ -269,71 +359,61 @@ class _RenderGestureDetector extends RenderMouseRegion {
   set behavior(HitTestBehavior value) {
     if (_behavior == value) return;
     _behavior = value;
-    // Update opaque based on behavior
     opaque = value == HitTestBehavior.opaque;
   }
 
-  // Store gesture detector annotation separately from mouse region annotation
   MouseTrackerAnnotation? _gestureAnnotation;
-
-  // Track button press state to detect state transitions
-  bool _isLeftButtonPressed = false;
+  final Set<MouseButton> _pressedButtons = <MouseButton>{};
 
   @override
   MouseTrackerAnnotation? get annotation =>
       _gestureAnnotation ?? super.annotation;
 
+  void _syncButtonTransitions(MouseEvent event) {
+    final target = Set<MouseButton>.of(event.buttons)
+      ..remove(MouseButton.wheelUp)
+      ..remove(MouseButton.wheelDown);
+
+    for (final button in target.difference(_pressedButtons)) {
+      _onPointerDown(event.copyWith(
+        button: button,
+        pressed: true,
+        buttons: target,
+      ));
+    }
+    for (final button in _pressedButtons.difference(target)) {
+      _onPointerUp(event.copyWith(
+        button: button,
+        pressed: false,
+        buttons: target,
+      ));
+    }
+
+    _pressedButtons
+      ..clear()
+      ..addAll(target);
+  }
+
   void _updateGestureAnnotation() {
     _gestureAnnotation = MouseTrackerAnnotation(
-      onEnter: (event) {
-        // When entering, sync our state with the current button state
-        // but don't trigger pointer down unless button is pressed during entry
-        if (event.button == MouseButton.left) {
-          final leftDown = event.pressed || event.isPrimaryButtonDown;
-          if (leftDown && !_isLeftButtonPressed) {
-            // Button is pressed as we enter - treat as new press
-            _isLeftButtonPressed = true;
-            _onPointerDown(event);
-          } else if (!leftDown) {
-            // Button not pressed, ensure state is clean
-            _isLeftButtonPressed = false;
-          }
-        }
-      },
+      onEnter: _syncButtonTransitions,
       onExit: (event) {
-        // When exiting, if button was pressed inside and is now released,
-        // we should complete the gesture
-        final leftDown = event.pressed || event.isPrimaryButtonDown;
-        if (!leftDown &&
-            _isLeftButtonPressed &&
-            event.button == MouseButton.left) {
-          _isLeftButtonPressed = false;
-          _onPointerUp(event);
+        if (_pressedButtons.isEmpty) return;
+        final released = Set<MouseButton>.of(_pressedButtons);
+        _pressedButtons.clear();
+        for (final button in released) {
+          _onPointerUp(event.copyWith(
+            button: button,
+            pressed: false,
+            buttons: const <MouseButton>{},
+          ));
         }
-        // Reset state when leaving region to prevent stuck buttons
-        // This handles the case where button is still pressed when we exit
-        _isLeftButtonPressed = false;
       },
       onHover: (event) {
-        // Handle move events for gesture recognizers
+        _syncButtonTransitions(event);
         if (event.button != MouseButton.wheelUp &&
             event.button != MouseButton.wheelDown) {
           _onPointerMove(event);
-        }
-
-        // Detect button state transitions (pressed -> not pressed, or vice versa)
-        // This works regardless of the isMotion flag by tracking actual state changes
-        if (event.button == MouseButton.left) {
-          final leftDown = event.pressed || event.isPrimaryButtonDown;
-          if (leftDown && !_isLeftButtonPressed) {
-            // Button was just pressed while hovering
-            _isLeftButtonPressed = true;
-            _onPointerDown(event);
-          } else if (!leftDown && _isLeftButtonPressed) {
-            // Button was just released while hovering
-            _isLeftButtonPressed = false;
-            _onPointerUp(event);
-          }
         }
       },
       renderObject: this,
@@ -347,14 +427,5 @@ class _RenderGestureDetector extends RenderMouseRegion {
   }
 
   @override
-  bool hitTestSelf(Offset position) {
-    // GestureDetector should always be hittable within its bounds when it has
-    // gesture callbacks registered. This ensures taps work even when child
-    // content is offset (e.g., by Center widget).
-    //
-    // The HitTestBehavior controls whether hits pass through to widgets
-    // behind (via hitTest returning early for opaque), not whether this
-    // GestureDetector itself is hittable.
-    return true;
-  }
+  bool hitTestSelf(Offset position) => true;
 }
