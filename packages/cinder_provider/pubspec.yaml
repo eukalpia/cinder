@@ -1,12 +1,18 @@
 name: cinder_provider
-description: Provider integration for cinder
-version: 0.0.1
-repository: https://github.com/norbert515/cinder
+description: Provider-style dependency injection and state management for Cinder.
+version: 1.0.0-dev.1
+repository: https://github.com/eukalpia/cinder
 
 environment:
   sdk: ">=3.5.0 <4.0.0"
 
 dependencies:
   meta: ^1.17.0
-  cinder: ^0.2.0
-  cinder_nested: ^0.0.1
+  cinder: ^1.0.0-dev.1
+  cinder_nested: ^1.0.0-dev.1
+
+dependency_overrides:
+  cinder:
+    path: ../..
+  cinder_nested:
+    path: ../cinder_nested
