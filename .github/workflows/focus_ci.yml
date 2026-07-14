@@ -1,0 +1,33 @@
+name: Focus system CI
+
+on:
+  pull_request:
+    branches:
+      - agent/flutter-core-breaking-refactor
+    paths:
+      - lib/src/components/focus.dart
+      - lib/src/components/focus_scope.dart
+      - lib/src/components/focusable.dart
+      - lib/src/components/keyboard_listener.dart
+      - lib/src/components/text_field.dart
+      - lib/cinder.dart
+      - test/focus/**
+      - test/input/**
+      - .github/workflows/focus_ci.yml
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+      - run: dart pub get
+      - run: dart format --output=none --set-exit-if-changed lib test
+      - run: dart analyze lib test
+      - run: dart test -r expanded test/focus test/input/keyboard_listener_default_focus_test.dart
