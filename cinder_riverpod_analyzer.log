@@ -1,20 +1,2 @@
 Analyzing cinder_riverpod...
-
-  error - lib/src/framework.dart:64:3 - Undefined name 'internal' used as an annotation. Try defining the name or importing it from another library. - undefined_annotation
-  error - lib/src/framework.dart:244:1 - Undefined name 'internal' used as an annotation. Try defining the name or importing it from another library. - undefined_annotation
-  error - lib/src/provider_context.dart:9:13 - Undefined class 'ProviderListenable'. Try changing the name to the name of an existing class, or creating a class with the name 'ProviderListenable'. - undefined_class
-  error - lib/src/provider_context.dart:17:14 - Undefined class 'ProviderListenable'. Try changing the name to the name of an existing class, or creating a class with the name 'ProviderListenable'. - undefined_class
-  error - lib/src/provider_context.dart:30:5 - Undefined class 'ProviderListenable'. Try changing the name to the name of an existing class, or creating a class with the name 'ProviderListenable'. - undefined_class
-  error - lib/src/provider_context.dart:50:5 - Undefined class 'ProviderListenable'. Try changing the name to the name of an existing class, or creating a class with the name 'ProviderListenable'. - undefined_class
-  error - lib/src/provider_context.dart:65:16 - Undefined class 'Refreshable'. Try changing the name to the name of an existing class, or creating a class with the name 'Refreshable'. - undefined_class
-  error - lib/src/provider_context.dart:71:19 - Undefined class 'ProviderOrFamily'. Try changing the name to the name of an existing class, or creating a class with the name 'ProviderOrFamily'. - undefined_class
-  error - lib/src/provider_dependencies.dart:18:13 - The name 'ProviderListenable' isn't a type, so it can't be used as a type argument. Try correcting the name to an existing type, or defining a type named 'ProviderListenable'. - non_type_as_type_argument
-  error - lib/src/provider_dependencies.dart:19:13 - The name 'ProviderListenable' isn't a type, so it can't be used as a type argument. Try correcting the name to an existing type, or defining a type named 'ProviderListenable'. - non_type_as_type_argument
-  error - lib/src/provider_dependencies.dart:22:13 - The name 'ProviderListenable' isn't a type, so it can't be used as a type argument. Try correcting the name to an existing type, or defining a type named 'ProviderListenable'. - non_type_as_type_argument
-  error - lib/src/provider_dependencies.dart:23:13 - The name 'ProviderListenable' isn't a type, so it can't be used as a type argument. Try correcting the name to an existing type, or defining a type named 'ProviderListenable'. - non_type_as_type_argument
-  error - lib/src/provider_dependencies.dart:26:14 - Undefined class 'ProviderListenable'. Try changing the name to the name of an existing class, or creating a class with the name 'ProviderListenable'. - undefined_class
-  error - lib/src/provider_dependencies.dart:57:5 - Undefined class 'ProviderListenable'. Try changing the name to the name of an existing class, or creating a class with the name 'ProviderListenable'. - undefined_class
-   info - lib/src/framework.dart:246:24 - Don't needlessly type annotate initializing formals. Try removing the type. - type_init_formals
-   info - lib/src/framework.dart:249:3 - Invalid use of a private type in a public API. Try making the private type public, or making the API that uses the private type also be private. - library_private_types_in_public_api
-
-16 issues found.
+No issues found!
