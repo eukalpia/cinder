@@ -40,6 +40,7 @@ jobs:
           extract('docs.b64')
           patch('fix1.patch', 'fix1.b64')
           patch('fix2.patch', 'fix2.b64')
+          patch('fix3.patch', 'fix3.b64')
           PY
       - run: python3 tool/generate_icon_packs.py
       - name: Analyze and test packages
