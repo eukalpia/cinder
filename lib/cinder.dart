@@ -21,6 +21,7 @@ export 'src/binding/scheduler_binding.dart';
 export 'src/binding/scheduler_phase.dart';
 export 'src/components/basic.dart';
 export 'src/components/builder.dart';
+export 'src/components/icon.dart';
 export 'src/components/focus.dart';
 export 'src/components/focusable.dart';
 export 'src/components/block_focus.dart';
