@@ -61,6 +61,7 @@ jobs:
           extract_tar(payload / 'docs.b64')
           apply_patch('fix1.patch', payload / 'fix1.b64')
           apply_patch('fix2.patch', payload / 'fix2.b64')
+          apply_patch('fix3.patch', payload / 'fix3.b64')
           PY
 
       - name: Generate complete icon catalogs
