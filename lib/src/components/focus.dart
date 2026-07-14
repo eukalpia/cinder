@@ -232,9 +232,7 @@ class FocusNode implements Listenable {
   }
 
   /// Removes focus from this node.
-  void unfocus({
-    UnfocusDisposition disposition = UnfocusDisposition.scope,
-  }) {
+  void unfocus({UnfocusDisposition disposition = UnfocusDisposition.scope}) {
     final scope = nearestScope;
     if (disposition == UnfocusDisposition.previouslyFocusedChild &&
         scope?.focusedChild != null &&
@@ -459,11 +457,13 @@ class _FocusState extends State<Focus> {
   void _scheduleAutofocus() {
     if (!widget.autofocus || _autofocusScheduled) return;
     _autofocusScheduled = true;
-    SchedulerBinding.instance.addPostFrameCallback((_) {
-      if (mounted && _node.attached && !_node.hasFocus) {
-        _node.requestFocus();
-      }
-    });
+
+    // The node is already attached when didChangeDependencies reaches here.
+    // Requesting focus synchronously makes the first key event deterministic
+    // and avoids requiring an extra frame after pumpWidget/runApp.
+    if (_node.attached && !_node.hasFocus) {
+      _node.requestFocus();
+    }
   }
 
   void _handleFocusChange() {
