@@ -19,6 +19,9 @@ integrations — without bringing Flutter or Node.js into your CLI runtime.
 
 </div>
 
+
+Cell-based Interactive Native Dart Engine Renderer
+
 > [!IMPORTANT]
 > Cinder `1.0.0-dev.1` is a breaking development line. The legacy Nocterm
 > `Component`, `App`, `Frame`, and manual `TextField(focused: ...)` APIs are not
