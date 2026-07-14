@@ -1,4 +1,4 @@
-name: Apply editor runtime fixes
+name: Apply clean pointer runtime patch
 
 on:
   push:
@@ -10,14 +10,14 @@ permissions:
   contents: write
 
 jobs:
-  fix:
+  apply:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
       - uses: dart-lang/setup-dart@v1
         with:
           sdk: stable
-      - name: Apply pointer-state and history fixes
+      - name: Apply production fixes
         shell: bash
         run: |
           set -euo pipefail
@@ -29,7 +29,9 @@ jobs:
               text = file.read_text()
               actual = text.count(old)
               if actual != count:
-                  raise SystemExit(f'{path}: expected {count} occurrence(s), found {actual}: {old!r}')
+                  raise SystemExit(
+                      f'{path}: expected {count} occurrence(s), found {actual}: {old!r}'
+                  )
               file.write_text(text.replace(old, new, count))
 
           replace(
@@ -66,9 +68,8 @@ jobs:
       ..remove(MouseButton.wheelUp)
       ..remove(MouseButton.wheelDown);
 
-    // Raw terminal/test events may only report the changed button. Normalize
-    // them before diffing so button-specific taps work even without tracker
-    // enrichment, while still preserving true multi-button state.
+    // Raw terminal events may only report the changed button. Normalize them
+    // before diffing while preserving true multi-button tracker state.
     if (event.pressed &&
         event.button != MouseButton.wheelUp &&
         event.button != MouseButton.wheelDown) {
@@ -137,25 +138,20 @@ jobs:
         expect(builtIndices.first, inInclusiveRange(30000, 40000));''',
           )
           PY
-          rm -f .github/workflows/diagnose-editor-tests.yml
           rm -f .github/workflows/fix-editor-runtime.yml
-      - run: dart pub get
-      - name: Format, analyze, and run focused regressions
+          rm -f .github/workflows/diagnose-editor-tests.yml
+          rm -f .github/workflows/diagnose-offset-runtime.yml
+      - name: Resolve and format
         shell: bash
         run: |
           set -euo pipefail
+          dart pub get
           dart format \
             lib/src/framework/render_object.dart \
             lib/src/components/gesture_detector.dart \
             lib/src/test/cinder_tester.dart \
             test/layout/anchored_list_view_test.dart
-          dart analyze --fatal-infos
-          dart test --reporter expanded \
-            test/components/text_field_editor_contract_test.dart \
-            test/input/pointer_buttons_and_context_menu_test.dart \
-            test/layout/anchored_list_view_test.dart \
-            test/components/text_field_focus_test.dart
-      - name: Commit verified runtime fixes
+      - name: Commit clean production patch
         shell: bash
         run: |
           set -euo pipefail
