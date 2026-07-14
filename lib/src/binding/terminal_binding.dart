@@ -11,6 +11,7 @@ import '../backend/terminal.dart' as term;
 import '../buffer.dart' as buf;
 import '../keyboard/input_event.dart';
 import '../keyboard/input_parser.dart';
+import '../rendering/frame_diff.dart';
 import '../rendering/mouse_hit_test.dart';
 import '../rendering/mouse_tracker.dart';
 import 'hot_reload_mixin.dart';
@@ -56,12 +57,20 @@ class TerminalBinding extends CinderBinding
 
   int _lastComparedCells = 0;
   int _lastAnsiRuns = 0;
+  int _lastWrittenCells = 0;
+  int _lastOutputCodeUnits = 0;
 
   /// Number of cells compared by the most recent differential frame.
   int get lastComparedCells => _lastComparedCells;
 
   /// Number of cursor-positioned ANSI runs emitted by the most recent frame.
   int get lastAnsiRuns => _lastAnsiRuns;
+
+  /// Number of terminal cells rewritten by the most recent frame.
+  int get lastWrittenCells => _lastWrittenCells;
+
+  /// Number of UTF-16 code units emitted, including ANSI style sequences.
+  int get lastOutputCodeUnits => _lastOutputCodeUnits;
 
   // Event-driven loop support
   final _eventLoopController = StreamController<void>.broadcast();
@@ -998,95 +1007,22 @@ class TerminalBinding extends CinderBinding
     _renderFullDiff(buffer, previous);
   }
 
-  /// Dirty-span differential renderer.
-  ///
-  /// Only the union of rows touched by the current and previous frame is
-  /// inspected. Consecutive changed cells are emitted as one cursor-positioned
-  /// ANSI run instead of one cursor move and write per cell.
+  /// Dirty-span differential renderer with cost-aware row batching.
   void _renderFullDiff(buf.Buffer buffer, buf.Buffer previous) {
-    _lastComparedCells = 0;
-    _lastAnsiRuns = 0;
-
-    for (var y = 0; y < buffer.height; y++) {
-      final currentDirty = buffer.isRowDirty(y);
-      final previousDirty = previous.isRowDirty(y);
-      if (!currentDirty && !previousDirty) continue;
-
-      final start = currentDirty && previousDirty
-          ? (buffer.dirtyStartForRow(y) < previous.dirtyStartForRow(y)
-                ? buffer.dirtyStartForRow(y)
-                : previous.dirtyStartForRow(y))
-          : currentDirty
-          ? buffer.dirtyStartForRow(y)
-          : previous.dirtyStartForRow(y);
-      final end = currentDirty && previousDirty
-          ? (buffer.dirtyEndForRow(y) > previous.dirtyEndForRow(y)
-                ? buffer.dirtyEndForRow(y)
-                : previous.dirtyEndForRow(y))
-          : currentDirty
-          ? buffer.dirtyEndForRow(y)
-          : previous.dirtyEndForRow(y);
-
-      var x = start;
-      while (x <= end) {
-        _lastComparedCells++;
-        final cell = buffer.getCell(x, y);
-        final oldCell = previous.getCell(x, y);
-        if (cell.matches(oldCell) ||
-            cell.char == '\u200B' ||
-            cell.isImagePlaceholder) {
-          x++;
-          continue;
-        }
-
-        final runStart = x;
-        final output = StringBuffer();
-        TextStyle? activeStyle;
-
-        while (x <= end) {
-          _lastComparedCells++;
-          final next = buffer.getCell(x, y);
-          final old = previous.getCell(x, y);
-          if (next.matches(old) ||
-              next.char == '\u200B' ||
-              next.isImagePlaceholder) {
-            break;
-          }
-
-          final hasStyle = _hasVisibleStyle(next.style);
-          if (hasStyle) {
-            if (activeStyle != next.style) {
-              if (activeStyle != null) output.write(TextStyle.reset);
-              output.write(next.style.toAnsi());
-              activeStyle = next.style;
-            }
-          } else if (activeStyle != null) {
-            output.write(TextStyle.reset);
-            activeStyle = null;
-          }
-
-          output.write(next.char);
-          x += next.width > 1 ? next.width : 1;
-        }
-
-        if (activeStyle != null) output.write(TextStyle.reset);
-        terminal.moveCursor(runStart, y);
-        terminal.write(output.toString());
-        _lastAnsiRuns++;
-      }
-    }
+    final stats = emitFrameDiff(
+      current: buffer,
+      previous: previous,
+      emitRun: (x, y, output) {
+        terminal.moveCursor(x, y);
+        terminal.write(output);
+      },
+    );
+    _lastComparedCells = stats.comparedCells;
+    _lastAnsiRuns = stats.ansiRuns;
+    _lastWrittenCells = stats.writtenCells;
+    _lastOutputCodeUnits = stats.outputCodeUnits;
 
     _renderPendingImages(buffer);
-  }
-
-  bool _hasVisibleStyle(TextStyle style) {
-    return style.color != null ||
-        style.backgroundColor != null ||
-        style.fontWeight == FontWeight.bold ||
-        style.fontWeight == FontWeight.dim ||
-        style.fontStyle == FontStyle.italic ||
-        style.decoration?.hasUnderline == true ||
-        style.reverse;
   }
 
   /// Full redraw (used for first frame or after resize).
@@ -1451,14 +1387,18 @@ class TerminalBinding extends CinderBinding
     // Report paint end time to scheduler for FrameTiming
     currentFramePaintEnd = t4;
 
-    // Render to terminal using differential rendering (buffer diff)
-    _renderDifferential(buffer);
+    // DEC synchronized output makes the terminal present the complete frame
+    // atomically. Unsupported terminals safely ignore private mode 2026.
+    terminal.write(EscapeCodes.beginSynchronizedOutput);
+    try {
+      _renderDifferential(buffer);
 
-    // After rendering, position the terminal cursor at the focused text
-    // field's cursor location. This stabilises the IME composition window
-    // (e.g. Chinese Pinyin) so it doesn't flicker across the screen.
-    _positionImeCursor();
-    terminal.flush();
+      // Keep IME composition anchored after all cursor-moving diff runs.
+      _positionImeCursor();
+    } finally {
+      terminal.write(EscapeCodes.endSynchronizedOutput);
+      terminal.flush();
+    }
 
     if (profiling) {
       t5 = DateTime.now().microsecondsSinceEpoch;

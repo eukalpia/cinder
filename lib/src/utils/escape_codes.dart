@@ -11,6 +11,12 @@ class EscapeCodes {
   static const moveCursorHome = '\x1b[H';
   static const alternateBuffer = '\x1b[?1049h';
   static const mainBuffer = '\x1b[?1049l';
+
+  /// Begin a synchronized terminal update (DEC private mode 2026).
+  static const beginSynchronizedOutput = '\x1b[?2026h';
+
+  /// End a synchronized terminal update. Unsupported terminals ignore it.
+  static const endSynchronizedOutput = '\x1b[?2026l';
 }
 
 class _Disable {
@@ -29,14 +35,14 @@ class _Disable {
   String get modifyOtherKeys => '\x1B[>4;0m';
 
   List<String> get values => [
-        motionTracking,
-        sgrMouseMode,
-        buttonEventTracking,
-        basicMouseTracking,
-        bracketedPasteMode,
-        kittyKeyboard,
-        modifyOtherKeys,
-      ];
+    motionTracking,
+    sgrMouseMode,
+    buttonEventTracking,
+    basicMouseTracking,
+    bracketedPasteMode,
+    kittyKeyboard,
+    modifyOtherKeys,
+  ];
 }
 
 class _Enable {
@@ -57,12 +63,12 @@ class _Enable {
   String get modifyOtherKeys => '\x1B[>4;1m';
 
   List<String> get values => [
-        motionTracking,
-        sgrMouseMode,
-        buttonEventTracking,
-        basicMouseTracking,
-        bracketedPasteMode,
-        kittyKeyboard,
-        modifyOtherKeys,
-      ];
+    motionTracking,
+    sgrMouseMode,
+    buttonEventTracking,
+    basicMouseTracking,
+    bracketedPasteMode,
+    kittyKeyboard,
+    modifyOtherKeys,
+  ];
 }
