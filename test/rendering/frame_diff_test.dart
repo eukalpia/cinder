@@ -1,5 +1,6 @@
 import 'package:cinder/src/buffer.dart';
 import 'package:cinder/src/rendering/frame_diff.dart';
+import 'package:cinder/src/image/image_cleanup.dart';
 import 'package:cinder/src/style.dart';
 import 'package:test/test.dart';
 
@@ -66,7 +67,15 @@ void main() {
 
     test('clears old text before an image placeholder is rendered', () {
       final previous = Buffer(4, 1)..writeCell(0, 0, char: 'X');
-      final current = Buffer(4, 1)..markImageRegion(0, 0, 1, 1, 'sixel');
+      final current = Buffer(4, 1)
+        ..markImageRegion(
+          0,
+          0,
+          1,
+          1,
+          'sixel',
+          protocol: ImageProtocol.sixel,
+        );
       final runs = <_Run>[];
 
       emitFrameDiff(
@@ -121,6 +130,43 @@ void main() {
       expect(runs[0].x, 1);
       expect(runs[0].output, 'A  B');
       expect(runs[1], const _Run(20, 0, 'C'));
+    });
+
+    test('does not bridge ANSI runs across native image placeholders', () {
+      final previous = Buffer(8, 1)
+        ..setString(0, 0, 'a')
+        ..markImageRegion(
+          3,
+          0,
+          2,
+          1,
+          'image',
+          protocol: ImageProtocol.kitty,
+          imageId: 7,
+        );
+      final current = Buffer(8, 1)
+        ..setString(0, 0, 'b')
+        ..markImageRegion(
+          3,
+          0,
+          2,
+          1,
+          'image',
+          protocol: ImageProtocol.kitty,
+          imageId: 7,
+        )
+        ..setString(6, 0, 'z');
+      final runs = <({int x, int y, String output})>[];
+
+      emitFrameDiff(
+        current: current,
+        previous: previous,
+        emitRun: (x, y, output) => runs.add((x: x, y: y, output: output)),
+      );
+
+      expect(runs, hasLength(2));
+      expect(runs.first.x, 0);
+      expect(runs.last.x, 6);
     });
   });
 }

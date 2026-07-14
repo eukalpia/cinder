@@ -8,6 +8,8 @@ export 'src/buffer.dart';
 export 'src/style.dart';
 export 'src/shutdown.dart' show shutdownApp;
 export 'src/components/progress_bar.dart';
+export 'src/components/icon.dart';
+export 'src/components/repaint_boundary.dart';
 export 'src/components/scrollbar.dart';
 export 'src/test/cinder_tester.dart';
 export 'src/test/terminal_state.dart';
@@ -99,6 +101,7 @@ export 'src/components/modal_barrier.dart';
 // Image support
 export 'src/components/image.dart';
 export 'src/image/image_cleanup.dart' show ImageProtocol;
+export 'src/image/terminal_capabilities.dart';
 
 // Text Selection
 export 'src/components/selection_area.dart';

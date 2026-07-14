@@ -1,0 +1,19 @@
+name: cinder_lucide
+description: Complete Lucide icon catalog for the Cinder terminal UI framework.
+version: 1.0.0-dev.1
+repository: https://github.com/eukalpia/cinder
+homepage: https://lucide.dev
+
+environment:
+  sdk: ">=3.5.0 <4.0.0"
+
+dependencies:
+  cinder: ^1.0.0-dev.1
+
+dev_dependencies:
+  lints: ^5.0.0
+  test: ^1.25.6
+
+dependency_overrides:
+  cinder:
+    path: ../..

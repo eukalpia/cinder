@@ -3,6 +3,25 @@ part of 'framework.dart';
 /// Visitor for render objects.
 typedef RenderObjectVisitor = void Function(RenderObject renderObject);
 
+/// A hardware terminal scroll request produced by a full-width viewport.
+class TerminalScrollRequest {
+  const TerminalScrollRequest({
+    required this.left,
+    required this.top,
+    required this.width,
+    required this.height,
+    required this.lines,
+  });
+
+  final int left;
+  final int top;
+  final int width;
+  final int height;
+
+  /// Positive values scroll content up; negative values scroll down.
+  final int lines;
+}
+
 /// Result of a hit test.
 class HitTestResult {
   final List<RenderObject> path = [];
@@ -16,6 +35,7 @@ class HitTestResult {
 class PipelineOwner {
   final List<RenderObject> _nodesNeedingLayout = [];
   final List<RenderObject> _nodesNeedingPaint = [];
+  final List<TerminalScrollRequest> _terminalScrollRequests = [];
 
   /// Flag to track if dirty nodes need to be merged after layout callback
   bool _shouldMergeDirtyNodes = false;
@@ -45,6 +65,24 @@ class PipelineOwner {
 
   /// Whether there are any render objects that need painting.
   bool get hasNodesToPaint => _nodesNeedingPaint.isNotEmpty;
+
+  List<RenderObject> takeNodesNeedingPaint() {
+    final nodes = List<RenderObject>.from(_nodesNeedingPaint);
+    _nodesNeedingPaint.clear();
+    return nodes;
+  }
+
+  void clearPaintQueue() => _nodesNeedingPaint.clear();
+
+  void requestTerminalScroll(TerminalScrollRequest request) {
+    _terminalScrollRequests.add(request);
+  }
+
+  List<TerminalScrollRequest> takeTerminalScrollRequests() {
+    final requests = List<TerminalScrollRequest>.from(_terminalScrollRequests);
+    _terminalScrollRequests.clear();
+    return requests;
+  }
 
   /// Enable mutations during layout callback.
   ///
@@ -333,6 +371,9 @@ abstract class RenderObject {
   /// This is true after [markNeedsPaint] is called and before paint is performed.
   bool get needsPaint => _needsPaint;
 
+  /// Whether paint invalidation stops at this node and may be cached as a layer.
+  bool get isRepaintBoundary => false;
+
   Object? _lastError;
   StackTrace? _lastStackTrace;
 
@@ -364,19 +405,25 @@ abstract class RenderObject {
   /// concern as [markNeedsLayout]).
   void markNeedsPaint() {
     if (_needsPaint) {
-      owner?.requestVisualUpdate();
+      // A dirty node may have been removed from the current paint queue while
+      // still awaiting composition. Re-enqueue the nearest boundary instead of
+      // merely scheduling a frame with an empty queue.
+      if (isRepaintBoundary || parent == null) {
+        owner?.requestPaint(this);
+      } else {
+        parent!.markNeedsPaint();
+      }
       return;
     }
     _needsPaint = true;
 
-    if (parent != null) {
-      // Continue propagation up the tree
-      parent!.markNeedsPaint();
-    } else {
-      // We're the root - always request visual update to ensure a frame
-      // gets scheduled, even if the flag was already set
-      owner?.requestVisualUpdate();
+    if (isRepaintBoundary || parent == null) {
+      owner?.requestPaint(this);
+      return;
     }
+
+    // Continue propagation until the nearest repaint boundary.
+    parent!.markNeedsPaint();
   }
 
   /// Compute the layout for this render object.
