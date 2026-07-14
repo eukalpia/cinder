@@ -1,0 +1,1007 @@
+===== packages/cinder_nested =====
+Resolving dependencies...
+Downloading packages...
++ ansi_escape_codes 2.2.1 (3.1.2 available)
++ archive 4.0.9
++ args 2.7.0
++ async 2.13.1
++ boolean_selector 2.1.2
++ characters 1.4.1
+! cinder 1.0.0-dev.1 from path ../.. (overridden)
++ collection 1.19.1
++ convert 3.1.2
++ crypto 3.0.7
++ equatable 2.1.0
++ ffi 2.2.0
++ hotreloader 4.4.0
++ image 4.9.1
++ logging 1.3.0
++ markdown 7.3.1
++ matcher 0.12.20
++ meta 1.19.0
++ path 1.9.1
++ petitparser 7.0.2
++ posix 6.5.0
++ quiver 3.2.2
++ source_span 1.10.2
++ stack_trace 1.12.1
++ stream_channel 2.1.4
++ stream_transform 2.1.1
++ string_scanner 1.4.1
++ term_glyph 1.2.2
++ test_api 0.7.13
++ typed_data 1.4.0
++ vm_service 15.2.0
++ watcher 1.2.1
++ xml 7.0.1
++ zmodem 0.0.6
+Changed 33 dependencies!
+1 package has newer versions incompatible with dependency constraints.
+Try `dart pub outdated` for more information.
+Changed lib/nested.dart
+Formatted 1 file (1 changed) in 0.01 seconds.
+Analyzing cinder_nested...
+No issues found!
+===== packages/cinder_provider =====
+Resolving dependencies...
+Downloading packages...
++ ansi_escape_codes 2.2.1 (3.1.2 available)
++ archive 4.0.9
++ args 2.7.0
++ async 2.13.1
++ boolean_selector 2.1.2
++ characters 1.4.1
+! cinder 1.0.0-dev.1 from path ../.. (overridden)
+! cinder_nested 1.0.0-dev.1 from path ../cinder_nested (overridden)
++ collection 1.19.1
++ convert 3.1.2
++ crypto 3.0.7
++ equatable 2.1.0
++ ffi 2.2.0
++ hotreloader 4.4.0
++ image 4.9.1
++ logging 1.3.0
++ markdown 7.3.1
++ matcher 0.12.20
++ meta 1.19.0
++ path 1.9.1
++ petitparser 7.0.2
++ posix 6.5.0
++ quiver 3.2.2
++ source_span 1.10.2
++ stack_trace 1.12.1
++ stream_channel 2.1.4
++ stream_transform 2.1.1
++ string_scanner 1.4.1
++ term_glyph 1.2.2
++ test_api 0.7.13
++ typed_data 1.4.0
++ vm_service 15.2.0
++ watcher 1.2.1
++ xml 7.0.1
++ zmodem 0.0.6
+Changed 33 dependencies!
+1 package has newer versions incompatible with dependency constraints.
+Try `dart pub outdated` for more information.
+Changed lib/src/consumer.dart
+Changed lib/src/inherited_provider.dart
+Changed lib/src/provider.dart
+Formatted 12 files (3 changed) in 0.02 seconds.
+Analyzing cinder_provider...
+No issues found!
+===== packages/cinder_riverpod =====
+Resolving dependencies...
+Downloading packages...
++ _fe_analyzer_shared 105.0.0
++ analyzer 14.1.0
++ ansi_escape_codes 2.2.1 (3.1.2 available)
++ archive 4.0.9
++ args 2.7.0
++ async 2.13.1
++ boolean_selector 2.1.2
++ characters 1.4.1
+! cinder 1.0.0-dev.1 from path ../.. (overridden)
++ cli_config 0.2.0
++ clock 1.1.2
++ collection 1.19.1
++ convert 3.1.2
++ coverage 1.15.1
++ crypto 3.0.7
++ equatable 2.1.0
++ ffi 2.2.0
++ file 7.0.1
++ fixnum 1.1.1
++ frontend_server_client 4.0.0
++ glob 2.1.3
++ hotreloader 4.4.0
++ http_multi_server 3.2.2
++ http_parser 4.1.2
++ image 4.9.1
++ io 1.0.5
++ logging 1.3.0
++ markdown 7.3.1
++ matcher 0.12.20
++ meta 1.19.0
++ mime 2.0.0
++ node_preamble 2.0.2
++ package_config 3.0.0
++ path 1.9.1
++ petitparser 7.0.2
++ pool 1.5.2
++ posix 6.5.0
++ pub_semver 2.2.0
++ quiver 3.2.2
++ riverpod 3.3.2
++ shelf 1.4.2
++ shelf_packages_handler 3.0.2
++ shelf_static 1.1.3
++ shelf_web_socket 3.0.0
++ source_map_stack_trace 2.1.2
++ source_maps 0.10.13
++ source_span 1.10.2
++ stack_trace 1.12.1
++ state_notifier 1.0.0
++ stream_channel 2.1.4
++ stream_transform 2.1.1
++ string_scanner 1.4.1
++ term_glyph 1.2.2
++ test 1.31.2
++ test_api 0.7.13
++ test_core 0.6.19
++ typed_data 1.4.0
++ uuid 4.5.3
++ vm_service 15.2.0
++ watcher 1.2.1
++ web 1.1.1
++ web_socket 1.0.1
++ web_socket_channel 3.0.3
++ webkit_inspection_protocol 1.2.1
++ xml 7.0.1
++ yaml 3.1.3
++ zmodem 0.0.6
+Changed 66 dependencies!
+1 package has newer versions incompatible with dependency constraints.
+Try `dart pub outdated` for more information.
+Changed lib/src/framework.dart
+Changed lib/src/provider_dependencies.dart
+Changed test/basic_integration_test.dart
+Changed test/direct_provider_test.dart
+Changed test/rebuild_test.dart
+Changed test/riverpod_test.dart
+Changed test/simple_test.dart
+Changed test/simple_watch_test.dart
+Changed test/watch_test.dart
+Changed example/counter_watch_demo.dart
+Formatted 12 files (10 changed) in 0.03 seconds.
+Analyzing cinder_riverpod...
+
+  error - example/counter_watch_demo.dart:5:25 - The function 'StateProvider' isn't defined. Try importing the library that defines 'StateProvider', correcting the name to the name of an existing function, or defining a function named 'StateProvider'. - undefined_function
+  error - lib/src/framework.dart:34:14 - The name 'Override' isn't a type, so it can't be used as a type argument. Try correcting the name to an existing type, or defining a type named 'Override'. - non_type_as_type_argument
+  error - lib/src/provider_context.dart:19:13 - Undefined class 'ProviderListenable'. Try changing the name to the name of an existing class, or creating a class with the name 'ProviderListenable'. - undefined_class
+  error - lib/src/provider_context.dart:36:14 - Undefined class 'ProviderListenable'. Try changing the name to the name of an existing class, or creating a class with the name 'ProviderListenable'. - undefined_class
+  error - lib/src/provider_context.dart:70:5 - Undefined class 'ProviderListenable'. Try changing the name to the name of an existing class, or creating a class with the name 'ProviderListenable'. - undefined_class
+  error - lib/src/provider_context.dart:110:5 - Undefined class 'ProviderListenable'. Try changing the name to the name of an existing class, or creating a class with the name 'ProviderListenable'. - undefined_class
+  error - lib/src/provider_context.dart:137:16 - Undefined class 'Refreshable'. Try changing the name to the name of an existing class, or creating a class with the name 'Refreshable'. - undefined_class
+  error - lib/src/provider_context.dart:152:19 - Undefined class 'ProviderOrFamily'. Try changing the name to the name of an existing class, or creating a class with the name 'ProviderOrFamily'. - undefined_class
+  error - lib/src/provider_dependencies.dart:18:13 - The name 'ProviderListenable' isn't a type, so it can't be used as a type argument. Try correcting the name to an existing type, or defining a type named 'ProviderListenable'. - non_type_as_type_argument
+  error - lib/src/provider_dependencies.dart:19:13 - The name 'ProviderListenable' isn't a type, so it can't be used as a type argument. Try correcting the name to an existing type, or defining a type named 'ProviderListenable'. - non_type_as_type_argument
+  error - lib/src/provider_dependencies.dart:22:13 - The name 'ProviderListenable' isn't a type, so it can't be used as a type argument. Try correcting the name to an existing type, or defining a type named 'ProviderListenable'. - non_type_as_type_argument
+  error - lib/src/provider_dependencies.dart:23:13 - The name 'ProviderListenable' isn't a type, so it can't be used as a type argument. Try correcting the name to an existing type, or defining a type named 'ProviderListenable'. - non_type_as_type_argument
+  error - lib/src/provider_dependencies.dart:31:14 - Undefined class 'ProviderListenable'. Try changing the name to the name of an existing class, or creating a class with the name 'ProviderListenable'. - undefined_class
+  error - lib/src/provider_dependencies.dart:72:5 - Undefined class 'ProviderListenable'. Try changing the name to the name of an existing class, or creating a class with the name 'ProviderListenable'. - undefined_class
+  error - test/direct_provider_test.dart:7:29 - The function 'StateProvider' isn't defined. Try importing the library that defines 'StateProvider', correcting the name to the name of an existing function, or defining a function named 'StateProvider'. - undefined_function
+  error - test/rebuild_test.dart:7:29 - The function 'StateProvider' isn't defined. Try importing the library that defines 'StateProvider', correcting the name to the name of an existing function, or defining a function named 'StateProvider'. - undefined_function
+  error - test/rebuild_test.dart:41:9 - Undefined class 'StateProvider'. Try changing the name to the name of an existing class, or creating a class with the name 'StateProvider'. - undefined_class
+  error - test/riverpod_test.dart:6:25 - The function 'StateProvider' isn't defined. Try importing the library that defines 'StateProvider', correcting the name to the name of an existing function, or defining a function named 'StateProvider'. - undefined_function
+  error - test/riverpod_test.dart:14:31 - Classes can only extend other classes. Try specifying a different superclass, or removing the extends clause. - extends_non_class
+  error - test/riverpod_test.dart:15:29 - Too many positional arguments: 0 expected, but 1 found. Try removing the extra arguments. - extra_positional_arguments
+  error - test/riverpod_test.dart:17:23 - Undefined name 'state'. Try correcting the name to one that is defined, or defining the name. - undefined_identifier
+  error - test/riverpod_test.dart:18:23 - Undefined name 'state'. Try correcting the name to one that is defined, or defining the name. - undefined_identifier
+  error - test/riverpod_test.dart:21:33 - The function 'StateNotifierProvider' isn't defined. Try importing the library that defines 'StateNotifierProvider', correcting the name to the name of an existing function, or defining a function named 'StateNotifierProvider'. - undefined_function
+  error - test/simple_test.dart:31:29 - The function 'StateProvider' isn't defined. Try importing the library that defines 'StateProvider', correcting the name to the name of an existing function, or defining a function named 'StateProvider'. - undefined_function
+  error - test/simple_watch_test.dart:7:29 - The function 'StateProvider' isn't defined. Try importing the library that defines 'StateProvider', correcting the name to the name of an existing function, or defining a function named 'StateProvider'. - undefined_function
+  error - test/simple_watch_test.dart:32:9 - Undefined class 'StateProvider'. Try changing the name to the name of an existing class, or creating a class with the name 'StateProvider'. - undefined_class
+  error - test/watch_test.dart:8:31 - The function 'StateProvider' isn't defined. Try importing the library that defines 'StateProvider', correcting the name to the name of an existing function, or defining a function named 'StateProvider'. - undefined_function
+  error - test/watch_test.dart:65:28 - The function 'StateProvider' isn't defined. Try importing the library that defines 'StateProvider', correcting the name to the name of an existing function, or defining a function named 'StateProvider'. - undefined_function
+  error - test/watch_test.dart:66:27 - The function 'StateProvider' isn't defined. Try importing the library that defines 'StateProvider', correcting the name to the name of an existing function, or defining a function named 'StateProvider'. - undefined_function
+  error - test/watch_test.dart:124:31 - The function 'StateProvider' isn't defined. Try importing the library that defines 'StateProvider', correcting the name to the name of an existing function, or defining a function named 'StateProvider'. - undefined_function
+  error - test/watch_test.dart:177:29 - The function 'StateProvider' isn't defined. Try importing the library that defines 'StateProvider', correcting the name to the name of an existing function, or defining a function named 'StateProvider'. - undefined_function
+  error - test/watch_test.dart:225:31 - The function 'StateProvider' isn't defined. Try importing the library that defines 'StateProvider', correcting the name to the name of an existing function, or defining a function named 'StateProvider'. - undefined_function
+  error - test/watch_test.dart:226:30 - The function 'StateProvider' isn't defined. Try importing the library that defines 'StateProvider', correcting the name to the name of an existing function, or defining a function named 'StateProvider'. - undefined_function
+  error - test/watch_test.dart:290:31 - The function 'StateProvider' isn't defined. Try importing the library that defines 'StateProvider', correcting the name to the name of an existing function, or defining a function named 'StateProvider'. - undefined_function
+  error - test/watch_test.dart:341:9 - Undefined class 'StateProvider'. Try changing the name to the name of an existing class, or creating a class with the name 'StateProvider'. - undefined_class
+warning - analysis_options.yaml:14:10 - The URI 'package:lints/recommended.yaml' included in '/home/runner/work/cinder/cinder/packages/cinder_riverpod/analysis_options.yaml' can't be found when analyzing '/home/runner/work/cinder/cinder/packages/cinder_riverpod'. - include_file_not_found
+
+36 issues found.
+00:00 +0: loading test/watch_test.dart
+00:00 +0 -1: loading test/watch_test.dart [E]
+  Failed to load "test/watch_test.dart":
+  test/watch_test.dart:341:9: Error: Type 'StateProvider' not found.
+    final StateProvider<int> counterProvider;
+          ^^^^^^^^^^^^^
+  lib/src/framework.dart:34:14: Error: Type 'Override' not found.
+    final List<Override> overrides;
+               ^^^^^^^^
+  lib/src/provider_context.dart:19:13: Error: Type 'ProviderListenable' not found.
+    T read<T>(ProviderListenable<T> provider) {
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_context.dart:36:14: Error: Type 'ProviderListenable' not found.
+    T watch<T>(ProviderListenable<T> provider) {
+               ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_context.dart:70:5: Error: Type 'ProviderListenable' not found.
+      ProviderListenable<T> provider,
+      ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_context.dart:110:5: Error: Type 'ProviderListenable' not found.
+      ProviderListenable<T> provider,
+      ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_context.dart:137:16: Error: Type 'Refreshable' not found.
+    T refresh<T>(Refreshable<T> provider) {
+                 ^^^^^^^^^^^
+  lib/src/provider_context.dart:152:19: Error: Type 'ProviderOrFamily' not found.
+    void invalidate(ProviderOrFamily provider) {
+                    ^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:18:13: Error: Type 'ProviderListenable' not found.
+    final Map<ProviderListenable, ProviderSubscription> _watchers = {};
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:19:13: Error: Type 'ProviderListenable' not found.
+    final Map<ProviderListenable, ProviderSubscription> _listeners = {};
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:22:13: Error: Type 'ProviderListenable' not found.
+    final Map<ProviderListenable, ProviderSubscription> _oldWatchers = {};
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:23:13: Error: Type 'ProviderListenable' not found.
+    final Map<ProviderListenable, ProviderSubscription> _oldListeners = {};
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:31:14: Error: Type 'ProviderListenable' not found.
+    T watch<T>(ProviderListenable<T> provider, ProviderContainer container) {
+               ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:72:5: Error: Type 'ProviderListenable' not found.
+      ProviderListenable<T> provider,
+      ^^^^^^^^^^^^^^^^^^
+  test/watch_test.dart:8:31: Error: Method not found: 'StateProvider'.
+        final counterProvider = StateProvider<int>((ref) => 0);
+                                ^^^^^^^^^^^^^
+  test/watch_test.dart:65:28: Error: Method not found: 'StateProvider'.
+        final nameProvider = StateProvider<String>((ref) => 'Alice');
+                             ^^^^^^^^^^^^^
+  test/watch_test.dart:66:27: Error: Method not found: 'StateProvider'.
+        final ageProvider = StateProvider<int>((ref) => 30);
+                            ^^^^^^^^^^^^^
+  test/watch_test.dart:124:31: Error: Method not found: 'StateProvider'.
+        final counterProvider = StateProvider<int>((ref) => 10);
+                                ^^^^^^^^^^^^^
+  test/watch_test.dart:177:29: Error: Method not found: 'StateProvider'.
+        final colorProvider = StateProvider<String>((ref) => 'blue');
+                              ^^^^^^^^^^^^^
+  test/watch_test.dart:225:31: Error: Method not found: 'StateProvider'.
+        final counterProvider = StateProvider<int>((ref) => 0);
+                                ^^^^^^^^^^^^^
+  test/watch_test.dart:226:30: Error: Method not found: 'StateProvider'.
+        final rebuildTrigger = StateProvider<int>((ref) => 0);
+                               ^^^^^^^^^^^^^
+  test/watch_test.dart:290:31: Error: Method not found: 'StateProvider'.
+        final counterProvider = StateProvider<int>((ref) => 0);
+                                ^^^^^^^^^^^^^
+  test/watch_test.dart:341:9: Error: 'StateProvider' isn't a type.
+    final StateProvider<int> counterProvider;
+          ^^^^^^^^^^^^^
+  lib/src/framework.dart:34:14: Error: 'Override' isn't a type.
+    final List<Override> overrides;
+               ^^^^^^^^
+  lib/src/provider_context.dart:19:13: Error: 'ProviderListenable' isn't a type.
+    T read<T>(ProviderListenable<T> provider) {
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_context.dart:36:14: Error: 'ProviderListenable' isn't a type.
+    T watch<T>(ProviderListenable<T> provider) {
+               ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_context.dart:70:5: Error: 'ProviderListenable' isn't a type.
+      ProviderListenable<T> provider,
+      ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_context.dart:110:5: Error: 'ProviderListenable' isn't a type.
+      ProviderListenable<T> provider,
+      ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_context.dart:137:16: Error: 'Refreshable' isn't a type.
+    T refresh<T>(Refreshable<T> provider) {
+                 ^^^^^^^^^^^
+  lib/src/provider_context.dart:152:19: Error: 'ProviderOrFamily' isn't a type.
+    void invalidate(ProviderOrFamily provider) {
+                    ^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:18:13: Error: 'ProviderListenable' isn't a type.
+    final Map<ProviderListenable, ProviderSubscription> _watchers = {};
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:18:67: Error: A value of type 'Map<dynamic, dynamic>' can't be assigned to a variable of type 'Map<invalid-type, ProviderSubscription<dynamic>>'.
+   - 'Map' is from 'dart:core'.
+   - 'ProviderSubscription' is from 'package:riverpod/src/framework.dart' ('../../../../../.pub-cache/hosted/pub.dev/riverpod-3.3.2/lib/src/framework.dart').
+    final Map<ProviderListenable, ProviderSubscription> _watchers = {};
+                                                                    ^
+  lib/src/provider_dependencies.dart:19:13: Error: 'ProviderListenable' isn't a type.
+    final Map<ProviderListenable, ProviderSubscription> _listeners = {};
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:19:68: Error: A value of type 'Map<dynamic, dynamic>' can't be assigned to a variable of type 'Map<invalid-type, ProviderSubscription<dynamic>>'.
+   - 'Map' is from 'dart:core'.
+   - 'ProviderSubscription' is from 'package:riverpod/src/framework.dart' ('../../../../../.pub-cache/hosted/pub.dev/riverpod-3.3.2/lib/src/framework.dart').
+    final Map<ProviderListenable, ProviderSubscription> _listeners = {};
+                                                                     ^
+  lib/src/provider_dependencies.dart:22:13: Error: 'ProviderListenable' isn't a type.
+    final Map<ProviderListenable, ProviderSubscription> _oldWatchers = {};
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:22:70: Error: A value of type 'Map<dynamic, dynamic>' can't be assigned to a variable of type 'Map<invalid-type, ProviderSubscription<dynamic>>'.
+   - 'Map' is from 'dart:core'.
+   - 'ProviderSubscription' is from 'package:riverpod/src/framework.dart' ('../../../../../.pub-cache/hosted/pub.dev/riverpod-3.3.2/lib/src/framework.dart').
+    final Map<ProviderListenable, ProviderSubscription> _oldWatchers = {};
+                                                                       ^
+  lib/src/provider_dependencies.dart:23:13: Error: 'ProviderListenable' isn't a type.
+    final Map<ProviderListenable, ProviderSubscription> _oldListeners = {};
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:23:71: Error: A value of type 'Map<dynamic, dynamic>' can't be assigned to a variable of type 'Map<invalid-type, ProviderSubscription<dynamic>>'.
+   - 'Map' is from 'dart:core'.
+   - 'ProviderSubscription' is from 'package:riverpod/src/framework.dart' ('../../../../../.pub-cache/hosted/pub.dev/riverpod-3.3.2/lib/src/framework.dart').
+    final Map<ProviderListenable, ProviderSubscription> _oldListeners = {};
+                                                                        ^
+  lib/src/provider_dependencies.dart:31:14: Error: 'ProviderListenable' isn't a type.
+    T watch<T>(ProviderListenable<T> provider, ProviderContainer container) {
+               ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:72:5: Error: 'ProviderListenable' isn't a type.
+      ProviderListenable<T> provider,
+      ^^^^^^^^^^^^^^^^^^
+00:00 +0 -2: loading test/basic_integration_test.dart [E]
+  Failed to load "test/basic_integration_test.dart":
+  lib/src/provider_context.dart:19:13: Error: Type 'ProviderListenable' not found.
+    T read<T>(ProviderListenable<T> provider) {
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_context.dart:36:14: Error: Type 'ProviderListenable' not found.
+    T watch<T>(ProviderListenable<T> provider) {
+               ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_context.dart:70:5: Error: Type 'ProviderListenable' not found.
+      ProviderListenable<T> provider,
+      ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_context.dart:110:5: Error: Type 'ProviderListenable' not found.
+      ProviderListenable<T> provider,
+      ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_context.dart:137:16: Error: Type 'Refreshable' not found.
+    T refresh<T>(Refreshable<T> provider) {
+                 ^^^^^^^^^^^
+  lib/src/provider_context.dart:152:19: Error: Type 'ProviderOrFamily' not found.
+    void invalidate(ProviderOrFamily provider) {
+                    ^^^^^^^^^^^^^^^^
+  lib/src/provider_context.dart:19:13: Error: 'ProviderListenable' isn't a type.
+    T read<T>(ProviderListenable<T> provider) {
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_context.dart:36:14: Error: 'ProviderListenable' isn't a type.
+    T watch<T>(ProviderListenable<T> provider) {
+               ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_context.dart:70:5: Error: 'ProviderListenable' isn't a type.
+      ProviderListenable<T> provider,
+      ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_context.dart:110:5: Error: 'ProviderListenable' isn't a type.
+      ProviderListenable<T> provider,
+      ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_context.dart:137:16: Error: 'Refreshable' isn't a type.
+    T refresh<T>(Refreshable<T> provider) {
+                 ^^^^^^^^^^^
+  lib/src/provider_context.dart:152:19: Error: 'ProviderOrFamily' isn't a type.
+    void invalidate(ProviderOrFamily provider) {
+                    ^^^^^^^^^^^^^^^^
+  lib/src/framework.dart:34:14: Error: Type 'Override' not found.
+    final List<Override> overrides;
+               ^^^^^^^^
+  lib/src/framework.dart:34:14: Error: 'Override' isn't a type.
+    final List<Override> overrides;
+               ^^^^^^^^
+  lib/src/provider_dependencies.dart:18:13: Error: Type 'ProviderListenable' not found.
+    final Map<ProviderListenable, ProviderSubscription> _watchers = {};
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:19:13: Error: Type 'ProviderListenable' not found.
+    final Map<ProviderListenable, ProviderSubscription> _listeners = {};
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:22:13: Error: Type 'ProviderListenable' not found.
+    final Map<ProviderListenable, ProviderSubscription> _oldWatchers = {};
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:23:13: Error: Type 'ProviderListenable' not found.
+    final Map<ProviderListenable, ProviderSubscription> _oldListeners = {};
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:31:14: Error: Type 'ProviderListenable' not found.
+    T watch<T>(ProviderListenable<T> provider, ProviderContainer container) {
+               ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:72:5: Error: Type 'ProviderListenable' not found.
+      ProviderListenable<T> provider,
+      ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:18:13: Error: 'ProviderListenable' isn't a type.
+    final Map<ProviderListenable, ProviderSubscription> _watchers = {};
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:18:67: Error: A value of type 'Map<dynamic, dynamic>' can't be assigned to a variable of type 'Map<invalid-type, ProviderSubscription<dynamic>>'.
+   - 'Map' is from 'dart:core'.
+   - 'ProviderSubscription' is from 'package:riverpod/src/framework.dart' ('../../../../../.pub-cache/hosted/pub.dev/riverpod-3.3.2/lib/src/framework.dart').
+    final Map<ProviderListenable, ProviderSubscription> _watchers = {};
+                                                                    ^
+  lib/src/provider_dependencies.dart:19:13: Error: 'ProviderListenable' isn't a type.
+    final Map<ProviderListenable, ProviderSubscription> _listeners = {};
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:19:68: Error: A value of type 'Map<dynamic, dynamic>' can't be assigned to a variable of type 'Map<invalid-type, ProviderSubscription<dynamic>>'.
+   - 'Map' is from 'dart:core'.
+   - 'ProviderSubscription' is from 'package:riverpod/src/framework.dart' ('../../../../../.pub-cache/hosted/pub.dev/riverpod-3.3.2/lib/src/framework.dart').
+    final Map<ProviderListenable, ProviderSubscription> _listeners = {};
+                                                                     ^
+  lib/src/provider_dependencies.dart:22:13: Error: 'ProviderListenable' isn't a type.
+    final Map<ProviderListenable, ProviderSubscription> _oldWatchers = {};
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:22:70: Error: A value of type 'Map<dynamic, dynamic>' can't be assigned to a variable of type 'Map<invalid-type, ProviderSubscription<dynamic>>'.
+   - 'Map' is from 'dart:core'.
+   - 'ProviderSubscription' is from 'package:riverpod/src/framework.dart' ('../../../../../.pub-cache/hosted/pub.dev/riverpod-3.3.2/lib/src/framework.dart').
+    final Map<ProviderListenable, ProviderSubscription> _oldWatchers = {};
+                                                                       ^
+  lib/src/provider_dependencies.dart:23:13: Error: 'ProviderListenable' isn't a type.
+    final Map<ProviderListenable, ProviderSubscription> _oldListeners = {};
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:23:71: Error: A value of type 'Map<dynamic, dynamic>' can't be assigned to a variable of type 'Map<invalid-type, ProviderSubscription<dynamic>>'.
+   - 'Map' is from 'dart:core'.
+   - 'ProviderSubscription' is from 'package:riverpod/src/framework.dart' ('../../../../../.pub-cache/hosted/pub.dev/riverpod-3.3.2/lib/src/framework.dart').
+    final Map<ProviderListenable, ProviderSubscription> _oldListeners = {};
+                                                                        ^
+  lib/src/provider_dependencies.dart:31:14: Error: 'ProviderListenable' isn't a type.
+    T watch<T>(ProviderListenable<T> provider, ProviderContainer container) {
+               ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:72:5: Error: 'ProviderListenable' isn't a type.
+      ProviderListenable<T> provider,
+      ^^^^^^^^^^^^^^^^^^
+00:00 +0 -3: loading test/simple_watch_test.dart [E]
+  Failed to load "test/simple_watch_test.dart":
+  test/simple_watch_test.dart:32:9: Error: Type 'StateProvider' not found.
+    final StateProvider<int> counterProvider;
+          ^^^^^^^^^^^^^
+  test/simple_watch_test.dart:7:29: Error: Method not found: 'StateProvider'.
+      final counterProvider = StateProvider<int>((ref) => 0);
+                              ^^^^^^^^^^^^^
+  test/simple_watch_test.dart:32:9: Error: 'StateProvider' isn't a type.
+    final StateProvider<int> counterProvider;
+          ^^^^^^^^^^^^^
+  lib/src/provider_context.dart:19:13: Error: Type 'ProviderListenable' not found.
+    T read<T>(ProviderListenable<T> provider) {
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_context.dart:36:14: Error: Type 'ProviderListenable' not found.
+    T watch<T>(ProviderListenable<T> provider) {
+               ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_context.dart:70:5: Error: Type 'ProviderListenable' not found.
+      ProviderListenable<T> provider,
+      ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_context.dart:110:5: Error: Type 'ProviderListenable' not found.
+      ProviderListenable<T> provider,
+      ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_context.dart:137:16: Error: Type 'Refreshable' not found.
+    T refresh<T>(Refreshable<T> provider) {
+                 ^^^^^^^^^^^
+  lib/src/provider_context.dart:152:19: Error: Type 'ProviderOrFamily' not found.
+    void invalidate(ProviderOrFamily provider) {
+                    ^^^^^^^^^^^^^^^^
+  lib/src/provider_context.dart:19:13: Error: 'ProviderListenable' isn't a type.
+    T read<T>(ProviderListenable<T> provider) {
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_context.dart:36:14: Error: 'ProviderListenable' isn't a type.
+    T watch<T>(ProviderListenable<T> provider) {
+               ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_context.dart:70:5: Error: 'ProviderListenable' isn't a type.
+      ProviderListenable<T> provider,
+      ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_context.dart:110:5: Error: 'ProviderListenable' isn't a type.
+      ProviderListenable<T> provider,
+      ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_context.dart:137:16: Error: 'Refreshable' isn't a type.
+    T refresh<T>(Refreshable<T> provider) {
+                 ^^^^^^^^^^^
+  lib/src/provider_context.dart:152:19: Error: 'ProviderOrFamily' isn't a type.
+    void invalidate(ProviderOrFamily provider) {
+                    ^^^^^^^^^^^^^^^^
+  lib/src/framework.dart:34:14: Error: Type 'Override' not found.
+    final List<Override> overrides;
+               ^^^^^^^^
+  lib/src/framework.dart:34:14: Error: 'Override' isn't a type.
+    final List<Override> overrides;
+               ^^^^^^^^
+  lib/src/provider_dependencies.dart:18:13: Error: Type 'ProviderListenable' not found.
+    final Map<ProviderListenable, ProviderSubscription> _watchers = {};
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:19:13: Error: Type 'ProviderListenable' not found.
+    final Map<ProviderListenable, ProviderSubscription> _listeners = {};
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:22:13: Error: Type 'ProviderListenable' not found.
+    final Map<ProviderListenable, ProviderSubscription> _oldWatchers = {};
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:23:13: Error: Type 'ProviderListenable' not found.
+    final Map<ProviderListenable, ProviderSubscription> _oldListeners = {};
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:31:14: Error: Type 'ProviderListenable' not found.
+    T watch<T>(ProviderListenable<T> provider, ProviderContainer container) {
+               ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:72:5: Error: Type 'ProviderListenable' not found.
+      ProviderListenable<T> provider,
+      ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:18:13: Error: 'ProviderListenable' isn't a type.
+    final Map<ProviderListenable, ProviderSubscription> _watchers = {};
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:18:67: Error: A value of type 'Map<dynamic, dynamic>' can't be assigned to a variable of type 'Map<invalid-type, ProviderSubscription<dynamic>>'.
+   - 'Map' is from 'dart:core'.
+   - 'ProviderSubscription' is from 'package:riverpod/src/framework.dart' ('../../../../../.pub-cache/hosted/pub.dev/riverpod-3.3.2/lib/src/framework.dart').
+    final Map<ProviderListenable, ProviderSubscription> _watchers = {};
+                                                                    ^
+  lib/src/provider_dependencies.dart:19:13: Error: 'ProviderListenable' isn't a type.
+    final Map<ProviderListenable, ProviderSubscription> _listeners = {};
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:19:68: Error: A value of type 'Map<dynamic, dynamic>' can't be assigned to a variable of type 'Map<invalid-type, ProviderSubscription<dynamic>>'.
+   - 'Map' is from 'dart:core'.
+   - 'ProviderSubscription' is from 'package:riverpod/src/framework.dart' ('../../../../../.pub-cache/hosted/pub.dev/riverpod-3.3.2/lib/src/framework.dart').
+    final Map<ProviderListenable, ProviderSubscription> _listeners = {};
+                                                                     ^
+  lib/src/provider_dependencies.dart:22:13: Error: 'ProviderListenable' isn't a type.
+    final Map<ProviderListenable, ProviderSubscription> _oldWatchers = {};
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:22:70: Error: A value of type 'Map<dynamic, dynamic>' can't be assigned to a variable of type 'Map<invalid-type, ProviderSubscription<dynamic>>'.
+   - 'Map' is from 'dart:core'.
+   - 'ProviderSubscription' is from 'package:riverpod/src/framework.dart' ('../../../../../.pub-cache/hosted/pub.dev/riverpod-3.3.2/lib/src/framework.dart').
+    final Map<ProviderListenable, ProviderSubscription> _oldWatchers = {};
+                                                                       ^
+  lib/src/provider_dependencies.dart:23:13: Error: 'ProviderListenable' isn't a type.
+    final Map<ProviderListenable, ProviderSubscription> _oldListeners = {};
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:23:71: Error: A value of type 'Map<dynamic, dynamic>' can't be assigned to a variable of type 'Map<invalid-type, ProviderSubscription<dynamic>>'.
+   - 'Map' is from 'dart:core'.
+   - 'ProviderSubscription' is from 'package:riverpod/src/framework.dart' ('../../../../../.pub-cache/hosted/pub.dev/riverpod-3.3.2/lib/src/framework.dart').
+    final Map<ProviderListenable, ProviderSubscription> _oldListeners = {};
+                                                                        ^
+  lib/src/provider_dependencies.dart:31:14: Error: 'ProviderListenable' isn't a type.
+    T watch<T>(ProviderListenable<T> provider, ProviderContainer container) {
+               ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:72:5: Error: 'ProviderListenable' isn't a type.
+      ProviderListenable<T> provider,
+      ^^^^^^^^^^^^^^^^^^
+00:00 +0 -4: loading test/simple_test.dart [E]
+  Failed to load "test/simple_test.dart":
+  test/simple_test.dart:31:29: Error: Method not found: 'StateProvider'.
+      final counterProvider = StateProvider<int>((ref) => 0);
+                              ^^^^^^^^^^^^^
+  lib/src/provider_context.dart:19:13: Error: Type 'ProviderListenable' not found.
+    T read<T>(ProviderListenable<T> provider) {
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_context.dart:36:14: Error: Type 'ProviderListenable' not found.
+    T watch<T>(ProviderListenable<T> provider) {
+               ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_context.dart:70:5: Error: Type 'ProviderListenable' not found.
+      ProviderListenable<T> provider,
+      ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_context.dart:110:5: Error: Type 'ProviderListenable' not found.
+      ProviderListenable<T> provider,
+      ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_context.dart:137:16: Error: Type 'Refreshable' not found.
+    T refresh<T>(Refreshable<T> provider) {
+                 ^^^^^^^^^^^
+  lib/src/provider_context.dart:152:19: Error: Type 'ProviderOrFamily' not found.
+    void invalidate(ProviderOrFamily provider) {
+                    ^^^^^^^^^^^^^^^^
+  lib/src/provider_context.dart:19:13: Error: 'ProviderListenable' isn't a type.
+    T read<T>(ProviderListenable<T> provider) {
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_context.dart:36:14: Error: 'ProviderListenable' isn't a type.
+    T watch<T>(ProviderListenable<T> provider) {
+               ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_context.dart:70:5: Error: 'ProviderListenable' isn't a type.
+      ProviderListenable<T> provider,
+      ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_context.dart:110:5: Error: 'ProviderListenable' isn't a type.
+      ProviderListenable<T> provider,
+      ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_context.dart:137:16: Error: 'Refreshable' isn't a type.
+    T refresh<T>(Refreshable<T> provider) {
+                 ^^^^^^^^^^^
+  lib/src/provider_context.dart:152:19: Error: 'ProviderOrFamily' isn't a type.
+    void invalidate(ProviderOrFamily provider) {
+                    ^^^^^^^^^^^^^^^^
+  lib/src/framework.dart:34:14: Error: Type 'Override' not found.
+    final List<Override> overrides;
+               ^^^^^^^^
+  lib/src/framework.dart:34:14: Error: 'Override' isn't a type.
+    final List<Override> overrides;
+               ^^^^^^^^
+  lib/src/provider_dependencies.dart:18:13: Error: Type 'ProviderListenable' not found.
+    final Map<ProviderListenable, ProviderSubscription> _watchers = {};
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:19:13: Error: Type 'ProviderListenable' not found.
+    final Map<ProviderListenable, ProviderSubscription> _listeners = {};
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:22:13: Error: Type 'ProviderListenable' not found.
+    final Map<ProviderListenable, ProviderSubscription> _oldWatchers = {};
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:23:13: Error: Type 'ProviderListenable' not found.
+    final Map<ProviderListenable, ProviderSubscription> _oldListeners = {};
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:31:14: Error: Type 'ProviderListenable' not found.
+    T watch<T>(ProviderListenable<T> provider, ProviderContainer container) {
+               ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:72:5: Error: Type 'ProviderListenable' not found.
+      ProviderListenable<T> provider,
+      ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:18:13: Error: 'ProviderListenable' isn't a type.
+    final Map<ProviderListenable, ProviderSubscription> _watchers = {};
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:18:67: Error: A value of type 'Map<dynamic, dynamic>' can't be assigned to a variable of type 'Map<invalid-type, ProviderSubscription<dynamic>>'.
+   - 'Map' is from 'dart:core'.
+   - 'ProviderSubscription' is from 'package:riverpod/src/framework.dart' ('../../../../../.pub-cache/hosted/pub.dev/riverpod-3.3.2/lib/src/framework.dart').
+    final Map<ProviderListenable, ProviderSubscription> _watchers = {};
+                                                                    ^
+  lib/src/provider_dependencies.dart:19:13: Error: 'ProviderListenable' isn't a type.
+    final Map<ProviderListenable, ProviderSubscription> _listeners = {};
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:19:68: Error: A value of type 'Map<dynamic, dynamic>' can't be assigned to a variable of type 'Map<invalid-type, ProviderSubscription<dynamic>>'.
+   - 'Map' is from 'dart:core'.
+   - 'ProviderSubscription' is from 'package:riverpod/src/framework.dart' ('../../../../../.pub-cache/hosted/pub.dev/riverpod-3.3.2/lib/src/framework.dart').
+    final Map<ProviderListenable, ProviderSubscription> _listeners = {};
+                                                                     ^
+  lib/src/provider_dependencies.dart:22:13: Error: 'ProviderListenable' isn't a type.
+    final Map<ProviderListenable, ProviderSubscription> _oldWatchers = {};
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:22:70: Error: A value of type 'Map<dynamic, dynamic>' can't be assigned to a variable of type 'Map<invalid-type, ProviderSubscription<dynamic>>'.
+   - 'Map' is from 'dart:core'.
+   - 'ProviderSubscription' is from 'package:riverpod/src/framework.dart' ('../../../../../.pub-cache/hosted/pub.dev/riverpod-3.3.2/lib/src/framework.dart').
+    final Map<ProviderListenable, ProviderSubscription> _oldWatchers = {};
+                                                                       ^
+  lib/src/provider_dependencies.dart:23:13: Error: 'ProviderListenable' isn't a type.
+    final Map<ProviderListenable, ProviderSubscription> _oldListeners = {};
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:23:71: Error: A value of type 'Map<dynamic, dynamic>' can't be assigned to a variable of type 'Map<invalid-type, ProviderSubscription<dynamic>>'.
+   - 'Map' is from 'dart:core'.
+   - 'ProviderSubscription' is from 'package:riverpod/src/framework.dart' ('../../../../../.pub-cache/hosted/pub.dev/riverpod-3.3.2/lib/src/framework.dart').
+    final Map<ProviderListenable, ProviderSubscription> _oldListeners = {};
+                                                                        ^
+  lib/src/provider_dependencies.dart:31:14: Error: 'ProviderListenable' isn't a type.
+    T watch<T>(ProviderListenable<T> provider, ProviderContainer container) {
+               ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:72:5: Error: 'ProviderListenable' isn't a type.
+      ProviderListenable<T> provider,
+      ^^^^^^^^^^^^^^^^^^
+00:00 +0 -5: loading test/direct_provider_test.dart [E]
+  Failed to load "test/direct_provider_test.dart":
+  test/direct_provider_test.dart:7:29: Error: Method not found: 'StateProvider'.
+      final counterProvider = StateProvider<int>((ref) => 0);
+                              ^^^^^^^^^^^^^
+  lib/src/provider_context.dart:19:13: Error: Type 'ProviderListenable' not found.
+    T read<T>(ProviderListenable<T> provider) {
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_context.dart:36:14: Error: Type 'ProviderListenable' not found.
+    T watch<T>(ProviderListenable<T> provider) {
+               ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_context.dart:70:5: Error: Type 'ProviderListenable' not found.
+      ProviderListenable<T> provider,
+      ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_context.dart:110:5: Error: Type 'ProviderListenable' not found.
+      ProviderListenable<T> provider,
+      ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_context.dart:137:16: Error: Type 'Refreshable' not found.
+    T refresh<T>(Refreshable<T> provider) {
+                 ^^^^^^^^^^^
+  lib/src/provider_context.dart:152:19: Error: Type 'ProviderOrFamily' not found.
+    void invalidate(ProviderOrFamily provider) {
+                    ^^^^^^^^^^^^^^^^
+  lib/src/provider_context.dart:19:13: Error: 'ProviderListenable' isn't a type.
+    T read<T>(ProviderListenable<T> provider) {
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_context.dart:36:14: Error: 'ProviderListenable' isn't a type.
+    T watch<T>(ProviderListenable<T> provider) {
+               ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_context.dart:70:5: Error: 'ProviderListenable' isn't a type.
+      ProviderListenable<T> provider,
+      ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_context.dart:110:5: Error: 'ProviderListenable' isn't a type.
+      ProviderListenable<T> provider,
+      ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_context.dart:137:16: Error: 'Refreshable' isn't a type.
+    T refresh<T>(Refreshable<T> provider) {
+                 ^^^^^^^^^^^
+  lib/src/provider_context.dart:152:19: Error: 'ProviderOrFamily' isn't a type.
+    void invalidate(ProviderOrFamily provider) {
+                    ^^^^^^^^^^^^^^^^
+  lib/src/framework.dart:34:14: Error: Type 'Override' not found.
+    final List<Override> overrides;
+               ^^^^^^^^
+  lib/src/framework.dart:34:14: Error: 'Override' isn't a type.
+    final List<Override> overrides;
+               ^^^^^^^^
+  lib/src/provider_dependencies.dart:18:13: Error: Type 'ProviderListenable' not found.
+    final Map<ProviderListenable, ProviderSubscription> _watchers = {};
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:19:13: Error: Type 'ProviderListenable' not found.
+    final Map<ProviderListenable, ProviderSubscription> _listeners = {};
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:22:13: Error: Type 'ProviderListenable' not found.
+    final Map<ProviderListenable, ProviderSubscription> _oldWatchers = {};
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:23:13: Error: Type 'ProviderListenable' not found.
+    final Map<ProviderListenable, ProviderSubscription> _oldListeners = {};
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:31:14: Error: Type 'ProviderListenable' not found.
+    T watch<T>(ProviderListenable<T> provider, ProviderContainer container) {
+               ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:72:5: Error: Type 'ProviderListenable' not found.
+      ProviderListenable<T> provider,
+      ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:18:13: Error: 'ProviderListenable' isn't a type.
+    final Map<ProviderListenable, ProviderSubscription> _watchers = {};
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:18:67: Error: A value of type 'Map<dynamic, dynamic>' can't be assigned to a variable of type 'Map<invalid-type, ProviderSubscription<dynamic>>'.
+   - 'Map' is from 'dart:core'.
+   - 'ProviderSubscription' is from 'package:riverpod/src/framework.dart' ('../../../../../.pub-cache/hosted/pub.dev/riverpod-3.3.2/lib/src/framework.dart').
+    final Map<ProviderListenable, ProviderSubscription> _watchers = {};
+                                                                    ^
+  lib/src/provider_dependencies.dart:19:13: Error: 'ProviderListenable' isn't a type.
+    final Map<ProviderListenable, ProviderSubscription> _listeners = {};
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:19:68: Error: A value of type 'Map<dynamic, dynamic>' can't be assigned to a variable of type 'Map<invalid-type, ProviderSubscription<dynamic>>'.
+   - 'Map' is from 'dart:core'.
+   - 'ProviderSubscription' is from 'package:riverpod/src/framework.dart' ('../../../../../.pub-cache/hosted/pub.dev/riverpod-3.3.2/lib/src/framework.dart').
+    final Map<ProviderListenable, ProviderSubscription> _listeners = {};
+                                                                     ^
+  lib/src/provider_dependencies.dart:22:13: Error: 'ProviderListenable' isn't a type.
+    final Map<ProviderListenable, ProviderSubscription> _oldWatchers = {};
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:22:70: Error: A value of type 'Map<dynamic, dynamic>' can't be assigned to a variable of type 'Map<invalid-type, ProviderSubscription<dynamic>>'.
+   - 'Map' is from 'dart:core'.
+   - 'ProviderSubscription' is from 'package:riverpod/src/framework.dart' ('../../../../../.pub-cache/hosted/pub.dev/riverpod-3.3.2/lib/src/framework.dart').
+    final Map<ProviderListenable, ProviderSubscription> _oldWatchers = {};
+                                                                       ^
+  lib/src/provider_dependencies.dart:23:13: Error: 'ProviderListenable' isn't a type.
+    final Map<ProviderListenable, ProviderSubscription> _oldListeners = {};
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:23:71: Error: A value of type 'Map<dynamic, dynamic>' can't be assigned to a variable of type 'Map<invalid-type, ProviderSubscription<dynamic>>'.
+   - 'Map' is from 'dart:core'.
+   - 'ProviderSubscription' is from 'package:riverpod/src/framework.dart' ('../../../../../.pub-cache/hosted/pub.dev/riverpod-3.3.2/lib/src/framework.dart').
+    final Map<ProviderListenable, ProviderSubscription> _oldListeners = {};
+                                                                        ^
+  lib/src/provider_dependencies.dart:31:14: Error: 'ProviderListenable' isn't a type.
+    T watch<T>(ProviderListenable<T> provider, ProviderContainer container) {
+               ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:72:5: Error: 'ProviderListenable' isn't a type.
+      ProviderListenable<T> provider,
+      ^^^^^^^^^^^^^^^^^^
+00:00 +0 -6: loading test/riverpod_test.dart [E]
+  Failed to load "test/riverpod_test.dart":
+  test/riverpod_test.dart:14:31: Error: Type 'StateNotifier' not found.
+  class CounterNotifier extends StateNotifier<int> {
+                                ^^^^^^^^^^^^^
+  test/riverpod_test.dart:6:25: Error: Method not found: 'StateProvider'.
+  final counterProvider = StateProvider<int>((ref) => 0);
+                          ^^^^^^^^^^^^^
+  test/riverpod_test.dart:21:33: Error: Method not found: 'StateNotifierProvider'.
+  final counterNotifierProvider = StateNotifierProvider<CounterNotifier, int>(
+                                  ^^^^^^^^^^^^^^^^^^^^^
+  test/riverpod_test.dart:17:23: Error: The getter 'state' isn't defined for the type 'CounterNotifier'.
+   - 'CounterNotifier' is from 'test/riverpod_test.dart'.
+  Try correcting the name to the name of an existing getter, or defining a getter or field named 'state'.
+    void increment() => state++;
+                        ^^^^^
+  test/riverpod_test.dart:17:23: Error: The setter 'state' isn't defined for the type 'CounterNotifier'.
+   - 'CounterNotifier' is from 'test/riverpod_test.dart'.
+  Try correcting the name to the name of an existing setter, or defining a setter or field named 'state'.
+    void increment() => state++;
+                        ^^^^^
+  test/riverpod_test.dart:18:23: Error: The getter 'state' isn't defined for the type 'CounterNotifier'.
+   - 'CounterNotifier' is from 'test/riverpod_test.dart'.
+  Try correcting the name to the name of an existing getter, or defining a getter or field named 'state'.
+    void decrement() => state--;
+                        ^^^^^
+  test/riverpod_test.dart:18:23: Error: The setter 'state' isn't defined for the type 'CounterNotifier'.
+   - 'CounterNotifier' is from 'test/riverpod_test.dart'.
+  Try correcting the name to the name of an existing setter, or defining a setter or field named 'state'.
+    void decrement() => state--;
+                        ^^^^^
+  lib/src/provider_context.dart:19:13: Error: Type 'ProviderListenable' not found.
+    T read<T>(ProviderListenable<T> provider) {
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_context.dart:36:14: Error: Type 'ProviderListenable' not found.
+    T watch<T>(ProviderListenable<T> provider) {
+               ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_context.dart:70:5: Error: Type 'ProviderListenable' not found.
+      ProviderListenable<T> provider,
+      ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_context.dart:110:5: Error: Type 'ProviderListenable' not found.
+      ProviderListenable<T> provider,
+      ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_context.dart:137:16: Error: Type 'Refreshable' not found.
+    T refresh<T>(Refreshable<T> provider) {
+                 ^^^^^^^^^^^
+  lib/src/provider_context.dart:152:19: Error: Type 'ProviderOrFamily' not found.
+    void invalidate(ProviderOrFamily provider) {
+                    ^^^^^^^^^^^^^^^^
+  lib/src/provider_context.dart:19:13: Error: 'ProviderListenable' isn't a type.
+    T read<T>(ProviderListenable<T> provider) {
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_context.dart:36:14: Error: 'ProviderListenable' isn't a type.
+    T watch<T>(ProviderListenable<T> provider) {
+               ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_context.dart:70:5: Error: 'ProviderListenable' isn't a type.
+      ProviderListenable<T> provider,
+      ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_context.dart:110:5: Error: 'ProviderListenable' isn't a type.
+      ProviderListenable<T> provider,
+      ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_context.dart:137:16: Error: 'Refreshable' isn't a type.
+    T refresh<T>(Refreshable<T> provider) {
+                 ^^^^^^^^^^^
+  lib/src/provider_context.dart:152:19: Error: 'ProviderOrFamily' isn't a type.
+    void invalidate(ProviderOrFamily provider) {
+                    ^^^^^^^^^^^^^^^^
+  lib/src/framework.dart:34:14: Error: Type 'Override' not found.
+    final List<Override> overrides;
+               ^^^^^^^^
+  lib/src/framework.dart:34:14: Error: 'Override' isn't a type.
+    final List<Override> overrides;
+               ^^^^^^^^
+  lib/src/provider_dependencies.dart:18:13: Error: Type 'ProviderListenable' not found.
+    final Map<ProviderListenable, ProviderSubscription> _watchers = {};
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:19:13: Error: Type 'ProviderListenable' not found.
+    final Map<ProviderListenable, ProviderSubscription> _listeners = {};
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:22:13: Error: Type 'ProviderListenable' not found.
+    final Map<ProviderListenable, ProviderSubscription> _oldWatchers = {};
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:23:13: Error: Type 'ProviderListenable' not found.
+    final Map<ProviderListenable, ProviderSubscription> _oldListeners = {};
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:31:14: Error: Type 'ProviderListenable' not found.
+    T watch<T>(ProviderListenable<T> provider, ProviderContainer container) {
+               ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:72:5: Error: Type 'ProviderListenable' not found.
+      ProviderListenable<T> provider,
+      ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:18:13: Error: 'ProviderListenable' isn't a type.
+    final Map<ProviderListenable, ProviderSubscription> _watchers = {};
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:18:67: Error: A value of type 'Map<dynamic, dynamic>' can't be assigned to a variable of type 'Map<invalid-type, ProviderSubscription<dynamic>>'.
+   - 'Map' is from 'dart:core'.
+   - 'ProviderSubscription' is from 'package:riverpod/src/framework.dart' ('../../../../../.pub-cache/hosted/pub.dev/riverpod-3.3.2/lib/src/framework.dart').
+    final Map<ProviderListenable, ProviderSubscription> _watchers = {};
+                                                                    ^
+  lib/src/provider_dependencies.dart:19:13: Error: 'ProviderListenable' isn't a type.
+    final Map<ProviderListenable, ProviderSubscription> _listeners = {};
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:19:68: Error: A value of type 'Map<dynamic, dynamic>' can't be assigned to a variable of type 'Map<invalid-type, ProviderSubscription<dynamic>>'.
+   - 'Map' is from 'dart:core'.
+   - 'ProviderSubscription' is from 'package:riverpod/src/framework.dart' ('../../../../../.pub-cache/hosted/pub.dev/riverpod-3.3.2/lib/src/framework.dart').
+    final Map<ProviderListenable, ProviderSubscription> _listeners = {};
+                                                                     ^
+  lib/src/provider_dependencies.dart:22:13: Error: 'ProviderListenable' isn't a type.
+    final Map<ProviderListenable, ProviderSubscription> _oldWatchers = {};
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:22:70: Error: A value of type 'Map<dynamic, dynamic>' can't be assigned to a variable of type 'Map<invalid-type, ProviderSubscription<dynamic>>'.
+   - 'Map' is from 'dart:core'.
+   - 'ProviderSubscription' is from 'package:riverpod/src/framework.dart' ('../../../../../.pub-cache/hosted/pub.dev/riverpod-3.3.2/lib/src/framework.dart').
+    final Map<ProviderListenable, ProviderSubscription> _oldWatchers = {};
+                                                                       ^
+  lib/src/provider_dependencies.dart:23:13: Error: 'ProviderListenable' isn't a type.
+    final Map<ProviderListenable, ProviderSubscription> _oldListeners = {};
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:23:71: Error: A value of type 'Map<dynamic, dynamic>' can't be assigned to a variable of type 'Map<invalid-type, ProviderSubscription<dynamic>>'.
+   - 'Map' is from 'dart:core'.
+   - 'ProviderSubscription' is from 'package:riverpod/src/framework.dart' ('../../../../../.pub-cache/hosted/pub.dev/riverpod-3.3.2/lib/src/framework.dart').
+    final Map<ProviderListenable, ProviderSubscription> _oldListeners = {};
+                                                                        ^
+  lib/src/provider_dependencies.dart:31:14: Error: 'ProviderListenable' isn't a type.
+    T watch<T>(ProviderListenable<T> provider, ProviderContainer container) {
+               ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:72:5: Error: 'ProviderListenable' isn't a type.
+      ProviderListenable<T> provider,
+      ^^^^^^^^^^^^^^^^^^
+00:00 +0 -7: loading test/rebuild_test.dart [E]
+  Failed to load "test/rebuild_test.dart":
+  test/rebuild_test.dart:41:9: Error: Type 'StateProvider' not found.
+    final StateProvider<int> counterProvider;
+          ^^^^^^^^^^^^^
+  test/rebuild_test.dart:7:29: Error: Method not found: 'StateProvider'.
+      final counterProvider = StateProvider<int>((ref) => 0);
+                              ^^^^^^^^^^^^^
+  test/rebuild_test.dart:41:9: Error: 'StateProvider' isn't a type.
+    final StateProvider<int> counterProvider;
+          ^^^^^^^^^^^^^
+  lib/src/provider_context.dart:19:13: Error: Type 'ProviderListenable' not found.
+    T read<T>(ProviderListenable<T> provider) {
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_context.dart:36:14: Error: Type 'ProviderListenable' not found.
+    T watch<T>(ProviderListenable<T> provider) {
+               ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_context.dart:70:5: Error: Type 'ProviderListenable' not found.
+      ProviderListenable<T> provider,
+      ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_context.dart:110:5: Error: Type 'ProviderListenable' not found.
+      ProviderListenable<T> provider,
+      ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_context.dart:137:16: Error: Type 'Refreshable' not found.
+    T refresh<T>(Refreshable<T> provider) {
+                 ^^^^^^^^^^^
+  lib/src/provider_context.dart:152:19: Error: Type 'ProviderOrFamily' not found.
+    void invalidate(ProviderOrFamily provider) {
+                    ^^^^^^^^^^^^^^^^
+  lib/src/provider_context.dart:19:13: Error: 'ProviderListenable' isn't a type.
+    T read<T>(ProviderListenable<T> provider) {
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_context.dart:36:14: Error: 'ProviderListenable' isn't a type.
+    T watch<T>(ProviderListenable<T> provider) {
+               ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_context.dart:70:5: Error: 'ProviderListenable' isn't a type.
+      ProviderListenable<T> provider,
+      ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_context.dart:110:5: Error: 'ProviderListenable' isn't a type.
+      ProviderListenable<T> provider,
+      ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_context.dart:137:16: Error: 'Refreshable' isn't a type.
+    T refresh<T>(Refreshable<T> provider) {
+                 ^^^^^^^^^^^
+  lib/src/provider_context.dart:152:19: Error: 'ProviderOrFamily' isn't a type.
+    void invalidate(ProviderOrFamily provider) {
+                    ^^^^^^^^^^^^^^^^
+  lib/src/framework.dart:34:14: Error: Type 'Override' not found.
+    final List<Override> overrides;
+               ^^^^^^^^
+  lib/src/framework.dart:34:14: Error: 'Override' isn't a type.
+    final List<Override> overrides;
+               ^^^^^^^^
+  lib/src/provider_dependencies.dart:18:13: Error: Type 'ProviderListenable' not found.
+    final Map<ProviderListenable, ProviderSubscription> _watchers = {};
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:19:13: Error: Type 'ProviderListenable' not found.
+    final Map<ProviderListenable, ProviderSubscription> _listeners = {};
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:22:13: Error: Type 'ProviderListenable' not found.
+    final Map<ProviderListenable, ProviderSubscription> _oldWatchers = {};
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:23:13: Error: Type 'ProviderListenable' not found.
+    final Map<ProviderListenable, ProviderSubscription> _oldListeners = {};
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:31:14: Error: Type 'ProviderListenable' not found.
+    T watch<T>(ProviderListenable<T> provider, ProviderContainer container) {
+               ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:72:5: Error: Type 'ProviderListenable' not found.
+      ProviderListenable<T> provider,
+      ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:18:13: Error: 'ProviderListenable' isn't a type.
+    final Map<ProviderListenable, ProviderSubscription> _watchers = {};
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:18:67: Error: A value of type 'Map<dynamic, dynamic>' can't be assigned to a variable of type 'Map<invalid-type, ProviderSubscription<dynamic>>'.
+   - 'Map' is from 'dart:core'.
+   - 'ProviderSubscription' is from 'package:riverpod/src/framework.dart' ('../../../../../.pub-cache/hosted/pub.dev/riverpod-3.3.2/lib/src/framework.dart').
+    final Map<ProviderListenable, ProviderSubscription> _watchers = {};
+                                                                    ^
+  lib/src/provider_dependencies.dart:19:13: Error: 'ProviderListenable' isn't a type.
+    final Map<ProviderListenable, ProviderSubscription> _listeners = {};
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:19:68: Error: A value of type 'Map<dynamic, dynamic>' can't be assigned to a variable of type 'Map<invalid-type, ProviderSubscription<dynamic>>'.
+   - 'Map' is from 'dart:core'.
+   - 'ProviderSubscription' is from 'package:riverpod/src/framework.dart' ('../../../../../.pub-cache/hosted/pub.dev/riverpod-3.3.2/lib/src/framework.dart').
+    final Map<ProviderListenable, ProviderSubscription> _listeners = {};
+                                                                     ^
+  lib/src/provider_dependencies.dart:22:13: Error: 'ProviderListenable' isn't a type.
+    final Map<ProviderListenable, ProviderSubscription> _oldWatchers = {};
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:22:70: Error: A value of type 'Map<dynamic, dynamic>' can't be assigned to a variable of type 'Map<invalid-type, ProviderSubscription<dynamic>>'.
+   - 'Map' is from 'dart:core'.
+   - 'ProviderSubscription' is from 'package:riverpod/src/framework.dart' ('../../../../../.pub-cache/hosted/pub.dev/riverpod-3.3.2/lib/src/framework.dart').
+    final Map<ProviderListenable, ProviderSubscription> _oldWatchers = {};
+                                                                       ^
+  lib/src/provider_dependencies.dart:23:13: Error: 'ProviderListenable' isn't a type.
+    final Map<ProviderListenable, ProviderSubscription> _oldListeners = {};
+              ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:23:71: Error: A value of type 'Map<dynamic, dynamic>' can't be assigned to a variable of type 'Map<invalid-type, ProviderSubscription<dynamic>>'.
+   - 'Map' is from 'dart:core'.
+   - 'ProviderSubscription' is from 'package:riverpod/src/framework.dart' ('../../../../../.pub-cache/hosted/pub.dev/riverpod-3.3.2/lib/src/framework.dart').
+    final Map<ProviderListenable, ProviderSubscription> _oldListeners = {};
+                                                                        ^
+  lib/src/provider_dependencies.dart:31:14: Error: 'ProviderListenable' isn't a type.
+    T watch<T>(ProviderListenable<T> provider, ProviderContainer container) {
+               ^^^^^^^^^^^^^^^^^^
+  lib/src/provider_dependencies.dart:72:5: Error: 'ProviderListenable' isn't a type.
+      ProviderListenable<T> provider,
+      ^^^^^^^^^^^^^^^^^^
+00:00 +0 -7: Some tests failed.
+
+Failing tests:
+  test/basic_integration_test.dart: loading test/basic_integration_test.dart
+  test/direct_provider_test.dart: loading test/direct_provider_test.dart
+  test/rebuild_test.dart: loading test/rebuild_test.dart
+  test/riverpod_test.dart: loading test/riverpod_test.dart
+  ... and 3 more
