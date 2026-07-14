@@ -132,8 +132,7 @@ class TerminalBinding extends CinderBinding
     _statsStartTime = DateTime.now();
     _perfLogTimer = Timer.periodic(interval, (_) {
       final stats = getPerformanceStats();
-      final msg =
-          'PERF: fps=${stats['fps']!.toStringAsFixed(1)}, '
+      final msg = 'PERF: fps=${stats['fps']!.toStringAsFixed(1)}, '
           'builds=${stats['builds']!.toStringAsFixed(1)}/s, '
           'layouts=${stats['layouts']!.toStringAsFixed(1)}/s, '
           'paints=${stats['paints']!.toStringAsFixed(1)}/s';
@@ -468,8 +467,7 @@ class TerminalBinding extends CinderBinding
       if (event is KeyboardInputEvent) {
         final keyEvent = event.event;
         // Check if this is a simple printable character (no modifiers except shift)
-        final isPrintable =
-            keyEvent.character != null &&
+        final isPrintable = keyEvent.character != null &&
             keyEvent.character!.isNotEmpty &&
             !keyEvent.isControlPressed &&
             !keyEvent.isAltPressed &&
@@ -1053,8 +1051,7 @@ class TerminalBinding extends CinderBinding
         }
 
         // Handle style
-        final hasStyle =
-            cell.style.color != null ||
+        final hasStyle = cell.style.color != null ||
             cell.style.backgroundColor != null ||
             cell.style.fontWeight == FontWeight.bold ||
             cell.style.fontWeight == FontWeight.dim ||

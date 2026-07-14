@@ -13,7 +13,7 @@ import 'utils/unicode_width.dart';
 /// object for every painted terminal position on every frame.
 class Cell {
   Cell({this.char = ' ', TextStyle? style, this.isImagePlaceholder = false})
-    : style = style ?? const TextStyle();
+      : style = style ?? const TextStyle();
 
   String char;
   TextStyle style;
@@ -104,13 +104,13 @@ class PendingImage {
 /// once, reuses cells, and records only the horizontal span touched on each row.
 class Buffer {
   Buffer(this.width, this.height)
-    : _flatCells = List<Cell>.generate(
-        width * height,
-        (_) => Cell(),
-        growable: false,
-      ),
-      _dirtyStart = Int32List(height),
-      _dirtyEnd = Int32List(height) {
+      : _flatCells = List<Cell>.generate(
+          width * height,
+          (_) => Cell(),
+          growable: false,
+        ),
+        _dirtyStart = Int32List(height),
+        _dirtyEnd = Int32List(height) {
     for (var y = 0; y < height; y++) {
       _dirtyStart[y] = width;
       _dirtyEnd[y] = -1;

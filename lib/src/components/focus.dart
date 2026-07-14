@@ -79,15 +79,13 @@ class FocusManager {
   }
 
   List<FocusNode> _traversableNodes({FocusScopeNode? scope}) {
-    return _nodes
-        .where((node) {
-          if (node is FocusScopeNode) return false;
-          if (!_canRequestFocus(node) || node.skipTraversal) return false;
-          if (!_ancestorsAllowTraversal(node)) return false;
-          if (scope != null && !node.ancestors.contains(scope)) return false;
-          return true;
-        })
-        .toList(growable: false);
+    return _nodes.where((node) {
+      if (node is FocusScopeNode) return false;
+      if (!_canRequestFocus(node) || node.skipTraversal) return false;
+      if (!_ancestorsAllowTraversal(node)) return false;
+      if (scope != null && !node.ancestors.contains(scope)) return false;
+      return true;
+    }).toList(growable: false);
   }
 
   @internal
@@ -170,8 +168,8 @@ class FocusNode implements Listenable {
     this.onKeyEvent,
     bool canRequestFocus = true,
     bool skipTraversal = false,
-  }) : _canRequestFocus = canRequestFocus,
-       _skipTraversal = skipTraversal;
+  })  : _canRequestFocus = canRequestFocus,
+        _skipTraversal = skipTraversal;
 
   final String? debugLabel;
   KeyEventHandler? onKeyEvent;
@@ -353,8 +351,7 @@ class FocusScopeNode extends FocusNode {
 
   /// Requests focus for [node], or the remembered/first traversable descendant.
   void requestScopeFocus([FocusNode? node]) {
-    final target =
-        node ??
+    final target = node ??
         FocusManager.instance.firstTraversableDescendant(this) ??
         (canRequestFocus ? this : null);
     target?.requestFocus();

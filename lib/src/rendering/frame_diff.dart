@@ -67,13 +67,13 @@ FrameDiffStats emitFrameDiff({
     final start = currentDirty && previousDirty
         ? _min(current.dirtyStartForRow(y), previous.dirtyStartForRow(y))
         : currentDirty
-        ? current.dirtyStartForRow(y)
-        : previous.dirtyStartForRow(y);
+            ? current.dirtyStartForRow(y)
+            : previous.dirtyStartForRow(y);
     final end = currentDirty && previousDirty
         ? _max(current.dirtyEndForRow(y), previous.dirtyEndForRow(y))
         : currentDirty
-        ? current.dirtyEndForRow(y)
-        : previous.dirtyEndForRow(y);
+            ? current.dirtyEndForRow(y)
+            : previous.dirtyEndForRow(y);
 
     var scan = start;
     while (scan <= end) {
