@@ -89,7 +89,7 @@ void main() {
   test('skipTraversal is skipped but explicit focus remains available',
       () async {
     final first = FocusNode(debugLabel: 'first');
-    final skipped = FocusNode(debugLabel: 'skipped', skipTraversal: true);
+    final skipped = FocusNode(debugLabel: 'skipped');
     final last = FocusNode(debugLabel: 'last');
 
     await testCinder('skip traversal', (tester) async {
@@ -98,7 +98,11 @@ void main() {
           child: Row(
             children: [
               Focus(focusNode: first, autofocus: true, child: const Text('1')),
-              Focus(focusNode: skipped, child: const Text('2')),
+              Focus(
+                focusNode: skipped,
+                skipTraversal: true,
+                child: const Text('2'),
+              ),
               Focus(focusNode: last, child: const Text('3')),
             ],
           ),
