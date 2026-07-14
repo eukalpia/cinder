@@ -1,8 +1,9 @@
+// ignore_for_file: invalid_use_of_internal_member
+
 import 'dart:async';
 import 'dart:collection';
 
 import 'package:cinder/cinder.dart';
-import 'package:meta/meta.dart';
 import 'package:riverpod/src/internals.dart';
 
 import 'provider_dependencies.dart';
@@ -56,7 +57,6 @@ class ProviderScope extends StatefulWidget {
     return scope.container;
   }
 
-  @internal
   static _InheritedProviderScopeElement scopeElementOf(
     BuildContext context, {
     bool listen = true,
@@ -200,7 +200,7 @@ class _UncontrolledProviderScopeState
   @override
   void Function()? scheduleDispose(Task task) {
     _disposeTimer?.cancel();
-    final timer = Timer.run(task.call);
+    final timer = Timer(Duration.zero, task.call);
     _disposeTimer = timer;
     return timer.cancel;
   }
@@ -224,7 +224,6 @@ class _UncontrolledProviderScopeState
   }
 }
 
-@internal
 class _InheritedProviderScope extends InheritedWidget {
   const _InheritedProviderScope({
     required this.container,
