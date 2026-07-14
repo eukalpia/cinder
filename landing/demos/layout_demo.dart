@@ -1,14 +1,14 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() async {
   await runApp(const LayoutDemo());
 }
 
-class LayoutDemo extends StatelessComponent {
+class LayoutDemo extends StatelessWidget {
   const LayoutDemo({super.key});
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,

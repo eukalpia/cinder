@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 final _debugLog = File('hoverable_widgets_demo_debug.log');
 
@@ -16,7 +16,7 @@ void main() {
   runApp(const HoverableWidgetsDemo());
 }
 
-class HoverableWidgetsDemo extends StatefulComponent {
+class HoverableWidgetsDemo extends StatefulWidget {
   const HoverableWidgetsDemo({super.key});
 
   @override
@@ -25,7 +25,7 @@ class HoverableWidgetsDemo extends StatefulComponent {
 
 class _HoverableWidgetsDemoState extends State<HoverableWidgetsDemo> {
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         border: BoxBorder.all(),
@@ -181,7 +181,7 @@ enum ButtonStyle {
 }
 
 // Hoverable Button Widget
-class HoverButton extends StatefulComponent {
+class HoverButton extends StatefulWidget {
   final String label;
   final ButtonStyle style;
 
@@ -200,7 +200,7 @@ class _HoverButtonState extends State<HoverButton> {
   bool _isPressed = false;
 
   Color _getBaseColor() {
-    return switch (component.style) {
+    return switch (widget.style) {
       ButtonStyle.primary => const Color(0xFF0066CC),
       ButtonStyle.success => const Color(0xFF00AA00),
       ButtonStyle.warning => const Color(0xFFFFAA00),
@@ -210,7 +210,7 @@ class _HoverButtonState extends State<HoverButton> {
   }
 
   Color _getHoverColor() {
-    return switch (component.style) {
+    return switch (widget.style) {
       ButtonStyle.primary => const Color(0xFF0088FF),
       ButtonStyle.success => const Color(0xFF00DD00),
       ButtonStyle.warning => const Color(0xFFFFCC00),
@@ -220,7 +220,7 @@ class _HoverButtonState extends State<HoverButton> {
   }
 
   Color _getPressedColor() {
-    return switch (component.style) {
+    return switch (widget.style) {
       ButtonStyle.primary => const Color(0xFF004488),
       ButtonStyle.success => const Color(0xFF008800),
       ButtonStyle.warning => const Color(0xFFDD8800),
@@ -230,7 +230,7 @@ class _HoverButtonState extends State<HoverButton> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     final color = _isPressed
         ? _getPressedColor()
         : _isHovering
@@ -248,43 +248,43 @@ class _HoverButtonState extends State<HoverButton> {
         setState(() {
           _isHovering = true;
         });
-        _log('Button "${component.label}" - Hover ENTER');
+        _log('Button "${widget.label}" - Hover ENTER');
       },
       onExit: (event) {
         setState(() {
           _isHovering = false;
           _isPressed = false;
         });
-        _log('Button "${component.label}" - Hover EXIT');
+        _log('Button "${widget.label}" - Hover EXIT');
       },
       child: GestureDetector(
         onTapDown: (details) {
           setState(() {
             _isPressed = true;
           });
-          _log('Button "${component.label}" - TAP DOWN');
+          _log('Button "${widget.label}" - TAP DOWN');
         },
         onTapUp: (details) {
           setState(() {
             _isPressed = false;
           });
-          _log('Button "${component.label}" - TAP UP');
+          _log('Button "${widget.label}" - TAP UP');
         },
         onTap: () {
-          _log('Button "${component.label}" - CLICKED');
+          _log('Button "${widget.label}" - CLICKED');
         },
         child: Container(
           decoration: BoxDecoration(
-            color: component.style == ButtonStyle.outlined ? null : color,
-            border: component.style == ButtonStyle.outlined
+            color: widget.style == ButtonStyle.outlined ? null : color,
+            border: widget.style == ButtonStyle.outlined
                 ? BoxBorder.all(color: color)
                 : BoxBorder.all(),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 1),
           child: Text(
-            '$prefix ${component.label}',
+            '$prefix ${widget.label}',
             style: TextStyle(
-              color: component.style == ButtonStyle.outlined
+              color: widget.style == ButtonStyle.outlined
                   ? color
                   : const Color(0xFFFFFFFF),
               fontWeight: _isHovering ? FontWeight.bold : null,
@@ -297,7 +297,7 @@ class _HoverButtonState extends State<HoverButton> {
 }
 
 // Hoverable Card Widget
-class HoverCard extends StatefulComponent {
+class HoverCard extends StatefulWidget {
   final String title;
   final String description;
   final String? icon;
@@ -317,23 +317,23 @@ class _HoverCardState extends State<HoverCard> {
   bool _isHovering = false;
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return MouseRegion(
       onEnter: (event) {
         setState(() {
           _isHovering = true;
         });
-        _log('Card "${component.title}" - Hover ENTER');
+        _log('Card "${widget.title}" - Hover ENTER');
       },
       onExit: (event) {
         setState(() {
           _isHovering = false;
         });
-        _log('Card "${component.title}" - Hover EXIT');
+        _log('Card "${widget.title}" - Hover EXIT');
       },
       child: GestureDetector(
         onTap: () {
-          _log('Card "${component.title}" - CLICKED');
+          _log('Card "${widget.title}" - CLICKED');
         },
         child: Container(
           decoration: BoxDecoration(
@@ -347,9 +347,9 @@ class _HoverCardState extends State<HoverCard> {
           padding: const EdgeInsets.all(2),
           child: Row(
             children: [
-              if (component.icon != null) ...[
+              if (widget.icon != null) ...[
                 Text(
-                  component.icon!,
+                  widget.icon!,
                   style: TextStyle(
                     color: _isHovering ? const Color(0xFF00FFFF) : null,
                   ),
@@ -361,14 +361,14 @@ class _HoverCardState extends State<HoverCard> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      component.title,
+                      widget.title,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: _isHovering ? const Color(0xFF00FFFF) : null,
                       ),
                     ),
                     Text(
-                      component.description,
+                      widget.description,
                       style: const TextStyle(
                         color: Color(0xFF888888),
                       ),
@@ -393,7 +393,7 @@ class _HoverCardState extends State<HoverCard> {
 }
 
 // Hoverable Menu List
-class HoverMenuList extends StatefulComponent {
+class HoverMenuList extends StatefulWidget {
   const HoverMenuList({super.key});
 
   @override
@@ -412,7 +412,7 @@ class _HoverMenuListState extends State<HoverMenuList> {
   ];
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         border: BoxBorder.all(),
@@ -513,7 +513,7 @@ class MenuItem {
 }
 
 // Hoverable Toggle Switch
-class HoverToggle extends StatefulComponent {
+class HoverToggle extends StatefulWidget {
   final String label;
 
   const HoverToggle({super.key, required this.label});
@@ -527,19 +527,19 @@ class _HoverToggleState extends State<HoverToggle> {
   bool _isEnabled = false;
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return MouseRegion(
       onEnter: (event) {
         setState(() {
           _isHovering = true;
         });
-        _log('Toggle "${component.label}" - Hover ENTER');
+        _log('Toggle "${widget.label}" - Hover ENTER');
       },
       onExit: (event) {
         setState(() {
           _isHovering = false;
         });
-        _log('Toggle "${component.label}" - Hover EXIT');
+        _log('Toggle "${widget.label}" - Hover EXIT');
       },
       child: GestureDetector(
         onTap: () {
@@ -547,7 +547,7 @@ class _HoverToggleState extends State<HoverToggle> {
             _isEnabled = !_isEnabled;
           });
           _log(
-              'Toggle "${component.label}" - TOGGLED to ${_isEnabled ? "ON" : "OFF"}');
+              'Toggle "${widget.label}" - TOGGLED to ${_isEnabled ? "ON" : "OFF"}');
         },
         child: Container(
           decoration: BoxDecoration(
@@ -580,7 +580,7 @@ class _HoverToggleState extends State<HoverToggle> {
               const SizedBox(width: 2),
               Expanded(
                 child: Text(
-                  component.label,
+                  widget.label,
                   style: TextStyle(
                     color: _isHovering ? const Color(0xFF00FFFF) : null,
                     fontWeight: _isHovering ? FontWeight.bold : null,
@@ -605,7 +605,7 @@ class _HoverToggleState extends State<HoverToggle> {
 }
 
 // Hoverable Tab Bar
-class HoverTabBar extends StatefulComponent {
+class HoverTabBar extends StatefulWidget {
   const HoverTabBar({super.key});
 
   @override
@@ -619,7 +619,7 @@ class _HoverTabBarState extends State<HoverTabBar> {
   final List<String> _tabs = const ['Home', 'Profile', 'Settings', 'About'];
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [

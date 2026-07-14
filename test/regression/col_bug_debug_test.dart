@@ -1,8 +1,8 @@
 import 'package:test/test.dart';
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
-// Example component for testing
-class ColumnBugDemo extends StatefulComponent {
+// Example widget for testing
+class ColumnBugDemo extends StatefulWidget {
   const ColumnBugDemo();
 
   @override
@@ -23,7 +23,7 @@ class _ColumnBugDemoState extends State<ColumnBugDemo> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     print('Building with first=$first');
     return Column(
       children: [
@@ -36,8 +36,8 @@ class _ColumnBugDemoState extends State<ColumnBugDemo> {
 void main() {
   group('Column Bug Debug', () {
     test('debug column replacement', () async {
-      await testNocterm('debug output', (tester) async {
-        await tester.pumpComponent(
+      await testCinder('debug output', (tester) async {
+        await tester.pumpWidget(
           const ColumnBugDemo(),
         );
 

@@ -1,4 +1,4 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 import '../components/stack.dart' as stack_lib;
 import 'render_theater.dart';
@@ -14,7 +14,7 @@ class OverlayEntry {
         _maintainState = maintainState;
 
   /// The builder for the widget to display in the overlay.
-  final ComponentBuilder builder;
+  final WidgetBuilder builder;
 
   /// Whether this entry occludes the entire overlay.
   bool get opaque => _opaque;
@@ -55,7 +55,7 @@ class OverlayEntry {
 }
 
 /// A stack of entries that can be managed independently.
-class Overlay extends StatefulComponent {
+class Overlay extends StatefulWidget {
   /// Creates an overlay.
   const Overlay({
     super.key,
@@ -89,7 +89,7 @@ class OverlayState extends State<Overlay> {
   void initState() {
     super.initState();
     // Add initial entries directly without calling setState
-    for (final OverlayEntry entry in component.initialEntries) {
+    for (final OverlayEntry entry in widget.initialEntries) {
       assert(entry._overlay == null);
       entry._overlay = this;
       _entries.add(entry);
@@ -161,9 +161,9 @@ class OverlayState extends State<Overlay> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     // Build only the entries that need to be visible
-    final List<Component> children = <Component>[];
+    final List<Widget> children = <Widget>[];
     bool onstage = true;
     int onstageCount = 0;
 
@@ -206,7 +206,7 @@ class OverlayState extends State<Overlay> {
 }
 
 /// A widget that builds and maintains the state for an [OverlayEntry].
-class _OverlayEntryWidget extends StatefulComponent {
+class _OverlayEntryWidget extends StatefulWidget {
   const _OverlayEntryWidget({
     required super.key,
     required this.entry,
@@ -230,15 +230,15 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     // Don't wrap in Container - let the builder result be the direct child
     // so Positioned parent data propagates correctly to RenderTheater
-    return component.entry.builder(context);
+    return widget.entry.builder(context);
   }
 }
 
 /// The Theater widget manages overlay entries with optimized rendering.
-class _Theater extends MultiChildRenderObjectComponent {
+class _Theater extends MultiChildRenderObjectWidget {
   const _Theater({
     this.skipCount = 0,
     this.clipBehavior = stack_lib.Clip.hardEdge,

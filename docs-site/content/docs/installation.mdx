@@ -1,6 +1,6 @@
 ---
 title: Installation
-description: Get Nocterm installed and ready to use
+description: Get Cinder installed and ready to use
 icon: download
 ---
 
@@ -11,13 +11,13 @@ You need:
 - Dart SDK 3.5.0 or later
 - A terminal emulator (any modern terminal works)
 
-## Add Nocterm to your project
+## Add Cinder to your project
 
-Add `nocterm` to your `pubspec.yaml`:
+Add `cinder` to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  nocterm: ^0.4.2
+  cinder: ^0.4.2
 ```
 
 Then install the package:
@@ -31,12 +31,12 @@ dart pub get
 Create a file called `hello.dart` and add this code:
 
 ```dart
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() {
   runApp(
     Center(
-      child: Text('Hello, Nocterm!'),
+      child: Text('Hello, Cinder!'),
     ),
   );
 }
@@ -48,7 +48,7 @@ Run the app:
 dart run hello.dart
 ```
 
-You should see "Hello, Nocterm!" displayed in the center of your terminal.
+You should see "Hello, Cinder!" displayed in the center of your terminal.
 
 Press `Ctrl+C` to exit.
 

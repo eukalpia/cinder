@@ -1,4 +1,4 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 /// Test that mimics vide_cli's DefaultRenderer structure
@@ -6,10 +6,10 @@ import 'package:test/test.dart';
 void main() {
   group('Tool Renderer Layout', () {
     test('row with flexible text and fixed suffix renders correctly', () async {
-      await testNocterm(
+      await testCinder(
         'row with flexible text',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -48,10 +48,10 @@ void main() {
     });
 
     test('nested row with expanded text renders correctly', () async {
-      await testNocterm(
+      await testCinder(
         'nested row with expanded',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -105,11 +105,11 @@ void main() {
     });
 
     test('multiple updates with same constraints should work', () async {
-      await testNocterm(
+      await testCinder(
         'multiple updates same constraints',
         (tester) async {
           // First render
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             _TestToolRenderer(filePath: '/path/to/file1.dart'),
           );
 
@@ -117,7 +117,7 @@ void main() {
           expect(tester.terminalState, containsText('file1.dart'));
 
           // Update with different content but same layout structure
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             _TestToolRenderer(filePath: '/path/to/file2.dart'),
           );
 
@@ -125,7 +125,7 @@ void main() {
           expect(tester.terminalState, containsText('file2.dart'));
 
           // Third update
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             _TestToolRenderer(filePath: '/path/to/file3.dart'),
           );
 
@@ -138,11 +138,11 @@ void main() {
     });
 
     test('text length changes within Flexible should not leave gaps', () async {
-      await testNocterm(
+      await testCinder(
         'flexible text length changes',
         (tester) async {
           // First render with LONG path
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             _TestToolRenderer(filePath: '/some/very/long/path/to/file.dart'),
           );
 
@@ -150,7 +150,7 @@ void main() {
           // The `)` should be right after the text
 
           // Update with SHORT path - this is where the bug might appear
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             _TestToolRenderer(filePath: 'short.dart'),
           );
 
@@ -170,7 +170,7 @@ void main() {
     });
 
     test('text length changes with styled text', () async {
-      await testNocterm(
+      await testCinder(
         'styled flexible text length changes',
         (tester) async {
           // Mimic vide_cli's exact structure with styled text
@@ -178,7 +178,7 @@ void main() {
           final dimColor = textColor.withOpacity(0.6);
 
           // First render with LONG path
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Row(
               children: [
                 Text('●', style: TextStyle(color: Colors.yellow)),
@@ -200,7 +200,7 @@ void main() {
           print('\n--- Long path (styled) ---');
 
           // Update with SHORT path
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Row(
               children: [
                 Text('●', style: TextStyle(color: Colors.green)),
@@ -232,11 +232,11 @@ void main() {
     });
 
     test('SizedBox width changes trigger relayout', () async {
-      await testNocterm(
+      await testCinder(
         'SizedBox width changes',
         (tester) async {
           // Render with SizedBox(width: 1)
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Row(
               children: [
                 Text('A'),
@@ -251,7 +251,7 @@ void main() {
           expect(tester.terminalState, containsText('A B'));
 
           // Update with SizedBox(width: 3)
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Row(
               children: [
                 Text('A'),
@@ -269,12 +269,12 @@ void main() {
         debugPrintAfterPump: true,
       );
     });
-    test('stateful component with dynamic content updates correctly', () async {
-      await testNocterm(
+    test('stateful widget with dynamic content updates correctly', () async {
+      await testCinder(
         'stateful dynamic content',
         (tester) async {
           // First render with pending state
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             _StatefulToolRenderer(
               toolName: 'Read',
               filePath: '/path/to/file.dart',
@@ -288,7 +288,7 @@ void main() {
           expect(tester.terminalState, containsText('file.dart'));
 
           // Update to completed state
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             _StatefulToolRenderer(
               toolName: 'Read',
               filePath: '/path/to/file.dart',
@@ -307,11 +307,11 @@ void main() {
     });
 
     test('row layout with conditional children', () async {
-      await testNocterm(
+      await testCinder(
         'conditional children',
         (tester) async {
           // First render without result
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -338,7 +338,7 @@ void main() {
           expect(tester.terminalState, containsText('Read'));
 
           // Update WITH result
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -382,14 +382,14 @@ void main() {
   });
 }
 
-/// Test component mimicking DefaultRenderer structure (Stateless)
-class _TestToolRenderer extends StatelessComponent {
+/// Test widget mimicking DefaultRenderer structure (Stateless)
+class _TestToolRenderer extends StatelessWidget {
   final String filePath;
 
   const _TestToolRenderer({required this.filePath});
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.only(bottom: 1),
       child: Column(
@@ -417,7 +417,7 @@ class _TestToolRenderer extends StatelessComponent {
 }
 
 /// Stateful version mimicking vide_cli's DefaultRenderer
-class _StatefulToolRenderer extends StatefulComponent {
+class _StatefulToolRenderer extends StatefulWidget {
   final String toolName;
   final String filePath;
   final bool hasResult;
@@ -434,8 +434,8 @@ class _StatefulToolRenderer extends StatefulComponent {
 
 class _StatefulToolRendererState extends State<_StatefulToolRenderer> {
   @override
-  Component build(BuildContext context) {
-    final statusColor = component.hasResult ? Colors.green : Colors.yellow;
+  Widget build(BuildContext context) {
+    final statusColor = widget.hasResult ? Colors.green : Colors.yellow;
 
     return Container(
       padding: EdgeInsets.only(bottom: 1),
@@ -446,11 +446,11 @@ class _StatefulToolRendererState extends State<_StatefulToolRenderer> {
             children: [
               Text('●', style: TextStyle(color: statusColor)),
               SizedBox(width: 1),
-              Text(component.toolName),
-              if (component.filePath.isNotEmpty) ...[
+              Text(widget.toolName),
+              if (widget.filePath.isNotEmpty) ...[
                 Flexible(
                   child: Text(
-                    '(file_path: ${component.filePath}',
+                    '(file_path: ${widget.filePath}',
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
                   ),

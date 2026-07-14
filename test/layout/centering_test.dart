@@ -1,13 +1,13 @@
 import 'package:test/test.dart';
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() {
   group('Text Centering', () {
     test('mathematical centering proof', () async {
-      await testNocterm(
+      await testCinder(
         'centering proof',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: DecoratedBox(
                 decoration: BoxDecoration(
@@ -41,10 +41,10 @@ void main() {
     });
 
     test('visual centering with emojis', () async {
-      await testNocterm(
+      await testCinder(
         'visual centering',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: DecoratedBox(
                 decoration: BoxDecoration(
@@ -81,10 +81,10 @@ void main() {
     });
 
     test('centering in different width containers', () async {
-      await testNocterm(
+      await testCinder(
         'different widths',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Row(
               children: [
                 // Narrow container
@@ -146,10 +146,10 @@ void main() {
     });
 
     test('centering with padding', () async {
-      await testNocterm(
+      await testCinder(
         'centering with padding',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: DecoratedBox(
                 decoration: BoxDecoration(
@@ -179,10 +179,10 @@ void main() {
     });
 
     test('ruler alignment test', () async {
-      await testNocterm(
+      await testCinder(
         'ruler alignment',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             DecoratedBox(
               decoration: BoxDecoration(
                 border: BoxBorder.all(color: Colors.white),
@@ -215,10 +215,10 @@ void main() {
     // Visual test for manual inspection
     test('centering visual test',
         skip: 'Run with debugPrintAfterPump for visual inspection', () async {
-      await testNocterm(
+      await testCinder(
         'centering visual',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,

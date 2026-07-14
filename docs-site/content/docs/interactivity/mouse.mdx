@@ -8,7 +8,7 @@ Mouse support in TUIs is optional but enhances usability. This guide covers mous
 
 ## Mouse events
 
-Not all terminals support mouse events. When available, Nocterm handles mouse clicks, scrolling, and movement.
+Not all terminals support mouse events. When available, Cinder handles mouse clicks, scrolling, and movement.
 
 ### Automatic mouse support
 
@@ -146,7 +146,7 @@ MouseRegion(
 Create hover highlights:
 
 ```dart
-class HoverButton extends StatefulComponent {
+class HoverButton extends StatefulWidget {
   @override
   State<HoverButton> createState() => _HoverButtonState();
 }
@@ -155,7 +155,7 @@ class _HoverButtonState extends State<HoverButton> {
   bool _isHovering = false;
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovering = true),
       onExit: (_) => setState(() => _isHovering = false),

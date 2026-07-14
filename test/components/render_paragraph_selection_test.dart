@@ -1,17 +1,17 @@
-import 'package:nocterm/nocterm.dart';
-import 'package:nocterm/src/components/render_paragraph.dart';
+import 'package:cinder/cinder.dart';
+import 'package:cinder/src/components/render_paragraph.dart';
 import 'package:quiver/strings.dart' hide isEmpty, isNotEmpty;
 import 'package:test/test.dart' hide isEmpty, isNotEmpty;
 
 void main() {
   group('RenderParagraph Selection', () {
     test('single RichText selection', () async {
-      await testNocterm(
+      await testCinder(
         'single rich text selection',
         (tester) async {
           String? completed;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 4,
@@ -49,12 +49,12 @@ void main() {
     });
 
     test('partial selection within styled spans', () async {
-      await testNocterm(
+      await testCinder(
         'partial styled selection',
         (tester) async {
           String? completed;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 4,
@@ -99,12 +99,12 @@ void main() {
     });
 
     test('multi-widget selection with RichText and Text', () async {
-      await testNocterm(
+      await testCinder(
         'multi-widget selection',
         (tester) async {
           String? completed;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 4,
@@ -150,12 +150,12 @@ void main() {
     });
 
     test('wrapped RichText selection', () async {
-      await testNocterm(
+      await testCinder(
         'wrapped rich text selection',
         (tester) async {
           String? completed;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 6,
               height: 5,
@@ -195,12 +195,12 @@ void main() {
     });
 
     test('selection with multiline content', () async {
-      await testNocterm(
+      await testCinder(
         'multiline content selection',
         (tester) async {
           String? completed;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 4,
@@ -240,12 +240,12 @@ void main() {
     });
 
     test('backward selection in RichText', () async {
-      await testNocterm(
+      await testCinder(
         'backward selection',
         (tester) async {
           String? completed;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 4,
@@ -283,12 +283,12 @@ void main() {
     });
 
     test('selection clears when RichText content changes', () async {
-      await testNocterm(
+      await testCinder(
         'selection clears on change',
         (tester) async {
           String? lastChanged;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 4,
@@ -315,7 +315,7 @@ void main() {
           expect(lastChanged, isNotBlank);
 
           // Change the content
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 4,
@@ -338,12 +338,12 @@ void main() {
     });
 
     test('multiple RichText widgets in selection', () async {
-      await testNocterm(
+      await testCinder(
         'multiple rich text selection',
         (tester) async {
           String? completed;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -399,10 +399,10 @@ void main() {
     });
 
     test('RichText selectableText returns plain text', () async {
-      await testNocterm(
+      await testCinder(
         'selectableText getter',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             RichText(
               text: const TextSpan(
                 children: [
@@ -426,7 +426,7 @@ void main() {
             element.visitChildren(findRenderParagraph);
           }
 
-          findRenderParagraph(NoctermTestBinding.instance.rootElement!);
+          findRenderParagraph(CinderTestBinding.instance.rootElement!);
           expect(renderParagraph, isNotNull);
           expect(renderParagraph!.selectableText, equals('Hello World'));
         },
@@ -434,10 +434,10 @@ void main() {
     });
 
     test('RichText selectableLayout returns layout result', () async {
-      await testNocterm(
+      await testCinder(
         'selectableLayout getter',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 20,
               child: RichText(
@@ -458,7 +458,7 @@ void main() {
             element.visitChildren(findRenderParagraph);
           }
 
-          findRenderParagraph(NoctermTestBinding.instance.rootElement!);
+          findRenderParagraph(CinderTestBinding.instance.rootElement!);
           expect(renderParagraph, isNotNull);
           expect(renderParagraph!.selectableLayout, isNotNull);
           expect(

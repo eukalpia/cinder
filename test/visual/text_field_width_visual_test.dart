@@ -1,15 +1,15 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 void main() {
   test('visual test - TextField width with borders and padding', () async {
-    await testNocterm(
+    await testCinder(
       'visual width test',
       (tester) async {
         final controller = TextEditingController(
             text: 'Hello World! This is a long text that should scroll.');
 
-        await tester.pumpComponent(
+        await tester.pumpWidget(
           Column(
             children: [
               const Text('TextField with width=30, border, padding:'),

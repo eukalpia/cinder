@@ -1,13 +1,13 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('ListView reverse', () {
     test('renders items from bottom to top when reverse is true', () async {
-      await testNocterm(
+      await testCinder(
         'reverse vertical ListView',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             SizedBox(
               width: 20,
               height: 10,
@@ -43,10 +43,10 @@ void main() {
 
     test('renders items from right to left when reverse is true and horizontal',
         () async {
-      await testNocterm(
+      await testCinder(
         'reverse horizontal ListView',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             SizedBox(
               width: 30,
               height: 5,
@@ -87,10 +87,10 @@ void main() {
     });
 
     test('normal ListView renders from top to bottom', () async {
-      await testNocterm(
+      await testCinder(
         'normal vertical ListView',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             SizedBox(
               width: 20,
               height: 10,
@@ -122,10 +122,10 @@ void main() {
     });
 
     test('ListView.builder with reverse', () async {
-      await testNocterm(
+      await testCinder(
         'reverse ListView.builder',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             SizedBox(
               width: 20,
               height: 10,
@@ -152,10 +152,10 @@ void main() {
     });
 
     test('ListView.separated with reverse', () async {
-      await testNocterm(
+      await testCinder(
         'reverse ListView.separated',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             SizedBox(
               width: 20,
               height: 15,

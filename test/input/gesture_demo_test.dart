@@ -1,4 +1,4 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 import '../../example/gesture_demo.dart';
@@ -9,10 +9,10 @@ void main() {
           'Known issue: GestureDemo uses nested constraints that need refactoring',
       () {
     test('visual development - initial render', () async {
-      await testNocterm(
+      await testCinder(
         'gesture demo renders correctly',
         (tester) async {
-          await tester.pumpComponent(const GestureDemoApp());
+          await tester.pumpWidget(const GestureDemoApp());
         },
         debugPrintAfterPump: true,
         size: const Size(100, 50),
@@ -20,10 +20,10 @@ void main() {
     });
 
     test('renders all zones and labels', () async {
-      await testNocterm(
+      await testCinder(
         'all zones visible',
         (tester) async {
-          await tester.pumpComponent(const GestureDemoApp());
+          await tester.pumpWidget(const GestureDemoApp());
 
           // Verify all zone labels are present
           expect(tester.terminalState, containsText('TAP ME'));
@@ -38,13 +38,13 @@ void main() {
     });
 
     test('tap zone interaction', () async {
-      await testNocterm(
+      await testCinder(
         'tap updates state',
         (tester) async {
           bool tapped = false;
 
-          await tester.pumpComponent(
-            _TestTapComponent(onTapCallback: () => tapped = true),
+          await tester.pumpWidget(
+            _TestTapWidget(onTapCallback: () => tapped = true),
           );
 
           // Tap
@@ -57,13 +57,13 @@ void main() {
     });
 
     test('double-tap detection', () async {
-      await testNocterm(
+      await testCinder(
         'double tap increments counter',
         (tester) async {
           int doubleTapCount = 0;
 
-          await tester.pumpComponent(
-            _TestDoubleTapComponent(
+          await tester.pumpWidget(
+            _TestDoubleTapWidget(
               onDoubleTapCallback: () => doubleTapCount++,
             ),
           );
@@ -80,14 +80,14 @@ void main() {
     });
 
     test('long press detection', () async {
-      await testNocterm(
+      await testCinder(
         'long press triggers callback',
         (tester) async {
           bool longPressStarted = false;
           bool longPressCompleted = false;
 
-          await tester.pumpComponent(
-            _TestLongPressComponent(
+          await tester.pumpWidget(
+            _TestLongPressWidget(
               onLongPressStartCallback: () => longPressStarted = true,
               onLongPressCallback: () => longPressCompleted = true,
             ),
@@ -106,13 +106,13 @@ void main() {
     });
 
     test('hover region detection', () async {
-      await testNocterm(
+      await testCinder(
         'hover changes state',
         (tester) async {
           bool isHovering = false;
 
-          await tester.pumpComponent(
-            _TestHoverComponent(
+          await tester.pumpWidget(
+            _TestHoverWidget(
               onEnterCallback: () => isHovering = true,
               onExitCallback: () => isHovering = false,
             ),
@@ -128,14 +128,14 @@ void main() {
     });
 
     test('combined zone - tap and hover', () async {
-      await testNocterm(
+      await testCinder(
         'combined zone handles multiple gestures',
         (tester) async {
           bool isHovering = false;
           int tapCount = 0;
 
-          await tester.pumpComponent(
-            _TestCombinedComponent(
+          await tester.pumpWidget(
+            _TestCombinedWidget(
               onEnterCallback: () => isHovering = true,
               onTapCallback: () => tapCount++,
             ),
@@ -153,10 +153,10 @@ void main() {
     });
 
     test('visual test - demo app renders', () async {
-      await testNocterm(
+      await testCinder(
         'gesture demo at default size',
         (tester) async {
-          await tester.pumpComponent(const GestureDemoApp());
+          await tester.pumpWidget(const GestureDemoApp());
 
           // Should render without overflow at proper size
           expect(tester.terminalState, containsText('GESTURE DETECTOR DEMO'));
@@ -167,13 +167,13 @@ void main() {
     });
 
     test('position tracking in callbacks', () async {
-      await testNocterm(
+      await testCinder(
         'tap provides position details',
         (tester) async {
           Offset? tapPosition;
 
-          await tester.pumpComponent(
-            _TestPositionComponent(
+          await tester.pumpWidget(
+            _TestPositionWidget(
               onTapDownCallback: (details) =>
                   tapPosition = details.localPosition,
             ),
@@ -193,26 +193,26 @@ void main() {
 }
 
 // Helper test components
-class _TestTapComponent extends StatefulComponent {
-  const _TestTapComponent({required this.onTapCallback});
+class _TestTapWidget extends StatefulWidget {
+  const _TestTapWidget({required this.onTapCallback});
 
   final VoidCallback onTapCallback;
 
   @override
-  State<_TestTapComponent> createState() => _TestTapComponentState();
+  State<_TestTapWidget> createState() => _TestTapWidgetState();
 }
 
-class _TestTapComponentState extends State<_TestTapComponent> {
+class _TestTapWidgetState extends State<_TestTapWidget> {
   int tapCount = 0;
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Container(
       width: 100,
       height: 50,
       child: GestureDetector(
         onTap: () {
-          component.onTapCallback();
+          widget.onTapCallback();
           setState(() {
             tapCount++;
           });
@@ -230,27 +230,26 @@ class _TestTapComponentState extends State<_TestTapComponent> {
   }
 }
 
-class _TestDoubleTapComponent extends StatefulComponent {
-  const _TestDoubleTapComponent({required this.onDoubleTapCallback});
+class _TestDoubleTapWidget extends StatefulWidget {
+  const _TestDoubleTapWidget({required this.onDoubleTapCallback});
 
   final VoidCallback onDoubleTapCallback;
 
   @override
-  State<_TestDoubleTapComponent> createState() =>
-      _TestDoubleTapComponentState();
+  State<_TestDoubleTapWidget> createState() => _TestDoubleTapWidgetState();
 }
 
-class _TestDoubleTapComponentState extends State<_TestDoubleTapComponent> {
+class _TestDoubleTapWidgetState extends State<_TestDoubleTapWidget> {
   int doubleTapCount = 0;
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Container(
       width: 100,
       height: 50,
       child: GestureDetector(
         onDoubleTap: () {
-          component.onDoubleTapCallback();
+          widget.onDoubleTapCallback();
           setState(() {
             doubleTapCount++;
           });
@@ -268,8 +267,8 @@ class _TestDoubleTapComponentState extends State<_TestDoubleTapComponent> {
   }
 }
 
-class _TestLongPressComponent extends StatelessComponent {
-  const _TestLongPressComponent({
+class _TestLongPressWidget extends StatelessWidget {
+  const _TestLongPressWidget({
     required this.onLongPressStartCallback,
     required this.onLongPressCallback,
   });
@@ -278,7 +277,7 @@ class _TestLongPressComponent extends StatelessComponent {
   final VoidCallback onLongPressCallback;
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Container(
       width: 100,
       height: 50,
@@ -296,8 +295,8 @@ class _TestLongPressComponent extends StatelessComponent {
   }
 }
 
-class _TestHoverComponent extends StatelessComponent {
-  const _TestHoverComponent({
+class _TestHoverWidget extends StatelessWidget {
+  const _TestHoverWidget({
     required this.onEnterCallback,
     required this.onExitCallback,
   });
@@ -306,7 +305,7 @@ class _TestHoverComponent extends StatelessComponent {
   final VoidCallback onExitCallback;
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Container(
       width: 100,
       height: 50,
@@ -324,8 +323,8 @@ class _TestHoverComponent extends StatelessComponent {
   }
 }
 
-class _TestCombinedComponent extends StatelessComponent {
-  const _TestCombinedComponent({
+class _TestCombinedWidget extends StatelessWidget {
+  const _TestCombinedWidget({
     required this.onEnterCallback,
     required this.onTapCallback,
   });
@@ -334,7 +333,7 @@ class _TestCombinedComponent extends StatelessComponent {
   final VoidCallback onTapCallback;
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Container(
       width: 100,
       height: 50,
@@ -354,13 +353,13 @@ class _TestCombinedComponent extends StatelessComponent {
   }
 }
 
-class _TestPositionComponent extends StatelessComponent {
-  const _TestPositionComponent({required this.onTapDownCallback});
+class _TestPositionWidget extends StatelessWidget {
+  const _TestPositionWidget({required this.onTapDownCallback});
 
   final Function(TapDownDetails) onTapDownCallback;
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Container(
       width: 100,
       height: 50,

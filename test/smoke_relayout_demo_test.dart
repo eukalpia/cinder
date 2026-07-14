@@ -2,15 +2,15 @@
 // through the real key-handling path and asserts every panel reacts.
 // Each panel exercises one of the explicit-markNeedsLayout fixes, so this
 // doubles as an integration guard for the layout-skip contract.
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 import '../example/relayout_fixes_demo.dart';
 
 void main() {
   test('relayout fixes demo: every panel reacts to its key', () async {
-    await testNocterm('demo smoke', (tester) async {
-      await tester.pumpComponent(const RelayoutFixesDemo());
+    await testCinder('demo smoke', (tester) async {
+      await tester.pumpWidget(const RelayoutFixesDemo());
       // Settle transient first-layout dirtiness so each keypress below
       // exercises the explicit markNeedsLayout paths.
       await tester.pump();

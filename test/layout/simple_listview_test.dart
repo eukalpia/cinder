@@ -1,4 +1,4 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -6,12 +6,12 @@ void main() {
       skip:
           'Known bug: ListView maxScrollExtent returns 0 when content exceeds viewport',
       () async {
-    await testNocterm(
+    await testCinder(
       'simple test',
       (tester) async {
         final scrollController = ScrollController();
 
-        await tester.pumpComponent(
+        await tester.pumpWidget(
           Container(
             width: 20,
             height: 8,

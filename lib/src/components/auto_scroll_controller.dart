@@ -1,4 +1,4 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 /// A ScrollController that automatically scrolls to the bottom when new content
 /// is added, but preserves scroll position when the user scrolls up.

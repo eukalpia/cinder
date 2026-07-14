@@ -1,4 +1,4 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -143,10 +143,10 @@ void main() {
   group('Alpha blending rendering', () {
     test('text with semi-transparent foreground blends with background',
         () async {
-      await testNocterm(
+      await testCinder(
         'semi-transparent text',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               color: Colors.blue,
               child: Text(
@@ -167,10 +167,10 @@ void main() {
 
     test('semi-transparent background blends with existing background',
         () async {
-      await testNocterm(
+      await testCinder(
         'semi-transparent background',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Stack(
               children: [
                 Container(
@@ -199,10 +199,10 @@ void main() {
     });
 
     test('multiple layers of transparency stack correctly', () async {
-      await testNocterm(
+      await testCinder(
         'layered transparency',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Stack(
               children: [
                 Container(
@@ -244,10 +244,10 @@ void main() {
     });
 
     test('text with transparent foreground over colored background', () async {
-      await testNocterm(
+      await testCinder(
         'transparent text on colored bg',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               color: Colors.green,
               padding: const EdgeInsets.all(2),
@@ -267,10 +267,10 @@ void main() {
     });
 
     test('zero opacity makes color fully transparent', () async {
-      await testNocterm(
+      await testCinder(
         'fully transparent text',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               color: Colors.blue,
               child: Text(
@@ -289,10 +289,10 @@ void main() {
     });
 
     test('full opacity works same as before', () async {
-      await testNocterm(
+      await testCinder(
         'fully opaque colors',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               color: Colors.blue.withOpacity(1.0),
               child: Text(
@@ -343,10 +343,10 @@ void main() {
 
   group('Visual development tests', () {
     test('visual: alpha gradient on colored background', () async {
-      await testNocterm(
+      await testCinder(
         'alpha gradient visualization',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 40,
               height: 10,
@@ -378,10 +378,10 @@ void main() {
     });
 
     test('visual: semi-transparent overlay effect', () async {
-      await testNocterm(
+      await testCinder(
         'overlay effect',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Stack(
               children: [
                 Container(

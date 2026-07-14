@@ -1,11 +1,11 @@
-import 'package:nocterm/nocterm.dart';
-import 'package:nocterm/src/framework/terminal_canvas.dart';
+import 'package:cinder/cinder.dart';
+import 'package:cinder/src/framework/terminal_canvas.dart';
 
 /// A widget that displays an error message when a render object fails.
 ///
 /// This widget is used as a fallback when errors occur during rendering.
 /// It provides a visual representation of the error in the terminal.
-class TUIErrorWidget extends SingleChildRenderObjectComponent {
+class TUIErrorWidget extends SingleChildRenderObjectWidget {
   const TUIErrorWidget({
     super.key,
     this.message = 'Error',
@@ -35,7 +35,7 @@ class TUIErrorWidget extends SingleChildRenderObjectComponent {
 
 /// A widget that deliberately throws an error during layout.
 /// Used for testing error handling.
-class ErrorThrowingWidget extends SingleChildRenderObjectComponent {
+class ErrorThrowingWidget extends SingleChildRenderObjectWidget {
   const ErrorThrowingWidget({
     super.key,
     this.throwInLayout = true,

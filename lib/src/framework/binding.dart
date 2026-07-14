@@ -1,11 +1,11 @@
 part of 'framework.dart';
 
-/// The glue between the component layer and the terminal rendering layer
-abstract class NoctermBinding {
-  static NoctermBinding? _instance;
-  static NoctermBinding get instance => _instance!;
+/// The glue between the widget layer and the terminal rendering layer
+abstract class CinderBinding {
+  static CinderBinding? _instance;
+  static CinderBinding get instance => _instance!;
 
-  NoctermBinding() {
+  CinderBinding() {
     assert(_instance == null, 'Only one TuiBinding instance allowed');
     _instance = this;
     initializeBinding();
@@ -31,7 +31,7 @@ abstract class NoctermBinding {
   }
 
   /// Registers a service extension method with the given name.
-  /// The full name will be "ext.nocterm.name".
+  /// The full name will be "ext.cinder.name".
   @protected
   void registerServiceExtension({
     required String name,
@@ -40,7 +40,7 @@ abstract class NoctermBinding {
         callback,
   }) {
     developer.registerExtension(
-      'ext.nocterm.$name',
+      'ext.cinder.$name',
       (String method, Map<String, String> parameters) async {
         final result = await callback(parameters);
         return developer.ServiceExtensionResponse.result(
@@ -85,12 +85,12 @@ abstract class NoctermBinding {
     return BuildOwner(onNeedsBuild);
   }
 
-  void attachRootComponent(Component rootComponent) {
+  void attachRootWidget(Widget rootWidget) {
     if (_rootElement != null) {
       _rootElement!.deactivate();
       _rootElement!.unmount();
     }
-    _rootElement = rootComponent.createElement();
+    _rootElement = rootWidget.createElement();
     // Set the owner before mounting (root has no parent to inherit from)
     _rootElement!._owner = buildOwner;
     _rootElement!.mount(null, null);
@@ -116,7 +116,7 @@ abstract class NoctermBinding {
 
   /// Cause the entire subtree rooted at the root element to be entirely
   /// rebuilt. This is used by development tools when the application code has
-  /// changed and is being hot-reloaded, to cause the component tree to pick up any
+  /// changed and is being hot-reloaded, to cause the widget tree to pick up any
   /// changed implementations.
   ///
   /// This is expensive and should not be called except during development.
@@ -129,7 +129,7 @@ abstract class NoctermBinding {
   /// Called to actually cause the application to reassemble, e.g. after a hot reload.
   ///
   /// This method is called by the hot reload mechanism to trigger a full rebuild
-  /// of the component tree with the new code.
+  /// of the widget tree with the new code.
   @protected
   @mustCallSuper
   Future<void> performReassemble() async {
@@ -139,31 +139,31 @@ abstract class NoctermBinding {
   }
 }
 
-/// InheritedComponent provides a way to pass data down the component tree.
-abstract class InheritedComponent extends ProxyComponent {
-  const InheritedComponent({super.key, required super.child});
+/// InheritedWidget provides a way to pass data down the widget tree.
+abstract class InheritedWidget extends ProxyWidget {
+  const InheritedWidget({super.key, required super.child});
 
   @override
   InheritedElement createElement() => InheritedElement(this);
 
-  /// Whether the framework should notify components that inherit from this component.
+  /// Whether the framework should notify components that inherit from this widget.
   @protected
-  bool updateShouldNotify(covariant InheritedComponent oldComponent);
+  bool updateShouldNotify(covariant InheritedWidget oldWidget);
 }
 
-/// Element for [InheritedComponent].
+/// Element for [InheritedWidget].
 class InheritedElement extends ProxyElement {
-  InheritedElement(InheritedComponent super.component);
+  InheritedElement(InheritedWidget super.widget);
 
   @override
-  InheritedComponent get component => super.component as InheritedComponent;
+  InheritedWidget get widget => super.widget as InheritedWidget;
 
   final Map<Element, Object?> _dependents = HashMap<Element, Object?>();
 
   @override
-  void updated(covariant InheritedComponent oldComponent) {
-    if (component.updateShouldNotify(oldComponent)) {
-      super.updated(oldComponent);
+  void updated(covariant InheritedWidget oldWidget) {
+    if (widget.updateShouldNotify(oldWidget)) {
+      super.updated(oldWidget);
     }
   }
 
@@ -171,7 +171,7 @@ class InheritedElement extends ProxyElement {
   void _updateInheritance() {
     _inheritedElements =
         (_parent?._inheritedElements ?? const PersistentHashMap.empty())
-            .put(component.runtimeType, this);
+            .put(widget.runtimeType, this);
   }
 
   @protected
@@ -189,15 +189,15 @@ class InheritedElement extends ProxyElement {
   }
 
   @override
-  void notifyClients(covariant InheritedComponent oldComponent) {
+  void notifyClients(covariant InheritedWidget oldWidget) {
     for (final Element dependent in _dependents.keys) {
-      notifyDependent(oldComponent, dependent);
+      notifyDependent(oldWidget, dependent);
     }
   }
 
   @protected
   void notifyDependent(
-      covariant InheritedComponent oldComponent, covariant Element dependent) {
+      covariant InheritedWidget oldWidget, covariant Element dependent) {
     dependent.didChangeDependencies();
   }
 

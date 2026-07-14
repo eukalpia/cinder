@@ -1,14 +1,14 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() {
   runApp(const VisualCenteringDemo());
 }
 
-class VisualCenteringDemo extends StatelessComponent {
+class VisualCenteringDemo extends StatelessWidget {
   const VisualCenteringDemo();
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,

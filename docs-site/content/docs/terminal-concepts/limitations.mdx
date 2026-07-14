@@ -16,7 +16,7 @@ Common variations:
 - **Mouse support**: Not all terminals support mouse input
 - **Unicode rendering**: Emoji and special characters vary widely
 
-Nocterm handles many differences automatically by using widely-supported ANSI codes. When you use `TextStyle(color: Colors.red)`, Nocterm picks an approach that works on most terminals.
+Cinder handles many differences automatically by using widely-supported ANSI codes. When you use `TextStyle(color: Colors.red)`, Cinder picks an approach that works on most terminals.
 
 > **Note**: Test your app on the terminals your users will use. The three most common are: macOS Terminal, iTerm2, and Windows Terminal.
 
@@ -54,7 +54,7 @@ Test your app at 80×24 to catch layout issues.
 
 ### Handle resizing
 
-Users resize terminal windows while your app runs. Nocterm rebuilds your UI automatically when this happens, but you should:
+Users resize terminal windows while your app runs. Cinder rebuilds your UI automatically when this happens, but you should:
 - Use flexible layouts (`Expanded`, `Column`, `Row`)
 - Test how your UI looks at different sizes
 - Add scrolling for content that might overflow
@@ -70,8 +70,8 @@ Terminals aren't as fast as GUI frameworks. Drawing happens by sending text to t
 - **Frequent updates**: Redrawing 60 times per second can overwhelm terminals
 - **Large amounts of text**: Rendering thousands of lines takes time
 
-### What Nocterm does
-Nocterm optimizes rendering:
+### What Cinder does
+Cinder optimizes rendering:
 - Updates only changed parts of the screen
 - Batches output to reduce system calls
 - Skips redraws when nothing changed
@@ -92,7 +92,7 @@ Not all terminals support mouse input. Even when they do, support varies:
 - **Treat mouse as optional**: Your app should work without a mouse
 - **Test without mouse**: Make sure you can do everything with just the keyboard
 
-Nocterm supports mouse events when the terminal supports them, but your app shouldn't require them.
+Cinder supports mouse events when the terminal supports them, but your app shouldn't require them.
 
 ## Best practices for robust TUIs
 
@@ -128,6 +128,6 @@ Tell users what terminals work best:
 
 ## Next steps
 
-- [Components](/docs/fundamentals/components) - Build your UI with confidence
+- [Widgets](/docs/fundamentals/components) - Build your UI with confidence
 - [Testing](/docs/testing/basics) - Test across different scenarios
 - [Keyboard Events](/docs/interactivity/keyboard) - Make your app keyboard-friendly

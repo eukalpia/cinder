@@ -2,7 +2,7 @@ library;
 
 import 'dart:math' as math;
 import 'package:characters/characters.dart';
-import 'package:nocterm/src/rectangle.dart';
+import 'package:cinder/src/rectangle.dart';
 
 import '../buffer.dart';
 import '../style.dart';
@@ -183,7 +183,7 @@ class TerminalCanvas {
   /// to darken or tint the underlying content without erasing it.
   ///
   /// Cells are expected to have explicit foreground/background colors
-  /// (set by the root [NoctermApp] fill). Cells with null colors are
+  /// (set by the root [CinderApp] fill). Cells with null colors are
   /// left unchanged since there is no RGB value to blend with.
   void applyTint(Rect rect, Color tintColor) {
     final left = math.max(0, rect.left.round());

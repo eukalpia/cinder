@@ -1,4 +1,4 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -6,12 +6,12 @@ void main() {
     test('non-lazy mode builds all children and has accurate extent',
         skip: 'Known bug: ListView maxScrollExtent calculation incorrect',
         () async {
-      await testNocterm(
+      await testCinder(
         'non-lazy ListView test',
         (tester) async {
           final scrollController = ScrollController();
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -50,13 +50,13 @@ void main() {
     });
 
     test('lazy mode with dynamic item addition', () async {
-      await testNocterm(
+      await testCinder(
         'lazy ListView test',
         (tester) async {
           final scrollController = ScrollController();
 
           // Start with 3 items
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -78,7 +78,7 @@ void main() {
           print('MaxScrollExtent: ${scrollController.maxScrollExtent}');
 
           // Add more items
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -121,14 +121,14 @@ void main() {
     });
 
     test('compare lazy vs non-lazy performance characteristics', () async {
-      await testNocterm(
+      await testCinder(
         'performance comparison',
         (tester) async {
           final lazyController = ScrollController();
           final nonLazyController = ScrollController();
 
           // Non-lazy ListView
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Row(
               children: [
                 Expanded(

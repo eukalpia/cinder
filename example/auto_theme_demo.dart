@@ -1,8 +1,8 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 /// Auto Theme Detection Demo
 ///
-/// This demo showcases nocterm's automatic terminal brightness detection.
+/// This demo showcases cinder's automatic terminal brightness detection.
 /// The app automatically selects a light or dark theme based on your terminal's
 /// background color.
 ///
@@ -13,7 +13,7 @@ import 'package:nocterm/nocterm.dart';
 /// - Switch your terminal theme and re-run to see the difference
 void main() async {
   await runApp(
-    NoctermApp(
+    CinderApp(
       title: 'Auto Theme Demo',
       // No theme specified - will auto-detect!
       child: const AutoThemeDemo(),
@@ -21,11 +21,11 @@ void main() async {
   );
 }
 
-class AutoThemeDemo extends StatelessComponent {
+class AutoThemeDemo extends StatelessWidget {
   const AutoThemeDemo({super.key});
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     final theme = TuiTheme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
@@ -104,7 +104,7 @@ class AutoThemeDemo extends StatelessComponent {
 
                         // Explanation
                         Text(
-                          'nocterm automatically detected your terminal',
+                          'cinder automatically detected your terminal',
                           style: TextStyle(color: theme.onSurface),
                         ),
                         Text(
@@ -150,7 +150,7 @@ class AutoThemeDemo extends StatelessComponent {
     );
   }
 
-  Component _buildColorSamples(TuiThemeData theme) {
+  Widget _buildColorSamples(TuiThemeData theme) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -167,7 +167,7 @@ class AutoThemeDemo extends StatelessComponent {
     );
   }
 
-  Component _colorDot(Color color, String label) {
+  Widget _colorDot(Color color, String label) {
     return Column(
       children: [
         Text(

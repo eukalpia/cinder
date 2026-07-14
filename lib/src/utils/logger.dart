@@ -4,7 +4,7 @@ import 'log_server.dart';
 ///
 /// This logger is designed for TUI applications where logging to stdout
 /// would interfere with the terminal UI. Instead, logs are streamed via
-/// WebSocket and can be viewed using the `nocterm logs` CLI command.
+/// WebSocket and can be viewed using the `cinder logs` CLI command.
 ///
 /// Features:
 /// - **WebSocket streaming**: Logs are sent to connected clients in real-time

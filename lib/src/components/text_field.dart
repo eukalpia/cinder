@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:characters/characters.dart';
-import 'package:nocterm/nocterm.dart' hide TextAlign;
-import 'package:nocterm/src/framework/terminal_canvas.dart';
+import 'package:cinder/cinder.dart' hide TextAlign;
+import 'package:cinder/src/framework/terminal_canvas.dart';
 import '../rendering/mouse_hit_test.dart';
 import '../rendering/mouse_tracker.dart';
 import '../text/text_layout_engine.dart';
@@ -106,7 +106,7 @@ class TextSelection {
 }
 
 /// A Material Design text field for terminal UI.
-class TextField extends StatefulComponent {
+class TextField extends StatefulWidget {
   const TextField({
     super.key,
     this.controller,
@@ -211,8 +211,8 @@ class _TextFieldState extends State<TextField> {
       _controller.selection = newSelection;
     });
     // Request focus if not already focused (e.g., user clicked in the field)
-    if (!component.focused) {
-      component.onFocusChange?.call(true);
+    if (!widget.focused) {
+      widget.onFocusChange?.call(true);
     }
   }
 
@@ -220,16 +220,16 @@ class _TextFieldState extends State<TextField> {
   void initState() {
     super.initState();
 
-    if (component.controller == null) {
+    if (widget.controller == null) {
       _controller = TextEditingController();
       _controllerIsInternal = true;
     } else {
-      _controller = component.controller!;
+      _controller = widget.controller!;
     }
 
     _controller.addListener(_handleControllerChanged);
 
-    if (component.focused && component.showCursor) {
+    if (widget.focused && widget.showCursor) {
       _startCursorBlink();
     }
   }
@@ -247,7 +247,7 @@ class _TextFieldState extends State<TextField> {
   }
 
   void _handleControllerChanged() {
-    component.onChanged?.call(_controller.text);
+    widget.onChanged?.call(_controller.text);
     setState(() {
       // Update view offset for horizontal scrolling
       _updateViewOffset();
@@ -255,13 +255,13 @@ class _TextFieldState extends State<TextField> {
   }
 
   @override
-  void didUpdateComponent(TextField oldComponent) {
-    super.didUpdateComponent(oldComponent);
+  void didUpdateWidget(TextField oldWidget) {
+    super.didUpdateWidget(oldWidget);
 
     // Handle focus changes or blink rate changes
-    if (component.focused != oldComponent.focused ||
-        component.cursorBlinkRate != oldComponent.cursorBlinkRate) {
-      if (component.focused && component.showCursor) {
+    if (widget.focused != oldWidget.focused ||
+        widget.cursorBlinkRate != oldWidget.cursorBlinkRate) {
+      if (widget.focused && widget.showCursor) {
         _startCursorBlink();
       } else {
         _stopCursorBlink();
@@ -274,14 +274,14 @@ class _TextFieldState extends State<TextField> {
     _cursorTimer?.cancel();
 
     // Check if blinking is disabled (null blink rate means static cursor)
-    if (component.cursorBlinkRate == null) {
+    if (widget.cursorBlinkRate == null) {
       // Non-blinking cursor - always visible
       _cursorVisible = true;
       return;
     }
 
     // Start blinking with specified rate
-    _cursorTimer = Timer.periodic(component.cursorBlinkRate!, (timer) {
+    _cursorTimer = Timer.periodic(widget.cursorBlinkRate!, (timer) {
       setState(() {
         _cursorVisible = !_cursorVisible;
       });
@@ -296,12 +296,12 @@ class _TextFieldState extends State<TextField> {
 
   void _updateViewOffset() {
     // Simple horizontal scrolling for single-line fields
-    if (component.maxLines == 1 && component.width != null) {
+    if (widget.maxLines == 1 && widget.width != null) {
       final text = _controller.text;
       final cursorPos = _controller.selection.extentOffset;
 
       // Account for borders and padding to get actual content width
-      final decoration = component.decoration ?? const InputDecoration();
+      final decoration = widget.decoration ?? const InputDecoration();
       final padding = decoration.contentPadding ??
           const EdgeInsets.symmetric(horizontal: 1);
       final horizontalPadding = padding.left + padding.right;
@@ -309,7 +309,7 @@ class _TextFieldState extends State<TextField> {
           decoration.border != null ? 2.0 : 0.0; // 1 on each side
       // Reserve 1 column for cursor display
       final maxVisibleWidth =
-          (component.width! - borderWidth - horizontalPadding - 1).toInt();
+          (widget.width! - borderWidth - horizontalPadding - 1).toInt();
 
       if (maxVisibleWidth <= 0) return; // No space to display text
 
@@ -354,12 +354,12 @@ class _TextFieldState extends State<TextField> {
   }
 
   bool _handleKeyEvent(KeyboardEvent event) {
-    if (component.readOnly || !component.enabled) {
+    if (widget.readOnly || !widget.enabled) {
       return false;
     }
 
     // Allow parent widgets to intercept key events first
-    if (component.onKeyEvent != null && component.onKeyEvent!(event)) {
+    if (widget.onKeyEvent != null && widget.onKeyEvent!(event)) {
       return true;
     }
 
@@ -383,20 +383,20 @@ class _TextFieldState extends State<TextField> {
         (event.isShiftPressed ||
             event.isControlPressed ||
             event.isAltPressed)) {
-      if (component.maxLines != 1) {
+      if (widget.maxLines != 1) {
         _insertText('\n');
       }
       return true;
     } else if (event.matches(LogicalKey.keyJ, ctrl: true)) {
       // Ctrl+J = universal newline fallback (works in all terminals)
-      if (component.maxLines != 1) {
+      if (widget.maxLines != 1) {
         _insertText('\n');
       }
       return true;
     } else if (key == LogicalKey.enter) {
       // Plain Enter submits in all fields (both single-line and multi-line)
-      component.onEditingComplete?.call();
-      component.onSubmitted?.call(_controller.text);
+      widget.onEditingComplete?.call();
+      widget.onSubmitted?.call(_controller.text);
       return true;
     } else if (key == LogicalKey.backspace) {
       _handleBackspace();
@@ -418,12 +418,12 @@ class _TextFieldState extends State<TextField> {
       return true;
     } else if (key == LogicalKey.arrowUp &&
         event.isShiftPressed &&
-        component.maxLines != 1) {
+        widget.maxLines != 1) {
       _moveCursorVertically(-1, true);
       return true;
     } else if (key == LogicalKey.arrowDown &&
         event.isShiftPressed &&
-        component.maxLines != 1) {
+        widget.maxLines != 1) {
       _moveCursorVertically(1, true);
       return true;
     } else if (key == LogicalKey.arrowLeft) {
@@ -432,10 +432,10 @@ class _TextFieldState extends State<TextField> {
     } else if (key == LogicalKey.arrowRight) {
       _moveCursor(1, false);
       return true;
-    } else if (key == LogicalKey.arrowUp && component.maxLines != 1) {
+    } else if (key == LogicalKey.arrowUp && widget.maxLines != 1) {
       _moveCursorVertically(-1, false);
       return true;
-    } else if (key == LogicalKey.arrowDown && component.maxLines != 1) {
+    } else if (key == LogicalKey.arrowDown && widget.maxLines != 1) {
       _moveCursorVertically(1, false);
       return true;
     } else if (key == LogicalKey.home) {
@@ -550,24 +550,24 @@ class _TextFieldState extends State<TextField> {
     final isCollapsed = clampedStart == clampedEnd;
 
     // Check if we're at max length
-    if (component.maxLength != null) {
+    if (widget.maxLength != null) {
       final currentLength = text.characters.length;
       final insertLength = char.characters.length;
       final deleteLength = isCollapsed ? 0 : (clampedEnd - clampedStart);
 
-      if (currentLength - deleteLength + insertLength > component.maxLength!) {
+      if (currentLength - deleteLength + insertLength > widget.maxLength!) {
         return;
       }
     }
 
     // Check max lines for multi-line fields
-    if (component.maxLines != null &&
-        component.maxLines! > 1 &&
+    if (widget.maxLines != null &&
+        widget.maxLines! > 1 &&
         char.contains('\n')) {
       final currentLines = text.split('\n').length;
       final newLines = char.split('\n').length - 1;
 
-      if (currentLines + newLines > component.maxLines!) {
+      if (currentLines + newLines > widget.maxLines!) {
         return;
       }
     }
@@ -855,7 +855,7 @@ class _TextFieldState extends State<TextField> {
     // Paste text from clipboard
     var clipboardText = ClipboardManager.paste();
     if (clipboardText != null && clipboardText.isNotEmpty) {
-      if (component.maxLines == 1) {
+      if (widget.maxLines == 1) {
         // Single-line field: replace all newlines/carriage returns with spaces
         // This prevents accidentally submitting the form when pasting multi-line text
         clipboardText = clipboardText.replaceAll(RegExp(r'[\r\n]+'), ' ');
@@ -870,7 +870,7 @@ class _TextFieldState extends State<TextField> {
 
       // Call onPaste callback if provided
       // If callback returns true, the paste was handled externally - skip default insertion
-      final handled = component.onPaste?.call(clipboardText) ?? false;
+      final handled = widget.onPaste?.call(clipboardText) ?? false;
       if (!handled) {
         _insertText(clipboardText);
       }
@@ -878,26 +878,26 @@ class _TextFieldState extends State<TextField> {
   }
 
   @override
-  Component build(BuildContext context) {
-    final decoration = component.decoration ?? const InputDecoration();
-    final isFocused = component.focused;
+  Widget build(BuildContext context) {
+    final decoration = widget.decoration ?? const InputDecoration();
+    final isFocused = widget.focused;
 
     // Prepare display text (for obscuring only)
     final actualText = _controller.text;
     String displayText = actualText;
-    if (component.obscureText) {
-      displayText = component.obscuringCharacter * displayText.length;
+    if (widget.obscureText) {
+      displayText = widget.obscuringCharacter * displayText.length;
     }
 
     // Handle view offset for single-line fields
-    if (component.maxLines == 1 && component.width != null) {
+    if (widget.maxLines == 1 && widget.width != null) {
       final padding = decoration.contentPadding ??
           const EdgeInsets.symmetric(horizontal: 1);
       final horizontalPadding = padding.left + padding.right;
       final borderWidth = decoration.border != null ? 2.0 : 0.0;
       // Reserve 1 column for cursor display
       final maxVisibleWidth =
-          (component.width! - borderWidth - horizontalPadding - 1).toInt();
+          (widget.width! - borderWidth - horizontalPadding - 1).toInt();
 
       if (maxVisibleWidth > 0 && _viewOffset < displayText.length) {
         // Extract the visible portion based on visual width, not character count
@@ -930,27 +930,27 @@ class _TextFieldState extends State<TextField> {
 
     // Resolve colors from theme if not provided
     final theme = TuiTheme.of(context);
-    final effectiveCursorColor = component.cursorColor ?? theme.primary;
+    final effectiveCursorColor = widget.cursorColor ?? theme.primary;
     final effectiveSelectionColor =
-        component.selectionColor ?? theme.primary.withOpacity(0.4);
+        widget.selectionColor ?? theme.primary.withOpacity(0.4);
 
     // Build the text field content
-    Component content = _TextFieldContent(
+    Widget content = _TextFieldContent(
       text: actualText,
-      placeholder: component.placeholder,
-      style: component.style,
-      placeholderStyle: component.placeholderStyle,
+      placeholder: widget.placeholder,
+      style: widget.style,
+      placeholderStyle: widget.placeholderStyle,
       selection: _controller.selection,
       viewOffset: _viewOffset,
-      cursorVisible: _cursorVisible && isFocused && component.showCursor,
+      cursorVisible: _cursorVisible && isFocused && widget.showCursor,
       cursorColor: effectiveCursorColor,
-      cursorStyle: component.cursorStyle,
+      cursorStyle: widget.cursorStyle,
       selectionColor: effectiveSelectionColor,
-      textAlign: component.textAlign,
-      maxLines: component.maxLines,
+      textAlign: widget.textAlign,
+      maxLines: widget.maxLines,
       isFocused: isFocused, // Pass focus state to render object
-      obscureText: component.obscureText,
-      obscuringCharacter: component.obscuringCharacter,
+      obscureText: widget.obscureText,
+      obscuringCharacter: widget.obscuringCharacter,
       onSelectionChange: _handleSelectionChangeFromRenderObject,
       onRenderObjectCreate: (renderObject) {
         _renderTextField = renderObject;
@@ -960,8 +960,8 @@ class _TextFieldState extends State<TextField> {
     // Apply decoration
     if (decoration.border != null || decoration.fillColor != null) {
       content = Container(
-        width: component.width,
-        height: component.height ?? (component.maxLines ?? 1).toDouble() + 2,
+        width: widget.width,
+        height: widget.height ?? (widget.maxLines ?? 1).toDouble() + 2,
         padding: decoration.contentPadding ??
             const EdgeInsets.symmetric(horizontal: 1),
         decoration: BoxDecoration(
@@ -983,8 +983,8 @@ class _TextFieldState extends State<TextField> {
   }
 }
 
-/// Internal component for rendering text field content
-class _TextFieldContent extends SingleChildRenderObjectComponent {
+/// Internal widget for rendering text field content
+class _TextFieldContent extends SingleChildRenderObjectWidget {
   const _TextFieldContent({
     required this.text,
     this.placeholder,
@@ -1885,7 +1885,7 @@ class InputDecoration {
   final String? errorText;
   final String? prefixText;
   final String? suffixText;
-  final Component? counter;
+  final Widget? counter;
   final bool? filled;
   final Color? fillColor;
   final BoxBorder? border;

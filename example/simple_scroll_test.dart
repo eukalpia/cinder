@@ -1,10 +1,10 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() async {
   await runApp(const SimpleScrollTest());
 }
 
-class SimpleScrollTest extends StatefulComponent {
+class SimpleScrollTest extends StatefulWidget {
   const SimpleScrollTest({super.key});
 
   @override
@@ -14,7 +14,7 @@ class SimpleScrollTest extends StatefulComponent {
 class _SimpleScrollTestState extends State<SimpleScrollTest> {
   final scrollController = ScrollController();
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Center(
       child: Container(
         height: 30,

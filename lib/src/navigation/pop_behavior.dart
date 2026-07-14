@@ -1,4 +1,4 @@
-import 'package:nocterm/nocterm_test.dart';
+import 'package:cinder/cinder_test.dart';
 
 import 'route.dart';
 

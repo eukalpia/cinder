@@ -1,4 +1,4 @@
-/// Theming system for nocterm TUI applications.
+/// Theming system for cinder TUI applications.
 ///
 /// This library provides a comprehensive theming system that makes it easy
 /// to create consistent, theme-compatible UIs. Colors automatically resolve

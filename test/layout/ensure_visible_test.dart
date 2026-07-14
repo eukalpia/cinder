@@ -1,5 +1,5 @@
 import 'package:test/test.dart';
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() {
   group('ScrollController.ensureVisible', () {
@@ -135,13 +135,13 @@ void main() {
 
   group('ScrollController.ensureIndexVisible', () {
     test('scrolls to make index visible in fixed-height ListView', () async {
-      await testNocterm(
+      await testCinder(
         'index-based ensureVisible with fixed height',
         (tester) async {
           final controller = ScrollController();
           final app = _TestListViewApp(controller: controller, itemCount: 20);
 
-          await tester.pumpComponent(app);
+          await tester.pumpWidget(app);
 
           // Initially at top
           expect(controller.offset, equals(0));
@@ -163,13 +163,13 @@ void main() {
     });
 
     test('does not scroll when index is already visible', () async {
-      await testNocterm(
+      await testCinder(
         'no scroll when already visible',
         (tester) async {
           final controller = ScrollController();
           final app = _TestListViewApp(controller: controller, itemCount: 20);
 
-          await tester.pumpComponent(app);
+          await tester.pumpWidget(app);
 
           // Item 2 should be visible at the top
           final initialOffset = controller.offset;
@@ -186,7 +186,7 @@ void main() {
 }
 
 /// Test app with fixed-height items
-class _TestListViewApp extends StatefulComponent {
+class _TestListViewApp extends StatefulWidget {
   const _TestListViewApp({required this.controller, required this.itemCount});
 
   final ScrollController controller;
@@ -198,10 +198,10 @@ class _TestListViewApp extends StatefulComponent {
 
 class _TestListViewAppState extends State<_TestListViewApp> {
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return ListView.builder(
-      controller: component.controller,
-      itemCount: component.itemCount,
+      controller: widget.controller,
+      itemCount: widget.itemCount,
       lazy: false, // Explicitly set to non-lazy mode for testing
       itemBuilder: (context, index) {
         return Text('Item $index');

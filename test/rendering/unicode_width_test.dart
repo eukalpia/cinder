@@ -1,4 +1,4 @@
-import 'package:nocterm/src/utils/unicode_width.dart';
+import 'package:cinder/src/utils/unicode_width.dart';
 import 'package:test/test.dart';
 
 void main() {

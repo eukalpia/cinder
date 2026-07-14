@@ -1,15 +1,15 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('TextField Cursor Bounds', () {
     test('cursor block stays within field boundaries', () async {
-      await testNocterm(
+      await testCinder(
         'cursor within bounds',
         (tester) async {
           final controller = TextEditingController(text: '');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: [
                 const Text('Test: Cursor should always stay within the border'),
@@ -61,12 +61,12 @@ void main() {
     });
 
     test('multi-line text with cursor at line ends', () async {
-      await testNocterm(
+      await testCinder(
         'multi-line cursor at line ends',
         (tester) async {
           final controller = TextEditingController(text: '');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TextField(
               controller: controller,
               width: 20,
@@ -115,12 +115,12 @@ void main() {
     });
 
     test('single-line field with cursor at end', () async {
-      await testNocterm(
+      await testCinder(
         'single-line cursor at end',
         (tester) async {
           final controller = TextEditingController(text: '');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TextField(
               controller: controller,
               width: 15,

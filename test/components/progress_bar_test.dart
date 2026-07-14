@@ -1,14 +1,14 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('ProgressBar', () {
     test('visual development - basic progress bar', () async {
-      await testNocterm(
+      await testCinder(
         'basic progress bar at different values',
         (tester) async {
           print('Progress at 0%:');
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             SizedBox(
               width: 30,
               height: 1,
@@ -21,7 +21,7 @@ void main() {
           );
 
           print('\nProgress at 25%:');
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             SizedBox(
               width: 30,
               height: 1,
@@ -34,7 +34,7 @@ void main() {
           );
 
           print('\nProgress at 50%:');
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             SizedBox(
               width: 30,
               height: 1,
@@ -47,7 +47,7 @@ void main() {
           );
 
           print('\nProgress at 75%:');
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             SizedBox(
               width: 30,
               height: 1,
@@ -60,7 +60,7 @@ void main() {
           );
 
           print('\nProgress at 100%:');
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             SizedBox(
               width: 30,
               height: 1,
@@ -77,11 +77,11 @@ void main() {
     });
 
     test('visual development - progress bar with borders', () async {
-      await testNocterm(
+      await testCinder(
         'progress bars with different border styles',
         (tester) async {
           print('Single border:');
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             SizedBox(
               width: 30,
               height: 3,
@@ -95,7 +95,7 @@ void main() {
           );
 
           print('\nDouble border:');
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             SizedBox(
               width: 30,
               height: 3,
@@ -109,7 +109,7 @@ void main() {
           );
 
           print('\nRounded border:');
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             SizedBox(
               width: 30,
               height: 3,
@@ -123,7 +123,7 @@ void main() {
           );
 
           print('\nBold border:');
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             SizedBox(
               width: 30,
               height: 3,
@@ -141,11 +141,11 @@ void main() {
     });
 
     test('visual development - progress bar with percentage', () async {
-      await testNocterm(
+      await testCinder(
         'progress bar showing percentage',
         (tester) async {
           print('Progress bar with percentage display:');
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: [
                 SizedBox(
@@ -180,11 +180,11 @@ void main() {
     });
 
     test('visual development - custom characters', () async {
-      await testNocterm(
+      await testCinder(
         'progress bar with custom fill characters',
         (tester) async {
           print('Custom characters:');
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: [
                 Text('Using = and -'),
@@ -234,11 +234,11 @@ void main() {
     });
 
     test('visual development - progress bar with labels', () async {
-      await testNocterm(
+      await testCinder(
         'progress bar with custom labels',
         (tester) async {
           print('Progress bars with labels:');
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: [
                 SizedBox(
@@ -285,11 +285,11 @@ void main() {
 
     test('visual development - indeterminate progress',
         skip: 'Known issue: Indeterminate progress animation timing', () async {
-      await testNocterm(
+      await testCinder(
         'indeterminate progress animation',
         (tester) async {
           print('Indeterminate progress (animated):');
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: [
                 Text('Indeterminate progress bar:'),
@@ -329,10 +329,10 @@ void main() {
     });
 
     test('renders correctly', () async {
-      await testNocterm(
+      await testCinder(
         'correct rendering',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             SizedBox(
               width: 20,
               height: 1,
@@ -351,11 +351,11 @@ void main() {
     });
 
     test('handles different sizes', () async {
-      await testNocterm(
+      await testCinder(
         'different sizes',
         (tester) async {
           // Small progress bar
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             SizedBox(
               width: 10,
               height: 1,
@@ -366,7 +366,7 @@ void main() {
           expect(tester.terminalState.getText().length, greaterThan(0));
 
           // Large progress bar
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             SizedBox(
               width: 50,
               height: 5,

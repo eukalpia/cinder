@@ -1,11 +1,11 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() async {
   await runApp(const FocusDemo());
 }
 
 /// Demo application showing focus handling with nested components
-class FocusDemo extends StatefulComponent {
+class FocusDemo extends StatefulWidget {
   const FocusDemo({super.key});
 
   @override
@@ -39,7 +39,7 @@ class _FocusDemoState extends State<FocusDemo> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Column(
       children: [
         Text(lastKeyPressed),
@@ -348,13 +348,13 @@ class _FocusDemoState extends State<FocusDemo> {
   }
 }
 
-class WrappedText extends StatelessComponent {
+class WrappedText extends StatelessWidget {
   const WrappedText({required this.text});
 
   final String text;
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Text(text);
   }
 }

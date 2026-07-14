@@ -1,4 +1,4 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 /// The direction in which text flows.
 enum TextDirection {
@@ -266,7 +266,7 @@ class Alignment extends AlignmentGeometry {
 }
 
 /// An offset that's expressed as a fraction of a [Size], but whose horizontal
-/// component is dependent on the writing direction.
+/// widget is dependent on the writing direction.
 class AlignmentDirectional extends AlignmentGeometry {
   /// Creates a directional alignment.
   const AlignmentDirectional(this.start, this.y);
@@ -395,7 +395,7 @@ enum Clip {
 /// the [Positioned] widget to its enclosing [Stack] must contain only
 /// [StatelessWidget]s or [StatefulWidget]s (not other kinds of widgets, like
 /// [RenderObjectWidget]s).
-class Positioned extends ParentDataComponent<StackParentData> {
+class Positioned extends ParentDataWidget<StackParentData> {
   /// Creates a widget that controls where a child of a [Stack] is positioned.
   ///
   /// Only two out of the three horizontal values ([left], [right], [width]), and only
@@ -507,7 +507,7 @@ class Positioned extends ParentDataComponent<StackParentData> {
     double? bottom,
     double? width,
     double? height,
-    required Component child,
+    required Widget child,
   }) {
     final (double? left, double? right) = switch (textDirection) {
       TextDirection.rtl => (end, start),

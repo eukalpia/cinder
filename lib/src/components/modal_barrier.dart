@@ -1,4 +1,4 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import '../framework/terminal_canvas.dart';
 
 /// Applies a color tint over its child content.
@@ -39,7 +39,7 @@ import '../framework/terminal_canvas.dart';
 ///
 ///  * [ModalBarrier], which uses tinting for dialog backgrounds.
 ///  * [ColoredBox], which fills an area with a solid color.
-class Tint extends SingleChildRenderObjectComponent {
+class Tint extends SingleChildRenderObjectWidget {
   /// Creates a widget that applies a color tint over its child.
   const Tint({
     super.key,
@@ -144,7 +144,7 @@ class RenderTint extends RenderObject
 ///   child: MyContent(),
 /// )
 /// ```
-class AnimatedTint extends AnimatedComponent {
+class AnimatedTint extends AnimatedWidget {
   /// Creates an animated tint widget.
   const AnimatedTint({
     super.key,
@@ -156,10 +156,10 @@ class AnimatedTint extends AnimatedComponent {
   Animation<Color?> get color => listenable as Animation<Color?>;
 
   /// The child widget to tint.
-  final Component? child;
+  final Widget? child;
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     final currentColor = color.value;
     if (currentColor == null || currentColor.alpha == 0) {
       return child ?? const SizedBox.shrink();
@@ -183,7 +183,7 @@ class AnimatedTint extends AnimatedComponent {
 ///   child: MyContent(),
 /// )
 /// ```
-class FadeTint extends StatefulComponent {
+class FadeTint extends StatefulWidget {
   /// Creates a fade tint widget.
   const FadeTint({
     super.key,
@@ -199,7 +199,7 @@ class FadeTint extends StatefulComponent {
   final Duration duration;
 
   /// The child widget to tint.
-  final Component? child;
+  final Widget? child;
 
   @override
   State<FadeTint> createState() => _FadeTintState();
@@ -214,7 +214,7 @@ class _FadeTintState extends State<FadeTint>
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: component.duration,
+      duration: widget.duration,
       vsync: this,
     );
 
@@ -223,20 +223,20 @@ class _FadeTintState extends State<FadeTint>
   }
 
   void _setupAnimation() {
-    final transparentColor = component.color.withAlpha(0);
+    final transparentColor = widget.color.withAlpha(0);
 
     _colorAnimation = ColorTween(
       begin: transparentColor,
-      end: component.color,
+      end: widget.color,
     ).animate(_controller);
   }
 
   @override
-  void didUpdateComponent(FadeTint oldComponent) {
-    super.didUpdateComponent(oldComponent);
-    if (component.color != oldComponent.color ||
-        component.duration != oldComponent.duration) {
-      _controller.duration = component.duration;
+  void didUpdateWidget(FadeTint oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.color != oldWidget.color ||
+        widget.duration != oldWidget.duration) {
+      _controller.duration = widget.duration;
       _setupAnimation();
     }
   }
@@ -248,10 +248,10 @@ class _FadeTintState extends State<FadeTint>
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return AnimatedTint(
       color: _colorAnimation,
-      child: component.child,
+      child: widget.child,
     );
   }
 }
@@ -272,7 +272,7 @@ class _FadeTintState extends State<FadeTint>
 ///
 ///  * [AnimatedModalBarrier], which animates the barrier color for smooth
 ///    fade-in/fade-out effects.
-class ModalBarrier extends StatelessComponent {
+class ModalBarrier extends StatelessWidget {
   /// Creates a widget that blocks user interaction.
   const ModalBarrier({
     super.key,
@@ -309,9 +309,9 @@ class ModalBarrier extends StatelessComponent {
   final bool obscure;
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     // Use a GestureDetector if dismissible, otherwise just the colored box
-    Component barrier = SizedBox.expand(
+    Widget barrier = SizedBox.expand(
       child: color != null
           ? ColoredBox(color: color!, obscure: obscure)
           : const SizedBox.shrink(),
@@ -337,7 +337,7 @@ class ModalBarrier extends StatelessComponent {
 /// Set [obscure] to true to fill with spaces, completely hiding any content
 /// underneath. When false (default), semi-transparent colors will tint the
 /// underlying content without erasing the text.
-class ColoredBox extends SingleChildRenderObjectComponent {
+class ColoredBox extends SingleChildRenderObjectWidget {
   /// Creates a widget that paints its area with the specified [color].
   const ColoredBox({
     super.key,
@@ -503,7 +503,7 @@ class RenderColoredBox extends RenderObject
 ///   onDismiss: () => _hideOverlay(),
 /// )
 /// ```
-class AnimatedModalBarrier extends AnimatedComponent {
+class AnimatedModalBarrier extends AnimatedWidget {
   /// Creates a widget that blocks user interaction with an animated color.
   const AnimatedModalBarrier({
     super.key,
@@ -526,7 +526,7 @@ class AnimatedModalBarrier extends AnimatedComponent {
   final bool obscure;
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return ModalBarrier(
       color: color.value,
       dismissible: dismissible,
@@ -542,7 +542,7 @@ class AnimatedModalBarrier extends AnimatedComponent {
 /// an [AnimationController] for easy use in dialogs and overlays.
 ///
 /// The barrier will fade in when shown and fade out when dismissed.
-class FadeModalBarrier extends StatefulComponent {
+class FadeModalBarrier extends StatefulWidget {
   /// Creates a fade modal barrier.
   const FadeModalBarrier({
     super.key,
@@ -583,7 +583,7 @@ class _FadeModalBarrierState extends State<FadeModalBarrier>
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: component.duration,
+      duration: widget.duration,
       vsync: this,
     );
 
@@ -592,7 +592,7 @@ class _FadeModalBarrierState extends State<FadeModalBarrier>
   }
 
   void _setupAnimation() {
-    final targetColor = component.color ?? Colors.black.withOpacity(0.5);
+    final targetColor = widget.color ?? Colors.black.withOpacity(0.5);
     final transparentColor = targetColor.withAlpha(0);
 
     _colorAnimation = ColorTween(
@@ -602,11 +602,11 @@ class _FadeModalBarrierState extends State<FadeModalBarrier>
   }
 
   @override
-  void didUpdateComponent(FadeModalBarrier oldComponent) {
-    super.didUpdateComponent(oldComponent);
-    if (component.color != oldComponent.color ||
-        component.duration != oldComponent.duration) {
-      _controller.duration = component.duration;
+  void didUpdateWidget(FadeModalBarrier oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.color != oldWidget.color ||
+        widget.duration != oldWidget.duration) {
+      _controller.duration = widget.duration;
       _setupAnimation();
     }
   }
@@ -618,12 +618,12 @@ class _FadeModalBarrierState extends State<FadeModalBarrier>
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return AnimatedModalBarrier(
       color: _colorAnimation,
-      dismissible: component.dismissible,
-      onDismiss: component.onDismiss,
-      obscure: component.obscure,
+      dismissible: widget.dismissible,
+      onDismiss: widget.onDismiss,
+      obscure: widget.obscure,
     );
   }
 }

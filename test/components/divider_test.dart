@@ -1,13 +1,13 @@
 import 'package:test/test.dart';
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() {
   group('Divider', () {
     test('visual development - horizontal divider', () async {
-      await testNocterm(
+      await testCinder(
         'see how horizontal divider looks',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 40,
               height: 10,
@@ -26,10 +26,10 @@ void main() {
     });
 
     test('visual development - divider styles', () async {
-      await testNocterm(
+      await testCinder(
         'different divider styles',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 40,
               height: 20,
@@ -57,10 +57,10 @@ void main() {
     });
 
     test('visual development - divider with indents', () async {
-      await testNocterm(
+      await testCinder(
         'divider with indents',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 40,
               height: 10,
@@ -84,10 +84,10 @@ void main() {
     });
 
     test('visual development - colored dividers', () async {
-      await testNocterm(
+      await testCinder(
         'colored dividers',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 40,
               height: 12,
@@ -111,10 +111,10 @@ void main() {
     });
 
     test('visual development - vertical divider', () async {
-      await testNocterm(
+      await testCinder(
         'vertical divider',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 50,
               height: 10,
@@ -135,10 +135,10 @@ void main() {
     });
 
     test('renders horizontal divider correctly', () async {
-      await testNocterm(
+      await testCinder(
         'horizontal divider rendering',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 20,
               height: 5,
@@ -160,10 +160,10 @@ void main() {
     });
 
     test('renders vertical divider correctly', () async {
-      await testNocterm(
+      await testCinder(
         'vertical divider rendering',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -185,10 +185,10 @@ void main() {
     });
 
     test('applies indents correctly', () async {
-      await testNocterm(
+      await testCinder(
         'divider indents',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 3,
@@ -202,10 +202,10 @@ void main() {
     });
 
     test('different styles render correctly', () async {
-      await testNocterm(
+      await testCinder(
         'divider styles',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 20,
               height: 2,
@@ -217,10 +217,10 @@ void main() {
         },
       );
 
-      await testNocterm(
+      await testCinder(
         'ascii divider style',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 20,
               height: 2,
@@ -234,10 +234,10 @@ void main() {
     });
 
     test('applies colors correctly', () async {
-      await testNocterm(
+      await testCinder(
         'colored divider',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 20,
               height: 2,

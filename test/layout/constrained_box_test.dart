@@ -1,13 +1,13 @@
-import 'package:nocterm/nocterm.dart' hide isNotEmpty;
+import 'package:cinder/cinder.dart' hide isNotEmpty;
 import 'package:test/test.dart';
 
 void main() {
   group('ConstrainedBox', () {
     test('applies minimum constraints', () async {
-      await testNocterm(
+      await testCinder(
         'minimum constraints',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             ConstrainedBox(
               constraints: const BoxConstraints(
                 minWidth: 20,
@@ -32,10 +32,10 @@ void main() {
     });
 
     test('applies maximum constraints', () async {
-      await testNocterm(
+      await testCinder(
         'maximum constraints',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             ConstrainedBox(
               constraints: const BoxConstraints(
                 maxWidth: 15,
@@ -58,10 +58,10 @@ void main() {
     });
 
     test('combines with parent constraints using enforce()', () async {
-      await testNocterm(
+      await testCinder(
         'enforce combines constraints',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             SizedBox(
               width: 50,
               height: 25,
@@ -89,10 +89,10 @@ void main() {
     });
 
     test('handles null child', () async {
-      await testNocterm(
+      await testCinder(
         'null child',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: [
                 Container(
@@ -121,10 +121,10 @@ void main() {
     });
 
     test('visual test - see constrained boxes in action', () async {
-      await testNocterm(
+      await testCinder(
         'visual constrained box',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,

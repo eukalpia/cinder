@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'dart:math' as math;
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() async {
   await runApp(const HomeAutomationDashboard());
 }
 
-class HomeAutomationDashboard extends StatefulComponent {
+class HomeAutomationDashboard extends StatefulWidget {
   const HomeAutomationDashboard({super.key});
 
   @override
@@ -87,7 +87,7 @@ class _HomeAutomationDashboardState extends State<HomeAutomationDashboard> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Focusable(
       focused: true,
       onKeyEvent: (event) {
@@ -167,7 +167,7 @@ class _HomeAutomationDashboardState extends State<HomeAutomationDashboard> {
     );
   }
 
-  Component _buildHeader() {
+  Widget _buildHeader() {
     return Container(
       height: 3,
       decoration: BoxDecoration(
@@ -205,7 +205,7 @@ class _HomeAutomationDashboardState extends State<HomeAutomationDashboard> {
     );
   }
 
-  Component _buildRoomSelector() {
+  Widget _buildRoomSelector() {
     return Container(
       width: 20,
       decoration: BoxDecoration(
@@ -239,7 +239,7 @@ class _HomeAutomationDashboardState extends State<HomeAutomationDashboard> {
     );
   }
 
-  Component _buildClimatePanel() {
+  Widget _buildClimatePanel() {
     return Container(
       height: 6,
       decoration: BoxDecoration(
@@ -294,7 +294,7 @@ class _HomeAutomationDashboardState extends State<HomeAutomationDashboard> {
     );
   }
 
-  Component _buildDeviceControls() {
+  Widget _buildDeviceControls() {
     return Container(
       decoration: BoxDecoration(
         border: BoxBorder.all(color: Color(0xFF2A3F5F)),
@@ -347,7 +347,7 @@ class _HomeAutomationDashboardState extends State<HomeAutomationDashboard> {
     );
   }
 
-  Component _buildDeviceRow(String name, String status, bool isOn) {
+  Widget _buildDeviceRow(String name, String status, bool isOn) {
     return Row(
       children: [
         Text(name, style: TextStyle(color: Color(0xFF888888))),
@@ -363,7 +363,7 @@ class _HomeAutomationDashboardState extends State<HomeAutomationDashboard> {
     );
   }
 
-  Component _buildEnergyMonitor() {
+  Widget _buildEnergyMonitor() {
     return Container(
       decoration: BoxDecoration(
         border: BoxBorder.all(color: Color(0xFF2A3F5F)),
@@ -412,7 +412,7 @@ class _HomeAutomationDashboardState extends State<HomeAutomationDashboard> {
     );
   }
 
-  Component _buildProgressBar(double value) {
+  Widget _buildProgressBar(double value) {
     final barWidth = 15;
     final filledWidth = (value * barWidth).round();
     final emptyWidth = barWidth - filledWidth;
@@ -423,7 +423,7 @@ class _HomeAutomationDashboardState extends State<HomeAutomationDashboard> {
     );
   }
 
-  Component _buildFooter() {
+  Widget _buildFooter() {
     return Container(
       height: 2,
       decoration: BoxDecoration(

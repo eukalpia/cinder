@@ -1,29 +1,29 @@
 ---
-title: Components
-description: Understanding StatelessComponent and StatefulComponent
+title: Widgets
+description: Understanding StatelessWidget and StatefulWidget
 icon: cube
 ---
 
-Components are the building blocks of Nocterm apps. This guide explains the two types of components and when to use each.
+Widgets are the building blocks of Cinder apps. This guide explains the two types of components and when to use each.
 
-## StatelessComponent
+## StatelessWidget
 
-A `StatelessComponent` describes a UI that doesn't change over time. It takes input through its constructor and returns a component tree from its `build()` method.
+A `StatelessWidget` describes a UI that doesn't change over time. It takes input through its constructor and returns a widget tree from its `build()` method.
 
-Use stateless components when your UI depends only on the component's properties, not on changing state.
+Use stateless components when your UI depends only on the widget's properties, not on changing state.
 
 ### Example
 
-Here's a simple greeting component:
+Here's a simple greeting widget:
 
 ```dart
-class Greeting extends StatelessComponent {
+class Greeting extends StatelessWidget {
   const Greeting({required this.name, super.key});
 
   final String name;
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Text('Hello, $name!');
   }
 }
@@ -35,32 +35,32 @@ Usage:
 Greeting(name: 'Alice')
 ```
 
-Every time you use this component with `name: 'Alice'`, it displays "Hello, Alice!". The component itself never changes—only its input changes.
+Every time you use this widget with `name: 'Alice'`, it displays "Hello, Alice!". The widget itself never changes—only its input changes.
 
-### When to use StatelessComponent
+### When to use StatelessWidget
 
 Use stateless components when:
 - The UI depends only on constructor parameters
 - You don't need to track changing state
-- The component just transforms data into UI
+- The widget just transforms data into UI
 
 Examples:
 - Display components that show data (labels, headers, formatted text)
 - Layout wrappers that arrange children
 - Reusable UI patterns that don't change
 
-## StatefulComponent
+## StatefulWidget
 
-A `StatefulComponent` describes UI that changes over time. It creates a `State` object that holds mutable state and rebuilds the UI when state changes.
+A `StatefulWidget` describes UI that changes over time. It creates a `State` object that holds mutable state and rebuilds the UI when state changes.
 
 Use stateful components when your UI needs to change in response to user input, timers, or other events.
 
 ### Example
 
-Here's a toggle component:
+Here's a toggle widget:
 
 ```dart
-class Toggle extends StatefulComponent {
+class Toggle extends StatefulWidget {
   const Toggle({super.key});
 
   @override
@@ -71,7 +71,7 @@ class _ToggleState extends State<Toggle> {
   bool _isOn = false;
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Focusable(
       focused: true,
       onKeyEvent: (event) {
@@ -89,17 +89,17 @@ class _ToggleState extends State<Toggle> {
 }
 ```
 
-The `_isOn` field holds state that changes when the user presses space. Calling `setState()` tells Nocterm to rebuild the UI.
+The `_isOn` field holds state that changes when the user presses space. Calling `setState()` tells Cinder to rebuild the UI.
 
-### Component and State separation
+### Widget and State separation
 
 Stateful components split into two parts:
-- **Component** (immutable): Configuration that can be rebuilt
+- **Widget** (immutable): Configuration that can be rebuilt
 - **State** (mutable): Internal state that persists across rebuilds
 
-The component is your configuration. The state is where you store changing data.
+The widget is your configuration. The state is where you store changing data.
 
-### When to use StatefulComponent
+### When to use StatefulWidget
 
 Use stateful components when:
 - You need to track changing values (counters, toggles, form input)
@@ -109,25 +109,25 @@ Use stateful components when:
 
 ## The build method
 
-Both component types have a `build()` method that returns the UI:
+Both widget types have a `build()` method that returns the UI:
 
 ```dart
 @override
-Component build(BuildContext context) {
+Widget build(BuildContext context) {
   return Text('Your UI here');
 }
 ```
 
-Nocterm calls `build()` when:
-- The component first appears
+Cinder calls `build()` when:
+- The widget first appears
 - `setState()` is called (stateful components)
-- The parent component rebuilds
+- The parent widget rebuilds
 
 Keep `build()` fast. It may be called frequently.
 
-## Component tree
+## Widget tree
 
-Components form a tree structure. Each component can have children, and those children can have their own children.
+Widgets form a tree structure. Each widget can have children, and those children can have their own children.
 
 Example tree:
 
@@ -160,11 +160,11 @@ Container(
 )
 ```
 
-Nocterm builds this tree. Changes propagate down the tree—if `Container` rebuilds, its children rebuild too.
+Cinder builds this tree. Changes propagate down the tree—if `Container` rebuilds, its children rebuild too.
 
 ## Keys
 
-Keys help Nocterm identify specific components in the tree. Use keys when you need to preserve state or distinguish between components of the same type.
+Keys help Cinder identify specific components in the tree. Use keys when you need to preserve state or distinguish between components of the same type.
 
 ### ValueKey
 
@@ -182,11 +182,11 @@ ListView(
 )
 ```
 
-Without keys, Nocterm might reuse the wrong component's state when the list changes.
+Without keys, Cinder might reuse the wrong widget's state when the list changes.
 
 ### GlobalKey
 
-Use `GlobalKey` to access a component's state from anywhere:
+Use `GlobalKey` to access a widget's state from anywhere:
 
 ```dart
 final formKey = GlobalKey<FormState>();
@@ -202,9 +202,9 @@ Global keys are rare in most apps. You usually manage state through normal paren
 Use keys when:
 - Reordering lists or collections
 - Distinguishing between components of the same type
-- Accessing a component's state from outside its tree
+- Accessing a widget's state from outside its tree
 
-Most components don't need keys. Only add them when you encounter issues with state preservation or component identity.
+Most components don't need keys. Only add them when you encounter issues with state preservation or widget identity.
 
 ## Next steps
 

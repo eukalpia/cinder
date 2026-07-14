@@ -1,15 +1,15 @@
 import 'dart:io';
 import 'dart:math' as math;
 
-import 'package:nocterm/nocterm.dart';
-import 'package:nocterm/src/third_party/xterm_pure.dart/xterm.dart' as xterm;
+import 'package:cinder/cinder.dart';
+import 'package:cinder/src/third_party/xterm_pure.dart/xterm.dart' as xterm;
 import '../process/pty_controller.dart' as pty;
 
-/// A terminal component using the xterm.dart library for proper terminal emulation.
+/// A terminal widget using the xterm.dart library for proper terminal emulation.
 ///
-/// This component requires a [PtyController] following the same pattern as Flutter's
+/// This widget requires a [PtyController] following the same pattern as Flutter's
 /// TextField with TextEditingController.
-class TerminalXterm extends StatefulComponent {
+class TerminalXterm extends StatefulWidget {
   /// The controller that manages the PTY process.
   final pty.PtyController controller;
 
@@ -56,7 +56,7 @@ class _TerminalXtermState extends State<TerminalXterm> {
 
     // Create the xterm terminal
     _terminal = xterm.Terminal(
-      maxLines: component.maxLines,
+      maxLines: widget.maxLines,
       platform: _getPlatform(),
     );
 
@@ -65,14 +65,14 @@ class _TerminalXtermState extends State<TerminalXterm> {
 
     // Set up terminal callbacks
     _terminal.onOutput = (data) {
-      if (component.controller.isRunning) {
-        component.controller.write(data);
+      if (widget.controller.isRunning) {
+        widget.controller.write(data);
       }
     };
 
     _terminal.onResize = (width, height, _, __) {
-      if (component.controller.isRunning) {
-        component.controller.resize(width, height);
+      if (widget.controller.isRunning) {
+        widget.controller.resize(width, height);
       }
     };
 
@@ -89,17 +89,17 @@ class _TerminalXtermState extends State<TerminalXterm> {
 
     // Listen to controller changes
     _controllerListener = _onControllerChanged;
-    component.controller.addListener(_controllerListener!);
+    widget.controller.addListener(_controllerListener!);
 
     // Auto-start if requested
-    if (component.autoStart && !component.controller.isRunning) {
+    if (widget.autoStart && !widget.controller.isRunning) {
       _startTerminal();
     }
   }
 
   void _setupControllerHandler() {
     // Set up output handler
-    component.controller.addOutputCallback((data) {
+    widget.controller.addOutputCallback((data) {
       _terminal.write(data);
       setState(() {
         // Trigger rebuild when terminal updates
@@ -121,7 +121,7 @@ class _TerminalXtermState extends State<TerminalXterm> {
 
   void _startTerminal() async {
     try {
-      await component.controller.start(columns: _cols, rows: _rows);
+      await widget.controller.start(columns: _cols, rows: _rows);
     } catch (e) {
       // Handle error
       _terminal.write('\r\nError starting terminal: $e\r\n');
@@ -129,11 +129,11 @@ class _TerminalXtermState extends State<TerminalXterm> {
   }
 
   void _handleKeyEvent(KeyboardEvent event) {
-    if (!component.controller.isRunning) return;
+    if (!widget.controller.isRunning) return;
 
     // Call parent's key handler first, if provided
-    if (component.onKeyEvent != null) {
-      final handled = component.onKeyEvent!(event);
+    if (widget.onKeyEvent != null) {
+      final handled = widget.onKeyEvent!(event);
       if (handled) return; // Parent consumed the event
     }
 
@@ -198,37 +198,37 @@ class _TerminalXtermState extends State<TerminalXterm> {
       _cols = cols;
       _rows = rows;
       _terminal.resize(cols, rows);
-      component.controller.resize(cols, rows);
+      widget.controller.resize(cols, rows);
     }
   }
 
   @override
   void dispose() {
     if (_controllerListener != null) {
-      component.controller.removeListener(_controllerListener!);
+      widget.controller.removeListener(_controllerListener!);
     }
     super.dispose();
   }
 
   @override
-  void didUpdateComponent(TerminalXterm oldComponent) {
-    super.didUpdateComponent(oldComponent);
+  void didUpdateWidget(TerminalXterm oldWidget) {
+    super.didUpdateWidget(oldWidget);
 
     // Handle controller change
-    if (oldComponent.controller != component.controller) {
+    if (oldWidget.controller != widget.controller) {
       if (_controllerListener != null) {
-        oldComponent.controller.removeListener(_controllerListener!);
+        oldWidget.controller.removeListener(_controllerListener!);
       }
       _controllerListener = _onControllerChanged;
-      component.controller.addListener(_controllerListener!);
+      widget.controller.addListener(_controllerListener!);
       _setupControllerHandler();
     }
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Focusable(
-      focused: component.focused,
+      focused: widget.focused,
       onKeyEvent: (event) {
         _handleKeyEvent(event);
         return true; // Consume all key events
@@ -243,7 +243,7 @@ class _TerminalXtermState extends State<TerminalXterm> {
 }
 
 /// Terminal renderer that converts xterm buffer to TUI components
-class _TerminalRenderer extends StatelessComponent {
+class _TerminalRenderer extends StatelessWidget {
   final xterm.Terminal terminal;
   final int scrollOffset;
   final void Function(int cols, int rows)? onSizeChange;
@@ -255,7 +255,7 @@ class _TerminalRenderer extends StatelessComponent {
   });
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     // For now, we'll render with a fixed size
     // In a real implementation, we'd get size from constraints
     const cols = 80;
@@ -264,7 +264,7 @@ class _TerminalRenderer extends StatelessComponent {
     // Notify size change
     onSizeChange?.call(cols, rows);
 
-    final lines = <Component>[];
+    final lines = <Widget>[];
 
     // Calculate visible range considering scrollback
     final buffer = terminal.buffer;
@@ -294,7 +294,7 @@ class _TerminalRenderer extends StatelessComponent {
     );
   }
 
-  Component _renderLine(xterm.BufferLine line, bool hasCursor, int cursorX) {
+  Widget _renderLine(xterm.BufferLine line, bool hasCursor, int cursorX) {
     final spans = <_StyledSpan>[];
     final lineLength = line.length;
     final cellData = xterm.CellData.empty();

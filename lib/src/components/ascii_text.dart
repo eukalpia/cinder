@@ -1,4 +1,4 @@
-import 'package:nocterm/nocterm.dart' hide TextAlign;
+import 'package:cinder/cinder.dart' hide TextAlign;
 
 import 'render_ascii_text.dart';
 import 'render_text.dart' show TextAlign;
@@ -7,7 +7,7 @@ import 'render_text.dart' show TextAlign;
 export 'ascii_font.dart' show AsciiFont, AsciiGlyph;
 export 'render_ascii_text.dart' show AsciiLayoutConfig, AsciiLayoutResult;
 
-/// A component that displays text as ASCII art using customizable fonts.
+/// A widget that displays text as ASCII art using customizable fonts.
 ///
 /// Similar to [Text], but renders the text in a large ASCII art format.
 /// Multiple built-in fonts are available, and custom fonts can be created
@@ -55,8 +55,8 @@ export 'render_ascii_text.dart' show AsciiLayoutConfig, AsciiLayoutResult;
 ///   };
 /// }
 /// ```
-class AsciiText extends SingleChildRenderObjectComponent {
-  /// Creates an ASCII art text component.
+class AsciiText extends SingleChildRenderObjectWidget {
+  /// Creates an ASCII art text widget.
   ///
   /// The [data] argument must not be null.
   ///
@@ -111,13 +111,13 @@ class AsciiText extends SingleChildRenderObjectComponent {
 
 /// A pre-styled variant of [AsciiText] with gradient coloring support.
 ///
-/// This is a convenience component that applies a style transformation
+/// This is a convenience widget that applies a style transformation
 /// to create visually striking ASCII text effects.
 ///
-/// Note: This component renders each line with the given style.
+/// Note: This widget renders each line with the given style.
 /// For true gradient effects, consider using multiple overlapping
 /// AsciiText components or custom rendering.
-class StyledAsciiText extends StatelessComponent {
+class StyledAsciiText extends StatelessWidget {
   const StyledAsciiText(
     this.data, {
     super.key,
@@ -132,7 +132,7 @@ class StyledAsciiText extends StatelessComponent {
   final TextStyle? style;
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return AsciiText(
       data,
       font: font,

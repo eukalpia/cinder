@@ -1,12 +1,12 @@
 import 'package:test/test.dart';
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() {
   test('visual color test', () async {
-    await testNocterm(
+    await testCinder(
       'new color palette',
       (tester) async {
-        await tester.pumpComponent(
+        await tester.pumpWidget(
           Column(
             children: [
               Text('Regular Colors:',

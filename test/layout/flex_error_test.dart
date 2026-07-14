@@ -1,11 +1,11 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('Flex error cases', () {
     test('Column with Expanded child in unbounded height should error',
         () async {
-      await testNocterm(
+      await testCinder(
         'expanded in unbounded column',
         (tester) async {
           print(
@@ -13,7 +13,7 @@ void main() {
           print(
               'Note: Error is caught by RenderObject and displayed as layout error');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: [
                 Container(
@@ -62,14 +62,14 @@ void main() {
     });
 
     test('Row with Expanded child in unbounded width should error', () async {
-      await testNocterm(
+      await testCinder(
         'expanded in unbounded row',
         (tester) async {
           print('\n=== Testing Expanded in unbounded Row (should error) ===');
           print(
               'Note: Error is caught by RenderObject and displayed as layout error');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Row(
               children: [
                 Container(
@@ -119,7 +119,7 @@ void main() {
 
     test('Column with MainAxisSize.max in unbounded height should error',
         () async {
-      await testNocterm(
+      await testCinder(
         'mainAxisSize.max in unbounded',
         (tester) async {
           print(
@@ -129,7 +129,7 @@ void main() {
           String? errorMessage;
 
           try {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               Column(
                 children: [
                   // Inner Column with MainAxisSize.max (default) should error
@@ -166,13 +166,13 @@ void main() {
 
     test('Column with MainAxisSize.min in unbounded height should work',
         () async {
-      await testNocterm(
+      await testCinder(
         'mainAxisSize.min in unbounded',
         (tester) async {
           print(
               '\n=== Testing MainAxisSize.min in unbounded Column (should work) ===');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: [
                 Container(

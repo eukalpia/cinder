@@ -1,6 +1,6 @@
 import 'dart:math' as math;
-import 'package:nocterm/nocterm.dart';
-import 'package:nocterm/src/framework/terminal_canvas.dart';
+import 'package:cinder/cinder.dart';
+import 'package:cinder/src/framework/terminal_canvas.dart';
 
 /// Render object for flex layouts (Row/Column)
 class RenderFlex extends RenderObject

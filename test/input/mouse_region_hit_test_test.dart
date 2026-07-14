@@ -1,18 +1,18 @@
 // ignore_for_file: unused_local_variable
 
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('RenderMouseRegion.hitTest', () {
     test('GestureDetector nested in MouseRegion receives tap events', () async {
-      await testNocterm(
+      await testCinder(
         'nested gesture detector hit test',
         (tester) async {
           bool tapReceived = false;
           bool mouseEntered = false;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 80,
               height: 24,
@@ -49,13 +49,13 @@ void main() {
 
     test('MouseRegion receives hover events while child receives taps',
         () async {
-      await testNocterm(
+      await testCinder(
         'both mouse region and gesture detector work',
         (tester) async {
           bool tapReceived = false;
           bool mouseEntered = false;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 80,
               height: 24,
@@ -94,13 +94,13 @@ void main() {
     });
 
     test('opaque MouseRegion still allows child tap events', () async {
-      await testNocterm(
+      await testCinder(
         'opaque mouse region with gesture detector',
         (tester) async {
           bool tapReceived = false;
           bool mouseEntered = false;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 80,
               height: 24,

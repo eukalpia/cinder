@@ -3,7 +3,7 @@ import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
 
-import 'nocterm_paths.dart';
+import 'cinder_paths.dart';
 
 /// A WebSocket-based log server that streams log messages to connected clients.
 ///
@@ -14,7 +14,7 @@ import 'nocterm_paths.dart';
 /// Features:
 /// - **Circular buffer**: Stores last N log entries in memory
 /// - **WebSocket streaming**: Multiple clients can connect simultaneously
-/// - **Port discovery**: Writes port to `~/.nocterm/<hash>/log_port` for CLI discovery
+/// - **Port discovery**: Writes port to `~/.cinder/<hash>/log_port` for CLI discovery
 /// - **Graceful shutdown**: Cleans up connections and port file on close
 ///
 /// Example:
@@ -184,7 +184,7 @@ class LogServer {
   /// Write port number to global log_port file
   Future<void> _writePortFile() async {
     try {
-      await ensureNoctermDirectoryExists();
+      await ensureCinderDirectoryExists();
 
       final portFile = File(getLogPortPath());
       await portFile.writeAsString('$port');

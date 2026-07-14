@@ -1,14 +1,14 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 void main() {
   test('TextField should have default selection color', () async {
-    await testNocterm(
+    await testCinder(
       'default selection color',
       (tester) async {
         final controller = TextEditingController(text: 'Test selection colors');
 
-        await tester.pumpComponent(
+        await tester.pumpWidget(
           Container(
             width: 30,
             height: 3,

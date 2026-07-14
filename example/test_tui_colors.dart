@@ -1,14 +1,14 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() async {
   runApp(const ColorTest());
 }
 
-class ColorTest extends StatelessComponent {
+class ColorTest extends StatelessWidget {
   const ColorTest();
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

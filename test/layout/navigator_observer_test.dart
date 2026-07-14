@@ -1,4 +1,4 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 /// Tests for NavigatorObserver notifications - previously zero-covered:
@@ -7,11 +7,11 @@ import 'package:test/test.dart';
 void main() {
   group('NavigatorObserver', () {
     test('didPush/didPop/didReplace fire with the correct routes', () async {
-      await testNocterm('observer events', (tester) async {
+      await testCinder('observer events', (tester) async {
         final log = <String>[];
         final observer = _RecordingObserver(log);
 
-        await tester.pumpComponent(Navigator(
+        await tester.pumpWidget(Navigator(
           observers: [observer],
           home: const Text('Home Page'),
           routes: {

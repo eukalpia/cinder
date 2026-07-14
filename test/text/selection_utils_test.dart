@@ -1,5 +1,5 @@
-import 'package:nocterm/nocterm.dart';
-import 'package:nocterm/src/text/selection_utils.dart' as selection_utils;
+import 'package:cinder/cinder.dart';
+import 'package:cinder/src/text/selection_utils.dart' as selection_utils;
 import 'package:test/test.dart';
 
 void main() {

@@ -275,7 +275,7 @@ class ParentData {
 /// - Painting: Drawing themselves and their children to the terminal canvas
 /// - Hit testing: Determining which render object is at a given position
 ///
-/// The render tree is separate from the component tree and is optimized for
+/// The render tree is separate from the widget tree and is optimized for
 /// layout and painting operations.
 abstract class RenderObject {
   /// The parent of this render object in the render tree.
@@ -627,10 +627,10 @@ abstract class RenderObject {
 
   /// Report an exception that occurred during rendering.
   void _reportException(String method, Object exception, StackTrace stack) {
-    NoctermError.reportError(NoctermErrorDetails(
+    CinderError.reportError(CinderErrorDetails(
       exception: exception,
       stack: stack,
-      library: 'nocterm rendering',
+      library: 'cinder rendering',
       context: 'during $method()',
       informationCollector: () => [
         'RenderObject: $runtimeType',
@@ -822,9 +822,9 @@ mixin ContainerRenderObjectMixin<ChildType extends RenderObject>
   }
 }
 
-/// Component that creates a RenderObject
-abstract class RenderObjectComponent extends Component {
-  const RenderObjectComponent({super.key});
+/// Widget that creates a RenderObject
+abstract class RenderObjectWidget extends Widget {
+  const RenderObjectWidget({super.key});
 
   @protected
   RenderObject createRenderObject(BuildContext context);
@@ -834,13 +834,12 @@ abstract class RenderObjectComponent extends Component {
       BuildContext context, covariant RenderObject renderObject) {}
 }
 
-/// Element for RenderObjectComponent
+/// Element for RenderObjectWidget
 abstract class RenderObjectElement extends Element {
-  RenderObjectElement(RenderObjectComponent super.component);
+  RenderObjectElement(RenderObjectWidget super.widget);
 
   @override
-  RenderObjectComponent get component =>
-      super.component as RenderObjectComponent;
+  RenderObjectWidget get widget => super.widget as RenderObjectWidget;
 
   RenderObject? _renderObject;
   @override
@@ -852,16 +851,16 @@ abstract class RenderObjectElement extends Element {
   @override
   void mount(Element? parent, dynamic newSlot) {
     super.mount(parent, newSlot);
-    _renderObject = component.createRenderObject(this);
-    _renderObject!.selectionId = component.key ?? _renderObject;
+    _renderObject = widget.createRenderObject(this);
+    _renderObject!.selectionId = widget.key ?? _renderObject;
     attachRenderObject(newSlot);
   }
 
   @override
-  void update(Component newComponent) {
-    super.update(newComponent);
-    component.updateRenderObject(this, renderObject);
-    renderObject.selectionId = component.key ?? renderObject;
+  void update(Widget newWidget) {
+    super.update(newWidget);
+    widget.updateRenderObject(this, renderObject);
+    renderObject.selectionId = widget.key ?? renderObject;
   }
 
   @override
@@ -931,7 +930,7 @@ abstract class RenderObjectElement extends Element {
 
 /// Element that has a single child
 class SingleChildRenderObjectElement extends RenderObjectElement {
-  SingleChildRenderObjectElement(super.component);
+  SingleChildRenderObjectElement(super.widget);
 
   Element? _child;
 
@@ -953,24 +952,24 @@ class SingleChildRenderObjectElement extends RenderObjectElement {
     super.mount(parent, newSlot);
     // Some single child render objects (like Text) don't have children
     try {
-      final dynamic comp = component;
-      final Component? childComponent = comp.child;
-      _child = updateChild(_child, childComponent, null);
+      final dynamic comp = widget;
+      final Widget? childWidget = comp.child;
+      _child = updateChild(_child, childWidget, null);
     } catch (e) {
-      // Component doesn't have a child property
+      // Widget doesn't have a child property
     }
   }
 
   @override
-  void update(Component newComponent) {
-    super.update(newComponent);
+  void update(Widget newWidget) {
+    super.update(newWidget);
     // Some single child render objects (like Text) don't have children
     try {
-      final dynamic comp = newComponent;
-      final Component? childComponent = comp.child;
-      _child = updateChild(_child, childComponent, null);
+      final dynamic comp = newWidget;
+      final Widget? childWidget = comp.child;
+      _child = updateChild(_child, childWidget, null);
     } catch (e) {
-      // Component doesn't have a child property
+      // Widget doesn't have a child property
     }
   }
 
@@ -1000,7 +999,7 @@ class SingleChildRenderObjectElement extends RenderObjectElement {
 
 /// Element that has multiple children
 class MultiChildRenderObjectElement extends RenderObjectElement {
-  MultiChildRenderObjectElement(super.component);
+  MultiChildRenderObjectElement(super.widget);
 
   List<Element> _children = const [];
   List<Element> get children => _children;
@@ -1020,28 +1019,27 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
   @override
   void mount(Element? parent, dynamic newSlot) {
     super.mount(parent, newSlot);
-    final List<Component> children =
-        (component as dynamic).children ?? const [];
+    final List<Widget> children = (widget as dynamic).children ?? const [];
     Element? previousChild;
     _children = List<Element>.generate(children.length, (index) {
       final slot = IndexedSlot(index, previousChild);
-      final child = inflateComponent(children[index], slot);
+      final child = inflateWidget(children[index], slot);
       previousChild = child;
       return child;
     });
   }
 
   @override
-  void update(Component newComponent) {
-    super.update(newComponent);
-    final List<Component> newChildren =
-        (newComponent as dynamic).children ?? const [];
+  void update(Widget newWidget) {
+    super.update(newWidget);
+    final List<Widget> newChildren =
+        (newWidget as dynamic).children ?? const [];
     _children = updateChildren(_children, newChildren);
   }
 
   /// Find the last render object descendant of an element.
   /// This traverses down the tree to find render objects even when
-  /// the element itself is not a RenderObjectElement (e.g., StatelessComponent).
+  /// the element itself is not a RenderObjectElement (e.g., StatelessWidget).
   RenderObject? _findLastRenderObjectDescendant(Element element) {
     RenderObject? result;
 

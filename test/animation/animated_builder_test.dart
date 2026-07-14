@@ -1,4 +1,4 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 /// A fake ticker provider for testing animations.
@@ -99,7 +99,7 @@ class TestNotifier extends ChangeNotifier {
 void main() {
   group('AnimatedBuilder', () {
     test('rebuilds when animation changes value', () async {
-      await testNocterm(
+      await testCinder(
         'animated builder rebuild',
         (tester) async {
           final vsync = FakeTickerProvider();
@@ -110,7 +110,7 @@ void main() {
 
           var buildCount = 0;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 40,
               height: 5,
@@ -131,7 +131,7 @@ void main() {
           controller.forward();
           vsync.tick(const Duration(milliseconds: 50));
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 40,
               height: 5,
@@ -153,7 +153,7 @@ void main() {
     });
 
     test('passes child through correctly', () async {
-      await testNocterm(
+      await testCinder(
         'animated builder child',
         (tester) async {
           final vsync = FakeTickerProvider();
@@ -162,7 +162,7 @@ void main() {
             vsync: vsync,
           );
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 50,
               height: 10,
@@ -190,7 +190,7 @@ void main() {
     });
 
     test('child is not rebuilt on animation change', () async {
-      await testNocterm(
+      await testCinder(
         'animated builder child stable',
         (tester) async {
           final vsync = FakeTickerProvider();
@@ -203,7 +203,7 @@ void main() {
 
           // Note: In this test setup, the child is created inline,
           // so we're testing that the child parameter is passed correctly
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 50,
               height: 10,
@@ -238,7 +238,7 @@ void main() {
     });
 
     test('works with different animation values', () async {
-      await testNocterm(
+      await testCinder(
         'animated builder different values',
         (tester) async {
           final vsync = FakeTickerProvider();
@@ -248,7 +248,7 @@ void main() {
           );
 
           // Test at value = 0
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 40,
               height: 5,
@@ -264,7 +264,7 @@ void main() {
 
           // Test at value = 0.5
           controller.value = 0.5;
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 40,
               height: 5,
@@ -280,7 +280,7 @@ void main() {
 
           // Test at value = 1.0
           controller.value = 1.0;
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 40,
               height: 5,
@@ -300,7 +300,7 @@ void main() {
     });
 
     test('works with driven animations (Tween)', () async {
-      await testNocterm(
+      await testCinder(
         'animated builder with tween',
         (tester) async {
           final vsync = FakeTickerProvider();
@@ -311,7 +311,7 @@ void main() {
           final animation =
               Tween<double>(begin: 10.0, end: 90.0).animate(controller);
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 40,
               height: 5,
@@ -326,7 +326,7 @@ void main() {
           expect(tester.terminalState, containsText('Size: 10'));
 
           controller.value = 0.5;
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 40,
               height: 5,
@@ -341,7 +341,7 @@ void main() {
           expect(tester.terminalState, containsText('Size: 50'));
 
           controller.value = 1.0;
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 40,
               height: 5,
@@ -361,7 +361,7 @@ void main() {
     });
 
     test('works with curved animations', () async {
-      await testNocterm(
+      await testCinder(
         'animated builder with curve',
         (tester) async {
           final vsync = FakeTickerProvider();
@@ -376,7 +376,7 @@ void main() {
           // easeIn at 0.5 should be less than 0.5
           expect(animation.value, lessThan(0.5));
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 40,
               height: 5,
@@ -398,14 +398,14 @@ void main() {
 
   group('ListenableBuilder', () {
     test('rebuilds when listenable notifies', () async {
-      await testNocterm(
+      await testCinder(
         'listenable builder rebuild',
         (tester) async {
           final notifier = TestNotifier();
 
           var buildCount = 0;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 40,
               height: 5,
@@ -425,7 +425,7 @@ void main() {
           // Change the value
           notifier.value = 5;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 40,
               height: 5,
@@ -445,12 +445,12 @@ void main() {
     });
 
     test('passes child through correctly', () async {
-      await testNocterm(
+      await testCinder(
         'listenable builder child',
         (tester) async {
           final notifier = TestNotifier();
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 50,
               height: 10,
@@ -478,7 +478,7 @@ void main() {
 
   group('Animation.drive', () {
     test('creates driven animation', () async {
-      await testNocterm(
+      await testCinder(
         'animation drive',
         (tester) async {
           final vsync = FakeTickerProvider();
@@ -506,7 +506,7 @@ void main() {
     });
 
     test('chains multiple drives', () async {
-      await testNocterm(
+      await testCinder(
         'animation chain drives',
         (tester) async {
           final vsync = FakeTickerProvider();
@@ -532,7 +532,7 @@ void main() {
 
   group('Animatable.animate', () {
     test('creates animation from animatable', () async {
-      await testNocterm(
+      await testCinder(
         'animatable animate',
         (tester) async {
           final vsync = FakeTickerProvider();
@@ -560,7 +560,7 @@ void main() {
 
   group('Animation status', () {
     test('status matches controller status', () async {
-      await testNocterm(
+      await testCinder(
         'animation status',
         (tester) async {
           final vsync = FakeTickerProvider();

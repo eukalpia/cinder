@@ -1,5 +1,5 @@
 import 'package:test/test.dart';
-import 'package:nocterm/src/text/text_layout_engine.dart';
+import 'package:cinder/src/text/text_layout_engine.dart';
 
 void main() {
   group('TextLayoutEngine', () {

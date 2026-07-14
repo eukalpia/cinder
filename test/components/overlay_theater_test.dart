@@ -1,13 +1,13 @@
 import 'package:test/test.dart';
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() {
   group('Overlay with Theater implementation', () {
     test('basic overlay rendering', () async {
-      await testNocterm(
+      await testCinder(
         'overlay with single entry',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Overlay(
               key: GlobalKey(),
               initialEntries: [
@@ -33,10 +33,10 @@ void main() {
     });
 
     test('overlay with multiple entries', () async {
-      await testNocterm(
+      await testCinder(
         'overlay with stacked entries',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Overlay(
               initialEntries: [
                 OverlayEntry(
@@ -77,7 +77,7 @@ void main() {
     });
 
     test('opaque entry blocks entries below', () async {
-      await testNocterm(
+      await testCinder(
         'opaque overlay entry',
         (tester) async {
           final bottomEntry = OverlayEntry(
@@ -99,7 +99,7 @@ void main() {
             ),
           );
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Overlay(
               initialEntries: [bottomEntry, opaqueEntry],
             ),
@@ -115,7 +115,7 @@ void main() {
     });
 
     test('maintainState keeps offstage entries alive', () async {
-      await testNocterm(
+      await testCinder(
         'maintain state for hidden entries',
         (tester) async {
           int buildCount = 0;
@@ -142,7 +142,7 @@ void main() {
             ),
           );
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Overlay(
               initialEntries: [bottomEntry, opaqueEntry],
             ),
@@ -157,12 +157,12 @@ void main() {
     });
 
     test('dynamic overlay entry insertion', () async {
-      await testNocterm(
+      await testCinder(
         'insert overlay entry dynamically',
         (tester) async {
           late OverlayState overlayState;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Overlay(
               initialEntries: [
                 OverlayEntry(
@@ -217,7 +217,7 @@ void main() {
     });
 
     test('overlay entry markNeedsBuild', () async {
-      await testNocterm(
+      await testCinder(
         'rebuild overlay entry on demand',
         (tester) async {
           int buildCount = 0;
@@ -234,7 +234,7 @@ void main() {
             },
           );
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Overlay(
               initialEntries: [entry],
             ),

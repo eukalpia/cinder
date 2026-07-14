@@ -3,7 +3,7 @@ import 'brightness.dart';
 
 /// A color that resolves differently based on theme brightness.
 ///
-/// This is the recommended way to specify colors in nocterm apps,
+/// This is the recommended way to specify colors in cinder apps,
 /// as it ensures your UI works in both light and dark themes.
 ///
 /// Example:

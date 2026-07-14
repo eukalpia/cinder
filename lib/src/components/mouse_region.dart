@@ -5,9 +5,9 @@ import '../rendering/mouse_region.dart';
 /// Signature for mouse event callbacks.
 typedef MouseEventCallback = void Function(MouseEvent event);
 
-/// A component that tracks mouse enter, exit, and hover events.
+/// A widget that tracks mouse enter, exit, and hover events.
 ///
-/// This component wraps its child and calls the provided callbacks when
+/// This widget wraps its child and calls the provided callbacks when
 /// the mouse enters, exits, or moves within the region.
 ///
 /// Example:
@@ -23,7 +23,7 @@ typedef MouseEventCallback = void Function(MouseEvent event);
 ///   ),
 /// )
 /// ```
-class MouseRegion extends SingleChildRenderObjectComponent {
+class MouseRegion extends SingleChildRenderObjectWidget {
   const MouseRegion({
     super.key,
     this.onEnter,

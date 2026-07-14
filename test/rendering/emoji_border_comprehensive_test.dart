@@ -1,5 +1,5 @@
 import 'package:test/test.dart';
-import 'package:nocterm/nocterm.dart' hide isNotEmpty;
+import 'package:cinder/cinder.dart' hide isNotEmpty;
 
 void main() {
   group('Comprehensive Emoji Border Tests', () {
@@ -8,10 +8,10 @@ void main() {
     // ============================================
 
     test('face emojis in bordered container', () async {
-      await testNocterm(
+      await testCinder(
         'face emojis border test',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Container(
                 width: 50,
@@ -42,10 +42,10 @@ void main() {
     });
 
     test('hand emojis in bordered container', () async {
-      await testNocterm(
+      await testCinder(
         'hand emojis border test',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Container(
                 width: 55,
@@ -77,10 +77,10 @@ void main() {
     });
 
     test('heart emojis in bordered container', () async {
-      await testNocterm(
+      await testCinder(
         'heart emojis border test',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Container(
                 width: 50,
@@ -111,10 +111,10 @@ void main() {
     });
 
     test('animal emojis in bordered container', () async {
-      await testNocterm(
+      await testCinder(
         'animal emojis border test',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Container(
                 width: 55,
@@ -145,10 +145,10 @@ void main() {
     });
 
     test('food emojis in bordered container', () async {
-      await testNocterm(
+      await testCinder(
         'food emojis border test',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Container(
                 width: 55,
@@ -180,10 +180,10 @@ void main() {
     });
 
     test('weather emojis in bordered container', () async {
-      await testNocterm(
+      await testCinder(
         'weather emojis border test',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Container(
                 width: 50,
@@ -215,10 +215,10 @@ void main() {
     });
 
     test('object emojis in bordered container', () async {
-      await testNocterm(
+      await testCinder(
         'object emojis border test',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Container(
                 width: 55,
@@ -250,10 +250,10 @@ void main() {
     });
 
     test('symbol emojis in bordered container', () async {
-      await testNocterm(
+      await testCinder(
         'symbol emojis border test',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Container(
                 width: 50,
@@ -284,10 +284,10 @@ void main() {
     });
 
     test('checkmark and status emojis in bordered container', () async {
-      await testNocterm(
+      await testCinder(
         'checkmark emojis border test',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Container(
                 width: 55,
@@ -319,10 +319,10 @@ void main() {
     });
 
     test('arrow emojis in bordered container', () async {
-      await testNocterm(
+      await testCinder(
         'arrow emojis border test',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Container(
                 width: 55,
@@ -358,10 +358,10 @@ void main() {
     // ============================================
 
     test('flag emojis in bordered container', () async {
-      await testNocterm(
+      await testCinder(
         'flag emojis border test',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Container(
                 width: 45,
@@ -389,10 +389,10 @@ void main() {
     });
 
     test('ZWJ family emojis in bordered container', () async {
-      await testNocterm(
+      await testCinder(
         'ZWJ family emojis border test',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Container(
                 width: 50,
@@ -421,10 +421,10 @@ void main() {
     });
 
     test('skin tone modifier emojis in bordered container', () async {
-      await testNocterm(
+      await testCinder(
         'skin tone emojis border test',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Container(
                 width: 45,
@@ -457,10 +457,10 @@ void main() {
     // ============================================
 
     test('emoji grid - each in own border', () async {
-      await testNocterm(
+      await testCinder(
         'emoji grid border test',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -590,10 +590,10 @@ void main() {
     });
 
     test('emoji with text alignment', () async {
-      await testNocterm(
+      await testCinder(
         'emoji text alignment border test',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -663,10 +663,10 @@ void main() {
     });
 
     test('stress test - many emojis in one container', () async {
-      await testNocterm(
+      await testCinder(
         'stress test many emojis border test',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Container(
                 width: 70,
@@ -704,10 +704,10 @@ void main() {
     });
 
     test('complex emojis in nested borders', () async {
-      await testNocterm(
+      await testCinder(
         'complex emojis nested borders test',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Container(
                 width: 55,
@@ -791,10 +791,10 @@ void main() {
     // ============================================
 
     test('single emoji per line in tight border', () async {
-      await testNocterm(
+      await testCinder(
         'single emoji per line border test',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Container(
                 width: 8,
@@ -825,10 +825,10 @@ void main() {
     });
 
     test('emoji at start, middle, and end of text', () async {
-      await testNocterm(
+      await testCinder(
         'emoji position border test',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Container(
                 width: 40,
@@ -859,10 +859,10 @@ void main() {
     });
 
     test('double border with emojis', () async {
-      await testNocterm(
+      await testCinder(
         'double border emoji test',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Container(
                 width: 45,
@@ -898,10 +898,10 @@ void main() {
     // ============================================
 
     test('visual comprehensive emoji test - ALL CATEGORIES', () async {
-      await testNocterm(
+      await testCinder(
         'comprehensive visual emoji border test',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Container(
                 width: 75,

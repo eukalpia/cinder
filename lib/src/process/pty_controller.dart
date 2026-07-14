@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 import 'pty_handler.dart';
 

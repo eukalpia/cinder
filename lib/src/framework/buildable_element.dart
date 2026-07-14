@@ -2,7 +2,7 @@ part of 'framework.dart';
 
 /// An element that has a build method.
 abstract class BuildableElement extends Element {
-  BuildableElement(super.component);
+  BuildableElement(super.widget);
 
   Element? _child;
 
@@ -28,17 +28,17 @@ abstract class BuildableElement extends Element {
       return true;
     }());
 
-    Component? built;
+    Widget? built;
     try {
       built = build();
     } catch (e, stack) {
       // Handle build errors
       _debugDoingBuild = false;
-      built = ErrorComponent(error: e, stackTrace: stack);
-      NoctermError.reportError(NoctermErrorDetails(
+      built = ErrorWidget(error: e, stackTrace: stack);
+      CinderError.reportError(CinderErrorDetails(
         exception: e,
         stack: stack,
-        library: 'nocterm framework',
+        library: 'cinder framework',
         context: 'while building $runtimeType',
       ));
     } finally {
@@ -53,7 +53,7 @@ abstract class BuildableElement extends Element {
   }
 
   @protected
-  Component build();
+  Widget build();
 
   @override
   void visitChildren(ElementVisitor visitor) {
@@ -69,12 +69,12 @@ abstract class BuildableElement extends Element {
   }
 }
 
-/// Component shown when there's an error during build.
+/// Widget shown when there's an error during build.
 ///
 /// Uses [RenderTUIErrorBox] to display a red bordered box with the error
 /// message and stack trace, matching the visual style of layout/paint errors.
-class ErrorComponent extends SingleChildRenderObjectComponent {
-  const ErrorComponent({
+class ErrorWidget extends SingleChildRenderObjectWidget {
+  const ErrorWidget({
     required this.error,
     required this.stackTrace,
   });

@@ -1,14 +1,14 @@
 import 'package:test/test.dart';
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import '../../example/stack_interactive_demo.dart';
 
 void main() {
   group('Stack Interactive Demo', () {
     test('visual test - initial state', () async {
-      await testNocterm(
+      await testCinder(
         'initial rendering',
         (tester) async {
-          await tester.pumpComponent(const StackInteractiveDemo());
+          await tester.pumpWidget(const StackInteractiveDemo());
 
           // Verify initial state
           expect(tester.terminalState, containsText('Interactive Stack Demo'));
@@ -29,10 +29,10 @@ void main() {
     });
 
     test('counter interaction', () async {
-      await testNocterm(
+      await testCinder(
         'counter up/down',
         (tester) async {
-          await tester.pumpComponent(const StackInteractiveDemo());
+          await tester.pumpWidget(const StackInteractiveDemo());
 
           // Initial counter
           expect(tester.terminalState, containsText('Counter: 0'));
@@ -67,10 +67,10 @@ void main() {
     });
 
     test('item selection', () async {
-      await testNocterm(
+      await testCinder(
         'select items with number keys',
         (tester) async {
-          await tester.pumpComponent(const StackInteractiveDemo());
+          await tester.pumpWidget(const StackInteractiveDemo());
 
           // Initially no item selected
           expect(tester.terminalState, containsText('Selected: None'));
@@ -99,10 +99,10 @@ void main() {
     });
 
     test('overlay toggle', () async {
-      await testNocterm(
+      await testCinder(
         'toggle overlay with O key',
         (tester) async {
-          await tester.pumpComponent(const StackInteractiveDemo());
+          await tester.pumpWidget(const StackInteractiveDemo());
 
           // Initially overlay is not shown
           expect(tester.terminalState, containsText('Normal Mode'));
@@ -125,10 +125,10 @@ void main() {
     });
 
     test('combined interactions', () async {
-      await testNocterm(
+      await testCinder(
         'test multiple features together',
         (tester) async {
-          await tester.pumpComponent(const StackInteractiveDemo());
+          await tester.pumpWidget(const StackInteractiveDemo());
 
           // Set counter to 3
           await tester.sendKey(LogicalKey.arrowUp);

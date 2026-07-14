@@ -15,15 +15,15 @@
 // leaders collapse to the default parent-data offset (0, 0) and the
 // Expanded gets the whole row - exactly the visual breakage observed.
 
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 void main() {
   test(
     'ListView Row items keep their leading columns across rebuilds',
     () async {
-      await testNocterm('row leaders preserved across rebuild', (tester) async {
-        await tester.pumpComponent(_LogViewer());
+      await testCinder('row leaders preserved across rebuild', (tester) async {
+        await tester.pumpWidget(_LogViewer());
         // Settle the transient dirtiness left by the first layout pass
         // (adoptChild re-marks while children are built), so the appends
         // below hit a genuinely clean render tree - otherwise a skipped
@@ -75,7 +75,7 @@ void main() {
   );
 }
 
-class _LogViewer extends StatefulComponent {
+class _LogViewer extends StatefulWidget {
   @override
   State<_LogViewer> createState() => _LogViewerState();
 }
@@ -90,7 +90,7 @@ class _LogViewerState extends State<_LogViewer> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return SizedBox(
       width: 40,
       height: 10,
@@ -109,12 +109,12 @@ class _Entry {
   final String message;
 }
 
-class _LogRow extends StatelessComponent {
+class _LogRow extends StatelessWidget {
   const _LogRow({required this.entry});
   final _Entry entry;
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Row(
       children: [
         Text(entry.level),

@@ -1,13 +1,13 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('Markdown Emoji Rendering', () {
     test('renders text with emojis correctly aligned', () async {
-      await testNocterm(
+      await testCinder(
         'markdown with emojis',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 40,
               child: const MarkdownText(
@@ -29,10 +29,10 @@ void main() {
     });
 
     test('renders multiple emojis in a row', () async {
-      await testNocterm(
+      await testCinder(
         'multiple emojis',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               child: const MarkdownText('🚀 ✨ 🎉 🔥 Multiple'),
@@ -46,10 +46,10 @@ void main() {
     });
 
     test('renders markdown bold with emojis', () async {
-      await testNocterm(
+      await testCinder(
         'bold with emojis',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 40,
               child: const MarkdownText('**Bold text** 🎯 and emoji'),
@@ -64,10 +64,10 @@ void main() {
     });
 
     test('renders markdown list with emojis', () async {
-      await testNocterm(
+      await testCinder(
         'list with emojis',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 40,
               child: const MarkdownText(
@@ -87,10 +87,10 @@ void main() {
     });
 
     test('renders markdown header with emoji', () async {
-      await testNocterm(
+      await testCinder(
         'header with emoji',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 40,
               child: const MarkdownText('# Features ✨\n\nSome content'),
@@ -105,10 +105,10 @@ void main() {
     });
 
     test('renders emoji alignment in boxed container', () async {
-      await testNocterm(
+      await testCinder(
         'emoji in box',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: DecoratedBox(
                 decoration: BoxDecoration(
@@ -135,10 +135,10 @@ void main() {
     });
 
     test('renders complex emoji sequences', () async {
-      await testNocterm(
+      await testCinder(
         'complex emoji',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 50,
               child: const MarkdownText(
@@ -160,10 +160,10 @@ void main() {
     });
 
     test('renders emoji at different positions', () async {
-      await testNocterm(
+      await testCinder(
         'emoji positions',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 40,
               child: const MarkdownText(

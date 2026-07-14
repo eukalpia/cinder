@@ -1,5 +1,5 @@
 import 'package:test/test.dart' hide isEmpty;
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() {
   group('Mouse Event Handling', () {
@@ -12,7 +12,7 @@ void main() {
     // of converting them to 'unknown' keyboard events.
     test('unknown keyboard events should not be sent to focusable nodes',
         () async {
-      await testNocterm(
+      await testCinder(
         'unknown key test',
         (tester) async {
           print('\n=== Testing Unknown Keyboard Events ===\n');
@@ -51,7 +51,7 @@ void main() {
             ],
           );
 
-          await tester.pumpComponent(app);
+          await tester.pumpWidget(app);
 
           // Simulate what happens when unparseable mouse events get converted to 'unknown' keyboard events
           // This mimics the bug in input_parser.dart lines 77-84

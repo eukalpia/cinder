@@ -1,13 +1,13 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart' hide isEmpty;
 
 void main() {
   test('multiline text rendering', () async {
-    await testNocterm(
+    await testCinder(
       'multiline text test',
       (tester) async {
         // Test 1: Simple multiline text
-        await tester.pumpComponent(
+        await tester.pumpWidget(
           Container(
             padding: const EdgeInsets.all(1),
             child: Text('Line 1\nLine 2\nLine 3'),
@@ -19,7 +19,7 @@ void main() {
         print('---');
 
         // Test 2: Box drawing
-        await tester.pumpComponent(
+        await tester.pumpWidget(
           Container(
             padding: const EdgeInsets.all(1),
             child: Text('╔═══╗\n║ A ║\n╚═══╝'),
@@ -32,7 +32,7 @@ void main() {
         print('---');
 
         // Test 3: Just the problematic row
-        await tester.pumpComponent(
+        await tester.pumpWidget(
           Container(
             padding: const EdgeInsets.all(1),
             child: Row(

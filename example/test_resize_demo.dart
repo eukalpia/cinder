@@ -6,7 +6,7 @@
 library;
 
 import 'dart:io';
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() async {
   print('Starting Terminal Resize Demo...');
@@ -18,11 +18,11 @@ void main() async {
   await runApp(TerminalResizeDemo());
 }
 
-class TerminalResizeDemo extends StatelessComponent {
+class TerminalResizeDemo extends StatelessWidget {
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     // The framework automatically handles resize events
-    // This component will be rebuilt when the terminal is resized
+    // This widget will be rebuilt when the terminal is resized
 
     return LayoutBuilder(
       builder: (context, constraints) {

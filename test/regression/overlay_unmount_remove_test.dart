@@ -1,5 +1,5 @@
 import 'package:test/test.dart';
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() {
   group('Overlay unmount regression', () {
@@ -8,7 +8,7 @@ void main() {
     // The issue was that OverlayState._remove called setState() even when
     // the state was no longer mounted, causing setState to fail.
     test('removing overlay entry during unmount does not throw', () async {
-      await testNocterm(
+      await testCinder(
         'overlay entry removal during unmount',
         (tester) async {
           final entry = OverlayEntry(
@@ -20,15 +20,15 @@ void main() {
           );
 
           // Create a stateful wrapper that removes the entry on dispose
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             _DisposingOverlayWrapper(entry: entry),
           );
 
           expect(tester.terminalState, containsText('Test Entry'));
 
-          // Replace with a different component - this triggers unmount
+          // Replace with a different widget - this triggers unmount
           // of the overlay and should not throw
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 20,
               height: 3,
@@ -46,7 +46,7 @@ void main() {
 
 /// A wrapper that holds an overlay and calls entry.remove() in its dispose.
 /// This simulates what happens when Route.dispose() is called during unmount.
-class _DisposingOverlayWrapper extends StatefulComponent {
+class _DisposingOverlayWrapper extends StatefulWidget {
   final OverlayEntry entry;
 
   const _DisposingOverlayWrapper({required this.entry});
@@ -61,14 +61,14 @@ class _DisposingOverlayWrapperState extends State<_DisposingOverlayWrapper> {
   void dispose() {
     // This simulates what Route.dispose() does - removes overlay entries
     // during the unmount phase
-    component.entry.remove();
+    widget.entry.remove();
     super.dispose();
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Overlay(
-      initialEntries: [component.entry],
+      initialEntries: [widget.entry],
     );
   }
 }

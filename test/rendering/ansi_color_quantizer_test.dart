@@ -1,4 +1,4 @@
-import 'package:nocterm/src/utils/ansi_color_quantizer.dart';
+import 'package:cinder/src/utils/ansi_color_quantizer.dart';
 import 'package:test/test.dart';
 
 void main() {

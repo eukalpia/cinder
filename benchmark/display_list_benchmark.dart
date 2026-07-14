@@ -4,12 +4,12 @@
 library;
 
 import 'package:characters/characters.dart';
-import 'package:nocterm/src/buffer.dart';
-import 'package:nocterm/src/framework/framework.dart';
-import 'package:nocterm/src/framework/terminal_canvas.dart';
-import 'package:nocterm/src/rectangle.dart';
-import 'package:nocterm/src/style.dart';
-import 'package:nocterm/src/utils/unicode_width.dart';
+import 'package:cinder/src/buffer.dart';
+import 'package:cinder/src/framework/framework.dart';
+import 'package:cinder/src/framework/terminal_canvas.dart';
+import 'package:cinder/src/rectangle.dart';
+import 'package:cinder/src/style.dart';
+import 'package:cinder/src/utils/unicode_width.dart';
 
 /// Number of iterations for each benchmark
 const int iterations = 1000;

@@ -1,10 +1,10 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() {
   runApp(const TodoApp());
 }
 
-class TodoApp extends StatefulComponent {
+class TodoApp extends StatefulWidget {
   const TodoApp({super.key});
 
   @override
@@ -13,7 +13,7 @@ class TodoApp extends StatefulComponent {
 
 class _TodoAppState extends State<TodoApp> {
   final List<TodoItem> todos = [
-    TodoItem('Learn nocterm basics', true),
+    TodoItem('Learn cinder basics', true),
     TodoItem('Build a TUI application', true),
     TodoItem('Add keyboard navigation', false),
     TodoItem('Implement state management', false),
@@ -24,7 +24,7 @@ class _TodoAppState extends State<TodoApp> {
   String newTodoText = '';
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Focusable(
       focused: true,
       onKeyEvent: (key) {
@@ -142,7 +142,7 @@ class _TodoAppState extends State<TodoApp> {
     );
   }
 
-  Component _buildTodoItem(TodoItem todo, bool isSelected) {
+  Widget _buildTodoItem(TodoItem todo, bool isSelected) {
     final checkmark = todo.completed ? '✓' : '☐';
     final textStyle = todo.completed
         ? TextStyle(
@@ -183,7 +183,7 @@ class _TodoAppState extends State<TodoApp> {
     );
   }
 
-  Component _buildNewTodoInput() {
+  Widget _buildNewTodoInput() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 1),
       decoration: BoxDecoration(

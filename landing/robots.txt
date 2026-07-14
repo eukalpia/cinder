@@ -1,11 +1,11 @@
-# Nocterm - TUI Framework for Dart
-# https://nocterm.dev
+# Cinder - TUI Framework for Dart
+# https://cinder.dev
 
 User-agent: *
 Allow: /
 
 # Sitemap location
-Sitemap: https://nocterm.dev/sitemap.xml
+Sitemap: https://cinder.dev/sitemap.xml
 
 # Block demo JS files (not useful for indexing)
 Disallow: /demos/*.js

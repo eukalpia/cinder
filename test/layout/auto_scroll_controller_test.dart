@@ -1,16 +1,16 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('AutoScrollController', () {
     test('auto-scrolls when content is added while at bottom', () async {
-      await testNocterm(
+      await testCinder(
         'auto-scroll at bottom',
         (tester) async {
           final scrollController = AutoScrollController();
           final items = List.generate(5, (i) => 'Message ${i + 1}');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: [
                 Expanded(
@@ -33,7 +33,7 @@ void main() {
           // Add more items to trigger scrolling
           items.addAll(List.generate(20, (i) => 'Message ${i + 6}'));
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: [
                 Expanded(
@@ -61,14 +61,14 @@ void main() {
     });
 
     test('disables auto-scroll when user scrolls up', () async {
-      await testNocterm(
+      await testCinder(
         'disable auto-scroll on manual scroll',
         (tester) async {
           final scrollController =
               AutoScrollController(autoScrollThreshold: 10);
           final items = List.generate(30, (i) => 'Message ${i + 1}');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: [
                 Expanded(
@@ -96,7 +96,7 @@ void main() {
           // Add new items
           items.addAll(['New Message 1', 'New Message 2']);
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: [
                 Expanded(
@@ -123,14 +123,14 @@ void main() {
     });
 
     test('re-enables auto-scroll when user scrolls back to bottom', () async {
-      await testNocterm(
+      await testCinder(
         're-enable auto-scroll at bottom',
         (tester) async {
           final scrollController =
               AutoScrollController(autoScrollThreshold: 10);
           final items = List.generate(30, (i) => 'Message ${i + 1}');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: [
                 Expanded(
@@ -162,7 +162,7 @@ void main() {
           // Add new items
           items.add('New Message');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: [
                 Expanded(
@@ -189,13 +189,13 @@ void main() {
     });
 
     test('manual control methods work correctly', () async {
-      await testNocterm(
+      await testCinder(
         'manual control methods',
         (tester) async {
           final scrollController = AutoScrollController();
           final items = List.generate(30, (i) => 'Message ${i + 1}');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: [
                 Expanded(
@@ -217,7 +217,7 @@ void main() {
 
           // Add items - should not auto-scroll
           items.add('New Message');
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: [
                 Expanded(

@@ -2,9 +2,9 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:io';
 
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
-/// Global debug mode state for nocterm applications.
+/// Global debug mode state for cinder applications.
 ///
 /// When debug mode is enabled, the [DebugOverlay] will display performance
 /// metrics and the framework will enable extended logging.
@@ -50,7 +50,7 @@ void toggleDebugMode() {
     debugRepaintRainbowEnabled = true;
     // Start detailed profiling
     try {
-      final binding = NoctermBinding.instance;
+      final binding = CinderBinding.instance;
       if (binding is TerminalBinding) {
         binding.startDetailedProfiling();
       }
@@ -60,7 +60,7 @@ void toggleDebugMode() {
     debugRepaintRainbowEnabled = false;
     // Stop detailed profiling
     try {
-      final binding = NoctermBinding.instance;
+      final binding = CinderBinding.instance;
       if (binding is TerminalBinding) {
         binding.stopDetailedProfiling();
       }
@@ -82,7 +82,7 @@ void toggleDebugMode() {
 ///
 /// ## Automatic Integration
 ///
-/// **Every nocterm app automatically has debug overlay support!**
+/// **Every cinder app automatically has debug overlay support!**
 /// Just press [Ctrl+G] at any time to toggle the debug overlay.
 /// No manual wrapping required - it's built into [runApp].
 ///
@@ -94,7 +94,7 @@ void toggleDebugMode() {
 /// ## Extended Logging
 ///
 /// When debug mode is enabled, detailed profiling information is logged
-/// every 5 seconds. View logs using `nocterm logs` in another terminal.
+/// every 5 seconds. View logs using `cinder logs` in another terminal.
 ///
 /// ## Manual Usage (Optional)
 ///
@@ -103,10 +103,10 @@ void toggleDebugMode() {
 /// ```dart
 /// DebugOverlay(
 ///   maxSamples: 200,  // Keep more frame samples
-///   child: MyComponent(),
+///   child: MyWidget(),
 /// )
 /// ```
-class DebugOverlay extends StatefulComponent {
+class DebugOverlay extends StatefulWidget {
   const DebugOverlay({
     super.key,
     required this.child,
@@ -115,7 +115,7 @@ class DebugOverlay extends StatefulComponent {
   });
 
   /// The child widget to wrap.
-  final Component child;
+  final Widget child;
 
   /// Whether the debug overlay feature is enabled.
   ///
@@ -221,7 +221,7 @@ class _DebugOverlayState extends State<DebugOverlay> {
     if (timing.isSlowFrame) {
       _slowFrameCount++;
     }
-    while (_recentFrames.length > component.maxSamples) {
+    while (_recentFrames.length > widget.maxSamples) {
       _recentFrames.removeFirst();
     }
   }
@@ -236,17 +236,17 @@ class _DebugOverlayState extends State<DebugOverlay> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     // Always use Stack to preserve the child widget tree.
     // If we conditionally switch between returning child directly vs wrapping
     // it in a Stack, the child will rebuild from scratch when debug mode toggles.
     // Instead, we always wrap in Stack and conditionally show/hide the overlay.
-    final showOverlay = debugMode && component.enabled;
+    final showOverlay = debugMode && widget.enabled;
 
     return Stack(
       fit: StackFit.expand,
       children: [
-        component.child,
+        widget.child,
         if (showOverlay)
           Positioned(
             top: 0,
@@ -257,7 +257,7 @@ class _DebugOverlayState extends State<DebugOverlay> {
     );
   }
 
-  Component _buildOverlay() {
+  Widget _buildOverlay() {
     final stats = _buildStatsText();
     final lines = stats.split('\n');
     final maxWidth =
@@ -353,7 +353,7 @@ class _DebugOverlayState extends State<DebugOverlay> {
     // Debug features status
     buffer.writeln(
         'Repaint rainbow: ${debugRepaintRainbowEnabled ? "ON 🌈" : "OFF"}');
-    buffer.write('Samples: ${_recentFrames.length}/${component.maxSamples}');
+    buffer.write('Samples: ${_recentFrames.length}/${widget.maxSamples}');
 
     return buffer.toString();
   }

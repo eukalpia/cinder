@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'package:nocterm/src/utils/log_server.dart';
-import 'package:nocterm/src/utils/logger.dart';
-import 'package:nocterm/src/utils/nocterm_paths.dart';
+import 'package:cinder/src/utils/log_server.dart';
+import 'package:cinder/src/utils/logger.dart';
+import 'package:cinder/src/utils/cinder_paths.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -18,11 +18,11 @@ void main() {
     tearDown(() async {
       await logServer.close();
 
-      // Clean up the global nocterm directory after tests
+      // Clean up the global cinder directory after tests
       try {
-        final noctermDir = Directory(getNoctermDirectory());
-        if (await noctermDir.exists()) {
-          await noctermDir.delete(recursive: true);
+        final cinderDir = Directory(getCinderDirectory());
+        if (await cinderDir.exists()) {
+          await cinderDir.delete(recursive: true);
         }
       } catch (_) {
         // Ignore cleanup errors

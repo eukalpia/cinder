@@ -2,10 +2,10 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:meta/meta.dart';
-import 'package:nocterm/src/binding/scheduler_phase.dart';
-import 'package:nocterm/src/foundation/nocterm_error.dart';
-import 'package:nocterm/src/foundation/performance.dart';
-import 'package:nocterm/src/framework/framework.dart';
+import 'package:cinder/src/binding/scheduler_phase.dart';
+import 'package:cinder/src/foundation/cinder_error.dart';
+import 'package:cinder/src/foundation/performance.dart';
+import 'package:cinder/src/framework/framework.dart';
 
 /// Signature for frame callbacks.
 ///
@@ -137,7 +137,7 @@ class _FrameCallbackEntry {
 ///   // Runs after frame completes
 /// });
 /// ```
-mixin SchedulerBinding on NoctermBinding {
+mixin SchedulerBinding on CinderBinding {
   @override
   void initializeBinding() {
     super.initializeBinding();
@@ -238,10 +238,10 @@ mixin SchedulerBinding on NoctermBinding {
       try {
         callback(timing);
       } catch (e, stack) {
-        NoctermError.reportError(NoctermErrorDetails(
+        CinderError.reportError(CinderErrorDetails(
           exception: e,
           stack: stack,
-          library: 'nocterm scheduler',
+          library: 'cinder scheduler',
           context: 'during frame timing callback',
         ));
       }
@@ -257,7 +257,7 @@ mixin SchedulerBinding on NoctermBinding {
   /// Whether a frame has been scheduled but not yet executed.
   ///
   /// This flag prevents scheduling multiple frames redundantly.
-  /// Unlike Flutter, nocterm resets this at the START of frame execution
+  /// Unlike Flutter, cinder resets this at the START of frame execution
   /// (in [handleBeginFrame]) to match Flutter's semantics and allow
   /// animations to reschedule themselves during the frame.
   bool get hasScheduledFrame => _hasScheduledFrame;
@@ -562,7 +562,7 @@ mixin SchedulerBinding on NoctermBinding {
   /// transient callbacks to execute before the build phase.
   void handleBeginFrame(Duration rawTimeStamp) {
     _frameNumber++;
-    NoctermTimeline.startSync('Frame #$_frameNumber');
+    CinderTimeline.startSync('Frame #$_frameNumber');
 
     _currentFrameTimeStamp = rawTimeStamp;
     _currentSystemFrameTimeStamp = rawTimeStamp;
@@ -577,7 +577,7 @@ mixin SchedulerBinding on NoctermBinding {
 
     try {
       // Phase 1: Transient callbacks (animations)
-      NoctermTimeline.startSync('Animate');
+      CinderTimeline.startSync('Animate');
       _schedulerPhase = SchedulerPhase.transientCallbacks;
       final localTransientCallbacks =
           Map<int, _FrameCallbackEntry>.of(_transientCallbacks);
@@ -597,7 +597,7 @@ mixin SchedulerBinding on NoctermBinding {
         }
       }
       _removeCompletedCallbacks();
-      NoctermTimeline.finishSync(); // Animate
+      CinderTimeline.finishSync(); // Animate
 
       // Phase 2: Microtasks
       // (These run automatically as part of the event loop)
@@ -637,11 +637,11 @@ mixin SchedulerBinding on NoctermBinding {
       // Execute persistent frame callbacks
       // Subclasses (like TerminalBinding) set currentFrameBuildEnd/LayoutEnd/PaintEnd
       // during their _drawFrameCallback to provide accurate phase timings.
-      NoctermTimeline.startSync('Build');
+      CinderTimeline.startSync('Build');
       for (final callback in List<FrameCallback>.of(_persistentCallbacks)) {
         _invokeFrameCallback(callback, _currentFrameTimeStamp!);
       }
-      NoctermTimeline.finishSync(); // Build
+      CinderTimeline.finishSync(); // Build
 
       // Use subclass-provided timing if available, otherwise use now
       final buildEnd =
@@ -674,7 +674,7 @@ mixin SchedulerBinding on NoctermBinding {
         _reportFrameTiming(timing);
       }
     } finally {
-      NoctermTimeline.finishSync(); // Frame
+      CinderTimeline.finishSync(); // Frame
 
       // Return to idle
       _schedulerPhase = SchedulerPhase.idle;
@@ -714,10 +714,10 @@ mixin SchedulerBinding on NoctermBinding {
         contextMessage
             .write(callbackStack.toString().split('\n').take(15).join('\n'));
       }
-      NoctermError.reportError(NoctermErrorDetails(
+      CinderError.reportError(CinderErrorDetails(
         exception: exception,
         stack: stack,
-        library: 'nocterm scheduler',
+        library: 'cinder scheduler',
         context: contextMessage.toString(),
       ));
     } finally {

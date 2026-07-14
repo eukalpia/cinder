@@ -6,14 +6,14 @@ import '../framework/framework.dart';
 /// keyboard event propagation to child widgets. It's useful for preventing
 /// background content from receiving keyboard input when modal dialogs
 /// or overlays are shown.
-class BlockFocus extends StatelessComponent {
+class BlockFocus extends StatelessWidget {
   /// Whether to block keyboard events.
   ///
   /// When true, keyboard events will not reach child widgets.
   final bool blocking;
 
   /// The child widget tree.
-  final Component child;
+  final Widget child;
 
   const BlockFocus({
     super.key,
@@ -22,7 +22,7 @@ class BlockFocus extends StatelessComponent {
   });
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     // We don't modify the tree structure, just mark this element
     // for special handling in the terminal binding
     return child;
@@ -34,11 +34,11 @@ class BlockFocus extends StatelessComponent {
 
 /// Element for BlockFocus that can be detected by the terminal binding.
 class BlockFocusElement extends StatelessElement {
-  BlockFocusElement(BlockFocus super.component);
+  BlockFocusElement(BlockFocus super.widget);
 
   @override
-  BlockFocus get component => super.component as BlockFocus;
+  BlockFocus get widget => super.widget as BlockFocus;
 
   /// Whether this element is currently blocking focus.
-  bool get isBlocking => component.blocking;
+  bool get isBlocking => widget.blocking;
 }

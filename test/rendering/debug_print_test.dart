@@ -1,8 +1,8 @@
 import 'package:test/test.dart';
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
-// Interactive counter component that responds to keyboard input
-class InteractiveCounter extends StatefulComponent {
+// Interactive counter widget that responds to keyboard input
+class InteractiveCounter extends StatefulWidget {
   const InteractiveCounter({super.key});
 
   @override
@@ -14,7 +14,7 @@ class _InteractiveCounterState extends State<InteractiveCounter> {
   final String _lastAction = 'Press + or - to change count';
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(2),
       child: Column(
@@ -76,7 +76,7 @@ void main() {
   group('Debug Print Tests', () {
     test('visual test with debug printing enabled', () async {
       // This test will automatically print the terminal output after each pump
-      await testNocterm(
+      await testCinder(
         'interactive counter with debug output',
         (tester) async {
           print('\n📺 This test has debugPrintAfterPump enabled');
@@ -84,7 +84,7 @@ void main() {
 
           // Initial render
           print('1️⃣ Initial state:');
-          await tester.pumpComponent(const InteractiveCounter());
+          await tester.pumpWidget(const InteractiveCounter());
 
           // Simulate incrementing
           print('\n2️⃣ After pressing "+" (increment):');
@@ -111,13 +111,13 @@ void main() {
     });
 
     test('can toggle debug printing during test', () async {
-      await testNocterm(
+      await testCinder(
         'toggle debug printing',
         (tester) async {
           print('\n📺 Debug printing can be toggled during the test:\n');
 
           // Start without debug printing
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               padding: const EdgeInsets.all(2),
               child: const Text('First pump - no debug output'),
@@ -128,7 +128,7 @@ void main() {
           print('\n🔛 Enabling debug printing...');
           tester.debugPrintAfterPump = true;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               padding: const EdgeInsets.all(2),
               child: Column(
@@ -145,7 +145,7 @@ void main() {
           print('\n🔴 Disabling debug printing...');
           tester.debugPrintAfterPump = false;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               padding: const EdgeInsets.all(2),
               child: const Text('Third pump - debug disabled again'),
@@ -160,12 +160,12 @@ void main() {
     });
 
     test('debug output with complex layout', () async {
-      await testNocterm(
+      await testCinder(
         'complex layout visualization',
         (tester) async {
           print('\n📺 Visualizing a complex layout:\n');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               padding: const EdgeInsets.all(1),
               child: Column(

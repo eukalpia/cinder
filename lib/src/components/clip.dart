@@ -1,11 +1,11 @@
-import 'package:nocterm/nocterm.dart';
-import 'package:nocterm/src/framework/terminal_canvas.dart';
+import 'package:cinder/cinder.dart';
+import 'package:cinder/src/framework/terminal_canvas.dart';
 
 /// A widget that clips its child using a rectangle.
 ///
 /// By default, [ClipRect] prevents its child from painting outside its
 /// bounds, but the size and location of the clip rect can be customized.
-class ClipRect extends SingleChildRenderObjectComponent {
+class ClipRect extends SingleChildRenderObjectWidget {
   /// Creates a rectangular clip.
   ///
   /// If [clipBehavior] is [Clip.none], no clipping will be applied.
@@ -96,7 +96,7 @@ class RenderClipRect extends RenderObject
 /// This is useful when you want a child to be larger than its parent and
 /// have the overflow clipped or just want to lay out a child with different
 /// constraints than those received from the parent.
-class OverflowBox extends SingleChildRenderObjectComponent {
+class OverflowBox extends SingleChildRenderObjectWidget {
   /// Creates a widget that lets its child overflow itself.
   const OverflowBox({
     super.key,
@@ -295,7 +295,7 @@ class RenderOverflowBox extends RenderObject
 ///  * [OverflowBox], a widget that imposes different constraints on its child
 ///    than it gets from its parent, possibly allowing the child to overflow
 ///    the parent.
-class SizedOverflowBox extends SingleChildRenderObjectComponent {
+class SizedOverflowBox extends SingleChildRenderObjectWidget {
   /// Creates a widget of a given size that lets its child overflow.
   const SizedOverflowBox({
     super.key,

@@ -1,12 +1,12 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 void main() {
   test('Parent bug', () async {
-    await testNocterm(
+    await testCinder(
       'Parent bug',
       (tester) async {
-        await tester.pumpComponent(
+        await tester.pumpWidget(
           Navigator(
             home: _Pusher(),
           ),
@@ -26,7 +26,7 @@ void main() {
   });
 }
 
-class _Pusher extends StatefulComponent {
+class _Pusher extends StatefulWidget {
   const _Pusher();
 
   @override
@@ -35,7 +35,7 @@ class _Pusher extends StatefulComponent {
 
 class _PusherState extends State<_Pusher> {
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Focusable(
       focused: true,
       onKeyEvent: (key) {
@@ -65,11 +65,11 @@ class _PusherState extends State<_Pusher> {
   }
 }
 
-class _SecondPage extends StatelessComponent {
+class _SecondPage extends StatelessWidget {
   const _SecondPage();
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Focusable(
       focused: true,
       onKeyEvent: (key) {

@@ -1,5 +1,5 @@
-import 'package:nocterm/nocterm.dart';
-import 'package:nocterm/src/keyboard/keyboard_parser.dart';
+import 'package:cinder/cinder.dart';
+import 'package:cinder/src/keyboard/keyboard_parser.dart';
 import 'package:test/test.dart';
 
 void main() {

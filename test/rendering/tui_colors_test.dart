@@ -1,13 +1,13 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('TUI Color Rendering', () {
     test('basic foreground colors', () async {
-      await testNocterm(
+      await testCinder(
         'foreground colors',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: const [
                 Text('Red text', style: TextStyle(color: Colors.red)),
@@ -37,10 +37,10 @@ void main() {
     });
 
     test('background colors', () async {
-      await testNocterm(
+      await testCinder(
         'background colors',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: const [
                 Text('White on red',
@@ -76,10 +76,10 @@ void main() {
     });
 
     test('text styles', () async {
-      await testNocterm(
+      await testCinder(
         'text styles',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: const [
                 Text('Bold text',
@@ -126,10 +126,10 @@ void main() {
     });
 
     test('RGB colors', () async {
-      await testNocterm(
+      await testCinder(
         'RGB colors',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: [
                 Text('Orange (255,128,0)',
@@ -159,10 +159,10 @@ void main() {
     });
 
     test('combined styles', () async {
-      await testNocterm(
+      await testCinder(
         'combined styles',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: const [
                 Text(
@@ -206,10 +206,10 @@ void main() {
     });
 
     test('color in containers', () async {
-      await testNocterm(
+      await testCinder(
         'colors in containers',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: [
                 Container(
@@ -259,10 +259,10 @@ void main() {
     // Visual test for manual inspection
     test('colors visual test',
         skip: 'Run with debugPrintAfterPump for visual inspection', () async {
-      await testNocterm(
+      await testCinder(
         'colors visual',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

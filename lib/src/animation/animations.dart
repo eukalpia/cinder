@@ -1,4 +1,4 @@
-/// Animation system for nocterm.
+/// Animation system for cinder.
 ///
 /// This library provides a complete animation system similar to Flutter's,
 /// including:
@@ -12,11 +12,11 @@
 ///
 /// ## Getting Started
 ///
-/// To use animations in your component, first add the
+/// To use animations in your widget, first add the
 /// [SingleTickerProviderStateMixin] to your State class:
 ///
 /// ```dart
-/// class _MyComponentState extends State<MyComponent>
+/// class _MyWidgetState extends State<MyWidget>
 ///     with SingleTickerProviderStateMixin {
 ///   late AnimationController _controller;
 ///   late Animation<double> _animation;
@@ -39,12 +39,12 @@
 ///   }
 ///
 ///   @override
-///   Component build(BuildContext context) {
+///   Widget build(BuildContext context) {
 ///     return AnimatedBuilder(
 ///       animation: _animation,
 ///       builder: (context, child) {
 ///         // Use _animation.value to drive your UI
-///         return SomeComponent(opacity: _animation.value);
+///         return SomeWidget(opacity: _animation.value);
 ///       },
 ///     );
 ///   }

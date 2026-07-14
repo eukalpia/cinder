@@ -1,12 +1,12 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('Ticker re-entrant restart', () {
-    late NoctermTestBinding binding;
+    late CinderTestBinding binding;
 
     setUp(() {
-      binding = NoctermTestBinding();
+      binding = CinderTestBinding();
     });
 
     tearDown(() {

@@ -1,11 +1,11 @@
 import 'dart:async';
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() async {
   await runApp(const WidgetReplacementTest());
 }
 
-class WidgetReplacementTest extends StatefulComponent {
+class WidgetReplacementTest extends StatefulWidget {
   const WidgetReplacementTest({super.key});
 
   @override
@@ -35,7 +35,7 @@ class _WidgetReplacementTestState extends State<WidgetReplacementTest> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,

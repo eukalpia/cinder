@@ -1,10 +1,10 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() async {
   await runApp(const ListViewDemo());
 }
 
-class ListViewDemo extends StatefulComponent {
+class ListViewDemo extends StatefulWidget {
   const ListViewDemo({super.key});
 
   @override
@@ -25,7 +25,7 @@ class _ListViewDemoState extends State<ListViewDemo> {
   ];
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Center(
       child: Focusable(
         focused: true,

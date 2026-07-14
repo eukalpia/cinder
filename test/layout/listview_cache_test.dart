@@ -1,18 +1,18 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('ListView cache optimization', () {
     test('itemBuilder is only called once per unique index during layout',
         () async {
-      await testNocterm(
+      await testCinder(
         'cache optimization test',
         (tester) async {
           final scrollController = ScrollController();
           int buildCount = 0;
           final builtIndices = <int>{};
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -54,13 +54,13 @@ void main() {
     });
 
     test('non-lazy mode also benefits from cache optimization', () async {
-      await testNocterm(
+      await testCinder(
         'non-lazy cache test',
         (tester) async {
           final scrollController = ScrollController();
           int buildCount = 0;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -98,13 +98,13 @@ void main() {
 
   group('ListView rebuild on state change', () {
     test('items rebuild when parent state changes (selection)', () async {
-      await testNocterm(
+      await testCinder(
         'selection rebuild test',
         (tester) async {
           // Test widget that tracks selection state
           int selectedIndex = 0;
 
-          Component buildList(int selected) {
+          Widget buildList(int selected) {
             return Container(
               width: 30,
               height: 5,
@@ -122,7 +122,7 @@ void main() {
           }
 
           // Initial render with item 0 selected
-          await tester.pumpComponent(buildList(selectedIndex));
+          await tester.pumpWidget(buildList(selectedIndex));
 
           expect(tester.terminalState.containsText('> Item 0'), isTrue,
               reason: 'Item 0 should be selected initially');
@@ -131,7 +131,7 @@ void main() {
 
           // Change selection to item 1
           selectedIndex = 1;
-          await tester.pumpComponent(buildList(selectedIndex));
+          await tester.pumpWidget(buildList(selectedIndex));
 
           expect(tester.terminalState.containsText('> Item 0'), isFalse,
               reason: 'Item 0 should no longer be selected');
@@ -140,7 +140,7 @@ void main() {
 
           // Change selection to item 2
           selectedIndex = 2;
-          await tester.pumpComponent(buildList(selectedIndex));
+          await tester.pumpWidget(buildList(selectedIndex));
 
           expect(tester.terminalState.containsText('> Item 1'), isFalse,
               reason: 'Item 1 should no longer be selected');
@@ -152,13 +152,13 @@ void main() {
     });
 
     test('items rebuild when itemCount changes', () async {
-      await testNocterm(
+      await testCinder(
         'item count change test',
         (tester) async {
           final scrollController = ScrollController();
 
           // Start with 3 items
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -179,7 +179,7 @@ void main() {
               reason: 'Item 5 should not exist yet');
 
           // Increase to 10 items
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -206,13 +206,13 @@ void main() {
     });
 
     test('cache is cleared when widget updates', () async {
-      await testNocterm(
+      await testCinder(
         'cache clear on update test',
         (tester) async {
           int buildCount = 0;
 
           // First render
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 3,
@@ -231,7 +231,7 @@ void main() {
           expect(tester.terminalState.containsText('Version 1'), isTrue);
 
           // Second render with different content
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 3,
@@ -263,14 +263,14 @@ void main() {
 
   group('ListView performance with large lists', () {
     test('lazy mode handles large item counts efficiently', () async {
-      await testNocterm(
+      await testCinder(
         'large list performance test',
         (tester) async {
           final scrollController = ScrollController();
           int buildCount = 0;
 
           // Create a list with 10,000 items and fixed itemExtent for O(1) jumping
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -309,13 +309,13 @@ void main() {
     });
 
     test('scrolling through list only builds new items', () async {
-      await testNocterm(
+      await testCinder(
         'scroll efficiency test',
         (tester) async {
           final scrollController = ScrollController();
           final builtIndices = <int>{};
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,

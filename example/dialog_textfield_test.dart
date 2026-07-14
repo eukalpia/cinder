@@ -1,14 +1,14 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() {
   runApp(const DialogTextFieldTest());
 }
 
-class DialogTextFieldTest extends StatelessComponent {
+class DialogTextFieldTest extends StatelessWidget {
   const DialogTextFieldTest({super.key});
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Navigator(
       home: const HomePage(),
       popBehavior: const PopBehavior(
@@ -18,11 +18,11 @@ class DialogTextFieldTest extends StatelessComponent {
   }
 }
 
-class HomePage extends StatelessComponent {
+class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(2),
       child: Column(
@@ -53,7 +53,7 @@ class HomePage extends StatelessComponent {
   }
 }
 
-class TextFieldDialog extends StatefulComponent {
+class TextFieldDialog extends StatefulWidget {
   const TextFieldDialog({super.key});
 
   @override
@@ -64,7 +64,7 @@ class _TextFieldDialogState extends State<TextFieldDialog> {
   String _value = '';
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(1),
       child: Column(

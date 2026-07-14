@@ -1,5 +1,5 @@
 import 'package:characters/characters.dart';
-import 'package:nocterm/src/rectangle.dart';
+import 'package:cinder/src/rectangle.dart';
 
 import 'style.dart';
 import 'utils/unicode_width.dart';

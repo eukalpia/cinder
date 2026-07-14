@@ -1,8 +1,8 @@
 import 'package:test/test.dart';
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
-// Mock component for testing
-class TestApp extends StatefulComponent {
+// Mock widget for testing
+class TestApp extends StatefulWidget {
   const TestApp({super.key});
 
   @override
@@ -22,7 +22,7 @@ class _TestAppState extends State<TestApp> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Column(
       children: [
         TextField(

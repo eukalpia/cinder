@@ -1,9 +1,9 @@
-name: nocterm
-description: A Flutter-like framework for building rich terminal user interfaces with components, state management, animations, and more.
-version: 0.8.0
-repository: https://github.com/Norbert515/nocterm
-homepage: https://docs.nocterm.dev
-documentation: https://docs.nocterm.dev
+name: cinder
+description: A Flutter-style, high-performance terminal UI framework for Dart.
+version: 1.0.0-dev.1
+repository: https://github.com/eukalpia/cinder
+homepage: https://github.com/eukalpia/cinder
+documentation: https://github.com/eukalpia/cinder#readme
 
 topics:
   - tui

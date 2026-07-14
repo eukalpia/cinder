@@ -1,16 +1,16 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 void main() {
   test('DEMO: Multi-line TextField cursor position fixed', () async {
-    await testNocterm(
+    await testCinder(
       'multi-line demo',
       (tester) async {
         final controller = TextEditingController(
             text:
                 'Hello this is a cool thing to do is typing a cool long string that can be enough');
 
-        await tester.pumpComponent(
+        await tester.pumpWidget(
           Column(
             children: [
               const Text('Multi-line (Enter to submit):'),

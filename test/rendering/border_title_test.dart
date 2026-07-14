@@ -1,13 +1,13 @@
 import 'package:test/test.dart';
-import 'package:nocterm/nocterm.dart' hide isNotEmpty;
+import 'package:cinder/cinder.dart' hide isNotEmpty;
 
 void main() {
   group('Border Title Rendering', () {
     test('basic left-aligned title', () async {
-      await testNocterm(
+      await testCinder(
         'left aligned title',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Container(
                 width: 25,
@@ -29,10 +29,10 @@ void main() {
     });
 
     test('center-aligned title', () async {
-      await testNocterm(
+      await testCinder(
         'center aligned title',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Container(
                 width: 25,
@@ -57,10 +57,10 @@ void main() {
     });
 
     test('right-aligned title', () async {
-      await testNocterm(
+      await testCinder(
         'right aligned title',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Container(
                 width: 25,
@@ -85,10 +85,10 @@ void main() {
     });
 
     test('title with custom style', () async {
-      await testNocterm(
+      await testCinder(
         'styled title',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Container(
                 width: 30,
@@ -115,10 +115,10 @@ void main() {
     });
 
     test('long title gets truncated', () async {
-      await testNocterm(
+      await testCinder(
         'truncated title',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Container(
                 width: 15,
@@ -142,10 +142,10 @@ void main() {
     });
 
     test('narrow container skips title', () async {
-      await testNocterm(
+      await testCinder(
         'narrow container',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Container(
                 width: 5,
@@ -167,10 +167,10 @@ void main() {
     });
 
     test('title with different border styles', () async {
-      await testNocterm(
+      await testCinder(
         'border styles with title',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: [
                 Container(
@@ -221,10 +221,10 @@ void main() {
     });
 
     test('all alignments comparison', () async {
-      await testNocterm(
+      await testCinder(
         'alignment comparison',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: [
                 Container(
@@ -277,10 +277,10 @@ void main() {
 
   group('Partial Border Rendering', () {
     test('top border only - no corners', () async {
-      await testNocterm(
+      await testCinder(
         'top border only',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 25,
               height: 3,
@@ -308,10 +308,10 @@ void main() {
     });
 
     test('top and bottom borders only - no corners', () async {
-      await testNocterm(
+      await testCinder(
         'top and bottom only',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 25,
               height: 3,
@@ -341,10 +341,10 @@ void main() {
     });
 
     test('full border - has corners', () async {
-      await testNocterm(
+      await testCinder(
         'full border with corners',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 25,
               height: 3,
@@ -374,10 +374,10 @@ void main() {
     });
 
     test('left and right borders only - no horizontal corners', () async {
-      await testNocterm(
+      await testCinder(
         'left and right only',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 25,
               height: 3,

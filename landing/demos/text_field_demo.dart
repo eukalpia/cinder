@@ -1,10 +1,10 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() async {
   await runApp(const TextFieldDemo());
 }
 
-class TextFieldDemo extends StatefulComponent {
+class TextFieldDemo extends StatefulWidget {
   const TextFieldDemo({super.key});
 
   @override
@@ -16,7 +16,7 @@ class _TextFieldDemoState extends State<TextFieldDemo> {
   final List<String> _messages = [];
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,

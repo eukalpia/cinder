@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 
-import 'package:nocterm/src/image/color_quantizer.dart';
-import 'package:nocterm/src/style.dart';
+import 'package:cinder/src/image/color_quantizer.dart';
+import 'package:cinder/src/style.dart';
 
 /// Encodes image data to Sixel format escape sequences.
 ///

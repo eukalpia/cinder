@@ -1,5 +1,5 @@
-import 'package:nocterm/src/components/text_field/cursor_movement.dart';
-import 'package:nocterm/src/text/text_layout_engine.dart';
+import 'package:cinder/src/components/text_field/cursor_movement.dart';
+import 'package:cinder/src/text/text_layout_engine.dart';
 import 'package:test/test.dart';
 
 void main() {

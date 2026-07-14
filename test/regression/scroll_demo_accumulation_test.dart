@@ -1,13 +1,13 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 import '../../example/scroll_demo.dart';
 
 void main() {
   test('check for content accumulation after multiple tab switches', () async {
-    await testNocterm(
+    await testCinder(
       'tab accumulation test',
       (tester) async {
-        await tester.pumpComponent(const ScrollDemo());
+        await tester.pumpWidget(const ScrollDemo());
 
         // Helper function to count items in current view
         int countItems(String pattern) {

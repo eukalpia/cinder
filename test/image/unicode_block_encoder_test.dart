@@ -1,6 +1,6 @@
 import 'dart:typed_data';
-import 'package:nocterm/src/image/unicode_block_encoder.dart';
-import 'package:nocterm/src/style.dart';
+import 'package:cinder/src/image/unicode_block_encoder.dart';
+import 'package:cinder/src/style.dart';
 import 'package:test/test.dart';
 
 void main() {

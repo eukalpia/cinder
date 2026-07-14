@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 /// Debug clipboard behavior
 void main() async {

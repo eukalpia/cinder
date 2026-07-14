@@ -1,20 +1,20 @@
-# Testing nocterm
+# Testing cinder
 
 Quick guide to writing tests that actually catch bugs. The harness
-(`testNocterm`, `NoctermTester`, `TerminalState`) is in
-`package:nocterm/nocterm.dart` — see `test/visual/tui_test_example_test.dart`
+(`testCinder`, `CinderTester`, `TerminalState`) is in
+`package:cinder/cinder.dart` — see `test/visual/tui_test_example_test.dart`
 for a tour.
 
 ## Settle before you mutate
 
 The first layout pass leaves transient dirtiness behind: `adoptChild`
 re-marks render objects *while* children are being built, so the frame
-after `pumpComponent` re-layouts no matter what. A test that pumps once and
+after `pumpWidget` re-layouts no matter what. A test that pumps once and
 then mutates is exercising the always-dirty path — it can pass against code
 where the mutation's relayout is silently skipped.
 
 ```dart
-await tester.pumpComponent(MyApp());
+await tester.pumpWidget(MyApp());
 await tester.pump();          // <- settle: next frame starts genuinely clean
 
 state.mutateSomething();
@@ -73,7 +73,7 @@ to guard against — the failure-first check is cheap insurance.
 State machines and data structures (gesture recognizers, `PersistentHashMap`)
 deserve direct unit tests with short timeouts/synthetic events — see
 `test/input/long_press_recognizer_test.dart`. Going through the full
-component harness for these adds noise without adding coverage.
+widget harness for these adds noise without adding coverage.
 
 ## Before committing
 

@@ -1,13 +1,13 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('MarkdownText Simple', () {
     test('renders simple paragraph without wrapping', () async {
-      await testNocterm(
+      await testCinder(
         'simple paragraph',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 100, // Wide enough to not wrap
               child: const MarkdownText('First paragraph.'),
@@ -22,10 +22,10 @@ void main() {
 
     test('renders two paragraphs',
         skip: 'Known issue: Markdown paragraph spacing', () async {
-      await testNocterm(
+      await testCinder(
         'two paragraphs',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 100, // Wide enough to not wrap
               child: const MarkdownText('''First paragraph.
@@ -49,10 +49,10 @@ Second paragraph.'''),
     });
 
     test('renders plain text spans correctly', () async {
-      await testNocterm(
+      await testCinder(
         'plain text spans',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 100,
               child:
@@ -68,10 +68,10 @@ Second paragraph.'''),
     });
 
     test('check line-by-line output', () async {
-      await testNocterm(
+      await testCinder(
         'line by line',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 50,
               child: const MarkdownText('''First.

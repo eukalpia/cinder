@@ -53,7 +53,7 @@ abstract class Route<T> {
 
 /// A standard page route
 class PageRoute<T> extends Route<T> {
-  final ComponentBuilder builder;
+  final WidgetBuilder builder;
 
   PageRoute({
     required this.builder,
@@ -75,7 +75,7 @@ class PageRoute<T> extends Route<T> {
 /// A modal overlay route (like a dialog)
 class ModalRoute<T> extends Route<T> {
   /// Builder for the modal content
-  final ComponentBuilder builder;
+  final WidgetBuilder builder;
 
   /// Whether tapping outside the modal dismisses it
   final bool barrierDismissible;
@@ -159,7 +159,7 @@ class ModalRoute<T> extends Route<T> {
       // Modal content entry
       OverlayEntry(
         builder: (context) {
-          Component modalContent = builder(context);
+          Widget modalContent = builder(context);
 
           // Apply size constraints if provided
           if (width != null || height != null) {

@@ -1,15 +1,15 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('TextField Multi-line', () {
     test('cursor position is correct with wrapped lines', () async {
-      await testNocterm(
+      await testCinder(
         'wrapped lines cursor',
         (tester) async {
           final controller = TextEditingController(text: '');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TextField(
               controller: controller,
               width: 30,
@@ -43,12 +43,12 @@ void main() {
     });
 
     test('cursor moves correctly across wrapped lines', () async {
-      await testNocterm(
+      await testCinder(
         'cursor movement across wrapped lines',
         (tester) async {
           final controller = TextEditingController(text: '');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TextField(
               controller: controller,
               width: 20,
@@ -87,12 +87,12 @@ void main() {
     });
 
     test('text entry works correctly with wrapped lines', () async {
-      await testNocterm(
+      await testCinder(
         'text entry with wrapped lines',
         (tester) async {
           final controller = TextEditingController(text: '');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TextField(
               controller: controller,
               width: 25,

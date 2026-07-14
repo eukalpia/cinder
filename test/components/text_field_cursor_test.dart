@@ -1,15 +1,15 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('TextField Selection', () {
     test('selection should be visible when using Shift+Arrow keys', () async {
-      await testNocterm(
+      await testCinder(
         'text selection rendering',
         (tester) async {
           final controller = TextEditingController(text: 'Hello World');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -63,12 +63,12 @@ void main() {
     });
 
     test('Ctrl+A should select all text', () async {
-      await testNocterm(
+      await testCinder(
         'select all functionality',
         (tester) async {
           final controller = TextEditingController(text: 'Test selection');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 3,
@@ -107,12 +107,12 @@ void main() {
     });
 
     test('typing should replace selected text', () async {
-      await testNocterm(
+      await testCinder(
         'replace selection with typed text',
         (tester) async {
           final controller = TextEditingController(text: 'Replace this text');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 3,
@@ -154,12 +154,12 @@ void main() {
     });
 
     test('visual selection highlighting', () async {
-      await testNocterm(
+      await testCinder(
         'check selection background color',
         (tester) async {
           final controller = TextEditingController(text: 'ABCDEFGHIJ');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 20,
               height: 3,

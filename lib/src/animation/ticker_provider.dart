@@ -1,5 +1,5 @@
-import 'package:nocterm/src/animation/ticker.dart';
-import 'package:nocterm/src/framework/framework.dart';
+import 'package:cinder/src/animation/ticker.dart';
+import 'package:cinder/src/framework/framework.dart';
 
 /// Provides a single [Ticker] that is configured to only tick while the
 /// current [State] is active.
@@ -7,7 +7,7 @@ import 'package:nocterm/src/framework/framework.dart';
 /// To use this mixin, add it to your [State] class:
 ///
 /// ```dart
-/// class MyState extends State<MyComponent> with SingleTickerProviderStateMixin {
+/// class MyState extends State<MyWidget> with SingleTickerProviderStateMixin {
 ///   late AnimationController _controller;
 ///
 ///   @override
@@ -29,7 +29,7 @@ import 'package:nocterm/src/framework/framework.dart';
 ///
 /// This mixin can only create a single ticker. If you need multiple tickers,
 /// use [TickerProviderStateMixin] instead.
-mixin SingleTickerProviderStateMixin<T extends StatefulComponent> on State<T>
+mixin SingleTickerProviderStateMixin<T extends StatefulWidget> on State<T>
     implements TickerProvider {
   Ticker? _ticker;
 
@@ -72,7 +72,7 @@ mixin SingleTickerProviderStateMixin<T extends StatefulComponent> on State<T>
 /// To use this mixin, add it to your [State] class:
 ///
 /// ```dart
-/// class MyState extends State<MyComponent> with TickerProviderStateMixin {
+/// class MyState extends State<MyWidget> with TickerProviderStateMixin {
 ///   late AnimationController _controller1;
 ///   late AnimationController _controller2;
 ///
@@ -101,7 +101,7 @@ mixin SingleTickerProviderStateMixin<T extends StatefulComponent> on State<T>
 /// Use this mixin when you need multiple [AnimationController]s. If you only
 /// need a single ticker, use [SingleTickerProviderStateMixin] instead, which
 /// is slightly more efficient.
-mixin TickerProviderStateMixin<T extends StatefulComponent> on State<T>
+mixin TickerProviderStateMixin<T extends StatefulWidget> on State<T>
     implements TickerProvider {
   Set<Ticker>? _tickers;
 

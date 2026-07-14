@@ -1,16 +1,16 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('Shift+Enter newline in TextField', () {
     test('Shift+Enter inserts newline in multiline field', () async {
-      await testNocterm(
+      await testCinder(
         'shift+enter newline',
         (tester) async {
           final controller = TextEditingController(text: '');
           String? submittedText;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TextField(
               controller: controller,
               width: 40,
@@ -52,13 +52,13 @@ void main() {
     });
 
     test('Ctrl+Enter inserts newline in multiline field', () async {
-      await testNocterm(
+      await testCinder(
         'ctrl+enter newline',
         (tester) async {
           final controller = TextEditingController(text: '');
           String? submittedText;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TextField(
               controller: controller,
               width: 40,
@@ -92,13 +92,13 @@ void main() {
     });
 
     test('Alt+Enter inserts newline in multiline field', () async {
-      await testNocterm(
+      await testCinder(
         'alt+enter newline',
         (tester) async {
           final controller = TextEditingController(text: '');
           String? submittedText;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TextField(
               controller: controller,
               width: 40,
@@ -132,13 +132,13 @@ void main() {
     });
 
     test('Ctrl+J inserts newline in multiline field', () async {
-      await testNocterm(
+      await testCinder(
         'ctrl+j newline',
         (tester) async {
           final controller = TextEditingController(text: '');
           String? submittedText;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TextField(
               controller: controller,
               width: 40,
@@ -171,13 +171,13 @@ void main() {
     });
 
     test('plain Enter still submits', () async {
-      await testNocterm(
+      await testCinder(
         'plain enter submits',
         (tester) async {
           final controller = TextEditingController(text: '');
           String? submittedText;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TextField(
               controller: controller,
               width: 40,
@@ -208,12 +208,12 @@ void main() {
     });
 
     test('Shift+Enter does not insert newline in single-line field', () async {
-      await testNocterm(
+      await testCinder(
         'shift+enter single line',
         (tester) async {
           final controller = TextEditingController(text: '');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TextField(
               controller: controller,
               width: 40,
@@ -245,12 +245,12 @@ void main() {
     });
 
     test('Ctrl+J does not insert newline in single-line field', () async {
-      await testNocterm(
+      await testCinder(
         'ctrl+j single line',
         (tester) async {
           final controller = TextEditingController(text: '');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TextField(
               controller: controller,
               width: 40,
@@ -281,12 +281,12 @@ void main() {
     });
 
     test('multiple newlines build a multiline text', () async {
-      await testNocterm(
+      await testCinder(
         'multiple newlines',
         (tester) async {
           final controller = TextEditingController(text: '');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TextField(
               controller: controller,
               width: 40,

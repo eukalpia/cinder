@@ -1,5 +1,5 @@
-import 'package:nocterm/nocterm.dart';
-import 'package:nocterm/src/utils/terminal_color_support.dart';
+import 'package:cinder/cinder.dart';
+import 'package:cinder/src/utils/terminal_color_support.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -48,10 +48,10 @@ void main() {
     });
 
     test('Container with default background color renders correctly', () async {
-      await testNocterm(
+      await testCinder(
         'container with default background',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 10,
               height: 3,
@@ -68,11 +68,11 @@ void main() {
     });
 
     test('default background clears other backgrounds', () async {
-      await testNocterm(
+      await testCinder(
         'default background clearing',
         (tester) async {
           // First pump a blue background
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 20,
               height: 5,
@@ -87,7 +87,7 @@ void main() {
           expect(tester.terminalState, containsText('Blue BG'));
 
           // Now pump a container with default background on top
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 20,
               height: 5,
@@ -108,10 +108,10 @@ void main() {
     });
 
     test('overlay with default background properly clears area', () async {
-      await testNocterm(
+      await testCinder(
         'overlay clearing with default',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Overlay(
               initialEntries: [
                 OverlayEntry(

@@ -1,26 +1,26 @@
 ---
 title: Writing Tests
-description: Test your Nocterm components
+description: Test your Cinder components
 icon: check-circle
 ---
 
-Nocterm provides a testing framework for TUI components. This guide shows you how to write tests.
+Cinder provides a testing framework for TUI components. This guide shows you how to write tests.
 
 ## Test setup
 
 Import the test library:
 
 ```dart
-import 'package:nocterm/nocterm.dart';
-import 'package:nocterm/nocterm_test.dart';
+import 'package:cinder/cinder.dart';
+import 'package:cinder/cinder_test.dart';
 import 'package:test/test.dart';
 
 void main() {
   test('counter increments', () async {
-    await testNocterm(
+    await testCinder(
       'counter test',
       (tester) async {
-        await tester.pumpComponent(Counter());
+        await tester.pumpWidget(Counter());
 
         expect(tester.terminalState, containsText('Count: 0'));
 
@@ -33,12 +33,12 @@ void main() {
 }
 ```
 
-## testNocterm function
+## testCinder function
 
-`testNocterm` runs a test with a virtual terminal:
+`testCinder` runs a test with a virtual terminal:
 
 ```dart
-await testNocterm(
+await testCinder(
   'test description',
   (tester) async {
     // Test code here
@@ -48,13 +48,13 @@ await testNocterm(
 );
 ```
 
-## NoctermTester
+## CinderTester
 
 The tester provides methods for testing:
 
 ```dart
-// Render a component
-await tester.pumpComponent(MyComponent());
+// Render a widget
+await tester.pumpWidget(MyWidget());
 
 // Send a key press
 await tester.sendKey(LogicalKey.enter);
@@ -81,10 +81,10 @@ Use matchers to verify output:
 
 ```dart
 test('text display', () async {
-  await testNocterm(
+  await testCinder(
     'displays text',
     (tester) async {
-      await tester.pumpComponent(Text('Hello'));
+      await tester.pumpWidget(Text('Hello'));
 
       // Check if text is present
       expect(tester.terminalState, containsText('Hello'));
@@ -126,12 +126,12 @@ Simulate user input:
 
 ```dart
 test('button click', () async {
-  await testNocterm(
+  await testCinder(
     'handles click',
     (tester) async {
       var clicked = false;
 
-      await tester.pumpComponent(
+      await tester.pumpWidget(
         Focusable(
           focused: true,
           onKeyEvent: (event) {
@@ -183,10 +183,10 @@ Test components that change over time:
 
 ```dart
 test('counter state', () async {
-  await testNocterm(
+  await testCinder(
     'counter increments',
     (tester) async {
-      await tester.pumpComponent(Counter());
+      await tester.pumpWidget(Counter());
 
       expect(tester.terminalState, containsText('Count: 0'));
 
@@ -207,8 +207,8 @@ test('counter state', () async {
 ```dart
 // Good - focused test
 test('displays title', () async {
-  await testNocterm('title', (tester) async {
-    await tester.pumpComponent(App());
+  await testCinder('title', (tester) async {
+    await tester.pumpWidget(App());
     expect(tester.terminalState, containsText('My App'));
   });
 });
@@ -241,11 +241,11 @@ test('handles terminal resize', () async { ... });
 
 ```dart
 test('disposes controllers', () async {
-  await testNocterm('disposal', (tester) async {
+  await testCinder('disposal', (tester) async {
     final controller = TextEditingController();
-    await tester.pumpComponent(TextField(controller: controller));
+    await tester.pumpWidget(TextField(controller: controller));
 
-    // Component should dispose controller
+    // Widget should dispose controller
     controller.dispose();  // Should not throw
   });
 });
@@ -255,4 +255,4 @@ test('disposes controllers', () async {
 
 - [Visual Testing](/docs/testing/visual) - Debug with visual output
 - [Test Matchers](/docs/testing/matchers) - All available matchers
-- [Components](/docs/fundamentals/components) - Build testable components
+- [Widgets](/docs/fundamentals/components) - Build testable components

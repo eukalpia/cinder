@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:nocterm/src/utils/terminal_color_support_internal.dart';
+import 'package:cinder/src/utils/terminal_color_support_internal.dart';
 
 bool? _overrideTruecolor;
 bool? _cachedTruecolor;

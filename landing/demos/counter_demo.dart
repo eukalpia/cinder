@@ -1,10 +1,10 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() async {
   await runApp(const CounterDemo());
 }
 
-class CounterDemo extends StatefulComponent {
+class CounterDemo extends StatefulWidget {
   const CounterDemo({super.key});
 
   @override
@@ -15,7 +15,7 @@ class _CounterDemoState extends State<CounterDemo> {
   int _count = 0;
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     final progress = (_count % 20) / 20;
     final barWidth = 30;
     final filled = (progress * barWidth).round();

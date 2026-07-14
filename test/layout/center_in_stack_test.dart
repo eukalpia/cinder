@@ -1,15 +1,15 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('Center in Stack', () {
     test('Center should properly center its child within Stack', () async {
-      await testNocterm(
+      await testCinder(
         'center in stack',
         (tester) async {
           // A 20x10 Stack with a Center containing a small "X" Text
           // The "X" should be centered in the Stack, not at top-left
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 20,
               height: 10,
@@ -49,12 +49,12 @@ void main() {
     });
 
     test('Center should expand to fill bounded constraints', () async {
-      await testNocterm(
+      await testCinder(
         'center expands in bounded',
         (tester) async {
           // When inside a Stack with bounded constraints,
           // Center should expand to fill the Stack, then center its child
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 8,
@@ -95,11 +95,11 @@ void main() {
     });
 
     test('Center without Stack should still work correctly', () async {
-      await testNocterm(
+      await testCinder(
         'standalone center',
         (tester) async {
           // Verify standalone Center still works
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 20,
               height: 6,

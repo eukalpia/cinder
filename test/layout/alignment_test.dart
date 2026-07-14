@@ -1,13 +1,13 @@
 import 'package:test/test.dart';
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() {
   group('Text Alignment', () {
     test('center alignment', () async {
-      await testNocterm(
+      await testCinder(
         'center aligned text',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             DecoratedBox(
               decoration: BoxDecoration(
                 border: BoxBorder.all(
@@ -39,10 +39,10 @@ void main() {
     });
 
     test('left alignment', () async {
-      await testNocterm(
+      await testCinder(
         'left aligned text',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             DecoratedBox(
               decoration: BoxDecoration(
                 border: BoxBorder.all(
@@ -70,10 +70,10 @@ void main() {
     });
 
     test('right alignment', () async {
-      await testNocterm(
+      await testCinder(
         'right aligned text',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             DecoratedBox(
               decoration: BoxDecoration(
                 border: BoxBorder.all(
@@ -101,10 +101,10 @@ void main() {
     });
 
     test('all alignments visual test', () async {
-      await testNocterm(
+      await testCinder(
         'all alignments visual',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Row(
               children: [
                 // Center alignment

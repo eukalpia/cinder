@@ -1,14 +1,14 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('Overlay tint effect', () {
     test('FadeModalBarrier dims background content in overlay', () async {
-      await testNocterm(
+      await testCinder(
         'overlay dimming',
         (tester) async {
           // Simulate the overlay demo structure
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Overlay(
               initialEntries: [
                 // Base content (like the main screen)

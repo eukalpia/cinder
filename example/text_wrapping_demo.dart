@@ -1,13 +1,13 @@
-import 'package:nocterm/nocterm.dart' hide TextAlign;
-import 'package:nocterm/src/components/basic.dart' show TextAlign, TextOverflow;
+import 'package:cinder/cinder.dart' hide TextAlign;
+import 'package:cinder/src/components/basic.dart' show TextAlign, TextOverflow;
 
 void main() {
   runApp(TextWrapDemo());
 }
 
-class TextWrapDemo extends StatelessComponent {
+class TextWrapDemo extends StatelessWidget {
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     const longText = 'This is a very long piece of text that will demonstrate '
         'how text wrapping works in our TUI framework. It should automatically '
         'wrap at word boundaries when it exceeds the available width.';

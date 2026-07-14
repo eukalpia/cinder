@@ -1,6 +1,6 @@
 ---
 title: Your First App
-description: Build your first Nocterm application
+description: Build your first Cinder application
 icon: rocket
 ---
 
@@ -11,13 +11,13 @@ In this guide, you'll build an interactive counter app. You'll learn how to crea
 Create a file called `counter.dart` and add this code:
 
 ```dart
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() {
   runApp(const Counter());
 }
 
-class Counter extends StatefulComponent {
+class Counter extends StatefulWidget {
   const Counter({super.key});
 
   @override
@@ -28,7 +28,7 @@ class _CounterState extends State<Counter> {
   int _count = 0;
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Focusable(
       focused: true,
       onKeyEvent: (event) {
@@ -79,14 +79,14 @@ void main() {
 }
 ```
 
-This function takes your root component and displays it in the terminal. It sets up the terminal (enables raw mode, alternate screen), handles rendering, and processes input events.
+This function takes your root widget and displays it in the terminal. It sets up the terminal (enables raw mode, alternate screen), handles rendering, and processes input events.
 
-### StatefulComponent
+### StatefulWidget
 
-`Counter` extends `StatefulComponent` because it needs to track the count:
+`Counter` extends `StatefulWidget` because it needs to track the count:
 
 ```dart
-class Counter extends StatefulComponent {
+class Counter extends StatefulWidget {
   const Counter({super.key});
 
   @override
@@ -94,7 +94,7 @@ class Counter extends StatefulComponent {
 }
 ```
 
-A `StatefulComponent` separates the component (which is immutable) from its state (which changes over time). The `createState()` method creates the state object.
+A `StatefulWidget` separates the widget (which is immutable) from its state (which changes over time). The `createState()` method creates the state object.
 
 ### State and setState
 
@@ -105,40 +105,40 @@ class _CounterState extends State<Counter> {
   int _count = 0;
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     // ... UI code
   }
 }
 ```
 
-When you call `setState()`, Nocterm rebuilds the component with the new state:
+When you call `setState()`, Cinder rebuilds the widget with the new state:
 
 ```dart
 setState(() => _count++);
 ```
 
-Always wrap state changes in `setState()`. This tells Nocterm to redraw the UI.
+Always wrap state changes in `setState()`. This tells Cinder to redraw the UI.
 
 ### The build method
 
-The `build()` method returns the UI for your component:
+The `build()` method returns the UI for your widget:
 
 ```dart
-Component build(BuildContext context) {
+Widget build(BuildContext context) {
   return Focusable(
-    // ... component tree
+    // ... widget tree
   );
 }
 ```
 
-Nocterm calls `build()` when:
-- The component first appears
+Cinder calls `build()` when:
+- The widget first appears
 - You call `setState()`
-- The parent component rebuilds
+- The parent widget rebuilds
 
 ### Handling keyboard input
 
-The `Focusable` component captures keyboard events:
+The `Focusable` widget captures keyboard events:
 
 ```dart
 Focusable(
@@ -148,7 +148,7 @@ Focusable(
       setState(() => _count++);
       return true;  // Event handled
     }
-    return false;  // Not handled, pass to next component
+    return false;  // Not handled, pass to next widget
   },
   child: // ...
 )
@@ -186,5 +186,5 @@ Modify the app to:
 ## Next steps
 
 - [How terminals work](/docs/terminal-concepts/how-terminals-work) - Understand what's happening under the hood
-- [Components](/docs/fundamentals/components) - Learn about StatelessComponent and StatefulComponent
+- [Widgets](/docs/fundamentals/components) - Learn about StatelessWidget and StatefulWidget
 - [Building UIs](/docs/fundamentals/building-uis) - Compose complex interfaces

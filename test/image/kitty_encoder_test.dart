@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:nocterm/src/image/kitty_encoder.dart';
+import 'package:cinder/src/image/kitty_encoder.dart';
 import 'package:test/test.dart';
 
 void main() {

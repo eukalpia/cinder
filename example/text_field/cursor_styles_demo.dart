@@ -1,10 +1,10 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() async {
   await runApp(const CursorStylesDemo());
 }
 
-class CursorStylesDemo extends StatefulComponent {
+class CursorStylesDemo extends StatefulWidget {
   const CursorStylesDemo({super.key});
 
   @override
@@ -107,7 +107,7 @@ class _CursorStylesDemoState extends State<CursorStylesDemo> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Focusable(
       focused: true,
       onKeyEvent: _handleGlobalKey,

@@ -1,8 +1,8 @@
 import 'package:test/test.dart';
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
-// Example component for testing
-class Counter extends StatefulComponent {
+// Example widget for testing
+class Counter extends StatefulWidget {
   const Counter({super.key});
 
   @override
@@ -25,7 +25,7 @@ class _CounterState extends State<Counter> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Focusable(
       focused: true,
       onKeyEvent: (event) {
@@ -65,8 +65,8 @@ class _CounterState extends State<Counter> {
 void main() {
   group('TUI Testing Framework', () {
     test('can debug render output', () async {
-      await testNocterm('debug output', (tester) async {
-        await tester.pumpComponent(
+      await testCinder('debug output', (tester) async {
+        await tester.pumpWidget(
           Container(
             padding: const EdgeInsets.all(1),
             child: const Text('Debug Me'),
@@ -79,7 +79,7 @@ void main() {
         // Output should contain the text
         expect(output, contains('Debug Me'));
 
-        await tester.pumpComponent(const Counter());
+        await tester.pumpWidget(const Counter());
         final output2 = tester.renderToString(showBorders: true);
 
         expect(output2, contains('Count: 0'));

@@ -1,13 +1,13 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() async {
   await runApp(const ChatDemo());
 }
 
-class ChatDemo extends StatefulComponent {
+class ChatDemo extends StatefulWidget {
   const ChatDemo({super.key});
 
   @override
@@ -135,7 +135,7 @@ class _ChatDemoState extends State<ChatDemo> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return SelectionArea(
       onSelectionCompleted: ClipboardManager.copy,
       selectionColor: Colors.red,
@@ -252,13 +252,13 @@ class _ChatDemoState extends State<ChatDemo> {
   }
 }
 
-class _MessageWidget extends StatelessComponent {
+class _MessageWidget extends StatelessWidget {
   final ChatMessage message;
 
   const _MessageWidget({required this.message});
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     final timeStr = '${message.timestamp.hour.toString().padLeft(2, '0')}:'
         '${message.timestamp.minute.toString().padLeft(2, '0')}:'
         '${message.timestamp.second.toString().padLeft(2, '0')}';

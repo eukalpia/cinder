@@ -1,15 +1,15 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 void main() {
   test('ListView dynamic add simple', () async {
-    await testNocterm(
+    await testCinder(
       'dynamic add test',
       (tester) async {
         final scrollController = ScrollController();
 
         // Start with 3 items
-        await tester.pumpComponent(
+        await tester.pumpWidget(
           Container(
             width: 20,
             height: 5,
@@ -30,7 +30,7 @@ void main() {
         print('MaxScrollExtent: ${scrollController.maxScrollExtent}');
 
         // Now rebuild with 10 items
-        await tester.pumpComponent(
+        await tester.pumpWidget(
           Container(
             width: 20,
             height: 5,

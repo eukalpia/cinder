@@ -1,13 +1,13 @@
 import 'package:test/test.dart';
-import 'package:nocterm/nocterm.dart' hide isNotEmpty;
+import 'package:cinder/cinder.dart' hide isNotEmpty;
 
 void main() {
   group('Border Rendering', () {
     test('minimum width border containers', () async {
-      await testNocterm(
+      await testCinder(
         'minimum width borders',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -51,10 +51,10 @@ void main() {
     });
 
     test('different border widths', () async {
-      await testNocterm(
+      await testCinder(
         'border widths',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -90,10 +90,10 @@ void main() {
     });
 
     test('nested borders', () async {
-      await testNocterm(
+      await testCinder(
         'nested borders',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Container(
                 width: 30,
@@ -124,10 +124,10 @@ void main() {
     });
 
     test('borders with different colors', () async {
-      await testNocterm(
+      await testCinder(
         'colored borders',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: [
                 Container(
@@ -175,10 +175,10 @@ void main() {
     });
 
     test('border with background color', () async {
-      await testNocterm(
+      await testCinder(
         'border with background',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Container(
                 width: 25,
@@ -203,10 +203,10 @@ void main() {
     });
 
     test('asymmetric border containers', () async {
-      await testNocterm(
+      await testCinder(
         'asymmetric borders',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: [
                 // Very wide and short
@@ -239,10 +239,10 @@ void main() {
     // Visual test for manual inspection
     test('border visual test',
         skip: 'Run with debugPrintAfterPump for visual inspection', () async {
-      await testNocterm(
+      await testCinder(
         'border visual',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,

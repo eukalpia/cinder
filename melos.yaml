@@ -1,5 +1,5 @@
-name: nocterm
-repository: https://github.com/norbert515/nocterm
+name: cinder
+repository: https://github.com/norbert515/cinder
 
 packages:
   - .
@@ -77,9 +77,9 @@ scripts:
     exec:
       concurrency: 5
 
-  # Run the main nocterm examples
+  # Run the main cinder examples
   example:
     description: Run an example (pass example name as argument)
     run: dart run example/$MELOS_ARGS.dart
     packageFilters:
-      scope: nocterm
+      scope: cinder

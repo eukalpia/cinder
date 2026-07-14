@@ -1,4 +1,4 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 /// Comprehensive test suite for differential rendering in the TUI framework.
@@ -194,12 +194,12 @@ void main() {
     });
 
     group('Style Change Detection', () {
-      test('detects color change in rendered component', () async {
-        await testNocterm(
+      test('detects color change in rendered widget', () async {
+        await testCinder(
           'color change detection',
           (tester) async {
             // Render with red color
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               Text('Hello', style: const TextStyle(color: Colors.red)),
             );
 
@@ -207,7 +207,7 @@ void main() {
             expect(cell1?.style.color, equals(Colors.red));
 
             // Render with blue color
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               Text('Hello', style: const TextStyle(color: Colors.blue)),
             );
 
@@ -221,16 +221,16 @@ void main() {
       });
 
       test('detects backgroundColor change', () async {
-        await testNocterm(
+        await testCinder(
           'backgroundColor change detection',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               Text('Hello',
                   style: const TextStyle(backgroundColor: Colors.red)),
             );
             final cell1 = tester.terminalState.getCellAt(0, 0);
 
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               Text('Hello',
                   style: const TextStyle(backgroundColor: Colors.blue)),
             );
@@ -244,16 +244,16 @@ void main() {
       });
 
       test('detects fontWeight change', () async {
-        await testNocterm(
+        await testCinder(
           'fontWeight change detection',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               const Text('Hello',
                   style: TextStyle(fontWeight: FontWeight.normal)),
             );
             final cell1 = tester.terminalState.getCellAt(0, 0);
 
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               const Text('Hello',
                   style: TextStyle(fontWeight: FontWeight.bold)),
             );
@@ -267,16 +267,16 @@ void main() {
       });
 
       test('detects fontStyle change', () async {
-        await testNocterm(
+        await testCinder(
           'fontStyle change detection',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               const Text('Hello',
                   style: TextStyle(fontStyle: FontStyle.normal)),
             );
             final cell1 = tester.terminalState.getCellAt(0, 0);
 
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               const Text('Hello',
                   style: TextStyle(fontStyle: FontStyle.italic)),
             );
@@ -290,16 +290,16 @@ void main() {
       });
 
       test('detects decoration change', () async {
-        await testNocterm(
+        await testCinder(
           'decoration change detection',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               const Text('Hello',
                   style: TextStyle(decoration: TextDecoration.none)),
             );
             final cell1 = tester.terminalState.getCellAt(0, 0);
 
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               const Text('Hello',
                   style: TextStyle(decoration: TextDecoration.underline)),
             );
@@ -342,20 +342,20 @@ void main() {
         expect(cell1 == cell2, isFalse);
       });
 
-      test('detects reverse style change in rendered component', () async {
+      test('detects reverse style change in rendered widget', () async {
         // This test exposes the bug in frame.dart _hasLineChanged()
-        await testNocterm(
+        await testCinder(
           'reverse change detection',
           (tester) async {
             // Render with reverse=false
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               const Text('Test', style: TextStyle(reverse: false)),
             );
             final cell1 = tester.terminalState.getCellAt(0, 0);
             expect(cell1?.style.reverse, isFalse);
 
             // Render with reverse=true
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               const Text('Test', style: TextStyle(reverse: true)),
             );
             final cell2 = tester.terminalState.getCellAt(0, 0);
@@ -377,7 +377,7 @@ void main() {
 
       test('reverse change detection with same text and colors', () async {
         // More explicit test - everything same except reverse
-        await testNocterm(
+        await testCinder(
           'reverse only difference',
           (tester) async {
             const baseStyle = TextStyle(
@@ -385,7 +385,7 @@ void main() {
               backgroundColor: Colors.black,
             );
 
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               Text('ABCD', style: baseStyle.copyWith(reverse: false)),
             );
 
@@ -395,7 +395,7 @@ void main() {
               if (cell != null) cellsBefore.add(cell);
             }
 
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               Text('ABCD', style: baseStyle.copyWith(reverse: true)),
             );
 
@@ -446,10 +446,10 @@ void main() {
 
     group('Wide Characters', () {
       test('emoji renders correctly', () async {
-        await testNocterm(
+        await testCinder(
           'emoji rendering',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               const Text('Hi\u{1F600}World'),
             );
 
@@ -460,10 +460,10 @@ void main() {
       });
 
       test('wide character followed by narrow char', () async {
-        await testNocterm(
+        await testCinder(
           'wide then narrow',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               const Text('\u{1F600}A'),
             );
 
@@ -481,7 +481,7 @@ void main() {
       });
 
       test('zero-width space markers are handled correctly', () async {
-        await testNocterm(
+        await testCinder(
           'zero-width markers',
           (tester) async {
             final buffer = Buffer(10, 1);
@@ -494,16 +494,16 @@ void main() {
       });
 
       test('replacing emoji with narrow chars', () async {
-        await testNocterm(
+        await testCinder(
           'replace emoji',
           (tester) async {
             // First render emoji
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               const Text('\u{1F600}\u{1F600}'),
             );
 
             // Then render narrow chars in same space
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               const Text('AAAA'),
             );
 
@@ -518,20 +518,20 @@ void main() {
 
     group('Frame Behavior', () {
       test('first frame counts correctly', () async {
-        await testNocterm(
+        await testCinder(
           'first frame',
           (tester) async {
-            await tester.pumpComponent(const Text('Hello'));
+            await tester.pumpWidget(const Text('Hello'));
             expect(tester.frameCount, equals(1));
           },
         );
       });
 
       test('subsequent pumps increment frame count', () async {
-        await testNocterm(
+        await testCinder(
           'frame counting',
           (tester) async {
-            await tester.pumpComponent(const Text('Frame 1'));
+            await tester.pumpWidget(const Text('Frame 1'));
             expect(tester.frameCount, equals(1));
 
             await tester.pump();
@@ -544,13 +544,13 @@ void main() {
       });
 
       test('content update changes buffer', () async {
-        await testNocterm(
+        await testCinder(
           'content update',
           (tester) async {
-            await tester.pumpComponent(const Text('AAA'));
+            await tester.pumpWidget(const Text('AAA'));
             final snapshot1 = tester.toSnapshot();
 
-            await tester.pumpComponent(const Text('BBB'));
+            await tester.pumpWidget(const Text('BBB'));
             final snapshot2 = tester.toSnapshot();
 
             expect(snapshot1, isNot(equals(snapshot2)));
@@ -561,13 +561,13 @@ void main() {
       });
 
       test('identical content produces identical buffer', () async {
-        await testNocterm(
+        await testCinder(
           'identical content',
           (tester) async {
-            await tester.pumpComponent(const Text('Same'));
+            await tester.pumpWidget(const Text('Same'));
             final snapshot1 = tester.toSnapshot();
 
-            await tester.pumpComponent(const Text('Same'));
+            await tester.pumpWidget(const Text('Same'));
             final snapshot2 = tester.toSnapshot();
 
             expect(snapshot1, equals(snapshot2));
@@ -578,10 +578,10 @@ void main() {
 
     group('Golden Tests', () {
       test('golden: basic text rendering', () async {
-        await testNocterm(
+        await testCinder(
           'golden text',
           (tester) async {
-            await tester.pumpComponent(const Text('Hello World'));
+            await tester.pumpWidget(const Text('Hello World'));
 
             expect(tester.toSnapshot(), equals('Hello·World'));
           },
@@ -589,10 +589,10 @@ void main() {
       });
 
       test('golden: styled text preserves content', () async {
-        await testNocterm(
+        await testCinder(
           'golden styled',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               const Text('Styled',
                   style: TextStyle(
                     color: Colors.red,
@@ -606,10 +606,10 @@ void main() {
       });
 
       test('golden: multiple lines', () async {
-        await testNocterm(
+        await testCinder(
           'golden multiline',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               const Column(
                 children: [
                   Text('Line 1'),
@@ -628,10 +628,10 @@ void main() {
       });
 
       test('golden: container with text', () async {
-        await testNocterm(
+        await testCinder(
           'golden container',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               Container(
                 width: 10,
                 height: 3,
@@ -703,10 +703,10 @@ void main() {
 
     group('TerminalState Methods', () {
       test('containsText finds text anywhere', () async {
-        await testNocterm(
+        await testCinder(
           'containsText',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               const Column(
                 children: [
                   Text('First line'),
@@ -723,10 +723,10 @@ void main() {
       });
 
       test('getTextAt retrieves text at position', () async {
-        await testNocterm(
+        await testCinder(
           'getTextAt',
           (tester) async {
-            await tester.pumpComponent(const Text('ABCDEFGH'));
+            await tester.pumpWidget(const Text('ABCDEFGH'));
 
             expect(
                 tester.terminalState.getTextAt(0, 0, length: 3), equals('ABC'));
@@ -737,10 +737,10 @@ void main() {
       });
 
       test('findText locates all occurrences', () async {
-        await testNocterm(
+        await testCinder(
           'findText',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               const Column(
                 children: [
                   Text('foo bar foo'),
@@ -756,10 +756,10 @@ void main() {
       });
 
       test('getCellAt returns null for out of bounds', () async {
-        await testNocterm(
+        await testCinder(
           'getCellAt bounds',
           (tester) async {
-            await tester.pumpComponent(const Text('Hi'));
+            await tester.pumpWidget(const Text('Hi'));
 
             expect(tester.terminalState.getCellAt(-1, 0), isNull);
             expect(tester.terminalState.getCellAt(0, -1), isNull);
@@ -772,10 +772,10 @@ void main() {
 
     group('StyledText Segments', () {
       test('getStyledText returns styled segments', () async {
-        await testNocterm(
+        await testCinder(
           'getStyledText',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               Row(
                 children: [
                   const Text('Red', style: TextStyle(color: Colors.red)),
@@ -890,12 +890,12 @@ void main() {
       test(
           'getStyledText should separate segments with different reverse values',
           () async {
-        await testNocterm(
+        await testCinder(
           'styled text reverse segments',
           (tester) async {
             // Render two adjacent texts with different reverse values
             // but same color (so _stylesEqual will incorrectly merge them)
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               Row(
                 children: [
                   const Text('AAA',
@@ -941,10 +941,10 @@ void main() {
 
       test('reverse style boundary should create separate styled segments',
           () async {
-        await testNocterm(
+        await testCinder(
           'reverse boundary creates segments',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               Row(
                 children: [
                   const Text('NORMAL', style: TextStyle(color: Colors.green)),
@@ -1011,11 +1011,11 @@ void main() {
 
       test('differential rendering should detect reverse-only change',
           () async {
-        await testNocterm(
+        await testCinder(
           'reverse only differential',
           (tester) async {
             // First render without reverse
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               const Text('TEST',
                   style: TextStyle(color: Colors.white, reverse: false)),
             );
@@ -1025,7 +1025,7 @@ void main() {
             expect(initialCell?.style.reverse, isFalse);
 
             // Re-render with only reverse changed
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               const Text('TEST',
                   style: TextStyle(color: Colors.white, reverse: true)),
             );

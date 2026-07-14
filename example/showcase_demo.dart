@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'dart:math' as math;
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() async {
   await runApp(const ShowcaseApp());
 }
 
-class ShowcaseApp extends StatefulComponent {
+class ShowcaseApp extends StatefulWidget {
   const ShowcaseApp({super.key});
 
   @override
@@ -45,7 +45,7 @@ class _ShowcaseAppState extends State<ShowcaseApp> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Focusable(
       focused: true,
       onKeyEvent: (event) {
@@ -97,7 +97,7 @@ class _ShowcaseAppState extends State<ShowcaseApp> {
     );
   }
 
-  Component _buildHeader() {
+  Widget _buildHeader() {
     return Container(
       decoration: BoxDecoration(
         color: Color(0xFF2D2E40),
@@ -129,7 +129,7 @@ class _ShowcaseAppState extends State<ShowcaseApp> {
     );
   }
 
-  Component _buildTabBar() {
+  Widget _buildTabBar() {
     return Container(
       decoration: BoxDecoration(
         color: Color(0xFF24253A),
@@ -170,7 +170,7 @@ class _ShowcaseAppState extends State<ShowcaseApp> {
     );
   }
 
-  Component _buildContent() {
+  Widget _buildContent() {
     switch (_selectedTab) {
       case 0:
         return DashboardTab();
@@ -187,7 +187,7 @@ class _ShowcaseAppState extends State<ShowcaseApp> {
     }
   }
 
-  Component _buildFooter() {
+  Widget _buildFooter() {
     return Container(
       decoration: BoxDecoration(
         color: Color(0xFF2D2E40),
@@ -233,7 +233,7 @@ class _ShowcaseAppState extends State<ShowcaseApp> {
   }
 }
 
-class DashboardTab extends StatefulComponent {
+class DashboardTab extends StatefulWidget {
   @override
   State<DashboardTab> createState() => _DashboardTabState();
 }
@@ -265,7 +265,7 @@ class _DashboardTabState extends State<DashboardTab> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.all(2),
       child: Column(
@@ -304,7 +304,7 @@ class _DashboardTabState extends State<DashboardTab> {
     );
   }
 
-  Component _buildStatCard(String title, String value, Color color) {
+  Widget _buildStatCard(String title, String value, Color color) {
     return Container(
       decoration: BoxDecoration(
         color: Color(0xFF24253A),
@@ -331,7 +331,7 @@ class _DashboardTabState extends State<DashboardTab> {
     );
   }
 
-  Component _buildSystemMonitor() {
+  Widget _buildSystemMonitor() {
     return Container(
       decoration: BoxDecoration(
         color: Color(0xFF24253A),
@@ -366,7 +366,7 @@ class _DashboardTabState extends State<DashboardTab> {
     );
   }
 
-  Component _buildProgressBar(String label, double value, Color color) {
+  Widget _buildProgressBar(String label, double value, Color color) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -415,7 +415,7 @@ class _DashboardTabState extends State<DashboardTab> {
     );
   }
 
-  Component _buildSparkline() {
+  Widget _buildSparkline() {
     String sparkline = '';
     final chars = ['▁', '▂', '▃', '▄', '▅', '▆', '▇', '█'];
     for (double value in _cpuHistory) {
@@ -428,7 +428,7 @@ class _DashboardTabState extends State<DashboardTab> {
     );
   }
 
-  Component _buildActivityFeed() {
+  Widget _buildActivityFeed() {
     final activities = [
       ('🟢', 'User login', '2m ago'),
       ('🔵', 'Order placed', '5m ago'),
@@ -487,7 +487,7 @@ class _DashboardTabState extends State<DashboardTab> {
   }
 }
 
-class FormsTab extends StatefulComponent {
+class FormsTab extends StatefulWidget {
   @override
   State<FormsTab> createState() => _FormsTabState();
 }
@@ -501,7 +501,7 @@ class _FormsTabState extends State<FormsTab> {
   final int _selectedOption = 0;
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.all(2),
       child: Column(
@@ -593,7 +593,7 @@ class _FormsTabState extends State<FormsTab> {
     );
   }
 
-  Component _buildFormField(String label, String value,
+  Widget _buildFormField(String label, String value,
       {bool isPassword = false}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -617,7 +617,7 @@ class _FormsTabState extends State<FormsTab> {
     );
   }
 
-  Component _buildRadioOption(int value, String label) {
+  Widget _buildRadioOption(int value, String label) {
     return Row(
       children: [
         Text(
@@ -634,14 +634,14 @@ class _FormsTabState extends State<FormsTab> {
   }
 }
 
-class ChartsTab extends StatefulComponent {
+class ChartsTab extends StatefulWidget {
   @override
   State<ChartsTab> createState() => _ChartsTabState();
 }
 
 class _ChartsTabState extends State<ChartsTab> {
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.all(2),
       child: Row(
@@ -658,7 +658,7 @@ class _ChartsTabState extends State<ChartsTab> {
     );
   }
 
-  Component _buildBarChart() {
+  Widget _buildBarChart() {
     final data = [
       ('Jan', 65),
       ('Feb', 78),
@@ -735,7 +735,7 @@ class _ChartsTabState extends State<ChartsTab> {
     );
   }
 
-  Component _buildLineChart() {
+  Widget _buildLineChart() {
     return Container(
       decoration: BoxDecoration(
         color: Color(0xFF24253A),
@@ -787,9 +787,9 @@ class _ChartsTabState extends State<ChartsTab> {
   }
 }
 
-class ColorsTab extends StatelessComponent {
+class ColorsTab extends StatelessWidget {
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     final colors = [
       ('Black', Color(0xFF000000)),
       ('Red', Color(0xFFFF0000)),
@@ -878,7 +878,7 @@ class ColorsTab extends StatelessComponent {
     );
   }
 
-  Component _buildColorRow(String name, Color color) {
+  Widget _buildColorRow(String name, Color color) {
     return Padding(
       padding: EdgeInsets.only(bottom: 1),
       child: Row(
@@ -904,9 +904,9 @@ class ColorsTab extends StatelessComponent {
   }
 }
 
-class AboutTab extends StatelessComponent {
+class AboutTab extends StatelessWidget {
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.all(2),
       child: Center(
@@ -953,7 +953,7 @@ class AboutTab extends StatelessComponent {
               ),
               SizedBox(height: 1),
               Text(
-                '• Flutter-like component system',
+                '• Flutter-like widget system',
                 style: TextStyle(color: Colors.white),
               ),
               Text(

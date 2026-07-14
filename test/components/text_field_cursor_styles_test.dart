@@ -1,14 +1,14 @@
 import 'package:test/test.dart';
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() {
   group('TextField Cursor Styles', () {
     test('visual development - all cursor styles', () async {
-      await testNocterm(
+      await testCinder(
         'cursor styles visual test',
         (tester) async {
           // Create a column with different cursor styles
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -68,14 +68,14 @@ void main() {
     });
 
     test('cursor renders correctly at different positions', () async {
-      await testNocterm(
+      await testCinder(
         'cursor position test',
         (tester) async {
           final controller = TextEditingController(text: 'Hello World');
 
           // Test cursor at beginning
           controller.selection = const TextSelection.collapsed(offset: 0);
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TextField(
               controller: controller,
               focused: true,
@@ -89,7 +89,7 @@ void main() {
 
           // Test cursor at middle
           controller.selection = const TextSelection.collapsed(offset: 5);
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TextField(
               controller: controller,
               focused: true,
@@ -104,7 +104,7 @@ void main() {
           // Test cursor at end
           controller.selection =
               TextSelection.collapsed(offset: controller.text.length);
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TextField(
               controller: controller,
               focused: true,
@@ -121,10 +121,10 @@ void main() {
     });
 
     test('empty field shows cursor correctly', () async {
-      await testNocterm(
+      await testCinder(
         'empty field cursor test',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: [
                 Text('Empty fields with different cursor styles:'),
@@ -154,13 +154,13 @@ void main() {
     });
 
     test('cursor style changes dynamically', () async {
-      await testNocterm(
+      await testCinder(
         'dynamic cursor style test',
         (tester) async {
           final controller = TextEditingController(text: 'Dynamic cursor');
 
           // Start with block cursor
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TextField(
               controller: controller,
               focused: true,
@@ -172,7 +172,7 @@ void main() {
           print('Initial: Block cursor');
 
           // Change to underline cursor
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TextField(
               controller: controller,
               focused: true,
@@ -188,10 +188,10 @@ void main() {
     });
 
     test('non-blinking cursor', () async {
-      await testNocterm(
+      await testCinder(
         'non-blinking cursor test',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: [
                 Text('Non-blinking cursors:',

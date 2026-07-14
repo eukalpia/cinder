@@ -1,15 +1,15 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('Click Bug Reproduction', () {
     test('click with isMotion=false should work (baseline)', () async {
-      await testNocterm(
+      await testCinder(
         'baseline click',
         (tester) async {
           int tapCount = 0;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 80,
               height: 24,
@@ -42,12 +42,12 @@ void main() {
     });
 
     test('click with isMotion=true should now work (bug fixed)', () async {
-      await testNocterm(
+      await testCinder(
         'isMotion bug fixed',
         (tester) async {
           int tapCount = 0;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 80,
               height: 24,
@@ -106,12 +106,12 @@ void main() {
     });
 
     test('mixed motion and click events', () async {
-      await testNocterm(
+      await testCinder(
         'mixed events',
         (tester) async {
           int tapCount = 0;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 80,
               height: 24,
@@ -181,13 +181,13 @@ void main() {
     });
 
     test('real world scenario: hover then click', () async {
-      await testNocterm(
+      await testCinder(
         'hover then click',
         (tester) async {
           int tapCount = 0;
           bool isHovering = false;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 80,
               height: 24,

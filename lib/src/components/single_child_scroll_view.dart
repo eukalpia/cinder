@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 
-import 'package:nocterm/nocterm.dart';
-import 'package:nocterm/src/framework/terminal_canvas.dart';
+import 'package:cinder/cinder.dart';
+import 'package:cinder/src/framework/terminal_canvas.dart';
 import '../rendering/scrollable_render_object.dart';
 
 /// A box in which a single widget can be scrolled.
@@ -12,7 +12,7 @@ import '../rendering/scrollable_render_object.dart';
 ///
 /// Set [keyboardScrollable] to true to enable keyboard navigation with
 /// arrow keys, Page Up/Down, and Home/End.
-class SingleChildScrollView extends StatefulComponent {
+class SingleChildScrollView extends StatefulWidget {
   const SingleChildScrollView({
     super.key,
     this.scrollDirection = Axis.vertical,
@@ -33,7 +33,7 @@ class SingleChildScrollView extends StatefulComponent {
   final EdgeInsets? padding;
 
   /// The widget that scrolls.
-  final Component? child;
+  final Widget? child;
 
   /// Whether to enable keyboard scrolling with arrow keys, Page Up/Down, etc.
   ///
@@ -51,25 +51,25 @@ class _SingleChildScrollViewState extends State<SingleChildScrollView> {
   ScrollController? _controller;
 
   ScrollController get _effectiveController =>
-      component.controller ?? _controller!;
+      widget.controller ?? _controller!;
 
   @override
   void initState() {
     super.initState();
-    if (component.controller == null) {
+    if (widget.controller == null) {
       _controller = ScrollController();
     }
   }
 
   @override
-  void didUpdateComponent(SingleChildScrollView oldWidget) {
-    super.didUpdateComponent(oldWidget);
-    if (component.controller != oldWidget.controller) {
+  void didUpdateWidget(SingleChildScrollView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.controller != oldWidget.controller) {
       if (oldWidget.controller == null) {
         _controller?.dispose();
         _controller = null;
       }
-      if (component.controller == null) {
+      if (widget.controller == null) {
         _controller = ScrollController();
       }
     }
@@ -83,7 +83,7 @@ class _SingleChildScrollViewState extends State<SingleChildScrollView> {
 
   bool _handleKeyEvent(KeyboardEvent event) {
     final controller = _effectiveController;
-    final isVertical = component.scrollDirection == Axis.vertical;
+    final isVertical = widget.scrollDirection == Axis.vertical;
 
     // Arrow keys for single line scroll
     if (isVertical) {
@@ -126,24 +126,24 @@ class _SingleChildScrollViewState extends State<SingleChildScrollView> {
   }
 
   @override
-  Component build(BuildContext context) {
-    Component? child = component.child;
+  Widget build(BuildContext context) {
+    Widget? child = widget.child;
 
-    if (component.padding != null && child != null) {
+    if (widget.padding != null && child != null) {
       child = Padding(
-        padding: component.padding!,
+        padding: widget.padding!,
         child: child,
       );
     }
 
-    Component viewport = _SingleChildViewport(
-      scrollDirection: component.scrollDirection,
+    Widget viewport = _SingleChildViewport(
+      scrollDirection: widget.scrollDirection,
       controller: _effectiveController,
       child: child,
     );
 
     // Wrap with Focusable for keyboard scrolling if enabled
-    if (component.keyboardScrollable) {
+    if (widget.keyboardScrollable) {
       viewport = Focusable(
         focused: true,
         onKeyEvent: _handleKeyEvent,
@@ -156,7 +156,7 @@ class _SingleChildScrollViewState extends State<SingleChildScrollView> {
 }
 
 /// Internal widget that handles the viewport and clipping.
-class _SingleChildViewport extends SingleChildRenderObjectComponent {
+class _SingleChildViewport extends SingleChildRenderObjectWidget {
   const _SingleChildViewport({
     required this.scrollDirection,
     required this.controller,

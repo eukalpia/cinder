@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>nocterm Demo</title>
+  <title>cinder Demo</title>
 
   <!-- xterm.js CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.css" />
@@ -109,7 +109,7 @@
 </head>
 <body>
   <header>
-    <h1>nocterm Demo</h1>
+    <h1>cinder Demo</h1>
     <p class="subtitle">
       Flutter-inspired TUI framework for Dart - running in your browser via xterm.js
     </p>
@@ -134,32 +134,32 @@
   <script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.js"></script>
 
-  <!-- nocterm terminal host -->
+  <!-- cinder terminal host -->
   <script src="../terminal-host.js"></script>
 
   <script>
     // Initialize and run the demo
     async function main() {
       try {
-        console.log('Initializing nocterm demo...');
+        console.log('Initializing cinder demo...');
 
         // Create the terminal host
-        const host = new NoctermTerminalHost('terminal');
+        const host = new CinderTerminalHost('terminal');
 
-        // Initialize (creates xterm.js terminal and nocterm bridge)
+        // Initialize (creates xterm.js terminal and cinder bridge)
         await host.initialize();
 
-        // Load the nocterm demo app
+        // Load the cinder demo app
         console.log('Loading demo app...');
         await host.loadApp('./bento_app.js');
 
         console.log('Demo app loaded successfully!');
 
         // Make host available globally for debugging
-        window.noctermHost = host;
+        window.cinderHost = host;
 
       } catch (error) {
-        console.error('Failed to initialize nocterm demo:', error);
+        console.error('Failed to initialize cinder demo:', error);
 
         // Show error in UI
         const terminalEl = document.getElementById('terminal');

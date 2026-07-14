@@ -1,12 +1,12 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() {
   runApp(SimpleMarkdownExample());
 }
 
-class SimpleMarkdownExample extends StatelessComponent {
+class SimpleMarkdownExample extends StatelessWidget {
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(2),
       child: SingleChildScrollView(
@@ -35,13 +35,13 @@ This is a simple example showing **bold text**, *italic text*, and `inline code`
 
 ```dart
 void main() {
-  print('Hello from Nocterm!');
+  print('Hello from Cinder!');
 }
 ```
 
 > This is a blockquote with some important information.
 
-Check out the [documentation](https://nocterm.dev) for more!'''),
+Check out the [documentation](https://cinder.dev) for more!'''),
           ],
         ),
       ),

@@ -1,12 +1,12 @@
 import 'dart:io';
 
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() {
   runApp(const TextFieldDemo());
 }
 
-class TextFieldDemo extends StatefulComponent {
+class TextFieldDemo extends StatefulWidget {
   const TextFieldDemo({super.key});
 
   @override
@@ -51,7 +51,7 @@ class _TextFieldDemoState extends State<TextFieldDemo> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Focusable(
       focused: true,
       onKeyEvent: (event) {

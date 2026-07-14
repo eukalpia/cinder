@@ -1,8 +1,8 @@
 import 'dart:collection';
 
-import 'package:nocterm/nocterm.dart';
-import 'package:nocterm/src/framework/terminal_canvas.dart';
-import 'package:nocterm/src/components/stack.dart' as stack_lib;
+import 'package:cinder/cinder.dart';
+import 'package:cinder/src/framework/terminal_canvas.dart';
+import 'package:cinder/src/components/stack.dart' as stack_lib;
 
 /// Parent data for children in a RenderTheater.
 class TheaterParentData extends stack_lib.StackParentData {

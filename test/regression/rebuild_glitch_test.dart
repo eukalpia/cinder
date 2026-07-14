@@ -1,15 +1,15 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart' hide isEmpty;
 
 void main() {
   group('Rebuild glitch test', () {
     test('conditional widget insertion should preserve correct order',
         () async {
-      await testNocterm(
+      await testCinder(
         'verify rebuild glitch',
         (tester) async {
           print('\n=== Initial render (includeAtStart = false) ===');
-          await tester.pumpComponent(HotReloadGlitchTest());
+          await tester.pumpWidget(HotReloadGlitchTest());
 
           // Initially should only show "Second"
           var initialState = tester.terminalState;
@@ -65,7 +65,7 @@ void main() {
   });
 }
 
-class HotReloadGlitchTest extends StatefulComponent {
+class HotReloadGlitchTest extends StatefulWidget {
   @override
   State<HotReloadGlitchTest> createState() => _HotReloadGlitchTestState();
 }
@@ -84,7 +84,7 @@ class _HotReloadGlitchTestState extends State<HotReloadGlitchTest> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Column(
       children: [
         if (includeAtStart) WrappedText(text: 'First'),
@@ -94,13 +94,13 @@ class _HotReloadGlitchTestState extends State<HotReloadGlitchTest> {
   }
 }
 
-class WrappedText extends StatelessComponent {
+class WrappedText extends StatelessWidget {
   const WrappedText({required this.text});
 
   final String text;
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Text(text);
   }
 }

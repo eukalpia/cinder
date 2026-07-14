@@ -1,14 +1,14 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart' hide isEmpty;
 
 void main() {
   test('debug output with complex layout - investigating', () async {
-    await testNocterm(
+    await testCinder(
       'complex layout visualization',
       (tester) async {
         print('\n📺 Visualizing a complex layout:\n');
 
-        await tester.pumpComponent(
+        await tester.pumpWidget(
           Container(
             padding: const EdgeInsets.all(1),
             child: Column(

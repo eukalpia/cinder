@@ -1,4 +1,4 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 /// Regression tests for render objects whose layout-relevant properties are
@@ -12,13 +12,13 @@ import 'package:test/test.dart';
 void main() {
   group('render object property changes mark layout dirty', () {
     test('Padding change re-layouts the child', () async {
-      await testNocterm('padding relayout', (tester) async {
+      await testCinder('padding relayout', (tester) async {
         // The Divider fills whatever width it is given, so the number of
         // painted line characters reveals the child's laid-out width.
         // RenderPadding.paint re-derives the child *offset* from the live
         // padding field, which masks the bug for position - the child's
         // stale constraints/size are the observable failure.
-        await tester.pumpComponent(const _PaddedDivider(padding: 1));
+        await tester.pumpWidget(const _PaddedDivider(padding: 1));
 
         expect(_dividerWidth(tester), 18,
             reason: 'padding 1 in a 20-wide box leaves 18 columns');
@@ -37,8 +37,8 @@ void main() {
     });
 
     test('Align change repositions the child', () async {
-      await testNocterm('align relayout', (tester) async {
-        await tester.pumpComponent(const _AlignedLabel(toBottomRight: false));
+      await testCinder('align relayout', (tester) async {
+        await tester.pumpWidget(const _AlignedLabel(toBottomRight: false));
 
         var match = tester.terminalState.findText('AB').single;
         expect((match.x, match.y), (0, 0));
@@ -60,14 +60,14 @@ void main() {
   });
 }
 
-int _dividerWidth(NoctermTester tester) {
+int _dividerWidth(CinderTester tester) {
   final text = tester.terminalState.getText();
   return RegExp(r'─+')
       .allMatches(text)
       .fold(0, (max, m) => m.end - m.start > max ? m.end - m.start : max);
 }
 
-class _PaddedDivider extends StatefulComponent {
+class _PaddedDivider extends StatefulWidget {
   const _PaddedDivider({required this.padding});
 
   final double padding;
@@ -77,14 +77,14 @@ class _PaddedDivider extends StatefulComponent {
 }
 
 class _PaddedDividerState extends State<_PaddedDivider> {
-  late double _padding = component.padding;
+  late double _padding = widget.padding;
 
   void setPadding(double value) {
     setState(() => _padding = value);
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.all(_padding),
       child: const Divider(),
@@ -92,7 +92,7 @@ class _PaddedDividerState extends State<_PaddedDivider> {
   }
 }
 
-class _AlignedLabel extends StatefulComponent {
+class _AlignedLabel extends StatefulWidget {
   const _AlignedLabel({required this.toBottomRight});
 
   final bool toBottomRight;
@@ -102,14 +102,14 @@ class _AlignedLabel extends StatefulComponent {
 }
 
 class _AlignedLabelState extends State<_AlignedLabel> {
-  late bool _bottomRight = component.toBottomRight;
+  late bool _bottomRight = widget.toBottomRight;
 
   void toggle() {
     setState(() => _bottomRight = !_bottomRight);
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Align(
       alignment: _bottomRight ? Alignment.bottomRight : Alignment.topLeft,
       child: const Text('AB'),

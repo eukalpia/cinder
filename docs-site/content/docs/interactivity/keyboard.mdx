@@ -6,7 +6,7 @@ icon: keyboard
 
 Keyboard events let your app respond to user input. This guide covers keyboard handling in detail.
 
-## Focusable component
+## Focusable widget
 
 Use `Focusable` to receive keyboard events:
 
@@ -17,7 +17,7 @@ Focusable(
     // Handle key event
     return true;  // Event handled
   },
-  child: Text('Focused component'),
+  child: Text('Focused widget'),
 )
 ```
 
@@ -150,7 +150,7 @@ onKeyEvent: (event) {
 
 ## Event bubbling
 
-Events bubble up the component tree until handled:
+Events bubble up the widget tree until handled:
 
 ```dart
 // Parent

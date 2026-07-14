@@ -1,13 +1,13 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('RichText', () {
     test('renders simple text span', () async {
-      await testNocterm(
+      await testCinder(
         'simple text span',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             RichText(
               text: const TextSpan(
                 text: 'Hello, World!',
@@ -23,10 +23,10 @@ void main() {
     });
 
     test('renders nested text spans with different styles', () async {
-      await testNocterm(
+      await testCinder(
         'nested text spans',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             RichText(
               text: const TextSpan(
                 children: [
@@ -54,10 +54,10 @@ void main() {
     });
 
     test('renders colored text spans', () async {
-      await testNocterm(
+      await testCinder(
         'colored text spans',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             RichText(
               text: const TextSpan(
                 children: [
@@ -85,10 +85,10 @@ void main() {
     });
 
     test('handles text wrapping', () async {
-      await testNocterm(
+      await testCinder(
         'text wrapping',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 20,
               child: RichText(
@@ -116,10 +116,10 @@ void main() {
     });
 
     test('handles mixed styles with backgrounds', () async {
-      await testNocterm(
+      await testCinder(
         'mixed styles with backgrounds',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             RichText(
               text: const TextSpan(
                 children: [
@@ -152,10 +152,10 @@ void main() {
     });
 
     test('respects text alignment', () async {
-      await testNocterm(
+      await testCinder(
         'text alignment',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               child: Column(
@@ -189,10 +189,10 @@ void main() {
 
     test('handles overflow with ellipsis',
         skip: 'Feature not implemented: RichText overflow ellipsis', () async {
-      await testNocterm(
+      await testCinder(
         'overflow with ellipsis',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 15,
               child: RichText(
@@ -214,10 +214,10 @@ void main() {
 
     test('handles max lines constraint',
         skip: 'Feature not implemented: RichText maxLines', () async {
-      await testNocterm(
+      await testCinder(
         'max lines constraint',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 20,
               child: RichText(

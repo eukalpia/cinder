@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 
-import 'package:nocterm/nocterm.dart';
-import 'package:nocterm/src/framework/terminal_canvas.dart';
+import 'package:cinder/cinder.dart';
+import 'package:cinder/src/framework/terminal_canvas.dart';
 import 'stack.dart' as stack_lib;
 
 /// Implements the stack layout algorithm.
@@ -316,7 +316,7 @@ class RenderStack extends RenderObject
 /// This class is useful if you want to overlap several children in a simple
 /// way, for example having some text and an image, overlaid with a gradient
 /// and a button attached to the bottom.
-class Stack extends MultiChildRenderObjectComponent {
+class Stack extends MultiChildRenderObjectWidget {
   /// Creates a stack layout widget.
   const Stack({
     super.key,
@@ -324,7 +324,7 @@ class Stack extends MultiChildRenderObjectComponent {
     this.textDirection,
     this.fit = stack_lib.StackFit.loose,
     this.clipBehavior = stack_lib.Clip.hardEdge,
-    super.children = const <Component>[],
+    super.children = const <Widget>[],
   });
 
   /// How to align the non-positioned and partially-positioned children in the stack.

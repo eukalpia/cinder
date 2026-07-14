@@ -1,4 +1,4 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 /// Visitor pattern callback for walking [InlineSpan] trees.
 typedef InlineSpanVisitor = bool Function(InlineSpan span);

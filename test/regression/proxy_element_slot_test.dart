@@ -1,4 +1,4 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 /// Regression test for ProxyElement slot passing bug.
@@ -12,16 +12,16 @@ import 'package:test/test.dart';
 /// to updateChild() instead of passing through `this.slot`.
 ///
 /// Fix: Changed to pass `slot` instead of `null`:
-///   _child = updateChild(_child, component.child, slot);
+///   _child = updateChild(_child, widget.child, slot);
 void main() {
   group('ProxyElement slot passing regression tests', () {
     group('Positioned child replacement in Stack', () {
       test('foreground stays on top when Positioned child changes', () async {
-        await testNocterm(
+        await testCinder(
           'positioned child replacement',
           (tester) async {
             // Initial state with SizedBox as background
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               _PositionedChildSwap(useAlternate: false),
             );
 
@@ -29,7 +29,7 @@ void main() {
             expect(tester.terminalState, containsText('FOREGROUND'));
 
             // Switch to alternate child (Container with text)
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               _PositionedChildSwap(useAlternate: true),
             );
 
@@ -41,10 +41,10 @@ void main() {
       });
 
       test('multiple Positioned children maintain correct order', () async {
-        await testNocterm(
+        await testCinder(
           'multiple positioned order',
           (tester) async {
-            await tester.pumpComponent(const _MultiPositionedStack());
+            await tester.pumpWidget(const _MultiPositionedStack());
 
             final state = tester.findState<_MultiPositionedStackState>();
 
@@ -73,10 +73,10 @@ void main() {
       });
 
       test('stateful toggle preserves child order', () async {
-        await testNocterm(
+        await testCinder(
           'stateful positioned toggle',
           (tester) async {
-            await tester.pumpComponent(const _StatefulPositionedToggle());
+            await tester.pumpWidget(const _StatefulPositionedToggle());
 
             final state = tester.findState<_StatefulPositionedToggleState>();
 
@@ -99,11 +99,11 @@ void main() {
 
     group('Nested ProxyElements', () {
       test('deeply nested Positioned maintains order', () async {
-        await testNocterm(
+        await testCinder(
           'nested positioned',
           (tester) async {
-            // Test with nested InheritedComponent -> Positioned -> child
-            await tester.pumpComponent(
+            // Test with nested InheritedWidget -> Positioned -> child
+            await tester.pumpWidget(
               Stack(
                 children: [
                   Positioned.fill(
@@ -127,11 +127,11 @@ void main() {
 
     group('ParentData preservation', () {
       test('Positioned parent data survives child replacement', () async {
-        await testNocterm(
+        await testCinder(
           'parent data preservation',
           (tester) async {
             // Initial positioned at specific location
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               SizedBox(
                 width: 80,
                 height: 24,
@@ -154,7 +154,7 @@ void main() {
             expect(tester.terminalState, containsText('CENTER'));
 
             // Replace the positioned child
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               SizedBox(
                 width: 80,
                 height: 24,
@@ -185,13 +185,13 @@ void main() {
 
 // Test helper components
 
-class _PositionedChildSwap extends StatelessComponent {
+class _PositionedChildSwap extends StatelessWidget {
   final bool useAlternate;
 
   const _PositionedChildSwap({required this.useAlternate});
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Stack(
       children: [
         // Background - this changes
@@ -217,7 +217,7 @@ class _PositionedChildSwap extends StatelessComponent {
   }
 }
 
-class _MultiPositionedStack extends StatefulComponent {
+class _MultiPositionedStack extends StatefulWidget {
   const _MultiPositionedStack();
 
   @override
@@ -232,7 +232,7 @@ class _MultiPositionedStackState extends State<_MultiPositionedStack> {
   void toggleMiddle() => setState(() => _middleAlt = !_middleAlt);
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Stack(
       children: [
         // Bottom layer - positioned at top-left
@@ -256,7 +256,7 @@ class _MultiPositionedStackState extends State<_MultiPositionedStack> {
   }
 }
 
-class _StatefulPositionedToggle extends StatefulComponent {
+class _StatefulPositionedToggle extends StatefulWidget {
   const _StatefulPositionedToggle();
 
   @override
@@ -270,7 +270,7 @@ class _StatefulPositionedToggleState extends State<_StatefulPositionedToggle> {
   void toggle() => setState(() => _showLarge = !_showLarge);
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Stack(
       children: [
         Positioned.fill(
@@ -296,13 +296,13 @@ class _StatefulPositionedToggleState extends State<_StatefulPositionedToggle> {
 }
 
 /// Simple wrapper to test nested ProxyElements
-class _ThemeWrapper extends StatelessComponent {
-  final Component child;
+class _ThemeWrapper extends StatelessWidget {
+  final Widget child;
 
   const _ThemeWrapper({required this.child});
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return child;
   }
 }

@@ -11,7 +11,7 @@ Input components handle user input in your terminal app. This guide covers text 
 `TextField` provides a text input field:
 
 ```dart
-class MyForm extends StatefulComponent {
+class MyForm extends StatefulWidget {
   const MyForm({super.key});
 
   @override
@@ -28,7 +28,7 @@ class _MyFormState extends State<MyForm> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return TextField(
       controller: _controller,
       decoration: InputDecoration(
@@ -109,10 +109,10 @@ TextField(
 
 ## Focusable
 
-`Focusable` makes any component respond to keyboard input:
+`Focusable` makes any widget respond to keyboard input:
 
 ```dart
-class Counter extends StatefulComponent {
+class Counter extends StatefulWidget {
   const Counter({super.key});
 
   @override
@@ -123,7 +123,7 @@ class _CounterState extends State<Counter> {
   int _count = 0;
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Focusable(
       focused: true,
       onKeyEvent: (event) {
@@ -209,14 +209,14 @@ onKeyEvent: (event) {
 }
 ```
 
-Events bubble up the component tree until a handler returns `true`.
+Events bubble up the widget tree until a handler returns `true`.
 
 ## Focus management
 
-Control which component receives keyboard input:
+Control which widget receives keyboard input:
 
 ```dart
-class App extends StatefulComponent {
+class App extends StatefulWidget {
   const App({super.key});
 
   @override
@@ -227,7 +227,7 @@ class _AppState extends State<App> {
   int _focusedIndex = 0;
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Column(
       children: [
         Focusable(
@@ -267,7 +267,7 @@ Only the `Focusable` with `focused: true` receives keyboard events.
 ### Simple form
 
 ```dart
-class LoginForm extends StatefulComponent {
+class LoginForm extends StatefulWidget {
   const LoginForm({super.key});
 
   @override
@@ -292,7 +292,7 @@ class _LoginFormState extends State<LoginForm> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Column(
       children: [
         Focusable(

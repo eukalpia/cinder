@@ -1,4 +1,4 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 /// Coverage for RenderTextField.getImeCursorPosition() (added in PR #83),
@@ -24,18 +24,18 @@ void main() {
         element.visitChildren(visit);
       }
 
-      visit(NoctermTestBinding.instance.rootElement!);
+      visit(CinderTestBinding.instance.rootElement!);
       return result;
     }
 
     test('tracks the cursor row across consecutive newlines', () async {
-      await testNocterm(
+      await testCinder(
         'ime cursor consecutive newlines',
         (tester) async {
           // Lines: ['a', '', 'b', 'c'] — an empty line between 'a' and 'b'.
           final controller = TextEditingController(text: 'a\n\nb\nc');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TextField(
               controller: controller,
               width: 20,

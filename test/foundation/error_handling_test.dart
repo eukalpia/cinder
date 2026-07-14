@@ -1,15 +1,15 @@
 import 'package:test/test.dart';
-import 'package:nocterm/nocterm.dart';
-import 'package:nocterm/src/components/error_widget.dart';
+import 'package:cinder/cinder.dart';
+import 'package:cinder/src/components/error_widget.dart';
 
 void main() {
   group('RenderObject Error Handling', () {
     test('layout error is caught and displayed', () async {
-      await testNocterm(
+      await testCinder(
         'layout error handling',
         (tester) async {
           // Create a widget that will throw during layout
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             const ErrorThrowingWidget(
               throwInLayout: true,
               throwInPaint: false,
@@ -36,11 +36,11 @@ void main() {
     });
 
     test('paint error is caught and displayed', () async {
-      await testNocterm(
+      await testCinder(
         'paint error handling',
         (tester) async {
           // Create a widget that will throw during paint
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             const ErrorThrowingWidget(
               throwInLayout: false,
               throwInPaint: true,
@@ -64,11 +64,11 @@ void main() {
 
     test('nested errors are isolated',
         skip: 'Known issue: Error isolation not working as expected', () async {
-      await testNocterm(
+      await testCinder(
         'nested error isolation',
         (tester) async {
           // Create a column with one failing and one working widget
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: [
                 const Text('Before Error'),
@@ -97,10 +97,10 @@ void main() {
     });
 
     test('TUIErrorWidget displays custom error message', () async {
-      await testNocterm(
+      await testCinder(
         'custom error widget',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             const TUIErrorWidget(
               message: 'Custom Error: Something went wrong',
               error: 'TestError',
@@ -124,10 +124,10 @@ void main() {
     });
 
     test('error box respects size constraints', () async {
-      await testNocterm(
+      await testCinder(
         'error box constraints',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             SizedBox(
               width: 30,
               height: 7,

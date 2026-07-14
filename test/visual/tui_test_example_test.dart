@@ -1,10 +1,10 @@
 // ignore_for_file: unused_element
 
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart' hide isEmpty;
 
-// Example component for testing
-class Counter extends StatefulComponent {
+// Example widget for testing
+class Counter extends StatefulWidget {
   const Counter({super.key});
 
   @override
@@ -27,7 +27,7 @@ class _CounterState extends State<Counter> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(2),
       child: Column(
@@ -56,8 +56,8 @@ class _CounterState extends State<Counter> {
 void main() {
   group('TUI Testing Framework', () {
     test('can render simple text', () async {
-      await testNocterm('simple text', (tester) async {
-        await tester.pumpComponent(
+      await testCinder('simple text', (tester) async {
+        await tester.pumpWidget(
           Container(
             child: const Text('Hello, TUI!'),
           ),
@@ -69,8 +69,8 @@ void main() {
     });
 
     test('can find text at specific position', () async {
-      await testNocterm('positioned text', (tester) async {
-        await tester.pumpComponent(
+      await testCinder('positioned text', (tester) async {
+        await tester.pumpWidget(
           Container(
             padding: const EdgeInsets.only(left: 5, top: 3),
             child: const Text('Positioned'),
@@ -83,8 +83,8 @@ void main() {
     });
 
     test('can detect styled text', () async {
-      await testNocterm('styled text', (tester) async {
-        await tester.pumpComponent(
+      await testCinder('styled text', (tester) async {
+        await tester.pumpWidget(
           Container(
             child: Text(
               'Styled Text',
@@ -103,8 +103,8 @@ void main() {
     });
 
     test('can handle multiple pumps', () async {
-      await testNocterm('multiple pumps', (tester) async {
-        await tester.pumpComponent(const Counter());
+      await testCinder('multiple pumps', (tester) async {
+        await tester.pumpWidget(const Counter());
 
         // Initial state
         expect(tester.terminalState, containsText('Count: 0'));
@@ -119,8 +119,8 @@ void main() {
     });
 
     test('can use snapshot testing', () async {
-      await testNocterm('snapshot test', (tester) async {
-        await tester.pumpComponent(
+      await testCinder('snapshot test', (tester) async {
+        await tester.pumpWidget(
           Container(
             padding: const EdgeInsets.all(1),
             child: Column(
@@ -147,8 +147,8 @@ void main() {
     });
 
     test('can render complex layouts', () async {
-      await testNocterm('complex layout', (tester) async {
-        await tester.pumpComponent(
+      await testCinder('complex layout', (tester) async {
+        await tester.pumpWidget(
           Container(
             padding: const EdgeInsets.all(2),
             child: Column(
@@ -181,8 +181,8 @@ void main() {
     });
 
     test('can debug render output', () async {
-      await testNocterm('debug output', (tester) async {
-        await tester.pumpComponent(
+      await testCinder('debug output', (tester) async {
+        await tester.pumpWidget(
           Container(
             padding: const EdgeInsets.all(1),
             child: const Text('Debug Me'),
@@ -200,8 +200,8 @@ void main() {
     });
 
     test('detects empty terminal', () async {
-      await testNocterm('empty terminal', (tester) async {
-        await tester.pumpComponent(Container());
+      await testCinder('empty terminal', (tester) async {
+        await tester.pumpWidget(Container());
 
         // Terminal should be empty
         expect(tester.terminalState, isEmpty);
@@ -209,8 +209,8 @@ void main() {
     });
 
     test('can find components', () async {
-      await testNocterm('find components', (tester) async {
-        await tester.pumpComponent(
+      await testCinder('find components', (tester) async {
+        await tester.pumpWidget(
           Column(
             children: [
               const Text('First'),
@@ -222,20 +222,20 @@ void main() {
           ),
         );
 
-        // Find specific component types
-        final texts = tester.findAllComponents<Text>();
+        // Find specific widget types
+        final texts = tester.findAllWidgets<Text>();
         expect(texts.length, 3);
 
-        final container = tester.findComponent<Container>();
+        final container = tester.findWidget<Container>();
         expect(container, isNotNull);
       });
     });
 
     test('can specify terminal size', () async {
-      await testNocterm(
+      await testCinder(
         'custom size',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               child: const Text('Small Terminal'),
             ),

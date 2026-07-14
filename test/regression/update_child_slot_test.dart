@@ -1,28 +1,28 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 /// Regression test for updateChild slot propagation on identity-equal
 /// components.
 ///
-/// When updateChild received a component that was identical (==) to the
-/// existing child's component (e.g. const widgets reused across rebuilds), it
+/// When updateChild received a widget that was identical (==) to the
+/// existing child's widget (e.g. const widgets reused across rebuilds), it
 /// returned early without checking whether the slot had changed. This meant
 /// reordering const children inside a Stack had no effect on render-tree paint
 /// order — the last-painted (visually "on top") child was frozen.
 void main() {
   group('updateChild slot propagation for identity-equal components', () {
     test('reordering const children in Stack changes paint order', () async {
-      await testNocterm('const child reorder', (tester) async {
+      await testCinder('const child reorder', (tester) async {
         // Pump with order A (bottom) → B (top).
         // B paints last so its text wins.
-        await tester.pumpComponent(const _ReorderableStack(topIsB: true));
+        await tester.pumpWidget(const _ReorderableStack(topIsB: true));
 
         // B is on top — only 'BBB' visible at the overlap position.
         expect(tester.terminalState, containsText('BBB'));
 
         // Reorder: B (bottom) → A (top).
         // A should now paint last.
-        await tester.pumpComponent(const _ReorderableStack(topIsB: false));
+        await tester.pumpWidget(const _ReorderableStack(topIsB: false));
 
         // A is on top — 'AAA' must be visible at the overlap position.
         expect(
@@ -35,18 +35,18 @@ void main() {
     });
 
     test('cycling const children through multiple reorders', () async {
-      await testNocterm('const child cycling', (tester) async {
-        await tester.pumpComponent(const _CyclingStack(activeIndex: 0));
+      await testCinder('const child cycling', (tester) async {
+        await tester.pumpWidget(const _CyclingStack(activeIndex: 0));
         expect(tester.terminalState, containsText('VIEW_0'));
 
-        await tester.pumpComponent(const _CyclingStack(activeIndex: 1));
+        await tester.pumpWidget(const _CyclingStack(activeIndex: 1));
         expect(tester.terminalState, containsText('VIEW_1'));
 
-        await tester.pumpComponent(const _CyclingStack(activeIndex: 2));
+        await tester.pumpWidget(const _CyclingStack(activeIndex: 2));
         expect(tester.terminalState, containsText('VIEW_2'));
 
         // Cycle back to 0.
-        await tester.pumpComponent(const _CyclingStack(activeIndex: 0));
+        await tester.pumpWidget(const _CyclingStack(activeIndex: 0));
         expect(
           tester.terminalState,
           containsText('VIEW_0'),
@@ -56,8 +56,8 @@ void main() {
     });
 
     test('stateful reorder preserves child state', () async {
-      await testNocterm('stateful reorder', (tester) async {
-        await tester.pumpComponent(const _StatefulReorder());
+      await testCinder('stateful reorder', (tester) async {
+        await tester.pumpWidget(const _StatefulReorder());
 
         final state = tester.findState<_StatefulReorderState>();
 
@@ -92,7 +92,7 @@ void main() {
 
 /// Stack with two const children whose order is controlled by [topIsB].
 /// Both children fill the entire area so the top one fully overlaps.
-class _ReorderableStack extends StatelessComponent {
+class _ReorderableStack extends StatelessWidget {
   const _ReorderableStack({required this.topIsB});
 
   final bool topIsB;
@@ -101,13 +101,13 @@ class _ReorderableStack extends StatelessComponent {
   static const _b = _ConstView(key: ValueKey('b'), label: 'BBB');
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Stack(children: topIsB ? const [_a, _b] : const [_b, _a]);
   }
 }
 
 /// Stack that cycles three const keyed views, placing the active one last.
-class _CyclingStack extends StatelessComponent {
+class _CyclingStack extends StatelessWidget {
   const _CyclingStack({required this.activeIndex});
 
   final int activeIndex;
@@ -119,7 +119,7 @@ class _CyclingStack extends StatelessComponent {
   ];
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Stack(
       children: [
         for (var i = 0; i < _views.length; i++)
@@ -131,7 +131,7 @@ class _CyclingStack extends StatelessComponent {
 }
 
 /// Stateful wrapper to toggle child order via setState.
-class _StatefulReorder extends StatefulComponent {
+class _StatefulReorder extends StatefulWidget {
   const _StatefulReorder();
 
   @override
@@ -144,19 +144,19 @@ class _StatefulReorderState extends State<_StatefulReorder> {
   void toggle() => setState(() => _topIsB = !_topIsB);
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return _ReorderableStack(topIsB: _topIsB);
   }
 }
 
 /// A const-constructible full-size view with a centered label.
-class _ConstView extends StatelessComponent {
+class _ConstView extends StatelessWidget {
   const _ConstView({required this.label, super.key});
 
   final String label;
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Positioned.fill(child: Center(child: Text(label)));
   }
 }

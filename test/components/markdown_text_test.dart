@@ -1,13 +1,13 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('MarkdownText', () {
     test('renders plain text', () async {
-      await testNocterm(
+      await testCinder(
         'plain text',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             const MarkdownText('This is plain text'),
           );
 
@@ -18,10 +18,10 @@ void main() {
     });
 
     test('renders bold text', () async {
-      await testNocterm(
+      await testCinder(
         'bold text',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             const MarkdownText('This is **bold** text'),
           );
 
@@ -32,10 +32,10 @@ void main() {
     });
 
     test('renders italic text', () async {
-      await testNocterm(
+      await testCinder(
         'italic text',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             const MarkdownText('This is *italic* text'),
           );
 
@@ -46,10 +46,10 @@ void main() {
     });
 
     test('renders headers', () async {
-      await testNocterm(
+      await testCinder(
         'headers',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             const MarkdownText('''# Header 1
 ## Header 2
 ### Header 3
@@ -66,10 +66,10 @@ Regular text'''),
     });
 
     test('renders code blocks', () async {
-      await testNocterm(
+      await testCinder(
         'code blocks',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             const MarkdownText('''Some text with `inline code` and:
 
 ```
@@ -91,10 +91,10 @@ More text'''),
     });
 
     test('renders lists', () async {
-      await testNocterm(
+      await testCinder(
         'lists',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             const MarkdownText('''Unordered list:
 - Item 1
 - Item 2
@@ -119,10 +119,10 @@ Ordered list:
     });
 
     test('renders links', () async {
-      await testNocterm(
+      await testCinder(
         'links',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             const MarkdownText('Check out [Flutter](https://flutter.dev)!'),
           );
 
@@ -134,10 +134,10 @@ Ordered list:
     });
 
     test('renders blockquotes', () async {
-      await testNocterm(
+      await testCinder(
         'blockquotes',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             const MarkdownText('''Normal text
 
 > This is a blockquote
@@ -155,10 +155,10 @@ More normal text'''),
     });
 
     test('renders horizontal rules', () async {
-      await testNocterm(
+      await testCinder(
         'horizontal rules',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             const MarkdownText('''Above the line
 
 ---
@@ -176,10 +176,10 @@ Below the line'''),
 
     test('renders complex markdown',
         skip: 'Known issue: Complex markdown rendering', () async {
-      await testNocterm(
+      await testCinder(
         'complex markdown',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             const MarkdownText('''# Welcome to Markdown
 
 This is a **demonstration** of the *markdown* renderer with ~~strikethrough~~.
@@ -223,10 +223,10 @@ That's all folks!'''),
     });
 
     test('handles images', () async {
-      await testNocterm(
+      await testCinder(
         'images',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             const MarkdownText('Here is an image: ![Alt text](image.png)'),
           );
 
@@ -237,10 +237,10 @@ That's all folks!'''),
     });
 
     test('renders simple table', () async {
-      await testNocterm(
+      await testCinder(
         'simple table',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             const MarkdownText('''| Header 1 | Header 2 |
 |----------|----------|
 | Cell 1   | Cell 2   |
@@ -258,11 +258,11 @@ That's all folks!'''),
     });
 
     test('table wraps cell content in narrow terminal', () async {
-      await testNocterm(
+      await testCinder(
         'table smart wrap',
         (tester) async {
           // This table naturally needs ~60 cols but we give it 40
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             const MarkdownText('''| Service | Description |
 |---------|-------------|
 | auth | Authentication and authorization service |
@@ -290,10 +290,10 @@ That's all folks!'''),
     });
 
     test('table preserves structure when it fits', () async {
-      await testNocterm(
+      await testCinder(
         'table fits',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             const MarkdownText('''| A | B |
 |---|---|
 | 1 | 2 |'''),
@@ -312,11 +312,11 @@ That's all folks!'''),
     });
 
     test('table with multi-line cells pads shorter cells', () async {
-      await testNocterm(
+      await testCinder(
         'table multi-line cell padding',
         (tester) async {
           // In a 30-wide terminal, the long cell should wrap while short stays on one line
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             const MarkdownText('''| Key | Value |
 |-----|-------|
 | id | A very long value that must wrap |

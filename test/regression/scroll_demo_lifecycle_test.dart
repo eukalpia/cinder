@@ -1,13 +1,13 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 import '../../example/scroll_demo.dart';
 
 void main() {
   test('no lifecycle errors when switching tabs rapidly', () async {
-    await testNocterm(
+    await testCinder(
       'rapid tab switching',
       (tester) async {
-        await tester.pumpComponent(const ScrollDemo());
+        await tester.pumpWidget(const ScrollDemo());
 
         // Rapidly switch tabs 20 times
         for (int i = 0; i < 20; i++) {

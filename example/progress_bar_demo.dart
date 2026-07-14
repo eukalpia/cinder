@@ -1,7 +1,7 @@
 import 'dart:async';
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
-class ProgressBarDemo extends StatefulComponent {
+class ProgressBarDemo extends StatefulWidget {
   @override
   State<ProgressBarDemo> createState() => _ProgressBarDemoState();
 }
@@ -54,7 +54,7 @@ class _ProgressBarDemoState extends State<ProgressBarDemo> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(2),
       child: Scrollbar(

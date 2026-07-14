@@ -1,5 +1,5 @@
-import 'package:nocterm/nocterm.dart';
-import 'package:nocterm/src/framework/terminal_canvas.dart';
+import 'package:cinder/cinder.dart';
+import 'package:cinder/src/framework/terminal_canvas.dart';
 
 enum DividerStyle {
   single,
@@ -10,7 +10,7 @@ enum DividerStyle {
   ascii,
 }
 
-class Divider extends SingleChildRenderObjectComponent {
+class Divider extends SingleChildRenderObjectWidget {
   const Divider({
     super.key,
     this.height = 1.0,
@@ -58,7 +58,7 @@ class Divider extends SingleChildRenderObjectComponent {
   }
 }
 
-class VerticalDivider extends SingleChildRenderObjectComponent {
+class VerticalDivider extends SingleChildRenderObjectWidget {
   const VerticalDivider({
     super.key,
     this.width = 1.0,

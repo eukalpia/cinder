@@ -1,13 +1,13 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('MarkdownText Line Breaks', () {
     test('renders paragraphs with proper spacing', () async {
-      await testNocterm(
+      await testCinder(
         'paragraph spacing',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             const MarkdownText('''First paragraph.
 
 Second paragraph.
@@ -32,10 +32,10 @@ Third paragraph.'''),
     });
 
     test('renders headers with proper line breaks', () async {
-      await testNocterm(
+      await testCinder(
         'header line breaks',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             const MarkdownText('''# Header 1
 Some text after header.
 
@@ -61,10 +61,10 @@ More text here.'''),
     });
 
     test('renders lists with proper formatting', () async {
-      await testNocterm(
+      await testCinder(
         'list formatting',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             const MarkdownText('''Some text before list.
 
 - Item 1
@@ -94,10 +94,10 @@ Text after list.'''),
     });
 
     test('renders code blocks with proper spacing', () async {
-      await testNocterm(
+      await testCinder(
         'code block spacing',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 50,
               child: const MarkdownText('''Text before code.
@@ -132,10 +132,10 @@ Text after code.'''),
     });
 
     test('handles mixed content correctly', () async {
-      await testNocterm(
+      await testCinder(
         'mixed content',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 60,
               child: const MarkdownText('''# Title
@@ -182,10 +182,10 @@ Final paragraph.'''),
     });
 
     test('check exact line structure', () async {
-      await testNocterm(
+      await testCinder(
         'exact line structure',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               padding: const EdgeInsets.all(1),
               child: const MarkdownText('''# Header

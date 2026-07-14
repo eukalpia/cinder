@@ -1,14 +1,14 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() {
   runApp(const StackDemo());
 }
 
-class StackDemo extends StatelessComponent {
+class StackDemo extends StatelessWidget {
   const StackDemo({super.key});
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Container(
       child: Stack(
         children: [

@@ -1,7 +1,7 @@
 import 'dart:io';
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
-class LoggerDemoApp extends StatefulComponent {
+class LoggerDemoApp extends StatefulWidget {
   @override
   State<LoggerDemoApp> createState() => _LoggerDemoAppState();
 }
@@ -15,7 +15,7 @@ class _LoggerDemoAppState extends State<LoggerDemoApp> {
     // Log some messages when the app starts
     print('App started at ${DateTime.now()}');
     print('Logs are streamed via WebSocket');
-    print('Run "nocterm logs" in another terminal to see logs');
+    print('Run "cinder logs" in another terminal to see logs');
     print('Multiple log entries are buffered in memory');
 
     // Schedule periodic logs to demonstrate streaming
@@ -34,7 +34,7 @@ class _LoggerDemoAppState extends State<LoggerDemoApp> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Column(
       children: [
         const Text('WebSocket Logger Demo'),
@@ -43,7 +43,7 @@ class _LoggerDemoAppState extends State<LoggerDemoApp> {
         const Text(''),
         const Text('To view logs:'),
         const Text('  1. Open another terminal'),
-        const Text('  2. Run: nocterm logs'),
+        const Text('  2. Run: cinder logs'),
         const Text(''),
         Text('Generated $_counter log messages so far'),
         const Text(''),
@@ -60,6 +60,6 @@ void main() async {
   // After app exits, show info about how to view logs
   stdout.writeln('\n=== Logger Demo Complete ===');
   stdout.writeln('Logs were streamed via WebSocket during execution.');
-  stdout.writeln('To view logs from a running app, use: nocterm logs');
+  stdout.writeln('To view logs from a running app, use: cinder logs');
   stdout.writeln('===============================\n');
 }

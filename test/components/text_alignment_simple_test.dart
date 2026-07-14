@@ -1,14 +1,14 @@
 import 'package:test/test.dart';
-import 'package:nocterm/nocterm.dart' hide TextAlign;
-import 'package:nocterm/src/components/basic.dart' show TextAlign;
+import 'package:cinder/cinder.dart' hide TextAlign;
+import 'package:cinder/src/components/basic.dart' show TextAlign;
 
 void main() {
   group('Simple Text Alignment Test', () {
     test('text alignment in SizedBox', () async {
-      await testNocterm(
+      await testCinder(
         'simple alignment',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: const [
                 SizedBox(

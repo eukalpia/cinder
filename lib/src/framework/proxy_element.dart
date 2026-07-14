@@ -5,38 +5,38 @@ part of 'framework.dart';
 /// Unlike [StatelessElement] and [StatefulElement], proxy elements do not
 /// call [build] during updates. Instead, they directly update their child
 /// via [updateChild] in [update], and provide the [updated] hook for
-/// subclasses to react to component changes.
+/// subclasses to react to widget changes.
 ///
-/// This mirrors Flutter's `ProxyElement` which extends `ComponentElement`.
+/// This mirrors Flutter's `ProxyElement` which extends `WidgetElement`.
 abstract class ProxyElement extends BuildableElement {
-  ProxyElement(super.component);
+  ProxyElement(super.widget);
 
   @override
-  ProxyComponent get component => super.component as ProxyComponent;
+  ProxyWidget get widget => super.widget as ProxyWidget;
 
   @override
-  Component build() => component.child;
+  Widget build() => widget.child;
 
   @override
-  void update(Component newComponent) {
-    final oldComponent = component;
-    super.update(newComponent);
-    assert(component == newComponent);
+  void update(Widget newWidget) {
+    final oldWidget = widget;
+    super.update(newWidget);
+    assert(widget == newWidget);
     // Pass through the slot so child render objects get inserted at the correct position
-    _child = updateChild(_child, component.child, slot);
-    updated(oldComponent);
+    _child = updateChild(_child, widget.child, slot);
+    updated(oldWidget);
   }
 
   /// Called after the widget has been updated.
   /// Subclasses can override this to perform actions after the child has been updated.
   @protected
-  void updated(ProxyComponent oldComponent) {
-    notifyClients(oldComponent);
+  void updated(ProxyWidget oldWidget) {
+    notifyClients(oldWidget);
   }
 
   /// Notify other objects that the widget associated with this element has changed.
   @protected
-  void notifyClients(ProxyComponent oldComponent);
+  void notifyClients(ProxyWidget oldWidget);
 
   void insertRenderObjectChild(RenderObject child, dynamic slot) {
     final RenderObjectElement? renderObjectElement =
@@ -71,18 +71,17 @@ abstract class ProxyElement extends BuildableElement {
 /// This properly manages the lifecycle of its child and ensures parent data
 /// is correctly applied to render objects.
 class ParentDataElement<T extends ParentData> extends ProxyElement {
-  ParentDataElement(super.component);
+  ParentDataElement(super.widget);
 
   @override
-  ParentDataComponent<T> get component =>
-      super.component as ParentDataComponent<T>;
+  ParentDataWidget<T> get widget => super.widget as ParentDataWidget<T>;
 
-  void _applyParentData(ParentDataComponent<T> component) {
+  void _applyParentData(ParentDataWidget<T> widget) {
     void applyParentDataToChild(Element child) {
       if (child is RenderObjectElement) {
         final renderObject = child.renderObject;
         final existingData = renderObject.parentData;
-        final newData = component.data;
+        final newData = widget.data;
 
         // If the existing parent data is a subtype that extends the new data's type,
         // copy properties instead of replacing. This handles cases like
@@ -150,17 +149,17 @@ class ParentDataElement<T extends ParentData> extends ProxyElement {
   @override
   void mount(Element? parent, dynamic newSlot) {
     super.mount(parent, newSlot);
-    _applyParentData(component);
+    _applyParentData(widget);
   }
 
   @override
   void attachRenderObject(dynamic newSlot) {
     super.attachRenderObject(newSlot);
-    _applyParentData(component);
+    _applyParentData(widget);
   }
 
   @override
-  void notifyClients(ProxyComponent oldComponent) {
-    _applyParentData(component);
+  void notifyClients(ProxyWidget oldWidget) {
+    _applyParentData(widget);
   }
 }

@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 /// Interactive TUI demo for displaying images in a scrollable ListView.
 ///
@@ -37,7 +37,7 @@ void main(List<String> args) async {
   await runApp(ImageListViewDemo(imagePath: imagePath));
 }
 
-class ImageListViewDemo extends StatefulComponent {
+class ImageListViewDemo extends StatefulWidget {
   final String imagePath;
 
   const ImageListViewDemo({super.key, required this.imagePath});
@@ -97,7 +97,7 @@ class _ImageListViewDemoState extends State<ImageListViewDemo> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     final protocol = _protocols[_selectedProtocolIndex];
 
     return Focusable(
@@ -154,7 +154,7 @@ class _ImageListViewDemoState extends State<ImageListViewDemo> {
                   ),
                   const Spacer(),
                   Text(
-                    'Source: ${component.imagePath}',
+                    'Source: ${widget.imagePath}',
                     style: const TextStyle(color: Colors.grey),
                   ),
                 ],
@@ -250,7 +250,7 @@ class _ImageListViewDemoState extends State<ImageListViewDemo> {
     );
   }
 
-  Component _buildImageItem({
+  Widget _buildImageItem({
     required int index,
     required String label,
     required ImageProtocol protocol,
@@ -273,7 +273,7 @@ class _ImageListViewDemoState extends State<ImageListViewDemo> {
               border: BoxBorder.all(color: Colors.cyan.withOpacity(0.5)),
             ),
             child: Image.file(
-              component.imagePath,
+              widget.imagePath,
               height: 8,
               fit: BoxFit.contain,
               protocol: protocol,
@@ -307,7 +307,7 @@ class _ImageListViewDemoState extends State<ImageListViewDemo> {
                 ),
                 const SizedBox(height: 1),
                 Text(
-                  'Path: ${component.imagePath}',
+                  'Path: ${widget.imagePath}',
                   style: TextStyle(color: Colors.cyan.withOpacity(0.7)),
                 ),
               ],

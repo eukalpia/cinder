@@ -1,6 +1,6 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
-class BorderTitleDemo extends StatefulComponent {
+class BorderTitleDemo extends StatefulWidget {
   @override
   State<BorderTitleDemo> createState() => _BorderTitleDemoState();
 }
@@ -9,7 +9,7 @@ class _BorderTitleDemoState extends State<BorderTitleDemo> {
   final scrollController = ScrollController();
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(1),
       child: Scrollbar(

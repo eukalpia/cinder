@@ -1,12 +1,12 @@
 part of 'framework.dart';
 
 /// A signature for the builder function used by [LayoutBuilder].
-typedef LayoutBuilderCallback = Component Function(
+typedef LayoutBuilderCallback = Widget Function(
   BuildContext context,
   BoxConstraints constraints,
 );
 
-/// A component that defers building its child until layout time.
+/// A widget that defers building its child until layout time.
 ///
 /// This allows the builder function to access the actual constraints
 /// that will be used for layout, enabling responsive designs.
@@ -27,8 +27,8 @@ typedef LayoutBuilderCallback = Component Function(
 ///   },
 /// )
 /// ```
-class LayoutBuilder extends RenderObjectComponent {
-  /// Creates a component that defers building until layout time.
+class LayoutBuilder extends RenderObjectWidget {
+  /// Creates a widget that defers building until layout time.
   const LayoutBuilder({super.key, required this.builder});
 
   /// Builder function called during layout with the actual constraints.
@@ -51,10 +51,10 @@ class LayoutBuilder extends RenderObjectComponent {
 /// Element for [LayoutBuilder] that manages building the child during layout.
 class LayoutBuilderElement extends RenderObjectElement {
   /// Creates an element for a [LayoutBuilder].
-  LayoutBuilderElement(LayoutBuilder super.component);
+  LayoutBuilderElement(LayoutBuilder super.widget);
 
   @override
-  LayoutBuilder get component => super.component as LayoutBuilder;
+  LayoutBuilder get widget => super.widget as LayoutBuilder;
 
   @override
   RenderLayoutBuilder get renderObject =>
@@ -71,12 +71,12 @@ class LayoutBuilderElement extends RenderObjectElement {
   }
 
   @override
-  void update(Component newComponent) {
-    super.update(newComponent);
+  void update(Widget newWidget) {
+    super.update(newWidget);
     _needsBuild = true;
-    // update() only runs when the component instance actually changed
+    // update() only runs when the widget instance actually changed
     // (identical components short-circuit in updateChild). The builder runs
-    // during layout, so the new component can only take effect if a layout
+    // during layout, so the new widget can only take effect if a layout
     // pass happens. Builder identity is no proxy for content: a stable
     // (hoisted) closure can read state that changed this build pass, so
     // there is no narrower safe gate than always marking. This matches
@@ -108,14 +108,14 @@ class LayoutBuilderElement extends RenderObjectElement {
 
       // Use owner to invoke the build
       owner!.buildScope(this, () {
-        Component? builtComponent;
+        Widget? builtWidget;
         try {
-          builtComponent = component.builder(this, constraints);
+          builtWidget = widget.builder(this, constraints);
         } catch (e, stackTrace) {
-          // On error, create an error display component
-          builtComponent = ErrorComponent(error: e, stackTrace: stackTrace);
+          // On error, create an error display widget
+          builtWidget = ErrorWidget(error: e, stackTrace: stackTrace);
         }
-        _child = updateChild(_child, builtComponent, null);
+        _child = updateChild(_child, builtWidget, null);
       });
     }
   }

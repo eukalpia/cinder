@@ -1,13 +1,13 @@
 import 'dart:math' as math;
 
-import 'package:nocterm/nocterm.dart';
-import 'package:nocterm/src/framework/terminal_canvas.dart';
+import 'package:cinder/cinder.dart';
+import 'package:cinder/src/framework/terminal_canvas.dart';
 
 import '../rendering/scrollable_render_object.dart';
 import 'selection_state.dart';
 
 /// Signature for a function that creates a widget for a given index.
-typedef IndexedWidgetBuilder = Component? Function(
+typedef IndexedWidgetBuilder = Widget? Function(
     BuildContext context, int index);
 
 /// Signature for a function that provides the item count.
@@ -20,7 +20,7 @@ typedef ItemCountGetter = int Function();
 ///
 /// Set [keyboardScrollable] to true to enable keyboard navigation with
 /// arrow keys, Page Up/Down, and Home/End.
-class ListView extends StatefulComponent {
+class ListView extends StatefulWidget {
   /// Creates a scrollable, linear array of widgets from an explicit [List].
   ListView({
     super.key,
@@ -32,7 +32,7 @@ class ListView extends StatefulComponent {
     this.lazy = false,
     this.keyboardScrollable = false,
     this.cacheExtent = 5.0,
-    List<Component> children = const [],
+    List<Widget> children = const [],
   })  : itemCount = children.length,
         itemBuilder = ((context, index) => children[index]),
         separatorBuilder = null;
@@ -143,25 +143,25 @@ class _ListViewState extends State<ListView> {
   ScrollController? _controller;
 
   ScrollController get _effectiveController =>
-      component.controller ?? _controller!;
+      widget.controller ?? _controller!;
 
   @override
   void initState() {
     super.initState();
-    if (component.controller == null) {
+    if (widget.controller == null) {
       _controller = ScrollController();
     }
   }
 
   @override
-  void didUpdateComponent(ListView oldWidget) {
-    super.didUpdateComponent(oldWidget);
-    if (component.controller != oldWidget.controller) {
+  void didUpdateWidget(ListView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.controller != oldWidget.controller) {
       if (oldWidget.controller == null) {
         _controller?.dispose();
         _controller = null;
       }
-      if (component.controller == null) {
+      if (widget.controller == null) {
         _controller = ScrollController();
       }
     }
@@ -175,7 +175,7 @@ class _ListViewState extends State<ListView> {
 
   bool _handleKeyEvent(KeyboardEvent event) {
     final controller = _effectiveController;
-    final isVertical = component.scrollDirection == Axis.vertical;
+    final isVertical = widget.scrollDirection == Axis.vertical;
 
     // Arrow keys for single line scroll
     if (isVertical) {
@@ -218,22 +218,22 @@ class _ListViewState extends State<ListView> {
   }
 
   @override
-  Component build(BuildContext context) {
-    Component viewport = _ListViewport(
-      scrollDirection: component.scrollDirection,
-      reverse: component.reverse,
+  Widget build(BuildContext context) {
+    Widget viewport = _ListViewport(
+      scrollDirection: widget.scrollDirection,
+      reverse: widget.reverse,
       controller: _effectiveController,
-      padding: component.padding,
-      itemExtent: component.itemExtent,
-      lazy: component.lazy,
-      cacheExtent: component.cacheExtent,
-      itemBuilder: component.itemBuilder,
-      separatorBuilder: component.separatorBuilder,
-      itemCount: component.itemCount,
+      padding: widget.padding,
+      itemExtent: widget.itemExtent,
+      lazy: widget.lazy,
+      cacheExtent: widget.cacheExtent,
+      itemBuilder: widget.itemBuilder,
+      separatorBuilder: widget.separatorBuilder,
+      itemCount: widget.itemCount,
     );
 
     // Wrap with Focusable for keyboard scrolling if enabled
-    if (component.keyboardScrollable) {
+    if (widget.keyboardScrollable) {
       viewport = Focusable(
         focused: true,
         onKeyEvent: _handleKeyEvent,
@@ -246,7 +246,7 @@ class _ListViewState extends State<ListView> {
 }
 
 /// Internal widget that handles the viewport and rendering for ListView.
-class _ListViewport extends RenderObjectComponent {
+class _ListViewport extends RenderObjectWidget {
   const _ListViewport({
     required this.scrollDirection,
     this.reverse = false,
@@ -311,10 +311,10 @@ class _ListViewport extends RenderObjectComponent {
 
 /// Element for ListView that manages building children on demand.
 class _ListViewportElement extends RenderObjectElement {
-  _ListViewportElement(_ListViewport super.component);
+  _ListViewportElement(_ListViewport super.widget);
 
   @override
-  _ListViewport get component => super.component as _ListViewport;
+  _ListViewport get widget => super.widget as _ListViewport;
 
   @override
   RenderListViewport get renderObject =>
@@ -345,10 +345,10 @@ class _ListViewportElement extends RenderObjectElement {
   }
 
   @override
-  void update(Component newComponent) {
-    super.update(newComponent);
+  void update(Widget newWidget) {
+    super.update(newWidget);
 
-    final newViewport = newComponent as _ListViewport;
+    final newViewport = newWidget as _ListViewport;
 
     // Remove cached children that are beyond the new item count.
     // Items are keyed by index, separators by -index - 1 (a separator
@@ -368,9 +368,9 @@ class _ListViewportElement extends RenderObjectElement {
     _needsChildUpdate = true;
     _updatedThisLayout.clear();
 
-    // update() only runs when the viewport component actually changed
+    // update() only runs when the viewport widget actually changed
     // (identical components short-circuit in updateChild). Children are
-    // built during layout, so the changed component can only take effect
+    // built during layout, so the changed widget can only take effect
     // if a layout pass happens. Builder identity is no proxy for content -
     // a stable (hoisted) itemBuilder can read state that changed this
     // build pass - so there is no narrower safe gate than always marking.
@@ -412,7 +412,7 @@ class _ListViewportElement extends RenderObjectElement {
   /// Builds or updates a child at the given index.
   Element? buildChild(int index) {
     // Check if index is valid
-    if (component.itemCount != null && index >= component.itemCount!) {
+    if (widget.itemCount != null && index >= widget.itemCount!) {
       return null;
     }
 
@@ -428,7 +428,7 @@ class _ListViewportElement extends RenderObjectElement {
 
       // Need to update this child - call itemBuilder and update element
       _updatedThisLayout.add(index);
-      final newChild = component.itemBuilder(this, index);
+      final newChild = widget.itemBuilder(this, index);
       if (newChild == null) {
         // Item no longer exists, remove cached element
         existingChild.deactivate();
@@ -438,7 +438,7 @@ class _ListViewportElement extends RenderObjectElement {
       }
 
       // Update existing element if possible
-      if (Component.canUpdate(existingChild.component, newChild)) {
+      if (Widget.canUpdate(existingChild.widget, newChild)) {
         existingChild.update(newChild);
         return existingChild;
       } else {
@@ -454,7 +454,7 @@ class _ListViewportElement extends RenderObjectElement {
     }
 
     // No cached element - create new one
-    final child = component.itemBuilder(this, index);
+    final child = widget.itemBuilder(this, index);
     if (child == null) return null;
 
     // ignore: invalid_use_of_protected_member
@@ -469,16 +469,16 @@ class _ListViewportElement extends RenderObjectElement {
 
   /// Builds a separator at the given index.
   Element? buildSeparator(int index) {
-    if (component.separatorBuilder == null) return null;
+    if (widget.separatorBuilder == null) return null;
 
-    final separator = component.separatorBuilder!(this, index);
+    final separator = widget.separatorBuilder!(this, index);
     if (separator == null) return null;
 
     final separatorIndex = -index - 1; // Use negative indices for separators
     final oldSeparator = _children[separatorIndex];
 
     if (oldSeparator != null &&
-        Component.canUpdate(oldSeparator.component, separator)) {
+        Widget.canUpdate(oldSeparator.widget, separator)) {
       oldSeparator.update(separator);
       return oldSeparator;
     } else {
@@ -858,8 +858,8 @@ class RenderListViewport extends RenderObject with ScrollableRenderObjectMixin {
         : innerConstraints.maxHeight;
 
     // Build visible children
-    final component = _element!.component;
-    final itemCount = component.itemCount;
+    final widget = _element!.widget;
+    final itemCount = widget.itemCount;
 
     // Child constraints
     final childConstraints = scrollDirection == Axis.vertical

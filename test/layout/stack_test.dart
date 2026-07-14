@@ -1,13 +1,13 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('Stack', () {
     test('Positioned.fill should fill entire Stack', () async {
-      await testNocterm(
+      await testCinder(
         'positioned fill background',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 40,
               height: 10,
@@ -51,11 +51,11 @@ void main() {
     });
 
     test('Stack sizing with different child configurations', () async {
-      await testNocterm(
+      await testCinder(
         'stack sizing test',
         (tester) async {
           print('\n=== Test 1: Stack with explicit size ===');
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 8,
@@ -73,7 +73,7 @@ void main() {
           await tester.pump();
 
           print('\n=== Test 2: Stack with Positioned.fill ===');
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 8,
@@ -95,7 +95,7 @@ void main() {
           await tester.pump();
 
           print('\n=== Test 3: Stack with mixed children ===');
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 8,
@@ -128,12 +128,12 @@ void main() {
     });
 
     test('Positioned.fill constraints', () async {
-      await testNocterm(
+      await testCinder(
         'positioned fill constraints',
         (tester) async {
           print('\n=== Testing Positioned.fill constraints ===');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 25,
               height: 6,

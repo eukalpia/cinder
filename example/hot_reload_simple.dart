@@ -1,4 +1,4 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() async {
   // Run with: dart run --enable-vm-service example/hot_reload_simple.dart
@@ -8,7 +8,7 @@ void main() async {
   await runApp(const SimpleHotReloadApp());
 }
 
-class SimpleHotReloadApp extends StatefulComponent {
+class SimpleHotReloadApp extends StatefulWidget {
   const SimpleHotReloadApp({super.key});
 
   @override
@@ -30,7 +30,7 @@ class _SimpleHotReloadAppState extends State<SimpleHotReloadApp> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     // Try changing these values and saving the file!
     final title = 'Hot Reload Demo'; // <- Change me!
     final borderColor = Colors.cyan; // <- Try Color.red, Color.green, etc

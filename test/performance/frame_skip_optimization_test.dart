@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 /// Tests for the frame-skip optimization that prevents unnecessary repaints.
@@ -14,10 +14,10 @@ import 'package:test/test.dart';
 void main() {
   group('Frame Skip Optimization', () {
     test('setState marks elements dirty and triggers rebuild', () async {
-      await testNocterm(
+      await testCinder(
         'setState marks dirty',
         (tester) async {
-          await tester.pumpComponent(const _BuildCounter());
+          await tester.pumpWidget(const _BuildCounter());
 
           expect(tester.terminalState, containsText('Build count: 1'));
 
@@ -35,10 +35,10 @@ void main() {
 
     test('static widget does not cause rebuilds on subsequent frames',
         () async {
-      await testNocterm(
+      await testCinder(
         'static no rebuilds',
         (tester) async {
-          await tester.pumpComponent(const _BuildCounter());
+          await tester.pumpWidget(const _BuildCounter());
 
           expect(tester.terminalState, containsText('Build count: 1'));
 
@@ -54,10 +54,10 @@ void main() {
     });
 
     test('timer-based animation only rebuilds when state changes', () async {
-      await testNocterm(
+      await testCinder(
         'timer rebuilds only on change',
         (tester) async {
-          await tester.pumpComponent(const _TimerCounter());
+          await tester.pumpWidget(const _TimerCounter());
 
           expect(tester.terminalState, containsText('Value: 0'));
 
@@ -87,10 +87,10 @@ void main() {
     });
 
     test('unchanged widget tree reuses previous frame', () async {
-      await testNocterm(
+      await testCinder(
         'unchanged reuses frame',
         (tester) async {
-          await tester.pumpComponent(const Text('Static content'));
+          await tester.pumpWidget(const Text('Static content'));
 
           // Get initial state as string
           final initialOutput = tester.terminalState.toString();
@@ -106,10 +106,10 @@ void main() {
     });
 
     test('nested widgets only rebuild when their state changes', () async {
-      await testNocterm(
+      await testCinder(
         'nested rebuild isolation',
         (tester) async {
-          await tester.pumpComponent(const _NestedCounters());
+          await tester.pumpWidget(const _NestedCounters());
 
           expect(tester.terminalState, containsText('Outer: 1'));
           expect(tester.terminalState, containsText('Inner: 1'));
@@ -129,11 +129,11 @@ void main() {
   });
 
   group('Frame Skip Regression Prevention', () {
-    test('spinner component causes rebuilds only when animating', () async {
-      await testNocterm(
+    test('spinner widget causes rebuilds only when animating', () async {
+      await testCinder(
         'spinner rebuild behavior',
         (tester) async {
-          await tester.pumpComponent(const _AnimatingSpinner());
+          await tester.pumpWidget(const _AnimatingSpinner());
 
           final state = _AnimatingSpinner.lastState!;
           expect(state.buildCount, equals(1));
@@ -165,10 +165,10 @@ void main() {
 
     test('high-frequency setState calls are batched into single frame',
         () async {
-      await testNocterm(
+      await testCinder(
         'frame batching',
         (tester) async {
-          await tester.pumpComponent(const _BuildCounter());
+          await tester.pumpWidget(const _BuildCounter());
 
           expect(tester.terminalState, containsText('Build count: 1'));
 
@@ -189,12 +189,12 @@ void main() {
     });
 
     test('frame skip works with complex widget tree', () async {
-      await testNocterm(
+      await testCinder(
         'complex tree skip',
         (tester) async {
           _ComplexTreeTracker.reset();
 
-          await tester.pumpComponent(const _ComplexTree());
+          await tester.pumpWidget(const _ComplexTree());
 
           // Count initial builds
           final initialBuilds = _ComplexTreeTracker.totalBuilds;
@@ -212,10 +212,10 @@ void main() {
 
     test('multiple independent stateful widgets do not affect each other',
         () async {
-      await testNocterm(
+      await testCinder(
         'independent widgets',
         (tester) async {
-          await tester.pumpComponent(const _TwoIndependentCounters());
+          await tester.pumpWidget(const _TwoIndependentCounters());
 
           final stateA = _CounterA.lastState!;
           final stateB = _CounterB.lastState!;
@@ -243,10 +243,10 @@ void main() {
     });
 
     test('frame skip after animation completes', () async {
-      await testNocterm(
+      await testCinder(
         'post animation skip',
         (tester) async {
-          await tester.pumpComponent(const _AnimatingSpinner());
+          await tester.pumpWidget(const _AnimatingSpinner());
 
           final state = _AnimatingSpinner.lastState!;
 
@@ -275,11 +275,11 @@ void main() {
 }
 
 // ============================================================================
-// Test Helper Components
+// Test Helper Widgets
 // ============================================================================
 
 /// A simple counter that tracks how many times it builds.
-class _BuildCounter extends StatefulComponent {
+class _BuildCounter extends StatefulWidget {
   const _BuildCounter();
 
   static _BuildCounterState? lastState;
@@ -302,14 +302,14 @@ class _BuildCounterState extends State<_BuildCounter> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     buildCount++;
     return Text('Build count: $buildCount');
   }
 }
 
 /// A counter that increments via a timer.
-class _TimerCounter extends StatefulComponent {
+class _TimerCounter extends StatefulWidget {
   const _TimerCounter();
 
   static _TimerCounterState? lastState;
@@ -344,14 +344,14 @@ class _TimerCounterState extends State<_TimerCounter> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     buildCount++;
     return Text('Value: $value');
   }
 }
 
 /// Nested counters to test rebuild isolation.
-class _NestedCounters extends StatefulComponent {
+class _NestedCounters extends StatefulWidget {
   const _NestedCounters();
 
   // ignore: unused_field
@@ -371,7 +371,7 @@ class _NestedCountersState extends State<_NestedCounters> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     outerBuildCount++;
     return Column(
       children: [
@@ -382,7 +382,7 @@ class _NestedCountersState extends State<_NestedCounters> {
   }
 }
 
-class _InnerCounter extends StatefulComponent {
+class _InnerCounter extends StatefulWidget {
   const _InnerCounter();
 
   static _InnerCounterState? lastState;
@@ -405,14 +405,14 @@ class _InnerCounterState extends State<_InnerCounter> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     innerBuildCount++;
     return Text('Inner: $innerBuildCount');
   }
 }
 
 /// An animating spinner that can be stopped.
-class _AnimatingSpinner extends StatefulComponent {
+class _AnimatingSpinner extends StatefulWidget {
   const _AnimatingSpinner();
 
   static _AnimatingSpinnerState? lastState;
@@ -456,7 +456,7 @@ class _AnimatingSpinnerState extends State<_AnimatingSpinner> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     buildCount++;
     return Text(isAnimating ? _frames[_index] : 'Stopped');
   }
@@ -476,11 +476,11 @@ class _ComplexTreeTracker {
 }
 
 /// A complex widget tree for testing.
-class _ComplexTree extends StatelessComponent {
+class _ComplexTree extends StatelessWidget {
   const _ComplexTree();
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Column(
       children: [
         for (int i = 0; i < 10; i++)
@@ -503,11 +503,11 @@ class _ComplexTree extends StatelessComponent {
 }
 
 /// Two independent counters to test isolation.
-class _TwoIndependentCounters extends StatelessComponent {
+class _TwoIndependentCounters extends StatelessWidget {
   const _TwoIndependentCounters();
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Column(
       children: const [
         _CounterA(),
@@ -517,7 +517,7 @@ class _TwoIndependentCounters extends StatelessComponent {
   }
 }
 
-class _CounterA extends StatefulComponent {
+class _CounterA extends StatefulWidget {
   const _CounterA();
 
   static _CounterAState? lastState;
@@ -538,13 +538,13 @@ class _CounterAState extends State<_CounterA> {
   void triggerRebuild() => setState(() {});
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     buildCount++;
     return Text('A: $buildCount');
   }
 }
 
-class _CounterB extends StatefulComponent {
+class _CounterB extends StatefulWidget {
   const _CounterB();
 
   static _CounterBState? lastState;
@@ -565,7 +565,7 @@ class _CounterBState extends State<_CounterB> {
   void triggerRebuild() => setState(() {});
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     buildCount++;
     return Text('B: $buildCount');
   }

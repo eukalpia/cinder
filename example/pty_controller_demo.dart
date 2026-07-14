@@ -1,8 +1,8 @@
 import 'dart:io';
 
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
-/// Example demonstrating the PTY controller/component pattern.
+/// Example demonstrating the PTY controller/widget pattern.
 ///
 /// This example shows how to use PtyController with TerminalXterm,
 /// following the same pattern as Flutter's TextEditingController.
@@ -10,7 +10,7 @@ void main() {
   runApp(const PtyControllerDemo());
 }
 
-class PtyControllerDemo extends StatefulComponent {
+class PtyControllerDemo extends StatefulWidget {
   const PtyControllerDemo({super.key});
 
   @override
@@ -83,7 +83,7 @@ class _PtyControllerDemoState extends State<PtyControllerDemo> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Column(
       children: [
         // Header
@@ -164,7 +164,7 @@ class _PtyControllerDemoState extends State<PtyControllerDemo> {
     );
   }
 
-  Component _buildStatusIndicator() {
+  Widget _buildStatusIndicator() {
     Color color;
     String text;
 

@@ -1,4 +1,4 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 /// Regression tests for stale content with stable (hoisted) builders.
@@ -13,8 +13,8 @@ void main() {
   group('stable builders must not pin stale content', () {
     test('ListView with a hoisted itemBuilder re-renders mutated state',
         () async {
-      await testNocterm('hoisted itemBuilder', (tester) async {
-        await tester.pumpComponent(_HoistedList());
+      await testCinder('hoisted itemBuilder', (tester) async {
+        await tester.pumpWidget(_HoistedList());
         // Settle the transient dirtiness left by the first layout pass
         // (adoptChild re-marks the viewport while building children), so
         // the next frame genuinely starts from a clean render object.
@@ -38,8 +38,8 @@ void main() {
 
     test('LayoutBuilder with a hoisted builder re-renders mutated state',
         () async {
-      await testNocterm('hoisted LayoutBuilder builder', (tester) async {
-        await tester.pumpComponent(_HoistedLayoutBuilder());
+      await testCinder('hoisted LayoutBuilder builder', (tester) async {
+        await tester.pumpWidget(_HoistedLayoutBuilder());
         // Settle the transient dirtiness left by the first layout pass
         // (adoptChild re-marks the render object while inserting the built
         // child), so the next frame genuinely starts from a clean state.
@@ -62,7 +62,7 @@ void main() {
   });
 }
 
-class _HoistedList extends StatefulComponent {
+class _HoistedList extends StatefulWidget {
   @override
   State<_HoistedList> createState() => _HoistedListState();
 }
@@ -74,7 +74,7 @@ class _HoistedListState extends State<_HoistedList> {
   // ListView the build method creates. A function declaration would not
   // guarantee a stable identity, which is what this test depends on.
   // ignore: prefer_function_declarations_over_variables
-  late final Component Function(BuildContext, int) _builder =
+  late final Widget Function(BuildContext, int) _builder =
       (context, index) => Text('$_label-$index');
 
   void rename(String label) {
@@ -82,7 +82,7 @@ class _HoistedListState extends State<_HoistedList> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return ListView.builder(
       itemCount: 2,
       itemExtent: 1,
@@ -91,7 +91,7 @@ class _HoistedListState extends State<_HoistedList> {
   }
 }
 
-class _HoistedLayoutBuilder extends StatefulComponent {
+class _HoistedLayoutBuilder extends StatefulWidget {
   @override
   State<_HoistedLayoutBuilder> createState() => _HoistedLayoutBuilderState();
 }
@@ -109,7 +109,7 @@ class _HoistedLayoutBuilderState extends State<_HoistedLayoutBuilder> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return LayoutBuilder(builder: _builder);
   }
 }

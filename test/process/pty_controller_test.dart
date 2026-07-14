@@ -1,8 +1,8 @@
-import 'package:nocterm/src/process/pty_controller.dart';
+import 'package:cinder/src/process/pty_controller.dart';
 import 'package:test/test.dart';
 import 'dart:async';
 import 'dart:io';
-import 'package:nocterm/nocterm.dart' hide isNotEmpty;
+import 'package:cinder/cinder.dart' hide isNotEmpty;
 
 void main() {
   group('PtyController', () {

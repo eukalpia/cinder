@@ -1,4 +1,4 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 /// Demonstrates ensureVisible with variable-height items.
 ///
@@ -8,7 +8,7 @@ void main() {
   runApp(const VariableHeightListDemo());
 }
 
-class VariableHeightListDemo extends StatefulComponent {
+class VariableHeightListDemo extends StatefulWidget {
   const VariableHeightListDemo({super.key});
 
   @override
@@ -51,7 +51,7 @@ class _VariableHeightListDemoState extends State<VariableHeightListDemo> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Focusable(
       focused: true,
       onKeyEvent: (event) {

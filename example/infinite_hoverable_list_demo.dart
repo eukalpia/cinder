@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 final _debugLog = File('infinite_hoverable_list_demo_debug.log');
 
@@ -16,7 +16,7 @@ void main() {
   runApp(const InfiniteHoverableListDemo());
 }
 
-class InfiniteHoverableListDemo extends StatefulComponent {
+class InfiniteHoverableListDemo extends StatefulWidget {
   const InfiniteHoverableListDemo({super.key});
 
   @override
@@ -30,7 +30,7 @@ class _InfiniteHoverableListDemoState extends State<InfiniteHoverableListDemo> {
   final ScrollController _scrollController = ScrollController();
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         border: BoxBorder.all(),
@@ -113,7 +113,7 @@ class _InfiniteHoverableListDemoState extends State<InfiniteHoverableListDemo> {
     );
   }
 
-  Component _buildListItem(int index) {
+  Widget _buildListItem(int index) {
     final isHovered = _hoveredIndex == index;
     final isSelected = _selectedIndex == index;
 

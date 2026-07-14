@@ -3186,9 +3186,9 @@ for(;;)switch(s){case 0:a=new A.fa()
 A.Q("WebBackend: _connect() called")
 q=v.G
 p=t.cU
-o=p.a(q.noctermBridge)
-if(o==null){A.Q("WebBackend: ERROR - noctermBridge is null!")
-A.T(A.dl("noctermBridge not found. The host (nocterm_web) must call WebBackend.initializeHost() before loading the guest app."))}A.Q("WebBackend: bridge found, registering callbacks...")
+o=p.a(q.cinderBridge)
+if(o==null){A.Q("WebBackend: ERROR - cinderBridge is null!")
+A.T(A.dl("cinderBridge not found. The host (cinder_web) must call WebBackend.initializeHost() before loading the guest app."))}A.Q("WebBackend: bridge found, registering callbacks...")
 if(typeof A.jC()=="function")A.T(A.az("Attempting to rewrap a JS function.",null))
 n=function(a4,a5){return function(a6){return a4(a5,a6,arguments.length)}}(A.nn,A.jC())
 m=$.jF()
@@ -3205,8 +3205,8 @@ o.onShutdown=n
 A.Q("WebBackend: callbacks registered successfully")
 m=new A.aO("")
 l=new A.hp(a,m)
-o=p.a(q.noctermBridge)
-if(o==null)A.T(A.dl("noctermBridge not initialized. The host must call WebBackend.initializeHost() first."))
+o=p.a(q.cinderBridge)
+if(o==null)A.T(A.dl("cinderBridge not initialized. The host must call WebBackend.initializeHost() first."))
 k=A.bi(o.width)
 if(k==null)k=null
 j=A.bi(o.height)
@@ -5801,7 +5801,7 @@ av(){var s=this.e,r=s.a
 if(r.length!==0){this.a.a7(r.charCodeAt(0)==0?r:r)
 s.a=""}}}
 A.fa.prototype={
-a7(a){var s,r=t.cU.a(v.G.noctermBridge)
+a7(a){var s,r=t.cU.a(v.G.cinderBridge)
 if(r!=null){s=t.aN.a(r.onOutput)
 if(s!=null)s.call(null,a)}},
 $imu:1}
@@ -5811,7 +5811,7 @@ fb(a){var s,r,q,p,o=A.aC(this.a$,t.R),n=o.length,m=0
 for(;m<o.length;o.length===n||(0,A.N)(o),++m){s=o[m]
 try{s.$1(a)}catch(p){r=A.au(p)
 q=A.as(p)
-A.k7(new A.cc(r,q,"nocterm scheduler","during frame timing callback",null))}}},
+A.k7(new A.cc(r,q,"cinder scheduler","during frame timing callback",null))}}},
 f4(){this.at$.he(0,new A.hk())},
 an(){if(this.r$)return
 this.r$=!0
@@ -5887,7 +5887,7 @@ try{a.$1(b)}catch(p){s=A.au(p)
 r=A.as(p)
 q=new A.aO("during frame callback")
 o=q.a
-A.jb(new A.cc(s,r,"nocterm scheduler",o.charCodeAt(0)==0?o:o,null))}finally{}},
+A.jb(new A.cc(s,r,"cinder scheduler",o.charCodeAt(0)==0?o:o,null))}finally{}},
 cO(a,b){return this.cP(a,b,null,null)},
 j(a){var s=this,r="SchedulerBinding:\n"+("  schedulerPhase: "+s.f$.j(0)+"\n")+("  hasScheduledFrame: "+s.r$+"\n")+("  transientCallbacks: "+s.at$.a+"\n")+("  persistentCallbacks: "+s.ay$.length+"\n")+("  postFrameCallbacks: "+s.ch$.gm(0)+"\n")
 return r.charCodeAt(0)==0?r:r}}
@@ -7502,7 +7502,7 @@ c4(){this.c3()},
 c3(){},
 hd(a,b){var s
 t.c9.a(a)
-s="ext.nocterm."+b
+s="ext.cinder."+b
 if(!B.c.b5(s,"ext."))A.T(A.fF(s,"method","Must begin with ext."))
 if($.kV.u(0,s)!=null)A.T(A.az("Extension already registered: "+s,null))
 $.kV.D(0,s,$.w.fu(new A.ha(a),t.a9,t.N,t.f))},
@@ -7609,7 +7609,7 @@ aj(){var s,r,q,p=this,o=null
 try{o=p.d7()}catch(q){s=A.au(q)
 r=A.as(q)
 o=new A.eg(s,r,null)
-A.jb(new A.cc(s,r,"nocterm framework","while building "+A.a_(p).j(0),null))}finally{p.f=!1}p.z=p.al(p.z,o,p.d)},
+A.jb(new A.cc(s,r,"cinder framework","while building "+A.a_(p).j(0),null))}finally{p.f=!1}p.z=p.al(p.z,o,p.d)},
 R(a){var s
 t.q.a(a)
 s=this.z
@@ -7983,7 +7983,7 @@ o.bS("performLayout",s,r)
 o.w=!0
 if(o.e==null?o.d!=null:q)o.e=o.d.Y(B.ba)}},
 bS(a,b,c){t.l.a(c)
-A.jb(new A.cc(b,c,"nocterm rendering","during "+a+"()",new A.hi(this)))
+A.jb(new A.cc(b,c,"cinder rendering","during "+a+"()",new A.hi(this)))
 this.x=b
 this.y=c},
 gbj(){var s,r=this.a

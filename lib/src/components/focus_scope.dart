@@ -7,9 +7,9 @@ import 'block_focus.dart';
 /// will be blocked from receiving keyboard events.
 /// This is useful for disabling focus on background content
 /// when showing modal dialogs or overlays.
-class FocusScope extends StatelessComponent {
+class FocusScope extends StatelessWidget {
   /// The child widget tree.
-  final Component child;
+  final Widget child;
 
   /// Whether to block focus events from reaching children.
   ///
@@ -24,7 +24,7 @@ class FocusScope extends StatelessComponent {
   });
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     // Use BlockFocus which is properly handled by TerminalBinding._dispatchKeyToElement
     // to actually block keyboard events from reaching children
     return BlockFocus(

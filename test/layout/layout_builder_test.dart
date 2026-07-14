@@ -1,16 +1,16 @@
-import 'package:nocterm/nocterm.dart' hide isNotEmpty, isEmpty;
+import 'package:cinder/cinder.dart' hide isNotEmpty, isEmpty;
 import 'package:test/test.dart';
 
 void main() {
   group('LayoutBuilder', () {
     group('constraint passing', () {
       test('receives terminal constraints at root', () async {
-        await testNocterm(
+        await testCinder(
           'terminal constraints at root',
           (tester) async {
             BoxConstraints? receivedConstraints;
 
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               LayoutBuilder(
                 builder: (context, constraints) {
                   receivedConstraints = constraints;
@@ -28,12 +28,12 @@ void main() {
       });
 
       test('receives constraints from parent', () async {
-        await testNocterm(
+        await testCinder(
           'receives parent constraints',
           (tester) async {
             BoxConstraints? receivedConstraints;
 
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               ConstrainedBox(
                 constraints: BoxConstraints.tight(const Size(40, 20)),
                 child: LayoutBuilder(
@@ -56,12 +56,12 @@ void main() {
       });
 
       test('builder is called with BoxConstraints', () async {
-        await testNocterm(
+        await testCinder(
           'builder called with BoxConstraints',
           (tester) async {
             BoxConstraints? receivedConstraints;
 
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               LayoutBuilder(
                 builder: (context, constraints) {
                   receivedConstraints = constraints;
@@ -82,12 +82,12 @@ void main() {
       });
 
       test('context is a valid BuildContext', () async {
-        await testNocterm(
+        await testCinder(
           'valid build context',
           (tester) async {
             BuildContext? receivedContext;
 
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               LayoutBuilder(
                 builder: (context, constraints) {
                   receivedContext = context;
@@ -105,10 +105,10 @@ void main() {
 
     group('rendering', () {
       test('renders child from builder', () async {
-        await testNocterm(
+        await testCinder(
           'renders child',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               LayoutBuilder(
                 builder: (context, constraints) {
                   return const Text('Hello LayoutBuilder');
@@ -122,10 +122,10 @@ void main() {
       });
 
       test('renders complex child structures', () async {
-        await testNocterm(
+        await testCinder(
           'complex child',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               LayoutBuilder(
                 builder: (context, constraints) {
                   return Column(
@@ -147,10 +147,10 @@ void main() {
       });
 
       test('nested LayoutBuilders render correctly', () async {
-        await testNocterm(
+        await testCinder(
           'nested LayoutBuilders',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               LayoutBuilder(
                 builder: (context, outerConstraints) {
                   return Column(
@@ -177,12 +177,12 @@ void main() {
 
     group('rebuilding behavior', () {
       test('calls builder on initial build', () async {
-        await testNocterm(
+        await testCinder(
           'initial build',
           (tester) async {
             int buildCount = 0;
 
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               LayoutBuilder(
                 builder: (context, constraints) {
                   buildCount++;
@@ -197,12 +197,12 @@ void main() {
       });
 
       test('rebuilds when parent state changes', () async {
-        await testNocterm(
+        await testCinder(
           'rebuilds on parent change',
           (tester) async {
             int buildCount = 0;
 
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               _BuildCountTracker(
                 onBuild: () {
                   buildCount++;
@@ -223,12 +223,12 @@ void main() {
       });
 
       test('rebuilds when builder function changes', () async {
-        await testNocterm(
+        await testCinder(
           'rebuilds when builder changes',
           (tester) async {
             int buildCount = 0;
 
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               _BuilderChanger(
                 onBuild: () {
                   buildCount++;
@@ -251,10 +251,10 @@ void main() {
 
     group('responsive layouts', () {
       test('can use constraints in layout decisions', () async {
-        await testNocterm(
+        await testCinder(
           'constraint-based layout',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               LayoutBuilder(
                 builder: (context, constraints) {
                   if (constraints.maxWidth > 50) {
@@ -273,10 +273,10 @@ void main() {
       });
 
       test('can use height in layout decisions', () async {
-        await testNocterm(
+        await testCinder(
           'height-based layout',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               LayoutBuilder(
                 builder: (context, constraints) {
                   if (constraints.maxHeight > 20) {
@@ -295,10 +295,10 @@ void main() {
       });
 
       test('can display constraint info', () async {
-        await testNocterm(
+        await testCinder(
           'display constraint info',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               LayoutBuilder(
                 builder: (context, constraints) {
                   return Column(
@@ -320,10 +320,10 @@ void main() {
 
     group('state preservation', () {
       test('stateful children preserve state across rebuilds', () async {
-        await testNocterm(
+        await testCinder(
           'preserves child state',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               _StatePreservationTest(),
             );
 
@@ -353,10 +353,10 @@ void main() {
 
     group('visual tests', () {
       test('visual: displays constraints info', () async {
-        await testNocterm(
+        await testCinder(
           'displays constraints info',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               LayoutBuilder(
                 builder: (context, constraints) {
                   return Column(
@@ -377,10 +377,10 @@ void main() {
       });
 
       test('visual: responsive layout in action', () async {
-        await testNocterm(
+        await testCinder(
           'responsive layout visual',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               LayoutBuilder(
                 builder: (context, constraints) {
                   final cols = constraints.maxWidth > 60 ? 3 : 2;
@@ -403,10 +403,10 @@ void main() {
       });
 
       test('visual: adaptive dialog', () async {
-        await testNocterm(
+        await testCinder(
           'adaptive dialog visual',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               Center(
                 child: Container(
                   decoration: BoxDecoration(
@@ -449,10 +449,10 @@ void main() {
 
     group('edge cases', () {
       test('handles error in builder gracefully', () async {
-        await testNocterm(
+        await testCinder(
           'error handling in builder',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               LayoutBuilder(
                 builder: (context, constraints) {
                   throw Exception('Test error in builder');
@@ -460,8 +460,8 @@ void main() {
               ),
             );
 
-            // Should render error component instead of crashing
-            // The error component shows the exception message
+            // Should render error widget instead of crashing
+            // The error widget shows the exception message
             final snapshot = tester.toSnapshot();
             // Error output contains "Exception"
             expect(snapshot.contains('Exception'), isTrue);
@@ -470,10 +470,10 @@ void main() {
       });
 
       test('handles empty builder (returns empty Container)', () async {
-        await testNocterm(
+        await testCinder(
           'empty builder',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               LayoutBuilder(
                 builder: (context, constraints) {
                   return Container();
@@ -490,10 +490,10 @@ void main() {
       });
 
       test('works inside Column', () async {
-        await testNocterm(
+        await testCinder(
           'inside Column',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               Column(
                 children: [
                   const Text('Header'),
@@ -517,10 +517,10 @@ void main() {
       });
 
       test('works inside Row', () async {
-        await testNocterm(
+        await testCinder(
           'inside Row',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               Row(
                 children: [
                   const Text('Left'),
@@ -544,10 +544,10 @@ void main() {
       });
 
       test('multiple LayoutBuilders in same tree', () async {
-        await testNocterm(
+        await testCinder(
           'multiple LayoutBuilders',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               Row(
                 children: [
                   Expanded(
@@ -585,12 +585,12 @@ void main() {
 
     group('with different terminal sizes', () {
       test('receives constraints matching small terminal', () async {
-        await testNocterm(
+        await testCinder(
           'small terminal',
           (tester) async {
             BoxConstraints? receivedConstraints;
 
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               LayoutBuilder(
                 builder: (context, constraints) {
                   receivedConstraints = constraints;
@@ -608,12 +608,12 @@ void main() {
       });
 
       test('receives constraints matching large terminal', () async {
-        await testNocterm(
+        await testCinder(
           'large terminal',
           (tester) async {
             BoxConstraints? receivedConstraints;
 
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               LayoutBuilder(
                 builder: (context, constraints) {
                   receivedConstraints = constraints;
@@ -631,10 +631,10 @@ void main() {
       });
 
       test('responsive layout adapts to terminal size', () async {
-        await testNocterm(
+        await testCinder(
           'adapts to small terminal',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               LayoutBuilder(
                 builder: (context, constraints) {
                   if (constraints.maxWidth >= 60) {
@@ -658,7 +658,7 @@ void main() {
 // Helper widgets for testing
 
 /// A widget that tracks build count
-class _BuildCountTracker extends StatefulComponent {
+class _BuildCountTracker extends StatefulWidget {
   const _BuildCountTracker({required this.onBuild});
 
   final void Function() onBuild;
@@ -677,10 +677,10 @@ class _BuildCountTrackerState extends State<_BuildCountTracker> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        component.onBuild();
+        widget.onBuild();
         return Text('Version: $_version');
       },
     );
@@ -688,7 +688,7 @@ class _BuildCountTrackerState extends State<_BuildCountTracker> {
 }
 
 /// A widget that changes its LayoutBuilder builder function
-class _BuilderChanger extends StatefulComponent {
+class _BuilderChanger extends StatefulWidget {
   const _BuilderChanger({required this.onBuild});
 
   final void Function() onBuild;
@@ -707,10 +707,10 @@ class _BuilderChangerState extends State<_BuilderChanger> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        component.onBuild();
+        widget.onBuild();
         return Text('Version: $_version');
       },
     );
@@ -718,7 +718,7 @@ class _BuilderChangerState extends State<_BuilderChanger> {
 }
 
 /// Test widget to verify state preservation
-class _StatePreservationTest extends StatefulComponent {
+class _StatePreservationTest extends StatefulWidget {
   @override
   State<_StatePreservationTest> createState() => _StatePreservationTestState();
 }
@@ -733,7 +733,7 @@ class _StatePreservationTestState extends State<_StatePreservationTest> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
         return Column(
@@ -748,7 +748,7 @@ class _StatePreservationTestState extends State<_StatePreservationTest> {
 }
 
 /// Simple counter widget to test state preservation
-class _Counter extends StatefulComponent {
+class _Counter extends StatefulWidget {
   const _Counter();
 
   @override
@@ -765,7 +765,7 @@ class _CounterState extends State<_Counter> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Text('Count: $count');
   }
 }

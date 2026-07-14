@@ -1,4 +1,4 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 /// Comprehensive tests for ListView parent data handling.
@@ -14,12 +14,12 @@ import 'package:test/test.dart';
 void main() {
   group('ListView parent data basics', () {
     test('items have correct parent data after initial layout', () async {
-      await testNocterm(
+      await testCinder(
         'initial parent data',
         (tester) async {
           final scrollController = ScrollController();
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 10,
@@ -53,12 +53,12 @@ void main() {
         skip:
             'Known bug: ListView maxScrollExtent not calculated correctly with Container',
         () async {
-      await testNocterm(
+      await testCinder(
         'fixed itemExtent parent data',
         (tester) async {
           final scrollController = ScrollController();
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -90,12 +90,12 @@ void main() {
     test('scrolling updates which items are visible',
         skip: 'Known bug: ListView scrolling with Container constraint',
         () async {
-      await testNocterm(
+      await testCinder(
         'scroll updates visibility',
         (tester) async {
           final scrollController = ScrollController();
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -131,12 +131,12 @@ void main() {
 
   group('ListView parent data with variable height items', () {
     test('variable height items are laid out correctly', () async {
-      await testNocterm(
+      await testCinder(
         'variable height layout',
         (tester) async {
           final scrollController = ScrollController();
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 10,
@@ -174,12 +174,12 @@ void main() {
     });
 
     test('scrolling works correctly with variable height items', () async {
-      await testNocterm(
+      await testCinder(
         'variable height scrolling',
         (tester) async {
           final scrollController = ScrollController();
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -221,13 +221,13 @@ void main() {
 
   group('ListView lazy mode parent data', () {
     test('lazy mode only builds visible items initially', () async {
-      await testNocterm(
+      await testCinder(
         'lazy initial build',
         (tester) async {
           final scrollController = ScrollController();
           final builtIndices = <int>{};
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -256,13 +256,13 @@ void main() {
     });
 
     test('lazy mode builds items as they scroll into view', () async {
-      await testNocterm(
+      await testCinder(
         'lazy scroll build',
         (tester) async {
           final scrollController = ScrollController();
           final builtIndices = <int>{};
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -295,12 +295,12 @@ void main() {
     });
 
     test('lazy mode removes items that scroll out of view', () async {
-      await testNocterm(
+      await testCinder(
         'lazy remove out of view',
         (tester) async {
           final scrollController = ScrollController();
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -334,10 +334,10 @@ void main() {
 
   group('ListView reverse mode parent data', () {
     test('reverse mode lays out items from bottom', () async {
-      await testNocterm(
+      await testCinder(
         'reverse layout',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 10,
@@ -361,12 +361,12 @@ void main() {
     });
 
     test('reverse mode scrolling works correctly', () async {
-      await testNocterm(
+      await testCinder(
         'reverse scroll',
         (tester) async {
           final scrollController = ScrollController();
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -399,12 +399,12 @@ void main() {
 
   group('ListView separated parent data', () {
     test('separators are included in layout calculations', () async {
-      await testNocterm(
+      await testCinder(
         'separated layout',
         (tester) async {
           final scrollController = ScrollController();
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 10,
@@ -433,12 +433,12 @@ void main() {
     test('separated mode scroll extent includes separators',
         skip: 'Known bug: ListView maxScrollExtent not calculated correctly',
         () async {
-      await testNocterm(
+      await testCinder(
         'separated scroll extent',
         (tester) async {
           final scrollController = ScrollController();
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -469,13 +469,13 @@ void main() {
     test('adding items updates scroll extent',
         skip: 'Known bug: ListView maxScrollExtent not calculated correctly',
         () async {
-      await testNocterm(
+      await testCinder(
         'add items extent',
         (tester) async {
           final scrollController = ScrollController();
 
           // Start with 5 items
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -494,7 +494,7 @@ void main() {
           expect(scrollController.maxScrollExtent, equals(0.0));
 
           // Add more items (10 total)
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -519,13 +519,13 @@ void main() {
     test('removing items updates scroll extent',
         skip: 'Known bug: ListView maxScrollExtent not calculated correctly',
         () async {
-      await testNocterm(
+      await testCinder(
         'remove items extent',
         (tester) async {
           final scrollController = ScrollController();
 
           // Start with 10 items
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -543,7 +543,7 @@ void main() {
           expect(scrollController.maxScrollExtent, equals(5.0));
 
           // Remove items (5 total)
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -566,12 +566,12 @@ void main() {
     });
 
     test('item content update reflects in display', () async {
-      await testNocterm(
+      await testCinder(
         'content update',
         (tester) async {
           int version = 1;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -588,7 +588,7 @@ void main() {
 
           // Update content
           version = 2;
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -613,13 +613,13 @@ void main() {
     test('scroll position clamped when items removed',
         skip: 'Known bug: ListView maxScrollExtent not calculated correctly',
         () async {
-      await testNocterm(
+      await testCinder(
         'clamp on remove',
         (tester) async {
           final scrollController = ScrollController();
 
           // Start with 20 items
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -640,7 +640,7 @@ void main() {
           expect(scrollController.offset, equals(15.0));
 
           // Remove most items
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -665,12 +665,12 @@ void main() {
     test('jumpTo respects bounds',
         skip: 'Known bug: ListView maxScrollExtent not calculated correctly',
         () async {
-      await testNocterm(
+      await testCinder(
         'jumpTo bounds',
         (tester) async {
           final scrollController = ScrollController();
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -706,12 +706,12 @@ void main() {
     test('scrollDown respects bounds',
         skip: 'Known bug: ListView maxScrollExtent not calculated correctly',
         () async {
-      await testNocterm(
+      await testCinder(
         'scrollDown bounds',
         (tester) async {
           final scrollController = ScrollController();
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -740,12 +740,12 @@ void main() {
     });
 
     test('scrollUp respects bounds', () async {
-      await testNocterm(
+      await testCinder(
         'scrollUp bounds',
         (tester) async {
           final scrollController = ScrollController();
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -780,10 +780,10 @@ void main() {
 
   group('ListView with complex items', () {
     test('items with Container and padding', () async {
-      await testNocterm(
+      await testCinder(
         'container items',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 10,
@@ -808,10 +808,10 @@ void main() {
     });
 
     test('items with nested Row/Column', () async {
-      await testNocterm(
+      await testCinder(
         'nested layout items',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 40,
               height: 10,
@@ -838,10 +838,10 @@ void main() {
     });
 
     test('items with GestureDetector', () async {
-      await testNocterm(
+      await testCinder(
         'gesture items',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 10,
@@ -867,13 +867,13 @@ void main() {
 
   group('ListView scrollToEnd regression', () {
     test('scrollToEnd works after items are added', () async {
-      await testNocterm(
+      await testCinder(
         'scrollToEnd after add',
         (tester) async {
           final scrollController = ScrollController();
 
           // Start with 5 items (no scroll needed)
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -889,7 +889,7 @@ void main() {
           );
 
           // Add items
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -921,12 +921,12 @@ void main() {
     });
 
     test('scrollToEnd works with lazy mode', () async {
-      await testNocterm(
+      await testCinder(
         'scrollToEnd lazy',
         (tester) async {
           final scrollController = ScrollController();
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -961,10 +961,10 @@ void main() {
 
   group('ListView horizontal mode', () {
     test('horizontal layout works correctly', () async {
-      await testNocterm(
+      await testCinder(
         'horizontal layout',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -989,12 +989,12 @@ void main() {
     });
 
     test('horizontal scrolling works', () async {
-      await testNocterm(
+      await testCinder(
         'horizontal scroll',
         (tester) async {
           final scrollController = ScrollController();
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 20,
               height: 3,

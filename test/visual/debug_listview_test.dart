@@ -1,14 +1,14 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 void main() {
   test('debug ListView extent', () async {
-    await testNocterm(
+    await testCinder(
       'debug test',
       (tester) async {
         final scrollController = ScrollController();
 
-        await tester.pumpComponent(
+        await tester.pumpWidget(
           Container(
             width: 20,
             height: 5, // Small viewport to force scrolling

@@ -4,7 +4,7 @@ import 'tui_theme_data.dart';
 /// Provides a theme to its descendants.
 ///
 /// Wrap your app in a [TuiTheme] to provide theme colors to all
-/// descendant components. Components can then access the theme using
+/// descendant components. Widgets can then access the theme using
 /// [TuiTheme.of].
 ///
 /// Example:
@@ -14,11 +14,11 @@ import 'tui_theme_data.dart';
 ///   child: MyApp(),
 /// )
 ///
-/// // In a component's build method:
+/// // In a widget's build method:
 /// final theme = TuiTheme.of(context);
 /// final textColor = theme.onSurface;
 /// ```
-class TuiTheme extends InheritedComponent {
+class TuiTheme extends InheritedWidget {
   /// The theme data for this subtree.
   final TuiThemeData data;
 
@@ -34,8 +34,8 @@ class TuiTheme extends InheritedComponent {
   /// If no [TuiTheme] ancestor exists, returns [TuiThemeData.dark] as
   /// the default theme.
   ///
-  /// This method registers the calling component as a dependent of the
-  /// [TuiTheme], so the component will rebuild when the theme changes.
+  /// This method registers the calling widget as a dependent of the
+  /// [TuiTheme], so the widget will rebuild when the theme changes.
   ///
   /// Example:
   /// ```dart
@@ -48,26 +48,25 @@ class TuiTheme extends InheritedComponent {
   /// }
   /// ```
   static TuiThemeData of(BuildContext context) {
-    final theme = context.dependOnInheritedComponentOfExactType<TuiTheme>();
+    final theme = context.dependOnInheritedWidgetOfExactType<TuiTheme>();
     return theme?.data ?? TuiThemeData.dark;
   }
 
   /// Returns the [TuiThemeData] from the closest [TuiTheme] ancestor
   /// without registering a dependency.
   ///
-  /// This method does NOT register the calling component as a dependent,
-  /// so the component will NOT rebuild when the theme changes. Use this
+  /// This method does NOT register the calling widget as a dependent,
+  /// so the widget will NOT rebuild when the theme changes. Use this
   /// for one-time reads where you don't want to rebuild on theme changes.
   ///
   /// Returns `null` if no [TuiTheme] ancestor exists.
   static TuiThemeData? maybeOf(BuildContext context) {
-    final element =
-        context.getElementForInheritedComponentOfExactType<TuiTheme>();
-    return (element?.component as TuiTheme?)?.data;
+    final element = context.getElementForInheritedWidgetOfExactType<TuiTheme>();
+    return (element?.widget as TuiTheme?)?.data;
   }
 
   @override
-  bool updateShouldNotify(TuiTheme oldComponent) {
-    return data != oldComponent.data;
+  bool updateShouldNotify(TuiTheme oldWidget) {
+    return data != oldWidget.data;
   }
 }

@@ -1,14 +1,14 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() async {
   await runApp(const TestSimpleScroll());
 }
 
-class TestSimpleScroll extends StatelessComponent {
+class TestSimpleScroll extends StatelessWidget {
   const TestSimpleScroll({super.key});
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Center(
       child: Container(
         width: 30,

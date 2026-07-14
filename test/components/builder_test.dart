@@ -1,13 +1,13 @@
 import 'package:test/test.dart';
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() {
   group('Builder', () {
-    test('builds component from builder callback', () async {
-      await testNocterm(
+    test('builds widget from builder callback', () async {
+      await testCinder(
         'basic builder',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -23,12 +23,12 @@ void main() {
     });
 
     test('provides BuildContext to builder callback', () async {
-      await testNocterm(
+      await testCinder(
         'builder context',
         (tester) async {
           BuildContext? capturedContext;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -48,10 +48,10 @@ void main() {
     });
 
     test('can access inherited widgets through context', () async {
-      await testNocterm(
+      await testCinder(
         'builder inherited access',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 40,
               height: 5,
@@ -76,12 +76,12 @@ void main() {
     });
 
     test('rebuilds when parent rebuilds', () async {
-      await testNocterm(
+      await testCinder(
         'builder rebuilds',
         (tester) async {
           var buildCount = 0;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -101,10 +101,10 @@ void main() {
     });
 
     test('works nested inside other components', () async {
-      await testNocterm(
+      await testCinder(
         'nested builder',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 40,
               height: 10,
@@ -127,11 +127,11 @@ void main() {
       );
     });
 
-    test('can return complex component trees', () async {
-      await testNocterm(
+    test('can return complex widget trees', () async {
+      await testCinder(
         'complex builder output',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 40,
               height: 10,
@@ -155,10 +155,10 @@ void main() {
     });
 
     test('visual development - builder in layout', () async {
-      await testNocterm(
+      await testCinder(
         'visual builder demo',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 50,
               height: 10,

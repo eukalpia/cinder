@@ -1,10 +1,10 @@
 import 'package:test/test.dart';
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() {
   group('Dialog Rendering', () {
     test('dialog should overlay on top of main content', () async {
-      await testNocterm(
+      await testCinder(
         'dialog overlay test',
         (tester) async {
           print('\n=== Testing Dialog Overlay ===\n');
@@ -26,7 +26,7 @@ void main() {
             ),
           );
 
-          await tester.pumpComponent(navigator);
+          await tester.pumpWidget(navigator);
 
           print('Initial state (main page only):');
           print('Terminal size: ${tester.terminalState.size}');
@@ -95,7 +95,7 @@ void main() {
     });
 
     test('dialog positioning', () async {
-      await testNocterm(
+      await testCinder(
         'dialog position test',
         (tester) async {
           print('\n=== Testing Dialog Positioning ===\n');
@@ -108,7 +108,7 @@ void main() {
             ),
           );
 
-          await tester.pumpComponent(navigator);
+          await tester.pumpWidget(navigator);
           final navState = tester.findState<NavigatorState>();
 
           // Show a small dialog that should be centered

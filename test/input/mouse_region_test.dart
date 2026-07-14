@@ -1,13 +1,13 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('MouseRegion', () {
     test('visual development - hover visualization', () async {
-      await testNocterm(
+      await testCinder(
         'hover visualization',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 80,
               height: 24,
@@ -30,14 +30,14 @@ void main() {
     });
 
     test('triggers onEnter when mouse enters', () async {
-      await testNocterm(
+      await testCinder(
         'onEnter callback',
         (tester) async {
           bool entered = false;
           int enterX = -1;
           int enterY = -1;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 80,
               height: 24,
@@ -69,14 +69,14 @@ void main() {
     });
 
     test('triggers onExit when mouse leaves', () async {
-      await testNocterm(
+      await testCinder(
         'onExit callback',
         (tester) async {
           bool exited = false;
           int exitX = -1;
           int exitY = -1;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 80,
               height: 24,
@@ -113,14 +113,14 @@ void main() {
     });
 
     test('triggers onHover when mouse moves inside', () async {
-      await testNocterm(
+      await testCinder(
         'onHover callback',
         (tester) async {
           int hoverCount = 0;
           int lastX = -1;
           int lastY = -1;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 80,
               height: 24,
@@ -156,13 +156,13 @@ void main() {
     });
 
     test('does not trigger callbacks outside region', () async {
-      await testNocterm(
+      await testCinder(
         'no callbacks outside region',
         (tester) async {
           bool entered = false;
           bool hovered = false;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 80,
               height: 24,
@@ -191,13 +191,13 @@ void main() {
     });
 
     test('respects opaque flag for hit testing', () async {
-      await testNocterm(
+      await testCinder(
         'opaque hit testing',
         (tester) async {
           bool topEntered = false;
           bool bottomEntered = false;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 80,
               height: 24,
@@ -240,13 +240,13 @@ void main() {
     });
 
     test('nested MouseRegions trigger correctly', () async {
-      await testNocterm(
+      await testCinder(
         'nested regions',
         (tester) async {
           bool outerEntered = false;
           bool innerEntered = false;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 80,
               height: 24,

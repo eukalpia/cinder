@@ -1,4 +1,4 @@
-import 'package:nocterm/src/utils/terminal_color_support_stub.dart';
+import 'package:cinder/src/utils/terminal_color_support_stub.dart';
 import 'package:test/test.dart';
 
 void main() {

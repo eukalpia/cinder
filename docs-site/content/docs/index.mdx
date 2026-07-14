@@ -1,19 +1,19 @@
 ---
-title: What is Nocterm?
+title: What is Cinder?
 description: A Flutter-like framework for building beautiful Terminal UIs in Dart
 icon: home
 ---
 
-Nocterm is a framework for building Terminal User Interfaces (TUIs) in Dart. If you know Flutter, you already know how to use Nocterm—it uses the same patterns, components, and APIs you're familiar with.
+Cinder is a framework for building Terminal User Interfaces (TUIs) in Dart. If you know Flutter, you already know how to use Cinder—it uses the same patterns, components, and APIs you're familiar with.
 
-In this guide, you'll learn what Nocterm is, when to use it, and what makes it different from other terminal frameworks.
+In this guide, you'll learn what Cinder is, when to use it, and what makes it different from other terminal frameworks.
 
-## Why use Nocterm?
+## Why use Cinder?
 
-Building terminal apps usually means dealing with low-level terminal codes, managing cursor positions, and handling complex state. Nocterm removes that complexity by giving you Flutter's declarative UI model in the terminal.
+Building terminal apps usually means dealing with low-level terminal codes, managing cursor positions, and handling complex state. Cinder removes that complexity by giving you Flutter's declarative UI model in the terminal.
 
 You get:
-- **Familiar API**: Use `StatefulComponent`, `setState()`, `Column`, `Row`, and other Flutter concepts
+- **Familiar API**: Use `StatefulWidget`, `setState()`, `Column`, `Row`, and other Flutter concepts
 - **Hot reload**: See changes instantly during development
 - **Rich components**: Text styling, layouts, scrolling, input fields, and markdown rendering
 - **Testing**: Write tests for your TUI just like you test Flutter apps
@@ -24,13 +24,13 @@ You get:
 Here's a complete counter app:
 
 ```dart
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() {
   runApp(const Counter());
 }
 
-class Counter extends StatefulComponent {
+class Counter extends StatefulWidget {
   const Counter({super.key});
 
   @override
@@ -41,7 +41,7 @@ class _CounterState extends State<Counter> {
   int _count = 0;
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Focusable(
       focused: true,
       onKeyEvent: (event) {
@@ -72,33 +72,33 @@ class _CounterState extends State<Counter> {
 
 If you've used Flutter, this code should look familiar. You create components, manage state with `setState()`, and compose UIs using layout widgets.
 
-## When to use Nocterm
+## When to use Cinder
 
-Nocterm is a good choice when you need:
+Cinder is a good choice when you need:
 - **Developer tools**: Build CLIs with rich interactive interfaces (log viewers, build tools, debuggers)
 - **System administration**: Create monitoring dashboards or configuration tools
 - **Data exploration**: Display tables, logs, or real-time data in the terminal
 - **Prototypes**: Quickly build interactive terminal apps without learning terminal APIs
 
-Nocterm is **not** designed for simple command-line tools that just print text and exit. For those, use standard Dart I/O.
+Cinder is **not** designed for simple command-line tools that just print text and exit. For those, use standard Dart I/O.
 
-## What you'll find in Nocterm
+## What you'll find in Cinder
 
-Nocterm includes:
+Cinder includes:
 - Layout components: `Column`, `Row`, `Stack`, `Container`, `Expanded`
 - Text components: `Text`, `RichText`, markdown rendering
 - Input components: `TextField`, `Focusable` for keyboard handling
 - Scrolling: `ListView`, `ScrollView` with mouse wheel support
-- State management: Built-in `StatefulComponent` and Riverpod integration
+- State management: Built-in `StatefulWidget` and Riverpod integration
 - Navigation: Overlay system for dialogs and modals
-- Testing: `testNocterm()` function and test matchers
+- Testing: `testCinder()` function and test matchers
 
 ## Project status
 
-> **Note**: Nocterm is in active development (version 0.4.2). While APIs are stabilizing, some changes may occur in future releases.
+> **Note**: Cinder is in active development (version 0.4.2). While APIs are stabilizing, some changes may occur in future releases.
 
 ## Next steps
 
-- [Installation](/docs/installation) - Add Nocterm to your project
+- [Installation](/docs/installation) - Add Cinder to your project
 - [Your First App](/docs/first-app) - Build a simple counter app
 - [How terminals work](/docs/terminal-concepts/how-terminals-work) - Learn terminal basics

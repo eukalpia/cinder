@@ -1,4 +1,4 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -318,14 +318,14 @@ void main() {
     });
   });
 
-  group('TuiTheme InheritedComponent', () {
+  group('TuiTheme InheritedWidget', () {
     test('TuiTheme.of returns the provided theme data', () async {
-      await testNocterm(
+      await testCinder(
         'TuiTheme.of returns provided theme',
         (tester) async {
           TuiThemeData? capturedTheme;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TuiTheme(
               data: TuiThemeData.dracula,
               child: LayoutBuilder(
@@ -345,12 +345,12 @@ void main() {
 
     test('TuiTheme.of returns default (dark) when no TuiTheme ancestor',
         () async {
-      await testNocterm(
+      await testCinder(
         'TuiTheme.of returns default dark theme',
         (tester) async {
           TuiThemeData? capturedTheme;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             LayoutBuilder(
               builder: (context, constraints) {
                 capturedTheme = TuiTheme.of(context);
@@ -366,13 +366,13 @@ void main() {
     });
 
     test('TuiTheme.maybeOf returns null when no TuiTheme ancestor', () async {
-      await testNocterm(
+      await testCinder(
         'TuiTheme.maybeOf returns null',
         (tester) async {
           TuiThemeData? capturedTheme;
           bool wasChecked = false;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             LayoutBuilder(
               builder: (context, constraints) {
                 capturedTheme = TuiTheme.maybeOf(context);
@@ -389,12 +389,12 @@ void main() {
     });
 
     test('TuiTheme.maybeOf returns theme when ancestor exists', () async {
-      await testNocterm(
+      await testCinder(
         'TuiTheme.maybeOf returns theme',
         (tester) async {
           TuiThemeData? capturedTheme;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TuiTheme(
               data: TuiThemeData.nord,
               child: LayoutBuilder(
@@ -413,13 +413,13 @@ void main() {
     });
 
     test('nested TuiTheme overrides parent theme', () async {
-      await testNocterm(
+      await testCinder(
         'nested TuiTheme overrides parent',
         (tester) async {
           TuiThemeData? outerTheme;
           TuiThemeData? innerTheme;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TuiTheme(
               data: TuiThemeData.dark,
               child: Column(
@@ -451,14 +451,14 @@ void main() {
     });
   });
 
-  group('Component Theme Integration', () {
+  group('Widget Theme Integration', () {
     test('ProgressBar uses theme primary and outline colors by default',
         () async {
-      await testNocterm(
+      await testCinder(
         'ProgressBar uses theme colors',
         (tester) async {
           // Test with dark theme
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TuiTheme(
               data: TuiThemeData.dark,
               child: SizedBox(
@@ -478,10 +478,10 @@ void main() {
     });
 
     test('ProgressBar renders with different themes', () async {
-      await testNocterm(
+      await testCinder(
         'ProgressBar with dracula theme',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TuiTheme(
               data: TuiThemeData.dracula,
               child: SizedBox(
@@ -497,10 +497,10 @@ void main() {
         },
       );
 
-      await testNocterm(
+      await testCinder(
         'ProgressBar with nord theme',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TuiTheme(
               data: TuiThemeData.nord,
               child: SizedBox(
@@ -518,10 +518,10 @@ void main() {
     });
 
     test('Divider uses theme outline color by default', () async {
-      await testNocterm(
+      await testCinder(
         'Divider uses theme colors',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TuiTheme(
               data: TuiThemeData.dark,
               child: Container(
@@ -544,10 +544,10 @@ void main() {
     });
 
     test('Divider renders with different themes', () async {
-      await testNocterm(
+      await testCinder(
         'Divider with catppuccinMocha theme',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TuiTheme(
               data: TuiThemeData.catppuccinMocha,
               child: Container(
@@ -562,10 +562,10 @@ void main() {
         },
       );
 
-      await testNocterm(
+      await testCinder(
         'Divider with gruvboxDark theme',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TuiTheme(
               data: TuiThemeData.gruvboxDark,
               child: Container(
@@ -582,13 +582,13 @@ void main() {
     });
 
     test('custom colors override theme colors for ProgressBar', () async {
-      await testNocterm(
+      await testCinder(
         'ProgressBar custom colors',
         (tester) async {
           final customValueColor = Colors.red;
           final customBackgroundColor = Colors.blue;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TuiTheme(
               data: TuiThemeData.dark,
               child: SizedBox(
@@ -610,10 +610,10 @@ void main() {
     });
 
     test('custom color overrides theme color for Divider', () async {
-      await testNocterm(
+      await testCinder(
         'Divider custom color',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TuiTheme(
               data: TuiThemeData.dark,
               child: Container(

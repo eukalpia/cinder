@@ -1,11 +1,11 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 /// Performance test for lazy ListView with very large item counts
 void main() {
   runApp(const ListViewPerformanceTest());
 }
 
-class ListViewPerformanceTest extends StatefulComponent {
+class ListViewPerformanceTest extends StatefulWidget {
   const ListViewPerformanceTest({super.key});
 
   @override
@@ -23,7 +23,7 @@ class _ListViewPerformanceTestState extends State<ListViewPerformanceTest> {
   final Set<int> _builtItems = {};
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Focusable(
       focused: true,
       onKeyEvent: _handleKeyEvent,
@@ -138,7 +138,7 @@ class _ListViewPerformanceTestState extends State<ListViewPerformanceTest> {
     );
   }
 
-  Component _buildItem(int index) {
+  Widget _buildItem(int index) {
     final colors = [
       const Color(0xFFFF6B6B),
       const Color(0xFF4ECDC4),

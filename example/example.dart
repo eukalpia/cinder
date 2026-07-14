@@ -1,13 +1,13 @@
-// A simple todo app built with nocterm.
+// A simple todo app built with cinder.
 // Run with: dart run example/example.dart
 
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() {
   runApp(const TodoApp());
 }
 
-class TodoApp extends StatefulComponent {
+class TodoApp extends StatefulWidget {
   const TodoApp({super.key});
 
   @override
@@ -16,7 +16,7 @@ class TodoApp extends StatefulComponent {
 
 class _TodoAppState extends State<TodoApp> {
   final List<TodoItem> todos = [
-    TodoItem('Learn nocterm basics', true),
+    TodoItem('Learn cinder basics', true),
     TodoItem('Build a TUI application', true),
     TodoItem('Add keyboard navigation', false),
     TodoItem('Implement state management', false),
@@ -25,7 +25,7 @@ class _TodoAppState extends State<TodoApp> {
   int selectedIndex = 0;
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Focusable(
       focused: true,
       onKeyEvent: (key) {
@@ -98,7 +98,7 @@ class _TodoAppState extends State<TodoApp> {
     );
   }
 
-  Component _buildTodoItem(TodoItem todo, bool isSelected) {
+  Widget _buildTodoItem(TodoItem todo, bool isSelected) {
     final checkmark = todo.completed ? '[x]' : '[ ]';
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 1),
