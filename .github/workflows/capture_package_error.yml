@@ -1,0 +1,57 @@
+name: Capture integration package error
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - '.github/workflows/capture_package_error.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: dev
+          fetch-depth: 0
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+      - run: python3 .github/scripts/finalize_renderer_v2.py
+      - name: Capture package checks
+        shell: bash
+        run: |
+          : > integration_package_error.log
+          final_status=0
+          for package in cinder_nested cinder_provider cinder_riverpod cinder_bloc; do
+            echo "===== $package =====" >> integration_package_error.log
+            (
+              cd "packages/$package" || exit 1
+              dart pub get >/tmp/${package}-pub.log 2>&1 || exit 1
+              dart analyze --fatal-infos >/tmp/${package}-analyze.log 2>&1 || exit 2
+              if find test -name '*_test.dart' -print -quit 2>/dev/null | grep -q .; then
+                dart test --reporter expanded >/tmp/${package}-test.log 2>&1 || exit 3
+              fi
+            )
+            status=$?
+            echo "status=$status" >> integration_package_error.log
+            if [ -f /tmp/${package}-analyze.log ]; then
+              tail -n 100 /tmp/${package}-analyze.log >> integration_package_error.log
+            fi
+            if [ -f /tmp/${package}-test.log ] && [ "$status" -ne 0 ]; then
+              tail -n 100 /tmp/${package}-test.log >> integration_package_error.log
+            fi
+            echo >> integration_package_error.log
+            if [ "$status" -ne 0 ]; then
+              final_status=$status
+            fi
+          done
+          git config user.name "Cinder Diagnostics Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add integration_package_error.log
+          git commit --no-verify -m "diagnostics: capture integration package validation" || true
+          git push origin HEAD:dev
+          exit "$final_status"
