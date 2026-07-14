@@ -165,14 +165,7 @@ Changed lib/src/context_extensions.dart
 Formatted 10 files (1 changed) in 0.01 seconds.
 Analyzing cinder_bloc...
 
-warning - lib/src/repository_provider.dart:52:64 - The '!' will have no effect because the receiver can't be null. Try removing the '!' operator. - unnecessary_non_null_assertion
-   info - lib/cinder_bloc.dart:1:9 - Library names are not necessary. Remove the library name. - unnecessary_library_name
-   info - lib/src/bloc_provider.dart:9:9 - Parameter 'key' could be a super parameter. Trying converting 'key' to a super parameter. - use_super_parameters
-   info - lib/src/bloc_provider.dart:18:9 - Parameter 'key' could be a super parameter. Trying converting 'key' to a super parameter. - use_super_parameters
-   info - lib/src/multi_bloc_provider.dart:7:3 - Parameters ''key' and 'providers'' could be super parameters. Trying converting ''key' and 'providers'' to super parameters. - use_super_parameters
-   info - lib/src/repository_provider.dart:7:3 - Parameters ''key' and 'child'' could be super parameters. Trying converting ''key' and 'child'' to super parameters. - use_super_parameters
-   info - lib/src/repository_provider.dart:16:9 - Use an initializing formal to assign a parameter to a field. Try using an initialing formal ('this.lazy') to initialize the field. - prefer_initializing_formals
-   info - lib/src/repository_provider.dart:19:3 - Parameters ''key' and 'child'' could be super parameters. Trying converting ''key' and 'child'' to super parameters. - use_super_parameters
-   info - lib/src/repository_provider.dart:61:3 - Parameters ''key' and 'providers'' could be super parameters. Trying converting ''key' and 'providers'' to super parameters. - use_super_parameters
+warning - lib/src/multi_bloc_provider.dart:1:8 - Unused import: 'package:cinder/cinder.dart'. Try removing the import directive. - unused_import
+warning - lib/src/multi_bloc_provider.dart:2:8 - Unused import: 'package:cinder_nested/nested.dart'. Try removing the import directive. - unused_import
 
-9 issues found.
+2 issues found.
