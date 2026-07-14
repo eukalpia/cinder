@@ -31,7 +31,18 @@ TEXT_SUFFIXES = {
     ".ps1",
 }
 
-SKIP_DIRS = {".git", ".dart_tool", "build", ".idea", ".vscode"}
+# .github is deliberately excluded. GitHub's workflow token can push source
+# changes with contents:write, but cannot update workflow files without the
+# separate workflow permission. Those files are rebranded through the GitHub
+# API after the source migration lands.
+SKIP_DIRS = {
+    ".git",
+    ".github",
+    ".dart_tool",
+    "build",
+    ".idea",
+    ".vscode",
+}
 
 FILE_REFERENCE_REPLACEMENTS: tuple[tuple[str, str], ...] = (
     ("stateful_component.dart", "stateful_widget.dart"),
@@ -150,6 +161,7 @@ def rename_brand_paths() -> None:
             path
             for path in ROOT.rglob("*")
             if ".git" not in path.parts
+            and ".github" not in path.parts
             and "nocterm" in path.name.lower()
             and path.name != "LICENSE"
         ),
@@ -240,8 +252,6 @@ def assert_no_legacy_public_api() -> None:
     )
     failures: list[str] = []
     for path in iter_text_files():
-        if ".github" in path.parts:
-            continue
         try:
             text = path.read_text(encoding="utf-8")
         except UnicodeDecodeError:
