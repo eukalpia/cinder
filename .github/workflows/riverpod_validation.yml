@@ -1,0 +1,27 @@
+name: Cinder Riverpod validation
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/riverpod_validation.yml'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: dev
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+      - name: Install dependencies
+        working-directory: packages/cinder_riverpod
+        run: dart pub get
+      - name: Analyze with fatal infos
+        working-directory: packages/cinder_riverpod
+        run: dart analyze --fatal-infos
+      - name: Test
+        working-directory: packages/cinder_riverpod
+        run: dart test --reporter expanded
