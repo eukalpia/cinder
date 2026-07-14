@@ -59,7 +59,8 @@ The current development line is **Cinder 1.0**.
 | Riverpod 3 integration | Available |
 | BLoC integration | Available |
 | Widget testing utilities | Available |
-| Renderer V2 dirty-region pipeline | Planned |
+| Renderer V2 reusable dirty-span pipeline | Available in `dev` |
+| Repaint boundaries and cached layers | Planned |
 | Stable `1.0.0` release | Planned |
 
 ## Installation
@@ -467,14 +468,18 @@ or maintaining aliases.
 Benchmarks live in [`benchmark/`](benchmark/) and run in GitHub Actions. Cinder
 already coalesces repeated state changes and input events into scheduled frames.
 
-The planned Renderer V2 will focus on:
+Renderer V2 now provides:
 
-- reusable flat front/back buffers;
-- dirty-region painting;
-- repaint boundaries and cached layers;
-- row-span output diffs;
-- terminal scroll-region optimization;
-- synchronized output where supported.
+- reusable flat front/back buffers and stable cell identities;
+- per-row dirty spans instead of unconditional full-screen comparison;
+- cost-aware row batching for ANSI output;
+- correct removal of wide graphemes and image-placeholder cleanup;
+- synchronized terminal output using DEC private mode 2026;
+- deterministic comparison/run metrics and regression benchmarks.
+
+The next rendering phase adds repaint boundaries, cached layers, and terminal
+scroll-region acceleration so static subtrees do not repaint during streaming
+log updates.
 
 Performance claims should always be tied to reproducible workloads, viewport
 sizes, terminals, and benchmark configurations.
@@ -488,7 +493,7 @@ sizes, terminals, and benchmark configurations.
 - [x] BLoC integration
 - [x] `FocusManager`, `FocusNode`, and traversal
 - [x] migrate `TextField` to focus nodes
-- [ ] Renderer V2
+- [x] Renderer V2 reusable dirty-span foundation
 - [ ] broader production widget kit
 - [ ] semantics and non-interactive output mode
 - [ ] stable `1.0.0` release

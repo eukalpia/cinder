@@ -99,13 +99,11 @@ class TerminalCanvas {
       final effectiveStyle = style ?? const TextStyle();
       final finalStyle = _blendStyle(effectiveStyle, existingCell);
 
-      _buffer.setCell(
+      _buffer.writeCell(
         cellX,
         cellY,
-        Cell(
-          char: grapheme, // Use the full grapheme cluster, not individual runes
-          style: finalStyle,
-        ),
+        char: grapheme, // Use the full grapheme cluster, not individual runes
+        style: finalStyle,
       );
 
       // For wide characters, we need to mark the next cell as occupied
@@ -119,16 +117,16 @@ class TerminalCanvas {
         // Get existing cell and blend style (handles alpha + background preservation)
         final nextExistingCell = _buffer.getCell(nextCellX, nextCellY);
         final nextEffectiveStyle = style ?? const TextStyle();
-        final nextFinalStyle =
-            _blendStyle(nextEffectiveStyle, nextExistingCell);
+        final nextFinalStyle = _blendStyle(
+          nextEffectiveStyle,
+          nextExistingCell,
+        );
 
-        _buffer.setCell(
+        _buffer.writeCell(
           nextCellX,
           nextCellY,
-          Cell(
-            char: '\u200B', // Zero-width space as a marker
-            style: nextFinalStyle,
-          ),
+          char: '\u200B', // Zero-width space as a marker
+          style: nextFinalStyle,
         );
       }
 
@@ -162,14 +160,7 @@ class TerminalCanvas {
         final existingCell = _buffer.getCell(cellX, cellY);
         final finalStyle = _blendStyle(effectiveStyle, existingCell);
 
-        _buffer.setCell(
-          cellX,
-          cellY,
-          Cell(
-            char: char,
-            style: finalStyle,
-          ),
-        );
+        _buffer.writeCell(cellX, cellY, char: char, style: finalStyle);
       }
     }
   }
@@ -210,19 +201,17 @@ class TerminalCanvas {
             ? Color.alphaBlend(tintColor, existingBg)
             : existingBg;
 
-        _buffer.setCell(
+        _buffer.writeCell(
           cellX,
           cellY,
-          Cell(
-            char: existingCell.char, // Keep the existing character!
-            style: TextStyle(
-              color: blendedFg,
-              backgroundColor: blendedBg,
-              fontWeight: existingCell.style.fontWeight,
-              fontStyle: existingCell.style.fontStyle,
-              decoration: existingCell.style.decoration,
-              reverse: existingCell.style.reverse,
-            ),
+          char: existingCell.char, // Keep the existing character!
+          style: TextStyle(
+            color: blendedFg,
+            backgroundColor: blendedBg,
+            fontWeight: existingCell.style.fontWeight,
+            fontStyle: existingCell.style.fontStyle,
+            decoration: existingCell.style.decoration,
+            reverse: existingCell.style.reverse,
           ),
         );
       }
@@ -271,14 +260,7 @@ class TerminalCanvas {
     final effectiveStyle = style ?? const TextStyle();
     final finalStyle = _blendStyle(effectiveStyle, existingCell);
 
-    _buffer.setCell(
-      cellX,
-      cellY,
-      Cell(
-        char: char,
-        style: finalStyle,
-      ),
-    );
+    _buffer.writeCell(cellX, cellY, char: char, style: finalStyle);
   }
 
   /// Create a clipped canvas for drawing within a sub-region

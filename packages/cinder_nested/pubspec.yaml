@@ -9,6 +9,9 @@ environment:
 dependencies:
   cinder: ^1.0.0-dev.1
 
+dev_dependencies:
+  test: ^1.25.6
+
 dependency_overrides:
   cinder:
     path: ../..
