@@ -1,0 +1,62 @@
+name: Format Renderer V2 PR sources
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/format_pr_sources.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: dev
+          fetch-depth: 0
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+      - name: Format only changed production files
+        run: |
+          dart format \
+            benchmark/renderer_v2_benchmark.dart \
+            lib/src/binding/terminal_binding.dart \
+            lib/src/buffer.dart \
+            lib/src/components/focus.dart \
+            lib/src/framework/terminal_canvas.dart \
+            lib/src/rendering/frame_diff.dart \
+            lib/src/utils/escape_codes.dart \
+            packages/cinder_riverpod/lib/cinder_riverpod.dart \
+            packages/cinder_riverpod/lib/src/framework.dart \
+            packages/cinder_riverpod/lib/src/provider_context.dart \
+            packages/cinder_riverpod/lib/src/provider_dependencies.dart \
+            test/rendering/buffer_v2_test.dart \
+            test/rendering/frame_diff_test.dart
+      - name: Commit formatting
+        run: |
+          git config user.name "Cinder Format Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add \
+            benchmark/renderer_v2_benchmark.dart \
+            lib/src/binding/terminal_binding.dart \
+            lib/src/buffer.dart \
+            lib/src/components/focus.dart \
+            lib/src/framework/terminal_canvas.dart \
+            lib/src/rendering/frame_diff.dart \
+            lib/src/utils/escape_codes.dart \
+            packages/cinder_riverpod/lib/cinder_riverpod.dart \
+            packages/cinder_riverpod/lib/src/framework.dart \
+            packages/cinder_riverpod/lib/src/provider_context.dart \
+            packages/cinder_riverpod/lib/src/provider_dependencies.dart \
+            test/rendering/buffer_v2_test.dart \
+            test/rendering/frame_diff_test.dart
+          if git diff --cached --quiet; then
+            echo "PR sources already formatted."
+            exit 0
+          fi
+          git commit --no-verify -m "style: format Renderer V2 PR sources"
+          git push origin HEAD:dev
