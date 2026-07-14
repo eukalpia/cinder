@@ -136,7 +136,7 @@ void main() {
             TextField(
               controller: controller,
               width: 8,
-              focused: true,
+              autofocus: true,
               decoration: const InputDecoration(
                 border: BoxBorder(),
                 contentPadding: EdgeInsets.symmetric(horizontal: 1),

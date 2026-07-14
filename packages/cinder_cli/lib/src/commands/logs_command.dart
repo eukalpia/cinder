@@ -147,8 +147,7 @@ Examples:
         // User specified a PID, find that instance
         final instance = instances.where((i) => i.pid == targetPid).firstOrNull;
         if (instance == null) {
-          stderr
-              .writeln('Error: No cinder instance found with PID $targetPid');
+          stderr.writeln('Error: No cinder instance found with PID $targetPid');
           stderr.writeln('Running instances:');
           for (final i in instances) {
             stderr.writeln('  PID ${i.pid} (port ${i.port})');

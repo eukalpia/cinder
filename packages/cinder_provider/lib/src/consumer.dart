@@ -165,8 +165,7 @@ class Consumer<T> extends SingleChildStatelessWidget {
   ///
   /// Must not be `null`.
   /// {@endtemplate}
-  final Widget Function(BuildContext context, T value, Widget? child)
-      builder;
+  final Widget Function(BuildContext context, T value, Widget? child) builder;
 
   @override
   Widget buildWithChild(BuildContext context, Widget? child) {

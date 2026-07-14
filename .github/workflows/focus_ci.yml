@@ -1,0 +1,93 @@
+name: Focus system CI
+
+on:
+  pull_request:
+    branches:
+      - agent/flutter-core-breaking-refactor
+    paths:
+      - lib/src/components/focus.dart
+      - lib/src/components/focus_scope.dart
+      - lib/src/components/focusable.dart
+      - lib/src/components/keyboard_listener.dart
+      - lib/src/components/text_field.dart
+      - lib/cinder.dart
+      - test/focus/**
+      - test/input/**
+      - test/components/text_field_focus_test.dart
+      - example/**
+      - benchmark/**
+      - packages/**
+      - .github/scripts/focus_system_fixes.py
+      - .github/scripts/text_field_callsite_fixes.py
+      - .github/workflows/focus_ci.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: cinder-focus-system
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/flutter-focus-system
+          fetch-depth: 0
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+      - run: dart pub get
+      - name: Apply focus and TextField migration
+        run: |
+          python3 .github/scripts/focus_system_fixes.py
+          python3 .github/scripts/text_field_callsite_fixes.py
+      - name: Format migrated Dart sources
+        run: dart format lib test example benchmark packages
+      - name: Commit generated fixes when needed
+        shell: bash
+        run: |
+          rm -f focus_validation_failure.log focus_test_failure.log
+          git config user.name "Cinder Focus Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit --no-verify -m "feat: migrate TextField to FocusNode"
+          git push origin HEAD:agent/flutter-focus-system
+      - name: Analyze focus system
+        shell: bash
+        run: |
+          set +e
+          dart analyze lib test example benchmark >/tmp/focus-analyze.log 2>&1
+          status=$?
+          cat /tmp/focus-analyze.log
+          if [ "$status" -ne 0 ]; then
+            cp /tmp/focus-analyze.log focus_validation_failure.log
+            git config user.name "Cinder Focus Bot"
+            git config user.email "actions@users.noreply.github.com"
+            git add focus_validation_failure.log
+            git commit --no-verify -m "test: capture focus analyzer failure"
+            git push origin HEAD:agent/flutter-focus-system
+            exit "$status"
+          fi
+      - name: Test focus system
+        shell: bash
+        run: |
+          set +e
+          dart test -r expanded test/focus test/components/text_field_focus_test.dart test/input/keyboard_listener_default_focus_test.dart >/tmp/focus-test.log 2>&1
+          status=$?
+          cat /tmp/focus-test.log
+          if [ "$status" -ne 0 ]; then
+            cp /tmp/focus-test.log focus_test_failure.log
+            git config user.name "Cinder Focus Bot"
+            git config user.email "actions@users.noreply.github.com"
+            git add focus_test_failure.log
+            git commit --no-verify -m "test: capture focus runtime failure"
+            git push origin HEAD:agent/flutter-focus-system
+            exit "$status"
+          fi

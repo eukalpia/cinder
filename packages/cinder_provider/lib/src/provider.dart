@@ -305,8 +305,7 @@ class Provider<T> extends InheritedProvider<T> {
       // We have to use this method instead of dependOnInheritedElement, because
       // dependOnInheritedElement does not support relocating using GlobalKey
       // if no provider were found previously.
-      context
-          .dependOnInheritedWidgetOfExactType<_InheritedProviderScope<T?>>();
+      context.dependOnInheritedWidgetOfExactType<_InheritedProviderScope<T?>>();
     }
 
     final value = inheritedElement?.value;

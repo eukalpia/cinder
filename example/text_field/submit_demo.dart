@@ -52,7 +52,7 @@ class _SubmitDemoState extends State<SubmitDemo> {
           Container(
             width: 56,
             child: TextField(
-              focused: _isFocused,
+              autofocus: _isFocused,
               onFocusChange: (focused) {
                 setState(() {
                   _isFocused = focused;

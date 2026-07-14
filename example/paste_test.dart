@@ -66,7 +66,7 @@ class _PasteTestAppState extends State<PasteTestApp> {
             const SizedBox(height: 1),
             TextField(
               controller: _controller,
-              focused: true,
+              autofocus: true,
               decoration: InputDecoration(
                 border: BoxBorder.all(
                   color: const Color.fromRGB(100, 255, 100),

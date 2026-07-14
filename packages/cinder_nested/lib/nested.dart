@@ -142,8 +142,7 @@ class _NestedHook extends StatelessWidget {
   _NestedHookElement createElement() => _NestedHookElement(this);
 
   @override
-  Widget build(BuildContext context) =>
-      throw StateError('handled internally');
+  Widget build(BuildContext context) => throw StateError('handled internally');
 }
 
 class _NestedHookElement extends StatelessElement {
@@ -316,16 +315,14 @@ abstract class SingleChildState<T extends SingleChildStatefulWidget>
   Widget buildWithChild(BuildContext context, Widget? child);
 
   @override
-  Widget build(BuildContext context) =>
-      buildWithChild(context, widget._child);
+  Widget build(BuildContext context) => buildWithChild(context, widget._child);
 }
 
 /// An [Element] that uses a [SingleChildStatefulWidget] as its configuration.
 class SingleChildStatefulElement extends StatefulElement
     with SingleChildWidgetElementMixin {
   /// Creates an element that uses the given widget as its configuration.
-  SingleChildStatefulElement(SingleChildStatefulWidget widget)
-      : super(widget);
+  SingleChildStatefulElement(SingleChildStatefulWidget widget) : super(widget);
 
   @override
   SingleChildStatefulWidget get widget =>

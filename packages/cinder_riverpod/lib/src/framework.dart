@@ -40,8 +40,8 @@ class ProviderScope extends StatefulWidget {
     _InheritedProviderScope? scope;
 
     if (listen) {
-      scope = context
-          .dependOnInheritedWidgetOfExactType<_InheritedProviderScope>();
+      scope =
+          context.dependOnInheritedWidgetOfExactType<_InheritedProviderScope>();
     } else {
       scope = context
           .getElementForInheritedWidgetOfExactType<_InheritedProviderScope>()
@@ -157,8 +157,8 @@ class UncontrolledProviderScope extends StatefulWidget {
 }
 
 /// Synchronizes Riverpod's deferred refresh work with Cinder frames.
-class _UncontrolledProviderScopeState
-    extends State<UncontrolledProviderScope> implements Vsync {
+class _UncontrolledProviderScopeState extends State<UncontrolledProviderScope>
+    implements Vsync {
   Timer? _disposeTimer;
 
   @override
@@ -236,8 +236,7 @@ class _InheritedProviderScopeElement extends InheritedElement {
   _InheritedProviderScopeElement(_InheritedProviderScope super.widget);
 
   @override
-  _InheritedProviderScope get widget =>
-      super.widget as _InheritedProviderScope;
+  _InheritedProviderScope get widget => super.widget as _InheritedProviderScope;
 
   ProviderContainer get container => widget.container;
 

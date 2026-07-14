@@ -16,7 +16,7 @@ void main() {
               decoration: BoxDecoration(border: BoxBorder.all()),
               child: TextField(
                 controller: controller,
-                focused: true,
+                autofocus: true,
                 selectionColor: Colors.blue, // Explicitly set selection color
                 cursorColor: Colors.green,
                 style: TextStyle(color: Colors.white),
@@ -75,7 +75,7 @@ void main() {
               decoration: BoxDecoration(border: BoxBorder.all()),
               child: TextField(
                 controller: controller,
-                focused: true,
+                autofocus: true,
                 selectionColor: Colors.cyan,
                 cursorColor: Colors.yellow,
               ),
@@ -119,7 +119,7 @@ void main() {
               decoration: BoxDecoration(border: BoxBorder.all()),
               child: TextField(
                 controller: controller,
-                focused: true,
+                autofocus: true,
                 selectionColor: Colors.magenta,
               ),
             ),
@@ -167,7 +167,7 @@ void main() {
               padding: EdgeInsets.all(1),
               child: TextField(
                 controller: controller,
-                focused: true,
+                autofocus: true,
                 selectionColor: Colors.blue,
                 cursorColor: Colors.white,
                 style: TextStyle(

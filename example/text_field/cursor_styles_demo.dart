@@ -169,7 +169,7 @@ class _CursorStylesDemoState extends State<CursorStylesDemo> {
                 style: TextStyle(fontWeight: FontWeight.bold)),
             TextField(
               controller: _textController,
-              focused: _focusedFieldIndex == 0,
+              autofocus: _focusedFieldIndex == 0,
               cursorStyle: _currentStyle,
               cursorColor: _cursorColor,
               cursorBlinkRate: _cursorBlinkRate,
@@ -198,7 +198,7 @@ class _CursorStylesDemoState extends State<CursorStylesDemo> {
                 ),
                 TextField(
                   controller: TextEditingController(text: 'Block cursor'),
-                  focused: _focusedFieldIndex == 1,
+                  autofocus: _focusedFieldIndex == 1,
                   cursorStyle: CursorStyle.block,
                   cursorColor: Colors.white,
                   width: 25,
@@ -222,7 +222,7 @@ class _CursorStylesDemoState extends State<CursorStylesDemo> {
                 ),
                 TextField(
                   controller: TextEditingController(text: 'Underline cursor'),
-                  focused: _focusedFieldIndex == 2,
+                  autofocus: _focusedFieldIndex == 2,
                   cursorStyle: CursorStyle.underline,
                   cursorColor: Colors.cyan,
                   width: 25,
@@ -245,7 +245,7 @@ class _CursorStylesDemoState extends State<CursorStylesDemo> {
                 ),
                 TextField(
                   controller: TextEditingController(text: 'Outline cursor'),
-                  focused: _focusedFieldIndex == 3,
+                  autofocus: _focusedFieldIndex == 3,
                   cursorStyle: CursorStyle.blockOutline,
                   cursorColor: Colors.red,
                   width: 25,

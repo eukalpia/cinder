@@ -1,7 +1,6 @@
-import 'package:test/test.dart';
 import 'package:cinder/cinder.dart';
+import 'package:test/test.dart';
 
-// Mock widget for testing
 class TestApp extends StatefulWidget {
   const TestApp({super.key});
 
@@ -12,136 +11,114 @@ class TestApp extends StatefulWidget {
 class _TestAppState extends State<TestApp> {
   final controller1 = TextEditingController(text: 'field1');
   final controller2 = TextEditingController(text: 'field2');
+  final focusNode1 = FocusNode(debugLabel: 'field1');
+  final focusNode2 = FocusNode(debugLabel: 'field2');
   int focusedField = 0;
 
   @override
   void dispose() {
     controller1.dispose();
     controller2.dispose();
+    focusNode1.dispose();
+    focusNode2.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        TextField(
-          controller: controller1,
-          focused: focusedField == 0,
-          onFocusChange: (focused) {
-            if (focused) {
-              setState(() => focusedField = 0);
-            }
-          },
-        ),
-        TextField(
-          controller: controller2,
-          focused: focusedField == 1,
-          onFocusChange: (focused) {
-            if (focused) {
-              setState(() => focusedField = 1);
-            }
-          },
-        ),
-      ],
+    return FocusScope(
+      child: Column(
+        children: [
+          TextField(
+            controller: controller1,
+            focusNode: focusNode1,
+            autofocus: true,
+            onFocusChange: (focused) {
+              if (focused) setState(() => focusedField = 0);
+            },
+          ),
+          TextField(
+            controller: controller2,
+            focusNode: focusNode2,
+            onFocusChange: (focused) {
+              if (focused) setState(() => focusedField = 1);
+            },
+          ),
+        ],
+      ),
     );
   }
 }
 
 void main() {
   group('TextField Focus Management', () {
-    test('TextField respects focused prop', () {
-      // Create two text fields with explicit focus control
-      final controller1 = TextEditingController(text: 'field1');
-      final controller2 = TextEditingController(text: 'field2');
-
-      final field1 = TextField(
-        controller: controller1,
-        focused: true,
-        onFocusChange: (focused) {},
+    test('TextField exposes Flutter-style focus configuration', () {
+      final node = FocusNode(debugLabel: 'field');
+      final field = TextField(
+        focusNode: node,
+        autofocus: true,
+        onFocusChange: (_) {},
       );
 
-      final field2 = TextField(
-        controller: controller2,
-        focused: false,
-        onFocusChange: (focused) {},
-      );
-
-      // Verify that the focused prop is correctly set
-      expect(field1.focused, true);
-      expect(field2.focused, false);
+      expect(field.focusNode, same(node));
+      expect(field.autofocus, isTrue);
+      node.dispose();
     });
 
-    test('TextField calls onFocusChange when tapped', () {
+    test('TextField keeps onFocusChange callback', () {
       final field = TextField(
-        focused: false,
-        onFocusChange: (focused) {},
+        onFocusChange: (_) {},
       );
 
-      // Verify onFocusChange callback is provided
       expect(field.onFocusChange, isNotNull);
     });
 
     test('TextEditingController manages text independently of focus', () {
       final controller = TextEditingController(text: 'initial');
+      final firstNode = FocusNode();
+      final secondNode = FocusNode();
 
-      // Text should be managed regardless of focus state
-      final fieldFocused = TextField(
+      final first = TextField(
         controller: controller,
-        focused: true,
-        onFocusChange: (_) {},
+        focusNode: firstNode,
+        autofocus: true,
+      );
+      final second = TextField(
+        controller: controller,
+        focusNode: secondNode,
       );
 
-      final fieldUnfocused = TextField(
-        controller: controller,
-        focused: false,
-        onFocusChange: (_) {},
-      );
+      expect(first.controller, same(controller));
+      expect(second.controller, same(controller));
 
-      // Both fields should use the same controller
-      expect(fieldFocused.controller, same(controller));
-      expect(fieldUnfocused.controller, same(controller));
-
-      // Text changes should work regardless of focus
       controller.text = 'updated';
       expect(controller.text, 'updated');
+
+      firstNode.dispose();
+      secondNode.dispose();
+      controller.dispose();
     });
 
-    test('TextField no longer uses FocusNode', () {
-      // Verify that TextField constructor doesn't accept FocusNode
-      final field = TextField(
-        focused: true,
-        onFocusChange: (_) {},
+    test('multiple TextFields retain distinct FocusNodes', () {
+      final nodes =
+          List.generate(3, (index) => FocusNode(debugLabel: '$index'));
+      final fields = List.generate(
+        3,
+        (index) => TextField(
+          focusNode: nodes[index],
+          autofocus: index == 0,
+        ),
       );
 
-      // The field should not have any focus node related properties
-      // This test confirms our refactoring removed FocusNode dependency
-      expect(field.focused, isA<bool>());
-    });
+      for (var index = 0; index < fields.length; index++) {
+        expect(fields[index].focusNode, same(nodes[index]));
+      }
+      expect(fields.first.autofocus, isTrue);
+      expect(fields[1].autofocus, isFalse);
 
-    test('Multiple TextFields can be managed with single focus index', () {
-      // This test demonstrates the pattern for managing multiple fields
-      int focusIndex = 0;
-
-      final fields = List.generate(3, (index) {
-        return TextField(
-          focused: focusIndex == index,
-          onFocusChange: (focused) {
-            if (focused) {
-              focusIndex = index;
-            }
-          },
-        );
-      });
-
-      // Verify each field has correct focus state
-      expect(fields[0].focused, true);
-      expect(fields[1].focused, false);
-      expect(fields[2].focused, false);
-
-      // Simulate focus change
-      fields[1].onFocusChange?.call(true);
-      expect(focusIndex, 1);
+      for (final node in nodes) {
+        node.dispose();
+      }
     });
   });
 }

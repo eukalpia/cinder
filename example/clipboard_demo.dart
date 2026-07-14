@@ -96,7 +96,7 @@ class _ClipboardDemoAppState extends State<ClipboardDemoApp> {
             const SizedBox(height: 0.5),
             TextField(
               controller: _controller1,
-              focused: _focusedField == 0,
+              autofocus: _focusedField == 0,
               decoration: InputDecoration(
                 border: BoxBorder.all(
                   color: _focusedField == 0
@@ -122,7 +122,7 @@ class _ClipboardDemoAppState extends State<ClipboardDemoApp> {
             const SizedBox(height: 0.5),
             TextField(
               controller: _controller2,
-              focused: _focusedField == 1,
+              autofocus: _focusedField == 1,
               decoration: InputDecoration(
                 border: BoxBorder.all(
                   color: _focusedField == 1

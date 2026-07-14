@@ -15,7 +15,7 @@ void main() {
               controller: controller,
               width: 40,
               maxLines: 5,
-              focused: true,
+              autofocus: true,
               onSubmitted: (text) => submittedText = text,
               decoration: const InputDecoration(
                 border: BoxBorder(),
@@ -63,7 +63,7 @@ void main() {
               controller: controller,
               width: 40,
               maxLines: 5,
-              focused: true,
+              autofocus: true,
               onSubmitted: (text) => submittedText = text,
               decoration: const InputDecoration(
                 border: BoxBorder(),
@@ -103,7 +103,7 @@ void main() {
               controller: controller,
               width: 40,
               maxLines: 5,
-              focused: true,
+              autofocus: true,
               onSubmitted: (text) => submittedText = text,
               decoration: const InputDecoration(
                 border: BoxBorder(),
@@ -143,7 +143,7 @@ void main() {
               controller: controller,
               width: 40,
               maxLines: 5,
-              focused: true,
+              autofocus: true,
               onSubmitted: (text) => submittedText = text,
               decoration: const InputDecoration(
                 border: BoxBorder(),
@@ -182,7 +182,7 @@ void main() {
               controller: controller,
               width: 40,
               maxLines: 5,
-              focused: true,
+              autofocus: true,
               onSubmitted: (text) => submittedText = text,
               decoration: const InputDecoration(
                 border: BoxBorder(),
@@ -218,7 +218,7 @@ void main() {
               controller: controller,
               width: 40,
               maxLines: 1,
-              focused: true,
+              autofocus: true,
               decoration: const InputDecoration(
                 border: BoxBorder(),
                 contentPadding: EdgeInsets.symmetric(horizontal: 1),
@@ -255,7 +255,7 @@ void main() {
               controller: controller,
               width: 40,
               maxLines: 1,
-              focused: true,
+              autofocus: true,
               decoration: const InputDecoration(
                 border: BoxBorder(),
                 contentPadding: EdgeInsets.symmetric(horizontal: 1),
@@ -291,7 +291,7 @@ void main() {
               controller: controller,
               width: 40,
               maxLines: 10,
-              focused: true,
+              autofocus: true,
               decoration: const InputDecoration(
                 border: BoxBorder(),
                 contentPadding: EdgeInsets.symmetric(horizontal: 1),

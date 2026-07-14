@@ -270,7 +270,7 @@ class _KeyboardTestAppState extends State<KeyboardTestApp> {
                               const SizedBox(height: 1),
                               TextField(
                                 controller: _textController,
-                                focused: _textFieldFocused,
+                                autofocus: _textFieldFocused,
                                 onFocusChange: (focused) {
                                   setState(() {
                                     _textFieldFocused = focused;

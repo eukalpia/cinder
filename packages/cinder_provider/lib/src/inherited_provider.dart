@@ -352,8 +352,8 @@ class _InheritedProviderScopeElement<T> extends InheritedElement
         inheritedElement = parent as InheritedElement;
         return false;
       }
-      inheritedElement = parent
-          .getElementForInheritedWidgetOfExactType<InheritedWidgetType>();
+      inheritedElement =
+          parent.getElementForInheritedWidgetOfExactType<InheritedWidgetType>();
       return false;
     });
 

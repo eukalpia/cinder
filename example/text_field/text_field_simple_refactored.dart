@@ -80,7 +80,7 @@ class _SimpleTextFieldDemoState extends State<SimpleTextFieldDemo> {
             Text('Name:', style: TextStyle(fontWeight: FontWeight.bold)),
             TextField(
               controller: _nameController,
-              focused: _focusedFieldIndex == 0,
+              autofocus: _focusedFieldIndex == 0,
               onFocusChange: (focused) {
                 if (focused) {
                   setState(() => _focusedFieldIndex = 0);
@@ -104,7 +104,7 @@ class _SimpleTextFieldDemoState extends State<SimpleTextFieldDemo> {
             Text('Email:', style: TextStyle(fontWeight: FontWeight.bold)),
             TextField(
               controller: _emailController,
-              focused: _focusedFieldIndex == 1,
+              autofocus: _focusedFieldIndex == 1,
               onFocusChange: (focused) {
                 if (focused) {
                   setState(() => _focusedFieldIndex = 1);
@@ -128,7 +128,7 @@ class _SimpleTextFieldDemoState extends State<SimpleTextFieldDemo> {
             Text('Password:', style: TextStyle(fontWeight: FontWeight.bold)),
             TextField(
               controller: _passwordController,
-              focused: _focusedFieldIndex == 2,
+              autofocus: _focusedFieldIndex == 2,
               onFocusChange: (focused) {
                 if (focused) {
                   setState(() => _focusedFieldIndex = 2);

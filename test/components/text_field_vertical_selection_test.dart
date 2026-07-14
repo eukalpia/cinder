@@ -17,7 +17,7 @@ void main() {
               decoration: BoxDecoration(border: BoxBorder.all()),
               child: TextField(
                 controller: controller,
-                focused: true,
+                autofocus: true,
                 maxLines: 3,
               ),
             ),
@@ -99,7 +99,7 @@ void main() {
               decoration: BoxDecoration(border: BoxBorder.all()),
               child: TextField(
                 controller: controller,
-                focused: true,
+                autofocus: true,
                 maxLines: 3,
               ),
             ),
