@@ -1,0 +1,38 @@
+name: Fix Renderer V2 benchmark callbacks
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - '.github/workflows/fix_renderer_benchmark.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: dev
+          fetch-depth: 0
+      - name: Patch finalizer source
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('.github/scripts/finalize_renderer_v2.py')
+          text = path.read_text(encoding='utf-8')
+          old = "emitRun: (_, _, _) {},"
+          new = "emitRun: (_x, _y, _output) {},"
+          if old not in text and new not in text:
+              raise SystemExit('Expected benchmark callback not found')
+          path.write_text(text.replace(old, new), encoding='utf-8')
+          PY
+      - name: Commit
+        run: |
+          git config user.name "Cinder Renderer Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add .github/scripts/finalize_renderer_v2.py
+          git commit --no-verify -m "fix: use unique benchmark callback names"
+          git push origin HEAD:dev
