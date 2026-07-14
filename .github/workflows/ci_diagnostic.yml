@@ -46,6 +46,8 @@ jobs:
 
           dart test -r expanded >ci_diagnostics/root_tests.log 2>&1
           echo $? > ci_diagnostics/root_tests.status
+          grep -nE 'FAILED|\[E\]|Expected:|Actual:|Some tests failed|Failing tests:|Error:' ci_diagnostics/root_tests.log | tail -n 500 > ci_diagnostics/root_tests_summary.log || true
+          tail -n 250 ci_diagnostics/root_tests.log > ci_diagnostics/root_tests_tail.log
 
           for package in packages/cinder_nested packages/cinder_provider packages/cinder_riverpod packages/cinder_bloc; do
             name=$(basename "$package")
