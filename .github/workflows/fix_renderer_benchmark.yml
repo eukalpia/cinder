@@ -23,8 +23,12 @@ jobs:
           from pathlib import Path
           path = Path('.github/scripts/finalize_renderer_v2.py')
           text = path.read_text(encoding='utf-8')
-          old = "emitRun: (_, _, _) {},"
-          new = "emitRun: (_x, _y, _output) {},"
+          old = "emitRun: (_x, _y, _output) {},"
+          new = """emitRun: (x, y, output) {
+              if (x < 0 || y < 0 || output.isEmpty) {
+                throw StateError('Invalid renderer run');
+              }
+            },"""
           if old not in text and new not in text:
               raise SystemExit('Expected benchmark callback not found')
           path.write_text(text.replace(old, new), encoding='utf-8')
@@ -34,5 +38,8 @@ jobs:
           git config user.name "Cinder Renderer Bot"
           git config user.email "actions@users.noreply.github.com"
           git add .github/scripts/finalize_renderer_v2.py
-          git commit --no-verify -m "fix: use unique benchmark callback names"
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit --no-verify -m "fix: validate benchmark renderer callbacks"
           git push origin HEAD:dev
