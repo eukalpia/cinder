@@ -1,10 +1,2 @@
 Analyzing buffer.dart, frame_diff.dart, terminal_canvas.dart, terminal_binding.dart, escape_codes.dart, rendering, renderer_v2_benchmark.dart...
-
-   info - benchmark/renderer_v2_benchmark.dart:15:15 - The local variable '_x' starts with an underscore. Try renaming the variable to not start with an underscore. - no_leading_underscores_for_local_identifiers
-   info - benchmark/renderer_v2_benchmark.dart:15:19 - The local variable '_y' starts with an underscore. Try renaming the variable to not start with an underscore. - no_leading_underscores_for_local_identifiers
-   info - benchmark/renderer_v2_benchmark.dart:15:23 - The local variable '_output' starts with an underscore. Try renaming the variable to not start with an underscore. - no_leading_underscores_for_local_identifiers
-   info - benchmark/renderer_v2_benchmark.dart:28:17 - The local variable '_x' starts with an underscore. Try renaming the variable to not start with an underscore. - no_leading_underscores_for_local_identifiers
-   info - benchmark/renderer_v2_benchmark.dart:28:21 - The local variable '_y' starts with an underscore. Try renaming the variable to not start with an underscore. - no_leading_underscores_for_local_identifiers
-   info - benchmark/renderer_v2_benchmark.dart:28:25 - The local variable '_output' starts with an underscore. Try renaming the variable to not start with an underscore. - no_leading_underscores_for_local_identifiers
-
-6 issues found.
+No issues found!
