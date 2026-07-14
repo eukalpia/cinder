@@ -1,5 +1,5 @@
 name: cinder
-repository: https://github.com/norbert515/cinder
+repository: https://github.com/eukalpia/cinder
 
 packages:
   - .

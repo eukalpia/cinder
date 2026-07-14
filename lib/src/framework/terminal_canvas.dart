@@ -5,6 +5,7 @@ import 'package:characters/characters.dart';
 import 'package:cinder/src/rectangle.dart';
 
 import '../buffer.dart';
+import '../image/image_cleanup.dart';
 import '../style.dart';
 import '../utils/unicode_width.dart';
 import 'framework.dart';
@@ -277,13 +278,22 @@ class TerminalCanvas {
     return TerminalCanvas(_buffer, clippedArea);
   }
 
+  /// Composites a cached terminal layer at [position].
+  void drawBuffer(Buffer source, Offset position) {
+    _buffer.blit(
+      source,
+      destinationX: area.left.round() + position.dx.round(),
+      destinationY: area.top.round() + position.dy.round(),
+    );
+  }
+
   /// Draw an image at the given position.
   ///
   /// This method marks the cell region as an image placeholder and queues
   /// the sixel data for rendering during the terminal flush phase.
   ///
   /// [imageData] - The RGBA pixel data of the image (used for cache validation).
-  /// [sixelData] - Pre-encoded sixel escape sequence string.
+  /// [encodedData] - Pre-encoded Kitty, iTerm2, or Sixel sequence.
   /// [x], [y] - Position in local canvas coordinates (cells).
   /// [widthCells], [heightCells] - Size of the image in terminal cells.
   ///
@@ -291,12 +301,14 @@ class TerminalCanvas {
   /// This method just records where the image should be placed.
   void drawImage(
     dynamic imageData,
-    String sixelData,
+    String encodedData,
     int x,
     int y,
     int widthCells,
-    int heightCells,
-  ) {
+    int heightCells, {
+    required ImageProtocol protocol,
+    int? imageId,
+  }) {
     // Bounds checking
     if (x < 0 || y < 0 || x >= area.width || y >= area.height) {
       return;
@@ -315,7 +327,15 @@ class TerminalCanvas {
     }
 
     // Mark cells as image placeholders to prevent text overlap
-    _buffer.markImageRegion(cellX, cellY, maxWidth, maxHeight, sixelData);
+    _buffer.markImageRegion(
+      cellX,
+      cellY,
+      maxWidth,
+      maxHeight,
+      encodedData,
+      protocol: protocol,
+      imageId: imageId,
+    );
   }
 
   Rect _intersect(Rect a, Rect b) {

@@ -209,6 +209,27 @@ class MemoryImage extends ImageProvider {
       Object.hash(bytes.length, bytes.isNotEmpty ? bytes[0] : 0);
 }
 
+/// An image provider for already-decoded RGBA pixels.
+///
+/// This avoids PNG/JPEG encoding when an application produces pixels directly.
+class ImageDataProvider extends ImageProvider {
+  const ImageDataProvider(this.data);
+
+  final ImageData data;
+
+  @override
+  Future<ImageData> resolve() => Future<ImageData>.value(data);
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        other is ImageDataProvider && identical(other.data, data);
+  }
+
+  @override
+  int get hashCode => identityHashCode(data);
+}
+
 /// Decodes image bytes into RGBA pixel data.
 ///
 /// Supports PNG, JPEG, GIF, BMP, WebP, and other common formats via the `image` package.
@@ -217,8 +238,7 @@ ImageData _decodeImage(Uint8List bytes) {
   final decoded = img.decodeImage(bytes);
 
   if (decoded == null) {
-    // Failed to decode - return placeholder
-    return _createPlaceholder(64, 64);
+    throw const FormatException('Unsupported or corrupt image data.');
   }
 
   // Convert to RGBA pixel data
@@ -235,25 +255,6 @@ ImageData _decodeImage(Uint8List bytes) {
       pixels[index + 1] = pixel.g.toInt();
       pixels[index + 2] = pixel.b.toInt();
       pixels[index + 3] = pixel.a.toInt();
-    }
-  }
-
-  return ImageData(pixels: pixels, width: width, height: height);
-}
-
-/// Creates a placeholder image with a checkerboard pattern.
-ImageData _createPlaceholder(int width, int height) {
-  final pixels = Uint8List(width * height * 4);
-
-  for (int y = 0; y < height; y++) {
-    for (int x = 0; x < width; x++) {
-      final index = (y * width + x) * 4;
-      final isLight = ((x ~/ 8) + (y ~/ 8)) % 2 == 0;
-
-      pixels[index] = isLight ? 200 : 100; // R
-      pixels[index + 1] = isLight ? 200 : 100; // G
-      pixels[index + 2] = isLight ? 200 : 100; // B
-      pixels[index + 3] = 255; // A
     }
   }
 
@@ -391,6 +392,25 @@ class Image extends StatefulWidget {
     this.errorWidget,
     this.protocol,
   }) : image = MemoryImage(bytes);
+
+  /// Creates an image directly from raw RGBA pixels.
+  Image.rgba(
+    Uint8List pixels, {
+    required int pixelWidth,
+    required int pixelHeight,
+    super.key,
+    this.width,
+    this.height,
+    this.fit = BoxFit.contain,
+    this.placeholder,
+    this.errorWidget,
+    this.protocol,
+  })  : assert(pixelWidth > 0),
+        assert(pixelHeight > 0),
+        assert(pixels.length == pixelWidth * pixelHeight * 4),
+        image = ImageDataProvider(
+          ImageData(pixels: pixels, width: pixelWidth, height: pixelHeight),
+        );
 
   /// The image to display.
   final ImageProvider image;
@@ -741,46 +761,15 @@ class RenderImage extends RenderObject {
   /// 3. iTerm2 (macOS terminals)
   /// 4. Unicode blocks (universal fallback)
   static ImageProtocol _detectProtocol() {
-    if (_detectedProtocol != null) {
-      return _detectedProtocol!;
-    }
+    return _detectedProtocol ??= TerminalCapabilities.fromEnvironment(
+      io.Platform.environment,
+    ).preferredImageProtocol;
+  }
 
-    final term = io.Platform.environment['TERM']?.toLowerCase() ?? '';
-    final termProgram =
-        io.Platform.environment['TERM_PROGRAM']?.toLowerCase() ?? '';
-
-    // Check for Kitty terminal
-    if (term.contains('kitty') ||
-        io.Platform.environment.containsKey('KITTY_WINDOW_ID')) {
-      _detectedProtocol = ImageProtocol.kitty;
-      return _detectedProtocol!;
-    }
-
-    // Check for WezTerm (supports Kitty protocol)
-    if (termProgram.contains('wezterm') || term.contains('wezterm')) {
-      _detectedProtocol = ImageProtocol.kitty;
-      return _detectedProtocol!;
-    }
-
-    // Check for iTerm2
-    if (termProgram.contains('iterm') ||
-        io.Platform.environment.containsKey('ITERM_SESSION_ID')) {
-      _detectedProtocol = ImageProtocol.iterm2;
-      return _detectedProtocol!;
-    }
-
-    // Check for known Sixel-supporting terminals
-    const sixelTerms = ['xterm', 'mlterm', 'yaft', 'foot', 'contour', 'mintty'];
-    for (final sixelTerm in sixelTerms) {
-      if (term.contains(sixelTerm)) {
-        _detectedProtocol = ImageProtocol.sixel;
-        return _detectedProtocol!;
-      }
-    }
-
-    // Default to unicode blocks (universal fallback)
-    _detectedProtocol = ImageProtocol.unicodeBlocks;
-    return _detectedProtocol!;
+  /// Clears cached auto-detection. Useful after changing terminal sessions.
+  @visibleForTesting
+  static void resetDetectedProtocol() {
+    _detectedProtocol = null;
   }
 
   /// Get the effective protocol (user-specified or auto-detected).
@@ -860,6 +849,8 @@ class RenderImage extends RenderObject {
       y,
       w,
       h,
+      protocol: effectiveProtocol,
+      imageId: _kittyImageId,
     );
   }
 

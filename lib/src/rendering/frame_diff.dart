@@ -88,6 +88,11 @@ FrameDiffStats emitFrameDiff({
       scan++;
 
       while (scan <= end) {
+        final nextCell = current.getCell(scan, y);
+        final oldCell = previous.getCell(scan, y);
+        if (nextCell.isImagePlaceholder || oldCell.isImagePlaceholder) {
+          break;
+        }
         if (isVisibleChange(scan, y)) {
           runEnd = scan;
           unchangedGap = 0;

@@ -15,7 +15,7 @@ integrations — without bringing Flutter or Node.js into your CLI runtime.
 [![Dart](https://img.shields.io/badge/Dart-%3E%3D3.5-0175C2?logo=dart)](https://dart.dev)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-[Quick start](#quick-start) · [Focus](#focus-and-keyboard-input) · [State management](#state-management) · [Testing](#testing) · [Architecture](#architecture)
+[Quick start](#quick-start) · [Icons](#material-and-lucide-icons) · [Images](#terminal-images) · [Focus](#focus-and-keyboard-input) · [State management](#state-management) · [Testing](#testing) · [Architecture](#architecture)
 
 </div>
 
@@ -62,8 +62,11 @@ The current development line is **Cinder 1.0**.
 | Riverpod 3 integration | Available |
 | BLoC integration | Available |
 | Widget testing utilities | Available |
-| Renderer V2 reusable dirty-span pipeline | Available in `dev` |
-| Repaint boundaries and cached layers | Planned |
+| Renderer V2 reusable dirty-span pipeline | Available |
+| Repaint boundaries and cached layers | Available |
+| Hardware terminal scroll regions | Available with safe fallback |
+| Material and Lucide icon packs | Available |
+| Kitty, iTerm2, Sixel, and Unicode images | Available |
 | Stable `1.0.0` release | Planned |
 
 ## Installation
@@ -141,6 +144,69 @@ Run the application:
 ```bash
 dart run bin/main.dart
 ```
+
+## Material and Lucide icons
+
+Cinder provides a Flutter-style icon API without requiring the Flutter SDK:
+
+```dart
+import 'package:cinder/cinder.dart';
+import 'package:cinder_material_icons/cinder_material_icons.dart';
+import 'package:cinder_lucide/cinder_lucide.dart';
+
+Row(
+  children: const [
+    Icon(Icons.home),
+    Icon(LucideIcons.search),
+    Icon(TerminalIcons.warning),
+  ],
+)
+```
+
+`Icon`, `IconData`, `IconTheme`, and `IconButton` follow Flutter naming and
+composition. Generated Material and Lucide catalogs expose the complete upstream
+identifier sets. Terminals cannot load a font per widget, so Cinder resolves each
+icon through an explicit rendering policy:
+
+- terminal-safe Unicode fallback by default;
+- ASCII fallback for restricted terminals and logs;
+- original private-use font code point when the active terminal font contains
+  Material Icons or Lucide glyphs.
+
+See [`doc/icons.md`](doc/icons.md) for installation, theming, font-mode, RTL, and
+generator details.
+
+## Terminal images
+
+Images are first-class render objects and work from files, URLs, encoded memory,
+or raw RGBA pixels:
+
+```dart
+Image.file('assets/dashboard.png', width: 40, height: 18)
+
+Image.network(
+  'https://example.com/chart.png',
+  width: 50,
+  height: 20,
+  fit: BoxFit.contain,
+)
+
+Image.rgba(
+  pixels,
+  pixelWidth: 320,
+  pixelHeight: 180,
+  width: 40,
+  height: 12,
+)
+```
+
+Cinder automatically prefers Kitty graphics, iTerm2 inline images, or Sixel and
+falls back to true-color Unicode half blocks everywhere else. Image overlays are
+tracked through double buffering, cached repaint layers, cleanup, and scroll
+regions so terminal graphics do not become detached from the widget tree.
+
+Set `CINDER_IMAGE_PROTOCOL=kitty|iterm2|sixel|unicode` to override detection.
+See [`doc/images.md`](doc/images.md) for the capability matrix and protocol notes.
 
 ## Core programming model
 
@@ -480,9 +546,10 @@ Renderer V2 now provides:
 - synchronized terminal output using DEC private mode 2026;
 - deterministic comparison/run metrics and regression benchmarks.
 
-The next rendering phase adds repaint boundaries, cached layers, and terminal
-scroll-region acceleration so static subtrees do not repaint during streaming
-log updates.
+Renderer V2 also isolates static subtrees with `RepaintBoundary`, composites
+cached cell layers, and uses DECSTBM plus CSI `S`/`T` for safe full-width vertical
+scroll acceleration. Unsupported layouts and terminals automatically fall back
+to damage-only differential rendering.
 
 Performance claims should always be tied to reproducible workloads, viewport
 sizes, terminals, and benchmark configurations.
@@ -497,6 +564,10 @@ sizes, terminals, and benchmark configurations.
 - [x] `FocusManager`, `FocusNode`, and traversal
 - [x] migrate `TextField` to focus nodes
 - [x] Renderer V2 reusable dirty-span foundation
+- [x] cached repaint layers and damage-only partial paint
+- [x] terminal scroll-region acceleration with fallback
+- [x] Material and Lucide icon packs
+- [x] Kitty, iTerm2, Sixel, and Unicode image rendering
 - [ ] broader production widget kit
 - [ ] semantics and non-interactive output mode
 - [ ] stable `1.0.0` release
@@ -524,3 +595,4 @@ Cinder is distributed under the [MIT License](LICENSE).
 
 The project is derived from Nocterm. Original copyright and fork attribution are
 preserved in [`NOTICE.md`](NOTICE.md), the license files, and repository history.
+
