@@ -15,3 +15,5 @@ Application state remains the source of truth for message IDs and selection; the
 ## Pointer and context menus
 
 `GestureDetector` exposes secondary and middle taps, raw pointer button state, and button-aware drag callbacks. `ContextMenuRegion` opens on right click or Shift+F10. `MenuAnchor` inserts the menu into the nearest overlay and clamps its measured bounds to the viewport.
+
+All new Dart sources are formatted after dependency resolution, matching the repository CI environment.
