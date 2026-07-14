@@ -33,6 +33,7 @@ Warning: Package resolution error when reading "analysis_options.yaml" file:
 Failed to resolve package URI "package:lints/recommended.yaml" in include at "/home/runner/work/cinder/cinder/packages/cinder_riverpod/analysis_options.yaml".
 Warning: Package resolution error when reading "analysis_options.yaml" file:
 Failed to resolve package URI "package:lints/recommended.yaml" in include at "/home/runner/work/cinder/cinder/analysis_options.yaml".
-Formatted 13 files (0 changed) in 0.06 seconds.
+Formatted 13 files (0 changed) in 0.05 seconds.
 
 Files modified by Dart 3.12.2 formatter:
+format_diagnostic.log
