@@ -1,7 +1,5 @@
-// ignore_for_file: invalid_use_of_internal_member
-
 import 'package:cinder/cinder.dart';
-import 'package:riverpod/src/internals.dart';
+import 'package:riverpod/riverpod.dart';
 
 import 'framework.dart';
 
