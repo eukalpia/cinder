@@ -1,0 +1,1 @@
+This temporary file is deleted in the following atomic tree commit.
