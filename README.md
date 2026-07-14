@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="doc/assets/cinder_logo.png" alt="Cinder" width="720">
+
 # Cinder
 
 **A Flutter-style terminal UI framework for Dart.**
