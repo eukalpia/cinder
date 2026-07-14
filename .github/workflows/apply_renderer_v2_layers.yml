@@ -1,0 +1,94 @@
+name: Apply Renderer V2 cached layers
+
+on:
+  pull_request:
+    branches: [dev]
+    paths:
+      - '.github/scripts/apply_renderer_v2_layers.py'
+      - '.github/phase2_payload/**'
+      - '.github/workflows/apply_renderer_v2_layers.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: renderer-v2-layers-apply
+  cancel-in-progress: true
+
+jobs:
+  apply-and-validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/renderer-v2-layers
+          fetch-depth: 0
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+      - name: Apply cached-layer architecture
+        run: python3 .github/scripts/apply_renderer_v2_layers.py
+      - name: Resolve formatter configuration
+        run: dart pub get
+      - name: Format changed sources
+        run: |
+          dart format \
+            benchmark/repaint_boundary_benchmark.dart \
+            lib/cinder.dart \
+            lib/src/binding/terminal_binding.dart \
+            lib/src/buffer.dart \
+            lib/src/components/basic.dart \
+            lib/src/components/modal_barrier.dart \
+            lib/src/components/repaint_boundary.dart \
+            lib/src/components/scrollbar.dart \
+            lib/src/framework/render_object.dart \
+            lib/src/framework/terminal_canvas.dart \
+            lib/src/rendering/mouse_region.dart \
+            lib/src/test/cinder_test_binding.dart \
+            lib/src/test/cinder_tester.dart \
+            test/rendering/buffer_sync_test.dart \
+            test/rendering/repaint_boundary_test.dart
+      - name: Analyze Phase 2
+        run: |
+          dart analyze \
+            lib/cinder.dart \
+            lib/src/binding/terminal_binding.dart \
+            lib/src/buffer.dart \
+            lib/src/components/basic.dart \
+            lib/src/components/modal_barrier.dart \
+            lib/src/components/repaint_boundary.dart \
+            lib/src/components/scrollbar.dart \
+            lib/src/framework/render_object.dart \
+            lib/src/framework/terminal_canvas.dart \
+            lib/src/rendering/mouse_region.dart \
+            lib/src/test/cinder_test_binding.dart \
+            lib/src/test/cinder_tester.dart \
+            test/rendering/buffer_sync_test.dart \
+            test/rendering/repaint_boundary_test.dart \
+            benchmark/repaint_boundary_benchmark.dart
+      - name: Run Renderer V2 layer contracts
+        run: |
+          dart test \
+            test/rendering/buffer_v2_test.dart \
+            test/rendering/buffer_sync_test.dart \
+            test/rendering/frame_diff_test.dart \
+            test/rendering/repaint_boundary_test.dart \
+            --reporter expanded
+      - name: Run complete root suite
+        run: dart test --reporter expanded
+      - name: Run renderer benchmarks
+        run: |
+          dart run benchmark/renderer_v2_benchmark.dart
+          dart run benchmark/repaint_boundary_benchmark.dart
+      - name: Commit validated production sources
+        run: |
+          git config user.name "Cinder Renderer Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add README.md benchmark lib test
+          if git diff --cached --quiet; then
+            echo "No production changes to commit."
+            exit 0
+          fi
+          git commit --no-verify -m "perf: add cached repaint layers"
+          git push origin HEAD:feature/renderer-v2-layers
