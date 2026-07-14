@@ -1,5 +1,5 @@
 import 'package:cinder/cinder.dart';
-import 'package:riverpod/riverpod.dart';
+import 'package:riverpod/src/internals.dart';
 
 /// Manages provider subscriptions for a single element.
 ///

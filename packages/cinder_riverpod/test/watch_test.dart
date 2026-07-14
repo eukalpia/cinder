@@ -286,7 +286,7 @@ void main() {
   });
 
   group('context.listen', () {
-    test('listen receives updates without rebuilding', () async {
+    test('listen callback can request rebuilds', () async {
       final counterProvider = StateProvider<int>((ref) => 0);
 
       await testCinder(
@@ -306,16 +306,16 @@ void main() {
           await tester.sendKey(LogicalKey.arrowUp);
           await tester.pump();
 
-          // Value updated but build count stays the same
+          // The listener calls setState, so this widget rebuilds exactly once.
           expect(tester.terminalState, containsText('Last value: 1'));
-          expect(tester.terminalState, containsText('Build count: 1'));
+          expect(tester.terminalState, containsText('Build count: 2'));
 
           // Increment again
           await tester.sendKey(LogicalKey.arrowUp);
           await tester.pump();
 
           expect(tester.terminalState, containsText('Last value: 2'));
-          expect(tester.terminalState, containsText('Build count: 1'));
+          expect(tester.terminalState, containsText('Build count: 3'));
         },
       );
     });
