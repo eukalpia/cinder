@@ -33,6 +33,12 @@ TEXT_SUFFIXES = {
 
 SKIP_DIRS = {".git", ".dart_tool", "build", ".idea", ".vscode"}
 
+FILE_REFERENCE_REPLACEMENTS: tuple[tuple[str, str], ...] = (
+    ("stateful_component.dart", "stateful_widget.dart"),
+    ("stateless_component.dart", "stateless_widget.dart"),
+    ("component.dart", "widget.dart"),
+)
+
 IDENTIFIER_REPLACEMENTS: tuple[tuple[str, str], ...] = (
     (r"\bMultiChildRenderObjectComponent\b", "MultiChildRenderObjectWidget"),
     (r"\bSingleChildRenderObjectComponent\b", "SingleChildRenderObjectWidget"),
@@ -95,6 +101,10 @@ def transform_text(path: Path) -> None:
         return
 
     transformed = original
+
+    for old, new in FILE_REFERENCE_REPLACEMENTS:
+        transformed = transformed.replace(old, new)
+
     for old, new in BRAND_REPLACEMENTS:
         transformed = transformed.replace(old, new)
 
