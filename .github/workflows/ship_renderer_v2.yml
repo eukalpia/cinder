@@ -1,0 +1,58 @@
+name: Ship validated Renderer V2
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - '.github/workflows/ship_renderer_v2.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  ship:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: dev
+          fetch-depth: 0
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+      - name: Apply validated Renderer V2
+        run: python3 .github/scripts/finalize_renderer_v2.py
+      - name: Format production targets
+        run: |
+          dart format \
+            lib/src/buffer.dart \
+            lib/src/rendering/frame_diff.dart \
+            lib/src/framework/terminal_canvas.dart \
+            lib/src/binding/terminal_binding.dart \
+            lib/src/utils/escape_codes.dart \
+            test/rendering/buffer_v2_test.dart \
+            test/rendering/frame_diff_test.dart \
+            benchmark/renderer_v2_benchmark.dart
+      - name: Remove one-shot infrastructure
+        shell: bash
+        run: |
+          rm -f \
+            .github/scripts/finalize_renderer_v2.py \
+            .github/workflows/finalize_renderer_v2.yml \
+            .github/workflows/finalize_renderer_v2_pr.yml \
+            .github/workflows/capture_package_error.yml \
+            .github/workflows/fix_renderer_benchmark.yml \
+            .github/workflows/fix_riverpod_api.yml \
+            .github/workflows/riverpod_validation.yml \
+            .github/workflows/ship_renderer_v2.yml \
+            renderer_v2_error.log \
+            integration_package_error.log \
+            cinder_riverpod_analyzer.log
+          rm -rf ci_diagnostics
+      - name: Commit production Renderer V2
+        run: |
+          git config user.name "Cinder Renderer Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A
+          git commit --no-verify -m "perf!: ship validated Renderer V2 pipeline"
+          git push origin HEAD:dev
