@@ -1,0 +1,47 @@
+name: Format editor history pointer changes
+
+on:
+  push:
+    branches:
+      - feature/editor-anchored-list-pointer-api
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dart-lang/setup-dart@v1
+      - name: Format changed Dart sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          dart format \
+            lib/cinder.dart \
+            lib/src/components/anchored_list_view.dart \
+            lib/src/components/context_menu.dart \
+            lib/src/components/gesture_detector.dart \
+            lib/src/components/list_view.dart \
+            lib/src/components/scroll_controller.dart \
+            lib/src/components/text_field.dart \
+            lib/src/gestures/events.dart \
+            lib/src/gestures/tap.dart \
+            lib/src/keyboard/mouse_event.dart \
+            lib/src/rendering/extent_index.dart \
+            lib/src/test/cinder_tester.dart \
+            test/components/text_field_editor_contract_test.dart \
+            test/input/pointer_buttons_and_context_menu_test.dart \
+            test/layout/anchored_list_view_test.dart
+          rm -f .github/workflows/format-editor-pr.yml
+      - name: Commit formatting
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "style: format editor history and pointer APIs"
+          git push
