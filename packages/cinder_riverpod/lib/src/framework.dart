@@ -159,7 +159,6 @@ class UncontrolledProviderScope extends StatefulWidget {
 /// Synchronizes Riverpod's deferred refresh work with Cinder frames.
 class _UncontrolledProviderScopeState
     extends State<UncontrolledProviderScope> implements Vsync {
-  Task? _pendingTask;
   Timer? _disposeTimer;
 
   @override
@@ -177,24 +176,16 @@ class _UncontrolledProviderScopeState
     }
   }
 
-  void _flushPendingTask() {
-    final task = _pendingTask;
-    _pendingTask = null;
-    task?.call();
-  }
-
   @override
   void Function()? scheduleRefresh(Task task) {
-    _pendingTask = task;
+    // Cinder does not revisit descendants dirtied midway through the same
+    // build traversal. Flush Riverpod first so listeners mark their elements
+    // dirty before the next Cinder frame starts.
+    task.call();
     if (mounted) {
       setState(() {});
     }
-
-    return () {
-      if (identical(_pendingTask, task)) {
-        _pendingTask = null;
-      }
-    };
+    return null;
   }
 
   @override
@@ -207,7 +198,6 @@ class _UncontrolledProviderScopeState
 
   @override
   Widget build(BuildContext context) {
-    _flushPendingTask();
     return _InheritedProviderScope(
       container: widget.container,
       child: widget.child,
@@ -218,7 +208,6 @@ class _UncontrolledProviderScopeState
   void dispose() {
     _disposeTimer?.cancel();
     _disposeTimer = null;
-    _pendingTask = null;
     widget.container.scheduler.flutterVsyncs.remove(this);
     super.dispose();
   }
