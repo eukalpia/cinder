@@ -100,7 +100,8 @@ void main() {
     });
 
     test('multiple TextFields retain distinct FocusNodes', () {
-      final nodes = List.generate(3, (index) => FocusNode(debugLabel: '$index'));
+      final nodes =
+          List.generate(3, (index) => FocusNode(debugLabel: '$index'));
       final fields = List.generate(
         3,
         (index) => TextField(
