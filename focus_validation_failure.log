@@ -1,0 +1,14 @@
+Analyzing lib, test...
+
+  error - test/components/text_field_focus_test.dart:30:11 - The named parameter 'focused' isn't defined. Try correcting the name to an existing named parameter's name, or defining a named parameter with the name 'focused'. - undefined_named_parameter
+  error - test/components/text_field_focus_test.dart:39:11 - The named parameter 'focused' isn't defined. Try correcting the name to an existing named parameter's name, or defining a named parameter with the name 'focused'. - undefined_named_parameter
+  error - test/components/text_field_focus_test.dart:71:21 - The getter 'focused' isn't defined for the type 'TextField'. Try importing the library that defines 'focused', correcting the name to the name of an existing getter, or defining a getter or field named 'focused'. - undefined_getter
+  error - test/components/text_field_focus_test.dart:72:21 - The getter 'focused' isn't defined for the type 'TextField'. Try importing the library that defines 'focused', correcting the name to the name of an existing getter, or defining a getter or field named 'focused'. - undefined_getter
+  error - test/components/text_field_focus_test.dart:119:20 - The getter 'focused' isn't defined for the type 'TextField'. Try importing the library that defines 'focused', correcting the name to the name of an existing getter, or defining a getter or field named 'focused'. - undefined_getter
+  error - test/components/text_field_focus_test.dart:128:11 - The named parameter 'focused' isn't defined. Try correcting the name to an existing named parameter's name, or defining a named parameter with the name 'focused'. - undefined_named_parameter
+  error - test/components/text_field_focus_test.dart:138:24 - The getter 'focused' isn't defined for the type 'TextField'. Try importing the library that defines 'focused', correcting the name to the name of an existing getter, or defining a getter or field named 'focused'. - undefined_getter
+  error - test/components/text_field_focus_test.dart:139:24 - The getter 'focused' isn't defined for the type 'TextField'. Try importing the library that defines 'focused', correcting the name to the name of an existing getter, or defining a getter or field named 'focused'. - undefined_getter
+  error - test/components/text_field_focus_test.dart:140:24 - The getter 'focused' isn't defined for the type 'TextField'. Try importing the library that defines 'focused', correcting the name to the name of an existing getter, or defining a getter or field named 'focused'. - undefined_getter
+  error - test/focus/text_field_focus_test.dart:42:37 - The name 'isEmpty' is defined in the libraries 'package:cinder/src/test/matchers.dart (via package:cinder/cinder.dart)' and 'package:matcher/src/core_matchers.dart (via package:test/test.dart)'. Try using 'as prefix' for one of the import directives, or hiding the name from all but one of the imports. - ambiguous_import
+
+10 issues found.
