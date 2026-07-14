@@ -23,7 +23,7 @@ void main() {
     'ListView Row items keep their leading columns across rebuilds',
     () async {
       await testCinder('row leaders preserved across rebuild', (tester) async {
-        await tester.pumpComponent(_LogViewer());
+        await tester.pumpWidget(_LogViewer());
         // Settle the transient dirtiness left by the first layout pass
         // (adoptChild re-marks while children are built), so the appends
         // below hit a genuinely clean render tree - otherwise a skipped

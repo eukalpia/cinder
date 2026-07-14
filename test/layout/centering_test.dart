@@ -7,7 +7,7 @@ void main() {
       await testCinder(
         'centering proof',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: DecoratedBox(
                 decoration: BoxDecoration(
@@ -44,7 +44,7 @@ void main() {
       await testCinder(
         'visual centering',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: DecoratedBox(
                 decoration: BoxDecoration(
@@ -84,7 +84,7 @@ void main() {
       await testCinder(
         'different widths',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Row(
               children: [
                 // Narrow container
@@ -149,7 +149,7 @@ void main() {
       await testCinder(
         'centering with padding',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: DecoratedBox(
                 decoration: BoxDecoration(
@@ -182,7 +182,7 @@ void main() {
       await testCinder(
         'ruler alignment',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             DecoratedBox(
               decoration: BoxDecoration(
                 border: BoxBorder.all(color: Colors.white),
@@ -218,7 +218,7 @@ void main() {
       await testCinder(
         'centering visual',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,

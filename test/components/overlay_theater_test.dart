@@ -7,7 +7,7 @@ void main() {
       await testCinder(
         'overlay with single entry',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Overlay(
               key: GlobalKey(),
               initialEntries: [
@@ -36,7 +36,7 @@ void main() {
       await testCinder(
         'overlay with stacked entries',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Overlay(
               initialEntries: [
                 OverlayEntry(
@@ -99,7 +99,7 @@ void main() {
             ),
           );
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Overlay(
               initialEntries: [bottomEntry, opaqueEntry],
             ),
@@ -142,7 +142,7 @@ void main() {
             ),
           );
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Overlay(
               initialEntries: [bottomEntry, opaqueEntry],
             ),
@@ -162,7 +162,7 @@ void main() {
         (tester) async {
           late OverlayState overlayState;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Overlay(
               initialEntries: [
                 OverlayEntry(
@@ -234,7 +234,7 @@ void main() {
             },
           );
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Overlay(
               initialEntries: [entry],
             ),

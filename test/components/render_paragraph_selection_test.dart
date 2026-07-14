@@ -11,7 +11,7 @@ void main() {
         (tester) async {
           String? completed;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 4,
@@ -54,7 +54,7 @@ void main() {
         (tester) async {
           String? completed;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 4,
@@ -104,7 +104,7 @@ void main() {
         (tester) async {
           String? completed;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 4,
@@ -155,7 +155,7 @@ void main() {
         (tester) async {
           String? completed;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 6,
               height: 5,
@@ -200,7 +200,7 @@ void main() {
         (tester) async {
           String? completed;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 4,
@@ -245,7 +245,7 @@ void main() {
         (tester) async {
           String? completed;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 4,
@@ -288,7 +288,7 @@ void main() {
         (tester) async {
           String? lastChanged;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 4,
@@ -315,7 +315,7 @@ void main() {
           expect(lastChanged, isNotBlank);
 
           // Change the content
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 4,
@@ -343,7 +343,7 @@ void main() {
         (tester) async {
           String? completed;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -402,7 +402,7 @@ void main() {
       await testCinder(
         'selectableText getter',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             RichText(
               text: const TextSpan(
                 children: [
@@ -437,7 +437,7 @@ void main() {
       await testCinder(
         'selectableLayout getter',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 20,
               child: RichText(

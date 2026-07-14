@@ -84,7 +84,7 @@ void main() {
 
           // Initial render
           print('1️⃣ Initial state:');
-          await tester.pumpComponent(const InteractiveCounter());
+          await tester.pumpWidget(const InteractiveCounter());
 
           // Simulate incrementing
           print('\n2️⃣ After pressing "+" (increment):');
@@ -117,7 +117,7 @@ void main() {
           print('\n📺 Debug printing can be toggled during the test:\n');
 
           // Start without debug printing
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               padding: const EdgeInsets.all(2),
               child: const Text('First pump - no debug output'),
@@ -128,7 +128,7 @@ void main() {
           print('\n🔛 Enabling debug printing...');
           tester.debugPrintAfterPump = true;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               padding: const EdgeInsets.all(2),
               child: Column(
@@ -145,7 +145,7 @@ void main() {
           print('\n🔴 Disabling debug printing...');
           tester.debugPrintAfterPump = false;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               padding: const EdgeInsets.all(2),
               child: const Text('Third pump - debug disabled again'),
@@ -165,7 +165,7 @@ void main() {
         (tester) async {
           print('\n📺 Visualizing a complex layout:\n');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               padding: const EdgeInsets.all(1),
               child: Column(

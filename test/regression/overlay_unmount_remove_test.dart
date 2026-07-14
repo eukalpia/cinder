@@ -20,7 +20,7 @@ void main() {
           );
 
           // Create a stateful wrapper that removes the entry on dispose
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             _DisposingOverlayWrapper(entry: entry),
           );
 
@@ -28,7 +28,7 @@ void main() {
 
           // Replace with a different widget - this triggers unmount
           // of the overlay and should not throw
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 20,
               height: 3,

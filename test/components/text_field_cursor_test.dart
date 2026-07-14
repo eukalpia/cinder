@@ -9,7 +9,7 @@ void main() {
         (tester) async {
           final controller = TextEditingController(text: 'Hello World');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -68,7 +68,7 @@ void main() {
         (tester) async {
           final controller = TextEditingController(text: 'Test selection');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 3,
@@ -112,7 +112,7 @@ void main() {
         (tester) async {
           final controller = TextEditingController(text: 'Replace this text');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 3,
@@ -159,7 +159,7 @@ void main() {
         (tester) async {
           final controller = TextEditingController(text: 'ABCDEFGHIJ');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 20,
               height: 3,

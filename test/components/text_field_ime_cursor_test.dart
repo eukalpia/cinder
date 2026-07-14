@@ -35,7 +35,7 @@ void main() {
           // Lines: ['a', '', 'b', 'c'] — an empty line between 'a' and 'b'.
           final controller = TextEditingController(text: 'a\n\nb\nc');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TextField(
               controller: controller,
               width: 20,

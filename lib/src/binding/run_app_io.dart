@@ -82,7 +82,7 @@ Future<void> _runApp(
       binding = TerminalBinding(terminal);
 
       binding!.initialize();
-      binding!.attachRootComponent(app);
+      binding!.attachRootWidget(app);
 
       if (enableHotReload && !bool.fromEnvironment('dart.vm.product')) {
         await binding!.initializeHotReload();

@@ -18,7 +18,7 @@ void main() {
         // RenderPadding.paint re-derives the child *offset* from the live
         // padding field, which masks the bug for position - the child's
         // stale constraints/size are the observable failure.
-        await tester.pumpComponent(const _PaddedDivider(padding: 1));
+        await tester.pumpWidget(const _PaddedDivider(padding: 1));
 
         expect(_dividerWidth(tester), 18,
             reason: 'padding 1 in a 20-wide box leaves 18 columns');
@@ -38,7 +38,7 @@ void main() {
 
     test('Align change repositions the child', () async {
       await testCinder('align relayout', (tester) async {
-        await tester.pumpComponent(const _AlignedLabel(toBottomRight: false));
+        await tester.pumpWidget(const _AlignedLabel(toBottomRight: false));
 
         var match = tester.terminalState.findText('AB').single;
         expect((match.x, match.y), (0, 0));

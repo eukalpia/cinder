@@ -9,7 +9,7 @@ void main() {
         final scrollController = ScrollController();
 
         // Start with 3 items
-        await tester.pumpComponent(
+        await tester.pumpWidget(
           Container(
             width: 20,
             height: 5,
@@ -30,7 +30,7 @@ void main() {
         print('MaxScrollExtent: ${scrollController.maxScrollExtent}');
 
         // Now rebuild with 10 items
-        await tester.pumpComponent(
+        await tester.pumpWidget(
           Container(
             width: 20,
             height: 5,

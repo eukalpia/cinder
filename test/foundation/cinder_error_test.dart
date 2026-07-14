@@ -349,7 +349,7 @@ void main() {
       await testCinder(
         'layout error integration',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             const ErrorThrowingWidget(
               throwInLayout: true,
               throwInPaint: false,
@@ -374,7 +374,7 @@ void main() {
       await testCinder(
         'paint error integration',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             const ErrorThrowingWidget(
               throwInLayout: false,
               throwInPaint: true,
@@ -399,7 +399,7 @@ void main() {
       await testCinder(
         'error context',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             const ErrorThrowingWidget(
               throwInLayout: true,
               errorMessage: 'Contextual error',
@@ -426,7 +426,7 @@ void main() {
         'multiple errors',
         (tester) async {
           // Use paint errors since they include the errorMessage in the exception
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: [
                 const ErrorThrowingWidget(

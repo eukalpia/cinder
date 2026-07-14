@@ -9,7 +9,7 @@ void main() {
         (tester) async {
           // A 20x10 Stack with a Center containing a small "X" Text
           // The "X" should be centered in the Stack, not at top-left
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 20,
               height: 10,
@@ -54,7 +54,7 @@ void main() {
         (tester) async {
           // When inside a Stack with bounded constraints,
           // Center should expand to fill the Stack, then center its child
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 8,
@@ -99,7 +99,7 @@ void main() {
         'standalone center',
         (tester) async {
           // Verify standalone Center still works
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 20,
               height: 6,

@@ -70,7 +70,7 @@ void main() {
           ),
         );
 
-        await tester.pumpComponent(navigator);
+        await tester.pumpWidget(navigator);
 
         // Clear log
         eventLog.clear();

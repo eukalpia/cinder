@@ -12,7 +12,7 @@ void main() {
           bool tapReceived = false;
           bool mouseEntered = false;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 80,
               height: 24,
@@ -55,7 +55,7 @@ void main() {
           bool tapReceived = false;
           bool mouseEntered = false;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 80,
               height: 24,
@@ -100,7 +100,7 @@ void main() {
           bool tapReceived = false;
           bool mouseEntered = false;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 80,
               height: 24,

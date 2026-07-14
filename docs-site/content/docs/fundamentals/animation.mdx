@@ -68,7 +68,7 @@ This creates a widget that fades in over 500ms when added to the tree.
 Always create controllers in `initState()` and dispose them in `dispose()`:
 
 ```dart
-class _MyState extends State<MyComponent>
+class _MyState extends State<MyWidget>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
 
@@ -386,7 +386,7 @@ AnimatedBuilder(
       child: child,  // This subtree won't rebuild
     );
   },
-  child: ExpensiveComponent(),  // Built once
+  child: ExpensiveWidget(),  // Built once
 )
 ```
 
@@ -532,5 +532,5 @@ _controller.addStatusListener((status) async {
 ## Next steps
 
 - [State Management](/docs/fundamentals/state) - Learn about state and setState
-- [Components](/docs/fundamentals/components) - Review widget types
+- [Widgets](/docs/fundamentals/components) - Review widget types
 - [Theming](/docs/fundamentals/theming) - Style your animated components

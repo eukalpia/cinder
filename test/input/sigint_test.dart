@@ -9,7 +9,7 @@ void main() {
       await testCinder(
         'intercept ctrl+c',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Focusable(
               focused: true,
               onKeyEvent: (event) {
@@ -43,7 +43,7 @@ void main() {
       await testCinder(
         'fallback to shutdown',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Focusable(
               focused: true,
               onKeyEvent: (event) {
@@ -76,7 +76,7 @@ void main() {
       await testCinder(
         'event properties',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Focusable(
               focused: true,
               onKeyEvent: (event) {
@@ -113,7 +113,7 @@ void main() {
       await testCinder(
         'focus respects routing',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: [
                 Focusable(
@@ -162,7 +162,7 @@ void main() {
       await testCinder(
         'event bubbling',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Focusable(
               focused: true,
               onKeyEvent: (event) {
@@ -205,7 +205,7 @@ void main() {
       await testCinder(
         'press twice pattern',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Focusable(
               focused: true,
               onKeyEvent: (event) {
@@ -248,7 +248,7 @@ void main() {
       await testCinder(
         'counter reset',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Focusable(
               focused: true,
               onKeyEvent: (event) {
@@ -296,7 +296,7 @@ void main() {
       await testCinder(
         'distinguish ctrl+c from c',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Focusable(
               focused: true,
               onKeyEvent: (event) {
@@ -342,7 +342,7 @@ void main() {
       await testCinder(
         'handler precedence',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Focusable(
               focused: true,
               onKeyEvent: (event) {
@@ -385,7 +385,7 @@ void main() {
       await testCinder(
         'ctrl+shift+c',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Focusable(
               focused: true,
               onKeyEvent: (event) {
@@ -427,7 +427,7 @@ void main() {
         'stateful counter',
         (tester) async {
           // Create a simple stateful widget
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             const _CounterApp(),
           );
 
@@ -465,7 +465,7 @@ void main() {
       await testCinder(
         'unfocused no handling',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Focusable(
               focused: false, // Not focused
               onKeyEvent: (event) {

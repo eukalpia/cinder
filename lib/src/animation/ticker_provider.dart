@@ -7,7 +7,7 @@ import 'package:cinder/src/framework/framework.dart';
 /// To use this mixin, add it to your [State] class:
 ///
 /// ```dart
-/// class MyState extends State<MyComponent> with SingleTickerProviderStateMixin {
+/// class MyState extends State<MyWidget> with SingleTickerProviderStateMixin {
 ///   late AnimationController _controller;
 ///
 ///   @override
@@ -72,7 +72,7 @@ mixin SingleTickerProviderStateMixin<T extends StatefulWidget> on State<T>
 /// To use this mixin, add it to your [State] class:
 ///
 /// ```dart
-/// class MyState extends State<MyComponent> with TickerProviderStateMixin {
+/// class MyState extends State<MyWidget> with TickerProviderStateMixin {
 ///   late AnimationController _controller1;
 ///   late AnimationController _controller2;
 ///

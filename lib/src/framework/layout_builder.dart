@@ -108,14 +108,14 @@ class LayoutBuilderElement extends RenderObjectElement {
 
       // Use owner to invoke the build
       owner!.buildScope(this, () {
-        Widget? builtComponent;
+        Widget? builtWidget;
         try {
-          builtComponent = widget.builder(this, constraints);
+          builtWidget = widget.builder(this, constraints);
         } catch (e, stackTrace) {
           // On error, create an error display widget
-          builtComponent = ErrorComponent(error: e, stackTrace: stackTrace);
+          builtWidget = ErrorWidget(error: e, stackTrace: stackTrace);
         }
-        _child = updateChild(_child, builtComponent, null);
+        _child = updateChild(_child, builtWidget, null);
       });
     }
   }

@@ -9,7 +9,7 @@ void main() {
         'layout error handling',
         (tester) async {
           // Create a widget that will throw during layout
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             const ErrorThrowingWidget(
               throwInLayout: true,
               throwInPaint: false,
@@ -40,7 +40,7 @@ void main() {
         'paint error handling',
         (tester) async {
           // Create a widget that will throw during paint
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             const ErrorThrowingWidget(
               throwInLayout: false,
               throwInPaint: true,
@@ -68,7 +68,7 @@ void main() {
         'nested error isolation',
         (tester) async {
           // Create a column with one failing and one working widget
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: [
                 const Text('Before Error'),
@@ -100,7 +100,7 @@ void main() {
       await testCinder(
         'custom error widget',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             const TUIErrorWidget(
               message: 'Custom Error: Something went wrong',
               error: 'TestError',
@@ -127,7 +127,7 @@ void main() {
       await testCinder(
         'error box constraints',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             SizedBox(
               width: 30,
               height: 7,

@@ -46,7 +46,7 @@ void main() {
           String textValue = 'Initial Text';
           late void Function() updateText;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             StatefulBuilder(
               builder: (context, setState) {
                 updateText = () {
@@ -81,7 +81,7 @@ void main() {
           int currentIndex = 0;
           late void Function() nextTheme;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             StatefulBuilder(
               builder: (context, setState) {
                 nextTheme = () {
@@ -136,7 +136,7 @@ void main() {
           String t2 = 'Second';
           late void Function() updateTexts;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             StatefulBuilder(
               builder: (context, setState) {
                 updateTexts = () {
@@ -172,7 +172,7 @@ void main() {
           String textValue = 'Initial';
           late void Function() updateText;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             StatefulBuilder(
               builder: (context, setState) {
                 updateText = () {
@@ -210,7 +210,7 @@ void main() {
           String textValue = 'Before';
           late void Function() updateText;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             StatefulBuilder(
               builder: (context, setState) {
                 updateText = () {

@@ -1,7 +1,7 @@
 import 'package:cinder/src/framework/framework.dart';
 import 'package:cinder/src/framework/value_listenable.dart';
 
-typedef ValueComponentBuilder<T> = Widget Function(
+typedef ValueWidgetBuilder<T> = Widget Function(
     BuildContext context, T value, Widget? child);
 
 class ValueListenableBuilder<T> extends StatefulWidget {
@@ -14,7 +14,7 @@ class ValueListenableBuilder<T> extends StatefulWidget {
 
   final ValueListenable<T> valueListenable;
 
-  final ValueComponentBuilder<T> builder;
+  final ValueWidgetBuilder<T> builder;
 
   final Widget? child;
 

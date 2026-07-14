@@ -18,7 +18,7 @@ abstract class BuildContext {
   CinderBinding get binding;
 
   /// Returns the nearest ancestor widget of the given type T.
-  T? findAncestorComponentOfExactType<T extends Widget>();
+  T? findAncestorWidgetOfExactType<T extends Widget>();
 
   /// Returns the state of the nearest ancestor [StatefulWidget].
   T? findAncestorStateOfType<T extends State>();
@@ -29,17 +29,17 @@ abstract class BuildContext {
   /// Returns the render object of the nearest ancestor [RenderObjectWidget].
   T? findAncestorRenderObjectOfType<T extends RenderObject>();
 
-  /// Obtains the nearest [InheritedComponent] of the given type T and
+  /// Obtains the nearest [InheritedWidget] of the given type T and
   /// registers this context to be rebuilt when that widget changes.
-  T? dependOnInheritedComponentOfExactType<T extends InheritedComponent>(
+  T? dependOnInheritedWidgetOfExactType<T extends InheritedWidget>(
       {Object? aspect});
 
   /// Registers this context with an [InheritedElement].
-  InheritedComponent dependOnInheritedElement(InheritedElement ancestor,
+  InheritedWidget dependOnInheritedElement(InheritedElement ancestor,
       {Object? aspect});
 
-  InheritedElement? getElementForInheritedComponentOfExactType<
-      T extends InheritedComponent>();
+  InheritedElement?
+      getElementForInheritedWidgetOfExactType<T extends InheritedWidget>();
 
   /// Visit all the children elements.
   void visitChildElements(ElementVisitor visitor);

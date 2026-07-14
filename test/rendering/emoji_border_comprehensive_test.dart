@@ -11,7 +11,7 @@ void main() {
       await testCinder(
         'face emojis border test',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Container(
                 width: 50,
@@ -45,7 +45,7 @@ void main() {
       await testCinder(
         'hand emojis border test',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Container(
                 width: 55,
@@ -80,7 +80,7 @@ void main() {
       await testCinder(
         'heart emojis border test',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Container(
                 width: 50,
@@ -114,7 +114,7 @@ void main() {
       await testCinder(
         'animal emojis border test',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Container(
                 width: 55,
@@ -148,7 +148,7 @@ void main() {
       await testCinder(
         'food emojis border test',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Container(
                 width: 55,
@@ -183,7 +183,7 @@ void main() {
       await testCinder(
         'weather emojis border test',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Container(
                 width: 50,
@@ -218,7 +218,7 @@ void main() {
       await testCinder(
         'object emojis border test',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Container(
                 width: 55,
@@ -253,7 +253,7 @@ void main() {
       await testCinder(
         'symbol emojis border test',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Container(
                 width: 50,
@@ -287,7 +287,7 @@ void main() {
       await testCinder(
         'checkmark emojis border test',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Container(
                 width: 55,
@@ -322,7 +322,7 @@ void main() {
       await testCinder(
         'arrow emojis border test',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Container(
                 width: 55,
@@ -361,7 +361,7 @@ void main() {
       await testCinder(
         'flag emojis border test',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Container(
                 width: 45,
@@ -392,7 +392,7 @@ void main() {
       await testCinder(
         'ZWJ family emojis border test',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Container(
                 width: 50,
@@ -424,7 +424,7 @@ void main() {
       await testCinder(
         'skin tone emojis border test',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Container(
                 width: 45,
@@ -460,7 +460,7 @@ void main() {
       await testCinder(
         'emoji grid border test',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -593,7 +593,7 @@ void main() {
       await testCinder(
         'emoji text alignment border test',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -666,7 +666,7 @@ void main() {
       await testCinder(
         'stress test many emojis border test',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Container(
                 width: 70,
@@ -707,7 +707,7 @@ void main() {
       await testCinder(
         'complex emojis nested borders test',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Container(
                 width: 55,
@@ -794,7 +794,7 @@ void main() {
       await testCinder(
         'single emoji per line border test',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Container(
                 width: 8,
@@ -828,7 +828,7 @@ void main() {
       await testCinder(
         'emoji position border test',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Container(
                 width: 40,
@@ -862,7 +862,7 @@ void main() {
       await testCinder(
         'double border emoji test',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Container(
                 width: 45,
@@ -901,7 +901,7 @@ void main() {
       await testCinder(
         'comprehensive visual emoji border test',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Container(
                 width: 75,

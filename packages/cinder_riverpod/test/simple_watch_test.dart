@@ -9,7 +9,7 @@ void main() {
     await testCinder(
       'basic watch',
       (tester) async {
-        await tester.pumpComponent(
+        await tester.pumpWidget(
           ProviderScope(
             child: _SimpleWatchWidget(counterProvider: counterProvider),
           ),

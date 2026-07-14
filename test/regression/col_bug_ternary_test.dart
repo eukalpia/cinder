@@ -55,7 +55,7 @@ void main() {
   group('Column Bug Ternary', () {
     test('ternary column replacement', () async {
       await testCinder('debug output', (tester) async {
-        await tester.pumpComponent(
+        await tester.pumpWidget(
           const ColumnBugDemo(),
         );
 

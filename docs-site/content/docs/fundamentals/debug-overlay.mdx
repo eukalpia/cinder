@@ -27,7 +27,7 @@ These metrics help identify performance bottlenecks. If build time is high, you 
 
 ## Repaint rainbow
 
-When debug mode is active, Cinder enables the "repaint rainbow" effect. Components that repaint are briefly colored, showing you exactly which parts of your UI are updating.
+When debug mode is active, Cinder enables the "repaint rainbow" effect. Widgets that repaint are briefly colored, showing you exactly which parts of your UI are updating.
 
 This is invaluable for debugging unnecessary repaints:
 - If a widget keeps changing color when it shouldn't, something is triggering unneeded rebuilds
@@ -63,7 +63,7 @@ if (debugMode) {
 ### Listen for debug mode changes
 
 ```dart
-class _MyState extends State<MyComponent> {
+class _MyState extends State<MyWidget> {
   late DebugModeCallback _debugCallback;
 
   @override

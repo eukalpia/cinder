@@ -144,7 +144,7 @@ class RenderTint extends RenderObject
 ///   child: MyContent(),
 /// )
 /// ```
-class AnimatedTint extends AnimatedComponent {
+class AnimatedTint extends AnimatedWidget {
   /// Creates an animated tint widget.
   const AnimatedTint({
     super.key,
@@ -503,7 +503,7 @@ class RenderColoredBox extends RenderObject
 ///   onDismiss: () => _hideOverlay(),
 /// )
 /// ```
-class AnimatedModalBarrier extends AnimatedComponent {
+class AnimatedModalBarrier extends AnimatedWidget {
   /// Creates a widget that blocks user interaction with an animated color.
   const AnimatedModalBarrier({
     super.key,

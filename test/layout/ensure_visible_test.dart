@@ -141,7 +141,7 @@ void main() {
           final controller = ScrollController();
           final app = _TestListViewApp(controller: controller, itemCount: 20);
 
-          await tester.pumpComponent(app);
+          await tester.pumpWidget(app);
 
           // Initially at top
           expect(controller.offset, equals(0));
@@ -169,7 +169,7 @@ void main() {
           final controller = ScrollController();
           final app = _TestListViewApp(controller: controller, itemCount: 20);
 
-          await tester.pumpComponent(app);
+          await tester.pumpWidget(app);
 
           // Item 2 should be visible at the top
           final initialOffset = controller.offset;

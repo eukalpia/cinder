@@ -34,7 +34,7 @@ abstract class BuildableElement extends Element {
     } catch (e, stack) {
       // Handle build errors
       _debugDoingBuild = false;
-      built = ErrorComponent(error: e, stackTrace: stack);
+      built = ErrorWidget(error: e, stackTrace: stack);
       CinderError.reportError(CinderErrorDetails(
         exception: e,
         stack: stack,
@@ -73,8 +73,8 @@ abstract class BuildableElement extends Element {
 ///
 /// Uses [RenderTUIErrorBox] to display a red bordered box with the error
 /// message and stack trace, matching the visual style of layout/paint errors.
-class ErrorComponent extends SingleChildRenderObjectWidget {
-  const ErrorComponent({
+class ErrorWidget extends SingleChildRenderObjectWidget {
+  const ErrorWidget({
     required this.error,
     required this.stackTrace,
   });

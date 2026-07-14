@@ -18,7 +18,7 @@ void main() {
             ),
           );
 
-          await tester.pumpComponent(navigator);
+          await tester.pumpWidget(navigator);
           final navState = tester.findState<NavigatorState>();
 
           print('Showing dialog...');
@@ -77,7 +77,7 @@ void main() {
             ),
           );
 
-          await tester.pumpComponent(navigator);
+          await tester.pumpWidget(navigator);
           final navState = tester.findState<NavigatorState>();
 
           // Navigate to page 2
@@ -124,7 +124,7 @@ void main() {
             ),
           );
 
-          await tester.pumpComponent(navigator);
+          await tester.pumpWidget(navigator);
           final navState = tester.findState<NavigatorState>();
 
           // Navigate to locked page

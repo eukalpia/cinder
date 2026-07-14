@@ -28,7 +28,7 @@ void main() {
         'itemCount increase',
         (tester) async {
           // Start with 3 items
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             SizedBox(
               width: 30,
               height: 10,
@@ -45,7 +45,7 @@ void main() {
           expect(tester.terminalState.containsText('Item 2'), isTrue);
 
           // Increase to 5 items
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             SizedBox(
               width: 30,
               height: 10,
@@ -72,7 +72,7 @@ void main() {
         'itemCount decrease',
         (tester) async {
           // Start with 5 items
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             SizedBox(
               width: 30,
               height: 10,
@@ -87,7 +87,7 @@ void main() {
           expect(tester.terminalState.containsText('Item 4'), isTrue);
 
           // Decrease to 3 items
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             SizedBox(
               width: 30,
               height: 10,
@@ -121,7 +121,7 @@ void main() {
         (tester) async {
           List<String> messages = ['Message 1', 'Message 2'];
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             SizedBox(
               width: 30,
               height: 10,
@@ -140,7 +140,7 @@ void main() {
           // Add new message (prepended, like in a chat)
           messages = ['NEW MESSAGE', ...messages];
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             SizedBox(
               width: 30,
               height: 10,
@@ -169,7 +169,7 @@ void main() {
         'rapid itemCount changes',
         (tester) async {
           for (int count = 3; count <= 8; count++) {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               SizedBox(
                 width: 30,
                 height: 15,
@@ -200,7 +200,7 @@ void main() {
           final scrollController = ScrollController();
           int buildCount = 0;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             SizedBox(
               width: 30,
               height: 5,
@@ -241,7 +241,7 @@ void main() {
           int buildCount = 0;
 
           // First render
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             SizedBox(
               width: 30,
               height: 5,
@@ -266,7 +266,7 @@ void main() {
           final initialBuildCount = buildCount;
 
           // Re-render with different header but same itemCount
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             SizedBox(
               width: 30,
               height: 5,
@@ -308,7 +308,7 @@ void main() {
       await testCinder(
         'reverse mode visual position',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             SizedBox(
               width: 30,
               height: 10,
@@ -339,7 +339,7 @@ void main() {
           final scrollController = ScrollController();
           List<String> messages = ['Msg 1', 'Msg 2', 'Msg 3'];
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             SizedBox(
               width: 30,
               height: 8,
@@ -355,7 +355,7 @@ void main() {
           // Add a message
           messages = ['New Msg', ...messages];
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             SizedBox(
               width: 30,
               height: 8,
@@ -383,7 +383,7 @@ void main() {
         (tester) async {
           List<String> messages = ['Initial'];
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             SizedBox(
               width: 30,
               height: 15,
@@ -399,7 +399,7 @@ void main() {
           for (int i = 1; i <= 5; i++) {
             messages = ['Msg $i', ...messages];
 
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               SizedBox(
                 width: 30,
                 height: 15,
@@ -431,7 +431,7 @@ void main() {
         'null to finite itemCount',
         (tester) async {
           // Initially infinite (null itemCount)
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             SizedBox(
               width: 30,
               height: 10,
@@ -450,7 +450,7 @@ void main() {
           expect(tester.terminalState.containsText('Item 0'), isTrue);
 
           // Change to finite
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             SizedBox(
               width: 30,
               height: 10,
@@ -477,7 +477,7 @@ void main() {
         'finite to null itemCount',
         (tester) async {
           // Initially 5 items
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             SizedBox(
               width: 30,
               height: 10,
@@ -491,7 +491,7 @@ void main() {
           expect(tester.terminalState.containsText('Item 4'), isTrue);
 
           // Change to infinite (null)
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             SizedBox(
               width: 30,
               height: 10,
@@ -519,7 +519,7 @@ void main() {
         'empty to populated',
         (tester) async {
           // Initially empty
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             SizedBox(
               width: 30,
               height: 10,
@@ -534,7 +534,7 @@ void main() {
           expect(tester.terminalState.containsText('Item'), isFalse);
 
           // Add items
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             SizedBox(
               width: 30,
               height: 10,
@@ -560,7 +560,7 @@ void main() {
         'populated to empty',
         (tester) async {
           // Initially 5 items
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             SizedBox(
               width: 30,
               height: 10,
@@ -575,7 +575,7 @@ void main() {
           expect(tester.terminalState.containsText('Item 4'), isTrue);
 
           // Clear all items
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             SizedBox(
               width: 30,
               height: 10,
@@ -609,7 +609,7 @@ void main() {
           // Simulate chat UI: messages list that grows
           List<String> messages = ['Message 1', 'Message 2'];
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             SizedBox(
               width: 40,
               height: 10,
@@ -628,7 +628,7 @@ void main() {
           // Add new message (prepended, like in a chat)
           messages = ['NEW MESSAGE', ...messages];
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             SizedBox(
               width: 40,
               height: 10,
@@ -660,7 +660,7 @@ void main() {
           final List<int> builtIndices = [];
 
           // Start with 3 items
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             SizedBox(
               width: 30,
               height: 10,
@@ -679,7 +679,7 @@ void main() {
           builtIndices.clear();
 
           // Increase itemCount - should trigger cache invalidation
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             SizedBox(
               width: 30,
               height: 10,
@@ -715,7 +715,7 @@ void main() {
       await testCinder(
         'stateful parent state change',
         (tester) async {
-          await tester.pumpComponent(_DynamicListView());
+          await tester.pumpWidget(_DynamicListView());
 
           // Initial state shows 3 items
           expect(tester.terminalState.containsText('Item 0'), isTrue);
@@ -740,7 +740,7 @@ void main() {
       await testCinder(
         'stateful reverse mode',
         (tester) async {
-          await tester.pumpComponent(_DynamicChatView());
+          await tester.pumpWidget(_DynamicChatView());
 
           // Initial state shows messages
           expect(tester.terminalState.containsText('Message 0'), isTrue);

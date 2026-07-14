@@ -10,7 +10,7 @@ void main() {
           // Create an overlay with entries
           final overlayKey = GlobalKey<OverlayState>();
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Overlay(
               key: overlayKey,
               initialEntries: [
@@ -56,7 +56,7 @@ void main() {
         (tester) async {
           final overlayKey = GlobalKey<OverlayState>();
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Overlay(
               key: overlayKey,
               initialEntries: [
@@ -97,7 +97,7 @@ void main() {
       await testCinder(
         'explicit color test',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 20,
               height: 5,

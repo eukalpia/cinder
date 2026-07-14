@@ -7,7 +7,7 @@ void main() {
       await testCinder(
         'foreground colors',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: const [
                 Text('Red text', style: TextStyle(color: Colors.red)),
@@ -40,7 +40,7 @@ void main() {
       await testCinder(
         'background colors',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: const [
                 Text('White on red',
@@ -79,7 +79,7 @@ void main() {
       await testCinder(
         'text styles',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: const [
                 Text('Bold text',
@@ -129,7 +129,7 @@ void main() {
       await testCinder(
         'RGB colors',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: [
                 Text('Orange (255,128,0)',
@@ -162,7 +162,7 @@ void main() {
       await testCinder(
         'combined styles',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: const [
                 Text(
@@ -209,7 +209,7 @@ void main() {
       await testCinder(
         'colors in containers',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: [
                 Container(
@@ -262,7 +262,7 @@ void main() {
       await testCinder(
         'colors visual',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

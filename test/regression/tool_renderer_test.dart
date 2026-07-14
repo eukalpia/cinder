@@ -9,7 +9,7 @@ void main() {
       await testCinder(
         'row with flexible text',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -51,7 +51,7 @@ void main() {
       await testCinder(
         'nested row with expanded',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -109,7 +109,7 @@ void main() {
         'multiple updates same constraints',
         (tester) async {
           // First render
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             _TestToolRenderer(filePath: '/path/to/file1.dart'),
           );
 
@@ -117,7 +117,7 @@ void main() {
           expect(tester.terminalState, containsText('file1.dart'));
 
           // Update with different content but same layout structure
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             _TestToolRenderer(filePath: '/path/to/file2.dart'),
           );
 
@@ -125,7 +125,7 @@ void main() {
           expect(tester.terminalState, containsText('file2.dart'));
 
           // Third update
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             _TestToolRenderer(filePath: '/path/to/file3.dart'),
           );
 
@@ -142,7 +142,7 @@ void main() {
         'flexible text length changes',
         (tester) async {
           // First render with LONG path
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             _TestToolRenderer(filePath: '/some/very/long/path/to/file.dart'),
           );
 
@@ -150,7 +150,7 @@ void main() {
           // The `)` should be right after the text
 
           // Update with SHORT path - this is where the bug might appear
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             _TestToolRenderer(filePath: 'short.dart'),
           );
 
@@ -178,7 +178,7 @@ void main() {
           final dimColor = textColor.withOpacity(0.6);
 
           // First render with LONG path
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Row(
               children: [
                 Text('●', style: TextStyle(color: Colors.yellow)),
@@ -200,7 +200,7 @@ void main() {
           print('\n--- Long path (styled) ---');
 
           // Update with SHORT path
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Row(
               children: [
                 Text('●', style: TextStyle(color: Colors.green)),
@@ -236,7 +236,7 @@ void main() {
         'SizedBox width changes',
         (tester) async {
           // Render with SizedBox(width: 1)
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Row(
               children: [
                 Text('A'),
@@ -251,7 +251,7 @@ void main() {
           expect(tester.terminalState, containsText('A B'));
 
           // Update with SizedBox(width: 3)
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Row(
               children: [
                 Text('A'),
@@ -274,7 +274,7 @@ void main() {
         'stateful dynamic content',
         (tester) async {
           // First render with pending state
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             _StatefulToolRenderer(
               toolName: 'Read',
               filePath: '/path/to/file.dart',
@@ -288,7 +288,7 @@ void main() {
           expect(tester.terminalState, containsText('file.dart'));
 
           // Update to completed state
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             _StatefulToolRenderer(
               toolName: 'Read',
               filePath: '/path/to/file.dart',
@@ -311,7 +311,7 @@ void main() {
         'conditional children',
         (tester) async {
           // First render without result
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -338,7 +338,7 @@ void main() {
           expect(tester.terminalState, containsText('Read'));
 
           // Update WITH result
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

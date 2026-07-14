@@ -12,7 +12,7 @@ void main() async {
     (tester) async {
       final controller = TextEditingController(text: '');
 
-      await tester.pumpComponent(
+      await tester.pumpWidget(
         TextField(
           controller: controller,
           focused: true,

@@ -38,7 +38,7 @@ class _TextTabsDemoState extends State<TextTabsDemo> {
             ),
             child: Center(
               child: Text(
-                'Text Components Demo',
+                'Text Widgets Demo',
                 style: TextStyle(
                     color: Colors.brightCyan, fontWeight: FontWeight.bold),
               ),

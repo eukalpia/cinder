@@ -5,7 +5,7 @@ Riverpod support for cinder - A reactive caching and data-binding framework for 
 ## Features
 
 - 🎯 **Full Riverpod Integration** - Use all Riverpod providers in your TUI apps
-- 🔄 **Automatic Rebuilds** - Components rebuild automatically when providers change
+- 🔄 **Automatic Rebuilds** - Widgets rebuild automatically when providers change
 - 📦 **State Management** - Manage complex state with providers
 - 🎨 **ChangeNotifier Support** - Use ChangeNotifier for mutable state
 - 🔍 **Computed Values** - Create derived state with Provider
@@ -69,10 +69,10 @@ class Counter extends ChangeNotifier {
 final counterNotifierProvider = ChangeNotifierProvider((ref) => Counter());
 ```
 
-### Using Providers in Components
+### Using Providers in Widgets
 
 ```dart
-class MyComponent extends StatelessWidget {
+class MyWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Watch - rebuilds when provider changes
@@ -100,12 +100,12 @@ class MyComponent extends StatelessWidget {
 ### Listening to Changes
 
 ```dart
-class ListenerComponent extends StatefulWidget {
+class ListenerWidget extends StatefulWidget {
   @override
-  State<ListenerComponent> createState() => _ListenerComponentState();
+  State<ListenerWidget> createState() => _ListenerWidgetState();
 }
 
-class _ListenerComponentState extends State<ListenerComponent> {
+class _ListenerWidgetState extends State<ListenerWidget> {
   @override
   void initState() {
     super.initState();

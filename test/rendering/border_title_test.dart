@@ -7,7 +7,7 @@ void main() {
       await testCinder(
         'left aligned title',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Container(
                 width: 25,
@@ -32,7 +32,7 @@ void main() {
       await testCinder(
         'center aligned title',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Container(
                 width: 25,
@@ -60,7 +60,7 @@ void main() {
       await testCinder(
         'right aligned title',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Container(
                 width: 25,
@@ -88,7 +88,7 @@ void main() {
       await testCinder(
         'styled title',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Container(
                 width: 30,
@@ -118,7 +118,7 @@ void main() {
       await testCinder(
         'truncated title',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Container(
                 width: 15,
@@ -145,7 +145,7 @@ void main() {
       await testCinder(
         'narrow container',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Container(
                 width: 5,
@@ -170,7 +170,7 @@ void main() {
       await testCinder(
         'border styles with title',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: [
                 Container(
@@ -224,7 +224,7 @@ void main() {
       await testCinder(
         'alignment comparison',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: [
                 Container(
@@ -280,7 +280,7 @@ void main() {
       await testCinder(
         'top border only',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 25,
               height: 3,
@@ -311,7 +311,7 @@ void main() {
       await testCinder(
         'top and bottom only',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 25,
               height: 3,
@@ -344,7 +344,7 @@ void main() {
       await testCinder(
         'full border with corners',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 25,
               height: 3,
@@ -377,7 +377,7 @@ void main() {
       await testCinder(
         'left and right only',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 25,
               height: 3,

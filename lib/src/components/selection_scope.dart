@@ -3,7 +3,7 @@ import 'selection_state.dart';
 
 /// Provides selection drag state to descendant widgets.
 ///
-/// This InheritedComponent is used by [SelectionArea] to communicate
+/// This InheritedWidget is used by [SelectionArea] to communicate
 /// its selection state to descendants like [ListView], which need to
 /// know when a selection drag is active to avoid cleaning up children
 /// that are part of the selection range.
@@ -20,7 +20,7 @@ import 'selection_state.dart';
 ///
 /// In the above example, [ListView] will automatically use [SelectionScope]
 /// to determine when to keep selection-range items built during a drag.
-class SelectionScope extends InheritedComponent {
+class SelectionScope extends InheritedWidget {
   /// Creates a selection scope.
   const SelectionScope({
     super.key,
@@ -50,7 +50,7 @@ class SelectionScope extends InheritedComponent {
   /// [SelectionScope], so the widget will rebuild when the selection
   /// state changes.
   static SelectionScope? maybeOf(BuildContext context) {
-    return context.dependOnInheritedComponentOfExactType<SelectionScope>();
+    return context.dependOnInheritedWidgetOfExactType<SelectionScope>();
   }
 
   /// Returns the [SelectionScope] from the closest ancestor.

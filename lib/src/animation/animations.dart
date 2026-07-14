@@ -16,7 +16,7 @@
 /// [SingleTickerProviderStateMixin] to your State class:
 ///
 /// ```dart
-/// class _MyComponentState extends State<MyComponent>
+/// class _MyWidgetState extends State<MyWidget>
 ///     with SingleTickerProviderStateMixin {
 ///   late AnimationController _controller;
 ///   late Animation<double> _animation;
@@ -44,7 +44,7 @@
 ///       animation: _animation,
 ///       builder: (context, child) {
 ///         // Use _animation.value to drive your UI
-///         return SomeComponent(opacity: _animation.value);
+///         return SomeWidget(opacity: _animation.value);
 ///       },
 ///     );
 ///   }

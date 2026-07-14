@@ -395,7 +395,7 @@ enum Clip {
 /// the [Positioned] widget to its enclosing [Stack] must contain only
 /// [StatelessWidget]s or [StatefulWidget]s (not other kinds of widgets, like
 /// [RenderObjectWidget]s).
-class Positioned extends ParentDataComponent<StackParentData> {
+class Positioned extends ParentDataWidget<StackParentData> {
   /// Creates a widget that controls where a child of a [Stack] is positioned.
   ///
   /// Only two out of the three horizontal values ([left], [right], [width]), and only

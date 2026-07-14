@@ -8,7 +8,7 @@ void main() {
       (tester) async {
         final controller = TextEditingController(text: 'Test selection colors');
 
-        await tester.pumpComponent(
+        await tester.pumpWidget(
           Container(
             width: 30,
             height: 3,

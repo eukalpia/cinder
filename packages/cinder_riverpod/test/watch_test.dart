@@ -11,9 +11,9 @@ void main() {
       await testCinder(
         'watch rebuilds',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             ProviderScope(
-              child: _WatchTestComponent(
+              child: _WatchTestWidget(
                 builder: (context) {
                   buildCount++;
                   final count = context.watch(counterProvider);
@@ -69,9 +69,9 @@ void main() {
       await testCinder(
         'multiple watches',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             ProviderScope(
-              child: _WatchTestComponent(
+              child: _WatchTestWidget(
                 builder: (context) {
                   buildCount++;
                   final name = context.watch(nameProvider);
@@ -132,9 +132,9 @@ void main() {
       await testCinder(
         'computed provider',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             ProviderScope(
-              child: _WatchTestComponent(
+              child: _WatchTestWidget(
                 builder: (context) {
                   buildCount++;
                   final doubled = context.watch(doubledProvider);
@@ -179,11 +179,11 @@ void main() {
       await testCinder(
         'nested scopes',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             ProviderScope(
               child: Column(
                 children: [
-                  _WatchTestComponent(
+                  _WatchTestWidget(
                     builder: (context) {
                       final color = context.watch(colorProvider);
                       return Text('Outer: $color');
@@ -193,7 +193,7 @@ void main() {
                     overrides: [
                       colorProvider.overrideWith((ref) => 'red'),
                     ],
-                    child: _WatchTestComponent(
+                    child: _WatchTestWidget(
                       builder: (context) {
                         final color = context.watch(colorProvider);
                         return Text('Inner: $color');
@@ -229,9 +229,9 @@ void main() {
       await testCinder(
         'no duplicate subscriptions',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             ProviderScope(
-              child: _WatchTestComponent(
+              child: _WatchTestWidget(
                 builder: (context) {
                   // Watch counter (track how many times watch is called)
                   watchCallCount++;
@@ -292,9 +292,9 @@ void main() {
       await testCinder(
         'listen without rebuild',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             ProviderScope(
-              child: _ListenTestComponent(counterProvider: counterProvider),
+              child: _ListenTestWidget(counterProvider: counterProvider),
             ),
           );
 
@@ -323,8 +323,8 @@ void main() {
 }
 
 // Test widget that uses watch
-class _WatchTestComponent extends StatelessWidget {
-  const _WatchTestComponent({required this.builder});
+class _WatchTestWidget extends StatelessWidget {
+  const _WatchTestWidget({required this.builder});
 
   final WidgetBuilder builder;
 
@@ -335,16 +335,16 @@ class _WatchTestComponent extends StatelessWidget {
 }
 
 // Test widget that uses listen
-class _ListenTestComponent extends StatefulWidget {
-  const _ListenTestComponent({required this.counterProvider});
+class _ListenTestWidget extends StatefulWidget {
+  const _ListenTestWidget({required this.counterProvider});
 
   final StateProvider<int> counterProvider;
 
   @override
-  State<_ListenTestComponent> createState() => _ListenTestComponentState();
+  State<_ListenTestWidget> createState() => _ListenTestWidgetState();
 }
 
-class _ListenTestComponentState extends State<_ListenTestComponent> {
+class _ListenTestWidgetState extends State<_ListenTestWidget> {
   int lastValue = 0;
   int buildCount = 0;
 

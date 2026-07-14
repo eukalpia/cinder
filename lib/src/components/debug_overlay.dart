@@ -103,7 +103,7 @@ void toggleDebugMode() {
 /// ```dart
 /// DebugOverlay(
 ///   maxSamples: 200,  // Keep more frame samples
-///   child: MyComponent(),
+///   child: MyWidget(),
 /// )
 /// ```
 class DebugOverlay extends StatefulWidget {

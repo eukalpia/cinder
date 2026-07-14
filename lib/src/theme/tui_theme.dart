@@ -4,7 +4,7 @@ import 'tui_theme_data.dart';
 /// Provides a theme to its descendants.
 ///
 /// Wrap your app in a [TuiTheme] to provide theme colors to all
-/// descendant components. Components can then access the theme using
+/// descendant components. Widgets can then access the theme using
 /// [TuiTheme.of].
 ///
 /// Example:
@@ -18,7 +18,7 @@ import 'tui_theme_data.dart';
 /// final theme = TuiTheme.of(context);
 /// final textColor = theme.onSurface;
 /// ```
-class TuiTheme extends InheritedComponent {
+class TuiTheme extends InheritedWidget {
   /// The theme data for this subtree.
   final TuiThemeData data;
 
@@ -48,7 +48,7 @@ class TuiTheme extends InheritedComponent {
   /// }
   /// ```
   static TuiThemeData of(BuildContext context) {
-    final theme = context.dependOnInheritedComponentOfExactType<TuiTheme>();
+    final theme = context.dependOnInheritedWidgetOfExactType<TuiTheme>();
     return theme?.data ?? TuiThemeData.dark;
   }
 
@@ -61,8 +61,7 @@ class TuiTheme extends InheritedComponent {
   ///
   /// Returns `null` if no [TuiTheme] ancestor exists.
   static TuiThemeData? maybeOf(BuildContext context) {
-    final element =
-        context.getElementForInheritedComponentOfExactType<TuiTheme>();
+    final element = context.getElementForInheritedWidgetOfExactType<TuiTheme>();
     return (element?.widget as TuiTheme?)?.data;
   }
 

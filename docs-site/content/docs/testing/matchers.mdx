@@ -122,7 +122,7 @@ expect(
 ```dart
 test('displays welcome message', () async {
   await testCinder('welcome', (tester) async {
-    await tester.pumpComponent(WelcomeScreen());
+    await tester.pumpWidget(WelcomeScreen());
 
     expect(tester.terminalState, containsText('Welcome to Cinder'));
     expect(tester.terminalState, hasTextAt(0, 0, 'Welcome'));
@@ -135,7 +135,7 @@ test('displays welcome message', () async {
 ```dart
 test('shows error in red', () async {
   await testCinder('error style', (tester) async {
-    await tester.pumpComponent(ErrorMessage(message: 'Failed'));
+    await tester.pumpWidget(ErrorMessage(message: 'Failed'));
 
     expect(
       tester.terminalState,
@@ -150,7 +150,7 @@ test('shows error in red', () async {
 ```dart
 test('empty list shows placeholder', () async {
   await testCinder('empty', (tester) async {
-    await tester.pumpComponent(ItemList(items: []));
+    await tester.pumpWidget(ItemList(items: []));
 
     expect(tester.terminalState, containsText('No items'));
   });
@@ -162,7 +162,7 @@ test('empty list shows placeholder', () async {
 ```dart
 test('title in correct position', () async {
   await testCinder('layout', (tester) async {
-    await tester.pumpComponent(
+    await tester.pumpWidget(
       Container(
         margin: EdgeInsets.all(2),
         child: Text('Title'),
@@ -180,7 +180,7 @@ test('title in correct position', () async {
 ```dart
 test('widget matches snapshot', () async {
   await testCinder('snapshot', (tester) async {
-    await tester.pumpComponent(ComplexComponent());
+    await tester.pumpWidget(ComplexWidget());
 
     expect(tester.terminalState, matchesSnapshot('complex-widget'));
   });

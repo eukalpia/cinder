@@ -9,7 +9,7 @@ void main() {
         final controller = TextEditingController(
             text: 'Hello World! This is a long text that should scroll.');
 
-        await tester.pumpComponent(
+        await tester.pumpWidget(
           Column(
             children: [
               const Text('TextField with width=30, border, padding:'),

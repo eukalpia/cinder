@@ -13,7 +13,7 @@ void main() {
         const rightWidth = 20;
         const height = 8;
 
-        await tester.pumpComponent(
+        await tester.pumpWidget(
           Row(
             children: [
               Container(

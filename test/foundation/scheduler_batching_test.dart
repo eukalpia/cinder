@@ -5,13 +5,13 @@ void main() {
   group('SchedulerBinding Frame Batching', () {
     test('multiple setState calls batch into single frame', () async {
       int buildCount = 0;
-      late TestBatchingComponentState state;
+      late TestBatchingWidgetState state;
 
       await testCinder(
         'batching test',
         (tester) async {
-          await tester.pumpComponent(
-            TestBatchingComponent(
+          await tester.pumpWidget(
+            TestBatchingWidget(
               onBuild: () => buildCount++,
               onStateCreated: (s) => state = s,
             ),
@@ -40,13 +40,13 @@ void main() {
 
     test('rapid events batch into single frame', () async {
       int renderCount = 0;
-      late TestEventComponentState state;
+      late TestEventWidgetState state;
 
       await testCinder(
         'rapid events test',
         (tester) async {
-          await tester.pumpComponent(
-            TestEventComponent(
+          await tester.pumpWidget(
+            TestEventWidget(
               onRender: () => renderCount++,
               onStateCreated: (s) => state = s,
             ),
@@ -82,8 +82,8 @@ void main() {
       await testCinder(
         'post-frame callback test',
         (tester) async {
-          await tester.pumpComponent(
-            TestCallbackComponent(
+          await tester.pumpWidget(
+            TestCallbackWidget(
               onBuild: () => executionOrder.add('build'),
               onPostFrame: () => executionOrder.add('post-frame'),
             ),
@@ -131,21 +131,21 @@ void main() {
 }
 
 // Test widget that counts builds
-class TestBatchingComponent extends StatefulWidget {
-  const TestBatchingComponent({
+class TestBatchingWidget extends StatefulWidget {
+  const TestBatchingWidget({
     super.key,
     required this.onBuild,
     required this.onStateCreated,
   });
 
   final VoidCallback onBuild;
-  final void Function(TestBatchingComponentState) onStateCreated;
+  final void Function(TestBatchingWidgetState) onStateCreated;
 
   @override
-  State<TestBatchingComponent> createState() => TestBatchingComponentState();
+  State<TestBatchingWidget> createState() => TestBatchingWidgetState();
 }
 
-class TestBatchingComponentState extends State<TestBatchingComponent> {
+class TestBatchingWidgetState extends State<TestBatchingWidget> {
   @override
   void initState() {
     super.initState();
@@ -164,21 +164,21 @@ class TestBatchingComponentState extends State<TestBatchingComponent> {
 }
 
 // Test widget for rapid events
-class TestEventComponent extends StatefulWidget {
-  const TestEventComponent({
+class TestEventWidget extends StatefulWidget {
+  const TestEventWidget({
     super.key,
     required this.onRender,
     required this.onStateCreated,
   });
 
   final VoidCallback onRender;
-  final void Function(TestEventComponentState) onStateCreated;
+  final void Function(TestEventWidgetState) onStateCreated;
 
   @override
-  State<TestEventComponent> createState() => TestEventComponentState();
+  State<TestEventWidget> createState() => TestEventWidgetState();
 }
 
-class TestEventComponentState extends State<TestEventComponent> {
+class TestEventWidgetState extends State<TestEventWidget> {
   int _value = 0;
   int get value => _value;
 
@@ -202,8 +202,8 @@ class TestEventComponentState extends State<TestEventComponent> {
 }
 
 // Test widget for post-frame callbacks
-class TestCallbackComponent extends StatefulWidget {
-  const TestCallbackComponent({
+class TestCallbackWidget extends StatefulWidget {
+  const TestCallbackWidget({
     super.key,
     required this.onBuild,
     required this.onPostFrame,
@@ -213,10 +213,10 @@ class TestCallbackComponent extends StatefulWidget {
   final VoidCallback onPostFrame;
 
   @override
-  State<TestCallbackComponent> createState() => TestCallbackComponentState();
+  State<TestCallbackWidget> createState() => TestCallbackWidgetState();
 }
 
-class TestCallbackComponentState extends State<TestCallbackComponent> {
+class TestCallbackWidgetState extends State<TestCallbackWidget> {
   @override
   void initState() {
     super.initState();

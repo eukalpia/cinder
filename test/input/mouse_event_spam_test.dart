@@ -51,7 +51,7 @@ void main() {
             ],
           );
 
-          await tester.pumpComponent(app);
+          await tester.pumpWidget(app);
 
           // Simulate what happens when unparseable mouse events get converted to 'unknown' keyboard events
           // This mimics the bug in input_parser.dart lines 77-84

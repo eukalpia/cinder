@@ -18,7 +18,7 @@ class _DemoAppState extends State<DemoApp> {
   final _items = [
     'Counter',
     'Colors',
-    'Components',
+    'Widgets',
     'About',
   ];
 
@@ -126,7 +126,7 @@ class _DemoAppState extends State<DemoApp> {
       case 1:
         return const _ColorsContent();
       case 2:
-        return const _ComponentsContent();
+        return const _WidgetsContent();
       case 3:
         return const _AboutContent();
       default:
@@ -275,8 +275,8 @@ class _ColorsContent extends StatelessWidget {
   }
 }
 
-class _ComponentsContent extends StatelessWidget {
-  const _ComponentsContent();
+class _WidgetsContent extends StatelessWidget {
+  const _WidgetsContent();
 
   @override
   Widget build(BuildContext context) {

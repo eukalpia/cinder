@@ -17,7 +17,7 @@ void main() {
         await testCinder(
           'basic stack layout builder',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               Stack(
                 children: [
                   Positioned.fill(
@@ -48,7 +48,7 @@ void main() {
         await testCinder(
           'complex layout builder content',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               Stack(
                 children: [
                   Positioned.fill(
@@ -89,14 +89,14 @@ void main() {
           'sized box to grid transition',
           (tester) async {
             // First render with SizedBox (minimal content)
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               _TogglableGridStack(showGrid: false),
             );
 
             expect(tester.terminalState, containsText('CENTERED_TEXT'));
 
             // Toggle to grid view (large widget tree)
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               _TogglableGridStack(showGrid: true),
             );
 
@@ -112,7 +112,7 @@ void main() {
         await testCinder(
           'stateful grid toggle',
           (tester) async {
-            await tester.pumpComponent(const _StatefulGridToggle());
+            await tester.pumpWidget(const _StatefulGridToggle());
 
             // Initial state: showGrid is false, just SizedBox
             expect(tester.terminalState, containsText('FOREGROUND_LABEL'));
@@ -138,7 +138,7 @@ void main() {
           'grid to sized box transition',
           (tester) async {
             // Start with grid view
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               _TogglableGridStack(showGrid: true),
             );
 
@@ -146,7 +146,7 @@ void main() {
             expect(tester.terminalState, containsText('[0,0]'));
 
             // Toggle back to SizedBox
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               _TogglableGridStack(showGrid: false),
             );
 
@@ -164,7 +164,7 @@ void main() {
         await testCinder(
           'rapid toggle test',
           (tester) async {
-            await tester.pumpComponent(const _StatefulGridToggle());
+            await tester.pumpWidget(const _StatefulGridToggle());
 
             final state = tester.findState<_StatefulGridToggleState>();
 
@@ -188,7 +188,7 @@ void main() {
         await testCinder(
           'alternating content',
           (tester) async {
-            await tester.pumpComponent(const _StatefulGridToggle());
+            await tester.pumpWidget(const _StatefulGridToggle());
 
             final state = tester.findState<_StatefulGridToggleState>();
 
@@ -221,7 +221,7 @@ void main() {
         await testCinder(
           'deeply nested content',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               Stack(
                 children: [
                   Positioned.fill(
@@ -269,7 +269,7 @@ void main() {
         await testCinder(
           'constraint based layout',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               Stack(
                 children: [
                   Positioned.fill(
@@ -314,7 +314,7 @@ void main() {
         await testCinder(
           'narrow terminal test',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               Stack(
                 children: [
                   Positioned.fill(
@@ -355,7 +355,7 @@ void main() {
           'error then success',
           (tester) async {
             // First, test with an error
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               Stack(
                 children: [
                   Positioned.fill(
@@ -377,7 +377,7 @@ void main() {
             expect(tester.terminalState, containsText('ERROR_OVERLAY'));
 
             // Then replace with working widget
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               Stack(
                 children: [
                   Positioned.fill(
@@ -406,7 +406,7 @@ void main() {
         await testCinder(
           'multiple positioned children',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               Stack(
                 children: [
                   // Background with LayoutBuilder

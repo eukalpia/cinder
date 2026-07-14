@@ -11,7 +11,7 @@ void main() {
         (tester) async {
           final controller = TextEditingController(text: 'Hello, World!');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TextField(
               controller: controller,
               focused: true,
@@ -45,7 +45,7 @@ void main() {
         (tester) async {
           final controller = TextEditingController(text: 'Cut this text');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TextField(
               controller: controller,
               focused: true,
@@ -90,7 +90,7 @@ void main() {
           // Put some text in the clipboard
           ClipboardManager.copy('Pasted content');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TextField(
               controller: controller,
               focused: true,
@@ -122,7 +122,7 @@ void main() {
           // Put replacement text in clipboard
           ClipboardManager.copy('New text');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TextField(
               controller: controller,
               focused: true,
@@ -160,7 +160,7 @@ void main() {
         (tester) async {
           final controller = TextEditingController(text: 'Original text');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TextField(
               controller: controller,
               focused: true,
@@ -218,7 +218,7 @@ void main() {
 
           ClipboardManager.copy(unicodeText);
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TextField(
               controller: controller,
               focused: true,
@@ -250,7 +250,7 @@ void main() {
           // Put multi-line text in clipboard
           ClipboardManager.copy('Line 1\nLine 2\nLine 3');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TextField(
               controller: controller,
               focused: true,

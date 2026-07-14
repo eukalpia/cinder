@@ -85,7 +85,7 @@ void main() {
         await testCinder(
           'emoji text rendering',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               const Text('Hello 🌍 World'),
             );
 
@@ -115,7 +115,7 @@ void main() {
         await testCinder(
           'chinese text rendering',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               const Text('你好世界'),
             );
 
@@ -140,7 +140,7 @@ void main() {
         await testCinder(
           'mixed content rendering',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               const Text('Code💻中文🎯End'),
             );
 
@@ -175,7 +175,7 @@ void main() {
           'emoji differential update',
           (tester) async {
             // First render with emoji
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               const Text('Status: 🚀 Loading'),
             );
 
@@ -183,7 +183,7 @@ void main() {
             expect(tester.terminalState, containsText('Loading'));
 
             // Update to different emoji (triggers differential rendering)
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               const Text('Status: ✅ Complete'),
             );
 
@@ -201,20 +201,20 @@ void main() {
         await testCinder(
           'chinese differential updates',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               const Text('第一次'),
             );
             expect(tester.terminalState, containsText('第一次'));
 
             // Update to different Chinese text
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               const Text('第二次'),
             );
             expect(tester.terminalState, containsText('第二次'));
             expect(tester.terminalState, isNot(containsText('一')));
 
             // Update again
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               const Text('完成！'),
             );
             expect(tester.terminalState, containsText('完成！'));
@@ -229,7 +229,7 @@ void main() {
           'wide to narrow replacement',
           (tester) async {
             // Start with emojis (wide)
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               const Text('🚀🎉'),
             );
 
@@ -239,7 +239,7 @@ void main() {
             expect(tester.terminalState.getCellAt(3, 0)?.char, '\u200B');
 
             // Replace with narrow ASCII characters
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               const Text('ABCD'),
             );
 
@@ -259,7 +259,7 @@ void main() {
           'narrow to wide replacement',
           (tester) async {
             // Start with ASCII
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               const Text('TEST'),
             );
 
@@ -267,7 +267,7 @@ void main() {
             expect(tester.terminalState.getCellAt(1, 0)?.char, 'E');
 
             // Replace with emojis
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               const Text('🌟🔥'),
             );
 
@@ -290,7 +290,7 @@ void main() {
           (tester) async {
             // This test ensures that wide characters rendered via Text widgets
             // remain correctly displayed when focus changes trigger differential rendering
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               _FocusableWidgetWithWideCharLabels(),
             );
 
@@ -320,7 +320,7 @@ void main() {
         await testCinder(
           'chinese focus change',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               _FocusableWidgetWithChineseLabels(),
             );
 
@@ -344,7 +344,7 @@ void main() {
         await testCinder(
           'multiple focus changes',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               _FocusableWidgetWithMixedLabels(),
             );
 
@@ -378,7 +378,7 @@ void main() {
         await testCinder(
           'wide char near changes',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               _CounterWithEmojiLabel(),
             );
 
@@ -409,7 +409,7 @@ void main() {
         await testCinder(
           'emoji in listview',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               SizedBox(
                 width: 40,
                 height: 10,
@@ -438,7 +438,7 @@ void main() {
         await testCinder(
           'chinese in column',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               const Column(
                 children: [
                   Text('第一行：你好'),
@@ -463,7 +463,7 @@ void main() {
         await testCinder(
           'styled emoji',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               const Text('🔥 Fire!',
                   style: TextStyle(
                       color: Colors.red, fontWeight: FontWeight.bold)),
@@ -486,7 +486,7 @@ void main() {
         await testCinder(
           'styled chinese',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               const Text('重要',
                   style: TextStyle(
                     color: Colors.yellow,
@@ -513,12 +513,12 @@ void main() {
         await testCinder(
           'empty after wide',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               const Text('🌟🌟🌟'),
             );
             expect(tester.terminalState, containsText('🌟'));
 
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               const Text(''),
             );
             // Should render cleanly without artifacts
@@ -532,7 +532,7 @@ void main() {
         await testCinder(
           'single wide char',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               const Text('中'),
             );
 
@@ -548,7 +548,7 @@ void main() {
           'wide at line end',
           (tester) async {
             // Use a narrow width to test edge wrapping behavior
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               SizedBox(
                 width: 10,
                 child: const Text('AAAAAAA中'),
@@ -570,7 +570,7 @@ void main() {
             final emojis = ['🚀', '🎉', '🔥', '✨', '💻', '🎯', '⭐', '🌟'];
 
             for (final emoji in emojis) {
-              await tester.pumpComponent(
+              await tester.pumpWidget(
                 Text('Status: $emoji'),
               );
               expect(tester.terminalState, containsText(emoji),

@@ -7,7 +7,7 @@ void main() {
       await testCinder(
         'horizontal overflow',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Container(
                 width: 20,
@@ -38,7 +38,7 @@ void main() {
       await testCinder(
         'vertical overflow',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Container(
                 width: 20,
@@ -73,7 +73,7 @@ void main() {
       await testCinder(
         'combined overflow',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: [
                 Text('Horizontal Overflow Test:'),
@@ -125,7 +125,7 @@ void main() {
       await testCinder(
         'nested overflow',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Container(
                 width: 30,
@@ -164,7 +164,7 @@ void main() {
       await testCinder(
         'flexible overflow',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 40,
               height: 10,
@@ -208,7 +208,7 @@ void main() {
       await testCinder(
         'overflow visual',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,

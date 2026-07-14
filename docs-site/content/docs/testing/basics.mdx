@@ -20,7 +20,7 @@ void main() {
     await testCinder(
       'counter test',
       (tester) async {
-        await tester.pumpComponent(Counter());
+        await tester.pumpWidget(Counter());
 
         expect(tester.terminalState, containsText('Count: 0'));
 
@@ -54,7 +54,7 @@ The tester provides methods for testing:
 
 ```dart
 // Render a widget
-await tester.pumpComponent(MyComponent());
+await tester.pumpWidget(MyWidget());
 
 // Send a key press
 await tester.sendKey(LogicalKey.enter);
@@ -84,7 +84,7 @@ test('text display', () async {
   await testCinder(
     'displays text',
     (tester) async {
-      await tester.pumpComponent(Text('Hello'));
+      await tester.pumpWidget(Text('Hello'));
 
       // Check if text is present
       expect(tester.terminalState, containsText('Hello'));
@@ -131,7 +131,7 @@ test('button click', () async {
     (tester) async {
       var clicked = false;
 
-      await tester.pumpComponent(
+      await tester.pumpWidget(
         Focusable(
           focused: true,
           onKeyEvent: (event) {
@@ -186,7 +186,7 @@ test('counter state', () async {
   await testCinder(
     'counter increments',
     (tester) async {
-      await tester.pumpComponent(Counter());
+      await tester.pumpWidget(Counter());
 
       expect(tester.terminalState, containsText('Count: 0'));
 
@@ -208,7 +208,7 @@ test('counter state', () async {
 // Good - focused test
 test('displays title', () async {
   await testCinder('title', (tester) async {
-    await tester.pumpComponent(App());
+    await tester.pumpWidget(App());
     expect(tester.terminalState, containsText('My App'));
   });
 });
@@ -243,7 +243,7 @@ test('handles terminal resize', () async { ... });
 test('disposes controllers', () async {
   await testCinder('disposal', (tester) async {
     final controller = TextEditingController();
-    await tester.pumpComponent(TextField(controller: controller));
+    await tester.pumpWidget(TextField(controller: controller));
 
     // Widget should dispose controller
     controller.dispose();  // Should not throw
@@ -255,4 +255,4 @@ test('disposes controllers', () async {
 
 - [Visual Testing](/docs/testing/visual) - Debug with visual output
 - [Test Matchers](/docs/testing/matchers) - All available matchers
-- [Components](/docs/fundamentals/components) - Build testable components
+- [Widgets](/docs/fundamentals/components) - Build testable components

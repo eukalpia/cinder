@@ -6,7 +6,7 @@ void main() {
     await testCinder(
       'Parent bug',
       (tester) async {
-        await tester.pumpComponent(
+        await tester.pumpWidget(
           Navigator(
             home: _Pusher(),
           ),

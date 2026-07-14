@@ -70,12 +70,12 @@ Navigator.of(context).push(PageRoute(
 ));
 ```
 
-### pushComponent
+### pushWidget
 
 Push a widget directly (creates a route for you):
 
 ```dart
-Navigator.of(context).pushComponent(
+Navigator.of(context).pushWidget(
   const DetailsPage(),
   name: '/details',
 );
@@ -106,7 +106,7 @@ Navigator.of(context).pushReplacement(PageRoute(
 Navigator.of(context).pushReplacementNamed('/new');
 
 // Or with a widget
-Navigator.of(context).pushReplacementComponent(const NewPage());
+Navigator.of(context).pushReplacementWidget(const NewPage());
 ```
 
 ### pop
@@ -159,7 +159,7 @@ Routes can return values when popped. Use `await` to get the result:
 
 ```dart
 // Push a page that will return a value
-final result = await Navigator.of(context).pushComponent<String>(
+final result = await Navigator.of(context).pushWidget<String>(
   const InputPage(),
 );
 
@@ -499,7 +499,7 @@ Named routes make navigation intent clear:
 Navigator.of(context).pushNamed('/settings');
 
 // Less clear
-Navigator.of(context).pushComponent(const SettingsPage());
+Navigator.of(context).pushWidget(const SettingsPage());
 ```
 
 ### Handle back navigation
@@ -535,4 +535,4 @@ class AnalyticsObserver extends NavigatorObserver {
 
 - [Focus Management](/docs/interactivity/focus) - Control focus in multi-screen apps
 - [Keyboard Input](/docs/interactivity/keyboard) - Handle keyboard events
-- [Components](/docs/fundamentals/components) - Build reusable components
+- [Widgets](/docs/fundamentals/components) - Build reusable components

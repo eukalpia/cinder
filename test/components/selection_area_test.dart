@@ -13,7 +13,7 @@ void main() {
           String? lastChanged;
           String? completed;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 20,
               height: 4,
@@ -61,7 +61,7 @@ void main() {
         (tester) async {
           String? lastChanged;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 20,
               height: 4,
@@ -87,7 +87,7 @@ void main() {
 
           // Change text content — selection should be cleared by the
           // RenderText.text setter calling clearSelection().
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 20,
               height: 4,
@@ -115,7 +115,7 @@ void main() {
         (tester) async {
           String? lastChanged;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 20,
               height: 4,
@@ -168,7 +168,7 @@ void main() {
         (tester) async {
           String? completed;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 20,
               height: 5,
@@ -211,7 +211,7 @@ void main() {
         (tester) async {
           String? completed;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 10,
               height: 2,
@@ -245,7 +245,7 @@ void main() {
         (tester) async {
           String? completed;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 20,
               height: 2,
@@ -283,7 +283,7 @@ void main() {
         (tester) async {
           String? lastChanged;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 20,
               height: 3,
@@ -330,7 +330,7 @@ void main() {
           RenderSelectionArea? renderObject;
           String? lastChanged;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 20,
               height: 2,
@@ -370,7 +370,7 @@ void main() {
         (tester) async {
           String? lastChanged;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 10,
               height: 2,
@@ -410,7 +410,7 @@ void main() {
         (tester) async {
           String? lastChanged;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 10,
               height: 2,
@@ -452,7 +452,7 @@ void main() {
         (tester) async {
           String? completed;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 10,
               height: 2,
@@ -500,7 +500,7 @@ void main() {
         (tester) async {
           String? lastChanged;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 20,
               height: 3,
@@ -546,7 +546,7 @@ void main() {
           RenderSelectionArea? renderObject;
           String? completed;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 10,
               height: 2,
@@ -581,7 +581,7 @@ void main() {
       await testCinder(
         'dispose mid-drag cleanup',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 10,
               height: 2,
@@ -608,7 +608,7 @@ void main() {
         (tester) async {
           String? completed;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 3,
@@ -646,7 +646,7 @@ void main() {
       await testCinder(
         'listview lazy restore',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 20,
               height: 3,
@@ -673,19 +673,19 @@ void main() {
           findViewport(CinderTestBinding.instance.rootElement!);
           expect(viewport, isNotNull);
 
-          final initialCount = tester.findAllComponents<Text>().length;
+          final initialCount = tester.findAllWidgets<Text>().length;
 
           SelectionDragState.begin();
           SelectionDragState.updateRange(viewport!, 0, 120);
           await tester.pump();
 
-          final duringDragCount = tester.findAllComponents<Text>().length;
+          final duringDragCount = tester.findAllWidgets<Text>().length;
           expect(duringDragCount, greaterThan(initialCount));
 
           SelectionDragState.end();
           await tester.pump();
 
-          final afterEndCount = tester.findAllComponents<Text>().length;
+          final afterEndCount = tester.findAllWidgets<Text>().length;
           expect(afterEndCount, lessThanOrEqualTo(initialCount));
         },
       );
@@ -697,7 +697,7 @@ void main() {
         (tester) async {
           String? lastChanged;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 10,
               height: 2,
@@ -732,7 +732,7 @@ void main() {
         (tester) async {
           String? completed;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 10,
               height: 3,
@@ -764,7 +764,7 @@ void main() {
         (tester) async {
           RenderSelectionArea? renderObject;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 20,
               height: 3,
@@ -799,7 +799,7 @@ void main() {
         (tester) async {
           String? completed;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 20,
               height: 4,
@@ -851,7 +851,7 @@ void main() {
         (tester) async {
           String? completed;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 20,
               height: 5,
@@ -899,7 +899,7 @@ void main() {
         (tester) async {
           String? completed;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 20,
               height: 4,
@@ -945,7 +945,7 @@ void main() {
           String? lastChanged;
 
           // Pump with red selection color.
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 20,
               height: 4,
@@ -971,7 +971,7 @@ void main() {
           expect(lastChanged, isNotBlank);
 
           // Re-pump with same color (early return at line 117).
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 20,
               height: 4,
@@ -984,7 +984,7 @@ void main() {
           );
 
           // Re-pump with different color (lines 120-123).
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 20,
               height: 4,
@@ -1007,7 +1007,7 @@ void main() {
         (tester) async {
           String? lastChanged;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 20,
               height: 4,
@@ -1043,7 +1043,7 @@ void main() {
         (tester) async {
           String? completed;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 20,
               height: 5,
@@ -1099,7 +1099,7 @@ void main() {
         (tester) async {
           String? completed;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 20,
               height: 5,
@@ -1155,7 +1155,7 @@ void main() {
         (tester) async {
           String? lastChanged;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 20,
               height: 4,
@@ -1189,7 +1189,7 @@ void main() {
         (tester) async {
           String? lastChanged;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 20,
               height: 3,
@@ -1246,7 +1246,7 @@ void main() {
         (tester) async {
           String? completed;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 20,
               height: 2,
@@ -1292,7 +1292,7 @@ void main() {
         (tester) async {
           String? completed;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 20,
               height: 3,
@@ -1331,7 +1331,7 @@ void main() {
         (tester) async {
           String? completed;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 6,
               height: 5,
@@ -1377,7 +1377,7 @@ void main() {
         (tester) async {
           String? completed;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 20,
               height: 4,
@@ -1420,7 +1420,7 @@ void main() {
           String? lastChanged;
           String? completed;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 20,
               height: 4,
@@ -1462,7 +1462,7 @@ void main() {
           String? lastChanged;
 
           // First: pump with selectable text.
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 20,
               height: 4,
@@ -1479,7 +1479,7 @@ void main() {
           // Now replace the child tree so there are no selectables.
           // The SelectionArea is rebuilt but the drag state (_isDragging)
           // persists in the render object.
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 20,
               height: 4,
@@ -1523,7 +1523,7 @@ void main() {
         (tester) async {
           final controller = ScrollController();
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             SelectionArea(
               child: SingleChildScrollView(
                 controller: controller,
@@ -1579,7 +1579,7 @@ void main() {
         (tester) async {
           final controller = ScrollController();
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             SelectionArea(
               child: SingleChildScrollView(
                 controller: controller,

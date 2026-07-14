@@ -18,7 +18,7 @@ void main() {
             },
           );
 
-          await tester.pumpComponent(navigator);
+          await tester.pumpWidget(navigator);
           expect(tester.terminalState, containsText('Home Page'));
 
           // Navigate to settings
@@ -58,7 +58,7 @@ void main() {
             },
           );
 
-          await tester.pumpComponent(navigator);
+          await tester.pumpWidget(navigator);
 
           // Should start at profile page
           expect(tester.terminalState, containsText('Profile'));
@@ -99,7 +99,7 @@ void main() {
             },
           );
 
-          await tester.pumpComponent(navigator);
+          await tester.pumpWidget(navigator);
           final navState = tester.findState<NavigatorState>();
 
           // Navigate to page 1
@@ -130,7 +130,7 @@ void main() {
             ),
           );
 
-          await tester.pumpComponent(navigator);
+          await tester.pumpWidget(navigator);
           final navState = tester.findState<NavigatorState>();
 
           expect(tester.terminalState, containsText('Main Content'));
@@ -195,7 +195,7 @@ void main() {
             ),
           );
 
-          await tester.pumpComponent(navigator);
+          await tester.pumpWidget(navigator);
           final navState = tester.findState<NavigatorState>();
 
           // Navigate to locked page
@@ -249,7 +249,7 @@ void main() {
             observers: [observer],
           );
 
-          await tester.pumpComponent(navigator);
+          await tester.pumpWidget(navigator);
           final navState = tester.findState<NavigatorState>();
 
           // Initial route should be pushed
@@ -286,11 +286,11 @@ void main() {
             ),
           );
 
-          await tester.pumpComponent(navigator);
+          await tester.pumpWidget(navigator);
           final navState = tester.findState<NavigatorState>();
 
           // Push a page and get result
-          final resultFuture = navState.pushComponent<String>(
+          final resultFuture = navState.pushWidget<String>(
             Container(
               child: const Text('Input Page'),
             ),

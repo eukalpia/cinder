@@ -9,12 +9,12 @@ for a tour.
 
 The first layout pass leaves transient dirtiness behind: `adoptChild`
 re-marks render objects *while* children are being built, so the frame
-after `pumpComponent` re-layouts no matter what. A test that pumps once and
+after `pumpWidget` re-layouts no matter what. A test that pumps once and
 then mutates is exercising the always-dirty path — it can pass against code
 where the mutation's relayout is silently skipped.
 
 ```dart
-await tester.pumpComponent(MyApp());
+await tester.pumpWidget(MyApp());
 await tester.pump();          // <- settle: next frame starts genuinely clean
 
 state.mutateSomething();

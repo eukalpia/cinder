@@ -9,7 +9,7 @@ void main() {
         'verify rebuild glitch',
         (tester) async {
           print('\n=== Initial render (includeAtStart = false) ===');
-          await tester.pumpComponent(HotReloadGlitchTest());
+          await tester.pumpWidget(HotReloadGlitchTest());
 
           // Initially should only show "Second"
           var initialState = tester.terminalState;

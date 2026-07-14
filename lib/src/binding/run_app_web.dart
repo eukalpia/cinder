@@ -20,7 +20,7 @@ Future<void> runAppImpl(
   final binding = TerminalBinding(terminal);
 
   binding.initialize();
-  binding.attachRootComponent(wrappedApp);
+  binding.attachRootWidget(wrappedApp);
 
   // Hot reload not supported on web
   // No log server on web

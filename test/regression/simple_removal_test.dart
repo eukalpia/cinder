@@ -23,7 +23,7 @@ void main() {
   test('Direct widget replacement in Column', () async {
     await testCinder('direct replacement', (tester) async {
       // Create a Column with FirstWidget
-      await tester.pumpComponent(
+      await tester.pumpWidget(
         Column(children: [FirstWidget()]),
       );
 
@@ -33,7 +33,7 @@ void main() {
       expect(tester.terminalState, isNot(containsText('SECOND')));
 
       // Replace with SecondWidget
-      await tester.pumpComponent(
+      await tester.pumpWidget(
         Column(children: [SecondWidget()]),
       );
 
@@ -60,7 +60,7 @@ void main() {
       }
 
       // Initial state
-      await tester.pumpComponent(buildColumn());
+      await tester.pumpWidget(buildColumn());
 
       print('Initial state (showFirst=true):');
       print(tester.renderToString(showBorders: false));
@@ -69,7 +69,7 @@ void main() {
 
       // Change state
       showFirst = false;
-      await tester.pumpComponent(buildColumn());
+      await tester.pumpWidget(buildColumn());
 
       print('\nAfter state change (showFirst=false):');
       print(tester.renderToString(showBorders: false));

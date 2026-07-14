@@ -7,12 +7,12 @@ part of 'framework.dart';
 /// via [updateChild] in [update], and provide the [updated] hook for
 /// subclasses to react to widget changes.
 ///
-/// This mirrors Flutter's `ProxyElement` which extends `ComponentElement`.
+/// This mirrors Flutter's `ProxyElement` which extends `WidgetElement`.
 abstract class ProxyElement extends BuildableElement {
   ProxyElement(super.widget);
 
   @override
-  ProxyComponent get widget => super.widget as ProxyComponent;
+  ProxyWidget get widget => super.widget as ProxyWidget;
 
   @override
   Widget build() => widget.child;
@@ -30,13 +30,13 @@ abstract class ProxyElement extends BuildableElement {
   /// Called after the widget has been updated.
   /// Subclasses can override this to perform actions after the child has been updated.
   @protected
-  void updated(ProxyComponent oldWidget) {
+  void updated(ProxyWidget oldWidget) {
     notifyClients(oldWidget);
   }
 
   /// Notify other objects that the widget associated with this element has changed.
   @protected
-  void notifyClients(ProxyComponent oldWidget);
+  void notifyClients(ProxyWidget oldWidget);
 
   void insertRenderObjectChild(RenderObject child, dynamic slot) {
     final RenderObjectElement? renderObjectElement =
@@ -74,9 +74,9 @@ class ParentDataElement<T extends ParentData> extends ProxyElement {
   ParentDataElement(super.widget);
 
   @override
-  ParentDataComponent<T> get widget => super.widget as ParentDataComponent<T>;
+  ParentDataWidget<T> get widget => super.widget as ParentDataWidget<T>;
 
-  void _applyParentData(ParentDataComponent<T> widget) {
+  void _applyParentData(ParentDataWidget<T> widget) {
     void applyParentDataToChild(Element child) {
       if (child is RenderObjectElement) {
         final renderObject = child.renderObject;
@@ -159,7 +159,7 @@ class ParentDataElement<T extends ParentData> extends ProxyElement {
   }
 
   @override
-  void notifyClients(ProxyComponent oldWidget) {
+  void notifyClients(ProxyWidget oldWidget) {
     _applyParentData(widget);
   }
 }

@@ -7,7 +7,7 @@ void main() {
       await testCinder(
         'see how horizontal divider looks',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 40,
               height: 10,
@@ -29,7 +29,7 @@ void main() {
       await testCinder(
         'different divider styles',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 40,
               height: 20,
@@ -60,7 +60,7 @@ void main() {
       await testCinder(
         'divider with indents',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 40,
               height: 10,
@@ -87,7 +87,7 @@ void main() {
       await testCinder(
         'colored dividers',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 40,
               height: 12,
@@ -114,7 +114,7 @@ void main() {
       await testCinder(
         'vertical divider',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 50,
               height: 10,
@@ -138,7 +138,7 @@ void main() {
       await testCinder(
         'horizontal divider rendering',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 20,
               height: 5,
@@ -163,7 +163,7 @@ void main() {
       await testCinder(
         'vertical divider rendering',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -188,7 +188,7 @@ void main() {
       await testCinder(
         'divider indents',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 3,
@@ -205,7 +205,7 @@ void main() {
       await testCinder(
         'divider styles',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 20,
               height: 2,
@@ -220,7 +220,7 @@ void main() {
       await testCinder(
         'ascii divider style',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 20,
               height: 2,
@@ -237,7 +237,7 @@ void main() {
       await testCinder(
         'colored divider',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 20,
               height: 2,

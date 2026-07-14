@@ -7,7 +7,7 @@ void main() {
       await testCinder(
         'markdown with emojis',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 40,
               child: const MarkdownText(
@@ -32,7 +32,7 @@ void main() {
       await testCinder(
         'multiple emojis',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               child: const MarkdownText('🚀 ✨ 🎉 🔥 Multiple'),
@@ -49,7 +49,7 @@ void main() {
       await testCinder(
         'bold with emojis',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 40,
               child: const MarkdownText('**Bold text** 🎯 and emoji'),
@@ -67,7 +67,7 @@ void main() {
       await testCinder(
         'list with emojis',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 40,
               child: const MarkdownText(
@@ -90,7 +90,7 @@ void main() {
       await testCinder(
         'header with emoji',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 40,
               child: const MarkdownText('# Features ✨\n\nSome content'),
@@ -108,7 +108,7 @@ void main() {
       await testCinder(
         'emoji in box',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: DecoratedBox(
                 decoration: BoxDecoration(
@@ -138,7 +138,7 @@ void main() {
       await testCinder(
         'complex emoji',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 50,
               child: const MarkdownText(
@@ -163,7 +163,7 @@ void main() {
       await testCinder(
         'emoji positions',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 40,
               child: const MarkdownText(

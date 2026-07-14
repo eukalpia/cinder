@@ -9,22 +9,22 @@ void main() {
         'widget replacement',
         (tester) async {
           // Initial state with Text widget
-          await tester.pumpComponent(
-            TestReplacementComponent(phase: 0),
+          await tester.pumpWidget(
+            TestReplacementWidget(phase: 0),
           );
           expect(tester.terminalState, containsText('Initial Text Widget'));
           expect(tester.terminalState, containsText('Phase: 0'));
 
           // Change to DecoratedBox
-          await tester.pumpComponent(
-            TestReplacementComponent(phase: 1),
+          await tester.pumpWidget(
+            TestReplacementWidget(phase: 1),
           );
           expect(tester.terminalState, containsText('Decorated Box'));
           expect(tester.terminalState, containsText('Phase: 1'));
 
           // Change back to Text
-          await tester.pumpComponent(
-            TestReplacementComponent(phase: 2),
+          await tester.pumpWidget(
+            TestReplacementWidget(phase: 2),
           );
           expect(tester.terminalState, containsText('Back to Text Widget'));
           expect(tester.terminalState, containsText('Phase: 2'));
@@ -36,7 +36,7 @@ void main() {
       await testCinder(
         'stateful replacement',
         (tester) async {
-          await tester.pumpComponent(const StatefulReplacementTest());
+          await tester.pumpWidget(const StatefulReplacementTest());
 
           // Initial state
           expect(tester.terminalState, containsText('State: 0'));
@@ -54,13 +54,13 @@ void main() {
         'conditional rendering',
         (tester) async {
           // Show first widget
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             ConditionalWidget(showFirst: true),
           );
           expect(tester.terminalState, containsText('First Widget'));
 
           // Switch to second widget
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             ConditionalWidget(showFirst: false),
           );
           expect(tester.terminalState, containsText('Second Widget'));
@@ -74,7 +74,7 @@ void main() {
         'list replacement',
         (tester) async {
           // Initial list
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: [
                 Text('Item 1'),
@@ -88,7 +88,7 @@ void main() {
           expect(tester.terminalState, containsText('Item 3'));
 
           // Replace with different widgets
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: [
                 Container(
@@ -117,7 +117,7 @@ void main() {
         'nested replacement',
         (tester) async {
           // Initial nested structure
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               child: Column(
                 children: [
@@ -135,7 +135,7 @@ void main() {
           expect(tester.terminalState, containsText('B'));
 
           // Replace inner structure
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               child: Column(
                 children: [
@@ -161,22 +161,22 @@ void main() {
         (tester) async {
           // Show different phases visually
           print('Phase 0 - Text Widget:');
-          await tester.pumpComponent(
-            TestReplacementComponent(phase: 0),
+          await tester.pumpWidget(
+            TestReplacementWidget(phase: 0),
           );
 
           await Future.delayed(Duration(milliseconds: 100));
 
           print('\nPhase 1 - DecoratedBox:');
-          await tester.pumpComponent(
-            TestReplacementComponent(phase: 1),
+          await tester.pumpWidget(
+            TestReplacementWidget(phase: 1),
           );
 
           await Future.delayed(Duration(milliseconds: 100));
 
           print('\nPhase 2 - Back to Text:');
-          await tester.pumpComponent(
-            TestReplacementComponent(phase: 2),
+          await tester.pumpWidget(
+            TestReplacementWidget(phase: 2),
           );
         },
         // debugPrintAfterPump: true, // Uncomment to see visual output
@@ -186,10 +186,10 @@ void main() {
 }
 
 // Test helper components
-class TestReplacementComponent extends StatelessWidget {
+class TestReplacementWidget extends StatelessWidget {
   final int phase;
 
-  const TestReplacementComponent({required this.phase});
+  const TestReplacementWidget({required this.phase});
 
   @override
   Widget build(BuildContext context) {

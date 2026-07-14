@@ -19,7 +19,7 @@ Cinder lets you build terminal user interfaces using the same patterns as Flutte
 
 - **Flutter-like API**: StatefulWidget, setState(), BuildContext, Row, Column, Expanded, ListView
 - **Hot Reload**: Change code and see updates instantly without restarting
-- **45+ Built-in Components**: Text, Button, TextField, ListView, Container, ProgressBar, Checkbox, Radio, Tabs, and more
+- **45+ Built-in Widgets**: Text, Button, TextField, ListView, Container, ProgressBar, Checkbox, Radio, Tabs, and more
 - **6 Color Themes**: Nord, Dracula, Gruvbox, Monokai, Solarized, and default
 - **Testing Framework**: testCinder() for widget testing, similar to Flutter's testWidgets()
 - **Animations**: Built-in animation support with AnimationController

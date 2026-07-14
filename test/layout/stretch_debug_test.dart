@@ -8,7 +8,7 @@ void main() {
       await testCinder(
         'container column constraints',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 10,
@@ -36,7 +36,7 @@ void main() {
       await testCinder(
         'container text constraints',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,

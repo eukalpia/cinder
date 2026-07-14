@@ -13,7 +13,7 @@ void main() {
   test('reordering keyed const children in a Row swaps their offsets',
       () async {
     await testCinder('row const reorder', (tester) async {
-      await tester.pumpComponent(const _SwappableRow(aFirst: true));
+      await tester.pumpWidget(const _SwappableRow(aFirst: true));
 
       expect(tester.terminalState.findText('AAA').single.x, 0);
       expect(tester.terminalState.findText('BB').single.x, 3);

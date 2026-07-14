@@ -9,7 +9,7 @@ void main() {
         (tester) async {
           int tapCount = 0;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 80,
               height: 24,
@@ -47,7 +47,7 @@ void main() {
         (tester) async {
           int tapCount = 0;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 80,
               height: 24,
@@ -111,7 +111,7 @@ void main() {
         (tester) async {
           int tapCount = 0;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 80,
               height: 24,
@@ -187,7 +187,7 @@ void main() {
           int tapCount = 0;
           bool isHovering = false;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 80,
               height: 24,

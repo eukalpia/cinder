@@ -38,7 +38,7 @@ final bool _isSoundMode = <int?>[] is! List<int>;
 ///     create: (_) => SomethingElse(),
 ///     child: Provider<AnotherThing>(
 ///       create: (_) => AnotherThing(),
-///       child: someComponent,
+///       child: someWidget,
 ///     ),
 ///   ),
 /// ),
@@ -53,13 +53,13 @@ final bool _isSoundMode = <int?>[] is! List<int>;
 ///     Provider<SomethingElse>(create: (_) => SomethingElse()),
 ///     Provider<AnotherThing>(create: (_) => AnotherThing()),
 ///   ],
-///   child: someComponent,
+///   child: someWidget,
 /// )
 /// ```
 ///
 /// The Widget tree representation of the two approaches are identical.
 class MultiProvider extends Nested {
-  /// Build a tree of providers from a list of [SingleChildComponent].
+  /// Build a tree of providers from a list of [SingleChildWidget].
   ///
   /// The parameter `builder` is syntactic sugar for obtaining a [BuildContext] that can
   /// read the providers created.
@@ -104,7 +104,7 @@ class MultiProvider extends Nested {
   /// ```dart
   /// MultiProvider(
   ///   providers: [
-  ///     Provider<Something>(create: (_) => Something(), child: SomeComponent()),
+  ///     Provider<Something>(create: (_) => Something(), child: SomeWidget()),
   ///   ],
   ///   child: Text('Something'),
   /// )
@@ -124,7 +124,7 @@ class MultiProvider extends Nested {
   /// see the "Performance optimizations" section of [AnimatedBuilder].
   MultiProvider({
     Key? key,
-    required List<SingleChildComponent> providers,
+    required List<SingleChildWidget> providers,
     Widget? child,
     TransitionBuilder? builder,
   }) : super(
@@ -135,8 +135,8 @@ class MultiProvider extends Nested {
               : child,
         );
 
-  static List<SingleChildComponent> _collapseProviders(
-    List<SingleChildComponent> providers,
+  static List<SingleChildWidget> _collapseProviders(
+    List<SingleChildWidget> providers,
   ) {
     // Merge InheritedProviders together
     Widget Function(Widget? child)? previous;
@@ -176,7 +176,7 @@ class MultiProvider extends Nested {
 ///
 /// [Provider] is the equivalent of a [State.initState] combined with
 /// [State.dispose]. [Create] is called only once in [State.initState].
-/// We cannot use [InheritedComponent] as it requires the value to be
+/// We cannot use [InheritedWidget] as it requires the value to be
 /// constructor-initialized and final.
 ///
 /// The following example instantiates a `Model` once, and disposes it when
@@ -207,7 +207,7 @@ class MultiProvider extends Nested {
 ///
 /// ## Testing
 ///
-/// When testing Components that consumes providers, it is necessary to
+/// When testing Widgets that consumes providers, it is necessary to
 /// add the proper providers in the Widget tree above the tested Widget.
 ///
 /// A typical test may look like this:
@@ -215,10 +215,10 @@ class MultiProvider extends Nested {
 /// ```dart
 /// final foo = MockFoo();
 ///
-/// await tester.pumpComponent(
+/// await tester.pumpWidget(
 ///   Provider<Foo>.value(
 ///     value: foo,
-///     child: TestedComponent(),
+///     child: TestedWidget(),
 ///   ),
 /// );
 /// ```
@@ -260,7 +260,7 @@ class Provider<T> extends InheritedProvider<T> {
   /// rebuilding dependents when [Provider] is rebuilt but `value` did not change.
   ///
   /// Defaults to `(previous, next) => previous != next`.
-  /// See [InheritedComponent.updateShouldNotify] for more information.
+  /// See [InheritedWidget.updateShouldNotify] for more information.
   /// {@endtemplate}
   Provider.value({
     Key? key,
@@ -284,7 +284,7 @@ class Provider<T> extends InheritedProvider<T> {
   /// value.
   ///
   /// If [listen] is `true`, later value changes will trigger a new
-  /// [State.build] to Components, and [State.didChangeDependencies] for
+  /// [State.build] to Widgets, and [State.didChangeDependencies] for
   /// [StatefulWidget].
   ///
   /// `listen: false` is necessary to be able to call `Provider.of` inside
@@ -306,7 +306,7 @@ class Provider<T> extends InheritedProvider<T> {
       // dependOnInheritedElement does not support relocating using GlobalKey
       // if no provider were found previously.
       context
-          .dependOnInheritedComponentOfExactType<_InheritedProviderScope<T?>>();
+          .dependOnInheritedWidgetOfExactType<_InheritedProviderScope<T?>>();
     }
 
     final value = inheritedElement?.value;
@@ -342,7 +342,7 @@ unsupported.
 If you want to expose a variable that can be anything, consider changing
 `dynamic` to `Object` instead.
 ''');
-    final inheritedElement = context.getElementForInheritedComponentOfExactType<
+    final inheritedElement = context.getElementForInheritedWidgetOfExactType<
         _InheritedProviderScope<T?>>() as _InheritedProviderScopeElement<T?>?;
 
     if (inheritedElement == null && null is! T) {
@@ -425,17 +425,17 @@ void main() {
 /// returned `null`.
 class ProviderNullException implements Exception {
   /// Create a ProviderNullException error with the type represented as a String.
-  ProviderNullException(this.valueType, this.ComponentType);
+  ProviderNullException(this.valueType, this.WidgetType);
 
   /// The type of the value being retrieved
   final Type valueType;
 
   /// The type of the Widget requesting the value
-  final Type ComponentType;
+  final Type WidgetType;
   @override
   String toString() {
     return '''
-Error: The Widget $ComponentType tried to read Provider<$valueType> but the matching
+Error: The Widget $WidgetType tried to read Provider<$valueType> but the matching
 provider returned null.
 
 To fix the error, consider changing Provider<$valueType> to Provider<$valueType?>.
@@ -447,18 +447,18 @@ To fix the error, consider changing Provider<$valueType> to Provider<$valueType?
 /// as an ancestor of the [BuildContext] used.
 class ProviderNotFoundException implements Exception {
   /// Create a ProviderNotFound error with the type represented as a String.
-  ProviderNotFoundException(this.valueType, this.ComponentType);
+  ProviderNotFoundException(this.valueType, this.WidgetType);
 
   /// The type of the value being retrieved
   final Type valueType;
 
   /// The type of the Widget requesting the value
-  final Type ComponentType;
+  final Type WidgetType;
 
   @override
   String toString() {
     return '''
-Error: Could not find the correct Provider<$valueType> above this $ComponentType Widget
+Error: Could not find the correct Provider<$valueType> above this $WidgetType Widget
 
 This happens because you used a `BuildContext` that does not include the provider
 of your choice. There are a few common scenarios:
@@ -473,7 +473,7 @@ of your choice. There are a few common scenarios:
 
 - You used a `BuildContext` that is an ancestor of the provider you are trying to read.
 
-  Make sure that $ComponentType is under your MultiProvider/Provider<$valueType>.
+  Make sure that $WidgetType is under your MultiProvider/Provider<$valueType>.
   This usually happens when you are creating a provider and trying to read it immediately.
 
   For example, instead of:
@@ -555,7 +555,7 @@ extension ReadContext on BuildContext {
   /// This has the same efficiency as the previous anti-pattern, but does not
   /// suffer from the drawback of being brittle.
   ///
-  /// **DON'T** use [read] for creating Components with a value that never changes
+  /// **DON'T** use [read] for creating Widgets with a value that never changes
   ///
   /// ```dart
   /// Widget build(BuildContext context) {
@@ -657,7 +657,7 @@ extension WatchContext on BuildContext {
   /// If [T] is non-nullable and the provider obtained returned `null`, will
   /// throw [ProviderNullException].
   ///
-  /// This allows Components to optionally depend on a provider:
+  /// This allows Widgets to optionally depend on a provider:
   ///
   /// ```dart
   /// runApp(
@@ -685,7 +685,7 @@ extension WatchContext on BuildContext {
   /// See also:
   ///
   /// - [ReadContext] and its `read` method, similar to [watch], but doesn't make
-  ///   Components rebuild if the value obtained changes.
+  ///   Widgets rebuild if the value obtained changes.
   T watch<T>() {
     return Provider.of<T>(this);
   }

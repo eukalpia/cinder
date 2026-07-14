@@ -10,7 +10,7 @@ void main() {
           final controller = TextEditingController(text: '');
           String? submittedText;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TextField(
               controller: controller,
               width: 40,
@@ -58,7 +58,7 @@ void main() {
           final controller = TextEditingController(text: '');
           String? submittedText;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TextField(
               controller: controller,
               width: 40,
@@ -98,7 +98,7 @@ void main() {
           final controller = TextEditingController(text: '');
           String? submittedText;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TextField(
               controller: controller,
               width: 40,
@@ -138,7 +138,7 @@ void main() {
           final controller = TextEditingController(text: '');
           String? submittedText;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TextField(
               controller: controller,
               width: 40,
@@ -177,7 +177,7 @@ void main() {
           final controller = TextEditingController(text: '');
           String? submittedText;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TextField(
               controller: controller,
               width: 40,
@@ -213,7 +213,7 @@ void main() {
         (tester) async {
           final controller = TextEditingController(text: '');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TextField(
               controller: controller,
               width: 40,
@@ -250,7 +250,7 @@ void main() {
         (tester) async {
           final controller = TextEditingController(text: '');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TextField(
               controller: controller,
               width: 40,
@@ -286,7 +286,7 @@ void main() {
         (tester) async {
           final controller = TextEditingController(text: '');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TextField(
               controller: controller,
               width: 40,

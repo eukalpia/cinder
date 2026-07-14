@@ -496,7 +496,7 @@ BenchmarkSuite widgetPipelineSuite(String label, Size size) {
     return Benchmark.async(
       name,
       () async {
-        binding!.attachRootComponent(buildWidget());
+        binding!.attachRootWidget(buildWidget());
         await binding!.pump();
       },
       warmup: warmup,
@@ -598,7 +598,7 @@ BenchmarkSuite widgetPipelineSuite(String label, Size size) {
         setup: () async {
           stateBinding = CinderTestBinding(size: size);
           final widget = _RebuildCounterWidget();
-          stateBinding!.attachRootComponent(widget);
+          stateBinding!.attachRootWidget(widget);
           await stateBinding!.pump();
           // Find the state
           counter = _findState<_RebuildCounter>(stateBinding!.rootElement!);

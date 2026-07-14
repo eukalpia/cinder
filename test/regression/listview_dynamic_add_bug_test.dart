@@ -15,7 +15,7 @@ void main() {
           final scrollController = ScrollController();
 
           // Build the ListView as a simple stateful widget
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             _TestListView(
               items: items,
               scrollController: scrollController,
@@ -36,7 +36,7 @@ void main() {
             items.add('Item $i');
           }
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             _TestListView(
               items: items,
               scrollController: scrollController,
@@ -90,7 +90,7 @@ void main() {
           final items = List.generate(20, (i) => 'Item ${i + 1}');
 
           // Build ListView with itemCount specified
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: [
                 Text('Total: ${items.length} items'),

@@ -39,7 +39,7 @@ void main() {
       await testCinder(
         'punctuation column advance',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             const Align(
               alignment: Alignment.topLeft,
               child: Text('“A”—B…C'),
@@ -65,7 +65,7 @@ void main() {
       await testCinder(
         'border hugs punctuation',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Align(
               alignment: Alignment.topLeft,
               child: Container(

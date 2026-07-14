@@ -10,7 +10,7 @@ void main() {
       await testCinder(
         'error box size constraint',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Row(
               children: [
                 const SizedBox(
@@ -73,7 +73,7 @@ void main() {
           // Create a widget that fails initially but succeeds on rebuild
           final widget = _TestRecoverableWidget();
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: [
                 const Text('Before'),
@@ -114,7 +114,7 @@ void main() {
         (tester) async {
           final widget = _TestRecoverableWidget(throwInPaint: true);
 
-          await tester.pumpComponent(widget);
+          await tester.pumpWidget(widget);
 
           // First pump - should show paint error
           var output = tester.terminalState.getText();

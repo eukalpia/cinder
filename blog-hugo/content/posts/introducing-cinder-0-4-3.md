@@ -1,5 +1,5 @@
 ---
-title: "Cinder v0.4.3: Improved Rendering, New Components, and Better Testing"
+title: "Cinder v0.4.3: Improved Rendering, New Widgets, and Better Testing"
 date: 2026-01-26
 description: "The latest release brings significant rendering performance improvements, new layout components, expanded image support, and updates to the testing framework."
 author: "Cinder Team"
@@ -46,7 +46,7 @@ The `testCinder()` testing API has been refined based on community feedback. Key
 await testCinder(
   'responsive layout',
   (tester) async {
-    await tester.pumpComponent(MyComponent());
+    await tester.pumpWidget(MyWidget());
     expect(tester.terminalState, containsText('Header'));
   },
   size: Size(40, 20),
@@ -54,7 +54,7 @@ await testCinder(
 );
 ```
 
-## New and Updated Components
+## New and Updated Widgets
 
 ### Container Enhancements
 

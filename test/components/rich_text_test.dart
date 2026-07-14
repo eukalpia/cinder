@@ -7,7 +7,7 @@ void main() {
       await testCinder(
         'simple text span',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             RichText(
               text: const TextSpan(
                 text: 'Hello, World!',
@@ -26,7 +26,7 @@ void main() {
       await testCinder(
         'nested text spans',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             RichText(
               text: const TextSpan(
                 children: [
@@ -57,7 +57,7 @@ void main() {
       await testCinder(
         'colored text spans',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             RichText(
               text: const TextSpan(
                 children: [
@@ -88,7 +88,7 @@ void main() {
       await testCinder(
         'text wrapping',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 20,
               child: RichText(
@@ -119,7 +119,7 @@ void main() {
       await testCinder(
         'mixed styles with backgrounds',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             RichText(
               text: const TextSpan(
                 children: [
@@ -155,7 +155,7 @@ void main() {
       await testCinder(
         'text alignment',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               child: Column(
@@ -192,7 +192,7 @@ void main() {
       await testCinder(
         'overflow with ellipsis',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 15,
               child: RichText(
@@ -217,7 +217,7 @@ void main() {
       await testCinder(
         'max lines constraint',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 20,
               child: RichText(

@@ -13,7 +13,7 @@ void main() {
         final singleLineController = TextEditingController(
             text: 'This text will scroll horizontally when it gets too long');
 
-        await tester.pumpComponent(
+        await tester.pumpWidget(
           Column(
             children: [
               const Text('✅ FIXED: Cursor now stays within field boundaries'),

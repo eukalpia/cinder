@@ -12,7 +12,7 @@ void main() {
       (tester) async {
         late ProviderContainer container;
 
-        await tester.pumpComponent(
+        await tester.pumpWidget(
           ProviderScope(
             child: Builder(
               builder: (context) {

@@ -5,7 +5,7 @@ part of 'provider.dart';
 ///
 /// See also:
 ///
-///   * [InheritedComponent.updateShouldNotify]
+///   * [InheritedWidget.updateShouldNotify]
 typedef UpdateShouldNotify<T> = bool Function(T previous, T current);
 
 /// A function that creates an object of type [T].
@@ -38,7 +38,7 @@ typedef Dispose<T> = void Function(BuildContext context, T value);
 typedef StartListening<T> = VoidCallback Function(
     InheritedContext<T?> element, T value);
 
-/// A generic implementation of an [InheritedComponent].
+/// A generic implementation of an [InheritedWidget].
 ///
 /// Any descendant of this Widget can obtain `value` using [Provider.of].
 ///
@@ -49,7 +49,7 @@ typedef StartListening<T> = VoidCallback Function(
 ///
 ///  - [DeferredInheritedProvider], a variant of this object where the provided
 ///    object and the created object are two different entity.
-class InheritedProvider<T> extends SingleChildStatelessComponent {
+class InheritedProvider<T> extends SingleChildStatelessWidget {
   /// Creates a value, then expose it to its descendants.
   ///
   /// The value will be disposed of when [InheritedProvider] is removed from
@@ -181,7 +181,7 @@ extension SelectContext on BuildContext {
   /// If [T] is non-nullable and the provider obtained returned `null`, will
   /// throw [ProviderNullException].
   ///
-  /// This allows Components to optionally depend on a provider:
+  /// This allows Widgets to optionally depend on a provider:
   ///
   /// ```dart
   /// runApp(
@@ -262,7 +262,7 @@ extension SelectContext on BuildContext {
       } else {
         // tell Flutter to rebuild the Widget when relocated using GlobalKey
         // if no provider were found before.
-        dependOnInheritedComponentOfExactType<_InheritedProviderScope<T?>>();
+        dependOnInheritedWidgetOfExactType<_InheritedProviderScope<T?>>();
       }
       return selected;
     } finally {
@@ -287,7 +287,7 @@ abstract class InheritedContext<T> extends BuildContext {
 
   /// Marks the [InheritedProvider] as needing to update dependents.
   ///
-  /// This bypass [InheritedComponent.updateShouldNotify] and will force Components
+  /// This bypass [InheritedWidget.updateShouldNotify] and will force Widgets
   /// that depends on [T] to rebuild.
   void markNeedsNotifyDependents();
 
@@ -298,7 +298,7 @@ abstract class InheritedContext<T> extends BuildContext {
   bool get hasValue;
 }
 
-class _InheritedProviderScope<T> extends InheritedComponent {
+class _InheritedProviderScope<T> extends InheritedWidget {
   _InheritedProviderScope({
     required this.owner,
     required this.debugType,
@@ -311,7 +311,7 @@ class _InheritedProviderScope<T> extends InheritedComponent {
   final String debugType;
 
   @override
-  bool updateShouldNotify(InheritedComponent oldWidget) {
+  bool updateShouldNotify(InheritedWidget oldWidget) {
     return false;
   }
 
@@ -341,19 +341,19 @@ class _InheritedProviderScopeElement<T> extends InheritedElement
       widget.owner._delegate.createState()..element = this;
 
   @override
-  InheritedElement? getElementForInheritedComponentOfExactType<
-      InheritedComponentType extends InheritedComponent>() {
+  InheritedElement? getElementForInheritedWidgetOfExactType<
+      InheritedWidgetType extends InheritedWidget>() {
     InheritedElement? inheritedElement;
 
     // An InheritedProvider<T>'s update tries to obtain a parent provider of
     // the same type.
     visitAncestorElements((parent) {
-      if (parent.widget.runtimeType == InheritedComponentType) {
+      if (parent.widget.runtimeType == InheritedWidgetType) {
         inheritedElement = parent as InheritedElement;
         return false;
       }
       inheritedElement = parent
-          .getElementForInheritedComponentOfExactType<InheritedComponentType>();
+          .getElementForInheritedWidgetOfExactType<InheritedWidgetType>();
       return false;
     });
 
@@ -407,7 +407,7 @@ class _InheritedProviderScopeElement<T> extends InheritedElement
   }
 
   @override
-  void notifyDependent(InheritedComponent oldWidget, Element dependent) {
+  void notifyDependent(InheritedWidget oldWidget, Element dependent) {
     final dependencies = getDependencies(dependent);
 
     var shouldNotify = false;
@@ -471,7 +471,7 @@ If you're in this situation, consider passing a `key` unique to each individual 
   }
 
   @override
-  void notifyClients(InheritedComponent oldWidget) {
+  void notifyClients(InheritedWidget oldWidget) {
     if (_updatedShouldNotify) {
       super.notifyClients(oldWidget);
     }
@@ -530,7 +530,7 @@ If you're in this situation, consider passing a `key` unique to each individual 
   T get value => _delegateState.value;
 
   @override
-  InheritedComponent dependOnInheritedElement(
+  InheritedWidget dependOnInheritedElement(
     InheritedElement ancestor, {
     Object? aspect,
   }) {
@@ -538,7 +538,7 @@ If you're in this situation, consider passing a `key` unique to each individual 
       if (_debugInheritLocked) {
         throw FlutterError(
           [
-            'Tried to listen to an InheritedComponent '
+            'Tried to listen to an InheritedWidget '
                 'in a life-cycle that will never be called again.',
             '''
 This error typically happens when calling Provider.of with `listen` to `true`,
@@ -627,7 +627,7 @@ class _CreateInheritedProviderState<T>
   VoidCallback? _removeListener;
   bool _didInitValue = false;
   T? _value;
-  _CreateInheritedProvider<T>? _previousComponent;
+  _CreateInheritedProvider<T>? _previousWidget;
   Object? _initError;
 
   @override
@@ -776,14 +776,14 @@ class _CreateInheritedProviderState<T>
           _removeListener!();
           _removeListener = null;
         }
-        _previousComponent?.dispose?.call(element!, previousValue as T);
+        _previousWidget?.dispose?.call(element!, previousValue as T);
       }
     }
 
     if (shouldNotify) {
       element!._shouldNotifyDependents = true;
     }
-    _previousComponent = delegate;
+    _previousWidget = delegate;
     return super.build(isBuildFromExternalSources: isBuildFromExternalSources);
   }
 

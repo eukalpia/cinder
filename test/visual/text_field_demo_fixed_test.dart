@@ -10,7 +10,7 @@ void main() {
             text:
                 'Hello this is a cool thing to do is typing a cool long string that can be enough');
 
-        await tester.pumpComponent(
+        await tester.pumpWidget(
           Column(
             children: [
               const Text('Multi-line (Enter to submit):'),

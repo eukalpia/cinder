@@ -19,7 +19,7 @@ void main() {
         (tester) async {
           final scrollController = ScrollController();
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 10,
@@ -58,7 +58,7 @@ void main() {
         (tester) async {
           final scrollController = ScrollController();
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -95,7 +95,7 @@ void main() {
         (tester) async {
           final scrollController = ScrollController();
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -136,7 +136,7 @@ void main() {
         (tester) async {
           final scrollController = ScrollController();
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 10,
@@ -179,7 +179,7 @@ void main() {
         (tester) async {
           final scrollController = ScrollController();
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -227,7 +227,7 @@ void main() {
           final scrollController = ScrollController();
           final builtIndices = <int>{};
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -262,7 +262,7 @@ void main() {
           final scrollController = ScrollController();
           final builtIndices = <int>{};
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -300,7 +300,7 @@ void main() {
         (tester) async {
           final scrollController = ScrollController();
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -337,7 +337,7 @@ void main() {
       await testCinder(
         'reverse layout',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 10,
@@ -366,7 +366,7 @@ void main() {
         (tester) async {
           final scrollController = ScrollController();
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -404,7 +404,7 @@ void main() {
         (tester) async {
           final scrollController = ScrollController();
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 10,
@@ -438,7 +438,7 @@ void main() {
         (tester) async {
           final scrollController = ScrollController();
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -475,7 +475,7 @@ void main() {
           final scrollController = ScrollController();
 
           // Start with 5 items
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -494,7 +494,7 @@ void main() {
           expect(scrollController.maxScrollExtent, equals(0.0));
 
           // Add more items (10 total)
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -525,7 +525,7 @@ void main() {
           final scrollController = ScrollController();
 
           // Start with 10 items
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -543,7 +543,7 @@ void main() {
           expect(scrollController.maxScrollExtent, equals(5.0));
 
           // Remove items (5 total)
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -571,7 +571,7 @@ void main() {
         (tester) async {
           int version = 1;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -588,7 +588,7 @@ void main() {
 
           // Update content
           version = 2;
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -619,7 +619,7 @@ void main() {
           final scrollController = ScrollController();
 
           // Start with 20 items
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -640,7 +640,7 @@ void main() {
           expect(scrollController.offset, equals(15.0));
 
           // Remove most items
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -670,7 +670,7 @@ void main() {
         (tester) async {
           final scrollController = ScrollController();
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -711,7 +711,7 @@ void main() {
         (tester) async {
           final scrollController = ScrollController();
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -745,7 +745,7 @@ void main() {
         (tester) async {
           final scrollController = ScrollController();
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -783,7 +783,7 @@ void main() {
       await testCinder(
         'container items',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 10,
@@ -811,7 +811,7 @@ void main() {
       await testCinder(
         'nested layout items',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 40,
               height: 10,
@@ -841,7 +841,7 @@ void main() {
       await testCinder(
         'gesture items',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 10,
@@ -873,7 +873,7 @@ void main() {
           final scrollController = ScrollController();
 
           // Start with 5 items (no scroll needed)
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -889,7 +889,7 @@ void main() {
           );
 
           // Add items
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -926,7 +926,7 @@ void main() {
         (tester) async {
           final scrollController = ScrollController();
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -964,7 +964,7 @@ void main() {
       await testCinder(
         'horizontal layout',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -994,7 +994,7 @@ void main() {
         (tester) async {
           final scrollController = ScrollController();
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 20,
               height: 3,

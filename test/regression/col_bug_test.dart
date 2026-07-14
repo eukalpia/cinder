@@ -54,7 +54,7 @@ void main() {
   group('TUI Testing Framework', () {
     test('can debug render output', () async {
       await testCinder('debug output', (tester) async {
-        await tester.pumpComponent(
+        await tester.pumpWidget(
           const ColumnBugDemo(),
         );
 

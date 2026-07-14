@@ -71,8 +71,7 @@ class HomePage extends StatelessWidget {
                 );
                 print('Dialog result: $result');
               } else if (value == 'input') {
-                final result =
-                    await Navigator.of(context).pushComponent<String>(
+                final result = await Navigator.of(context).pushWidget<String>(
                   const InputPage(),
                 );
                 print('Input result: $result');

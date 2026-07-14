@@ -7,7 +7,7 @@ void main() {
       await testCinder(
         'center aligned text',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             DecoratedBox(
               decoration: BoxDecoration(
                 border: BoxBorder.all(
@@ -42,7 +42,7 @@ void main() {
       await testCinder(
         'left aligned text',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             DecoratedBox(
               decoration: BoxDecoration(
                 border: BoxBorder.all(
@@ -73,7 +73,7 @@ void main() {
       await testCinder(
         'right aligned text',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             DecoratedBox(
               decoration: BoxDecoration(
                 border: BoxBorder.all(
@@ -104,7 +104,7 @@ void main() {
       await testCinder(
         'all alignments visual',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Row(
               children: [
                 // Center alignment

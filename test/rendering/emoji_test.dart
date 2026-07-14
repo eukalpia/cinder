@@ -7,7 +7,7 @@ void main() {
       await testCinder(
         'emoji width',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: DecoratedBox(
                 decoration: BoxDecoration(
@@ -53,7 +53,7 @@ void main() {
       await testCinder(
         'emoji alignment centered',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: DecoratedBox(
                 decoration: BoxDecoration(
@@ -97,7 +97,7 @@ void main() {
       await testCinder(
         'emoji alignments',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Row(
               children: [
                 // Left aligned with emoji
@@ -154,7 +154,7 @@ void main() {
       await testCinder(
         'sparkles width',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -201,7 +201,7 @@ void main() {
       await testCinder(
         'emoji with borders',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -244,7 +244,7 @@ void main() {
       await testCinder(
         'emoji visual',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: DecoratedBox(
                 decoration: BoxDecoration(

@@ -9,7 +9,7 @@ void main() {
         (tester) async {
           print('Testing SingleChildScrollView with vertical content:');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Container(
                 width: 30,
@@ -51,7 +51,7 @@ void main() {
         (tester) async {
           print('Testing SingleChildScrollView with horizontal content:');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Container(
                 width: 20,
@@ -90,7 +90,7 @@ void main() {
         (tester) async {
           print('Testing SingleChildScrollView with padding:');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 10,
@@ -120,7 +120,7 @@ void main() {
         (tester) async {
           final controller = ScrollController();
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 10,
@@ -167,7 +167,7 @@ void main() {
         (tester) async {
           print('Testing basic ListView:');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Container(
                 width: 30,
@@ -205,7 +205,7 @@ void main() {
         (tester) async {
           print('Testing ListView.builder with lazy loading:');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 40,
               height: 15,
@@ -243,7 +243,7 @@ void main() {
         (tester) async {
           print('Testing ListView.separated:');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 35,
               height: 12,
@@ -276,7 +276,7 @@ void main() {
         (tester) async {
           print('Testing horizontal ListView:');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -316,7 +316,7 @@ void main() {
 
           final controller = ScrollController();
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Container(
                 width: 35,
@@ -362,7 +362,7 @@ void main() {
 
           final controller = ScrollController();
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 40,
               height: 12,
@@ -408,7 +408,7 @@ void main() {
         (tester) async {
           print('Testing nested scroll views:');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Container(
@@ -445,7 +445,7 @@ void main() {
         (tester) async {
           final controller = ScrollController();
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 8,

@@ -261,7 +261,7 @@ class Flex extends RenderObjectWidget {
 }
 
 /// Take up remaining space in a flex container
-class Expanded extends ParentDataComponent<FlexParentData> {
+class Expanded extends ParentDataWidget<FlexParentData> {
   Expanded({
     super.key,
     int flex = 1,
@@ -270,7 +270,7 @@ class Expanded extends ParentDataComponent<FlexParentData> {
 }
 
 /// Flexible widget for flex containers
-class Flexible extends ParentDataComponent<FlexParentData> {
+class Flexible extends ParentDataWidget<FlexParentData> {
   Flexible({
     super.key,
     int flex = 1,
@@ -280,15 +280,15 @@ class Flexible extends ParentDataComponent<FlexParentData> {
 }
 
 /// Proxy widget that wraps a single child
-abstract class ProxyComponent extends Widget {
-  const ProxyComponent({super.key, required this.child});
+abstract class ProxyWidget extends Widget {
+  const ProxyWidget({super.key, required this.child});
 
   final Widget child;
 }
 
 /// Widget that applies parent data to its child
-class ParentDataComponent<T extends ParentData> extends ProxyComponent {
-  const ParentDataComponent({
+class ParentDataWidget<T extends ParentData> extends ProxyWidget {
+  const ParentDataWidget({
     super.key,
     required super.child,
     required this.data,

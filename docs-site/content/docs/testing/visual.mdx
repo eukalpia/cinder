@@ -15,7 +15,7 @@ test('visual check', () async {
   await testCinder(
     'see widget',
     (tester) async {
-      await tester.pumpComponent(MyComponent());
+      await tester.pumpWidget(MyWidget());
 
       // Terminal output printed to console
     },
@@ -24,7 +24,7 @@ test('visual check', () async {
 });
 ```
 
-When enabled, the terminal state prints after each `pumpComponent()` call.
+When enabled, the terminal state prints after each `pumpWidget()` call.
 
 ## Development workflow
 
@@ -37,7 +37,7 @@ test('new widget visual', () async {
   await testCinder(
     'see layout',
     (tester) async {
-      await tester.pumpComponent(
+      await tester.pumpWidget(
         Container(
           decoration: BoxDecoration(
             border: BoxBorder.all(color: Colors.blue),
@@ -71,7 +71,7 @@ test('widget layout', () async {
   await testCinder(
     'correct layout',
     (tester) async {
-      await tester.pumpComponent(MyComponent());
+      await tester.pumpWidget(MyWidget());
 
       expect(tester.terminalState, containsText('Hello'));
       expect(tester.terminalState, hasTextAt(3, 3, 'Hello'));
@@ -90,7 +90,7 @@ test('develop new feature', () async {
   await testCinder(
     'feature visual',
     (tester) async {
-      await tester.pumpComponent(NewFeature());
+      await tester.pumpWidget(NewFeature());
 
       // See what it looks like
     },
@@ -106,7 +106,7 @@ test('debug failing test', () async {
   await testCinder(
     'why is this failing?',
     (tester) async {
-      await tester.pumpComponent(BrokenComponent());
+      await tester.pumpWidget(BrokenWidget());
 
       // Enable to see what's actually rendered
     },
@@ -122,7 +122,7 @@ test('complex layout', () async {
   await testCinder(
     'verify alignment',
     (tester) async {
-      await tester.pumpComponent(
+      await tester.pumpWidget(
         Column(
           children: [
             Row(children: [/* ... */]),
@@ -161,7 +161,7 @@ test('small terminal', () async {
   await testCinder(
     'fits in 40x10',
     (tester) async {
-      await tester.pumpComponent(ResponsiveComponent());
+      await tester.pumpWidget(ResponsiveWidget());
     },
     size: Size(40, 10),
     debugPrintAfterPump: true,
@@ -172,7 +172,7 @@ test('large terminal', () async {
   await testCinder(
     'uses space in 120x40',
     (tester) async {
-      await tester.pumpComponent(ResponsiveComponent());
+      await tester.pumpWidget(ResponsiveWidget());
     },
     size: Size(120, 40),
     debugPrintAfterPump: true,
@@ -201,7 +201,7 @@ test('complete test', () async {
   await testCinder(
     'layout and assertions',
     (tester) async {
-      await tester.pumpComponent(Widget());
+      await tester.pumpWidget(Widget());
 
       // Assertions verify behavior
       expect(tester.terminalState, containsText('Expected'));
@@ -225,7 +225,7 @@ test('visual spec', () async {
   await testCinder(
     'matches spec',
     (tester) async {
-      await tester.pumpComponent(Card()),
+      await tester.pumpWidget(Card()),
     },
     debugPrintAfterPump: true,
   );
@@ -236,4 +236,4 @@ test('visual spec', () async {
 
 - [Test Matchers](/docs/testing/matchers) - Learn all matchers
 - [Writing Tests](/docs/testing/basics) - Test basics
-- [Components](/docs/fundamentals/components) - Build components
+- [Widgets](/docs/fundamentals/components) - Build components

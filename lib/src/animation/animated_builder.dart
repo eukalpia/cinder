@@ -3,7 +3,7 @@ import 'package:cinder/src/framework/listenable.dart';
 
 /// A widget that rebuilds when the given [Listenable] changes value.
 ///
-/// [AnimatedComponent] is most commonly used with [Animation] objects, which are
+/// [AnimatedWidget] is most commonly used with [Animation] objects, which are
 /// [Listenable]s, but it can be used with any [Listenable], including
 /// [ChangeNotifier] and [ValueNotifier].
 ///
@@ -12,7 +12,7 @@ import 'package:cinder/src/framework/listenable.dart';
 ///
 /// Example:
 /// ```dart
-/// class SpinningContainer extends AnimatedComponent {
+/// class SpinningContainer extends AnimatedWidget {
 ///   const SpinningContainer({
 ///     super.key,
 ///     required AnimationController controller,
@@ -28,9 +28,9 @@ import 'package:cinder/src/framework/listenable.dart';
 ///   }
 /// }
 /// ```
-abstract class AnimatedComponent extends StatefulWidget {
+abstract class AnimatedWidget extends StatefulWidget {
   /// Creates a widget that rebuilds when [listenable] changes value.
-  const AnimatedComponent({
+  const AnimatedWidget({
     super.key,
     required this.listenable,
   });
@@ -46,10 +46,10 @@ abstract class AnimatedComponent extends StatefulWidget {
   Widget build(BuildContext context);
 
   @override
-  State<AnimatedComponent> createState() => _AnimatedComponentState();
+  State<AnimatedWidget> createState() => _AnimatedWidgetState();
 }
 
-class _AnimatedComponentState extends State<AnimatedComponent> {
+class _AnimatedWidgetState extends State<AnimatedWidget> {
   @override
   void initState() {
     super.initState();
@@ -57,7 +57,7 @@ class _AnimatedComponentState extends State<AnimatedComponent> {
   }
 
   @override
-  void didUpdateWidget(AnimatedComponent oldWidget) {
+  void didUpdateWidget(AnimatedWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.listenable != oldWidget.listenable) {
       oldWidget.listenable.removeListener(_handleChange);
@@ -84,7 +84,7 @@ class _AnimatedComponentState extends State<AnimatedComponent> {
 }
 
 /// Signature for the builder callback used by [AnimatedBuilder].
-typedef AnimatedComponentBuilder = Widget Function(
+typedef AnimatedWidgetBuilder = Widget Function(
   BuildContext context,
   Widget? child,
 );
@@ -147,7 +147,7 @@ class AnimatedBuilder extends StatefulWidget {
   /// widget tree, and should typically be constructed once and passed
   /// to the [AnimatedBuilder] as a child rather than constructed in the
   /// builder callback.
-  final AnimatedComponentBuilder builder;
+  final AnimatedWidgetBuilder builder;
 
   /// The child widget to pass to the [builder].
   ///
@@ -233,7 +233,7 @@ class ListenableBuilder extends StatefulWidget {
   final Listenable listenable;
 
   /// Called every time the listenable notifies its listeners.
-  final AnimatedComponentBuilder builder;
+  final AnimatedWidgetBuilder builder;
 
   /// The child widget to pass to the [builder].
   final Widget? child;

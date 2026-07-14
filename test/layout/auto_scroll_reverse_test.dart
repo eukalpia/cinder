@@ -11,7 +11,7 @@ void main() {
           final scrollController = AutoScrollController();
           final items = List.generate(10, (i) => 'Message ${i + 1}');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 10,
@@ -53,7 +53,7 @@ void main() {
           final scrollController = AutoScrollController();
           final items = List.generate(15, (i) => 'Message ${i + 1}');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 8,
@@ -83,7 +83,7 @@ void main() {
           items.add('Message 17');
           items.add('Message 18');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 8,
@@ -126,7 +126,7 @@ void main() {
           final scrollController = AutoScrollController(autoScrollThreshold: 5);
           final items = List.generate(20, (i) => 'Message ${i + 1}');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 8,
@@ -163,7 +163,7 @@ void main() {
           // Add new items
           items.add('New Message');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 8,

@@ -10,7 +10,7 @@ void main() {
           (tester) async {
             final controller = TextEditingController(text: 'Hello World');
 
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               Container(
                 width: 30,
                 height: 1,
@@ -50,7 +50,7 @@ void main() {
           (tester) async {
             final controller = TextEditingController(text: 'Hello');
 
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               Container(
                 width: 30,
                 height: 1,
@@ -82,7 +82,7 @@ void main() {
           (tester) async {
             final controller = TextEditingController(text: '');
 
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               Container(
                 width: 30,
                 height: 1,
@@ -114,7 +114,7 @@ void main() {
           (tester) async {
             final controller = TextEditingController(text: 'Hello World');
 
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               Container(
                 width: 30,
                 height: 1,
@@ -153,7 +153,7 @@ void main() {
           (tester) async {
             final controller = TextEditingController(text: 'Hello World');
 
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               Container(
                 width: 30,
                 height: 1,
@@ -194,7 +194,7 @@ void main() {
           (tester) async {
             final controller = TextEditingController(text: 'Hello World');
 
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               Container(
                 width: 30,
                 height: 1,
@@ -230,7 +230,7 @@ void main() {
           (tester) async {
             final controller = TextEditingController(text: 'Hello World');
 
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               Container(
                 width: 30,
                 height: 1,
@@ -269,7 +269,7 @@ void main() {
             final controller = TextEditingController(text: 'Hello');
             bool? focusChanged;
 
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               Container(
                 width: 30,
                 height: 1,
@@ -305,7 +305,7 @@ void main() {
             final controller =
                 TextEditingController(text: 'Line 1\nLine 2\nLine 3');
 
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               Container(
                 width: 30,
                 height: 5,
@@ -351,7 +351,7 @@ void main() {
           (tester) async {
             final controller = TextEditingController(text: 'AAA\nBBBBB\nCC');
 
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               Container(
                 width: 30,
                 height: 5,
@@ -384,7 +384,7 @@ void main() {
           (tester) async {
             final controller = TextEditingController(text: 'Hello World');
 
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               Container(
                 width: 30,
                 height: 1,
@@ -426,7 +426,7 @@ void main() {
           (tester) async {
             final controller = TextEditingController(text: 'Hello World');
 
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               Container(
                 width: 30,
                 height: 1,
@@ -475,7 +475,7 @@ void main() {
             final controller =
                 TextEditingController(text: 'Line 1\nLine 2\nLine 3');
 
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               Container(
                 width: 30,
                 height: 5,
@@ -519,7 +519,7 @@ void main() {
           (tester) async {
             final controller = TextEditingController(text: 'Hello World Test');
 
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               Container(
                 width: 30,
                 height: 1,
@@ -565,7 +565,7 @@ void main() {
           (tester) async {
             final controller = TextEditingController(text: 'Hello World');
 
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               Container(
                 width: 30,
                 height: 1,
@@ -605,7 +605,7 @@ void main() {
           (tester) async {
             final controller = TextEditingController(text: 'Hello');
 
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               TextField(
                 controller: controller,
                 focused: true,

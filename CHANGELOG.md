@@ -126,7 +126,7 @@ reliably.
 - **Website**: Add cinder.dev website link to README
 
 ## Refactoring
-- **Internal**: Use built-in `getElementForInheritedComponentOfExactType` for cleaner code
+- **Internal**: Use built-in `getElementForInheritedWidgetOfExactType` for cleaner code
 
 ## Testing
 - **CI Fix**: Fix unicode block encoder tests for CI environment
@@ -136,7 +136,7 @@ reliably.
 # 0.4.2
 
 ## Bug Fixes
-- **Refactor**: Use built-in `getElementForInheritedComponentOfExactType` for cleaner code
+- **Refactor**: Use built-in `getElementForInheritedWidgetOfExactType` for cleaner code
 
 ---
 
@@ -160,7 +160,7 @@ reliably.
 - **cacheExtent**: New `cacheExtent` property on `ListView` for smoother scrolling with pre-rendered items
 - **Offset caching**: Performance optimization for variable-height ListView items
 
-### UI Components
+### UI Widgets
 - **Tint widget**: New widget for applying color tints to children
 - **ModalBarrier.obscure**: New property to control barrier visibility
 - **ColoredBox.obscure**: Consistent obscure support across box widgets
@@ -239,7 +239,7 @@ reliably.
 - **AnimatedBuilder**: Widget that rebuilds on animation changes
 - **SingleTickerProviderStateMixin**: Mixin for state classes that need animation support
 
-### New Components
+### New Widgets
 - **AsciiText**: Large ASCII art text renderer with extensible font system
   - Built-in fonts: `standard`, `banner`, `block`, `slim`
   - Custom font support via `AsciiFont` extension
@@ -266,7 +266,7 @@ This is a **major release** with 100+ commits introducing foundational changes f
 ### Comprehensive Theming System
 - **6 built-in themes**: dark, light, nord, dracula, catppuccin, gruvbox
 - **Auto-detection**: Terminal brightness detection via OSC 11, COLORFGBG, and macOS Dark Mode
-- New `TuiThemeData`, `TuiColors`, and `TuiTheme` InheritedComponent
+- New `TuiThemeData`, `TuiColors`, and `TuiTheme` InheritedWidget
 - Added `onSuccess` and `onWarning` colors for complete status color pairs
 
 ### Differential Rendering (Major Performance Boost)
@@ -287,7 +287,7 @@ This is a **major release** with 100+ commits introducing foundational changes f
 
 ## Major Features
 
-### UI Components
+### UI Widgets
 - **LayoutBuilder**: Constraint-aware layouts (Flutter-like) for responsive designs
 - **ValueListenableBuilder**: Reactive widget for `ValueListenable`
 - **Rectangle class**: Exposed for geometry operations
@@ -375,7 +375,7 @@ This is a **major release** with 100+ commits introducing foundational changes f
 - **Render Theater**: New overlay management system with optimized paint ordering and hit testing
 - **Provider Dependencies**: Sophisticated subscription management for reactive UI updates
 
-### UI Components
+### UI Widgets
 - **Stack Widget**: Overlapping layout support with positioned/non-positioned children
 - **ConstrainedBox**: Min/max width/height constraints for precise layout control
 - **Markdown Support**: Rich text rendering with headers, lists, code blocks, tables, and links

@@ -8,7 +8,7 @@ void main() {
       await testCinder(
         'tab switching with error',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             const _TabbedPageWidget(),
           );
 
@@ -78,7 +78,7 @@ void main() {
       await testCinder(
         'tab switching with paint error',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             const _TabbedPageWithPaintError(),
           );
 

@@ -16,7 +16,7 @@ void main() {
   group('ParentDataElement copy-path relayout', () {
     test('moving a Positioned inside an Overlay repositions it', () async {
       await testCinder('overlay positioned move', (tester) async {
-        await tester.pumpComponent(const _OverlayMover());
+        await tester.pumpWidget(const _OverlayMover());
 
         final state = tester.findState<_OverlayMoverState>();
 

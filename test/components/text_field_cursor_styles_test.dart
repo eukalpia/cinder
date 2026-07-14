@@ -8,7 +8,7 @@ void main() {
         'cursor styles visual test',
         (tester) async {
           // Create a column with different cursor styles
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -75,7 +75,7 @@ void main() {
 
           // Test cursor at beginning
           controller.selection = const TextSelection.collapsed(offset: 0);
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TextField(
               controller: controller,
               focused: true,
@@ -89,7 +89,7 @@ void main() {
 
           // Test cursor at middle
           controller.selection = const TextSelection.collapsed(offset: 5);
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TextField(
               controller: controller,
               focused: true,
@@ -104,7 +104,7 @@ void main() {
           // Test cursor at end
           controller.selection =
               TextSelection.collapsed(offset: controller.text.length);
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TextField(
               controller: controller,
               focused: true,
@@ -124,7 +124,7 @@ void main() {
       await testCinder(
         'empty field cursor test',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: [
                 Text('Empty fields with different cursor styles:'),
@@ -160,7 +160,7 @@ void main() {
           final controller = TextEditingController(text: 'Dynamic cursor');
 
           // Start with block cursor
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TextField(
               controller: controller,
               focused: true,
@@ -172,7 +172,7 @@ void main() {
           print('Initial: Block cursor');
 
           // Change to underline cursor
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TextField(
               controller: controller,
               focused: true,
@@ -191,7 +191,7 @@ void main() {
       await testCinder(
         'non-blinking cursor test',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: [
                 Text('Non-blinking cursors:',

@@ -7,7 +7,7 @@ void main() {
       await testCinder(
         'minimum width borders',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -54,7 +54,7 @@ void main() {
       await testCinder(
         'border widths',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -93,7 +93,7 @@ void main() {
       await testCinder(
         'nested borders',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Container(
                 width: 30,
@@ -127,7 +127,7 @@ void main() {
       await testCinder(
         'colored borders',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: [
                 Container(
@@ -178,7 +178,7 @@ void main() {
       await testCinder(
         'border with background',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Container(
                 width: 25,
@@ -206,7 +206,7 @@ void main() {
       await testCinder(
         'asymmetric borders',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: [
                 // Very wide and short
@@ -242,7 +242,7 @@ void main() {
       await testCinder(
         'border visual',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,

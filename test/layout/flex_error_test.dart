@@ -13,7 +13,7 @@ void main() {
           print(
               'Note: Error is caught by RenderObject and displayed as layout error');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: [
                 Container(
@@ -69,7 +69,7 @@ void main() {
           print(
               'Note: Error is caught by RenderObject and displayed as layout error');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Row(
               children: [
                 Container(
@@ -129,7 +129,7 @@ void main() {
           String? errorMessage;
 
           try {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               Column(
                 children: [
                   // Inner Column with MainAxisSize.max (default) should error
@@ -172,7 +172,7 @@ void main() {
           print(
               '\n=== Testing MainAxisSize.min in unbounded Column (should work) ===');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: [
                 Container(

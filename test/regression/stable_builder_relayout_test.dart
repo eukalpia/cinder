@@ -14,7 +14,7 @@ void main() {
     test('ListView with a hoisted itemBuilder re-renders mutated state',
         () async {
       await testCinder('hoisted itemBuilder', (tester) async {
-        await tester.pumpComponent(_HoistedList());
+        await tester.pumpWidget(_HoistedList());
         // Settle the transient dirtiness left by the first layout pass
         // (adoptChild re-marks the viewport while building children), so
         // the next frame genuinely starts from a clean render object.
@@ -39,7 +39,7 @@ void main() {
     test('LayoutBuilder with a hoisted builder re-renders mutated state',
         () async {
       await testCinder('hoisted LayoutBuilder builder', (tester) async {
-        await tester.pumpComponent(_HoistedLayoutBuilder());
+        await tester.pumpWidget(_HoistedLayoutBuilder());
         // Settle the transient dirtiness left by the first layout pass
         // (adoptChild re-marks the render object while inserting the built
         // child), so the next frame genuinely starts from a clean state.

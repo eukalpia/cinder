@@ -318,14 +318,14 @@ void main() {
     });
   });
 
-  group('TuiTheme InheritedComponent', () {
+  group('TuiTheme InheritedWidget', () {
     test('TuiTheme.of returns the provided theme data', () async {
       await testCinder(
         'TuiTheme.of returns provided theme',
         (tester) async {
           TuiThemeData? capturedTheme;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TuiTheme(
               data: TuiThemeData.dracula,
               child: LayoutBuilder(
@@ -350,7 +350,7 @@ void main() {
         (tester) async {
           TuiThemeData? capturedTheme;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             LayoutBuilder(
               builder: (context, constraints) {
                 capturedTheme = TuiTheme.of(context);
@@ -372,7 +372,7 @@ void main() {
           TuiThemeData? capturedTheme;
           bool wasChecked = false;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             LayoutBuilder(
               builder: (context, constraints) {
                 capturedTheme = TuiTheme.maybeOf(context);
@@ -394,7 +394,7 @@ void main() {
         (tester) async {
           TuiThemeData? capturedTheme;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TuiTheme(
               data: TuiThemeData.nord,
               child: LayoutBuilder(
@@ -419,7 +419,7 @@ void main() {
           TuiThemeData? outerTheme;
           TuiThemeData? innerTheme;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TuiTheme(
               data: TuiThemeData.dark,
               child: Column(
@@ -458,7 +458,7 @@ void main() {
         'ProgressBar uses theme colors',
         (tester) async {
           // Test with dark theme
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TuiTheme(
               data: TuiThemeData.dark,
               child: SizedBox(
@@ -481,7 +481,7 @@ void main() {
       await testCinder(
         'ProgressBar with dracula theme',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TuiTheme(
               data: TuiThemeData.dracula,
               child: SizedBox(
@@ -500,7 +500,7 @@ void main() {
       await testCinder(
         'ProgressBar with nord theme',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TuiTheme(
               data: TuiThemeData.nord,
               child: SizedBox(
@@ -521,7 +521,7 @@ void main() {
       await testCinder(
         'Divider uses theme colors',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TuiTheme(
               data: TuiThemeData.dark,
               child: Container(
@@ -547,7 +547,7 @@ void main() {
       await testCinder(
         'Divider with catppuccinMocha theme',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TuiTheme(
               data: TuiThemeData.catppuccinMocha,
               child: Container(
@@ -565,7 +565,7 @@ void main() {
       await testCinder(
         'Divider with gruvboxDark theme',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TuiTheme(
               data: TuiThemeData.gruvboxDark,
               child: Container(
@@ -588,7 +588,7 @@ void main() {
           final customValueColor = Colors.red;
           final customBackgroundColor = Colors.blue;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TuiTheme(
               data: TuiThemeData.dark,
               child: SizedBox(
@@ -613,7 +613,7 @@ void main() {
       await testCinder(
         'Divider custom color',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TuiTheme(
               data: TuiThemeData.dark,
               child: Container(

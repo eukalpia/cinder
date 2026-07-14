@@ -7,7 +7,7 @@ void main() {
       await testCinder(
         'reverse vertical ListView',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             SizedBox(
               width: 20,
               height: 10,
@@ -46,7 +46,7 @@ void main() {
       await testCinder(
         'reverse horizontal ListView',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             SizedBox(
               width: 30,
               height: 5,
@@ -90,7 +90,7 @@ void main() {
       await testCinder(
         'normal vertical ListView',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             SizedBox(
               width: 20,
               height: 10,
@@ -125,7 +125,7 @@ void main() {
       await testCinder(
         'reverse ListView.builder',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             SizedBox(
               width: 20,
               height: 10,
@@ -155,7 +155,7 @@ void main() {
       await testCinder(
         'reverse ListView.separated',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             SizedBox(
               width: 20,
               height: 15,

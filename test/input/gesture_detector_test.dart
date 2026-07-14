@@ -7,7 +7,7 @@ void main() {
       await testCinder(
         'tap visualization',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 80,
               height: 24,
@@ -35,7 +35,7 @@ void main() {
         (tester) async {
           int tapCount = 0;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 80,
               height: 24,
@@ -74,7 +74,7 @@ void main() {
           double? downX, downY;
           double? upX, upY;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 80,
               height: 24,
@@ -120,7 +120,7 @@ void main() {
         (tester) async {
           int doubleTapCount = 0;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 80,
               height: 24,
@@ -156,7 +156,7 @@ void main() {
         (tester) async {
           int longPressCount = 0;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 80,
               height: 24,
@@ -196,7 +196,7 @@ void main() {
           // Use Stack with Positioned to create a small GestureDetector
           // that doesn't fill its parent. This properly tests hit testing
           // boundaries.
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 80,
               height: 24,
@@ -234,7 +234,7 @@ void main() {
           int outerTaps = 0;
           int innerTaps = 0;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 80,
               height: 24,
@@ -274,7 +274,7 @@ void main() {
           int topTaps = 0;
           int bottomTaps = 0;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 80,
               height: 24,
@@ -327,7 +327,7 @@ void main() {
           double? startX, startY;
           double? endX, endY;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 80,
               height: 24,

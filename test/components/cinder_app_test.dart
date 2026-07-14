@@ -7,7 +7,7 @@ void main() {
       await testCinder(
         'title initialization',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             CinderApp(
               title: 'Test App',
               child: Text('Hello'),
@@ -26,7 +26,7 @@ void main() {
       await testCinder(
         'separate title and icon',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             CinderApp(
               title: 'My Window Title',
               iconName: 'MyApp',
@@ -44,7 +44,7 @@ void main() {
         'title update',
         (tester) async {
           // Initial state
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             CinderApp(
               title: 'Initial Title',
               child: Text('Content'),
@@ -54,7 +54,7 @@ void main() {
           expect(tester.terminalState, containsText('Content'));
 
           // Update the title
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             CinderApp(
               title: 'Updated Title',
               child: Text('Content'),
@@ -70,7 +70,7 @@ void main() {
       await testCinder(
         'child rendering',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             CinderApp(
               title: 'Test',
               child: Column(
@@ -92,7 +92,7 @@ void main() {
       await testCinder(
         'no title',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             CinderApp(
               child: Text('No Title Set'),
             ),
@@ -107,7 +107,7 @@ void main() {
       await testCinder(
         'visual with title',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             CinderApp(
               title: 'Demo Application',
               iconName: 'DemoApp',
@@ -144,7 +144,7 @@ void main() {
       await testCinder(
         'navigator with home',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             CinderApp(
               title: 'Nav Test',
               home: Text('Home Screen'),
@@ -160,7 +160,7 @@ void main() {
       await testCinder(
         'navigator with routes',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             CinderApp(
               title: 'Routes Test',
               routes: {
@@ -179,7 +179,7 @@ void main() {
       await testCinder(
         'navigator with initial route',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             CinderApp(
               title: 'Initial Route Test',
               initialRoute: '/settings',
@@ -203,7 +203,7 @@ void main() {
           (tester) async {
             final navigatorKey = GlobalKey<NavigatorState>();
 
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               CinderApp(
                 title: 'Push Test',
                 navigatorKey: navigatorKey,
@@ -232,7 +232,7 @@ void main() {
       await testCinder(
         'child without navigator',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             CinderApp(
               title: 'Child Test',
               child: Text('Simple Child'),

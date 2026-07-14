@@ -41,7 +41,7 @@ void main() {
             '5 (first row) + 1 (space) + 1 (center) + 1 (space) + 1 (bottom row) + 2 (padding) = 11 lines');
 
         // Now test the actual widget with sufficient height
-        await tester.pumpComponent(
+        await tester.pumpWidget(
           Container(
             padding: const EdgeInsets.all(1),
             child: Column(

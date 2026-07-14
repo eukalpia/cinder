@@ -7,7 +7,7 @@ void main() {
       await testCinder(
         'center in column no overflow',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: [
                 Center(child: Text('Line 1')),
@@ -27,7 +27,7 @@ void main() {
       await testCinder(
         'align with width and height factors',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: [
                 // Test widthFactor
@@ -63,7 +63,7 @@ void main() {
       await testCinder(
         'multiple centers',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: [
                 Center(

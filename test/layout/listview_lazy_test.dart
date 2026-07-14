@@ -11,7 +11,7 @@ void main() {
         (tester) async {
           final scrollController = ScrollController();
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -56,7 +56,7 @@ void main() {
           final scrollController = ScrollController();
 
           // Start with 3 items
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -78,7 +78,7 @@ void main() {
           print('MaxScrollExtent: ${scrollController.maxScrollExtent}');
 
           // Add more items
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -128,7 +128,7 @@ void main() {
           final nonLazyController = ScrollController();
 
           // Non-lazy ListView
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Row(
               children: [
                 Expanded(

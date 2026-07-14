@@ -10,7 +10,7 @@ void main() {
     await testCinder(
       'basic provider read',
       (tester) async {
-        await tester.pumpComponent(
+        await tester.pumpWidget(
           ProviderScope(
             child: StatelessBuilder(
               builder: (context) {
@@ -33,7 +33,7 @@ void main() {
     await testCinder(
       'state provider modification',
       (tester) async {
-        await tester.pumpComponent(
+        await tester.pumpWidget(
           ProviderScope(
             child: StatefulBuilder(
               builder: (context, setState) {
@@ -77,7 +77,7 @@ void main() {
     await testCinder(
       'provider override',
       (tester) async {
-        await tester.pumpComponent(
+        await tester.pumpWidget(
           ProviderScope(
             overrides: [
               greetingProvider.overrideWith((ref) => 'Overridden!'),

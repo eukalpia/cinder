@@ -80,7 +80,7 @@ class AcceleratedScrollController extends ScrollController {
 }
 ```
 
-### 2. Update handleMouseWheel in Scrollable Components
+### 2. Update handleMouseWheel in Scrollable Widgets
 
 Modify `RenderListViewport.handleMouseWheel()` to use acceleration:
 

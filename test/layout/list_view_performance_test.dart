@@ -8,7 +8,7 @@ void main() {
       await testCinder(
         'list view visual',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 40,
               height: 10,
@@ -30,7 +30,7 @@ void main() {
 
           // Scroll down
           final controller = ScrollController();
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 40,
               height: 10,

@@ -6,7 +6,7 @@ void main() {
     await testCinder(
       'new color palette',
       (tester) async {
-        await tester.pumpComponent(
+        await tester.pumpWidget(
           Column(
             children: [
               Text('Regular Colors:',

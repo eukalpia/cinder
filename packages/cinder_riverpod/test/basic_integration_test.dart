@@ -15,7 +15,7 @@ void main() {
       'riverpod basic functionality',
       (tester) async {
         // Test 1: Basic provider read
-        await tester.pumpComponent(
+        await tester.pumpWidget(
           ProviderScope(
             child: _SimpleBuilder(
               builder: (context) {
@@ -29,7 +29,7 @@ void main() {
         expect(tester.terminalState, containsText('Hello, Cinder!'));
 
         // Test 2: Provider overrides
-        await tester.pumpComponent(
+        await tester.pumpWidget(
           ProviderScope(
             overrides: [
               nameProvider.overrideWith((ref) => 'Riverpod'),
@@ -54,7 +54,7 @@ void main() {
     await testCinder(
       'nested provider scopes',
       (tester) async {
-        await tester.pumpComponent(
+        await tester.pumpWidget(
           ProviderScope(
             child: Column(
               children: [
@@ -98,7 +98,7 @@ void main() {
     await testCinder(
       'multiple providers',
       (tester) async {
-        await tester.pumpComponent(
+        await tester.pumpWidget(
           ProviderScope(
             child: _SimpleBuilder(
               builder: (context) {

@@ -61,52 +61,52 @@ import 'selector.dart' show Selector;
 /// Unless `listen: false` is passed to [Provider.of], the Widget
 /// associated with the [BuildContext] passed to [Provider.of] will rebuild
 /// whenever the obtained value changes. This is the expected behavior,
-/// but sometimes it may rebuild more Components than needed.
+/// but sometimes it may rebuild more Widgets than needed.
 ///
 /// Here's an example:
 ///
 /// ```dart
 ///  @override
 ///  Widget build(BuildContext context) {
-///    return FooComponent(
-///      child: BarComponent(
+///    return FooWidget(
+///      child: BarWidget(
 ///        bar: Provider.of<Bar>(context),
 ///      ),
 ///    );
 ///  }
 /// ```
 ///
-/// In the above code, only `BarComponent` depends on the value returned by
-/// [Provider.of]. But when `Bar` changes, then both `BarComponent` _and_
-/// `FooComponent` will rebuild.
+/// In the above code, only `BarWidget` depends on the value returned by
+/// [Provider.of]. But when `Bar` changes, then both `BarWidget` _and_
+/// `FooWidget` will rebuild.
 ///
-/// Ideally, only `BarComponent` should be rebuilt. One
+/// Ideally, only `BarWidget` should be rebuilt. One
 /// solution to achieve that is to use [Consumer].
 ///
-/// To do so, we will wrap _only_ the Components that depends on a provider into
+/// To do so, we will wrap _only_ the Widgets that depends on a provider into
 /// a [Consumer]:
 ///
 /// ```dart
 ///  @override
 ///  Widget build(BuildContext context) {
-///    return FooComponent(
+///    return FooWidget(
 ///      child: Consumer<Bar>(
-///        builder: (_, bar, __) => BarComponent(bar: bar),
+///        builder: (_, bar, __) => BarWidget(bar: bar),
 ///      ),
 ///    );
 ///  }
 /// ```
 ///
-/// In this situation, if `Bar` were to update, only `BarComponent` would rebuild.
+/// In this situation, if `Bar` were to update, only `BarWidget` would rebuild.
 ///
-/// But what if it was `FooComponent` that depended on a provider? Example:
+/// But what if it was `FooWidget` that depended on a provider? Example:
 ///
 /// ```dart
 ///  @override
 ///  Widget build(BuildContext context) {
-///    return FooComponent(
+///    return FooWidget(
 ///      foo: Provider.of<Foo>(context),
-///      child: BarComponent(),
+///      child: BarWidget(),
 ///    );
 ///  }
 /// ```
@@ -118,19 +118,19 @@ import 'selector.dart' show Selector;
 ///  @override
 ///  Widget build(BuildContext context) {
 ///    return Consumer<Foo>(
-///      builder: (_, foo, child) => FooComponent(foo: foo, child: child),
-///      child: BarComponent(),
+///      builder: (_, foo, child) => FooWidget(foo: foo, child: child),
+///      child: BarWidget(),
 ///    );
 ///  }
 /// ```
 ///
-/// In that example, `BarComponent` is built outside of [builder]. Then, the
-/// `BarComponent` instance is passed to [builder] as the last parameter.
+/// In that example, `BarWidget` is built outside of [builder]. Then, the
+/// `BarWidget` instance is passed to [builder] as the last parameter.
 ///
 /// This means that when [builder] is called again with new values, a new
-/// instance of `BarComponent` will not be created.
-/// This lets Flutter know that it doesn't have to rebuild `BarComponent`.
-/// Therefore in such a configuration, only `FooComponent` will rebuild
+/// instance of `BarWidget` will not be created.
+/// This lets Flutter know that it doesn't have to rebuild `BarWidget`.
+/// Therefore in such a configuration, only `FooWidget` will rebuild
 /// if `Foo` changes.
 ///
 /// ## Note:
@@ -153,7 +153,7 @@ import 'selector.dart' show Selector;
 /// See also:
 ///   * [Selector], a [Consumer] that can filter updates.
 /// {@endtemplate}
-class Consumer<T> extends SingleChildStatelessComponent {
+class Consumer<T> extends SingleChildStatelessWidget {
   /// {@template provider.consumer.constructor}
   /// Consumes a [Provider<T>]
   /// {@endtemplate}
@@ -175,7 +175,7 @@ class Consumer<T> extends SingleChildStatelessComponent {
 }
 
 /// {@macro provider.consumer}
-class Consumer2<A, B> extends SingleChildStatelessComponent {
+class Consumer2<A, B> extends SingleChildStatelessWidget {
   /// {@macro provider.consumer.constructor}
   Consumer2({Key? key, required this.builder, Widget? child})
       : super(key: key, child: child);
@@ -200,7 +200,7 @@ class Consumer2<A, B> extends SingleChildStatelessComponent {
 }
 
 /// {@macro provider.consumer}
-class Consumer3<A, B, C> extends SingleChildStatelessComponent {
+class Consumer3<A, B, C> extends SingleChildStatelessWidget {
   /// {@macro provider.consumer.constructor}
   Consumer3({Key? key, required this.builder, Widget? child})
       : super(key: key, child: child);
@@ -227,7 +227,7 @@ class Consumer3<A, B, C> extends SingleChildStatelessComponent {
 }
 
 /// {@macro provider.consumer}
-class Consumer4<A, B, C, D> extends SingleChildStatelessComponent {
+class Consumer4<A, B, C, D> extends SingleChildStatelessWidget {
   /// {@macro provider.consumer.constructor}
   Consumer4({Key? key, required this.builder, Widget? child})
       : super(key: key, child: child);
@@ -256,7 +256,7 @@ class Consumer4<A, B, C, D> extends SingleChildStatelessComponent {
 }
 
 /// {@macro provider.consumer}
-class Consumer5<A, B, C, D, E> extends SingleChildStatelessComponent {
+class Consumer5<A, B, C, D, E> extends SingleChildStatelessWidget {
   /// {@macro provider.consumer.constructor}
   Consumer5({Key? key, required this.builder, Widget? child})
       : super(key: key, child: child);
@@ -287,7 +287,7 @@ class Consumer5<A, B, C, D, E> extends SingleChildStatelessComponent {
 }
 
 /// {@macro provider.consumer}
-class Consumer6<A, B, C, D, E, F> extends SingleChildStatelessComponent {
+class Consumer6<A, B, C, D, E, F> extends SingleChildStatelessWidget {
   /// {@macro provider.consumer.constructor}
   Consumer6({Key? key, required this.builder, Widget? child})
       : super(key: key, child: child);

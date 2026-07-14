@@ -9,7 +9,7 @@ void main() {
         'constraints debug',
         (tester) async {
           // Simple case - Text directly in a Container
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -27,7 +27,7 @@ void main() {
           print(tester.terminalState.getText());
 
           // Text in Column in Container
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -49,7 +49,7 @@ void main() {
           print(tester.terminalState.getText());
 
           // Text in Column with crossAxisAlignment
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,

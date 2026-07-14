@@ -85,12 +85,12 @@ abstract class CinderBinding {
     return BuildOwner(onNeedsBuild);
   }
 
-  void attachRootComponent(Widget rootComponent) {
+  void attachRootWidget(Widget rootWidget) {
     if (_rootElement != null) {
       _rootElement!.deactivate();
       _rootElement!.unmount();
     }
-    _rootElement = rootComponent.createElement();
+    _rootElement = rootWidget.createElement();
     // Set the owner before mounting (root has no parent to inherit from)
     _rootElement!._owner = buildOwner;
     _rootElement!.mount(null, null);
@@ -139,29 +139,29 @@ abstract class CinderBinding {
   }
 }
 
-/// InheritedComponent provides a way to pass data down the widget tree.
-abstract class InheritedComponent extends ProxyComponent {
-  const InheritedComponent({super.key, required super.child});
+/// InheritedWidget provides a way to pass data down the widget tree.
+abstract class InheritedWidget extends ProxyWidget {
+  const InheritedWidget({super.key, required super.child});
 
   @override
   InheritedElement createElement() => InheritedElement(this);
 
   /// Whether the framework should notify components that inherit from this widget.
   @protected
-  bool updateShouldNotify(covariant InheritedComponent oldWidget);
+  bool updateShouldNotify(covariant InheritedWidget oldWidget);
 }
 
-/// Element for [InheritedComponent].
+/// Element for [InheritedWidget].
 class InheritedElement extends ProxyElement {
-  InheritedElement(InheritedComponent super.widget);
+  InheritedElement(InheritedWidget super.widget);
 
   @override
-  InheritedComponent get widget => super.widget as InheritedComponent;
+  InheritedWidget get widget => super.widget as InheritedWidget;
 
   final Map<Element, Object?> _dependents = HashMap<Element, Object?>();
 
   @override
-  void updated(covariant InheritedComponent oldWidget) {
+  void updated(covariant InheritedWidget oldWidget) {
     if (widget.updateShouldNotify(oldWidget)) {
       super.updated(oldWidget);
     }
@@ -189,7 +189,7 @@ class InheritedElement extends ProxyElement {
   }
 
   @override
-  void notifyClients(covariant InheritedComponent oldWidget) {
+  void notifyClients(covariant InheritedWidget oldWidget) {
     for (final Element dependent in _dependents.keys) {
       notifyDependent(oldWidget, dependent);
     }
@@ -197,7 +197,7 @@ class InheritedElement extends ProxyElement {
 
   @protected
   void notifyDependent(
-      covariant InheritedComponent oldWidget, covariant Element dependent) {
+      covariant InheritedWidget oldWidget, covariant Element dependent) {
     dependent.didChangeDependencies();
   }
 

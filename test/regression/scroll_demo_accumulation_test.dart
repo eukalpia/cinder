@@ -7,7 +7,7 @@ void main() {
     await testCinder(
       'tab accumulation test',
       (tester) async {
-        await tester.pumpComponent(const ScrollDemo());
+        await tester.pumpWidget(const ScrollDemo());
 
         // Helper function to count items in current view
         int countItems(String pattern) {

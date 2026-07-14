@@ -15,14 +15,14 @@ void main() {
       await testCinder('const child reorder', (tester) async {
         // Pump with order A (bottom) → B (top).
         // B paints last so its text wins.
-        await tester.pumpComponent(const _ReorderableStack(topIsB: true));
+        await tester.pumpWidget(const _ReorderableStack(topIsB: true));
 
         // B is on top — only 'BBB' visible at the overlap position.
         expect(tester.terminalState, containsText('BBB'));
 
         // Reorder: B (bottom) → A (top).
         // A should now paint last.
-        await tester.pumpComponent(const _ReorderableStack(topIsB: false));
+        await tester.pumpWidget(const _ReorderableStack(topIsB: false));
 
         // A is on top — 'AAA' must be visible at the overlap position.
         expect(
@@ -36,17 +36,17 @@ void main() {
 
     test('cycling const children through multiple reorders', () async {
       await testCinder('const child cycling', (tester) async {
-        await tester.pumpComponent(const _CyclingStack(activeIndex: 0));
+        await tester.pumpWidget(const _CyclingStack(activeIndex: 0));
         expect(tester.terminalState, containsText('VIEW_0'));
 
-        await tester.pumpComponent(const _CyclingStack(activeIndex: 1));
+        await tester.pumpWidget(const _CyclingStack(activeIndex: 1));
         expect(tester.terminalState, containsText('VIEW_1'));
 
-        await tester.pumpComponent(const _CyclingStack(activeIndex: 2));
+        await tester.pumpWidget(const _CyclingStack(activeIndex: 2));
         expect(tester.terminalState, containsText('VIEW_2'));
 
         // Cycle back to 0.
-        await tester.pumpComponent(const _CyclingStack(activeIndex: 0));
+        await tester.pumpWidget(const _CyclingStack(activeIndex: 0));
         expect(
           tester.terminalState,
           containsText('VIEW_0'),
@@ -57,7 +57,7 @@ void main() {
 
     test('stateful reorder preserves child state', () async {
       await testCinder('stateful reorder', (tester) async {
-        await tester.pumpComponent(const _StatefulReorder());
+        await tester.pumpWidget(const _StatefulReorder());
 
         final state = tester.findState<_StatefulReorderState>();
 

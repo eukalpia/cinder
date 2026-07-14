@@ -7,7 +7,7 @@ void main() {
       await testCinder(
         'basic builder',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -28,7 +28,7 @@ void main() {
         (tester) async {
           BuildContext? capturedContext;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -51,7 +51,7 @@ void main() {
       await testCinder(
         'builder inherited access',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 40,
               height: 5,
@@ -81,7 +81,7 @@ void main() {
         (tester) async {
           var buildCount = 0;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -104,7 +104,7 @@ void main() {
       await testCinder(
         'nested builder',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 40,
               height: 10,
@@ -131,7 +131,7 @@ void main() {
       await testCinder(
         'complex builder output',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 40,
               height: 10,
@@ -158,7 +158,7 @@ void main() {
       await testCinder(
         'visual builder demo',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 50,
               height: 10,

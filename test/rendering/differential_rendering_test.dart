@@ -199,7 +199,7 @@ void main() {
           'color change detection',
           (tester) async {
             // Render with red color
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               Text('Hello', style: const TextStyle(color: Colors.red)),
             );
 
@@ -207,7 +207,7 @@ void main() {
             expect(cell1?.style.color, equals(Colors.red));
 
             // Render with blue color
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               Text('Hello', style: const TextStyle(color: Colors.blue)),
             );
 
@@ -224,13 +224,13 @@ void main() {
         await testCinder(
           'backgroundColor change detection',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               Text('Hello',
                   style: const TextStyle(backgroundColor: Colors.red)),
             );
             final cell1 = tester.terminalState.getCellAt(0, 0);
 
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               Text('Hello',
                   style: const TextStyle(backgroundColor: Colors.blue)),
             );
@@ -247,13 +247,13 @@ void main() {
         await testCinder(
           'fontWeight change detection',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               const Text('Hello',
                   style: TextStyle(fontWeight: FontWeight.normal)),
             );
             final cell1 = tester.terminalState.getCellAt(0, 0);
 
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               const Text('Hello',
                   style: TextStyle(fontWeight: FontWeight.bold)),
             );
@@ -270,13 +270,13 @@ void main() {
         await testCinder(
           'fontStyle change detection',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               const Text('Hello',
                   style: TextStyle(fontStyle: FontStyle.normal)),
             );
             final cell1 = tester.terminalState.getCellAt(0, 0);
 
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               const Text('Hello',
                   style: TextStyle(fontStyle: FontStyle.italic)),
             );
@@ -293,13 +293,13 @@ void main() {
         await testCinder(
           'decoration change detection',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               const Text('Hello',
                   style: TextStyle(decoration: TextDecoration.none)),
             );
             final cell1 = tester.terminalState.getCellAt(0, 0);
 
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               const Text('Hello',
                   style: TextStyle(decoration: TextDecoration.underline)),
             );
@@ -348,14 +348,14 @@ void main() {
           'reverse change detection',
           (tester) async {
             // Render with reverse=false
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               const Text('Test', style: TextStyle(reverse: false)),
             );
             final cell1 = tester.terminalState.getCellAt(0, 0);
             expect(cell1?.style.reverse, isFalse);
 
             // Render with reverse=true
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               const Text('Test', style: TextStyle(reverse: true)),
             );
             final cell2 = tester.terminalState.getCellAt(0, 0);
@@ -385,7 +385,7 @@ void main() {
               backgroundColor: Colors.black,
             );
 
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               Text('ABCD', style: baseStyle.copyWith(reverse: false)),
             );
 
@@ -395,7 +395,7 @@ void main() {
               if (cell != null) cellsBefore.add(cell);
             }
 
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               Text('ABCD', style: baseStyle.copyWith(reverse: true)),
             );
 
@@ -449,7 +449,7 @@ void main() {
         await testCinder(
           'emoji rendering',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               const Text('Hi\u{1F600}World'),
             );
 
@@ -463,7 +463,7 @@ void main() {
         await testCinder(
           'wide then narrow',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               const Text('\u{1F600}A'),
             );
 
@@ -498,12 +498,12 @@ void main() {
           'replace emoji',
           (tester) async {
             // First render emoji
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               const Text('\u{1F600}\u{1F600}'),
             );
 
             // Then render narrow chars in same space
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               const Text('AAAA'),
             );
 
@@ -521,7 +521,7 @@ void main() {
         await testCinder(
           'first frame',
           (tester) async {
-            await tester.pumpComponent(const Text('Hello'));
+            await tester.pumpWidget(const Text('Hello'));
             expect(tester.frameCount, equals(1));
           },
         );
@@ -531,7 +531,7 @@ void main() {
         await testCinder(
           'frame counting',
           (tester) async {
-            await tester.pumpComponent(const Text('Frame 1'));
+            await tester.pumpWidget(const Text('Frame 1'));
             expect(tester.frameCount, equals(1));
 
             await tester.pump();
@@ -547,10 +547,10 @@ void main() {
         await testCinder(
           'content update',
           (tester) async {
-            await tester.pumpComponent(const Text('AAA'));
+            await tester.pumpWidget(const Text('AAA'));
             final snapshot1 = tester.toSnapshot();
 
-            await tester.pumpComponent(const Text('BBB'));
+            await tester.pumpWidget(const Text('BBB'));
             final snapshot2 = tester.toSnapshot();
 
             expect(snapshot1, isNot(equals(snapshot2)));
@@ -564,10 +564,10 @@ void main() {
         await testCinder(
           'identical content',
           (tester) async {
-            await tester.pumpComponent(const Text('Same'));
+            await tester.pumpWidget(const Text('Same'));
             final snapshot1 = tester.toSnapshot();
 
-            await tester.pumpComponent(const Text('Same'));
+            await tester.pumpWidget(const Text('Same'));
             final snapshot2 = tester.toSnapshot();
 
             expect(snapshot1, equals(snapshot2));
@@ -581,7 +581,7 @@ void main() {
         await testCinder(
           'golden text',
           (tester) async {
-            await tester.pumpComponent(const Text('Hello World'));
+            await tester.pumpWidget(const Text('Hello World'));
 
             expect(tester.toSnapshot(), equals('Hello·World'));
           },
@@ -592,7 +592,7 @@ void main() {
         await testCinder(
           'golden styled',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               const Text('Styled',
                   style: TextStyle(
                     color: Colors.red,
@@ -609,7 +609,7 @@ void main() {
         await testCinder(
           'golden multiline',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               const Column(
                 children: [
                   Text('Line 1'),
@@ -631,7 +631,7 @@ void main() {
         await testCinder(
           'golden container',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               Container(
                 width: 10,
                 height: 3,
@@ -706,7 +706,7 @@ void main() {
         await testCinder(
           'containsText',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               const Column(
                 children: [
                   Text('First line'),
@@ -726,7 +726,7 @@ void main() {
         await testCinder(
           'getTextAt',
           (tester) async {
-            await tester.pumpComponent(const Text('ABCDEFGH'));
+            await tester.pumpWidget(const Text('ABCDEFGH'));
 
             expect(
                 tester.terminalState.getTextAt(0, 0, length: 3), equals('ABC'));
@@ -740,7 +740,7 @@ void main() {
         await testCinder(
           'findText',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               const Column(
                 children: [
                   Text('foo bar foo'),
@@ -759,7 +759,7 @@ void main() {
         await testCinder(
           'getCellAt bounds',
           (tester) async {
-            await tester.pumpComponent(const Text('Hi'));
+            await tester.pumpWidget(const Text('Hi'));
 
             expect(tester.terminalState.getCellAt(-1, 0), isNull);
             expect(tester.terminalState.getCellAt(0, -1), isNull);
@@ -775,7 +775,7 @@ void main() {
         await testCinder(
           'getStyledText',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               Row(
                 children: [
                   const Text('Red', style: TextStyle(color: Colors.red)),
@@ -895,7 +895,7 @@ void main() {
           (tester) async {
             // Render two adjacent texts with different reverse values
             // but same color (so _stylesEqual will incorrectly merge them)
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               Row(
                 children: [
                   const Text('AAA',
@@ -944,7 +944,7 @@ void main() {
         await testCinder(
           'reverse boundary creates segments',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               Row(
                 children: [
                   const Text('NORMAL', style: TextStyle(color: Colors.green)),
@@ -1015,7 +1015,7 @@ void main() {
           'reverse only differential',
           (tester) async {
             // First render without reverse
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               const Text('TEST',
                   style: TextStyle(color: Colors.white, reverse: false)),
             );
@@ -1025,7 +1025,7 @@ void main() {
             expect(initialCell?.style.reverse, isFalse);
 
             // Re-render with only reverse changed
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               const Text('TEST',
                   style: TextStyle(color: Colors.white, reverse: true)),
             );

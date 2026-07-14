@@ -8,7 +8,7 @@ void main() {
       (tester) async {
         print('\n📺 Visualizing a complex layout:\n');
 
-        await tester.pumpComponent(
+        await tester.pumpWidget(
           Container(
             padding: const EdgeInsets.all(1),
             child: Column(

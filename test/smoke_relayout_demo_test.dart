@@ -10,7 +10,7 @@ import '../example/relayout_fixes_demo.dart';
 void main() {
   test('relayout fixes demo: every panel reacts to its key', () async {
     await testCinder('demo smoke', (tester) async {
-      await tester.pumpComponent(const RelayoutFixesDemo());
+      await tester.pumpWidget(const RelayoutFixesDemo());
       // Settle transient first-layout dirtiness so each keypress below
       // exercises the explicit markNeedsLayout paths.
       await tester.pump();

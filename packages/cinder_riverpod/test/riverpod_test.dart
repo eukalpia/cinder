@@ -69,14 +69,14 @@ class StateNotifierCounter extends StatelessWidget {
   }
 }
 
-class ListenerComponent extends StatefulWidget {
-  const ListenerComponent({super.key});
+class ListenerWidget extends StatefulWidget {
+  const ListenerWidget({super.key});
 
   @override
-  State<ListenerComponent> createState() => _ListenerComponentState();
+  State<ListenerWidget> createState() => _ListenerWidgetState();
 }
 
-class _ListenerComponentState extends State<ListenerComponent> {
+class _ListenerWidgetState extends State<ListenerWidget> {
   String _lastChange = 'No changes yet';
 
   @override
@@ -114,7 +114,7 @@ void main() {
       await testCinder(
         'provider scope basic',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             ProviderScope(
               child: SimpleBuilder(
                 builder: (context) {
@@ -135,7 +135,7 @@ void main() {
       await testCinder(
         'watch rebuilds',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             ProviderScope(
               child: Column(
                 children: [
@@ -185,7 +185,7 @@ void main() {
       await testCinder(
         'computed providers',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             ProviderScope(
               child: Column(
                 children: [
@@ -228,7 +228,7 @@ void main() {
       await testCinder(
         'state notifier provider',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             ProviderScope(
               child: Column(
                 children: [
@@ -280,11 +280,11 @@ void main() {
       await testCinder(
         'listen updates',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             ProviderScope(
               child: Column(
                 children: [
-                  const ListenerComponent(),
+                  const ListenerWidget(),
                   SimpleBuilder(
                     builder: (context) {
                       return KeyboardListener(
@@ -323,7 +323,7 @@ void main() {
       await testCinder(
         'provider overrides',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             ProviderScope(
               overrides: [
                 counterProvider.overrideWith((ref) => 42),
@@ -342,7 +342,7 @@ void main() {
       await testCinder(
         'nested scopes',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             ProviderScope(
               child: Column(
                 children: [
@@ -374,7 +374,7 @@ void main() {
       await testCinder(
         'refresh provider',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             ProviderScope(
               child: SimpleBuilder(
                 builder: (context) {
@@ -423,7 +423,7 @@ void main() {
       await testCinder(
         'invalidate provider',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             ProviderScope(
               child: SimpleBuilder(
                 builder: (context) {

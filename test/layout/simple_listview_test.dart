@@ -11,7 +11,7 @@ void main() {
       (tester) async {
         final scrollController = ScrollController();
 
-        await tester.pumpComponent(
+        await tester.pumpWidget(
           Container(
             width: 20,
             height: 8,

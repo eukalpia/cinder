@@ -66,7 +66,7 @@ void main() {
   group('TUI Testing Framework', () {
     test('can debug render output', () async {
       await testCinder('debug output', (tester) async {
-        await tester.pumpComponent(
+        await tester.pumpWidget(
           Container(
             padding: const EdgeInsets.all(1),
             child: const Text('Debug Me'),
@@ -79,7 +79,7 @@ void main() {
         // Output should contain the text
         expect(output, contains('Debug Me'));
 
-        await tester.pumpComponent(const Counter());
+        await tester.pumpWidget(const Counter());
         final output2 = tester.renderToString(showBorders: true);
 
         expect(output2, contains('Count: 0'));

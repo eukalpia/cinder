@@ -146,7 +146,7 @@ void main() {
       await testCinder(
         'semi-transparent text',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               color: Colors.blue,
               child: Text(
@@ -170,7 +170,7 @@ void main() {
       await testCinder(
         'semi-transparent background',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Stack(
               children: [
                 Container(
@@ -202,7 +202,7 @@ void main() {
       await testCinder(
         'layered transparency',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Stack(
               children: [
                 Container(
@@ -247,7 +247,7 @@ void main() {
       await testCinder(
         'transparent text on colored bg',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               color: Colors.green,
               padding: const EdgeInsets.all(2),
@@ -270,7 +270,7 @@ void main() {
       await testCinder(
         'fully transparent text',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               color: Colors.blue,
               child: Text(
@@ -292,7 +292,7 @@ void main() {
       await testCinder(
         'fully opaque colors',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               color: Colors.blue.withOpacity(1.0),
               child: Text(
@@ -346,7 +346,7 @@ void main() {
       await testCinder(
         'alpha gradient visualization',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 40,
               height: 10,
@@ -381,7 +381,7 @@ void main() {
       await testCinder(
         'overlay effect',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Stack(
               children: [
                 Container(

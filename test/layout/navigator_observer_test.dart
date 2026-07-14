@@ -11,7 +11,7 @@ void main() {
         final log = <String>[];
         final observer = _RecordingObserver(log);
 
-        await tester.pumpComponent(Navigator(
+        await tester.pumpWidget(Navigator(
           observers: [observer],
           home: const Text('Home Page'),
           routes: {

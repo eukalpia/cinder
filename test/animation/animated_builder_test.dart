@@ -110,7 +110,7 @@ void main() {
 
           var buildCount = 0;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 40,
               height: 5,
@@ -131,7 +131,7 @@ void main() {
           controller.forward();
           vsync.tick(const Duration(milliseconds: 50));
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 40,
               height: 5,
@@ -162,7 +162,7 @@ void main() {
             vsync: vsync,
           );
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 50,
               height: 10,
@@ -203,7 +203,7 @@ void main() {
 
           // Note: In this test setup, the child is created inline,
           // so we're testing that the child parameter is passed correctly
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 50,
               height: 10,
@@ -248,7 +248,7 @@ void main() {
           );
 
           // Test at value = 0
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 40,
               height: 5,
@@ -264,7 +264,7 @@ void main() {
 
           // Test at value = 0.5
           controller.value = 0.5;
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 40,
               height: 5,
@@ -280,7 +280,7 @@ void main() {
 
           // Test at value = 1.0
           controller.value = 1.0;
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 40,
               height: 5,
@@ -311,7 +311,7 @@ void main() {
           final animation =
               Tween<double>(begin: 10.0, end: 90.0).animate(controller);
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 40,
               height: 5,
@@ -326,7 +326,7 @@ void main() {
           expect(tester.terminalState, containsText('Size: 10'));
 
           controller.value = 0.5;
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 40,
               height: 5,
@@ -341,7 +341,7 @@ void main() {
           expect(tester.terminalState, containsText('Size: 50'));
 
           controller.value = 1.0;
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 40,
               height: 5,
@@ -376,7 +376,7 @@ void main() {
           // easeIn at 0.5 should be less than 0.5
           expect(animation.value, lessThan(0.5));
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 40,
               height: 5,
@@ -405,7 +405,7 @@ void main() {
 
           var buildCount = 0;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 40,
               height: 5,
@@ -425,7 +425,7 @@ void main() {
           // Change the value
           notifier.value = 5;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 40,
               height: 5,
@@ -450,7 +450,7 @@ void main() {
         (tester) async {
           final notifier = TestNotifier();
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 50,
               height: 10,

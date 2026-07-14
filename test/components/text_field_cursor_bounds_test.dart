@@ -9,7 +9,7 @@ void main() {
         (tester) async {
           final controller = TextEditingController(text: '');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: [
                 const Text('Test: Cursor should always stay within the border'),
@@ -66,7 +66,7 @@ void main() {
         (tester) async {
           final controller = TextEditingController(text: '');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TextField(
               controller: controller,
               width: 20,
@@ -120,7 +120,7 @@ void main() {
         (tester) async {
           final controller = TextEditingController(text: '');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TextField(
               controller: controller,
               width: 15,

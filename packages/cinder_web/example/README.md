@@ -37,7 +37,7 @@ The demo includes 4 interactive tabs:
 
 ## Implementation Highlights
 
-- **Stateful Components**: Uses `StatefulWidget` and `State` with lifecycle methods
+- **Stateful Widgets**: Uses `StatefulWidget` and `State` with lifecycle methods
 - **Timers**: Real-time updates via `Timer.periodic`
 - **Keyboard Input**: `Focusable` widget with `onKeyEvent` handling
 - **Mouse Input**: `GestureDetector` with `onTap` callbacks

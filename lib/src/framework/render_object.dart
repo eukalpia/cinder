@@ -953,8 +953,8 @@ class SingleChildRenderObjectElement extends RenderObjectElement {
     // Some single child render objects (like Text) don't have children
     try {
       final dynamic comp = widget;
-      final Widget? childComponent = comp.child;
-      _child = updateChild(_child, childComponent, null);
+      final Widget? childWidget = comp.child;
+      _child = updateChild(_child, childWidget, null);
     } catch (e) {
       // Widget doesn't have a child property
     }
@@ -966,8 +966,8 @@ class SingleChildRenderObjectElement extends RenderObjectElement {
     // Some single child render objects (like Text) don't have children
     try {
       final dynamic comp = newWidget;
-      final Widget? childComponent = comp.child;
-      _child = updateChild(_child, childComponent, null);
+      final Widget? childWidget = comp.child;
+      _child = updateChild(_child, childWidget, null);
     } catch (e) {
       // Widget doesn't have a child property
     }
@@ -1023,7 +1023,7 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
     Element? previousChild;
     _children = List<Element>.generate(children.length, (index) {
       final slot = IndexedSlot(index, previousChild);
-      final child = inflateComponent(children[index], slot);
+      final child = inflateWidget(children[index], slot);
       previousChild = child;
       return child;
     });

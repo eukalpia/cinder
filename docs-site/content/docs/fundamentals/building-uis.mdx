@@ -66,7 +66,7 @@ The `children` parameter takes a list of components.
 
 ### Nesting components deeply
 
-Components can nest as deeply as needed:
+Widgets can nest as deeply as needed:
 
 ```dart
 Container(
@@ -104,7 +104,7 @@ This creates a bordered box with a title and two side-by-side panels.
 
 ## Passing data down
 
-Components pass data to their children through constructor parameters:
+Widgets pass data to their children through constructor parameters:
 
 ```dart
 class UserCard extends StatelessWidget {
@@ -156,7 +156,7 @@ Use `context` to access components higher in the tree:
 
 ```dart
 // Find the nearest ancestor of a specific type
-final ancestor = context.findAncestorComponentOfExactType<MyComponent>();
+final ancestor = context.findAncestorWidgetOfExactType<MyWidget>();
 
 // Find ancestor state
 final state = context.findAncestorStateOfType<MyState>();
@@ -308,4 +308,4 @@ class LabeledValue extends StatelessWidget {
 
 - [State Management](/docs/fundamentals/state) - Handle changing data
 - [Layout](/docs/components/layout) - Learn layout components
-- [Components](/docs/fundamentals/components) - Review widget basics
+- [Widgets](/docs/fundamentals/components) - Review widget basics

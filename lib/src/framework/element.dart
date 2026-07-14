@@ -155,17 +155,17 @@ abstract class Element implements BuildContext {
         newChild = child;
       } else {
         deactivateChild(child);
-        newChild = inflateComponent(newWidget, newSlot);
+        newChild = inflateWidget(newWidget, newSlot);
       }
     } else {
-      newChild = inflateComponent(newWidget, newSlot);
+      newChild = inflateWidget(newWidget, newSlot);
     }
 
     return newChild;
   }
 
   @protected
-  Element inflateComponent(Widget newWidget, dynamic newSlot) {
+  Element inflateWidget(Widget newWidget, dynamic newSlot) {
     final Element newChild = newWidget.createElement();
     newChild.mount(this, newSlot);
     return newChild;
@@ -247,7 +247,7 @@ abstract class Element implements BuildContext {
 
   @protected
   List<Element> updateChildren(
-      List<Element> oldChildren, List<Widget> newComponents) {
+      List<Element> oldChildren, List<Widget> newWidgets) {
     Element? replaceWithNullIfForgotten(Element child) {
       return _owner!._forgottenChildren.contains(child) ? null : child;
     }
@@ -264,11 +264,11 @@ abstract class Element implements BuildContext {
 
     int newChildrenTop = 0;
     int oldChildrenTop = 0;
-    int newChildrenBottom = newComponents.length - 1;
+    int newChildrenBottom = newWidgets.length - 1;
     int oldChildrenBottom = oldChildren.length - 1;
 
     final List<Element?> newChildren =
-        List<Element?>.filled(newComponents.length, null);
+        List<Element?>.filled(newWidgets.length, null);
 
     Element? previousChild;
 
@@ -277,7 +277,7 @@ abstract class Element implements BuildContext {
         (newChildrenTop <= newChildrenBottom)) {
       final Element? oldChild =
           replaceWithNullIfForgotten(oldChildren[oldChildrenTop]);
-      final Widget newWidget = newComponents[newChildrenTop];
+      final Widget newWidget = newWidgets[newChildrenTop];
       assert(oldChild == null ||
           oldChild._lifecycleState == _ElementLifecycle.active);
       if (oldChild == null || !Widget.canUpdate(oldChild.widget, newWidget)) {
@@ -297,7 +297,7 @@ abstract class Element implements BuildContext {
         (newChildrenTop <= newChildrenBottom)) {
       final Element? oldChild =
           replaceWithNullIfForgotten(oldChildren[oldChildrenBottom]);
-      final Widget newWidget = newComponents[newChildrenBottom];
+      final Widget newWidget = newWidgets[newChildrenBottom];
       assert(oldChild == null ||
           oldChild._lifecycleState == _ElementLifecycle.active);
       if (oldChild == null || !Widget.canUpdate(oldChild.widget, newWidget)) {
@@ -331,7 +331,7 @@ abstract class Element implements BuildContext {
     // Update the middle of the list.
     while (newChildrenTop <= newChildrenBottom) {
       Element? oldChild;
-      final Widget newWidget = newComponents[newChildrenTop];
+      final Widget newWidget = newWidgets[newChildrenTop];
       if (newWidget.key != null) {
         final Key key = newWidget.key!;
         if (oldKeyedChildren != null) {
@@ -357,9 +357,9 @@ abstract class Element implements BuildContext {
     // We've scanned the whole list.
     assert(oldChildrenTop == oldChildrenBottom + 1);
     assert(newChildrenTop == newChildrenBottom + 1);
-    assert(newComponents.length - newChildrenTop ==
+    assert(newWidgets.length - newChildrenTop ==
         oldChildren.length - oldChildrenTop);
-    newChildrenBottom = newComponents.length - 1;
+    newChildrenBottom = newWidgets.length - 1;
     oldChildrenBottom = oldChildren.length - 1;
 
     // Update the bottom of the list.
@@ -368,7 +368,7 @@ abstract class Element implements BuildContext {
       final Element oldChild = oldChildren[oldChildrenTop];
       assert(replaceWithNullIfForgotten(oldChild) != null);
       assert(oldChild._lifecycleState == _ElementLifecycle.active);
-      final Widget newWidget = newComponents[newChildrenTop];
+      final Widget newWidget = newWidgets[newChildrenTop];
       assert(Widget.canUpdate(oldChild.widget, newWidget));
       final Element newChild = updateChild(
           oldChild, newWidget, slotFor(newChildrenTop, previousChild))!;
@@ -398,7 +398,7 @@ abstract class Element implements BuildContext {
   }
 
   @override
-  T? dependOnInheritedComponentOfExactType<T extends InheritedComponent>(
+  T? dependOnInheritedWidgetOfExactType<T extends InheritedWidget>(
       {Object? aspect}) {
     if (_inheritedElements?[T] case final InheritedElement ancestor) {
       if (dependOnInheritedElement(ancestor, aspect: aspect)
@@ -407,13 +407,13 @@ abstract class Element implements BuildContext {
       }
 
       throw Exception(
-          'dependOnInheritedComponentOfExactType: $T is not an $InheritedComponent');
+          'dependOnInheritedWidgetOfExactType: $T is not an $InheritedWidget');
     }
     return null;
   }
 
   @override
-  InheritedComponent dependOnInheritedElement(InheritedElement ancestor,
+  InheritedWidget dependOnInheritedElement(InheritedElement ancestor,
       {Object? aspect}) {
     (_dependencies ??= HashSet<InheritedElement>()).add(ancestor);
     ancestor.updateDependencies(this, aspect);
@@ -421,8 +421,8 @@ abstract class Element implements BuildContext {
   }
 
   @override
-  InheritedElement? getElementForInheritedComponentOfExactType<
-      T extends InheritedComponent>() {
+  InheritedElement?
+      getElementForInheritedWidgetOfExactType<T extends InheritedWidget>() {
     return _inheritedElements?[T];
   }
 
@@ -437,7 +437,7 @@ abstract class Element implements BuildContext {
   bool get debugDoingBuild => false;
 
   @override
-  T? findAncestorComponentOfExactType<T extends Widget>() {
+  T? findAncestorWidgetOfExactType<T extends Widget>() {
     Element? ancestor = parent;
     while (ancestor != null) {
       if (ancestor.widget case final T widget) {

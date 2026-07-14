@@ -12,7 +12,7 @@ void main() {
           print(
               'Inner Column should receive infinite height during measurement');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 20,
@@ -67,7 +67,7 @@ void main() {
           print(
               'IntrinsicHeight should measure children first, then provide finite constraint');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 20,
@@ -127,7 +127,7 @@ void main() {
           print('\n=== Column in Column with Expanded ===');
           print('Expanded should give finite constraints to inner Column');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 20,
@@ -194,7 +194,7 @@ void main() {
           print('\n=== Column in Column with Flexible ===');
           print('Flexible should give bounded constraints to inner Column');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 20,
@@ -254,7 +254,7 @@ void main() {
           print('MainAxisSize.min should size Column to its content');
           print('MainAxisSize.max should expand to available space');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Row(
               children: [
                 // Left: MainAxisSize.max (default)

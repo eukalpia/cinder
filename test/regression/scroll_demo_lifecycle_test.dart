@@ -7,7 +7,7 @@ void main() {
     await testCinder(
       'rapid tab switching',
       (tester) async {
-        await tester.pumpComponent(const ScrollDemo());
+        await tester.pumpWidget(const ScrollDemo());
 
         // Rapidly switch tabs 20 times
         for (int i = 0; i < 20; i++) {

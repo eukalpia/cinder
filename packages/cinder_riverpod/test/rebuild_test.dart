@@ -9,7 +9,7 @@ void main() {
     await testCinder(
       'watch rebuild test',
       (tester) async {
-        await tester.pumpComponent(
+        await tester.pumpWidget(
           ProviderScope(
             child: _TestWidget(counterProvider: counterProvider),
           ),

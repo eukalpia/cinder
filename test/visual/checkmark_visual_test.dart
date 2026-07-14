@@ -7,7 +7,7 @@ void main() {
       await testCinder(
         'checkmark layout',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 40,
               padding: const EdgeInsets.all(1),
@@ -48,7 +48,7 @@ void main() {
       await testCinder(
         'clipboard status',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 50,
               padding: const EdgeInsets.all(1),

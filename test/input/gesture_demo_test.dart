@@ -12,7 +12,7 @@ void main() {
       await testCinder(
         'gesture demo renders correctly',
         (tester) async {
-          await tester.pumpComponent(const GestureDemoApp());
+          await tester.pumpWidget(const GestureDemoApp());
         },
         debugPrintAfterPump: true,
         size: const Size(100, 50),
@@ -23,7 +23,7 @@ void main() {
       await testCinder(
         'all zones visible',
         (tester) async {
-          await tester.pumpComponent(const GestureDemoApp());
+          await tester.pumpWidget(const GestureDemoApp());
 
           // Verify all zone labels are present
           expect(tester.terminalState, containsText('TAP ME'));
@@ -43,8 +43,8 @@ void main() {
         (tester) async {
           bool tapped = false;
 
-          await tester.pumpComponent(
-            _TestTapComponent(onTapCallback: () => tapped = true),
+          await tester.pumpWidget(
+            _TestTapWidget(onTapCallback: () => tapped = true),
           );
 
           // Tap
@@ -62,8 +62,8 @@ void main() {
         (tester) async {
           int doubleTapCount = 0;
 
-          await tester.pumpComponent(
-            _TestDoubleTapComponent(
+          await tester.pumpWidget(
+            _TestDoubleTapWidget(
               onDoubleTapCallback: () => doubleTapCount++,
             ),
           );
@@ -86,8 +86,8 @@ void main() {
           bool longPressStarted = false;
           bool longPressCompleted = false;
 
-          await tester.pumpComponent(
-            _TestLongPressComponent(
+          await tester.pumpWidget(
+            _TestLongPressWidget(
               onLongPressStartCallback: () => longPressStarted = true,
               onLongPressCallback: () => longPressCompleted = true,
             ),
@@ -111,8 +111,8 @@ void main() {
         (tester) async {
           bool isHovering = false;
 
-          await tester.pumpComponent(
-            _TestHoverComponent(
+          await tester.pumpWidget(
+            _TestHoverWidget(
               onEnterCallback: () => isHovering = true,
               onExitCallback: () => isHovering = false,
             ),
@@ -134,8 +134,8 @@ void main() {
           bool isHovering = false;
           int tapCount = 0;
 
-          await tester.pumpComponent(
-            _TestCombinedComponent(
+          await tester.pumpWidget(
+            _TestCombinedWidget(
               onEnterCallback: () => isHovering = true,
               onTapCallback: () => tapCount++,
             ),
@@ -156,7 +156,7 @@ void main() {
       await testCinder(
         'gesture demo at default size',
         (tester) async {
-          await tester.pumpComponent(const GestureDemoApp());
+          await tester.pumpWidget(const GestureDemoApp());
 
           // Should render without overflow at proper size
           expect(tester.terminalState, containsText('GESTURE DETECTOR DEMO'));
@@ -172,8 +172,8 @@ void main() {
         (tester) async {
           Offset? tapPosition;
 
-          await tester.pumpComponent(
-            _TestPositionComponent(
+          await tester.pumpWidget(
+            _TestPositionWidget(
               onTapDownCallback: (details) =>
                   tapPosition = details.localPosition,
             ),
@@ -193,16 +193,16 @@ void main() {
 }
 
 // Helper test components
-class _TestTapComponent extends StatefulWidget {
-  const _TestTapComponent({required this.onTapCallback});
+class _TestTapWidget extends StatefulWidget {
+  const _TestTapWidget({required this.onTapCallback});
 
   final VoidCallback onTapCallback;
 
   @override
-  State<_TestTapComponent> createState() => _TestTapComponentState();
+  State<_TestTapWidget> createState() => _TestTapWidgetState();
 }
 
-class _TestTapComponentState extends State<_TestTapComponent> {
+class _TestTapWidgetState extends State<_TestTapWidget> {
   int tapCount = 0;
 
   @override
@@ -230,17 +230,16 @@ class _TestTapComponentState extends State<_TestTapComponent> {
   }
 }
 
-class _TestDoubleTapComponent extends StatefulWidget {
-  const _TestDoubleTapComponent({required this.onDoubleTapCallback});
+class _TestDoubleTapWidget extends StatefulWidget {
+  const _TestDoubleTapWidget({required this.onDoubleTapCallback});
 
   final VoidCallback onDoubleTapCallback;
 
   @override
-  State<_TestDoubleTapComponent> createState() =>
-      _TestDoubleTapComponentState();
+  State<_TestDoubleTapWidget> createState() => _TestDoubleTapWidgetState();
 }
 
-class _TestDoubleTapComponentState extends State<_TestDoubleTapComponent> {
+class _TestDoubleTapWidgetState extends State<_TestDoubleTapWidget> {
   int doubleTapCount = 0;
 
   @override
@@ -268,8 +267,8 @@ class _TestDoubleTapComponentState extends State<_TestDoubleTapComponent> {
   }
 }
 
-class _TestLongPressComponent extends StatelessWidget {
-  const _TestLongPressComponent({
+class _TestLongPressWidget extends StatelessWidget {
+  const _TestLongPressWidget({
     required this.onLongPressStartCallback,
     required this.onLongPressCallback,
   });
@@ -296,8 +295,8 @@ class _TestLongPressComponent extends StatelessWidget {
   }
 }
 
-class _TestHoverComponent extends StatelessWidget {
-  const _TestHoverComponent({
+class _TestHoverWidget extends StatelessWidget {
+  const _TestHoverWidget({
     required this.onEnterCallback,
     required this.onExitCallback,
   });
@@ -324,8 +323,8 @@ class _TestHoverComponent extends StatelessWidget {
   }
 }
 
-class _TestCombinedComponent extends StatelessWidget {
-  const _TestCombinedComponent({
+class _TestCombinedWidget extends StatelessWidget {
+  const _TestCombinedWidget({
     required this.onEnterCallback,
     required this.onTapCallback,
   });
@@ -354,8 +353,8 @@ class _TestCombinedComponent extends StatelessWidget {
   }
 }
 
-class _TestPositionComponent extends StatelessWidget {
-  const _TestPositionComponent({required this.onTapDownCallback});
+class _TestPositionWidget extends StatelessWidget {
+  const _TestPositionWidget({required this.onTapDownCallback});
 
   final Function(TapDownDetails) onTapDownCallback;
 

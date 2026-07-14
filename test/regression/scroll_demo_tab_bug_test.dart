@@ -8,7 +8,7 @@ void main() {
       await testCinder(
         'tab navigation bug reproduction',
         (tester) async {
-          await tester.pumpComponent(const ScrollDemo());
+          await tester.pumpWidget(const ScrollDemo());
 
           print('Initial state:');
           tester.terminalState.toString();
@@ -89,7 +89,7 @@ void main() {
       await testCinder(
         'tab content stability check',
         (tester) async {
-          await tester.pumpComponent(const ScrollDemo());
+          await tester.pumpWidget(const ScrollDemo());
 
           // Collect states for each tab after multiple cycles
           Map<int, List<String>> tabStates = {

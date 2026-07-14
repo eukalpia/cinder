@@ -37,7 +37,7 @@ void main() {
   group('Column Bug Debug', () {
     test('debug column replacement', () async {
       await testCinder('debug output', (tester) async {
-        await tester.pumpComponent(
+        await tester.pumpWidget(
           const ColumnBugDemo(),
         );
 

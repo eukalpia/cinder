@@ -26,8 +26,8 @@ void main() {
 Access theme colors in any widget:
 
 ```dart
-class MyComponent extends StatelessWidget {
-  const MyComponent({super.key});
+class MyWidget extends StatelessWidget {
+  const MyWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -360,7 +360,7 @@ class _ThemeSwitcherState extends State<ThemeSwitcher> {
 
 ## Theme-aware components
 
-Components that call `TuiTheme.of(context)` automatically rebuild when the theme changes. This happens because `TuiTheme` is an `InheritedComponent` that notifies dependents.
+Widgets that call `TuiTheme.of(context)` automatically rebuild when the theme changes. This happens because `TuiTheme` is an `InheritedWidget` that notifies dependents.
 
 If you need to read the theme without rebuilding on changes (rare), use `TuiTheme.maybeOf`:
 
@@ -408,15 +408,15 @@ Test your app with different themes to ensure colors work in all contexts:
 ```dart
 // In tests, try different themes
 await testCinder('renders in dark theme', (tester) async {
-  await tester.pumpComponent(
-    TuiTheme(data: TuiThemeData.dark, child: MyComponent()),
+  await tester.pumpWidget(
+    TuiTheme(data: TuiThemeData.dark, child: MyWidget()),
   );
   // Verify appearance
 });
 
 await testCinder('renders in light theme', (tester) async {
-  await tester.pumpComponent(
-    TuiTheme(data: TuiThemeData.light, child: MyComponent()),
+  await tester.pumpWidget(
+    TuiTheme(data: TuiThemeData.light, child: MyWidget()),
   );
   // Verify appearance
 });

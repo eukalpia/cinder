@@ -8,7 +8,7 @@ void main() {
         'tint dims content',
         (tester) async {
           // First, render some colored text without tint
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               color: Colors.blue,
               child: Text(
@@ -22,7 +22,7 @@ void main() {
           print('Before tint - fg: ${initialCell?.style.color}');
 
           // Now wrap with Tint widget
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Tint(
               color: Colors.black.withOpacity(0.6),
               child: Container(
@@ -65,7 +65,7 @@ void main() {
         'transparent tint',
         (tester) async {
           // Render with transparent tint
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Tint(
               color: Colors.black.withOpacity(0.0),
               child: Container(
@@ -93,7 +93,7 @@ void main() {
         'colored tint',
         (tester) async {
           // Apply a red tint
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Tint(
               color: Colors.red.withOpacity(0.5),
               child: Container(
@@ -128,7 +128,7 @@ void main() {
         'coloredbox tint',
         (tester) async {
           // Use Stack to layer ColoredBox over content
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Stack(
               children: [
                 Container(

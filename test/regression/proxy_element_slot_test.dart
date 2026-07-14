@@ -21,7 +21,7 @@ void main() {
           'positioned child replacement',
           (tester) async {
             // Initial state with SizedBox as background
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               _PositionedChildSwap(useAlternate: false),
             );
 
@@ -29,7 +29,7 @@ void main() {
             expect(tester.terminalState, containsText('FOREGROUND'));
 
             // Switch to alternate child (Container with text)
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               _PositionedChildSwap(useAlternate: true),
             );
 
@@ -44,7 +44,7 @@ void main() {
         await testCinder(
           'multiple positioned order',
           (tester) async {
-            await tester.pumpComponent(const _MultiPositionedStack());
+            await tester.pumpWidget(const _MultiPositionedStack());
 
             final state = tester.findState<_MultiPositionedStackState>();
 
@@ -76,7 +76,7 @@ void main() {
         await testCinder(
           'stateful positioned toggle',
           (tester) async {
-            await tester.pumpComponent(const _StatefulPositionedToggle());
+            await tester.pumpWidget(const _StatefulPositionedToggle());
 
             final state = tester.findState<_StatefulPositionedToggleState>();
 
@@ -102,8 +102,8 @@ void main() {
         await testCinder(
           'nested positioned',
           (tester) async {
-            // Test with nested InheritedComponent -> Positioned -> child
-            await tester.pumpComponent(
+            // Test with nested InheritedWidget -> Positioned -> child
+            await tester.pumpWidget(
               Stack(
                 children: [
                   Positioned.fill(
@@ -131,7 +131,7 @@ void main() {
           'parent data preservation',
           (tester) async {
             // Initial positioned at specific location
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               SizedBox(
                 width: 80,
                 height: 24,
@@ -154,7 +154,7 @@ void main() {
             expect(tester.terminalState, containsText('CENTER'));
 
             // Replace the positioned child
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               SizedBox(
                 width: 80,
                 height: 24,

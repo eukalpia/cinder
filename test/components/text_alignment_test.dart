@@ -8,7 +8,7 @@ void main() {
       await testCinder(
         'text alignment rendering',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 20,
               height: 10,
@@ -56,7 +56,7 @@ void main() {
       await testCinder(
         'alignment at various widths',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: [
                 // Very narrow container
@@ -118,7 +118,7 @@ void main() {
       await testCinder(
         'justified text',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               decoration: BoxDecoration(
@@ -151,7 +151,7 @@ void main() {
       await testCinder(
         'alignment with padding',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               padding: const EdgeInsets.all(2),

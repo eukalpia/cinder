@@ -7,7 +7,7 @@ void main() {
       await testCinder(
         'simple paragraph',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 100, // Wide enough to not wrap
               child: const MarkdownText('First paragraph.'),
@@ -25,7 +25,7 @@ void main() {
       await testCinder(
         'two paragraphs',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 100, // Wide enough to not wrap
               child: const MarkdownText('''First paragraph.
@@ -52,7 +52,7 @@ Second paragraph.'''),
       await testCinder(
         'plain text spans',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 100,
               child:
@@ -71,7 +71,7 @@ Second paragraph.'''),
       await testCinder(
         'line by line',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 50,
               child: const MarkdownText('''First.

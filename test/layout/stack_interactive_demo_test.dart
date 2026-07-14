@@ -8,7 +8,7 @@ void main() {
       await testCinder(
         'initial rendering',
         (tester) async {
-          await tester.pumpComponent(const StackInteractiveDemo());
+          await tester.pumpWidget(const StackInteractiveDemo());
 
           // Verify initial state
           expect(tester.terminalState, containsText('Interactive Stack Demo'));
@@ -32,7 +32,7 @@ void main() {
       await testCinder(
         'counter up/down',
         (tester) async {
-          await tester.pumpComponent(const StackInteractiveDemo());
+          await tester.pumpWidget(const StackInteractiveDemo());
 
           // Initial counter
           expect(tester.terminalState, containsText('Counter: 0'));
@@ -70,7 +70,7 @@ void main() {
       await testCinder(
         'select items with number keys',
         (tester) async {
-          await tester.pumpComponent(const StackInteractiveDemo());
+          await tester.pumpWidget(const StackInteractiveDemo());
 
           // Initially no item selected
           expect(tester.terminalState, containsText('Selected: None'));
@@ -102,7 +102,7 @@ void main() {
       await testCinder(
         'toggle overlay with O key',
         (tester) async {
-          await tester.pumpComponent(const StackInteractiveDemo());
+          await tester.pumpWidget(const StackInteractiveDemo());
 
           // Initially overlay is not shown
           expect(tester.terminalState, containsText('Normal Mode'));
@@ -128,7 +128,7 @@ void main() {
       await testCinder(
         'test multiple features together',
         (tester) async {
-          await tester.pumpComponent(const StackInteractiveDemo());
+          await tester.pumpWidget(const StackInteractiveDemo());
 
           // Set counter to 3
           await tester.sendKey(LogicalKey.arrowUp);

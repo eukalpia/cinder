@@ -37,7 +37,7 @@ class CinderTester {
     final buffer = _binding.lastBuffer;
     if (buffer == null) {
       throw StateError(
-        'No frame has been rendered yet. Call pump() or pumpComponent() first.',
+        'No frame has been rendered yet. Call pump() or pumpWidget() first.',
       );
     }
 
@@ -81,8 +81,8 @@ class CinderTester {
   }
 
   /// Pump a widget as the root of the tree
-  Future<void> pumpComponent(Widget widget, [Duration? duration]) async {
-    _binding.attachRootComponent(widget);
+  Future<void> pumpWidget(Widget widget, [Duration? duration]) async {
+    _binding.attachRootWidget(widget);
     await pump(duration);
   }
 
@@ -232,7 +232,7 @@ class CinderTester {
   }
 
   /// Find a widget in the tree by type
-  T? findComponent<T extends Widget>() {
+  T? findWidget<T extends Widget>() {
     if (_binding.rootElement == null) return null;
 
     T? result;
@@ -249,7 +249,7 @@ class CinderTester {
   }
 
   /// Find all components of a specific type
-  List<T> findAllComponents<T extends Widget>() {
+  List<T> findAllWidgets<T extends Widget>() {
     if (_binding.rootElement == null) return [];
 
     final results = <T>[];

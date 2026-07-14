@@ -10,7 +10,7 @@ void main() {
           (tester) async {
             BoxConstraints? receivedConstraints;
 
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               LayoutBuilder(
                 builder: (context, constraints) {
                   receivedConstraints = constraints;
@@ -33,7 +33,7 @@ void main() {
           (tester) async {
             BoxConstraints? receivedConstraints;
 
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               ConstrainedBox(
                 constraints: BoxConstraints.tight(const Size(40, 20)),
                 child: LayoutBuilder(
@@ -61,7 +61,7 @@ void main() {
           (tester) async {
             BoxConstraints? receivedConstraints;
 
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               LayoutBuilder(
                 builder: (context, constraints) {
                   receivedConstraints = constraints;
@@ -87,7 +87,7 @@ void main() {
           (tester) async {
             BuildContext? receivedContext;
 
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               LayoutBuilder(
                 builder: (context, constraints) {
                   receivedContext = context;
@@ -108,7 +108,7 @@ void main() {
         await testCinder(
           'renders child',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               LayoutBuilder(
                 builder: (context, constraints) {
                   return const Text('Hello LayoutBuilder');
@@ -125,7 +125,7 @@ void main() {
         await testCinder(
           'complex child',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               LayoutBuilder(
                 builder: (context, constraints) {
                   return Column(
@@ -150,7 +150,7 @@ void main() {
         await testCinder(
           'nested LayoutBuilders',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               LayoutBuilder(
                 builder: (context, outerConstraints) {
                   return Column(
@@ -182,7 +182,7 @@ void main() {
           (tester) async {
             int buildCount = 0;
 
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               LayoutBuilder(
                 builder: (context, constraints) {
                   buildCount++;
@@ -202,7 +202,7 @@ void main() {
           (tester) async {
             int buildCount = 0;
 
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               _BuildCountTracker(
                 onBuild: () {
                   buildCount++;
@@ -228,7 +228,7 @@ void main() {
           (tester) async {
             int buildCount = 0;
 
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               _BuilderChanger(
                 onBuild: () {
                   buildCount++;
@@ -254,7 +254,7 @@ void main() {
         await testCinder(
           'constraint-based layout',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               LayoutBuilder(
                 builder: (context, constraints) {
                   if (constraints.maxWidth > 50) {
@@ -276,7 +276,7 @@ void main() {
         await testCinder(
           'height-based layout',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               LayoutBuilder(
                 builder: (context, constraints) {
                   if (constraints.maxHeight > 20) {
@@ -298,7 +298,7 @@ void main() {
         await testCinder(
           'display constraint info',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               LayoutBuilder(
                 builder: (context, constraints) {
                   return Column(
@@ -323,7 +323,7 @@ void main() {
         await testCinder(
           'preserves child state',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               _StatePreservationTest(),
             );
 
@@ -356,7 +356,7 @@ void main() {
         await testCinder(
           'displays constraints info',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               LayoutBuilder(
                 builder: (context, constraints) {
                   return Column(
@@ -380,7 +380,7 @@ void main() {
         await testCinder(
           'responsive layout visual',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               LayoutBuilder(
                 builder: (context, constraints) {
                   final cols = constraints.maxWidth > 60 ? 3 : 2;
@@ -406,7 +406,7 @@ void main() {
         await testCinder(
           'adaptive dialog visual',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               Center(
                 child: Container(
                   decoration: BoxDecoration(
@@ -452,7 +452,7 @@ void main() {
         await testCinder(
           'error handling in builder',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               LayoutBuilder(
                 builder: (context, constraints) {
                   throw Exception('Test error in builder');
@@ -473,7 +473,7 @@ void main() {
         await testCinder(
           'empty builder',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               LayoutBuilder(
                 builder: (context, constraints) {
                   return Container();
@@ -493,7 +493,7 @@ void main() {
         await testCinder(
           'inside Column',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               Column(
                 children: [
                   const Text('Header'),
@@ -520,7 +520,7 @@ void main() {
         await testCinder(
           'inside Row',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               Row(
                 children: [
                   const Text('Left'),
@@ -547,7 +547,7 @@ void main() {
         await testCinder(
           'multiple LayoutBuilders',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               Row(
                 children: [
                   Expanded(
@@ -590,7 +590,7 @@ void main() {
           (tester) async {
             BoxConstraints? receivedConstraints;
 
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               LayoutBuilder(
                 builder: (context, constraints) {
                   receivedConstraints = constraints;
@@ -613,7 +613,7 @@ void main() {
           (tester) async {
             BoxConstraints? receivedConstraints;
 
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               LayoutBuilder(
                 builder: (context, constraints) {
                   receivedConstraints = constraints;
@@ -634,7 +634,7 @@ void main() {
         await testCinder(
           'adapts to small terminal',
           (tester) async {
-            await tester.pumpComponent(
+            await tester.pumpWidget(
               LayoutBuilder(
                 builder: (context, constraints) {
                   if (constraints.maxWidth >= 60) {

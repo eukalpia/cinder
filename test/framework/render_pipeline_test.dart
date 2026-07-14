@@ -25,7 +25,7 @@ void main() {
       await testCinder(
         'sets needsLayout flag',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             _LayoutTracker(
               onLayoutTrackerCreated: (tracker) {
                 // Initially the layout flag is cleared after first frame
@@ -49,7 +49,7 @@ void main() {
         (tester) async {
           bool paintMarkCalled = false;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             _LayoutTracker(
               onLayoutTrackerCreated: (tracker) {
                 // Override to track paint marking
@@ -75,8 +75,8 @@ void main() {
           int layoutCount = 0;
           late _TrackingRenderBox tracker;
 
-          await tester.pumpComponent(
-            _LayoutCounterComponent(
+          await tester.pumpWidget(
+            _LayoutCounterWidget(
               onLayoutCounted: () => layoutCount++,
               onRenderBoxCreated: (rb) => tracker = rb,
             ),
@@ -107,7 +107,7 @@ void main() {
           late _TrackingRenderBox parentTracker;
           late _TrackingRenderBox childTracker;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             _NestedLayoutTrackers(
               onParentCreated: (rb) => parentTracker = rb,
               onChildCreated: (rb) => childTracker = rb,
@@ -133,7 +133,7 @@ void main() {
         (tester) async {
           final trackers = <_TrackingRenderBox>[];
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             _DeeplyNestedTrackers(
               depth: 5,
               onTrackerCreated: (rb) => trackers.add(rb),
@@ -168,7 +168,7 @@ void main() {
       await testCinder(
         'sets needsPaint flag',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             _LayoutTracker(
               onLayoutTrackerCreated: (tracker) {
                 // After first frame, flag should be cleared
@@ -193,7 +193,7 @@ void main() {
           late _TrackingRenderBox parentTracker;
           late _TrackingRenderBox childTracker;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             _NestedLayoutTrackers(
               onParentCreated: (rb) => parentTracker = rb,
               onChildCreated: (rb) => childTracker = rb,
@@ -218,8 +218,8 @@ void main() {
         (tester) async {
           late _TrackingRenderBox tracker;
 
-          await tester.pumpComponent(
-            _LayoutCounterComponent(
+          await tester.pumpWidget(
+            _LayoutCounterWidget(
               onLayoutCounted: () {},
               onRenderBoxCreated: (rb) => tracker = rb,
             ),
@@ -255,8 +255,8 @@ void main() {
           late _TrackingRenderBox tracker;
           int paintCount = 0;
 
-          await tester.pumpComponent(
-            _PaintCounterComponent(
+          await tester.pumpWidget(
+            _PaintCounterWidget(
               onPaintCounted: () => paintCount++,
               onRenderBoxCreated: (rb) => tracker = rb,
             ),
@@ -291,7 +291,7 @@ void main() {
         (tester) async {
           final trackers = <_TrackingRenderBox>[];
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             _DeeplyNestedTrackers(
               depth: 5,
               onTrackerCreated: (rb) => trackers.add(rb),
@@ -325,7 +325,7 @@ void main() {
       await testCinder(
         'requestLayout adds to dirty',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             _LayoutTracker(
               onLayoutTrackerCreated: (tracker) {
                 final pipelineOwner = CinderTestBinding.instance.pipelineOwner;
@@ -350,7 +350,7 @@ void main() {
       await testCinder(
         'requestPaint with deduplication',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             _LayoutTracker(
               onLayoutTrackerCreated: (tracker) {
                 final pipelineOwner = CinderTestBinding.instance.pipelineOwner;
@@ -386,7 +386,7 @@ void main() {
           expect(pipelineOwner.hasNodesToLayout, isFalse);
 
           // Pump a widget that marks dirty
-          await tester.pumpComponent(const _SimpleLayoutComponent());
+          await tester.pumpWidget(const _SimpleLayoutWidget());
 
           // After pump, layout is done, so should be empty again
           expect(pipelineOwner.hasNodesToLayout, isFalse);
@@ -416,8 +416,8 @@ void main() {
           int layoutCount = 0;
           late _TrackingRenderBox tracker;
 
-          await tester.pumpComponent(
-            _LayoutCounterComponent(
+          await tester.pumpWidget(
+            _LayoutCounterWidget(
               onLayoutCounted: () => layoutCount++,
               onRenderBoxCreated: (rb) => tracker = rb,
             ),
@@ -450,7 +450,7 @@ void main() {
           final layoutOrder = <int>[];
           final trackers = <_TrackingRenderBox>[];
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             _DeeplyNestedTrackers(
               depth: 3,
               onTrackerCreated: (rb) {
@@ -490,7 +490,7 @@ void main() {
       await testCinder(
         'requestVisualUpdate schedules frame',
         (tester) async {
-          await tester.pumpComponent(const Text('test'));
+          await tester.pumpWidget(const Text('test'));
 
           // Clear any pending frames
           await tester.pump();
@@ -510,7 +510,7 @@ void main() {
       await testCinder(
         'single frame for multiple requests',
         (tester) async {
-          await tester.pumpComponent(const Text('test'));
+          await tester.pumpWidget(const Text('test'));
 
           final initialFrameCount = tester.frameCount;
           await tester.pump();
@@ -537,8 +537,8 @@ void main() {
         (tester) async {
           late _TrackingRenderBox tracker;
 
-          await tester.pumpComponent(
-            _LayoutCounterComponent(
+          await tester.pumpWidget(
+            _LayoutCounterWidget(
               onLayoutCounted: () {},
               onRenderBoxCreated: (rb) => tracker = rb,
             ),
@@ -561,8 +561,8 @@ void main() {
         (tester) async {
           late _TrackingRenderBox tracker;
 
-          await tester.pumpComponent(
-            _LayoutCounterComponent(
+          await tester.pumpWidget(
+            _LayoutCounterWidget(
               onLayoutCounted: () {},
               onRenderBoxCreated: (rb) => tracker = rb,
             ),
@@ -588,8 +588,8 @@ void main() {
         (tester) async {
           late _TrackingRenderBox tracker;
 
-          await tester.pumpComponent(
-            _LayoutCounterComponent(
+          await tester.pumpWidget(
+            _LayoutCounterWidget(
               onLayoutCounted: () {},
               onRenderBoxCreated: (rb) => tracker = rb,
             ),
@@ -627,7 +627,7 @@ void main() {
           int buildCount = 0;
           late _SimpleBuildCounterState state;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             _SimpleBuildCounter(
               onBuild: () => buildCount++,
               onStateCreated: (s) => state = s,
@@ -656,8 +656,8 @@ void main() {
           int layoutCount = 0;
           late _TrackingRenderBox tracker;
 
-          await tester.pumpComponent(
-            _LayoutCounterComponent(
+          await tester.pumpWidget(
+            _LayoutCounterWidget(
               onLayoutCounted: () => layoutCount++,
               onRenderBoxCreated: (rb) => tracker = rb,
             ),
@@ -684,8 +684,8 @@ void main() {
           int paintCount = 0;
           late _TrackingRenderBox tracker;
 
-          await tester.pumpComponent(
-            _PaintCounterComponent(
+          await tester.pumpWidget(
+            _PaintCounterWidget(
               onPaintCounted: () => paintCount++,
               onRenderBoxCreated: (rb) => tracker = rb,
             ),
@@ -713,7 +713,7 @@ void main() {
           int buildCount = 0;
           late _SimpleBuildCounterState state;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             _SimpleBuildCounter(
               onBuild: () => buildCount++,
               onStateCreated: (s) => state = s,
@@ -746,7 +746,7 @@ void main() {
           int deepestPaintCount = 0;
           final trackers = <_TrackingRenderBox>[];
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             _DeeplyNestedTrackers(
               depth: 5,
               onTrackerCreated: (rb) {
@@ -782,8 +782,8 @@ void main() {
         (tester) async {
           late _TrackingRenderBox tracker;
 
-          await tester.pumpComponent(
-            _LayoutCounterComponent(
+          await tester.pumpWidget(
+            _LayoutCounterWidget(
               onLayoutCounted: () {},
               onRenderBoxCreated: (rb) => tracker = rb,
             ),
@@ -811,8 +811,8 @@ void main() {
         (tester) async {
           late _TrackingRenderBox tracker;
 
-          await tester.pumpComponent(
-            _PaintCounterComponent(
+          await tester.pumpWidget(
+            _PaintCounterWidget(
               onPaintCounted: () {},
               onRenderBoxCreated: (rb) => tracker = rb,
             ),
@@ -840,7 +840,7 @@ void main() {
         (tester) async {
           final trackers = <_TrackingRenderBox>[];
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             _DeeplyNestedTrackers(
               depth: 5,
               onTrackerCreated: (rb) => trackers.add(rb),
@@ -879,8 +879,8 @@ void main() {
           int layoutCount = 0;
           bool shouldMarkDirtyDuringLayout = false;
 
-          await tester.pumpComponent(
-            _LayoutCounterComponent(
+          await tester.pumpWidget(
+            _LayoutCounterWidget(
               onLayoutCounted: () {
                 layoutCount++;
                 if (shouldMarkDirtyDuringLayout && layoutCount < 3) {
@@ -922,8 +922,8 @@ void main() {
           late _TrackingRenderBox tracker;
           int layoutCount = 0;
 
-          await tester.pumpComponent(
-            _LayoutCounterComponent(
+          await tester.pumpWidget(
+            _LayoutCounterWidget(
               onLayoutCounted: () => layoutCount++,
               onRenderBoxCreated: (rb) => tracker = rb,
             ),
@@ -958,8 +958,8 @@ void main() {
           late _TrackingRenderBox tracker;
           int paintCount = 0;
 
-          await tester.pumpComponent(
-            _PaintCounterComponent(
+          await tester.pumpWidget(
+            _PaintCounterWidget(
               onPaintCounted: () => paintCount++,
               onRenderBoxCreated: (rb) => tracker = rb,
             ),
@@ -992,8 +992,8 @@ void main() {
           late _TrackingRenderBox tracker;
           int layoutCount = 0;
 
-          await tester.pumpComponent(
-            _LayoutCounterComponent(
+          await tester.pumpWidget(
+            _LayoutCounterWidget(
               onLayoutCounted: () => layoutCount++,
               onRenderBoxCreated: (rb) => tracker = rb,
             ),
@@ -1027,8 +1027,8 @@ void main() {
           late _TrackingRenderBox tracker;
           int paintCount = 0;
 
-          await tester.pumpComponent(
-            _PaintCounterComponent(
+          await tester.pumpWidget(
+            _PaintCounterWidget(
               onPaintCounted: () => paintCount++,
               onRenderBoxCreated: (rb) => tracker = rb,
             ),
@@ -1062,7 +1062,7 @@ void main() {
           int buildCount = 0;
           late _SimpleBuildCounterState state;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             _SimpleBuildCounter(
               onBuild: () => buildCount++,
               onStateCreated: (s) => state = s,
@@ -1103,8 +1103,8 @@ void main() {
           int paintCount = 0;
           late _TrackingRenderBox tracker;
 
-          await tester.pumpComponent(
-            _PaintCounterComponent(
+          await tester.pumpWidget(
+            _PaintCounterWidget(
               onPaintCounted: () => paintCount++,
               onRenderBoxCreated: (rb) => tracker = rb,
             ),
@@ -1150,7 +1150,7 @@ void main() {
         (tester) async {
           final trackers = <_TrackingRenderBox>[];
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             _DeeplyNestedTrackers(
               depth: 3,
               onTrackerCreated: (rb) => trackers.add(rb),
@@ -1186,7 +1186,7 @@ void main() {
         (tester) async {
           final trackers = <_TrackingRenderBox>[];
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             _DeeplyNestedTrackers(
               depth: 5,
               onTrackerCreated: (rb) => trackers.add(rb),
@@ -1222,7 +1222,7 @@ void main() {
         (tester) async {
           final trackers = <_TrackingRenderBox>[];
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             _DeeplyNestedTrackers(
               depth: 4,
               onTrackerCreated: (rb) => trackers.add(rb),
@@ -1271,7 +1271,7 @@ void main() {
           // always propagates to parent. This test verifies that behavior.
           final trackers = <_TrackingRenderBox>[];
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             _DeeplyNestedTrackers(
               depth: 3,
               onTrackerCreated: (rb) => trackers.add(rb),
@@ -1300,7 +1300,7 @@ void main() {
           final trackers = <_TrackingRenderBox>[];
           final layoutOrder = <int>[];
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             _DeeplyNestedTrackers(
               depth: 3,
               onTrackerCreated: (rb) {
@@ -1332,7 +1332,7 @@ void main() {
 }
 
 // ============================================================================
-// Test Helper Components and Render Objects
+// Test Helper Widgets and Render Objects
 // ============================================================================
 
 /// A custom RenderObject for testing that tracks internal state
@@ -1399,8 +1399,8 @@ class _LayoutTracker extends SingleChildRenderObjectWidget {
 }
 
 /// Widget that counts layouts
-class _LayoutCounterComponent extends SingleChildRenderObjectWidget {
-  const _LayoutCounterComponent({
+class _LayoutCounterWidget extends SingleChildRenderObjectWidget {
+  const _LayoutCounterWidget({
     required this.onLayoutCounted,
     required this.onRenderBoxCreated,
     super.child,
@@ -1419,8 +1419,8 @@ class _LayoutCounterComponent extends SingleChildRenderObjectWidget {
 }
 
 /// Widget that counts paints
-class _PaintCounterComponent extends SingleChildRenderObjectWidget {
-  const _PaintCounterComponent({
+class _PaintCounterWidget extends SingleChildRenderObjectWidget {
+  const _PaintCounterWidget({
     required this.onPaintCounted,
     required this.onRenderBoxCreated,
   });
@@ -1449,10 +1449,10 @@ class _NestedLayoutTrackers extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _LayoutCounterComponent(
+    return _LayoutCounterWidget(
       onLayoutCounted: () {},
       onRenderBoxCreated: onParentCreated,
-      child: _LayoutCounterComponent(
+      child: _LayoutCounterWidget(
         onLayoutCounted: () {},
         onRenderBoxCreated: onChildCreated,
       ),
@@ -1480,7 +1480,7 @@ class _DeeplyNestedTrackers extends StatelessWidget {
       return const Text('leaf');
     }
 
-    return _LayoutCounterComponent(
+    return _LayoutCounterWidget(
       onLayoutCounted: () {},
       onRenderBoxCreated: onTrackerCreated,
       child: remaining > 1 ? _buildNested(remaining - 1) : null,
@@ -1489,8 +1489,8 @@ class _DeeplyNestedTrackers extends StatelessWidget {
 }
 
 /// Simple widget for testing layout
-class _SimpleLayoutComponent extends SingleChildRenderObjectWidget {
-  const _SimpleLayoutComponent();
+class _SimpleLayoutWidget extends SingleChildRenderObjectWidget {
+  const _SimpleLayoutWidget();
 
   @override
   RenderObject createRenderObject(BuildContext context) {

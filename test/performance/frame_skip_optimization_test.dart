@@ -17,7 +17,7 @@ void main() {
       await testCinder(
         'setState marks dirty',
         (tester) async {
-          await tester.pumpComponent(const _BuildCounter());
+          await tester.pumpWidget(const _BuildCounter());
 
           expect(tester.terminalState, containsText('Build count: 1'));
 
@@ -38,7 +38,7 @@ void main() {
       await testCinder(
         'static no rebuilds',
         (tester) async {
-          await tester.pumpComponent(const _BuildCounter());
+          await tester.pumpWidget(const _BuildCounter());
 
           expect(tester.terminalState, containsText('Build count: 1'));
 
@@ -57,7 +57,7 @@ void main() {
       await testCinder(
         'timer rebuilds only on change',
         (tester) async {
-          await tester.pumpComponent(const _TimerCounter());
+          await tester.pumpWidget(const _TimerCounter());
 
           expect(tester.terminalState, containsText('Value: 0'));
 
@@ -90,7 +90,7 @@ void main() {
       await testCinder(
         'unchanged reuses frame',
         (tester) async {
-          await tester.pumpComponent(const Text('Static content'));
+          await tester.pumpWidget(const Text('Static content'));
 
           // Get initial state as string
           final initialOutput = tester.terminalState.toString();
@@ -109,7 +109,7 @@ void main() {
       await testCinder(
         'nested rebuild isolation',
         (tester) async {
-          await tester.pumpComponent(const _NestedCounters());
+          await tester.pumpWidget(const _NestedCounters());
 
           expect(tester.terminalState, containsText('Outer: 1'));
           expect(tester.terminalState, containsText('Inner: 1'));
@@ -133,7 +133,7 @@ void main() {
       await testCinder(
         'spinner rebuild behavior',
         (tester) async {
-          await tester.pumpComponent(const _AnimatingSpinner());
+          await tester.pumpWidget(const _AnimatingSpinner());
 
           final state = _AnimatingSpinner.lastState!;
           expect(state.buildCount, equals(1));
@@ -168,7 +168,7 @@ void main() {
       await testCinder(
         'frame batching',
         (tester) async {
-          await tester.pumpComponent(const _BuildCounter());
+          await tester.pumpWidget(const _BuildCounter());
 
           expect(tester.terminalState, containsText('Build count: 1'));
 
@@ -194,7 +194,7 @@ void main() {
         (tester) async {
           _ComplexTreeTracker.reset();
 
-          await tester.pumpComponent(const _ComplexTree());
+          await tester.pumpWidget(const _ComplexTree());
 
           // Count initial builds
           final initialBuilds = _ComplexTreeTracker.totalBuilds;
@@ -215,7 +215,7 @@ void main() {
       await testCinder(
         'independent widgets',
         (tester) async {
-          await tester.pumpComponent(const _TwoIndependentCounters());
+          await tester.pumpWidget(const _TwoIndependentCounters());
 
           final stateA = _CounterA.lastState!;
           final stateB = _CounterB.lastState!;
@@ -246,7 +246,7 @@ void main() {
       await testCinder(
         'post animation skip',
         (tester) async {
-          await tester.pumpComponent(const _AnimatingSpinner());
+          await tester.pumpWidget(const _AnimatingSpinner());
 
           final state = _AnimatingSpinner.lastState!;
 
@@ -275,7 +275,7 @@ void main() {
 }
 
 // ============================================================================
-// Test Helper Components
+// Test Helper Widgets
 // ============================================================================
 
 /// A simple counter that tracks how many times it builds.

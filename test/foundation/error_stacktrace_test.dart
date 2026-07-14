@@ -8,7 +8,7 @@ void main() {
       await testCinder(
         'layout error with stack trace',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             const Center(
               child: SizedBox(
                 width: 60,
@@ -36,7 +36,7 @@ void main() {
       await testCinder(
         'paint error with stack trace',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             const Center(
               child: SizedBox(
                 width: 70,
@@ -74,7 +74,7 @@ void main() {
       await testCinder(
         'truncated stack trace',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             const Center(
               child: SizedBox(
                 width: 50,
@@ -124,7 +124,7 @@ void main() {
 #2      main (package:test/main.dart:5:10)
 ''');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TUIErrorWidget(
               message: 'Custom Error Display',
               error: fakeError,

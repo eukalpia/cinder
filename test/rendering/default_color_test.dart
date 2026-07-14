@@ -51,7 +51,7 @@ void main() {
       await testCinder(
         'container with default background',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 10,
               height: 3,
@@ -72,7 +72,7 @@ void main() {
         'default background clearing',
         (tester) async {
           // First pump a blue background
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 20,
               height: 5,
@@ -87,7 +87,7 @@ void main() {
           expect(tester.terminalState, containsText('Blue BG'));
 
           // Now pump a container with default background on top
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 20,
               height: 5,
@@ -111,7 +111,7 @@ void main() {
       await testCinder(
         'overlay clearing with default',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Overlay(
               initialEntries: [
                 OverlayEntry(

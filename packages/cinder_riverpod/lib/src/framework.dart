@@ -51,10 +51,10 @@ class ProviderScope extends StatefulWidget {
 
     if (listen) {
       scope = context
-          .dependOnInheritedComponentOfExactType<UncontrolledProviderScope>();
+          .dependOnInheritedWidgetOfExactType<UncontrolledProviderScope>();
     } else {
       scope =
-          context.findAncestorComponentOfExactType<UncontrolledProviderScope>();
+          context.findAncestorWidgetOfExactType<UncontrolledProviderScope>();
     }
 
     if (scope == null) {
@@ -71,10 +71,10 @@ class ProviderScope extends StatefulWidget {
   static _UncontrolledProviderScopeElement scopeElementOf(
       BuildContext context) {
     // Find the InheritedElement for UncontrolledProviderScope
-    // Use the built-in getElementForInheritedComponentOfExactType which uses the
+    // Use the built-in getElementForInheritedWidgetOfExactType which uses the
     // properly maintained _inheritedElements map, rather than walking the parent chain.
     final InheritedElement? element =
-        context.getElementForInheritedComponentOfExactType<
+        context.getElementForInheritedWidgetOfExactType<
             UncontrolledProviderScope>();
 
     if (element == null || element is! _UncontrolledProviderScopeElement) {
@@ -116,11 +116,11 @@ class _ProviderScopeState extends State<ProviderScope> {
   }
 }
 
-/// An [InheritedComponent] that exposes a [ProviderContainer] to its descendants.
+/// An [InheritedWidget] that exposes a [ProviderContainer] to its descendants.
 ///
 /// This is the internal implementation used by [ProviderScope].
 @internal
-class UncontrolledProviderScope extends InheritedComponent {
+class UncontrolledProviderScope extends InheritedWidget {
   const UncontrolledProviderScope({
     super.key,
     required this.container,
@@ -167,12 +167,12 @@ class _UncontrolledProviderScopeElement extends InheritedElement {
     super.updateDependencies(dependent, aspect);
 
     // When a dependency is registered, ensure we have a ProviderDependencies for it
-    // This happens when an element calls dependOnInheritedComponentOfExactType
+    // This happens when an element calls dependOnInheritedWidgetOfExactType
     getDependencies(dependent);
   }
 
   @override
-  void notifyDependent(InheritedComponent oldWidget, Element dependent) {
+  void notifyDependent(InheritedWidget oldWidget, Element dependent) {
     // Called when this InheritedElement changes and needs to notify dependents
     // First, let the dependent's provider dependencies know it's about to rebuild
     final dependencies = _dependents[dependent];

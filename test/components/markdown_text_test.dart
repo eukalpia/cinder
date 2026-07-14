@@ -7,7 +7,7 @@ void main() {
       await testCinder(
         'plain text',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             const MarkdownText('This is plain text'),
           );
 
@@ -21,7 +21,7 @@ void main() {
       await testCinder(
         'bold text',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             const MarkdownText('This is **bold** text'),
           );
 
@@ -35,7 +35,7 @@ void main() {
       await testCinder(
         'italic text',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             const MarkdownText('This is *italic* text'),
           );
 
@@ -49,7 +49,7 @@ void main() {
       await testCinder(
         'headers',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             const MarkdownText('''# Header 1
 ## Header 2
 ### Header 3
@@ -69,7 +69,7 @@ Regular text'''),
       await testCinder(
         'code blocks',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             const MarkdownText('''Some text with `inline code` and:
 
 ```
@@ -94,7 +94,7 @@ More text'''),
       await testCinder(
         'lists',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             const MarkdownText('''Unordered list:
 - Item 1
 - Item 2
@@ -122,7 +122,7 @@ Ordered list:
       await testCinder(
         'links',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             const MarkdownText('Check out [Flutter](https://flutter.dev)!'),
           );
 
@@ -137,7 +137,7 @@ Ordered list:
       await testCinder(
         'blockquotes',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             const MarkdownText('''Normal text
 
 > This is a blockquote
@@ -158,7 +158,7 @@ More normal text'''),
       await testCinder(
         'horizontal rules',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             const MarkdownText('''Above the line
 
 ---
@@ -179,7 +179,7 @@ Below the line'''),
       await testCinder(
         'complex markdown',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             const MarkdownText('''# Welcome to Markdown
 
 This is a **demonstration** of the *markdown* renderer with ~~strikethrough~~.
@@ -226,7 +226,7 @@ That's all folks!'''),
       await testCinder(
         'images',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             const MarkdownText('Here is an image: ![Alt text](image.png)'),
           );
 
@@ -240,7 +240,7 @@ That's all folks!'''),
       await testCinder(
         'simple table',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             const MarkdownText('''| Header 1 | Header 2 |
 |----------|----------|
 | Cell 1   | Cell 2   |
@@ -262,7 +262,7 @@ That's all folks!'''),
         'table smart wrap',
         (tester) async {
           // This table naturally needs ~60 cols but we give it 40
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             const MarkdownText('''| Service | Description |
 |---------|-------------|
 | auth | Authentication and authorization service |
@@ -293,7 +293,7 @@ That's all folks!'''),
       await testCinder(
         'table fits',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             const MarkdownText('''| A | B |
 |---|---|
 | 1 | 2 |'''),
@@ -316,7 +316,7 @@ That's all folks!'''),
         'table multi-line cell padding',
         (tester) async {
           // In a 30-wide terminal, the long cell should wrap while short stays on one line
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             const MarkdownText('''| Key | Value |
 |-----|-------|
 | id | A very long value that must wrap |

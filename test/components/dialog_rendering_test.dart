@@ -26,7 +26,7 @@ void main() {
             ),
           );
 
-          await tester.pumpComponent(navigator);
+          await tester.pumpWidget(navigator);
 
           print('Initial state (main page only):');
           print('Terminal size: ${tester.terminalState.size}');
@@ -108,7 +108,7 @@ void main() {
             ),
           );
 
-          await tester.pumpComponent(navigator);
+          await tester.pumpWidget(navigator);
           final navState = tester.findState<NavigatorState>();
 
           // Show a small dialog that should be centered

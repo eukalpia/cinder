@@ -7,7 +7,7 @@ void main() {
       await testCinder(
         'hover visualization',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 80,
               height: 24,
@@ -37,7 +37,7 @@ void main() {
           int enterX = -1;
           int enterY = -1;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 80,
               height: 24,
@@ -76,7 +76,7 @@ void main() {
           int exitX = -1;
           int exitY = -1;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 80,
               height: 24,
@@ -120,7 +120,7 @@ void main() {
           int lastX = -1;
           int lastY = -1;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 80,
               height: 24,
@@ -162,7 +162,7 @@ void main() {
           bool entered = false;
           bool hovered = false;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 80,
               height: 24,
@@ -197,7 +197,7 @@ void main() {
           bool topEntered = false;
           bool bottomEntered = false;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 80,
               height: 24,
@@ -246,7 +246,7 @@ void main() {
           bool outerEntered = false;
           bool innerEntered = false;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 80,
               height: 24,

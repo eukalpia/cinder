@@ -8,7 +8,7 @@ void main() {
       await testCinder(
         'simple alignment',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: const [
                 SizedBox(

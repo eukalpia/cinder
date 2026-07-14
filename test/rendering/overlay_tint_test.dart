@@ -8,7 +8,7 @@ void main() {
         'overlay dimming',
         (tester) async {
           // Simulate the overlay demo structure
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Overlay(
               initialEntries: [
                 // Base content (like the main screen)

@@ -39,7 +39,7 @@ extension ProviderContext on BuildContext {
 
     // Register this element as depending on the inherited provider scope
     // This ensures we get notified when the scope changes
-    dependOnInheritedComponentOfExactType<UncontrolledProviderScope>();
+    dependOnInheritedWidgetOfExactType<UncontrolledProviderScope>();
 
     // Get the provider scope element
     final scopeElement = ProviderScope.scopeElementOf(this);

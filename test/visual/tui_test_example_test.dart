@@ -57,7 +57,7 @@ void main() {
   group('TUI Testing Framework', () {
     test('can render simple text', () async {
       await testCinder('simple text', (tester) async {
-        await tester.pumpComponent(
+        await tester.pumpWidget(
           Container(
             child: const Text('Hello, TUI!'),
           ),
@@ -70,7 +70,7 @@ void main() {
 
     test('can find text at specific position', () async {
       await testCinder('positioned text', (tester) async {
-        await tester.pumpComponent(
+        await tester.pumpWidget(
           Container(
             padding: const EdgeInsets.only(left: 5, top: 3),
             child: const Text('Positioned'),
@@ -84,7 +84,7 @@ void main() {
 
     test('can detect styled text', () async {
       await testCinder('styled text', (tester) async {
-        await tester.pumpComponent(
+        await tester.pumpWidget(
           Container(
             child: Text(
               'Styled Text',
@@ -104,7 +104,7 @@ void main() {
 
     test('can handle multiple pumps', () async {
       await testCinder('multiple pumps', (tester) async {
-        await tester.pumpComponent(const Counter());
+        await tester.pumpWidget(const Counter());
 
         // Initial state
         expect(tester.terminalState, containsText('Count: 0'));
@@ -120,7 +120,7 @@ void main() {
 
     test('can use snapshot testing', () async {
       await testCinder('snapshot test', (tester) async {
-        await tester.pumpComponent(
+        await tester.pumpWidget(
           Container(
             padding: const EdgeInsets.all(1),
             child: Column(
@@ -148,7 +148,7 @@ void main() {
 
     test('can render complex layouts', () async {
       await testCinder('complex layout', (tester) async {
-        await tester.pumpComponent(
+        await tester.pumpWidget(
           Container(
             padding: const EdgeInsets.all(2),
             child: Column(
@@ -182,7 +182,7 @@ void main() {
 
     test('can debug render output', () async {
       await testCinder('debug output', (tester) async {
-        await tester.pumpComponent(
+        await tester.pumpWidget(
           Container(
             padding: const EdgeInsets.all(1),
             child: const Text('Debug Me'),
@@ -201,7 +201,7 @@ void main() {
 
     test('detects empty terminal', () async {
       await testCinder('empty terminal', (tester) async {
-        await tester.pumpComponent(Container());
+        await tester.pumpWidget(Container());
 
         // Terminal should be empty
         expect(tester.terminalState, isEmpty);
@@ -210,7 +210,7 @@ void main() {
 
     test('can find components', () async {
       await testCinder('find components', (tester) async {
-        await tester.pumpComponent(
+        await tester.pumpWidget(
           Column(
             children: [
               const Text('First'),
@@ -223,10 +223,10 @@ void main() {
         );
 
         // Find specific widget types
-        final texts = tester.findAllComponents<Text>();
+        final texts = tester.findAllWidgets<Text>();
         expect(texts.length, 3);
 
-        final container = tester.findComponent<Container>();
+        final container = tester.findWidget<Container>();
         expect(container, isNotNull);
       });
     });
@@ -235,7 +235,7 @@ void main() {
       await testCinder(
         'custom size',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               child: const Text('Small Terminal'),
             ),

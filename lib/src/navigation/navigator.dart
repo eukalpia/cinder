@@ -188,7 +188,7 @@ class NavigatorState extends State<Navigator> {
   }
 
   /// Push a widget directly onto the navigation stack.
-  Future<T?> pushComponent<T>(Widget widget, {String? name}) {
+  Future<T?> pushWidget<T>(Widget widget, {String? name}) {
     final route = PageRoute<T>(
       builder: (context) => widget,
       settings: RouteSettings(name: name),
@@ -267,7 +267,7 @@ class NavigatorState extends State<Navigator> {
   }
 
   /// Push a widget and replace the current top route
-  Future<T?> pushReplacementComponent<T, TO>(Widget widget,
+  Future<T?> pushReplacementWidget<T, TO>(Widget widget,
       {String? name, TO? result}) {
     final route = PageRoute<T>(
       builder: (context) => widget,

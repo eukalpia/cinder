@@ -12,7 +12,7 @@ void main() {
           int buildCount = 0;
           final builtIndices = <int>{};
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -60,7 +60,7 @@ void main() {
           final scrollController = ScrollController();
           int buildCount = 0;
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -122,7 +122,7 @@ void main() {
           }
 
           // Initial render with item 0 selected
-          await tester.pumpComponent(buildList(selectedIndex));
+          await tester.pumpWidget(buildList(selectedIndex));
 
           expect(tester.terminalState.containsText('> Item 0'), isTrue,
               reason: 'Item 0 should be selected initially');
@@ -131,7 +131,7 @@ void main() {
 
           // Change selection to item 1
           selectedIndex = 1;
-          await tester.pumpComponent(buildList(selectedIndex));
+          await tester.pumpWidget(buildList(selectedIndex));
 
           expect(tester.terminalState.containsText('> Item 0'), isFalse,
               reason: 'Item 0 should no longer be selected');
@@ -140,7 +140,7 @@ void main() {
 
           // Change selection to item 2
           selectedIndex = 2;
-          await tester.pumpComponent(buildList(selectedIndex));
+          await tester.pumpWidget(buildList(selectedIndex));
 
           expect(tester.terminalState.containsText('> Item 1'), isFalse,
               reason: 'Item 1 should no longer be selected');
@@ -158,7 +158,7 @@ void main() {
           final scrollController = ScrollController();
 
           // Start with 3 items
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -179,7 +179,7 @@ void main() {
               reason: 'Item 5 should not exist yet');
 
           // Increase to 10 items
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -212,7 +212,7 @@ void main() {
           int buildCount = 0;
 
           // First render
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 3,
@@ -231,7 +231,7 @@ void main() {
           expect(tester.terminalState.containsText('Version 1'), isTrue);
 
           // Second render with different content
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 3,
@@ -270,7 +270,7 @@ void main() {
           int buildCount = 0;
 
           // Create a list with 10,000 items and fixed itemExtent for O(1) jumping
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -315,7 +315,7 @@ void main() {
           final scrollController = ScrollController();
           final builtIndices = <int>{};
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,

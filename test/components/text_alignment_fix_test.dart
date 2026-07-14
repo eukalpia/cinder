@@ -8,7 +8,7 @@ void main() {
       await testCinder(
         'proper alignment',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               padding: const EdgeInsets.all(1),
@@ -65,7 +65,7 @@ void main() {
       await testCinder(
         'sized box alignment',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               padding: const EdgeInsets.all(1),
@@ -103,7 +103,7 @@ void main() {
       await testCinder(
         'expanded alignment',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               padding: const EdgeInsets.all(1),

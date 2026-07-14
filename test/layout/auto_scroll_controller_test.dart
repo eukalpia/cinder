@@ -10,7 +10,7 @@ void main() {
           final scrollController = AutoScrollController();
           final items = List.generate(5, (i) => 'Message ${i + 1}');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: [
                 Expanded(
@@ -33,7 +33,7 @@ void main() {
           // Add more items to trigger scrolling
           items.addAll(List.generate(20, (i) => 'Message ${i + 6}'));
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: [
                 Expanded(
@@ -68,7 +68,7 @@ void main() {
               AutoScrollController(autoScrollThreshold: 10);
           final items = List.generate(30, (i) => 'Message ${i + 1}');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: [
                 Expanded(
@@ -96,7 +96,7 @@ void main() {
           // Add new items
           items.addAll(['New Message 1', 'New Message 2']);
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: [
                 Expanded(
@@ -130,7 +130,7 @@ void main() {
               AutoScrollController(autoScrollThreshold: 10);
           final items = List.generate(30, (i) => 'Message ${i + 1}');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: [
                 Expanded(
@@ -162,7 +162,7 @@ void main() {
           // Add new items
           items.add('New Message');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: [
                 Expanded(
@@ -195,7 +195,7 @@ void main() {
           final scrollController = AutoScrollController();
           final items = List.generate(30, (i) => 'Message ${i + 1}');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: [
                 Expanded(
@@ -217,7 +217,7 @@ void main() {
 
           // Add items - should not auto-scroll
           items.add('New Message');
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Column(
               children: [
                 Expanded(

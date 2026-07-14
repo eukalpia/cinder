@@ -140,7 +140,7 @@ void main() {
       await testCinder(
         'image placeholder',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: img.Image.file(
                 '/nonexistent/path.png',
@@ -162,7 +162,7 @@ void main() {
       await testCinder(
         'image error',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: img.Image.file(
                 '/definitely/not/a/real/file.png',
@@ -208,7 +208,7 @@ void main() {
           // not raw pixels. This test demonstrates the widget structure.
           // For actual sixel rendering, you'd need a terminal that supports it.
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: SizedBox(
                 width: 20,
@@ -231,7 +231,7 @@ void main() {
         'render image size',
         (tester) async {
           // Test that Image widget respects size constraints
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Center(
               child: SizedBox(
                 width: 20,

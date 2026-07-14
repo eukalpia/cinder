@@ -188,7 +188,7 @@ class CinderApp extends StatefulWidget {
   /// The theme to use for this application.
   ///
   /// If provided, this theme will be applied to all descendant components
-  /// via [TuiTheme]. Components can access it using `TuiTheme.of(context)`.
+  /// via [TuiTheme]. Widgets can access it using `TuiTheme.of(context)`.
   ///
   /// If null, the theme will be auto-detected based on terminal brightness.
   /// See the class documentation for details on the detection methods.

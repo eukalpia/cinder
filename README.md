@@ -73,7 +73,7 @@ Test your TUI components just like Flutter widgets:
 
 ```dart
 await testCinder('counter test', (tester) async {
-  await tester.pumpComponent(Counter());
+  await tester.pumpWidget(Counter());
   await tester.sendKey(LogicalKey.space);
 
   expect(tester.terminalState, containsText('Count: 1'));

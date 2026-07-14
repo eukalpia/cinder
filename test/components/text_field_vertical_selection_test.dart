@@ -10,7 +10,7 @@ void main() {
           final controller =
               TextEditingController(text: 'Line 1\nLine 2\nLine 3');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 30,
               height: 5,
@@ -92,7 +92,7 @@ void main() {
           final controller = TextEditingController(
               text: 'First line\nSecond line\nThird line');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Container(
               width: 40,
               height: 5,

@@ -2,12 +2,12 @@ import 'package:cinder/cinder.dart';
 
 /// A widget that simplify the writing of deeply nested widget trees.
 ///
-/// It relies on the new kind of widget [SingleChildComponent], which has two
+/// It relies on the new kind of widget [SingleChildWidget], which has two
 /// concrete implementations:
-/// - [SingleChildStatelessComponent]
-/// - [SingleChildStatefulComponent]
+/// - [SingleChildStatelessWidget]
+/// - [SingleChildStatefulWidget]
 ///
-/// They are both respectively a [SingleChildComponent] variant of [StatelessWidget]
+/// They are both respectively a [SingleChildWidget] variant of [StatelessWidget]
 /// and [StatefulWidget].
 ///
 /// The difference between a widget and its single-child variant is that they have
@@ -16,36 +16,36 @@ import 'package:cinder/cinder.dart';
 /// As such, a `StatelessWidget` would be:
 ///
 /// ```dart
-/// class MyComponent extends StatelessWidget {
-///   MyComponent({Key key, this.child}): super(key: key);
+/// class MyWidget extends StatelessWidget {
+///   MyWidget({Key key, this.child}): super(key: key);
 ///
 ///   final Widget child;
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
-///     return SomethingComponent(child: child);
+///     return SomethingWidget(child: child);
 ///   }
 /// }
 /// ```
 ///
-/// Whereas a [SingleChildStatelessComponent] would be:
+/// Whereas a [SingleChildStatelessWidget] would be:
 ///
 /// ```dart
-/// class MyComponent extends SingleChildStatelessComponent {
-///   MyComponent({Key key, Widget child}): super(key: key, child: child);
+/// class MyWidget extends SingleChildStatelessWidget {
+///   MyWidget({Key key, Widget child}): super(key: key, child: child);
 ///
 ///   @override
 ///   Widget buildWithChild(BuildContext context, Widget child) {
-///     return SomethingComponent(child: child);
+///     return SomethingWidget(child: child);
 ///   }
 /// }
 /// ```
 ///
-/// This allows our new `MyComponent` to be used both with:
+/// This allows our new `MyWidget` to be used both with:
 ///
 /// ```dart
-/// MyComponent(
-///   child: AnotherComponent(),
+/// MyWidget(
+///   child: AnotherWidget(),
 /// )
 /// ```
 ///
@@ -54,24 +54,24 @@ import 'package:cinder/cinder.dart';
 /// ```dart
 /// Nested(
 ///   children: [
-///     MyComponent(),
+///     MyWidget(),
 ///     ...
 ///   ],
-///   child: AnotherComponent(),
+///   child: AnotherWidget(),
 /// )
 /// ```
-class Nested extends StatelessWidget implements SingleChildComponent {
+class Nested extends StatelessWidget implements SingleChildWidget {
   /// Allows configuring key, children and child
   Nested({
     Key? key,
-    required List<SingleChildComponent> children,
+    required List<SingleChildWidget> children,
     Widget? child,
   })  : assert(children.isNotEmpty),
         _children = children,
         _child = child,
         super(key: key);
 
-  final List<SingleChildComponent> _children;
+  final List<SingleChildWidget> _children;
   final Widget? _child;
 
   @override
@@ -84,7 +84,7 @@ class Nested extends StatelessWidget implements SingleChildComponent {
 }
 
 class _NestedElement extends StatelessElement
-    with SingleChildComponentElementMixin {
+    with SingleChildWidgetElementMixin {
   _NestedElement(Nested widget) : super(widget);
 
   @override
@@ -100,7 +100,7 @@ class _NestedElement extends StatelessElement
     for (final child in widget._children.reversed) {
       nextNode = nestedHook = _NestedHook(
         owner: this,
-        wrappedComponent: child,
+        wrappedWidget: child,
         injectedChild: nextNode,
       );
     }
@@ -111,7 +111,7 @@ class _NestedElement extends StatelessElement
       // then N+1 wouldn't rebuild because N didn't change
       for (final node in nodes) {
         node
-          ..wrappedChild = nestedHook!.wrappedComponent
+          ..wrappedChild = nestedHook!.wrappedWidget
           ..injectedChild = nestedHook.injectedChild;
 
         final next = nestedHook.injectedChild;
@@ -130,11 +130,11 @@ class _NestedElement extends StatelessElement
 class _NestedHook extends StatelessWidget {
   _NestedHook({
     this.injectedChild,
-    required this.wrappedComponent,
+    required this.wrappedWidget,
     required this.owner,
   });
 
-  final SingleChildComponent wrappedComponent;
+  final SingleChildWidget wrappedWidget;
   final Widget? injectedChild;
   final _NestedElement owner;
 
@@ -159,8 +159,8 @@ class _NestedHookElement extends StatelessElement {
     if (value is _NestedHook &&
         previous is _NestedHook &&
         Widget.canUpdate(
-          value.wrappedComponent,
-          previous.wrappedComponent,
+          value.wrappedWidget,
+          previous.wrappedWidget,
         )) {
       // no need to rebuild the wrapped widget just for a _NestedHook.
       // The widget doesn't matter here, only its Element.
@@ -172,9 +172,9 @@ class _NestedHookElement extends StatelessElement {
     }
   }
 
-  SingleChildComponent? _wrappedChild;
-  SingleChildComponent? get wrappedChild => _wrappedChild;
-  set wrappedChild(SingleChildComponent? value) {
+  SingleChildWidget? _wrappedChild;
+  SingleChildWidget? get wrappedChild => _wrappedChild;
+  set wrappedChild(SingleChildWidget? value) {
     if (_wrappedChild != value) {
       _wrappedChild = value;
       markNeedsBuild();
@@ -184,7 +184,7 @@ class _NestedHookElement extends StatelessElement {
   @override
   void mount(Element? parent, dynamic newSlot) {
     widget.owner.nodes.add(this);
-    _wrappedChild = widget.wrappedComponent;
+    _wrappedChild = widget.wrappedWidget;
     _injectedChild = widget.injectedChild;
     super.mount(parent, newSlot);
   }
@@ -203,17 +203,17 @@ class _NestedHookElement extends StatelessElement {
 
 /// A [Widget] that takes a single descendant.
 ///
-/// As opposed to [ProxyComponent], it may have a "build" method.
+/// As opposed to [ProxyWidget], it may have a "build" method.
 ///
 /// See also:
-/// - [SingleChildStatelessComponent]
-/// - [SingleChildStatefulComponent]
-abstract class SingleChildComponent implements Widget {
+/// - [SingleChildStatelessWidget]
+/// - [SingleChildStatefulWidget]
+abstract class SingleChildWidget implements Widget {
   @override
-  SingleChildComponentElementMixin createElement();
+  SingleChildWidgetElementMixin createElement();
 }
 
-mixin SingleChildComponentElementMixin on Element {
+mixin SingleChildWidgetElementMixin on Element {
   _NestedHookElement? _parent;
 
   @override
@@ -236,14 +236,14 @@ mixin SingleChildComponentElementMixin on Element {
   }
 }
 
-/// A [StatelessWidget] that implements [SingleChildComponent] and is therefore
+/// A [StatelessWidget] that implements [SingleChildWidget] and is therefore
 /// compatible with [Nested].
 ///
 /// Its [build] method must **not** be overriden. Instead use [buildWithChild].
-abstract class SingleChildStatelessComponent extends StatelessWidget
-    implements SingleChildComponent {
+abstract class SingleChildStatelessWidget extends StatelessWidget
+    implements SingleChildWidget {
   /// Creates a widget that has exactly one child widget.
-  const SingleChildStatelessComponent({Key? key, Widget? child})
+  const SingleChildStatelessWidget({Key? key, Widget? child})
       : _child = child,
         super(key: key);
 
@@ -252,7 +252,7 @@ abstract class SingleChildStatelessComponent extends StatelessWidget
   /// A [build] method that receives an extra `child` parameter.
   ///
   /// This method may be called with a `child` different from the parameter
-  /// passed to the constructor of [SingleChildStatelessComponent].
+  /// passed to the constructor of [SingleChildStatelessWidget].
   /// It may also be called again with a different `child`, without this widget
   /// being recreated.
   Widget buildWithChild(BuildContext context, Widget? child);
@@ -266,11 +266,11 @@ abstract class SingleChildStatelessComponent extends StatelessWidget
   }
 }
 
-/// An [Element] that uses a [SingleChildStatelessComponent] as its configuration.
+/// An [Element] that uses a [SingleChildStatelessWidget] as its configuration.
 class SingleChildStatelessElement extends StatelessElement
-    with SingleChildComponentElementMixin {
+    with SingleChildWidgetElementMixin {
   /// Creates an element that uses the given widget as its configuration.
-  SingleChildStatelessElement(SingleChildStatelessComponent widget)
+  SingleChildStatelessElement(SingleChildStatelessWidget widget)
       : super(widget);
 
   @override
@@ -282,15 +282,15 @@ class SingleChildStatelessElement extends StatelessElement
   }
 
   @override
-  SingleChildStatelessComponent get widget =>
-      super.widget as SingleChildStatelessComponent;
+  SingleChildStatelessWidget get widget =>
+      super.widget as SingleChildStatelessWidget;
 }
 
 /// A [StatefulWidget] that is compatible with [Nested].
-abstract class SingleChildStatefulComponent extends StatefulWidget
-    implements SingleChildComponent {
+abstract class SingleChildStatefulWidget extends StatefulWidget
+    implements SingleChildWidget {
   /// Creates a widget that has exactly one child widget.
-  const SingleChildStatefulComponent({Key? key, Widget? child})
+  const SingleChildStatefulWidget({Key? key, Widget? child})
       : _child = child,
         super(key: key);
 
@@ -302,15 +302,15 @@ abstract class SingleChildStatefulComponent extends StatefulWidget
   }
 }
 
-/// A [State] for [SingleChildStatefulComponent].
+/// A [State] for [SingleChildStatefulWidget].
 ///
 /// Do not override [build] and instead override [buildWithChild].
-abstract class SingleChildState<T extends SingleChildStatefulComponent>
+abstract class SingleChildState<T extends SingleChildStatefulWidget>
     extends State<T> {
   /// A [build] method that receives an extra `child` parameter.
   ///
   /// This method may be called with a `child` different from the parameter
-  /// passed to the constructor of [SingleChildStatelessComponent].
+  /// passed to the constructor of [SingleChildStatelessWidget].
   /// It may also be called again with a different `child`, without this widget
   /// being recreated.
   Widget buildWithChild(BuildContext context, Widget? child);
@@ -320,20 +320,20 @@ abstract class SingleChildState<T extends SingleChildStatefulComponent>
       buildWithChild(context, widget._child);
 }
 
-/// An [Element] that uses a [SingleChildStatefulComponent] as its configuration.
+/// An [Element] that uses a [SingleChildStatefulWidget] as its configuration.
 class SingleChildStatefulElement extends StatefulElement
-    with SingleChildComponentElementMixin {
+    with SingleChildWidgetElementMixin {
   /// Creates an element that uses the given widget as its configuration.
-  SingleChildStatefulElement(SingleChildStatefulComponent widget)
+  SingleChildStatefulElement(SingleChildStatefulWidget widget)
       : super(widget);
 
   @override
-  SingleChildStatefulComponent get widget =>
-      super.widget as SingleChildStatefulComponent;
+  SingleChildStatefulWidget get widget =>
+      super.widget as SingleChildStatefulWidget;
 
   @override
-  SingleChildState<SingleChildStatefulComponent> get state =>
-      super.state as SingleChildState<SingleChildStatefulComponent>;
+  SingleChildState<SingleChildStatefulWidget> get state =>
+      super.state as SingleChildState<SingleChildStatefulWidget>;
 
   @override
   Widget build() {
@@ -344,10 +344,10 @@ class SingleChildStatefulElement extends StatefulElement
   }
 }
 
-/// A [SingleChildComponent] that delegates its implementation to a callback.
+/// A [SingleChildWidget] that delegates its implementation to a callback.
 ///
 /// It works like [Builder], but is compatible with [Nested].
-class SingleChildBuilder extends SingleChildStatelessComponent {
+class SingleChildBuilder extends SingleChildStatelessWidget {
   /// Creates a widget that delegates its build to a callback.
   ///
   /// The [builder] argument must not be null.
@@ -366,8 +366,8 @@ class SingleChildBuilder extends SingleChildStatelessComponent {
   }
 }
 
-mixin SingleChildStatelessComponentMixin
-    implements StatelessWidget, SingleChildStatelessComponent {
+mixin SingleChildStatelessWidgetMixin
+    implements StatelessWidget, SingleChildStatelessWidget {
   Widget? get child;
 
   @override
@@ -384,8 +384,8 @@ mixin SingleChildStatelessComponentMixin
   }
 }
 
-mixin SingleChildStatefulComponentMixin on StatefulWidget
-    implements SingleChildComponent {
+mixin SingleChildStatefulWidgetMixin on StatefulWidget
+    implements SingleChildWidget {
   Widget? get child;
 
   @override
@@ -400,19 +400,19 @@ mixin SingleChildStateMixin<T extends StatefulWidget> on State<T> {
   Widget build(BuildContext context) {
     return buildWithChild(
       context,
-      (widget as SingleChildStatefulComponentMixin).child!,
+      (widget as SingleChildStatefulWidgetMixin).child!,
     );
   }
 }
 
 class _SingleChildStatefulMixinElement extends StatefulElement
-    with SingleChildComponentElementMixin {
-  _SingleChildStatefulMixinElement(SingleChildStatefulComponentMixin widget)
+    with SingleChildWidgetElementMixin {
+  _SingleChildStatefulMixinElement(SingleChildStatefulWidgetMixin widget)
       : super(widget);
 
   @override
-  SingleChildStatefulComponentMixin get widget =>
-      super.widget as SingleChildStatefulComponentMixin;
+  SingleChildStatefulWidgetMixin get widget =>
+      super.widget as SingleChildStatefulWidgetMixin;
 
   @override
   SingleChildStateMixin<StatefulWidget> get state =>
@@ -428,7 +428,7 @@ class _SingleChildStatefulMixinElement extends StatefulElement
 }
 
 mixin SingleChildInheritedElementMixin
-    on InheritedElement, SingleChildComponentElementMixin {
+    on InheritedElement, SingleChildWidgetElementMixin {
   @override
   Widget build() {
     if (_parent != null) {

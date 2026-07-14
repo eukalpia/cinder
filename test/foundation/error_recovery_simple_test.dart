@@ -8,7 +8,7 @@ void main() {
       await testCinder(
         'error box constraint',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             Row(
               children: [
                 const Text('A'),
@@ -57,7 +57,7 @@ void main() {
       await testCinder(
         'direct error widget',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             const Center(
               child: SizedBox(
                 width: 40,
@@ -84,7 +84,7 @@ void main() {
       await testCinder(
         'paint error display',
         (tester) async {
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             const Center(
               child: SizedBox(
                 width: 40,

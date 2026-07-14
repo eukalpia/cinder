@@ -10,7 +10,7 @@ void main() {
         (tester) async {
           final controller = TextEditingController(text: '');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TextField(
               controller: controller,
               width: 20,
@@ -54,7 +54,7 @@ void main() {
         (tester) async {
           final controller = TextEditingController(text: '');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TextField(
               controller: controller,
               width: 10,
@@ -93,7 +93,7 @@ void main() {
         (tester) async {
           final controller = TextEditingController(text: '');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TextField(
               controller: controller,
               width: 12,
@@ -132,7 +132,7 @@ void main() {
         (tester) async {
           final controller = TextEditingController(text: '');
 
-          await tester.pumpComponent(
+          await tester.pumpWidget(
             TextField(
               controller: controller,
               width: 8,
