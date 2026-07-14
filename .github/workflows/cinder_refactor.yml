@@ -1,0 +1,66 @@
+name: Cinder breaking refactor
+
+on:
+  push:
+    branches:
+      - agent/flutter-core-breaking-refactor
+    paths:
+      - .github/scripts/cinder_breaking_refactor.py
+      - .github/workflows/cinder_refactor.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    if: ${{ !contains(github.event.head_commit.message || '', '[cinder-refactor]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: agent/flutter-core-breaking-refactor
+          fetch-depth: 0
+
+      - name: Set up Dart
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+
+      - name: Apply breaking migration
+        run: python3 .github/scripts/cinder_breaking_refactor.py
+
+      - name: Install dependencies
+        run: dart pub get
+
+      - name: Format source
+        run: dart format lib test example benchmark
+
+      - name: Analyze root package
+        run: dart analyze lib test example benchmark
+
+      - name: Run root tests
+        run: dart test -r expanded
+
+      - name: Verify legacy API is gone
+        shell: bash
+        run: |
+          test ! -e lib/src/app.dart
+          test ! -e lib/src/frame.dart
+          test -e lib/cinder.dart
+          ! grep -R "package:nocterm" --include='*.dart' lib test example benchmark
+          ! grep -R "class Component" --include='*.dart' lib
+          ! grep -R "StatelessComponent\|StatefulComponent\|RenderObjectComponent" --include='*.dart' lib
+
+      - name: Commit migration
+        shell: bash
+        run: |
+          git config user.name "Cinder Migration Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A
+          git diff --cached --stat
+          git commit -m "[cinder-refactor] replace legacy API with Flutter-style widgets"
+          git push origin HEAD:agent/flutter-core-breaking-refactor
