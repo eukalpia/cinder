@@ -1,0 +1,72 @@
+name: Diagnose Renderer Packages
+
+on:
+  pull_request:
+    branches: [dev]
+    paths:
+      - '.github/workflows/diagnose_renderer_packages.yml'
+      - '.github/release_payload/**'
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: feature/renderer-production
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+      - name: Apply payloads
+        run: |
+          python3 - <<'PY'
+          import base64, gzip, io, subprocess, tarfile
+          from pathlib import Path
+          root = Path.cwd().resolve()
+          payload = root / '.github' / 'release_payload'
+          def decode(name):
+              return gzip.decompress(base64.b64decode((payload / name).read_text()))
+          def patch(name, payload_name):
+              path = Path('/tmp') / name
+              path.write_bytes(decode(payload_name))
+              subprocess.run(['git', 'apply', '--whitespace=nowarn', str(path)], check=True)
+          def extract(payload_name):
+              with tarfile.open(fileobj=io.BytesIO(decode(payload_name)), mode='r:') as archive:
+                  archive.extractall(root, filter='data')
+          patch('phase23.patch', 'phase23.b64')
+          extract('icons.b64')
+          patch('image.patch', 'image_docs_patch.b64')
+          extract('docs.b64')
+          patch('fix1.patch', 'fix1.b64')
+          patch('fix2.patch', 'fix2.b64')
+          PY
+      - run: python3 tool/generate_icon_packs.py
+      - name: Analyze and test packages
+        shell: bash
+        run: |
+          mkdir -p /tmp/package-logs
+          failed=0
+          for package in cinder_nested cinder_provider cinder_riverpod cinder_bloc cinder_material_icons cinder_lucide; do
+            (
+              set +e
+              cd "packages/$package"
+              dart pub get > "/tmp/package-logs/$package-pub-get.log" 2>&1
+              get_status=$?
+              dart analyze --fatal-infos > "/tmp/package-logs/$package-analyze.log" 2>&1
+              analyze_status=$?
+              test_status=0
+              if find test -name '*_test.dart' -print -quit 2>/dev/null | grep -q .; then
+                dart test --reporter expanded > "/tmp/package-logs/$package-test.log" 2>&1
+                test_status=$?
+              fi
+              printf 'pub_get=%s\nanalyze=%s\ntest=%s\n' "$get_status" "$analyze_status" "$test_status" > "/tmp/package-logs/$package-status.txt"
+              exit $(( get_status || analyze_status || test_status ))
+            ) || failed=1
+          done
+          exit "$failed"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: renderer-production-packages
+          path: /tmp/package-logs
