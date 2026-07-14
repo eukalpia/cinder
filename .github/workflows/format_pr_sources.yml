@@ -1,4 +1,4 @@
-name: Format Renderer V2 PR sources
+name: Diagnose Renderer V2 formatting
 
 on:
   pull_request:
@@ -20,43 +20,28 @@ jobs:
       - uses: dart-lang/setup-dart@v1
         with:
           sdk: stable
-      - name: Format only changed production files
+      - name: Reproduce changed-file formatting
+        shell: bash
         run: |
-          dart format \
-            benchmark/renderer_v2_benchmark.dart \
-            lib/src/binding/terminal_binding.dart \
-            lib/src/buffer.dart \
-            lib/src/components/focus.dart \
-            lib/src/framework/terminal_canvas.dart \
-            lib/src/rendering/frame_diff.dart \
-            lib/src/utils/escape_codes.dart \
-            packages/cinder_riverpod/lib/cinder_riverpod.dart \
-            packages/cinder_riverpod/lib/src/framework.dart \
-            packages/cinder_riverpod/lib/src/provider_context.dart \
-            packages/cinder_riverpod/lib/src/provider_dependencies.dart \
-            test/rendering/buffer_v2_test.dart \
-            test/rendering/frame_diff_test.dart
-      - name: Commit formatting
+          git fetch origin main
+          mapfile -t files < <(git diff --name-only --diff-filter=ACMR origin/main HEAD | grep -E '^(lib|test|example|benchmark|packages/cinder_riverpod)/.*\.dart$' || true)
+          {
+            echo 'Changed Dart files:'
+            printf '%s\n' "${files[@]}"
+            echo
+          } > format_diagnostic.log
+          if [ "${#files[@]}" -gt 0 ]; then
+            dart format "${files[@]}" >> format_diagnostic.log 2>&1
+          fi
+          {
+            echo
+            echo 'Files modified by Dart 3.12.2 formatter:'
+            git diff --name-only
+          } >> format_diagnostic.log
+      - name: Commit formatting and report
         run: |
           git config user.name "Cinder Format Bot"
           git config user.email "actions@users.noreply.github.com"
-          git add \
-            benchmark/renderer_v2_benchmark.dart \
-            lib/src/binding/terminal_binding.dart \
-            lib/src/buffer.dart \
-            lib/src/components/focus.dart \
-            lib/src/framework/terminal_canvas.dart \
-            lib/src/rendering/frame_diff.dart \
-            lib/src/utils/escape_codes.dart \
-            packages/cinder_riverpod/lib/cinder_riverpod.dart \
-            packages/cinder_riverpod/lib/src/framework.dart \
-            packages/cinder_riverpod/lib/src/provider_context.dart \
-            packages/cinder_riverpod/lib/src/provider_dependencies.dart \
-            test/rendering/buffer_v2_test.dart \
-            test/rendering/frame_diff_test.dart
-          if git diff --cached --quiet; then
-            echo "PR sources already formatted."
-            exit 0
-          fi
-          git commit --no-verify -m "style: format Renderer V2 PR sources"
+          git add -A -- '*.dart' format_diagnostic.log
+          git commit --no-verify -m "style: normalize changed Cinder sources"
           git push origin HEAD:dev
