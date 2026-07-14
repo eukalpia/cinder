@@ -8,23 +8,20 @@ class BlocProvider<T extends StateStreamableSource<Object?>>
     extends SingleChildStatelessWidget {
   const BlocProvider({
     required T Function(BuildContext context) create,
-    Key? key,
-    this.child,
+    super.key,
+    super.child,
     this.lazy = true,
   })  : _create = create,
-        _value = null,
-        super(key: key, child: child);
+        _value = null;
 
   const BlocProvider.value({
     required T value,
-    Key? key,
-    this.child,
+    super.key,
+    super.child,
   })  : _value = value,
         _create = null,
-        lazy = true,
-        super(key: key, child: child);
+        lazy = true;
 
-  final Widget? child;
   final bool lazy;
   final T Function(BuildContext context)? _create;
   final T? _value;
