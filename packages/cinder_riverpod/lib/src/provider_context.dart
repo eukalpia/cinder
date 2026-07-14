@@ -1,71 +1,33 @@
+// ignore_for_file: invalid_use_of_internal_member
+
 import 'package:cinder/cinder.dart';
-import 'package:riverpod/riverpod.dart';
+import 'package:riverpod/src/internals.dart';
 
 import 'framework.dart';
 
-/// Extension methods on [BuildContext] for interacting with providers.
+/// Extension methods on [BuildContext] for interacting with Riverpod.
 extension ProviderContext on BuildContext {
   /// Read a provider value without listening to changes.
-  ///
-  /// This will not cause the widget to rebuild when the provider changes.
-  /// Use this for one-time reads or in event handlers.
-  ///
-  /// ```dart
-  /// onPressed: () {
-  ///   final value = context.read(myProvider);
-  ///   // Use value...
-  /// }
-  /// ```
   T read<T>(ProviderListenable<T> provider) {
     final container = ProviderScope.containerOf(this, listen: false);
     return container.read(provider);
   }
 
-  /// Watch a provider and rebuild when it changes.
+  /// Watch a provider and rebuild this widget when it changes.
   ///
-  /// This will cause the widget to rebuild whenever the provider's value changes.
-  /// Should only be called during the build method.
-  ///
-  /// ```dart
-  /// @override
-  /// Widget build(BuildContext context) {
-  ///   final value = context.watch(myProvider);
-  ///   return Text(value.toString());
-  /// }
-  /// ```
+  /// Call this only while building a widget.
   T watch<T>(ProviderListenable<T> provider) {
     final element = this as Element;
     assert(element.mounted, 'watch called on an unmounted widget');
 
-    // Register this element as depending on the inherited provider scope
-    // This ensures we get notified when the scope changes
-    dependOnInheritedWidgetOfExactType<UncontrolledProviderScope>();
-
-    // Get the provider scope element
     final scopeElement = ProviderScope.scopeElementOf(this);
-
-    // Get or create dependencies for this element
     final dependencies = scopeElement.getDependencies(element);
-
-    // Watch the provider through the dependency tracker
     return dependencies.watch(provider, scopeElement.container);
   }
 
-  /// Listen to a provider with a callback.
+  /// Listen to a provider without implicitly rebuilding this widget.
   ///
-  /// The callback will be called whenever the provider's value changes.
-  /// The subscription is automatically managed and will be disposed when
-  /// the widget is unmounted.
-  ///
-  /// ```dart
-  /// @override
-  /// void initState() {
-  ///   super.initState();
-  ///   context.listen(myProvider, (previous, next) {
-  ///     print('Value changed from $previous to $next');
-  ///   });
-  /// }
-  /// ```
+  /// The subscription is owned by the element and disposed automatically.
   void listen<T>(
     ProviderListenable<T> provider,
     void Function(T? previous, T next) listener, {
@@ -73,14 +35,9 @@ extension ProviderContext on BuildContext {
     void Function(Object error, StackTrace stackTrace)? onError,
   }) {
     final element = this as Element;
-
-    // Get the provider scope element (don't register as dependent for listen)
-    final scopeElement = ProviderScope.scopeElementOf(this);
-
-    // Get or create dependencies for this element
+    final scopeElement = ProviderScope.scopeElementOf(this, listen: false);
     final dependencies = scopeElement.getDependencies(element);
 
-    // Listen through the dependency tracker
     dependencies.listen(
       provider,
       listener,
@@ -90,32 +47,14 @@ extension ProviderContext on BuildContext {
     );
   }
 
-  /// Subscribe to a provider and return the subscription.
-  ///
-  /// Unlike [listen], this returns a [ProviderSubscription] that can be
-  /// manually managed. The subscription is still automatically disposed
-  /// when the widget is unmounted if you use the dependency system.
-  ///
-  /// For manual management, you should close the subscription in dispose().
-  ///
-  /// ```dart
-  /// late final subscription = context.subscribe(myProvider, (previous, next) {
-  ///   // Handle changes
-  /// });
-  ///
-  /// // Later, you can read the current value:
-  /// final value = subscription.read();
-  /// ```
+  /// Create a manually managed provider subscription.
   ProviderSubscription<T> subscribe<T>(
     ProviderListenable<T> provider,
     void Function(T? previous, T next) listener, {
     bool fireImmediately = false,
     void Function(Object error, StackTrace stackTrace)? onError,
   }) {
-    // For subscribe, we return the raw subscription
-    // Users are responsible for cleanup
     final container = ProviderScope.containerOf(this, listen: false);
-
     return container.listen<T>(
       provider,
       listener,
@@ -124,31 +63,13 @@ extension ProviderContext on BuildContext {
     );
   }
 
-  /// Refresh a provider, causing it to rebuild.
-  ///
-  /// This is useful for providers that fetch data, allowing you to
-  /// trigger a refetch.
-  ///
-  /// ```dart
-  /// onPressed: () {
-  ///   context.refresh(myFutureProvider);
-  /// }
-  /// ```
+  /// Refresh a provider and return its refreshed value.
   T refresh<T>(Refreshable<T> provider) {
     final container = ProviderScope.containerOf(this, listen: false);
     return container.refresh(provider);
   }
 
-  /// Invalidate a provider, causing it to be rebuilt on next read.
-  ///
-  /// Unlike [refresh], this doesn't immediately rebuild the provider.
-  /// It will be rebuilt the next time it's read.
-  ///
-  /// ```dart
-  /// onPressed: () {
-  ///   context.invalidate(myProvider);
-  /// }
-  /// ```
+  /// Invalidate a provider or family.
   void invalidate(ProviderOrFamily provider) {
     final container = ProviderScope.containerOf(this, listen: false);
     container.invalidate(provider);
