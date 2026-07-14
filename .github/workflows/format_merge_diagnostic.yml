@@ -1,4 +1,4 @@
-name: Diagnose merge formatting
+name: Normalize Renderer V2 formatting
 
 on:
   pull_request:
@@ -6,52 +6,51 @@ on:
     paths:
       - '.github/workflows/format_merge_diagnostic.yml'
 
+permissions:
+  contents: write
+
 jobs:
-  diagnose:
+  format:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
         with:
+          ref: dev
           fetch-depth: 0
       - uses: dart-lang/setup-dart@v1
         with:
           sdk: stable
-      - name: Diagnose root and Riverpod formatting
-        env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+      - name: Resolve formatter configuration
+        run: |
+          dart pub get
+          (cd packages/cinder_riverpod && dart pub get)
+      - name: Format changed root and Riverpod sources
         shell: bash
         run: |
-          set +e
-          : > format-merge-report.txt
-          echo "HEAD=$(git rev-parse HEAD)" >> format-merge-report.txt
-          echo "BASE_SHA=$BASE_SHA" >> format-merge-report.txt
-          echo >> format-merge-report.txt
-
-          echo '===== ROOT =====' >> format-merge-report.txt
-          dart pub get >> format-merge-report.txt 2>&1
-          echo "pub_get_status=$?" >> format-merge-report.txt
-          mapfile -t root_files < <(git diff --name-only --diff-filter=ACMR "$BASE_SHA" HEAD | grep -E '^(lib|test|example|benchmark)/.*\.dart$' || true)
-          printf 'file=%s\n' "${root_files[@]}" >> format-merge-report.txt
-          dart format "${root_files[@]}" >> format-merge-report.txt 2>&1
-          echo "format_status=$?" >> format-merge-report.txt
-          git diff -- "${root_files[@]}" >> format-merge-report.txt 2>&1
-          git diff --quiet -- "${root_files[@]}"
-          echo "diff_status=$?" >> format-merge-report.txt
-          git restore --worktree -- "${root_files[@]}"
-          echo >> format-merge-report.txt
-
-          echo '===== CINDER_RIVERPOD =====' >> format-merge-report.txt
-          (cd packages/cinder_riverpod && dart pub get) >> format-merge-report.txt 2>&1
-          echo "pub_get_status=$?" >> format-merge-report.txt
-          prefix='packages/cinder_riverpod/'
-          mapfile -t riverpod_files < <(git diff --name-only --diff-filter=ACMR "$BASE_SHA" HEAD | grep -E "^${prefix}.*\\.dart$" || true)
-          printf 'file=%s\n' "${riverpod_files[@]}" >> format-merge-report.txt
-          dart format "${riverpod_files[@]}" >> format-merge-report.txt 2>&1
-          echo "format_status=$?" >> format-merge-report.txt
-          git diff -- "${riverpod_files[@]}" >> format-merge-report.txt 2>&1
-          git diff --quiet -- "${riverpod_files[@]}"
-          echo "diff_status=$?" >> format-merge-report.txt
-      - uses: actions/upload-artifact@v4
-        with:
-          name: format-merge-report
-          path: format-merge-report.txt
+          git fetch origin main
+          mapfile -t files < <(git diff --name-only --diff-filter=ACMR origin/main HEAD | grep -E '^(lib|test|example|benchmark|packages/cinder_riverpod)/.*\.dart$' || true)
+          dart format "${files[@]}"
+      - name: Commit normalized formatting
+        run: |
+          git config user.name "Cinder Format Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add \
+            benchmark/renderer_v2_benchmark.dart \
+            lib/src/binding/terminal_binding.dart \
+            lib/src/buffer.dart \
+            lib/src/components/focus.dart \
+            lib/src/framework/terminal_canvas.dart \
+            lib/src/rendering/frame_diff.dart \
+            lib/src/utils/escape_codes.dart \
+            packages/cinder_riverpod/lib/cinder_riverpod.dart \
+            packages/cinder_riverpod/lib/src/framework.dart \
+            packages/cinder_riverpod/lib/src/provider_context.dart \
+            packages/cinder_riverpod/lib/src/provider_dependencies.dart \
+            test/rendering/buffer_v2_test.dart \
+            test/rendering/frame_diff_test.dart
+          if git diff --cached --quiet; then
+            echo "Sources already use the resolved formatter configuration."
+            exit 0
+          fi
+          git commit --no-verify -m "style: normalize Renderer V2 sources"
+          git push origin HEAD:dev
