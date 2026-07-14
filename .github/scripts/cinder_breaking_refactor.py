@@ -33,7 +33,6 @@ TEXT_SUFFIXES = {
 
 SKIP_DIRS = {".git", ".dart_tool", "build", ".idea", ".vscode"}
 
-# Longest/specific identifiers first.
 IDENTIFIER_REPLACEMENTS: tuple[tuple[str, str], ...] = (
     (r"\bMultiChildRenderObjectComponent\b", "MultiChildRenderObjectWidget"),
     (r"\bSingleChildRenderObjectComponent\b", "SingleChildRenderObjectWidget"),
@@ -103,8 +102,6 @@ def transform_text(path: Path) -> None:
         for pattern, replacement in IDENTIFIER_REPLACEMENTS:
             transformed = re.sub(pattern, replacement, transformed)
 
-    # The fork owns its repository metadata; upstream attribution remains in
-    # LICENSE and NOTICE.md instead of stale package URLs.
     transformed = transformed.replace(
         "https://github.com/Norbert515/cinder", "https://github.com/eukalpia/cinder"
     )
@@ -112,8 +109,6 @@ def transform_text(path: Path) -> None:
         "https://docs.cinder.dev", "https://github.com/eukalpia/cinder"
     )
 
-    # Remove exports of the deleted legacy runtime after lib/nocterm.dart is
-    # renamed to lib/cinder.dart.
     if path.as_posix().endswith("lib/nocterm.dart") or path.as_posix().endswith(
         "lib/cinder.dart"
     ):
@@ -140,7 +135,6 @@ def rename_path(source: Path, destination: Path) -> None:
 
 
 def rename_brand_paths() -> None:
-    # Bottom-up so child paths are renamed before their parents.
     candidates = sorted(
         (
             path
@@ -236,7 +230,7 @@ def assert_no_legacy_public_api() -> None:
     )
     failures: list[str] = []
     for path in iter_text_files():
-        if ".github" in path.parts and "scripts" in path.parts:
+        if ".github" in path.parts:
             continue
         try:
             text = path.read_text(encoding="utf-8")
@@ -263,7 +257,6 @@ def main() -> None:
 
     rename_brand_paths()
 
-    # A second pass catches references whose file paths changed during rename.
     for path in iter_text_files():
         transform_text(path)
 
