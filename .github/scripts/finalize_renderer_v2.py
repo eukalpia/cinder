@@ -504,7 +504,11 @@ void main() {
   final warmup = emitFrameDiff(
     current: current,
     previous: previous,
-    emitRun: (_x, _y, _output) {},
+    emitRun: (x, y, output) {
+    if (x < 0 || y < 0 || output.isEmpty) {
+      throw StateError('Invalid renderer run');
+    }
+  },
   );
   if (warmup.comparedCells != 1 || warmup.ansiRuns != 1) {
     throw StateError('Single-cell damage contract regressed: $warmup');
@@ -517,7 +521,11 @@ void main() {
     final stats = emitFrameDiff(
       current: current,
       previous: previous,
-      emitRun: (_x, _y, _output) {},
+      emitRun: (x, y, output) {
+    if (x < 0 || y < 0 || output.isEmpty) {
+      throw StateError('Invalid renderer run');
+    }
+  },
     );
     comparisons += stats.comparedCells;
     runs += stats.ansiRuns;
