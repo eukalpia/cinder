@@ -1,0 +1,7 @@
+lds, lessThan(100));
++      expect(tester.terminalState, containsText('legacy 33333'));
++    });
++    controller.dispose();
++  });
++
++}
