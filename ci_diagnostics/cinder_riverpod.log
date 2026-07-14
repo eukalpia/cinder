@@ -99,19 +99,20 @@ TEST: computed provider
 00:00 +3: test/basic_integration_test.dart: Riverpod integration - basic read and overrides
 ] 52;c;\00:00 +3: test/watch_test.dart: context.watch nested ProviderScopes with watch
 TEST: nested scopes
+00:00 +3: test/basic_integration_test.dart: Riverpod integration - basic read and overrides
   ✓ PASSED
-00:00 +4: test/basic_integration_test.dart: Riverpod integration - basic read and overrides
-] 52;c;\00:00 +4: test/watch_test.dart: context.watch watch does not create duplicate subscriptions
+00:00 +4: test/watch_test.dart: context.watch nested ProviderScopes with watch
+  ✓ PASSED
+00:00 +5: test/basic_integration_test.dart: Riverpod integration - nested scopes
+] 52;c;\TEST: nested provider scopes
+] 52;c;\00:00 +5: test/watch_test.dart: context.watch watch does not create duplicate subscriptions
 TEST: no duplicate subscriptions
   ✓ PASSED
-00:00 +5: test/basic_integration_test.dart: Riverpod integration - basic read and overrides
-] 52;c;\00:00 +5: test/watch_test.dart: context.listen listen callback can request rebuilds
+00:00 +6: test/basic_integration_test.dart: Riverpod integration - nested scopes
+] 52;c;\00:00 +6: test/watch_test.dart: context.listen listen callback can request rebuilds
 TEST: listen without rebuild
   ✓ PASSED
-00:00 +6: test/basic_integration_test.dart: Riverpod integration - basic read and overrides
-  ✓ PASSED
 00:00 +7: test/basic_integration_test.dart: Riverpod integration - nested scopes
-] 52;c;\TEST: nested provider scopes
   ✓ PASSED
 00:00 +8: test/basic_integration_test.dart: Riverpod integration - multiple providers
 ] 52;c;\TEST: multiple providers
@@ -172,23 +173,24 @@ TEST: provider scope basic
 [BUILD] Count value: 1
 [TEST] Final build count: 2
   ✓ PASSED
-00:00 +14: test/riverpod_test.dart: cinder_riverpod ProviderScope provides container to descendants
+00:00 +13: test/riverpod_test.dart: cinder_riverpod ProviderScope provides container to descendants
   ✓ PASSED
+00:00 +14: test/riverpod_test.dart: cinder_riverpod ProviderScope provides container to descendants
 00:00 +15: test/riverpod_test.dart: cinder_riverpod watch triggers rebuilds
 ] 52;c;\TEST: watch rebuilds
   ✓ PASSED
 00:00 +16: test/riverpod_test.dart: cinder_riverpod computed providers update when dependencies change
-TEST: computed providers
-] 52;c;\  ✓ PASSED
+] 52;c;\TEST: computed providers
+  ✓ PASSED
 00:00 +17: test/riverpod_test.dart: cinder_riverpod StateNotifierProvider works correctly
-TEST: state notifier provider
-] 52;c;\  ✓ PASSED
+] 52;c;\TEST: state notifier provider
+  ✓ PASSED
 00:00 +18: test/riverpod_test.dart: cinder_riverpod listen receives updates
 ] 52;c;\TEST: listen updates
   ✓ PASSED
 00:00 +19: test/riverpod_test.dart: cinder_riverpod provider overrides work
-TEST: provider overrides
-] 52;c;\  ✓ PASSED
+] 52;c;\TEST: provider overrides
+  ✓ PASSED
 00:00 +20: test/riverpod_test.dart: cinder_riverpod nested ProviderScopes work
 ] 52;c;\TEST: nested scopes
   ✓ PASSED
