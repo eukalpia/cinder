@@ -1,0 +1,55 @@
+name: Renderer V2
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'lib/src/buffer.dart'
+      - 'lib/src/framework/terminal_canvas.dart'
+      - 'lib/src/binding/terminal_binding.dart'
+      - '.github/scripts/apply_renderer_v2.py'
+      - '.github/workflows/renderer_v2.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: renderer-v2-dev
+  cancel-in-progress: true
+
+jobs:
+  migrate-and-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: dev
+          fetch-depth: 0
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+      - name: Apply Renderer V2 migration
+        run: python3 .github/scripts/apply_renderer_v2.py
+      - name: Format
+        run: dart format lib/src/buffer.dart lib/src/framework/terminal_canvas.dart lib/src/binding/terminal_binding.dart
+      - name: Install dependencies
+        run: dart pub get
+      - name: Analyze
+        run: dart analyze lib test benchmark
+      - name: Test buffer and renderer
+        run: |
+          dart test test/buffer_test.dart test/buffer_dirty_regions_test.dart test/buffer_unicode_test.dart test/rendering --reporter expanded
+      - name: Run complete test suite
+        run: dart test --reporter expanded
+      - name: Commit generated renderer changes
+        run: |
+          git config user.name "Cinder CI Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add lib/src/buffer.dart lib/src/framework/terminal_canvas.dart lib/src/binding/terminal_binding.dart
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit --no-verify -m "perf: enable Renderer V2 reusable dirty-span pipeline"
+          git push origin HEAD:dev
