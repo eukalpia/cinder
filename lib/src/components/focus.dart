@@ -331,12 +331,10 @@ class FocusScopeNode extends FocusNode {
   FocusScopeNode? get parentScope => nearestScope;
   Iterable<FocusNode> get children => List<FocusNode>.unmodifiable(_children);
 
-  @internal
   void _addChild(FocusNode node) {
     if (!_children.contains(node)) _children.add(node);
   }
 
-  @internal
   void _removeChild(FocusNode node) {
     _children.remove(node);
     _forgetFocusedChild(node);
@@ -379,7 +377,7 @@ class Focus extends StatefulWidget {
   final bool autofocus;
   final bool canRequestFocus;
   final bool skipTraversal;
-  final ValueChanged<bool>? onFocusChange;
+  final void Function(bool hasFocus)? onFocusChange;
   final KeyEventHandler? onKeyEvent;
   final Widget child;
 

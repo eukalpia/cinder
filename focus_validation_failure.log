@@ -1,7 +1,0 @@
-Analyzing lib, test...
-
-  error - lib/src/components/focus.dart:382:9 - Undefined class 'ValueChanged'. Try changing the name to the name of an existing class, or creating a class with the name 'ValueChanged'. - undefined_class
-warning - lib/src/components/focus.dart:334:4 - Only public elements in a package's private API can be annotated as being internal. - invalid_internal_annotation
-warning - lib/src/components/focus.dart:339:4 - Only public elements in a package's private API can be annotated as being internal. - invalid_internal_annotation
-
-3 issues found.
