@@ -1,10 +1,10 @@
 import 'package:test/test.dart';
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() {
   group('Emoji Rendering', () {
     test('emoji width handling', () async {
-      await testNocterm(
+      await testCinder(
         'emoji width',
         (tester) async {
           await tester.pumpComponent(
@@ -50,7 +50,7 @@ void main() {
     });
 
     test('emoji alignment in centered text', () async {
-      await testNocterm(
+      await testCinder(
         'emoji alignment centered',
         (tester) async {
           await tester.pumpComponent(
@@ -68,7 +68,7 @@ void main() {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: const [
                       Text('✨ Features:'),
-                      Text('  • Component-based architecture'),
+                      Text('  • Widget-based architecture'),
                       Text('  • Constraint-based layout system'),
                       Text('  • Stateful and Stateless components'),
                       Text('  • BuildContext for tree traversal'),
@@ -84,8 +84,8 @@ void main() {
 
           // Verify the content is rendered
           expect(tester.terminalState, containsText('✨ Features:'));
-          expect(tester.terminalState,
-              containsText('Component-based architecture'));
+          expect(
+              tester.terminalState, containsText('Widget-based architecture'));
           expect(tester.terminalState,
               containsText('Constraint-based layout system'));
           expect(tester.terminalState, containsText('Built with Dart'));
@@ -94,7 +94,7 @@ void main() {
     });
 
     test('emoji in different alignments', () async {
-      await testNocterm(
+      await testCinder(
         'emoji alignments',
         (tester) async {
           await tester.pumpComponent(
@@ -151,7 +151,7 @@ void main() {
     });
 
     test('sparkles width calculation', () async {
-      await testNocterm(
+      await testCinder(
         'sparkles width',
         (tester) async {
           await tester.pumpComponent(
@@ -198,7 +198,7 @@ void main() {
     });
 
     test('emoji border rendering', () async {
-      await testNocterm(
+      await testCinder(
         'emoji with borders',
         (tester) async {
           await tester.pumpComponent(
@@ -241,7 +241,7 @@ void main() {
     // Visual test for manual inspection
     test('emoji visual test',
         skip: 'Run with debugPrintAfterPump for visual inspection', () async {
-      await testNocterm(
+      await testCinder(
         'emoji visual',
         (tester) async {
           await tester.pumpComponent(

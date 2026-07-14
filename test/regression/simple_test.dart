@@ -1,8 +1,8 @@
 import 'package:test/test.dart';
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
-// Example component for testing
-class Counter extends StatefulComponent {
+// Example widget for testing
+class Counter extends StatefulWidget {
   const Counter({super.key});
 
   @override
@@ -25,7 +25,7 @@ class _CounterState extends State<Counter> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Focusable(
       focused: true,
       onKeyEvent: (event) {
@@ -65,7 +65,7 @@ class _CounterState extends State<Counter> {
 void main() {
   group('TUI Testing Framework', () {
     test('can debug render output', () async {
-      await testNocterm('debug output', (tester) async {
+      await testCinder('debug output', (tester) async {
         await tester.pumpComponent(
           Container(
             padding: const EdgeInsets.all(1),

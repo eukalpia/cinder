@@ -1,11 +1,11 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 import '../../example/scroll_demo.dart';
 
 void main() {
   group('ScrollDemo Tab Navigation Bug', () {
     test('reproduces tab navigation causing layout changes', () async {
-      await testNocterm(
+      await testCinder(
         'tab navigation bug reproduction',
         (tester) async {
           await tester.pumpComponent(const ScrollDemo());
@@ -86,7 +86,7 @@ void main() {
     });
 
     test('checks specific tab content stability', () async {
-      await testNocterm(
+      await testCinder(
         'tab content stability check',
         (tester) async {
           await tester.pumpComponent(const ScrollDemo());

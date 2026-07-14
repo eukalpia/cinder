@@ -1,10 +1,10 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('MouseRegion', () {
     test('visual development - hover visualization', () async {
-      await testNocterm(
+      await testCinder(
         'hover visualization',
         (tester) async {
           await tester.pumpComponent(
@@ -30,7 +30,7 @@ void main() {
     });
 
     test('triggers onEnter when mouse enters', () async {
-      await testNocterm(
+      await testCinder(
         'onEnter callback',
         (tester) async {
           bool entered = false;
@@ -69,7 +69,7 @@ void main() {
     });
 
     test('triggers onExit when mouse leaves', () async {
-      await testNocterm(
+      await testCinder(
         'onExit callback',
         (tester) async {
           bool exited = false;
@@ -113,7 +113,7 @@ void main() {
     });
 
     test('triggers onHover when mouse moves inside', () async {
-      await testNocterm(
+      await testCinder(
         'onHover callback',
         (tester) async {
           int hoverCount = 0;
@@ -156,7 +156,7 @@ void main() {
     });
 
     test('does not trigger callbacks outside region', () async {
-      await testNocterm(
+      await testCinder(
         'no callbacks outside region',
         (tester) async {
           bool entered = false;
@@ -191,7 +191,7 @@ void main() {
     });
 
     test('respects opaque flag for hit testing', () async {
-      await testNocterm(
+      await testCinder(
         'opaque hit testing',
         (tester) async {
           bool topEntered = false;
@@ -240,7 +240,7 @@ void main() {
     });
 
     test('nested MouseRegions trigger correctly', () async {
-      await testNocterm(
+      await testCinder(
         'nested regions',
         (tester) async {
           bool outerEntered = false;

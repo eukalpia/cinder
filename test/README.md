@@ -1,8 +1,8 @@
-# Testing nocterm
+# Testing cinder
 
 Quick guide to writing tests that actually catch bugs. The harness
-(`testNocterm`, `NoctermTester`, `TerminalState`) is in
-`package:nocterm/nocterm.dart` — see `test/visual/tui_test_example_test.dart`
+(`testCinder`, `CinderTester`, `TerminalState`) is in
+`package:cinder/cinder.dart` — see `test/visual/tui_test_example_test.dart`
 for a tour.
 
 ## Settle before you mutate
@@ -73,7 +73,7 @@ to guard against — the failure-first check is cheap insurance.
 State machines and data structures (gesture recognizers, `PersistentHashMap`)
 deserve direct unit tests with short timeouts/synthetic events — see
 `test/input/long_press_recognizer_test.dart`. Going through the full
-component harness for these adds noise without adding coverage.
+widget harness for these adds noise without adding coverage.
 
 ## Before committing
 

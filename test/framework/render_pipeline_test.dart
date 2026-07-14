@@ -1,8 +1,8 @@
-import 'package:nocterm/nocterm.dart';
-import 'package:nocterm/src/framework/terminal_canvas.dart';
+import 'package:cinder/cinder.dart';
+import 'package:cinder/src/framework/terminal_canvas.dart';
 import 'package:test/test.dart';
 
-/// Comprehensive test suite for the nocterm rendering pipeline.
+/// Comprehensive test suite for the cinder rendering pipeline.
 ///
 /// These tests prevent regressions in performance optimizations by ensuring
 /// the rendering pipeline correctly handles:
@@ -22,7 +22,7 @@ void main() {
   // ============================================================================
   group('markNeedsLayout propagation', () {
     test('markNeedsLayout sets _needsLayout flag on the object', () async {
-      await testNocterm(
+      await testCinder(
         'sets needsLayout flag',
         (tester) async {
           await tester.pumpComponent(
@@ -44,7 +44,7 @@ void main() {
     });
 
     test('markNeedsLayout calls markNeedsPaint', () async {
-      await testNocterm(
+      await testCinder(
         'calls markNeedsPaint',
         (tester) async {
           bool paintMarkCalled = false;
@@ -69,7 +69,7 @@ void main() {
     });
 
     test('markNeedsLayout works when called multiple times', () async {
-      await testNocterm(
+      await testCinder(
         'multiple markNeedsLayout calls',
         (tester) async {
           int layoutCount = 0;
@@ -101,7 +101,7 @@ void main() {
     });
 
     test('markNeedsLayout propagates to parent', () async {
-      await testNocterm(
+      await testCinder(
         'propagates to parent',
         (tester) async {
           late _TrackingRenderBox parentTracker;
@@ -128,7 +128,7 @@ void main() {
     });
 
     test('markNeedsLayout works on deeply nested render objects', () async {
-      await testNocterm(
+      await testCinder(
         'deeply nested layout',
         (tester) async {
           final trackers = <_TrackingRenderBox>[];
@@ -165,7 +165,7 @@ void main() {
   // ============================================================================
   group('markNeedsPaint propagation', () {
     test('markNeedsPaint sets _needsPaint flag on the object', () async {
-      await testNocterm(
+      await testCinder(
         'sets needsPaint flag',
         (tester) async {
           await tester.pumpComponent(
@@ -187,7 +187,7 @@ void main() {
     });
 
     test('markNeedsPaint propagates up to root', () async {
-      await testNocterm(
+      await testCinder(
         'propagates to root',
         (tester) async {
           late _TrackingRenderBox parentTracker;
@@ -213,7 +213,7 @@ void main() {
     });
 
     test('markNeedsPaint schedules frame via requestVisualUpdate', () async {
-      await testNocterm(
+      await testCinder(
         'schedules frame',
         (tester) async {
           late _TrackingRenderBox tracker;
@@ -249,7 +249,7 @@ void main() {
       // The bug was: calling markNeedsPaint when flag was already set
       // would early-return and NOT call requestVisualUpdate, causing
       // rendering to permanently stop.
-      await testNocterm(
+      await testCinder(
         'multiple markNeedsPaint calls',
         (tester) async {
           late _TrackingRenderBox tracker;
@@ -286,7 +286,7 @@ void main() {
     });
 
     test('markNeedsPaint works on deeply nested render objects', () async {
-      await testNocterm(
+      await testCinder(
         'deeply nested paint',
         (tester) async {
           final trackers = <_TrackingRenderBox>[];
@@ -322,13 +322,13 @@ void main() {
   // ============================================================================
   group('PipelineOwner', () {
     test('requestLayout adds to dirty list', () async {
-      await testNocterm(
+      await testCinder(
         'requestLayout adds to dirty',
         (tester) async {
           await tester.pumpComponent(
             _LayoutTracker(
               onLayoutTrackerCreated: (tracker) {
-                final pipelineOwner = NoctermTestBinding.instance.pipelineOwner;
+                final pipelineOwner = CinderTestBinding.instance.pipelineOwner;
 
                 // Clear the list by flushing
                 pipelineOwner.flushLayout();
@@ -347,13 +347,13 @@ void main() {
     });
 
     test('requestPaint adds to dirty list with deduplication', () async {
-      await testNocterm(
+      await testCinder(
         'requestPaint with deduplication',
         (tester) async {
           await tester.pumpComponent(
             _LayoutTracker(
               onLayoutTrackerCreated: (tracker) {
-                final pipelineOwner = NoctermTestBinding.instance.pipelineOwner;
+                final pipelineOwner = CinderTestBinding.instance.pipelineOwner;
 
                 // Clear paint list
                 pipelineOwner.flushPaint();
@@ -374,10 +374,10 @@ void main() {
     });
 
     test('hasNodesToLayout reflects list state', () async {
-      await testNocterm(
+      await testCinder(
         'hasNodesToLayout state',
         (tester) async {
-          final pipelineOwner = NoctermTestBinding.instance.pipelineOwner;
+          final pipelineOwner = CinderTestBinding.instance.pipelineOwner;
 
           // Initially might have nodes from setup
           pipelineOwner.flushLayout();
@@ -385,7 +385,7 @@ void main() {
           // After flush, should be empty
           expect(pipelineOwner.hasNodesToLayout, isFalse);
 
-          // Pump a component that marks dirty
+          // Pump a widget that marks dirty
           await tester.pumpComponent(const _SimpleLayoutComponent());
 
           // After pump, layout is done, so should be empty again
@@ -395,10 +395,10 @@ void main() {
     });
 
     test('hasNodesToPaint reflects list state', () async {
-      await testNocterm(
+      await testCinder(
         'hasNodesToPaint state',
         (tester) async {
-          final pipelineOwner = NoctermTestBinding.instance.pipelineOwner;
+          final pipelineOwner = CinderTestBinding.instance.pipelineOwner;
 
           // Flush paint
           pipelineOwner.flushPaint();
@@ -410,7 +410,7 @@ void main() {
     });
 
     test('flushLayout processes nodes and clears flags', () async {
-      await testNocterm(
+      await testCinder(
         'flushLayout clears flags',
         (tester) async {
           int layoutCount = 0;
@@ -444,7 +444,7 @@ void main() {
     test('flushLayout processes nodes in depth order', () async {
       // Note: The actual order depends on the implementation.
       // The key requirement is that layout happens correctly, not a specific order.
-      await testNocterm(
+      await testCinder(
         'depth ordering',
         (tester) async {
           final layoutOrder = <int>[];
@@ -487,7 +487,7 @@ void main() {
   // ============================================================================
   group('frame scheduling', () {
     test('requestVisualUpdate triggers frame scheduling', () async {
-      await testNocterm(
+      await testCinder(
         'requestVisualUpdate schedules frame',
         (tester) async {
           await tester.pumpComponent(const Text('test'));
@@ -495,7 +495,7 @@ void main() {
           // Clear any pending frames
           await tester.pump();
 
-          final pipelineOwner = NoctermTestBinding.instance.pipelineOwner;
+          final pipelineOwner = CinderTestBinding.instance.pipelineOwner;
 
           // Manually request visual update
           pipelineOwner.requestVisualUpdate();
@@ -507,7 +507,7 @@ void main() {
     });
 
     test('multiple requestVisualUpdate calls result in single frame', () async {
-      await testNocterm(
+      await testCinder(
         'single frame for multiple requests',
         (tester) async {
           await tester.pumpComponent(const Text('test'));
@@ -515,7 +515,7 @@ void main() {
           final initialFrameCount = tester.frameCount;
           await tester.pump();
 
-          final pipelineOwner = NoctermTestBinding.instance.pipelineOwner;
+          final pipelineOwner = CinderTestBinding.instance.pipelineOwner;
 
           // Request visual update multiple times
           pipelineOwner.requestVisualUpdate();
@@ -532,7 +532,7 @@ void main() {
     });
 
     test('frame is scheduled when markNeedsLayout called', () async {
-      await testNocterm(
+      await testCinder(
         'markNeedsLayout schedules frame',
         (tester) async {
           late _TrackingRenderBox tracker;
@@ -556,7 +556,7 @@ void main() {
     });
 
     test('frame is scheduled when markNeedsPaint called', () async {
-      await testNocterm(
+      await testCinder(
         'markNeedsPaint schedules frame',
         (tester) async {
           late _TrackingRenderBox tracker;
@@ -583,7 +583,7 @@ void main() {
         'frame is scheduled even when flags already dirty - CRITICAL REGRESSION TEST',
         () async {
       // THIS IS THE CRITICAL TEST THAT WOULD HAVE CAUGHT THE BUG
-      await testNocterm(
+      await testCinder(
         'frame scheduled when flags already dirty',
         (tester) async {
           late _TrackingRenderBox tracker;
@@ -621,7 +621,7 @@ void main() {
   // ============================================================================
   group('frame-skip optimization', () {
     test('frame is NOT skipped when needsBuild is true', () async {
-      await testNocterm(
+      await testCinder(
         'no skip when needsBuild',
         (tester) async {
           int buildCount = 0;
@@ -650,7 +650,7 @@ void main() {
     });
 
     test('frame is NOT skipped when needsLayout is true', () async {
-      await testNocterm(
+      await testCinder(
         'no skip when needsLayout',
         (tester) async {
           int layoutCount = 0;
@@ -678,7 +678,7 @@ void main() {
     });
 
     test('frame is NOT skipped when needsPaint is true', () async {
-      await testNocterm(
+      await testCinder(
         'no skip when needsPaint',
         (tester) async {
           int paintCount = 0;
@@ -707,7 +707,7 @@ void main() {
 
     test('skipping frame does not prevent future frames from rendering',
         () async {
-      await testNocterm(
+      await testCinder(
         'future frames render',
         (tester) async {
           int buildCount = 0;
@@ -740,7 +740,7 @@ void main() {
     });
 
     test('deeply nested dirty child still triggers frame', () async {
-      await testNocterm(
+      await testCinder(
         'deeply nested triggers frame',
         (tester) async {
           int deepestPaintCount = 0;
@@ -777,7 +777,7 @@ void main() {
   // ============================================================================
   group('dirty flag clearing', () {
     test('_needsLayout cleared after layout() called', () async {
-      await testNocterm(
+      await testCinder(
         'needsLayout cleared after layout',
         (tester) async {
           late _TrackingRenderBox tracker;
@@ -806,7 +806,7 @@ void main() {
     });
 
     test('_needsPaint cleared after paint pass', () async {
-      await testNocterm(
+      await testCinder(
         'needsPaint cleared after paint',
         (tester) async {
           late _TrackingRenderBox tracker;
@@ -835,7 +835,7 @@ void main() {
     });
 
     test('flags cleared even for deeply nested objects', () async {
-      await testNocterm(
+      await testCinder(
         'deeply nested flags cleared',
         (tester) async {
           final trackers = <_TrackingRenderBox>[];
@@ -872,7 +872,7 @@ void main() {
     });
 
     test('new dirty marks during layout are handled', () async {
-      await testNocterm(
+      await testCinder(
         'dirty during layout handled',
         (tester) async {
           late _TrackingRenderBox tracker;
@@ -916,7 +916,7 @@ void main() {
     test(
         'calling markNeedsLayout when already dirty still schedules frame - CRITICAL',
         () async {
-      await testNocterm(
+      await testCinder(
         'already dirty layout schedules frame',
         (tester) async {
           late _TrackingRenderBox tracker;
@@ -952,7 +952,7 @@ void main() {
     test(
         'calling markNeedsPaint when already dirty still schedules frame - CRITICAL',
         () async {
-      await testNocterm(
+      await testCinder(
         'already dirty paint schedules frame',
         (tester) async {
           late _TrackingRenderBox tracker;
@@ -986,7 +986,7 @@ void main() {
     });
 
     test('after frame skip, subsequent markNeedsLayout still works', () async {
-      await testNocterm(
+      await testCinder(
         'post-skip markNeedsLayout works',
         (tester) async {
           late _TrackingRenderBox tracker;
@@ -1021,7 +1021,7 @@ void main() {
     });
 
     test('after frame skip, subsequent markNeedsPaint still works', () async {
-      await testNocterm(
+      await testCinder(
         'post-skip markNeedsPaint works',
         (tester) async {
           late _TrackingRenderBox tracker;
@@ -1056,7 +1056,7 @@ void main() {
     });
 
     test('rapid setState calls do not stop rendering', () async {
-      await testNocterm(
+      await testCinder(
         'rapid setState continues rendering',
         (tester) async {
           int buildCount = 0;
@@ -1097,7 +1097,7 @@ void main() {
 
     test('interrupt-like pattern (skip frame, then new update) still renders',
         () async {
-      await testNocterm(
+      await testCinder(
         'interrupt pattern renders',
         (tester) async {
           int paintCount = 0;
@@ -1145,7 +1145,7 @@ void main() {
   // ============================================================================
   group('nested render tree', () {
     test('3-level deep tree propagation', () async {
-      await testNocterm(
+      await testCinder(
         '3-level propagation',
         (tester) async {
           final trackers = <_TrackingRenderBox>[];
@@ -1181,7 +1181,7 @@ void main() {
     });
 
     test('5-level deep tree propagation', () async {
-      await testNocterm(
+      await testCinder(
         '5-level propagation',
         (tester) async {
           final trackers = <_TrackingRenderBox>[];
@@ -1217,7 +1217,7 @@ void main() {
     });
 
     test('mixed dirty states in tree', () async {
-      await testNocterm(
+      await testCinder(
         'mixed dirty states',
         (tester) async {
           final trackers = <_TrackingRenderBox>[];
@@ -1264,7 +1264,7 @@ void main() {
     });
 
     test('child dirty but parent not dirty scenario', () async {
-      await testNocterm(
+      await testCinder(
         'child dirty parent clean',
         (tester) async {
           // Note: In the current implementation, marking a child dirty
@@ -1292,7 +1292,7 @@ void main() {
     });
 
     test('parent dirty but child clean scenario', () async {
-      await testNocterm(
+      await testCinder(
         'parent dirty child clean',
         (tester) async {
           // This scenario: parent is dirty, child is clean
@@ -1317,7 +1317,7 @@ void main() {
           // Mark only parent dirty (note: this is hard to achieve in practice
           // because markNeedsLayout propagates up, not down)
           // We simulate by calling the pipelineOwner directly
-          final pipelineOwner = NoctermTestBinding.instance.pipelineOwner;
+          final pipelineOwner = CinderTestBinding.instance.pipelineOwner;
           trackers[0]._needsLayout = true;
           pipelineOwner.requestLayout(trackers[0]);
 
@@ -1379,8 +1379,8 @@ class _TrackingRenderBox extends RenderObject
   }
 }
 
-/// Component that provides a tracking render object for layout tests
-class _LayoutTracker extends SingleChildRenderObjectComponent {
+/// Widget that provides a tracking render object for layout tests
+class _LayoutTracker extends SingleChildRenderObjectWidget {
   const _LayoutTracker({
     required this.onLayoutTrackerCreated,
   });
@@ -1398,8 +1398,8 @@ class _LayoutTracker extends SingleChildRenderObjectComponent {
   }
 }
 
-/// Component that counts layouts
-class _LayoutCounterComponent extends SingleChildRenderObjectComponent {
+/// Widget that counts layouts
+class _LayoutCounterComponent extends SingleChildRenderObjectWidget {
   const _LayoutCounterComponent({
     required this.onLayoutCounted,
     required this.onRenderBoxCreated,
@@ -1418,8 +1418,8 @@ class _LayoutCounterComponent extends SingleChildRenderObjectComponent {
   }
 }
 
-/// Component that counts paints
-class _PaintCounterComponent extends SingleChildRenderObjectComponent {
+/// Widget that counts paints
+class _PaintCounterComponent extends SingleChildRenderObjectWidget {
   const _PaintCounterComponent({
     required this.onPaintCounted,
     required this.onRenderBoxCreated,
@@ -1438,7 +1438,7 @@ class _PaintCounterComponent extends SingleChildRenderObjectComponent {
 }
 
 /// Nested trackers for testing propagation
-class _NestedLayoutTrackers extends StatelessComponent {
+class _NestedLayoutTrackers extends StatelessWidget {
   const _NestedLayoutTrackers({
     required this.onParentCreated,
     required this.onChildCreated,
@@ -1448,7 +1448,7 @@ class _NestedLayoutTrackers extends StatelessComponent {
   final void Function(_TrackingRenderBox) onChildCreated;
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return _LayoutCounterComponent(
       onLayoutCounted: () {},
       onRenderBoxCreated: onParentCreated,
@@ -1461,7 +1461,7 @@ class _NestedLayoutTrackers extends StatelessComponent {
 }
 
 /// Deeply nested trackers for testing deep propagation
-class _DeeplyNestedTrackers extends StatelessComponent {
+class _DeeplyNestedTrackers extends StatelessWidget {
   const _DeeplyNestedTrackers({
     required this.depth,
     required this.onTrackerCreated,
@@ -1471,11 +1471,11 @@ class _DeeplyNestedTrackers extends StatelessComponent {
   final void Function(_TrackingRenderBox) onTrackerCreated;
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return _buildNested(depth);
   }
 
-  Component _buildNested(int remaining) {
+  Widget _buildNested(int remaining) {
     if (remaining <= 0) {
       return const Text('leaf');
     }
@@ -1488,8 +1488,8 @@ class _DeeplyNestedTrackers extends StatelessComponent {
   }
 }
 
-/// Simple component for testing layout
-class _SimpleLayoutComponent extends SingleChildRenderObjectComponent {
+/// Simple widget for testing layout
+class _SimpleLayoutComponent extends SingleChildRenderObjectWidget {
   const _SimpleLayoutComponent();
 
   @override
@@ -1499,7 +1499,7 @@ class _SimpleLayoutComponent extends SingleChildRenderObjectComponent {
 }
 
 /// Simple build counter for state tests
-class _SimpleBuildCounter extends StatefulComponent {
+class _SimpleBuildCounter extends StatefulWidget {
   const _SimpleBuildCounter({
     required this.onBuild,
     required this.onStateCreated,
@@ -1516,7 +1516,7 @@ class _SimpleBuildCounterState extends State<_SimpleBuildCounter> {
   @override
   void initState() {
     super.initState();
-    component.onStateCreated(this);
+    widget.onStateCreated(this);
   }
 
   void triggerRebuild() {
@@ -1524,8 +1524,8 @@ class _SimpleBuildCounterState extends State<_SimpleBuildCounter> {
   }
 
   @override
-  Component build(BuildContext context) {
-    component.onBuild();
+  Widget build(BuildContext context) {
+    widget.onBuild();
     return const Text('counter');
   }
 }

@@ -1,9 +1,9 @@
 import 'package:test/test.dart';
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() {
   test('scrollbar placement uses local offset', () async {
-    await testNocterm(
+    await testCinder(
       'scrollbar offset placement',
       (tester) async {
         final controller = ScrollController();

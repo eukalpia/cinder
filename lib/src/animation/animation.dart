@@ -1,7 +1,7 @@
-import 'package:nocterm/src/animation/curves.dart';
-import 'package:nocterm/src/animation/ticker.dart';
-import 'package:nocterm/src/framework/listenable.dart';
-import 'package:nocterm/src/framework/value_listenable.dart';
+import 'package:cinder/src/animation/curves.dart';
+import 'package:cinder/src/animation/ticker.dart';
+import 'package:cinder/src/framework/listenable.dart';
+import 'package:cinder/src/framework/value_listenable.dart';
 
 /// The status of an animation.
 enum AnimationStatus {

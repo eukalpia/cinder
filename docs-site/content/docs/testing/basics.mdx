@@ -1,23 +1,23 @@
 ---
 title: Writing Tests
-description: Test your Nocterm components
+description: Test your Cinder components
 icon: check-circle
 ---
 
-Nocterm provides a testing framework for TUI components. This guide shows you how to write tests.
+Cinder provides a testing framework for TUI components. This guide shows you how to write tests.
 
 ## Test setup
 
 Import the test library:
 
 ```dart
-import 'package:nocterm/nocterm.dart';
-import 'package:nocterm/nocterm_test.dart';
+import 'package:cinder/cinder.dart';
+import 'package:cinder/cinder_test.dart';
 import 'package:test/test.dart';
 
 void main() {
   test('counter increments', () async {
-    await testNocterm(
+    await testCinder(
       'counter test',
       (tester) async {
         await tester.pumpComponent(Counter());
@@ -33,12 +33,12 @@ void main() {
 }
 ```
 
-## testNocterm function
+## testCinder function
 
-`testNocterm` runs a test with a virtual terminal:
+`testCinder` runs a test with a virtual terminal:
 
 ```dart
-await testNocterm(
+await testCinder(
   'test description',
   (tester) async {
     // Test code here
@@ -48,12 +48,12 @@ await testNocterm(
 );
 ```
 
-## NoctermTester
+## CinderTester
 
 The tester provides methods for testing:
 
 ```dart
-// Render a component
+// Render a widget
 await tester.pumpComponent(MyComponent());
 
 // Send a key press
@@ -81,7 +81,7 @@ Use matchers to verify output:
 
 ```dart
 test('text display', () async {
-  await testNocterm(
+  await testCinder(
     'displays text',
     (tester) async {
       await tester.pumpComponent(Text('Hello'));
@@ -126,7 +126,7 @@ Simulate user input:
 
 ```dart
 test('button click', () async {
-  await testNocterm(
+  await testCinder(
     'handles click',
     (tester) async {
       var clicked = false;
@@ -183,7 +183,7 @@ Test components that change over time:
 
 ```dart
 test('counter state', () async {
-  await testNocterm(
+  await testCinder(
     'counter increments',
     (tester) async {
       await tester.pumpComponent(Counter());
@@ -207,7 +207,7 @@ test('counter state', () async {
 ```dart
 // Good - focused test
 test('displays title', () async {
-  await testNocterm('title', (tester) async {
+  await testCinder('title', (tester) async {
     await tester.pumpComponent(App());
     expect(tester.terminalState, containsText('My App'));
   });
@@ -241,11 +241,11 @@ test('handles terminal resize', () async { ... });
 
 ```dart
 test('disposes controllers', () async {
-  await testNocterm('disposal', (tester) async {
+  await testCinder('disposal', (tester) async {
     final controller = TextEditingController();
     await tester.pumpComponent(TextField(controller: controller));
 
-    // Component should dispose controller
+    // Widget should dispose controller
     controller.dispose();  // Should not throw
   });
 });

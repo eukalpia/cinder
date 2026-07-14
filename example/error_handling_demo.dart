@@ -1,6 +1,6 @@
-/// NoctermError Demo
+/// CinderError Demo
 ///
-/// This demo showcases the NoctermError system for custom error handling.
+/// This demo showcases the CinderError system for custom error handling.
 /// It demonstrates:
 /// 1. Setting up a custom error handler (like you would for Sentry integration)
 /// 2. Triggering errors during widget build/layout
@@ -9,15 +9,15 @@
 /// Run with: dart run example/error_handling_demo.dart
 library;
 
-import 'package:nocterm/nocterm.dart';
-import 'package:nocterm/src/components/error_widget.dart';
+import 'package:cinder/cinder.dart';
+import 'package:cinder/src/components/error_widget.dart';
 
 void main() async {
   // ============================================
   // CUSTOM ERROR HANDLER SETUP
   // ============================================
   // This is where you would integrate with Sentry, Crashlytics, etc.
-  NoctermError.onError = (details) {
+  CinderError.onError = (details) {
     // Simulate sending to Sentry
     print('');
     print('🚨 ═══════════════════════════════════════════════════════════ 🚨');
@@ -42,7 +42,7 @@ void main() async {
     print('');
 
     // Still dump to console for visibility
-    NoctermError.dumpErrorToConsole(details);
+    CinderError.dumpErrorToConsole(details);
   };
 
   // Run the demo app
@@ -50,7 +50,7 @@ void main() async {
 }
 
 /// Main demo application showing error handling
-class ErrorHandlingDemo extends StatefulComponent {
+class ErrorHandlingDemo extends StatefulWidget {
   const ErrorHandlingDemo({super.key});
 
   @override
@@ -63,7 +63,7 @@ class _ErrorHandlingDemoState extends State<ErrorHandlingDemo> {
   String _lastError = 'None';
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Column(
       children: [
         // Header
@@ -74,7 +74,7 @@ class _ErrorHandlingDemoState extends State<ErrorHandlingDemo> {
           ),
           child: Center(
             child: Text(
-              'NoctermError Demo - Press keys to trigger errors',
+              'CinderError Demo - Press keys to trigger errors',
               style: TextStyle(color: Colors.cyan, fontWeight: FontWeight.bold),
             ),
           ),
@@ -215,7 +215,7 @@ class _ErrorHandlingDemoState extends State<ErrorHandlingDemo> {
     );
   }
 
-  Component _buildErrorWidget() {
+  Widget _buildErrorWidget() {
     switch (_currentError) {
       case ErrorType.none:
         return Column(
@@ -290,13 +290,13 @@ class _ErrorHandlingDemoState extends State<ErrorHandlingDemo> {
       });
       return true;
     } else if (event.logicalKey == LogicalKey.digit3) {
-      // Trigger error through NoctermError.reportError
+      // Trigger error through CinderError.reportError
       _errorCount++;
       _lastError = 'Build';
-      NoctermError.reportError(
-        NoctermErrorDetails(
+      CinderError.reportError(
+        CinderErrorDetails(
           exception: StateError('Build phase error in widget'),
-          library: 'nocterm framework',
+          library: 'cinder framework',
           context: 'during widget build',
           informationCollector: () => [
             'Widget: ErrorHandlingDemo',
@@ -313,8 +313,8 @@ class _ErrorHandlingDemoState extends State<ErrorHandlingDemo> {
       // Manually report an error
       _errorCount++;
       _lastError = 'Manual';
-      NoctermError.reportError(
-        NoctermErrorDetails(
+      CinderError.reportError(
+        CinderErrorDetails(
           exception: Exception('Manually reported error for demo'),
           library: 'error_handling_demo',
           context: 'during manual error trigger',
@@ -335,7 +335,7 @@ class _ErrorHandlingDemoState extends State<ErrorHandlingDemo> {
         _currentError = ErrorType.none;
         _lastError = 'None (reset)';
       });
-      NoctermError.resetErrorCount();
+      CinderError.resetErrorCount();
       return true;
     } else if (event.logicalKey == LogicalKey.keyQ) {
       return false; // Let it bubble up to exit

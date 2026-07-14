@@ -110,7 +110,7 @@ Users can:
 Control scrolling programmatically:
 
 ```dart
-class ScrollExample extends StatefulComponent {
+class ScrollExample extends StatefulWidget {
   const ScrollExample({super.key});
 
   @override
@@ -135,7 +135,7 @@ class _ScrollExampleState extends State<ScrollExample> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Column(
       children: [
         Row(

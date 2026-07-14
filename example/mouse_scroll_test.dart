@@ -1,14 +1,14 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() async {
   await runApp(const MouseScrollTest());
 }
 
-class MouseScrollTest extends StatelessComponent {
+class MouseScrollTest extends StatelessWidget {
   const MouseScrollTest({super.key});
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Column(
       children: [
         Container(

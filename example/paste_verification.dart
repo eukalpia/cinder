@@ -1,4 +1,4 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 /// This test verifies that terminal paste (Cmd+V) works correctly
 /// by simulating what happens when the terminal sends pasted bytes
@@ -7,7 +7,7 @@ void main() async {
   print('=' * 60);
 
   // Test with the actual test framework
-  await testNocterm(
+  await testCinder(
     'Terminal paste simulation',
     (tester) async {
       final controller = TextEditingController(text: '');

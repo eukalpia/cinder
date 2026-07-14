@@ -1,10 +1,10 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('GestureDetector', () {
     test('visual development - tap visualization', () async {
-      await testNocterm(
+      await testCinder(
         'tap visualization',
         (tester) async {
           await tester.pumpComponent(
@@ -30,7 +30,7 @@ void main() {
     });
 
     test('triggers onTap on click', () async {
-      await testNocterm(
+      await testCinder(
         'onTap callback',
         (tester) async {
           int tapCount = 0;
@@ -66,7 +66,7 @@ void main() {
     });
 
     test('triggers onTapDown and onTapUp', () async {
-      await testNocterm(
+      await testCinder(
         'onTapDown and onTapUp callbacks',
         (tester) async {
           bool tapDownCalled = false;
@@ -115,7 +115,7 @@ void main() {
     });
 
     test('triggers onDoubleTap on double click', () async {
-      await testNocterm(
+      await testCinder(
         'onDoubleTap callback',
         (tester) async {
           int doubleTapCount = 0;
@@ -151,7 +151,7 @@ void main() {
     });
 
     test('triggers onLongPress when held', () async {
-      await testNocterm(
+      await testCinder(
         'onLongPress callback',
         (tester) async {
           int longPressCount = 0;
@@ -188,7 +188,7 @@ void main() {
     });
 
     test('does not trigger onTap outside detector', () async {
-      await testNocterm(
+      await testCinder(
         'no tap outside',
         (tester) async {
           int tapCount = 0;
@@ -228,7 +228,7 @@ void main() {
     });
 
     test('HitTestBehavior.deferToChild defers to child', () async {
-      await testNocterm(
+      await testCinder(
         'deferToChild behavior',
         (tester) async {
           int outerTaps = 0;
@@ -268,7 +268,7 @@ void main() {
     });
 
     test('HitTestBehavior.opaque blocks hits behind', () async {
-      await testNocterm(
+      await testCinder(
         'opaque behavior',
         (tester) async {
           int topTaps = 0;
@@ -319,7 +319,7 @@ void main() {
     test('onLongPressStart and onLongPressEnd callbacks',
         skip: 'Known issue: Long press timer not advancing in test environment',
         () async {
-      await testNocterm(
+      await testCinder(
         'long press start and end',
         (tester) async {
           bool longPressStarted = false;

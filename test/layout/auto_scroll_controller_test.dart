@@ -1,10 +1,10 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('AutoScrollController', () {
     test('auto-scrolls when content is added while at bottom', () async {
-      await testNocterm(
+      await testCinder(
         'auto-scroll at bottom',
         (tester) async {
           final scrollController = AutoScrollController();
@@ -61,7 +61,7 @@ void main() {
     });
 
     test('disables auto-scroll when user scrolls up', () async {
-      await testNocterm(
+      await testCinder(
         'disable auto-scroll on manual scroll',
         (tester) async {
           final scrollController =
@@ -123,7 +123,7 @@ void main() {
     });
 
     test('re-enables auto-scroll when user scrolls back to bottom', () async {
-      await testNocterm(
+      await testCinder(
         're-enable auto-scroll at bottom',
         (tester) async {
           final scrollController =
@@ -189,7 +189,7 @@ void main() {
     });
 
     test('manual control methods work correctly', () async {
-      await testNocterm(
+      await testCinder(
         'manual control methods',
         (tester) async {
           final scrollController = AutoScrollController();

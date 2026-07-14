@@ -1,12 +1,12 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('SIGINT (Ctrl+C) handling', () {
-    test('component can intercept Ctrl+C', () async {
+    test('widget can intercept Ctrl+C', () async {
       bool ctrlCReceived = false;
 
-      await testNocterm(
+      await testCinder(
         'intercept ctrl+c',
         (tester) async {
           await tester.pumpComponent(
@@ -40,7 +40,7 @@ void main() {
       // This test verifies the event is created but not handled
       bool ctrlCReceived = false;
 
-      await testNocterm(
+      await testCinder(
         'fallback to shutdown',
         (tester) async {
           await tester.pumpComponent(
@@ -73,7 +73,7 @@ void main() {
     test('Ctrl+C has correct event properties', () async {
       KeyboardEvent? receivedEvent;
 
-      await testNocterm(
+      await testCinder(
         'event properties',
         (tester) async {
           await tester.pumpComponent(
@@ -106,11 +106,11 @@ void main() {
       );
     });
 
-    test('only focused component receives Ctrl+C', () async {
+    test('only focused widget receives Ctrl+C', () async {
       bool focusedReceived = false;
       bool unfocusedReceived = false;
 
-      await testNocterm(
+      await testCinder(
         'focus respects routing',
         (tester) async {
           await tester.pumpComponent(
@@ -159,7 +159,7 @@ void main() {
       bool childReceived = false;
       bool parentReceived = false;
 
-      await testNocterm(
+      await testCinder(
         'event bubbling',
         (tester) async {
           await tester.pumpComponent(
@@ -202,7 +202,7 @@ void main() {
     test('press twice pattern works', () async {
       int ctrlCCount = 0;
 
-      await testNocterm(
+      await testCinder(
         'press twice pattern',
         (tester) async {
           await tester.pumpComponent(
@@ -245,7 +245,7 @@ void main() {
     test('counter resets on other key press', () async {
       int ctrlCCount = 0;
 
-      await testNocterm(
+      await testCinder(
         'counter reset',
         (tester) async {
           await tester.pumpComponent(
@@ -293,7 +293,7 @@ void main() {
       bool ctrlCReceived = false;
       bool regularCReceived = false;
 
-      await testNocterm(
+      await testCinder(
         'distinguish ctrl+c from c',
         (tester) async {
           await tester.pumpComponent(
@@ -339,7 +339,7 @@ void main() {
     test('nested focused components - child handles before parent', () async {
       final List<String> handlerOrder = [];
 
-      await testNocterm(
+      await testCinder(
         'handler precedence',
         (tester) async {
           await tester.pumpComponent(
@@ -382,7 +382,7 @@ void main() {
     test('multiple modifiers with Ctrl+C', () async {
       KeyboardEvent? receivedEvent;
 
-      await testNocterm(
+      await testCinder(
         'ctrl+shift+c',
         (tester) async {
           await tester.pumpComponent(
@@ -422,11 +422,11 @@ void main() {
       );
     });
 
-    test('stateful component with Ctrl+C counter', () async {
-      await testNocterm(
+    test('stateful widget with Ctrl+C counter', () async {
+      await testCinder(
         'stateful counter',
         (tester) async {
-          // Create a simple stateful component
+          // Create a simple stateful widget
           await tester.pumpComponent(
             const _CounterApp(),
           );
@@ -459,10 +459,10 @@ void main() {
       );
     });
 
-    test('Ctrl+C in unfocused component should not be handled', () async {
+    test('Ctrl+C in unfocused widget should not be handled', () async {
       bool unfocusedHandlerCalled = false;
 
-      await testNocterm(
+      await testCinder(
         'unfocused no handling',
         (tester) async {
           await tester.pumpComponent(
@@ -487,7 +487,7 @@ void main() {
             ),
           );
 
-          // Handler should not be called because component is not focused
+          // Handler should not be called because widget is not focused
           expect(unfocusedHandlerCalled, isFalse);
         },
       );
@@ -495,8 +495,8 @@ void main() {
   });
 }
 
-/// Simple stateful component for testing Ctrl+C counter pattern
-class _CounterApp extends StatefulComponent {
+/// Simple stateful widget for testing Ctrl+C counter pattern
+class _CounterApp extends StatefulWidget {
   const _CounterApp();
 
   @override
@@ -507,7 +507,7 @@ class _CounterAppState extends State<_CounterApp> {
   int _count = 0;
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Focusable(
       focused: true,
       onKeyEvent: (event) {

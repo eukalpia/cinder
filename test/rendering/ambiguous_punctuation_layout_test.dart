@@ -1,5 +1,5 @@
 import 'package:test/test.dart';
-import 'package:nocterm/nocterm.dart' hide isNotEmpty;
+import 'package:cinder/cinder.dart' hide isNotEmpty;
 
 /// End-to-end layout tests for East Asian Ambiguous punctuation
 /// (General Punctuation 0x2010-0x205F: em dash, en dash, smart quotes,
@@ -10,7 +10,7 @@ import 'package:nocterm/nocterm.dart' hide isNotEmpty;
 /// contains them, which shifts cell placement and breaks the
 /// alignment of lists, padded tables, and bordered boxes. The unit
 /// test in unicode_width_test.dart guards runeWidth(); these tests
-/// guard the actual render pipeline (component -> buffer cells).
+/// guard the actual render pipeline (widget -> buffer cells).
 void main() {
   group('Ambiguous punctuation layout (e2e)', () {
     test('buffer places punctuation in exactly one cell', () {
@@ -36,7 +36,7 @@ void main() {
     });
 
     test('rendered text advances one column per punctuation glyph', () async {
-      await testNocterm(
+      await testCinder(
         'punctuation column advance',
         (tester) async {
           await tester.pumpComponent(
@@ -62,7 +62,7 @@ void main() {
       // A min-sized box wraps Text('A—B') (display width 3). The right
       // border must sit at column left+4 (1 border + 3 content). If the
       // em dash measured as width 2 the box would be one column wider.
-      await testNocterm(
+      await testCinder(
         'border hugs punctuation',
         (tester) async {
           await tester.pumpComponent(

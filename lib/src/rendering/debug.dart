@@ -1,4 +1,4 @@
-/// Debug flags for the nocterm rendering system.
+/// Debug flags for the cinder rendering system.
 library;
 
 import '../style.dart';

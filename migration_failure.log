@@ -1,9 +1,0 @@
-Traceback (most recent call last):
-  File "/home/runner/work/cinder/cinder/.github/scripts/cinder_breaking_refactor.py", line 278, in <module>
-    main()
-  File "/home/runner/work/cinder/cinder/.github/scripts/cinder_breaking_refactor.py", line 272, in main
-    assert_no_legacy_public_api()
-  File "/home/runner/work/cinder/cinder/.github/scripts/cinder_breaking_refactor.py", line 249, in assert_no_legacy_public_api
-    raise RuntimeError("Legacy API remains:\n" + "\n".join(failures[:100]))
-RuntimeError: Legacy API remains:
-.github/workflows/cinder_refactor.yml contains 'class Component'

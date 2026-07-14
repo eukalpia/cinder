@@ -1,8 +1,8 @@
 import 'dart:typed_data';
 
-import 'package:nocterm/src/image/sixel_encoder.dart';
-import 'package:nocterm/src/image/color_quantizer.dart';
-import 'package:nocterm/src/style.dart';
+import 'package:cinder/src/image/sixel_encoder.dart';
+import 'package:cinder/src/image/color_quantizer.dart';
+import 'package:cinder/src/style.dart';
 import 'package:test/test.dart';
 
 void main() {

@@ -1,4 +1,4 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 /// Regression tests for wide character rendering bug.
@@ -82,7 +82,7 @@ void main() {
 
     group('Wide Character Full Rendering', () {
       test('emoji renders correctly in Text widget', () async {
-        await testNocterm(
+        await testCinder(
           'emoji text rendering',
           (tester) async {
             await tester.pumpComponent(
@@ -112,7 +112,7 @@ void main() {
       });
 
       test('Chinese characters render correctly', () async {
-        await testNocterm(
+        await testCinder(
           'chinese text rendering',
           (tester) async {
             await tester.pumpComponent(
@@ -137,7 +137,7 @@ void main() {
       });
 
       test('mixed ASCII, emoji, and Chinese in same text', () async {
-        await testNocterm(
+        await testCinder(
           'mixed content rendering',
           (tester) async {
             await tester.pumpComponent(
@@ -171,7 +171,7 @@ void main() {
 
     group('Wide Character Differential Rendering', () {
       test('emoji remains correct after content update', () async {
-        await testNocterm(
+        await testCinder(
           'emoji differential update',
           (tester) async {
             // First render with emoji
@@ -198,7 +198,7 @@ void main() {
       });
 
       test('Chinese characters correct after multiple updates', () async {
-        await testNocterm(
+        await testCinder(
           'chinese differential updates',
           (tester) async {
             await tester.pumpComponent(
@@ -225,7 +225,7 @@ void main() {
       });
 
       test('wide characters replaced by narrow characters correctly', () async {
-        await testNocterm(
+        await testCinder(
           'wide to narrow replacement',
           (tester) async {
             // Start with emojis (wide)
@@ -255,7 +255,7 @@ void main() {
       });
 
       test('narrow characters replaced by wide characters correctly', () async {
-        await testNocterm(
+        await testCinder(
           'narrow to wide replacement',
           (tester) async {
             // Start with ASCII
@@ -285,7 +285,7 @@ void main() {
     group('Focus Change with Wide Characters', () {
       test('wide characters in Text remain correct after focus changes',
           () async {
-        await testNocterm(
+        await testCinder(
           'wide char focus change',
           (tester) async {
             // This test ensures that wide characters rendered via Text widgets
@@ -317,7 +317,7 @@ void main() {
       });
 
       test('Chinese text remains correct after focus changes', () async {
-        await testNocterm(
+        await testCinder(
           'chinese focus change',
           (tester) async {
             await tester.pumpComponent(
@@ -341,7 +341,7 @@ void main() {
       });
 
       test('multiple focus changes preserve wide characters', () async {
-        await testNocterm(
+        await testCinder(
           'multiple focus changes',
           (tester) async {
             await tester.pumpComponent(
@@ -375,7 +375,7 @@ void main() {
       test(
           'wide character state preserved when non-wide content changes nearby',
           () async {
-        await testNocterm(
+        await testCinder(
           'wide char near changes',
           (tester) async {
             await tester.pumpComponent(
@@ -406,7 +406,7 @@ void main() {
 
     group('Wide Characters in Lists and Scrolling', () {
       test('emoji in ListView items render correctly', () async {
-        await testNocterm(
+        await testCinder(
           'emoji in listview',
           (tester) async {
             await tester.pumpComponent(
@@ -435,7 +435,7 @@ void main() {
       });
 
       test('Chinese in Column items render correctly', () async {
-        await testNocterm(
+        await testCinder(
           'chinese in column',
           (tester) async {
             await tester.pumpComponent(
@@ -460,7 +460,7 @@ void main() {
 
     group('Wide Characters with Styles', () {
       test('styled emoji renders correctly', () async {
-        await testNocterm(
+        await testCinder(
           'styled emoji',
           (tester) async {
             await tester.pumpComponent(
@@ -483,7 +483,7 @@ void main() {
       });
 
       test('styled Chinese characters render correctly', () async {
-        await testNocterm(
+        await testCinder(
           'styled chinese',
           (tester) async {
             await tester.pumpComponent(
@@ -510,7 +510,7 @@ void main() {
 
     group('Edge Cases', () {
       test('empty string after wide character string', () async {
-        await testNocterm(
+        await testCinder(
           'empty after wide',
           (tester) async {
             await tester.pumpComponent(
@@ -529,7 +529,7 @@ void main() {
       });
 
       test('single wide character', () async {
-        await testNocterm(
+        await testCinder(
           'single wide char',
           (tester) async {
             await tester.pumpComponent(
@@ -544,7 +544,7 @@ void main() {
       });
 
       test('wide character at end of line', () async {
-        await testNocterm(
+        await testCinder(
           'wide at line end',
           (tester) async {
             // Use a narrow width to test edge wrapping behavior
@@ -564,7 +564,7 @@ void main() {
       });
 
       test('rapid updates with wide characters', () async {
-        await testNocterm(
+        await testCinder(
           'rapid wide updates',
           (tester) async {
             final emojis = ['🚀', '🎉', '🔥', '✨', '💻', '🎯', '⭐', '🌟'];
@@ -585,7 +585,7 @@ void main() {
 }
 
 /// Test widget: Focusable items with emoji labels
-class _FocusableWidgetWithWideCharLabels extends StatefulComponent {
+class _FocusableWidgetWithWideCharLabels extends StatefulWidget {
   @override
   State<_FocusableWidgetWithWideCharLabels> createState() =>
       _FocusableWidgetWithWideCharLabelsState();
@@ -596,7 +596,7 @@ class _FocusableWidgetWithWideCharLabelsState
   int _focusedIndex = 0;
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Focusable(
       focused: true,
       onKeyEvent: (event) {
@@ -630,7 +630,7 @@ class _FocusableWidgetWithWideCharLabelsState
 }
 
 /// Test widget: Focusable items with Chinese labels
-class _FocusableWidgetWithChineseLabels extends StatefulComponent {
+class _FocusableWidgetWithChineseLabels extends StatefulWidget {
   @override
   State<_FocusableWidgetWithChineseLabels> createState() =>
       _FocusableWidgetWithChineseLabelsState();
@@ -641,7 +641,7 @@ class _FocusableWidgetWithChineseLabelsState
   int _focusedIndex = 0;
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Focusable(
       focused: true,
       onKeyEvent: (event) {
@@ -675,7 +675,7 @@ class _FocusableWidgetWithChineseLabelsState
 }
 
 /// Test widget: Focusable items with mixed labels
-class _FocusableWidgetWithMixedLabels extends StatefulComponent {
+class _FocusableWidgetWithMixedLabels extends StatefulWidget {
   @override
   State<_FocusableWidgetWithMixedLabels> createState() =>
       _FocusableWidgetWithMixedLabelsState();
@@ -686,7 +686,7 @@ class _FocusableWidgetWithMixedLabelsState
   int _focusedIndex = 0;
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Focusable(
       focused: true,
       onKeyEvent: (event) {
@@ -727,7 +727,7 @@ class _FocusableWidgetWithMixedLabelsState
 }
 
 /// Test widget: Counter with emoji label
-class _CounterWithEmojiLabel extends StatefulComponent {
+class _CounterWithEmojiLabel extends StatefulWidget {
   @override
   State<_CounterWithEmojiLabel> createState() => _CounterWithEmojiLabelState();
 }
@@ -736,7 +736,7 @@ class _CounterWithEmojiLabelState extends State<_CounterWithEmojiLabel> {
   int _count = 0;
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Focusable(
       focused: true,
       onKeyEvent: (event) {

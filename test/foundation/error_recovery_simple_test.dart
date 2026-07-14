@@ -1,11 +1,11 @@
 import 'package:test/test.dart';
-import 'package:nocterm/nocterm.dart';
-import 'package:nocterm/src/components/error_widget.dart';
+import 'package:cinder/cinder.dart';
+import 'package:cinder/src/components/error_widget.dart';
 
 void main() {
   group('Error Recovery Simple', () {
     test('error box is constrained to widget space', () async {
-      await testNocterm(
+      await testCinder(
         'error box constraint',
         (tester) async {
           await tester.pumpComponent(
@@ -54,7 +54,7 @@ void main() {
     });
 
     test('direct error widget shows error box properly', () async {
-      await testNocterm(
+      await testCinder(
         'direct error widget',
         (tester) async {
           await tester.pumpComponent(
@@ -81,7 +81,7 @@ void main() {
     });
 
     test('paint error shows error box', () async {
-      await testNocterm(
+      await testCinder(
         'paint error display',
         (tester) async {
           await tester.pumpComponent(

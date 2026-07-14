@@ -2,21 +2,21 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:js_interop';
 
-import 'package:nocterm/src/size.dart';
+import 'package:cinder/src/size.dart';
 
 import 'terminal_backend.dart';
 import 'web_bridge.dart';
 
 /// Backend for web platform - uses JavaScript bridge for communication.
 ///
-/// This enables compiled nocterm apps (WASM/JS) to communicate with
-/// a host application (nocterm_web) that renders to xterm.js.
+/// This enables compiled cinder apps (WASM/JS) to communicate with
+/// a host application (cinder_web) that renders to xterm.js.
 ///
-/// The communication happens through `window.noctermBridge`, a JavaScript
+/// The communication happens through `window.cinderBridge`, a JavaScript
 /// object that is shared between the host and guest because they run
 /// in the same browser context (even though they're separately compiled).
 ///
-/// ## Host Side (nocterm_web)
+/// ## Host Side (cinder_web)
 ///
 /// The host must initialize the bridge before loading the guest app:
 /// ```dart
@@ -39,7 +39,7 @@ import 'web_bridge.dart';
 /// };
 /// ```
 ///
-/// ## Guest Side (nocterm app compiled to JS)
+/// ## Guest Side (cinder app compiled to JS)
 ///
 /// The guest just uses WebBackend normally:
 /// ```dart
@@ -50,7 +50,7 @@ import 'web_bridge.dart';
 class WebBackend implements TerminalBackend {
   // ===========================================================================
   // HOST-SIDE STATIC METHODS
-  // These are called by nocterm_web to set up and control the bridge.
+  // These are called by cinder_web to set up and control the bridge.
   // ===========================================================================
 
   static final _outputController = StreamController<String>.broadcast();
@@ -63,8 +63,8 @@ class WebBackend implements TerminalBackend {
   /// After calling this, you MUST call setSize() before loading the guest.
   static void initializeHost() {
     // Create the bridge object on window
-    final bridge = createNoctermBridge();
-    noctermBridge = bridge;
+    final bridge = createCinderBridge();
+    cinderBridge = bridge;
 
     // Don't set default size - host MUST call setSize() with actual terminal size
 
@@ -84,7 +84,7 @@ class WebBackend implements TerminalBackend {
   /// Send input bytes to the guest app.
   /// Called by host when xterm.js receives keyboard/mouse input.
   static void sendInput(List<int> bytes) {
-    final bridge = noctermBridge;
+    final bridge = cinderBridge;
     if (bridge != null) {
       final onInput = bridge.onInput;
       if (onInput != null) {
@@ -105,10 +105,10 @@ class WebBackend implements TerminalBackend {
   /// Get the current terminal size.
   /// Throws if the bridge is not initialized or size is not set.
   static Size get currentSize {
-    final bridge = noctermBridge;
+    final bridge = cinderBridge;
     if (bridge == null) {
       throw StateError(
-        'noctermBridge not initialized. '
+        'cinderBridge not initialized. '
         'The host must call WebBackend.initializeHost() first.',
       );
     }
@@ -129,7 +129,7 @@ class WebBackend implements TerminalBackend {
   /// Set the terminal size.
   /// Called by host when xterm.js resizes.
   static void setSize(Size size) {
-    final bridge = noctermBridge;
+    final bridge = cinderBridge;
     if (bridge != null) {
       bridge.width = size.width.toJS;
       bridge.height = size.height.toJS;
@@ -146,7 +146,7 @@ class WebBackend implements TerminalBackend {
 
   /// Signal that the guest app should shut down.
   static void requestShutdown() {
-    final bridge = noctermBridge;
+    final bridge = cinderBridge;
     if (bridge != null) {
       final onShutdown = bridge.onShutdown;
       if (onShutdown != null) {
@@ -159,7 +159,7 @@ class WebBackend implements TerminalBackend {
   /// Reset the bridge for loading a new app.
   /// Note: Does NOT reset size - the host should call setSize() with current size.
   static void reset() {
-    final bridge = noctermBridge;
+    final bridge = cinderBridge;
     if (bridge != null) {
       // Clear guest callbacks
       bridge.onInput = null;
@@ -172,13 +172,13 @@ class WebBackend implements TerminalBackend {
 
   /// Check if an app is currently connected (has registered callbacks).
   static bool get isAppConnected {
-    final bridge = noctermBridge;
+    final bridge = cinderBridge;
     return bridge != null && bridge.onInput != null;
   }
 
   // ===========================================================================
   // GUEST-SIDE INSTANCE METHODS
-  // These are used by the nocterm app (compiled to JS) via Terminal.
+  // These are used by the cinder app (compiled to JS) via Terminal.
   // ===========================================================================
 
   bool _disposed = false;
@@ -190,11 +190,11 @@ class WebBackend implements TerminalBackend {
 
   void _connect() {
     print('WebBackend: _connect() called');
-    final bridge = noctermBridge;
+    final bridge = cinderBridge;
     if (bridge == null) {
-      print('WebBackend: ERROR - noctermBridge is null!');
+      print('WebBackend: ERROR - cinderBridge is null!');
       throw StateError(
-        'noctermBridge not found. The host (nocterm_web) must call '
+        'cinderBridge not found. The host (cinder_web) must call '
         'WebBackend.initializeHost() before loading the guest app.',
       );
     }
@@ -245,7 +245,7 @@ class WebBackend implements TerminalBackend {
   void writeRaw(String data) {
     if (_disposed) return;
 
-    final bridge = noctermBridge;
+    final bridge = cinderBridge;
     if (bridge != null) {
       final onOutput = bridge.onOutput;
       if (onOutput != null) {
@@ -301,7 +301,7 @@ class WebBackend implements TerminalBackend {
     _connected = false;
 
     // Clear our callbacks from the bridge
-    final bridge = noctermBridge;
+    final bridge = cinderBridge;
     if (bridge != null) {
       bridge.onInput = null;
       bridge.onResize = null;

@@ -1,5 +1,5 @@
 /**
- * nocterm Landing Page Effects
+ * cinder Landing Page Effects
  * WebGL plasma background + CSS wave animation
  */
 

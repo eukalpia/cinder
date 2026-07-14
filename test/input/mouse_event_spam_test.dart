@@ -1,5 +1,5 @@
 import 'package:test/test.dart' hide isEmpty;
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() {
   group('Mouse Event Handling', () {
@@ -12,7 +12,7 @@ void main() {
     // of converting them to 'unknown' keyboard events.
     test('unknown keyboard events should not be sent to focusable nodes',
         () async {
-      await testNocterm(
+      await testCinder(
         'unknown key test',
         (tester) async {
           print('\n=== Testing Unknown Keyboard Events ===\n');

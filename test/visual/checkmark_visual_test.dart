@@ -1,10 +1,10 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('Checkmark Visual Layout Test', () {
     test('checkmark symbols should align properly', () async {
-      await testNocterm(
+      await testCinder(
         'checkmark layout',
         (tester) async {
           await tester.pumpComponent(
@@ -45,7 +45,7 @@ void main() {
     });
 
     test('clipboard status text with checkmark', () async {
-      await testNocterm(
+      await testCinder(
         'clipboard status',
         (tester) async {
           await tester.pumpComponent(

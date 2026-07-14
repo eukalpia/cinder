@@ -123,7 +123,7 @@ reliably.
 
 ## Documentation
 - **Image Documentation**: Add documentation for image support and mark as experimental
-- **Website**: Add nocterm.dev website link to README
+- **Website**: Add cinder.dev website link to README
 
 ## Refactoring
 - **Internal**: Use built-in `getElementForInheritedComponentOfExactType` for cleaner code
@@ -243,7 +243,7 @@ reliably.
 - **AsciiText**: Large ASCII art text renderer with extensible font system
   - Built-in fonts: `standard`, `banner`, `block`, `slim`
   - Custom font support via `AsciiFont` extension
-- **Builder**: Simple component for inline building (like Flutter's Builder)
+- **Builder**: Simple widget for inline building (like Flutter's Builder)
 
 ### TextField Improvements
 - **onKeyEvent callback**: Intercept key events before TextField processes them
@@ -312,7 +312,7 @@ This is a **major release** with 100+ commits introducing foundational changes f
 - **Pre-commit hook**: Auto-format on commit
 
 ### Documentation
-- **Full documentation site** at docs.nocterm.dev (Fumadocs + GitHub Pages)
+- **Full documentation site** at docs.cinder.dev (Fumadocs + GitHub Pages)
 - Updated README with proper badges and guides
 
 ## Performance Improvements
@@ -334,7 +334,7 @@ This is a **major release** with 100+ commits introducing foundational changes f
 
 ### Other Fixes
 - Navigator test stale context (now uses GlobalKey)
-- Stateful component inheritance
+- Stateful widget inheritance
 - TextField `onChange` text mutation issues
 - Shell command exceptions
 - Frame buffer null assertion removal

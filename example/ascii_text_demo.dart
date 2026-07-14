@@ -1,9 +1,9 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
-/// Demo showcasing the AsciiText component with various fonts and styles.
-class AsciiTextDemo extends StatelessComponent {
+/// Demo showcasing the AsciiText widget with various fonts and styles.
+class AsciiTextDemo extends StatelessWidget {
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(1),
       child: Column(

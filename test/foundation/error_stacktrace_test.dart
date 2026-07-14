@@ -1,11 +1,11 @@
 import 'package:test/test.dart';
-import 'package:nocterm/nocterm.dart';
-import 'package:nocterm/src/components/error_widget.dart';
+import 'package:cinder/cinder.dart';
+import 'package:cinder/src/components/error_widget.dart';
 
 void main() {
   group('Error Stack Trace Display', () {
     test('layout error shows stack trace in error box', () async {
-      await testNocterm(
+      await testCinder(
         'layout error with stack trace',
         (tester) async {
           await tester.pumpComponent(
@@ -33,7 +33,7 @@ void main() {
     });
 
     test('paint error shows stack trace in error box', () async {
-      await testNocterm(
+      await testCinder(
         'paint error with stack trace',
         (tester) async {
           await tester.pumpComponent(
@@ -71,7 +71,7 @@ void main() {
     });
 
     test('error box truncates long stack traces', () async {
-      await testNocterm(
+      await testCinder(
         'truncated stack trace',
         (tester) async {
           await tester.pumpComponent(
@@ -113,7 +113,7 @@ void main() {
     });
 
     test('custom error widget shows provided error and stack', () async {
-      await testNocterm(
+      await testCinder(
         'custom error widget with stack',
         (tester) async {
           // Create a fake stack trace

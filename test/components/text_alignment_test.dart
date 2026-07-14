@@ -1,11 +1,11 @@
 import 'package:test/test.dart';
-import 'package:nocterm/nocterm.dart' hide TextAlign;
-import 'package:nocterm/src/components/basic.dart' show TextAlign;
+import 'package:cinder/cinder.dart' hide TextAlign;
+import 'package:cinder/src/components/basic.dart' show TextAlign;
 
 void main() {
   group('Text Alignment Visual Tests', () {
     test('text alignment in constrained container', () async {
-      await testNocterm(
+      await testCinder(
         'text alignment rendering',
         (tester) async {
           await tester.pumpComponent(
@@ -53,7 +53,7 @@ void main() {
     });
 
     test('text alignment with different widths', () async {
-      await testNocterm(
+      await testCinder(
         'alignment at various widths',
         (tester) async {
           await tester.pumpComponent(
@@ -115,7 +115,7 @@ void main() {
     });
 
     test('justified text alignment', () async {
-      await testNocterm(
+      await testCinder(
         'justified text',
         (tester) async {
           await tester.pumpComponent(
@@ -148,7 +148,7 @@ void main() {
     });
 
     test('text alignment with padding', () async {
-      await testNocterm(
+      await testCinder(
         'alignment with padding',
         (tester) async {
           await tester.pumpComponent(

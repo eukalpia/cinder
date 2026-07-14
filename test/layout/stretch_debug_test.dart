@@ -1,11 +1,11 @@
 import 'package:test/test.dart';
-import 'package:nocterm/nocterm.dart' hide TextAlign;
-import 'package:nocterm/src/components/basic.dart' show TextAlign;
+import 'package:cinder/cinder.dart' hide TextAlign;
+import 'package:cinder/src/components/basic.dart' show TextAlign;
 
 void main() {
   group('Stretch Debug Test', () {
     test('container constrains column correctly', () async {
-      await testNocterm(
+      await testCinder(
         'container column constraints',
         (tester) async {
           await tester.pumpComponent(
@@ -33,7 +33,7 @@ void main() {
     });
 
     test('container constrains text directly', () async {
-      await testNocterm(
+      await testCinder(
         'container text constraints',
         (tester) async {
           await tester.pumpComponent(

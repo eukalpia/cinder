@@ -1,9 +1,9 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 void main() {
   test('debug ListView extent', () async {
-    await testNocterm(
+    await testCinder(
       'debug test',
       (tester) async {
         final scrollController = ScrollController();

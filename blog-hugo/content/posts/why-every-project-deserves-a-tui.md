@@ -55,10 +55,10 @@ Tools like `lazygit`, `k9s`, and `btop` are popular for exactly this reason. Key
 
 For Flutter projects, Dart is a natural choice. I can share models, API clients, whatever. No need to rewrite stuff in another language just for a dev tool.
 
-I've been building [Nocterm](https://nocterm.dev), a TUI framework that uses Flutter-like APIs. If I know Flutter, I already know how to build with it.
+I've been building [Cinder](https://cinder.dev), a TUI framework that uses Flutter-like APIs. If I know Flutter, I already know how to build with it.
 
 ```dart
-class MyDashboard extends StatefulComponent {
+class MyDashboard extends StatefulWidget {
   @override
   State<MyDashboard> createState() => _MyDashboardState();
 }
@@ -67,7 +67,7 @@ class _MyDashboardState extends State<MyDashboard> {
   String _status = 'Ready';
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Column(
       children: [
         Text('App Status: $_status'),
@@ -81,7 +81,7 @@ class _MyDashboardState extends State<MyDashboard> {
 }
 ```
 
-`StatefulComponent`, `setState()`, `Column`, `Row`. It's all there. Hot reload works too, which makes iterating fast. And I can compile to a native executable that starts instantly.
+`StatefulWidget`, `setState()`, `Column`, `Row`. It's all there. Hot reload works too, which makes iterating fast. And I can compile to a native executable that starts instantly.
 
 ## A practical example: the dev dashboard
 
@@ -92,11 +92,11 @@ void main() async {
   await runApp(const DevDashboard());
 }
 
-class DevDashboard extends StatefulComponent {
+class DevDashboard extends StatefulWidget {
   // ... state management
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Focusable(
       onKeyEvent: _handleKeyEvent,
       child: Column(
@@ -181,4 +181,4 @@ It doesn't need to replace the `justfile` or `Makefile`. I think of it as a laye
 
 ---
 
-The example dev dashboard from this post is in the [Nocterm repo](https://github.com/Norbert515/nocterm) under `example/dev_dashboard_demo.dart` if you want to poke around.
+The example dev dashboard from this post is in the [Cinder repo](https://github.com/eukalpia/cinder) under `example/dev_dashboard_demo.dart` if you want to poke around.

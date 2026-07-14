@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 // Debug log file
 final _debugLog = File('gesture_debug.log');
@@ -19,7 +19,7 @@ void main() {
   runApp(const GestureDemoApp());
 }
 
-class GestureDemoApp extends StatefulComponent {
+class GestureDemoApp extends StatefulWidget {
   const GestureDemoApp({super.key});
 
   @override
@@ -51,7 +51,7 @@ class _GestureDemoAppState extends State<GestureDemoApp> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Container(
       width: 100,
       height: 50,
@@ -70,7 +70,7 @@ class _GestureDemoAppState extends State<GestureDemoApp> {
     );
   }
 
-  Component _buildHeader() {
+  Widget _buildHeader() {
     return Container(
       width: 80,
       padding: const EdgeInsets.all(1),
@@ -90,7 +90,7 @@ class _GestureDemoAppState extends State<GestureDemoApp> {
     );
   }
 
-  Component _buildGestureZones() {
+  Widget _buildGestureZones() {
     return Column(
       children: [
         // First row: Tap and Double-Tap zones
@@ -124,7 +124,7 @@ class _GestureDemoAppState extends State<GestureDemoApp> {
     );
   }
 
-  Component _buildTapZone() {
+  Widget _buildTapZone() {
     return GestureDetector(
       onTap: () {
         _addEvent('Tap detected');
@@ -181,7 +181,7 @@ class _GestureDemoAppState extends State<GestureDemoApp> {
     );
   }
 
-  Component _buildDoubleTapZone() {
+  Widget _buildDoubleTapZone() {
     return GestureDetector(
       onDoubleTap: () {
         _addEvent('Double-tap detected');
@@ -207,7 +207,7 @@ class _GestureDemoAppState extends State<GestureDemoApp> {
     );
   }
 
-  Component _buildLongPressZone() {
+  Widget _buildLongPressZone() {
     return GestureDetector(
       onLongPress: () {
         _addEvent('Long press completed');
@@ -257,7 +257,7 @@ class _GestureDemoAppState extends State<GestureDemoApp> {
     );
   }
 
-  Component _buildHoverZone() {
+  Widget _buildHoverZone() {
     return MouseRegion(
       onEnter: (event) {
         _addEvent('Mouse entered hover zone');
@@ -302,7 +302,7 @@ class _GestureDemoAppState extends State<GestureDemoApp> {
     );
   }
 
-  Component _buildCombinedZone() {
+  Widget _buildCombinedZone() {
     return MouseRegion(
       onEnter: (event) {
         _addEvent('Combined: Mouse entered');
@@ -391,7 +391,7 @@ class _GestureDemoAppState extends State<GestureDemoApp> {
     );
   }
 
-  Component _buildEventLog() {
+  Widget _buildEventLog() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -428,7 +428,7 @@ class _GestureDemoAppState extends State<GestureDemoApp> {
     );
   }
 
-  Component _buildFooter() {
+  Widget _buildFooter() {
     return Container(
       padding: const EdgeInsets.only(left: 2, bottom: 1),
       child: const Text('Press Ctrl+C to exit'),

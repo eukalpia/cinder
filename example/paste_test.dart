@@ -1,10 +1,10 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() async {
   await runApp(const PasteTestApp());
 }
 
-class PasteTestApp extends StatefulComponent {
+class PasteTestApp extends StatefulWidget {
   const PasteTestApp({super.key});
 
   @override
@@ -31,7 +31,7 @@ class _PasteTestAppState extends State<PasteTestApp> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Focusable(
       focused: true,
       onKeyEvent: (event) {

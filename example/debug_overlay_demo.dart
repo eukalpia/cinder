@@ -1,24 +1,24 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
-/// Demonstrates the debug overlay feature in nocterm.
+/// Demonstrates the debug overlay feature in cinder.
 ///
 /// This example shows:
-/// - Press Ctrl+G to toggle the debug overlay (works in ANY nocterm app!)
+/// - Press Ctrl+G to toggle the debug overlay (works in ANY cinder app!)
 /// - The overlay shows real-time performance metrics
 /// - Repaint rainbow is enabled when debug mode is active
-/// - Extended logging is sent to `nocterm logs`
+/// - Extended logging is sent to `cinder logs`
 ///
-/// Note: Debug overlay is automatically available in all nocterm apps.
+/// Note: Debug overlay is automatically available in all cinder apps.
 /// No manual wrapping required - just press Ctrl+G!
 ///
 /// Run with: dart run example/debug_overlay_demo.dart
-/// View logs with: nocterm logs (in another terminal)
+/// View logs with: cinder logs (in another terminal)
 void main() {
   // No need to wrap with DebugOverlay - it's automatic!
   runApp(const _DebugOverlayDemo());
 }
 
-class _DebugOverlayDemo extends StatefulComponent {
+class _DebugOverlayDemo extends StatefulWidget {
   const _DebugOverlayDemo();
 
   @override
@@ -43,7 +43,7 @@ class _DebugOverlayDemoState extends State<_DebugOverlayDemo> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Focusable(
       focused: true,
       onKeyEvent: (event) {
@@ -85,7 +85,7 @@ class _DebugOverlayDemoState extends State<_DebugOverlayDemo> {
                   Text('When enabled, you will see:'),
                   Text('  - Performance overlay in top-right corner'),
                   Text('  - Repaint rainbow (colors on repainted areas)'),
-                  Text('  - Extended logging (view with `nocterm logs`)'),
+                  Text('  - Extended logging (view with `cinder logs`)'),
                 ],
               ),
             ),
@@ -119,7 +119,7 @@ class _DebugOverlayDemoState extends State<_DebugOverlayDemo> {
     );
   }
 
-  Component _buildStatusIndicator() {
+  Widget _buildStatusIndicator() {
     return Row(
       children: [
         Container(
@@ -146,7 +146,7 @@ class _DebugOverlayDemoState extends State<_DebugOverlayDemo> {
     );
   }
 
-  Component _buildCounter() {
+  Widget _buildCounter() {
     return Row(
       children: [
         const Text('Counter: '),

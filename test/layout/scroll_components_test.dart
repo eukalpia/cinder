@@ -1,10 +1,10 @@
 import 'package:test/test.dart';
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() {
   group('SingleChildScrollView', () {
     test('visual development - vertical scroll', () async {
-      await testNocterm(
+      await testCinder(
         'vertical scrolling',
         (tester) async {
           print('Testing SingleChildScrollView with vertical content:');
@@ -46,7 +46,7 @@ void main() {
     });
 
     test('horizontal scrolling', () async {
-      await testNocterm(
+      await testCinder(
         'horizontal scroll',
         (tester) async {
           print('Testing SingleChildScrollView with horizontal content:');
@@ -85,7 +85,7 @@ void main() {
     });
 
     test('with padding', () async {
-      await testNocterm(
+      await testCinder(
         'scroll with padding',
         (tester) async {
           print('Testing SingleChildScrollView with padding:');
@@ -115,7 +115,7 @@ void main() {
     });
 
     test('controlled scrolling', () async {
-      await testNocterm(
+      await testCinder(
         'programmatic scroll',
         (tester) async {
           final controller = ScrollController();
@@ -162,7 +162,7 @@ void main() {
 
   group('ListView', () {
     test('visual development - basic list', () async {
-      await testNocterm(
+      await testCinder(
         'basic ListView',
         (tester) async {
           print('Testing basic ListView:');
@@ -200,7 +200,7 @@ void main() {
     });
 
     test('ListView.builder', () async {
-      await testNocterm(
+      await testCinder(
         'builder pattern',
         (tester) async {
           print('Testing ListView.builder with lazy loading:');
@@ -238,7 +238,7 @@ void main() {
     });
 
     test('ListView.separated', () async {
-      await testNocterm(
+      await testCinder(
         'separated list',
         (tester) async {
           print('Testing ListView.separated:');
@@ -271,7 +271,7 @@ void main() {
     });
 
     test('horizontal ListView', () async {
-      await testNocterm(
+      await testCinder(
         'horizontal list',
         (tester) async {
           print('Testing horizontal ListView:');
@@ -309,7 +309,7 @@ void main() {
   group('Scrollbar', () {
     test('visual development - with scrollbar',
         skip: 'Known issue: Scrollbar arrow rendering', () async {
-      await testNocterm(
+      await testCinder(
         'scrollbar display',
         (tester) async {
           print('Testing Scrollbar widget:');
@@ -355,7 +355,7 @@ void main() {
     });
 
     test('scrollbar with ListView', () async {
-      await testNocterm(
+      await testCinder(
         'ListView with scrollbar',
         (tester) async {
           print('Testing Scrollbar with ListView:');
@@ -403,7 +403,7 @@ void main() {
 
   group('Integration tests', () {
     test('nested scrolling', () async {
-      await testNocterm(
+      await testCinder(
         'nested scroll views',
         (tester) async {
           print('Testing nested scroll views:');
@@ -440,7 +440,7 @@ void main() {
     });
 
     test('scroll physics boundaries', () async {
-      await testNocterm(
+      await testCinder(
         'boundary testing',
         (tester) async {
           final controller = ScrollController();

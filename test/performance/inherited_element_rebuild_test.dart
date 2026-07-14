@@ -1,12 +1,12 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
-class BuildTracker extends StatelessComponent {
+class BuildTracker extends StatelessWidget {
   final VoidCallback onBuild;
   const BuildTracker({required this.onBuild, super.key});
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     onBuild();
     return const SizedBox();
   }

@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() async {
   await runApp(ResizeTestApp());
 }
 
-class ResizeTestApp extends StatefulComponent {
+class ResizeTestApp extends StatefulWidget {
   @override
   State<ResizeTestApp> createState() => _ResizeTestAppState();
 }
@@ -55,7 +55,7 @@ class _ResizeTestAppState extends State<ResizeTestApp> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     final size = _currentSize ?? Size(80.0, 24.0);
     final width = size.width.toInt();
     final height = size.height.toInt();

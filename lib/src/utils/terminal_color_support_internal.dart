@@ -1,7 +1,7 @@
-import 'package:nocterm/src/utils/truthiness.dart';
+import 'package:cinder/src/utils/truthiness.dart';
 
 bool detectTruecolorFromEnv(Map<String, String> env) {
-  final override = env['NOCTERM_TRUECOLOR']?.toLowerCase();
+  final override = env['CINDER_TRUECOLOR']?.toLowerCase();
   if (override != null && override.isNotEmpty) {
     if (truthy(override)) return true;
     if (falsey(override)) return false;

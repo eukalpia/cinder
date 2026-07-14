@@ -1,6 +1,6 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
-/// Demonstrates alpha/transparency support in nocterm.
+/// Demonstrates alpha/transparency support in cinder.
 ///
 /// This example shows:
 /// - Creating colors with alpha using Color.fromARGB()

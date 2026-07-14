@@ -1,27 +1,27 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
-class WidgetA extends StatelessComponent {
+class WidgetA extends StatelessWidget {
   const WidgetA();
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Text('A');
   }
 }
 
-class WidgetB extends StatelessComponent {
+class WidgetB extends StatelessWidget {
   const WidgetB();
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Text('B');
   }
 }
 
 void main() {
-  test('Column properly replaces StatelessComponent children', () async {
-    await testNocterm('stateless replacement', (tester) async {
+  test('Column properly replaces StatelessWidget children', () async {
+    await testCinder('stateless replacement', (tester) async {
       // Start with WidgetA
       await tester.pumpComponent(
         Column(children: [

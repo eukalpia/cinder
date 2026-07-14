@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 // Debug log file
 final _debugLog = File('mouse_debug.log');
@@ -19,7 +19,7 @@ void main() {
   runApp(const MouseDemo());
 }
 
-class MouseDemo extends StatefulComponent {
+class MouseDemo extends StatefulWidget {
   const MouseDemo({super.key});
 
   @override
@@ -31,7 +31,7 @@ class _MouseDemoState extends State<MouseDemo> {
   int? _selectedListItem;
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Stack(
       children: [
         Container(

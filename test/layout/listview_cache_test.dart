@@ -1,11 +1,11 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('ListView cache optimization', () {
     test('itemBuilder is only called once per unique index during layout',
         () async {
-      await testNocterm(
+      await testCinder(
         'cache optimization test',
         (tester) async {
           final scrollController = ScrollController();
@@ -54,7 +54,7 @@ void main() {
     });
 
     test('non-lazy mode also benefits from cache optimization', () async {
-      await testNocterm(
+      await testCinder(
         'non-lazy cache test',
         (tester) async {
           final scrollController = ScrollController();
@@ -98,13 +98,13 @@ void main() {
 
   group('ListView rebuild on state change', () {
     test('items rebuild when parent state changes (selection)', () async {
-      await testNocterm(
+      await testCinder(
         'selection rebuild test',
         (tester) async {
           // Test widget that tracks selection state
           int selectedIndex = 0;
 
-          Component buildList(int selected) {
+          Widget buildList(int selected) {
             return Container(
               width: 30,
               height: 5,
@@ -152,7 +152,7 @@ void main() {
     });
 
     test('items rebuild when itemCount changes', () async {
-      await testNocterm(
+      await testCinder(
         'item count change test',
         (tester) async {
           final scrollController = ScrollController();
@@ -206,7 +206,7 @@ void main() {
     });
 
     test('cache is cleared when widget updates', () async {
-      await testNocterm(
+      await testCinder(
         'cache clear on update test',
         (tester) async {
           int buildCount = 0;
@@ -263,7 +263,7 @@ void main() {
 
   group('ListView performance with large lists', () {
     test('lazy mode handles large item counts efficiently', () async {
-      await testNocterm(
+      await testCinder(
         'large list performance test',
         (tester) async {
           final scrollController = ScrollController();
@@ -309,7 +309,7 @@ void main() {
     });
 
     test('scrolling through list only builds new items', () async {
-      await testNocterm(
+      await testCinder(
         'scroll efficiency test',
         (tester) async {
           final scrollController = ScrollController();

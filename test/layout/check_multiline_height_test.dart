@@ -1,9 +1,9 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart' hide isEmpty;
 
 void main() {
   test('check heights needed', () async {
-    await testNocterm(
+    await testCinder(
       'height calculation',
       (tester) async {
         // Count the actual lines needed
@@ -40,7 +40,7 @@ void main() {
         print(
             '5 (first row) + 1 (space) + 1 (center) + 1 (space) + 1 (bottom row) + 2 (padding) = 11 lines');
 
-        // Now test the actual component with sufficient height
+        // Now test the actual widget with sufficient height
         await tester.pumpComponent(
           Container(
             padding: const EdgeInsets.all(1),

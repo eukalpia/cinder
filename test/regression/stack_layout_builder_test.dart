@@ -1,4 +1,4 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 /// Regression tests for the Stack repaint bug with LayoutBuilder.
@@ -14,7 +14,7 @@ void main() {
     group('basic Stack with LayoutBuilder', () {
       test('renders both children when LayoutBuilder has simple content',
           () async {
-        await testNocterm(
+        await testCinder(
           'basic stack layout builder',
           (tester) async {
             await tester.pumpComponent(
@@ -45,7 +45,7 @@ void main() {
 
       test('renders both children when LayoutBuilder has complex content',
           () async {
-        await testNocterm(
+        await testCinder(
           'complex layout builder content',
           (tester) async {
             await tester.pumpComponent(
@@ -85,7 +85,7 @@ void main() {
     group('SizedBox to Grid transition', () {
       test('foreground remains visible after transition to large grid',
           () async {
-        await testNocterm(
+        await testCinder(
           'sized box to grid transition',
           (tester) async {
             // First render with SizedBox (minimal content)
@@ -109,7 +109,7 @@ void main() {
       });
 
       test('foreground remains visible with stateful toggle', () async {
-        await testNocterm(
+        await testCinder(
           'stateful grid toggle',
           (tester) async {
             await tester.pumpComponent(const _StatefulGridToggle());
@@ -134,7 +134,7 @@ void main() {
     group('Grid to SizedBox transition', () {
       test('foreground remains visible after transition back to SizedBox',
           () async {
-        await testNocterm(
+        await testCinder(
           'grid to sized box transition',
           (tester) async {
             // Start with grid view
@@ -161,7 +161,7 @@ void main() {
 
     group('multiple toggles', () {
       test('rapid toggles do not break rendering', () async {
-        await testNocterm(
+        await testCinder(
           'rapid toggle test',
           (tester) async {
             await tester.pumpComponent(const _StatefulGridToggle());
@@ -185,7 +185,7 @@ void main() {
       });
 
       test('alternating content changes preserve foreground', () async {
-        await testNocterm(
+        await testCinder(
           'alternating content',
           (tester) async {
             await tester.pumpComponent(const _StatefulGridToggle());
@@ -218,7 +218,7 @@ void main() {
 
     group('LayoutBuilder with complex content in Stack', () {
       test('deeply nested widgets in LayoutBuilder work correctly', () async {
-        await testNocterm(
+        await testCinder(
           'deeply nested content',
           (tester) async {
             await tester.pumpComponent(
@@ -266,7 +266,7 @@ void main() {
     group('LayoutBuilder with constraint-based decisions', () {
       test('foreground visible when LayoutBuilder changes based on constraints',
           () async {
-        await testNocterm(
+        await testCinder(
           'constraint based layout',
           (tester) async {
             await tester.pumpComponent(
@@ -311,7 +311,7 @@ void main() {
       });
 
       test('foreground visible in narrow terminal', () async {
-        await testNocterm(
+        await testCinder(
           'narrow terminal test',
           (tester) async {
             await tester.pumpComponent(
@@ -351,7 +351,7 @@ void main() {
     group('error handling in LayoutBuilder', () {
       test('foreground visible even if LayoutBuilder throws initially',
           () async {
-        await testNocterm(
+        await testCinder(
           'error then success',
           (tester) async {
             // First, test with an error
@@ -372,11 +372,11 @@ void main() {
               ),
             );
 
-            // Error component should render but overlay should still be there
+            // Error widget should render but overlay should still be there
             expect(tester.terminalState, containsText('Exception'));
             expect(tester.terminalState, containsText('ERROR_OVERLAY'));
 
-            // Then replace with working component
+            // Then replace with working widget
             await tester.pumpComponent(
               Stack(
                 children: [
@@ -403,7 +403,7 @@ void main() {
 
     group('Stack with multiple positioned children and LayoutBuilder', () {
       test('all positioned children visible with LayoutBuilder', () async {
-        await testNocterm(
+        await testCinder(
           'multiple positioned children',
           (tester) async {
             await tester.pumpComponent(
@@ -459,13 +459,13 @@ void main() {
 // Helper components for testing
 
 /// A stack with togglable grid content in LayoutBuilder
-class _TogglableGridStack extends StatelessComponent {
+class _TogglableGridStack extends StatelessWidget {
   final bool showGrid;
 
   const _TogglableGridStack({required this.showGrid});
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Stack(
       children: [
         Positioned.fill(
@@ -511,7 +511,7 @@ class _TogglableGridStack extends StatelessComponent {
 }
 
 /// A stateful version for testing state-triggered transitions
-class _StatefulGridToggle extends StatefulComponent {
+class _StatefulGridToggle extends StatefulWidget {
   const _StatefulGridToggle();
 
   @override
@@ -528,7 +528,7 @@ class _StatefulGridToggleState extends State<_StatefulGridToggle> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Stack(
       children: [
         Positioned.fill(

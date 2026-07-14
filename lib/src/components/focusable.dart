@@ -5,9 +5,9 @@ import '../keyboard/keyboard_event.dart';
 /// Returns true if the event was handled, false otherwise.
 typedef KeyEventHandler = bool Function(KeyboardEvent event);
 
-/// A component that can receive keyboard focus and handle keyboard events.
+/// A widget that can receive keyboard focus and handle keyboard events.
 ///
-/// This component wraps its child and, when focused, receives keyboard events
+/// This widget wraps its child and, when focused, receives keyboard events
 /// from the framework. Events that are not handled (onKeyEvent returns false) will
 /// bubble up to parent Focusable components.
 ///
@@ -30,7 +30,7 @@ typedef KeyEventHandler = bool Function(KeyboardEvent event);
 ///   child: Container(child: Text('Press Enter')),
 /// )
 /// ```
-class Focusable extends StatelessComponent {
+class Focusable extends StatelessWidget {
   const Focusable({
     super.key,
     required this.focused,
@@ -38,37 +38,37 @@ class Focusable extends StatelessComponent {
     required this.child,
   });
 
-  /// Whether this component currently has focus.
+  /// Whether this widget currently has focus.
   final bool focused;
 
   /// Callback to handle keyboard events with character data.
   /// Should return true if the event was handled, false otherwise.
   final KeyEventHandler onKeyEvent;
 
-  /// The child component to wrap.
-  final Component child;
+  /// The child widget to wrap.
+  final Widget child;
 
   @override
   FocusableElement createElement() => FocusableElement(this);
 
   @override
-  Component build(BuildContext context) => child;
+  Widget build(BuildContext context) => child;
 }
 
-/// Element for the Focusable component.
+/// Element for the Focusable widget.
 class FocusableElement extends StatelessElement {
-  FocusableElement(Focusable super.component);
+  FocusableElement(Focusable super.widget);
 
   @override
-  Focusable get component => super.component as Focusable;
+  Focusable get widget => super.widget as Focusable;
 
   /// Handle a keyboard event if this element is focused.
   bool handleKeyEvent(KeyboardEvent event) {
-    if (!component.focused) {
+    if (!widget.focused) {
       return false;
     }
 
-    final handled = component.onKeyEvent(event);
+    final handled = widget.onKeyEvent(event);
     return handled;
   }
 }

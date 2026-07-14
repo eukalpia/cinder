@@ -1,10 +1,10 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() {
   runApp(const StackSimpleStatefulDemo());
 }
 
-class StackSimpleStatefulDemo extends StatefulComponent {
+class StackSimpleStatefulDemo extends StatefulWidget {
   const StackSimpleStatefulDemo({super.key});
 
   @override
@@ -62,7 +62,7 @@ class _StackSimpleStatefulDemoState extends State<StackSimpleStatefulDemo> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Stack(
       children: [
         // Background layer
@@ -205,7 +205,7 @@ class _StackSimpleStatefulDemoState extends State<StackSimpleStatefulDemo> {
   }
 }
 
-class StatefulChild extends StatefulComponent {
+class StatefulChild extends StatefulWidget {
   const StatefulChild({super.key});
 
   @override
@@ -232,7 +232,7 @@ class _StatefulChildState extends State<StatefulChild> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         border: BoxBorder.all(color: Colors.red),

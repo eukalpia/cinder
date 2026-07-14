@@ -1,9 +1,9 @@
 import 'dart:convert';
 
 import 'package:meta/meta.dart';
-import 'package:nocterm/src/size.dart';
-import 'package:nocterm/src/style.dart';
-import 'package:nocterm/src/utils/escape_codes.dart';
+import 'package:cinder/src/size.dart';
+import 'package:cinder/src/style.dart';
+import 'package:cinder/src/utils/escape_codes.dart';
 
 import 'terminal_backend.dart';
 

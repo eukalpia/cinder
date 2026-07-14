@@ -1,4 +1,4 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart' hide isEmpty, isNotEmpty;
 
 /// Unit tests for the terminal-state matchers, with emphasis on the
@@ -6,14 +6,14 @@ import 'package:test/test.dart' hide isEmpty, isNotEmpty;
 void main() {
   group('containsTextOnce', () {
     test('matches a single occurrence', () async {
-      await testNocterm('single occurrence', (tester) async {
+      await testCinder('single occurrence', (tester) async {
         await tester.pumpComponent(const Text('UNIQUE'));
         expect(tester.terminalState, containsTextOnce('UNIQUE'));
       }, size: const Size(20, 3));
     });
 
     test('fails when the text is absent', () async {
-      await testNocterm('absent', (tester) async {
+      await testCinder('absent', (tester) async {
         await tester.pumpComponent(const Text('something'));
         expect(containsTextOnce('MISSING').matches(tester.terminalState, {}),
             isFalse);
@@ -22,7 +22,7 @@ void main() {
 
     test('fails on duplicates - the stale-ghost symptom containsText misses',
         () async {
-      await testNocterm('duplicates', (tester) async {
+      await testCinder('duplicates', (tester) async {
         await tester.pumpComponent(
           const Column(children: [Text('GHOST'), Text('GHOST')]),
         );
@@ -44,7 +44,7 @@ void main() {
 
   group('hasTextAt', () {
     test('matches text at the exact position only', () async {
-      await testNocterm('positional', (tester) async {
+      await testCinder('positional', (tester) async {
         await tester.pumpComponent(
           const Align(alignment: Alignment.topLeft, child: Text('AB')),
         );

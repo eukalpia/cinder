@@ -1,6 +1,6 @@
 import 'dart:math' as math;
-import 'package:nocterm/nocterm.dart';
-import 'package:nocterm/src/framework/terminal_canvas.dart';
+import 'package:cinder/cinder.dart';
+import 'package:cinder/src/framework/terminal_canvas.dart';
 
 enum ProgressBarBorderStyle {
   single,
@@ -12,7 +12,7 @@ enum ProgressBarBorderStyle {
   doubleVertical,
 }
 
-class ProgressBar extends SingleChildRenderObjectComponent {
+class ProgressBar extends SingleChildRenderObjectWidget {
   const ProgressBar({
     super.key,
     this.value,

@@ -1,5 +1,5 @@
-import 'package:nocterm/src/utils/ansi_color_quantizer.dart';
-import 'package:nocterm/src/utils/terminal_color_support.dart';
+import 'package:cinder/src/utils/ansi_color_quantizer.dart';
+import 'package:cinder/src/utils/terminal_color_support.dart';
 
 /// Linearly interpolate between two integers.
 int _lerpInt(int a, int b, double t) {
@@ -86,13 +86,13 @@ class Color {
   /// Colors with alpha < 255 will be blended with the background during rendering.
   final int alpha;
 
-  /// The red component of this color, 0 to 255.
+  /// The red widget of this color, 0 to 255.
   final int red;
 
-  /// The green component of this color, 0 to 255.
+  /// The green widget of this color, 0 to 255.
   final int green;
 
-  /// The blue component of this color, 0 to 255.
+  /// The blue widget of this color, 0 to 255.
   final int blue;
 
   /// Whether this is the default terminal color
@@ -101,9 +101,9 @@ class Color {
   /// Creates a color from an integer value.
   ///
   /// The value should be in 0xRRGGBB format where:
-  /// - RR is the red component (0-255)
-  /// - GG is the green component (0-255)
-  /// - BB is the blue component (0-255)
+  /// - RR is the red widget (0-255)
+  /// - GG is the green widget (0-255)
+  /// - BB is the blue widget (0-255)
   ///
   /// The alpha channel defaults to 255 (fully opaque).
   const Color(int value)
@@ -136,9 +136,9 @@ class Color {
   ///
   /// All values must be between 0 and 255 inclusive.
   /// - [alpha]: 0 (fully transparent) to 255 (fully opaque)
-  /// - [red]: Red component
-  /// - [green]: Green component
-  /// - [blue]: Blue component
+  /// - [red]: Red widget
+  /// - [green]: Green widget
+  /// - [blue]: Blue widget
   const Color.fromARGB(this.alpha, this.red, this.green, this.blue)
       : assert(alpha >= 0 && alpha <= 255),
         assert(red >= 0 && red <= 255),

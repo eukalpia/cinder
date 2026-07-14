@@ -1,0 +1,22 @@
+name: cinder_cli
+description: CLI tools for cinder - TUI framework for Dart
+version: 1.0.0
+repository: https://github.com/norbert515/cinder
+
+environment:
+  sdk: ">=3.5.0 <4.0.0"
+
+dependencies:
+  args: ^2.7.0
+  file: ^7.0.1
+  meta: ^1.17.0
+  cinder: ^0.2.0
+  scoped_deps: ^0.1.0+2
+
+dev_dependencies:
+  lints: ^5.0.0
+  mocktail: ^1.0.4
+  test: ^1.24.0
+
+executables:
+  cinder: cinder_cli.dart

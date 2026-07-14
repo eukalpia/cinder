@@ -4,7 +4,7 @@ description: How terminals display colors and styles
 icon: code
 ---
 
-ANSI escape codes are special character sequences that control how terminals display text. This guide explains what they are and how Nocterm uses them behind the scenes.
+ANSI escape codes are special character sequences that control how terminals display text. This guide explains what they are and how Cinder uses them behind the scenes.
 
 ## What are ANSI codes?
 
@@ -47,15 +47,15 @@ Full RGB color with 16 million colors. You can specify any RGB value like `rgb(1
 
 Many modern terminals support this, but not all.
 
-### What Nocterm does
+### What Cinder does
 
-Nocterm provides color constants like `Colors.red`, `Colors.blue`, etc. You use them like this:
+Cinder provides color constants like `Colors.red`, `Colors.blue`, etc. You use them like this:
 
 ```dart
 Text('Hello', style: TextStyle(color: Colors.red))
 ```
 
-Nocterm handles the ANSI codes for you. You never write `\x1b[31m` directly.
+Cinder handles the ANSI codes for you. You never write `\x1b[31m` directly.
 
 ## Text styling
 
@@ -68,7 +68,7 @@ ANSI codes support various text styles:
 
 Support varies by terminal. Bold and underline work almost everywhere. Italic is less common.
 
-In Nocterm, you apply styles through `TextStyle`:
+In Cinder, you apply styles through `TextStyle`:
 
 ```dart
 TextStyle(
@@ -87,7 +87,7 @@ TUIs need to position the cursor precisely to draw UI elements. ANSI codes contr
 
 For example, to draw a box, you move the cursor to each corner and print the border characters.
 
-Nocterm handles all cursor positioning. When you use `Column`, `Row`, or other layouts, Nocterm calculates where each component goes and moves the cursor automatically.
+Cinder handles all cursor positioning. When you use `Column`, `Row`, or other layouts, Cinder calculates where each widget goes and moves the cursor automatically.
 
 ## Screen manipulation
 
@@ -96,14 +96,14 @@ ANSI codes can also:
 - Scroll regions up or down
 - Save and restore cursor position
 
-Nocterm uses these to optimize rendering. When your UI changes, Nocterm updates only the parts that changed instead of redrawing everything.
+Cinder uses these to optimize rendering. When your UI changes, Cinder updates only the parts that changed instead of redrawing everything.
 
 ## Why you don't write ANSI codes
 
 Without a framework, building a TUI means writing lots of ANSI codes:
 
 ```dart
-// Without Nocterm
+// Without Cinder
 print('\x1b[2J'); // Clear screen
 print('\x1b[1;1H'); // Move to top-left
 print('\x1b[31;1m'); // Red, bold
@@ -111,14 +111,14 @@ print('Hello');
 print('\x1b[0m'); // Reset
 ```
 
-With Nocterm, you write declarative UI code:
+With Cinder, you write declarative UI code:
 
 ```dart
-// With Nocterm
+// With Cinder
 Text('Hello', style: TextStyle(color: Colors.red, bold: true))
 ```
 
-Nocterm generates the correct ANSI codes and handles terminal differences for you.
+Cinder generates the correct ANSI codes and handles terminal differences for you.
 
 ## Next steps
 

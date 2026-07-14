@@ -1,4 +1,4 @@
-import 'package:nocterm/src/components/basic.dart' show Axis;
+import 'package:cinder/src/components/basic.dart' show Axis;
 
 /// The direction of a scroll, relative to the axis of the scrollable.
 enum AxisDirection {

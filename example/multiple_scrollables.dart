@@ -1,14 +1,14 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() async {
   await runApp(const MultipleScrollablesTest());
 }
 
-class MultipleScrollablesTest extends StatelessComponent {
+class MultipleScrollablesTest extends StatelessWidget {
   const MultipleScrollablesTest({super.key});
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Column(
       children: [
         // Header

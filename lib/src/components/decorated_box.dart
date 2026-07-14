@@ -1,5 +1,5 @@
-import 'package:nocterm/nocterm.dart';
-import 'package:nocterm/src/framework/terminal_canvas.dart';
+import 'package:cinder/cinder.dart';
+import 'package:cinder/src/framework/terminal_canvas.dart';
 
 /// Title alignment options for border titles
 enum TitleAlignment {
@@ -862,7 +862,7 @@ enum DecorationPosition {
 }
 
 /// Widget that paints a decoration either before or after its child
-class DecoratedBox extends SingleChildRenderObjectComponent {
+class DecoratedBox extends SingleChildRenderObjectWidget {
   const DecoratedBox({
     super.key,
     required this.decoration,
@@ -893,7 +893,7 @@ class DecoratedBox extends SingleChildRenderObjectComponent {
 }
 
 /// Simplified Container widget that uses the new DecoratedBox
-class Container extends StatelessComponent {
+class Container extends StatelessWidget {
   const Container({
     super.key,
     this.alignment,
@@ -910,7 +910,7 @@ class Container extends StatelessComponent {
     this.child,
   });
 
-  final Component? child;
+  final Widget? child;
   final AlignmentGeometry? alignment;
   final EdgeInsets? padding;
   final Color? color;
@@ -932,8 +932,8 @@ class Container extends StatelessComponent {
   final Clip clipBehavior;
 
   @override
-  Component build(BuildContext context) {
-    Component? current = child;
+  Widget build(BuildContext context) {
+    Widget? current = child;
 
     if (child == null &&
         (constraints == null ||

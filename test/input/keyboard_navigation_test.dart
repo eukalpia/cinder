@@ -1,10 +1,10 @@
 import 'package:test/test.dart';
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() {
   group('Keyboard Navigation', () {
     test('ESC key should close dialog', () async {
-      await testNocterm(
+      await testCinder(
         'esc key test',
         (tester) async {
           print('\n=== Testing ESC Key ===\n');
@@ -57,7 +57,7 @@ void main() {
         skip:
             'Known bug: PopBehavior.shouldPop compares LogicalKey with String',
         () async {
-      await testNocterm(
+      await testCinder(
         'custom pop key test',
         (tester) async {
           print('\n=== Testing Custom Pop Key (Q) ===\n');
@@ -101,7 +101,7 @@ void main() {
     });
 
     test('canPop callback should prevent popping', () async {
-      await testNocterm(
+      await testCinder(
         'canPop callback test',
         (tester) async {
           print('\n=== Testing canPop Callback ===\n');

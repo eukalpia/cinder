@@ -1,13 +1,13 @@
 import 'dart:async';
 import 'dart:math' as math;
-import 'package:nocterm/nocterm.dart';
-import 'package:nocterm/src/components/decorated_box.dart';
+import 'package:cinder/cinder.dart';
+import 'package:cinder/src/components/decorated_box.dart';
 
 void main() async {
   await runApp(const TaskManagerApp());
 }
 
-class TaskManagerApp extends StatefulComponent {
+class TaskManagerApp extends StatefulWidget {
   const TaskManagerApp({super.key});
 
   @override
@@ -108,7 +108,7 @@ class _TaskManagerAppState extends State<TaskManagerApp> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Focusable(
       focused: true,
       onKeyEvent: (event) {
@@ -155,7 +155,7 @@ class _TaskManagerAppState extends State<TaskManagerApp> {
     );
   }
 
-  Component _buildHeader() {
+  Widget _buildHeader() {
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -189,7 +189,7 @@ class _TaskManagerAppState extends State<TaskManagerApp> {
     );
   }
 
-  Component _buildTabBar() {
+  Widget _buildTabBar() {
     return Container(
       decoration: BoxDecoration(
         color: Color(0xFF1F2937),
@@ -207,7 +207,7 @@ class _TaskManagerAppState extends State<TaskManagerApp> {
     );
   }
 
-  Component _buildTab(String title, bool isSelected, int index) {
+  Widget _buildTab(String title, bool isSelected, int index) {
     final shortcut = (index + 1).toString();
     return Container(
       decoration: BoxDecoration(
@@ -238,7 +238,7 @@ class _TaskManagerAppState extends State<TaskManagerApp> {
     );
   }
 
-  Component _buildContent() {
+  Widget _buildContent() {
     switch (_selectedTab) {
       case 0:
         return _buildDashboard();
@@ -253,7 +253,7 @@ class _TaskManagerAppState extends State<TaskManagerApp> {
     }
   }
 
-  Component _buildDashboard() {
+  Widget _buildDashboard() {
     return Column(
       children: [
         Row(
@@ -299,7 +299,7 @@ class _TaskManagerAppState extends State<TaskManagerApp> {
     );
   }
 
-  Component _buildStatCard(
+  Widget _buildStatCard(
       String label, String value, double percentage, Color color) {
     return Container(
       decoration: BoxDecoration(
@@ -324,7 +324,7 @@ class _TaskManagerAppState extends State<TaskManagerApp> {
     );
   }
 
-  Component _buildMiniProgressBar(double percentage, Color color) {
+  Widget _buildMiniProgressBar(double percentage, Color color) {
     return Container(
       height: 1,
       decoration: BoxDecoration(
@@ -347,7 +347,7 @@ class _TaskManagerAppState extends State<TaskManagerApp> {
     );
   }
 
-  Component _buildQuickInfo() {
+  Widget _buildQuickInfo() {
     return Container(
       decoration: BoxDecoration(
         color: Color(0xFF1F2937),
@@ -376,7 +376,7 @@ class _TaskManagerAppState extends State<TaskManagerApp> {
     );
   }
 
-  Component _buildInfoRow(String label, String value) {
+  Widget _buildInfoRow(String label, String value) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 0.5),
       child: Row(
@@ -389,7 +389,7 @@ class _TaskManagerAppState extends State<TaskManagerApp> {
     );
   }
 
-  Component _buildTopProcesses() {
+  Widget _buildTopProcesses() {
     final topProcesses = List<ProcessInfo>.from(_processes)
       ..sort((a, b) => b.cpu.compareTo(a.cpu))
       ..take(5);
@@ -447,7 +447,7 @@ class _TaskManagerAppState extends State<TaskManagerApp> {
     return Color(0xFF10B981);
   }
 
-  Component _buildProcesses() {
+  Widget _buildProcesses() {
     return Column(
       children: [
         _buildProcessHeader(),
@@ -459,7 +459,7 @@ class _TaskManagerAppState extends State<TaskManagerApp> {
     );
   }
 
-  Component _buildProcessHeader() {
+  Widget _buildProcessHeader() {
     return Container(
       decoration: BoxDecoration(
         color: Color(0xFF1F2937),
@@ -504,7 +504,7 @@ class _TaskManagerAppState extends State<TaskManagerApp> {
     );
   }
 
-  Component _buildProcessList() {
+  Widget _buildProcessList() {
     return Column(
       children: _processes.asMap().entries.map((entry) {
         final index = entry.key;
@@ -548,7 +548,7 @@ class _TaskManagerAppState extends State<TaskManagerApp> {
     );
   }
 
-  Component _buildPerformance() {
+  Widget _buildPerformance() {
     return Column(
       children: [
         Expanded(
@@ -598,7 +598,7 @@ class _TaskManagerAppState extends State<TaskManagerApp> {
     );
   }
 
-  Component _buildGraph(List<double> data, Color color) {
+  Widget _buildGraph(List<double> data, Color color) {
     // Create ASCII art graph
     final maxValue = data.reduce(math.max);
     final height = 10;
@@ -616,7 +616,7 @@ class _TaskManagerAppState extends State<TaskManagerApp> {
     );
   }
 
-  Component _buildNetwork() {
+  Widget _buildNetwork() {
     return Column(
       children: [
         _buildNetworkHeader(),
@@ -628,7 +628,7 @@ class _TaskManagerAppState extends State<TaskManagerApp> {
     );
   }
 
-  Component _buildNetworkHeader() {
+  Widget _buildNetworkHeader() {
     return Container(
       decoration: BoxDecoration(
         color: Color(0xFF1F2937),
@@ -668,7 +668,7 @@ class _TaskManagerAppState extends State<TaskManagerApp> {
     );
   }
 
-  Component _buildConnectionList() {
+  Widget _buildConnectionList() {
     return Column(
       children: _connections.asMap().entries.map((entry) {
         final index = entry.key;
@@ -721,7 +721,7 @@ class _TaskManagerAppState extends State<TaskManagerApp> {
     }
   }
 
-  Component _buildFooter() {
+  Widget _buildFooter() {
     return Container(
       decoration: BoxDecoration(
         color: Color(0xFF1F2937),

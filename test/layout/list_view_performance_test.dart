@@ -1,11 +1,11 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('ListView Performance', () {
     test('visual test - ListView should render without continuous updates',
         () async {
-      await testNocterm(
+      await testCinder(
         'list view visual',
         (tester) async {
           await tester.pumpComponent(

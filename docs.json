@@ -1,12 +1,12 @@
 {
-  "name": "Nocterm",
+  "name": "Cinder",
   "description": "A Flutter-like framework for building beautiful Terminal UIs in Dart",
   "sidebar": [
     {
       "group": "Introduction",
       "pages": [
         {
-          "title": "What is Nocterm?",
+          "title": "What is Cinder?",
           "href": "/",
           "icon": "home"
         },

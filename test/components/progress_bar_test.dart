@@ -1,10 +1,10 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('ProgressBar', () {
     test('visual development - basic progress bar', () async {
-      await testNocterm(
+      await testCinder(
         'basic progress bar at different values',
         (tester) async {
           print('Progress at 0%:');
@@ -77,7 +77,7 @@ void main() {
     });
 
     test('visual development - progress bar with borders', () async {
-      await testNocterm(
+      await testCinder(
         'progress bars with different border styles',
         (tester) async {
           print('Single border:');
@@ -141,7 +141,7 @@ void main() {
     });
 
     test('visual development - progress bar with percentage', () async {
-      await testNocterm(
+      await testCinder(
         'progress bar showing percentage',
         (tester) async {
           print('Progress bar with percentage display:');
@@ -180,7 +180,7 @@ void main() {
     });
 
     test('visual development - custom characters', () async {
-      await testNocterm(
+      await testCinder(
         'progress bar with custom fill characters',
         (tester) async {
           print('Custom characters:');
@@ -234,7 +234,7 @@ void main() {
     });
 
     test('visual development - progress bar with labels', () async {
-      await testNocterm(
+      await testCinder(
         'progress bar with custom labels',
         (tester) async {
           print('Progress bars with labels:');
@@ -285,7 +285,7 @@ void main() {
 
     test('visual development - indeterminate progress',
         skip: 'Known issue: Indeterminate progress animation timing', () async {
-      await testNocterm(
+      await testCinder(
         'indeterminate progress animation',
         (tester) async {
           print('Indeterminate progress (animated):');
@@ -329,7 +329,7 @@ void main() {
     });
 
     test('renders correctly', () async {
-      await testNocterm(
+      await testCinder(
         'correct rendering',
         (tester) async {
           await tester.pumpComponent(
@@ -351,7 +351,7 @@ void main() {
     });
 
     test('handles different sizes', () async {
-      await testNocterm(
+      await testCinder(
         'different sizes',
         (tester) async {
           // Small progress bar

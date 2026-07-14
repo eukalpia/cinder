@@ -1,4 +1,4 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 /// Regression test for ParentDataElement's copy-in-place path skipping
@@ -15,7 +15,7 @@ import 'package:test/test.dart';
 void main() {
   group('ParentDataElement copy-path relayout', () {
     test('moving a Positioned inside an Overlay repositions it', () async {
-      await testNocterm('overlay positioned move', (tester) async {
+      await testCinder('overlay positioned move', (tester) async {
         await tester.pumpComponent(const _OverlayMover());
 
         final state = tester.findState<_OverlayMoverState>();
@@ -42,7 +42,7 @@ void main() {
   });
 }
 
-class _OverlayMover extends StatefulComponent {
+class _OverlayMover extends StatefulWidget {
   const _OverlayMover();
 
   @override
@@ -65,7 +65,7 @@ class _OverlayMoverState extends State<_OverlayMover> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Overlay(initialEntries: [_entry]);
   }
 }

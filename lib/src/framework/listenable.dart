@@ -1,4 +1,4 @@
-import 'package:nocterm/src/framework/framework.dart';
+import 'package:cinder/src/framework/framework.dart';
 
 abstract class Listenable {
   /// Abstract const constructor. This constructor enables subclasses to provide

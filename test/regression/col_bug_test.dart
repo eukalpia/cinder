@@ -1,8 +1,8 @@
 import 'package:test/test.dart';
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
-// Example component for testing
-class ColumnBugDemo extends StatefulComponent {
+// Example widget for testing
+class ColumnBugDemo extends StatefulWidget {
   const ColumnBugDemo();
 
   @override
@@ -23,7 +23,7 @@ class _ColumnBugDemoState extends State<ColumnBugDemo> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Column(
       children: [
         first ? FirstWidget() : SecondWidget(),
@@ -32,20 +32,20 @@ class _ColumnBugDemoState extends State<ColumnBugDemo> {
   }
 }
 
-class FirstWidget extends StatelessComponent {
+class FirstWidget extends StatelessWidget {
   const FirstWidget();
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Text('1');
   }
 }
 
-class SecondWidget extends StatelessComponent {
+class SecondWidget extends StatelessWidget {
   const SecondWidget();
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Text('2');
   }
 }
@@ -53,7 +53,7 @@ class SecondWidget extends StatelessComponent {
 void main() {
   group('TUI Testing Framework', () {
     test('can debug render output', () async {
-      await testNocterm('debug output', (tester) async {
+      await testCinder('debug output', (tester) async {
         await tester.pumpComponent(
           const ColumnBugDemo(),
         );

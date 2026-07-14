@@ -1,9 +1,9 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 void main() {
   test('FINAL DEMO: TextField with proper cursor bounds', () async {
-    await testNocterm(
+    await testCinder(
       'final demo',
       (tester) async {
         final multiLineController = TextEditingController(

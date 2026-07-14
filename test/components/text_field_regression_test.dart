@@ -1,10 +1,10 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('TextField Regression Tests', () {
     test('single-line field still works correctly', () async {
-      await testNocterm(
+      await testCinder(
         'single-line',
         (tester) async {
           final controller = TextEditingController(text: 'Hello World');
@@ -40,7 +40,7 @@ void main() {
     });
 
     test('multi-line field with explicit newlines works', () async {
-      await testNocterm(
+      await testCinder(
         'explicit newlines',
         (tester) async {
           final controller =
@@ -77,7 +77,7 @@ void main() {
     });
 
     test('cursor position is correct after text changes', () async {
-      await testNocterm(
+      await testCinder(
         'cursor after text change',
         (tester) async {
           final controller = TextEditingController(text: '');

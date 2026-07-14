@@ -1,13 +1,13 @@
 import 'dart:async';
 import 'dart:math' as math;
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 /// Full-screen bento grid with shader effects
 void main() async {
   await runApp(const BentoFullDemo());
 }
 
-class BentoFullDemo extends StatefulComponent {
+class BentoFullDemo extends StatefulWidget {
   const BentoFullDemo({super.key});
 
   @override
@@ -43,7 +43,7 @@ class _BentoFullDemoState extends State<BentoFullDemo> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Focusable(
       focused: true,
       onKeyEvent: (event) {
@@ -131,7 +131,7 @@ class _BentoFullDemoState extends State<BentoFullDemo> {
                       SizedBox(width: 1),
                       Expanded(
                           child: _buildFeatureCard('✓', 'Testing',
-                              'testNocterm()', Color(0xFF1dd1a1), 4)),
+                              'testCinder()', Color(0xFF1dd1a1), 4)),
                     ],
                   ),
                 ),
@@ -146,7 +146,7 @@ class _BentoFullDemoState extends State<BentoFullDemo> {
     );
   }
 
-  Component _buildHeroPanel(int width, int height) {
+  Widget _buildHeroPanel(int width, int height) {
     return Container(
       decoration: BoxDecoration(
         color: Color(0xFF0c0c14),
@@ -176,7 +176,7 @@ class _BentoFullDemoState extends State<BentoFullDemo> {
                     style: TextStyle(color: Color(0xFF9999bb)),
                   ),
                   Text(
-                    'StatefulComponent • setState() • Row • Column • hot reload',
+                    'StatefulWidget • setState() • Row • Column • hot reload',
                     style: TextStyle(color: Color(0xFF666688)),
                   ),
                 ],
@@ -188,7 +188,7 @@ class _BentoFullDemoState extends State<BentoFullDemo> {
     );
   }
 
-  Component _buildPlasmaBackground(int w, int h) {
+  Widget _buildPlasmaBackground(int w, int h) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -235,7 +235,7 @@ class _BentoFullDemoState extends State<BentoFullDemo> {
     return Color.fromRGB(r, g, b);
   }
 
-  Component _buildAsciiTitle() {
+  Widget _buildAsciiTitle() {
     final glow = _glow(Color(0xFFc0a0ff), 2, 0.7);
     final lines = [
       '███╗   ██╗ ██████╗  ██████╗████████╗███████╗██████╗ ███╗   ███╗',
@@ -253,7 +253,7 @@ class _BentoFullDemoState extends State<BentoFullDemo> {
     );
   }
 
-  Component _buildStatsPanel(int width) {
+  Widget _buildStatsPanel(int width) {
     return Container(
       decoration: BoxDecoration(
         color: Color(0xFF0c0c14),
@@ -276,7 +276,7 @@ class _BentoFullDemoState extends State<BentoFullDemo> {
     );
   }
 
-  Component _buildStatRow(String label, String value, Color color) {
+  Widget _buildStatRow(String label, String value, Color color) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -287,9 +287,9 @@ class _BentoFullDemoState extends State<BentoFullDemo> {
     );
   }
 
-  Component _buildCodePanel(int width) {
+  Widget _buildCodePanel(int width) {
     final lines = [
-      ('class', ' App ', 'extends', ' StatefulComponent'),
+      ('class', ' App ', 'extends', ' StatefulWidget'),
       ('  int', ' counter', ' = ', '0;'),
       ('', '', '', ''),
       ('  void', ' increment', '()', ' {'),
@@ -342,7 +342,7 @@ class _BentoFullDemoState extends State<BentoFullDemo> {
     );
   }
 
-  Component _buildFeatureCard(
+  Widget _buildFeatureCard(
       String icon, String title, String desc, Color color, int idx) {
     // Smooth wave across feature cards - each card has a phase offset
     final wave = math.sin(_time * 1 - idx * 1.2);
@@ -406,7 +406,7 @@ class _BentoFullDemoState extends State<BentoFullDemo> {
     );
   }
 
-  Component _buildBottomBar(int width) {
+  Widget _buildBottomBar(int width) {
     return Container(
       decoration: BoxDecoration(
         color: Color(0xFF0c0c14),
@@ -420,7 +420,7 @@ class _BentoFullDemoState extends State<BentoFullDemo> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text('✦ ', style: TextStyle(color: _glow(Color(0xFFc678dd), 2))),
-              Text('nocterm',
+              Text('cinder',
                   style: TextStyle(
                       color: Color(0xFFffffff), fontWeight: FontWeight.bold)),
               Text(' v0.3.5', style: TextStyle(color: Color(0xFF4a4a5a))),
@@ -437,7 +437,7 @@ class _BentoFullDemoState extends State<BentoFullDemo> {
     );
   }
 
-  List<Component> _buildWave() {
+  List<Widget> _buildWave() {
     return [
       for (int i = 0; i < 30; i++)
         Text(

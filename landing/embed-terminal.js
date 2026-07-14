@@ -1,7 +1,7 @@
 /**
- * Embeddable nocterm terminal for landing page demos
+ * Embeddable cinder terminal for landing page demos
  *
- * This is a smaller, inline version of NoctermTerminalHost
+ * This is a smaller, inline version of CinderTerminalHost
  * designed for embedding interactive demos within the landing page.
  */
 
@@ -71,7 +71,7 @@ class EmbeddedTerminal {
     container.innerHTML = '';
     this.terminal.open(container);
 
-    // Initialize the nocterm bridge
+    // Initialize the cinder bridge
     this.initializeBridge();
     this.updateBridgeSize();
 
@@ -95,7 +95,7 @@ class EmbeddedTerminal {
   }
 
   initializeBridge() {
-    window.noctermBridge = {
+    window.cinderBridge = {
       width: null,
       height: null,
       onOutput: null,
@@ -104,21 +104,21 @@ class EmbeddedTerminal {
       onShutdown: null,
     };
 
-    window.noctermBridge.onOutput = (data) => {
+    window.cinderBridge.onOutput = (data) => {
       this.writeToTerminal(data);
     };
   }
 
   updateBridgeSize() {
-    if (window.noctermBridge) {
-      window.noctermBridge.width = this.terminal.cols;
-      window.noctermBridge.height = this.terminal.rows;
+    if (window.cinderBridge) {
+      window.cinderBridge.width = this.terminal.cols;
+      window.cinderBridge.height = this.terminal.rows;
     }
   }
 
   sendInputToGuest(data) {
-    if (window.noctermBridge && window.noctermBridge.onInput) {
-      window.noctermBridge.onInput(data);
+    if (window.cinderBridge && window.cinderBridge.onInput) {
+      window.cinderBridge.onInput(data);
     }
   }
 
@@ -129,11 +129,11 @@ class EmbeddedTerminal {
   }
 
   handleResize(cols, rows) {
-    if (window.noctermBridge) {
-      window.noctermBridge.width = cols;
-      window.noctermBridge.height = rows;
-      if (window.noctermBridge.onResize) {
-        window.noctermBridge.onResize(cols, rows);
+    if (window.cinderBridge) {
+      window.cinderBridge.width = cols;
+      window.cinderBridge.height = rows;
+      if (window.cinderBridge.onResize) {
+        window.cinderBridge.onResize(cols, rows);
       }
     }
   }
@@ -159,8 +159,8 @@ class EmbeddedTerminal {
 
   // Send a key sequence to the terminal (for switching demos from outside)
   sendKey(key) {
-    if (window.noctermBridge && window.noctermBridge.onInput) {
-      window.noctermBridge.onInput(key);
+    if (window.cinderBridge && window.cinderBridge.onInput) {
+      window.cinderBridge.onInput(key);
     }
   }
 
@@ -178,8 +178,8 @@ class EmbeddedTerminal {
       this.terminal.dispose();
       this.terminal = null;
     }
-    if (window.noctermBridge) {
-      delete window.noctermBridge;
+    if (window.cinderBridge) {
+      delete window.cinderBridge;
     }
   }
 }

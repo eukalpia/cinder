@@ -1,4 +1,4 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() async {
   await runApp(const ShowcaseApp());
@@ -6,7 +6,7 @@ void main() async {
 
 /// Interactive widget showcase - each demo is a standalone interactive widget
 /// that users can play with directly in the browser.
-class ShowcaseApp extends StatefulComponent {
+class ShowcaseApp extends StatefulWidget {
   const ShowcaseApp({super.key});
 
   @override
@@ -15,7 +15,7 @@ class ShowcaseApp extends StatefulComponent {
 
 class _ShowcaseAppState extends State<ShowcaseApp> {
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     // Just show the TextField demo - landing page will reload for different demos
     return const Center(child: TextFieldDemo());
   }
@@ -25,7 +25,7 @@ class _ShowcaseAppState extends State<ShowcaseApp> {
 // TextField Demo - Interactive text input
 // ============================================
 
-class TextFieldDemo extends StatefulComponent {
+class TextFieldDemo extends StatefulWidget {
   const TextFieldDemo({super.key});
 
   @override
@@ -37,7 +37,7 @@ class _TextFieldDemoState extends State<TextFieldDemo> {
   final List<String> _messages = [];
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return SizedBox(
       width: 46,
       height: 12,
@@ -132,7 +132,7 @@ class _TextFieldDemoState extends State<TextFieldDemo> {
 // ListView Demo - Scrollable list with selection
 // ============================================
 
-class ListViewDemo extends StatefulComponent {
+class ListViewDemo extends StatefulWidget {
   const ListViewDemo({super.key});
 
   @override
@@ -153,7 +153,7 @@ class _ListViewDemoState extends State<ListViewDemo> {
   ];
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Focusable(
       focused: true,
       onKeyEvent: (event) {
@@ -258,7 +258,7 @@ class _ListViewDemoState extends State<ListViewDemo> {
 // Counter Demo - Interactive state management
 // ============================================
 
-class CounterDemo extends StatefulComponent {
+class CounterDemo extends StatefulWidget {
   const CounterDemo({super.key});
 
   @override
@@ -269,7 +269,7 @@ class _CounterDemoState extends State<CounterDemo> {
   int _count = 0;
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     final progress = (_count % 20) / 20;
     final barWidth = 36;
     final filled = (progress * barWidth).round();
@@ -360,11 +360,11 @@ class _CounterDemoState extends State<CounterDemo> {
 // Layout Demo - Visual nested layout showcase
 // ============================================
 
-class LayoutDemo extends StatelessComponent {
+class LayoutDemo extends StatelessWidget {
   const LayoutDemo({super.key});
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return SizedBox(
       width: 46,
       height: 12,

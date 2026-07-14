@@ -4,14 +4,14 @@ import 'dart:typed_data';
 
 import 'package:image/image.dart' as img;
 import 'package:meta/meta.dart';
-import 'package:nocterm/nocterm.dart';
-import 'package:nocterm/src/framework/terminal_canvas.dart';
-import 'package:nocterm/src/image/color_quantizer.dart';
-import 'package:nocterm/src/image/image_cleanup.dart';
-import 'package:nocterm/src/image/iterm2_encoder.dart';
-import 'package:nocterm/src/image/kitty_encoder.dart';
-import 'package:nocterm/src/image/sixel_encoder.dart';
-import 'package:nocterm/src/image/unicode_block_encoder.dart';
+import 'package:cinder/cinder.dart';
+import 'package:cinder/src/framework/terminal_canvas.dart';
+import 'package:cinder/src/image/color_quantizer.dart';
+import 'package:cinder/src/image/image_cleanup.dart';
+import 'package:cinder/src/image/iterm2_encoder.dart';
+import 'package:cinder/src/image/kitty_encoder.dart';
+import 'package:cinder/src/image/sixel_encoder.dart';
+import 'package:cinder/src/image/unicode_block_encoder.dart';
 
 /// Decoded image data in RGBA format.
 ///
@@ -287,7 +287,7 @@ enum BoxFit {
 
 /// A widget that displays an image in the terminal.
 ///
-/// {@template nocterm.image.experimental}
+/// {@template cinder.image.experimental}
 /// **Experimental**: This feature is experimental and requires terminal support
 /// for image protocols. Not all terminals support image display.
 ///
@@ -343,7 +343,7 @@ enum BoxFit {
 ///
 /// If no protocol is specified, the best available protocol is auto-detected.
 @experimental
-class Image extends StatefulComponent {
+class Image extends StatefulWidget {
   /// Creates an image widget.
   const Image({
     super.key,
@@ -409,10 +409,10 @@ class Image extends StatefulComponent {
   final BoxFit fit;
 
   /// A widget to display while the image is loading.
-  final Component? placeholder;
+  final Widget? placeholder;
 
   /// A widget to display if the image fails to load.
-  final Component? errorWidget;
+  final Widget? errorWidget;
 
   /// The image protocol to use.
   ///
@@ -436,8 +436,8 @@ class _ImageState extends State<Image> {
   }
 
   @override
-  void didUpdateComponent(Image oldComponent) {
-    if (component.image != oldComponent.image) {
+  void didUpdateWidget(Image oldWidget) {
+    if (widget.image != oldWidget.image) {
       _loadImage();
     }
   }
@@ -449,7 +449,7 @@ class _ImageState extends State<Image> {
     });
 
     try {
-      final data = await component.image.resolve();
+      final data = await widget.image.resolve();
       if (mounted) {
         setState(() {
           _imageData = data;
@@ -467,37 +467,37 @@ class _ImageState extends State<Image> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     if (_isLoading) {
-      return component.placeholder ??
+      return widget.placeholder ??
           SizedBox(
-            width: component.width?.toDouble(),
-            height: component.height?.toDouble(),
+            width: widget.width?.toDouble(),
+            height: widget.height?.toDouble(),
             child: const Text('...'),
           );
     }
 
     if (_error != null) {
-      return component.errorWidget ??
+      return widget.errorWidget ??
           SizedBox(
-            width: component.width?.toDouble(),
-            height: component.height?.toDouble(),
+            width: widget.width?.toDouble(),
+            height: widget.height?.toDouble(),
             child: const Text('[!]'),
           );
     }
 
     return _RawImage(
       imageData: _imageData!,
-      width: component.width,
-      height: component.height,
-      fit: component.fit,
-      protocol: component.protocol,
+      width: widget.width,
+      height: widget.height,
+      fit: widget.fit,
+      protocol: widget.protocol,
     );
   }
 }
 
 /// Internal widget that renders the actual image.
-class _RawImage extends SingleChildRenderObjectComponent {
+class _RawImage extends SingleChildRenderObjectWidget {
   const _RawImage({
     required this.imageData,
     this.width,

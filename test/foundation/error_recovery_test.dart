@@ -1,13 +1,13 @@
-import 'package:nocterm/nocterm.dart';
-import 'package:nocterm/src/components/error_widget.dart';
-import 'package:nocterm/src/framework/terminal_canvas.dart';
+import 'package:cinder/cinder.dart';
+import 'package:cinder/src/components/error_widget.dart';
+import 'package:cinder/src/framework/terminal_canvas.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('Error Recovery', () {
     test('error box takes only the space of failed widget',
         skip: 'Error recovery system needs refactoring', () async {
-      await testNocterm(
+      await testCinder(
         'error box size constraint',
         (tester) async {
           await tester.pumpComponent(
@@ -67,7 +67,7 @@ void main() {
 
     test('errors clear when performLayout succeeds on retry',
         skip: 'Error recovery system needs refactoring', () async {
-      await testNocterm(
+      await testCinder(
         'error recovery on successful layout',
         (tester) async {
           // Create a widget that fails initially but succeeds on rebuild
@@ -109,7 +109,7 @@ void main() {
 
     test('paint errors clear on successful repaint',
         skip: 'Error recovery system needs refactoring', () async {
-      await testNocterm(
+      await testCinder(
         'paint error recovery',
         (tester) async {
           final widget = _TestRecoverableWidget(throwInPaint: true);
@@ -136,7 +136,7 @@ void main() {
 
 /// A test widget that can recover from errors
 // ignore: must_be_immutable
-class _TestRecoverableWidget extends SingleChildRenderObjectComponent {
+class _TestRecoverableWidget extends SingleChildRenderObjectWidget {
   _TestRecoverableWidget({this.throwInPaint = false});
 
   final bool throwInPaint;

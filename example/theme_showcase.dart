@@ -1,4 +1,4 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 /// Theme showcase example demonstrating all built-in themes.
 ///
@@ -17,7 +17,7 @@ const _themes = <(String name, TuiThemeData theme)>[
   ('Gruvbox Dark', TuiThemeData.gruvboxDark),
 ];
 
-class ThemeShowcase extends StatefulComponent {
+class ThemeShowcase extends StatefulWidget {
   const ThemeShowcase({super.key});
 
   @override
@@ -52,7 +52,7 @@ class _ThemeShowcaseState extends State<ThemeShowcase> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return TuiTheme(
       data: _currentTheme,
       child: SelectionArea(
@@ -103,7 +103,7 @@ class _ThemeShowcaseState extends State<ThemeShowcase> {
   }
 }
 
-class _ThemeShowcaseContent extends StatelessComponent {
+class _ThemeShowcaseContent extends StatelessWidget {
   _ThemeShowcaseContent({
     required this.themeName,
     required this.themeIndex,
@@ -113,7 +113,7 @@ class _ThemeShowcaseContent extends StatelessComponent {
   final int themeIndex;
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     final theme = TuiTheme.of(context);
 
     return Container(
@@ -143,7 +143,7 @@ class _ThemeShowcaseContent extends StatelessComponent {
                       // Welcome text
                       Center(
                         child: Text(
-                          'Welcome to nocterm TUI framework',
+                          'Welcome to cinder TUI framework',
                           style: TextStyle(color: theme.onSurface),
                         ),
                       ),
@@ -183,7 +183,7 @@ class _ThemeShowcaseContent extends StatelessComponent {
     );
   }
 
-  Component _buildHeader(TuiThemeData theme) {
+  Widget _buildHeader(TuiThemeData theme) {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 1),
       decoration: BoxDecoration(color: theme.surface),
@@ -199,7 +199,7 @@ class _ThemeShowcaseContent extends StatelessComponent {
     );
   }
 
-  Component _buildProgressSection(TuiThemeData theme) {
+  Widget _buildProgressSection(TuiThemeData theme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -224,7 +224,7 @@ class _ThemeShowcaseContent extends StatelessComponent {
     );
   }
 
-  Component _buildStatusSection(TuiThemeData theme) {
+  Widget _buildStatusSection(TuiThemeData theme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -268,7 +268,7 @@ class _ThemeShowcaseContent extends StatelessComponent {
     );
   }
 
-  Component _buildThemeSelector(TuiThemeData theme) {
+  Widget _buildThemeSelector(TuiThemeData theme) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -285,7 +285,7 @@ class _ThemeShowcaseContent extends StatelessComponent {
     );
   }
 
-  Component _buildFooter(TuiThemeData theme) {
+  Widget _buildFooter(TuiThemeData theme) {
     return Column(
       children: [
         Center(

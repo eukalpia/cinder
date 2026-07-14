@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-import 'package:nocterm/src/style.dart';
+import 'package:cinder/src/style.dart';
 
 /// Color quantizer using the median-cut algorithm.
 ///
@@ -155,13 +155,13 @@ class ColorQuantizer {
   /// Packs RGB values into a single integer.
   static int _packRgb(int r, int g, int b) => (r << 16) | (g << 8) | b;
 
-  /// Unpacks red component from packed RGB.
+  /// Unpacks red widget from packed RGB.
   static int _unpackR(int packed) => (packed >> 16) & 0xFF;
 
-  /// Unpacks green component from packed RGB.
+  /// Unpacks green widget from packed RGB.
   static int _unpackG(int packed) => (packed >> 8) & 0xFF;
 
-  /// Unpacks blue component from packed RGB.
+  /// Unpacks blue widget from packed RGB.
   static int _unpackB(int packed) => packed & 0xFF;
 
   /// Builds palette directly when unique colors <= maxColors.

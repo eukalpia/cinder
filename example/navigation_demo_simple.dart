@@ -1,14 +1,14 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() {
   runApp(const NavigationDemo());
 }
 
-class NavigationDemo extends StatelessComponent {
+class NavigationDemo extends StatelessWidget {
   const NavigationDemo({super.key});
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Navigator(
       home: const HomePage(),
       routes: {
@@ -24,11 +24,11 @@ class NavigationDemo extends StatelessComponent {
   }
 }
 
-class HomePage extends StatelessComponent {
+class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(2),
       child: Column(
@@ -48,11 +48,11 @@ class HomePage extends StatelessComponent {
   }
 }
 
-class AboutPage extends StatelessComponent {
+class AboutPage extends StatelessWidget {
   const AboutPage({super.key});
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(2),
       child: Column(
@@ -70,7 +70,7 @@ class AboutPage extends StatelessComponent {
           ),
           const SizedBox(height: 2),
           const Text('Navigation Demo v1.0'),
-          const Text('Built with Nocterm TUI Framework'),
+          const Text('Built with Cinder TUI Framework'),
           const SizedBox(height: 2),
           const Text('This demonstrates:'),
           const Text('- Push/Pop navigation'),
@@ -97,8 +97,8 @@ class AboutPage extends StatelessComponent {
   }
 }
 
-// Simple menu list component
-class MenuList extends StatefulComponent {
+// Simple menu list widget
+class MenuList extends StatefulWidget {
   final List<MenuItem> items;
   final Function(dynamic) onSelect;
 
@@ -118,33 +118,33 @@ class _MenuListState extends State<MenuList> {
   bool _handleKey(LogicalKey key) {
     if (key == LogicalKey.arrowDown) {
       setState(() {
-        _selectedIndex = (_selectedIndex + 1) % component.items.length;
+        _selectedIndex = (_selectedIndex + 1) % widget.items.length;
       });
       return true;
     } else if (key == LogicalKey.arrowUp) {
       setState(() {
-        _selectedIndex = (_selectedIndex - 1 + component.items.length) %
-            component.items.length;
+        _selectedIndex =
+            (_selectedIndex - 1 + widget.items.length) % widget.items.length;
       });
       return true;
     } else if (key == LogicalKey.enter) {
-      component.onSelect(component.items[_selectedIndex].value);
+      widget.onSelect(widget.items[_selectedIndex].value);
       return true;
     }
     return false;
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return KeyboardListener(
       onKeyEvent: _handleKey,
       autofocus: true,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          for (int i = 0; i < component.items.length; i++)
+          for (int i = 0; i < widget.items.length; i++)
             Text(
-              '${i == _selectedIndex ? '> ' : '  '}${component.items[i].label}',
+              '${i == _selectedIndex ? '> ' : '  '}${widget.items[i].label}',
               style: i == _selectedIndex
                   ? const TextStyle(
                       fontWeight: FontWeight.bold,

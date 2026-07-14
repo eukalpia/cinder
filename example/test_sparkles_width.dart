@@ -1,4 +1,4 @@
-import 'package:nocterm/src/utils/unicode_width.dart';
+import 'package:cinder/src/utils/unicode_width.dart';
 
 void main() {
   // Test the sparkles emoji specifically

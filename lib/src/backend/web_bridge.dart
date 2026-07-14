@@ -1,17 +1,17 @@
 import 'dart:js_interop';
 import 'dart:js_interop_unsafe';
 
-/// JavaScript bridge object for nocterm host-guest communication.
-/// This is stored on `window.noctermBridge` and shared between
+/// JavaScript bridge object for cinder host-guest communication.
+/// This is stored on `window.cinderBridge` and shared between
 /// separately compiled Dart applications.
 @JS()
 @staticInterop
-class NoctermBridge {}
+class CinderBridge {}
 
-/// Create a new empty JS object that can be used as a NoctermBridge.
-NoctermBridge createNoctermBridge() {
+/// Create a new empty JS object that can be used as a CinderBridge.
+CinderBridge createCinderBridge() {
   // Create a plain JS object: {}
-  return _createEmptyObject() as NoctermBridge;
+  return _createEmptyObject() as CinderBridge;
 }
 
 /// Helper to create an empty JS object via JS interop.
@@ -22,10 +22,10 @@ JSObject _createEmptyObject() {
   return _objectConstructor.callAsConstructor<JSObject>();
 }
 
-/// Extension to add properties to NoctermBridge.
-extension NoctermBridgeExtension on NoctermBridge {
+/// Extension to add properties to CinderBridge.
+extension CinderBridgeExtension on CinderBridge {
   // ─────────────────────────────────────────────────────────────────
-  // Guest → Host: Output from the nocterm app
+  // Guest → Host: Output from the cinder app
   // ─────────────────────────────────────────────────────────────────
 
   /// Callback for output data from guest app.
@@ -66,12 +66,12 @@ extension NoctermBridgeExtension on NoctermBridge {
 }
 
 /// Global accessor for the bridge object.
-@JS('noctermBridge')
-external NoctermBridge? get noctermBridge;
+@JS('cinderBridge')
+external CinderBridge? get cinderBridge;
 
 /// Global setter for the bridge object.
-@JS('noctermBridge')
-external set noctermBridge(NoctermBridge? value);
+@JS('cinderBridge')
+external set cinderBridge(CinderBridge? value);
 
 /// Check if the bridge has been initialized (by host).
-bool get isBridgeInitialized => noctermBridge != null;
+bool get isBridgeInitialized => cinderBridge != null;

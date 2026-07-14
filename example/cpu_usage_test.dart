@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 /// Test app to measure CPU usage from different sources:
 /// - Spinners (Timer.periodic every 100ms)
@@ -12,7 +12,7 @@ void main() {
   runApp(const CpuUsageTestApp());
 }
 
-class CpuUsageTestApp extends StatefulComponent {
+class CpuUsageTestApp extends StatefulWidget {
   const CpuUsageTestApp({super.key});
 
   @override
@@ -72,7 +72,7 @@ class _CpuUsageTestAppState extends State<CpuUsageTestApp> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     _frameCount++;
 
     return Focusable(
@@ -88,7 +88,7 @@ class _CpuUsageTestAppState extends State<CpuUsageTestApp> {
               children: [
                 const Text('CPU Usage Test',
                     style: TextStyle(fontWeight: FontWeight.bold)),
-                const Text('Watch nocterm logs for frame count'),
+                const Text('Watch cinder logs for frame count'),
               ],
             ),
           ),
@@ -172,8 +172,8 @@ class _CpuUsageTestAppState extends State<CpuUsageTestApp> {
   }
 }
 
-/// Test spinner component - rebuilds every 100ms
-class _TestSpinner extends StatefulComponent {
+/// Test spinner widget - rebuilds every 100ms
+class _TestSpinner extends StatefulWidget {
   const _TestSpinner();
 
   @override
@@ -202,13 +202,13 @@ class _TestSpinnerState extends State<_TestSpinner> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Text(_frames[_index], style: const TextStyle(color: Colors.blue));
   }
 }
 
-/// Test cursor blink component - rebuilds every 500ms
-class _TestCursorBlink extends StatefulComponent {
+/// Test cursor blink widget - rebuilds every 500ms
+class _TestCursorBlink extends StatefulWidget {
   const _TestCursorBlink();
 
   @override
@@ -236,7 +236,7 @@ class _TestCursorBlinkState extends State<_TestCursorBlink> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Text(
       _visible ? '█' : ' ',
       style: const TextStyle(color: Colors.green),

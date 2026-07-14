@@ -1,11 +1,11 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() async {
   await runApp(const KeyboardModifiersDemo());
 }
 
 /// Demo application showing the new keyboard modifier handling
-class KeyboardModifiersDemo extends StatefulComponent {
+class KeyboardModifiersDemo extends StatefulWidget {
   const KeyboardModifiersDemo({super.key});
 
   @override
@@ -34,7 +34,7 @@ class _KeyboardModifiersDemoState extends State<KeyboardModifiersDemo> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Focusable(
       focused: true,
       onKeyEvent: (event) {

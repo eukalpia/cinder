@@ -1,10 +1,10 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() async {
   await runApp(const DemoApp());
 }
 
-class DemoApp extends StatefulComponent {
+class DemoApp extends StatefulWidget {
   const DemoApp({super.key});
 
   @override
@@ -23,7 +23,7 @@ class _DemoAppState extends State<DemoApp> {
   ];
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Focusable(
       focused: true,
       onKeyEvent: (event) {
@@ -68,7 +68,7 @@ class _DemoAppState extends State<DemoApp> {
               child: Row(
                 children: [
                   Text(
-                    ' nocterm demo ',
+                    ' cinder demo ',
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -119,7 +119,7 @@ class _DemoAppState extends State<DemoApp> {
     );
   }
 
-  Component _buildContent() {
+  Widget _buildContent() {
     switch (_selectedIndex) {
       case 0:
         return _CounterContent(count: _counter);
@@ -135,14 +135,14 @@ class _DemoAppState extends State<DemoApp> {
   }
 }
 
-class _MenuItem extends StatelessComponent {
+class _MenuItem extends StatelessWidget {
   final String label;
   final bool selected;
 
   const _MenuItem({required this.label, required this.selected});
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         color: selected ? Colors.blue : null,
@@ -170,13 +170,13 @@ class _MenuItem extends StatelessComponent {
   }
 }
 
-class _CounterContent extends StatelessComponent {
+class _CounterContent extends StatelessWidget {
   final int count;
 
   const _CounterContent({required this.count});
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -207,14 +207,14 @@ class _CounterContent extends StatelessComponent {
   }
 }
 
-class _ProgressBar extends StatelessComponent {
+class _ProgressBar extends StatelessWidget {
   final int value;
   final int max;
 
   const _ProgressBar({required this.value, required this.max});
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     final filled = (value * 20 / max).round();
     final empty = 20 - filled;
 
@@ -236,11 +236,11 @@ class _ProgressBar extends StatelessComponent {
   }
 }
 
-class _ColorsContent extends StatelessComponent {
+class _ColorsContent extends StatelessWidget {
   const _ColorsContent();
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -275,16 +275,16 @@ class _ColorsContent extends StatelessComponent {
   }
 }
 
-class _ComponentsContent extends StatelessComponent {
+class _ComponentsContent extends StatelessWidget {
   const _ComponentsContent();
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Component Library',
+          'Widget Library',
           style: TextStyle(fontWeight: FontWeight.bold, color: Colors.cyan),
         ),
         const SizedBox(height: 1),
@@ -306,16 +306,16 @@ class _ComponentsContent extends StatelessComponent {
   }
 }
 
-class _AboutContent extends StatelessComponent {
+class _AboutContent extends StatelessWidget {
   const _AboutContent();
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'About nocterm',
+          'About cinder',
           style: TextStyle(fontWeight: FontWeight.bold, color: Colors.cyan),
         ),
         const SizedBox(height: 1),
@@ -329,7 +329,7 @@ class _AboutContent extends StatelessComponent {
         const Text('  * 6 themes'),
         const SizedBox(height: 1),
         Text(
-          'pub.dev/packages/nocterm',
+          'pub.dev/packages/cinder',
           style: TextStyle(color: Colors.blue),
         ),
       ],

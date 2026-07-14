@@ -1,6 +1,6 @@
 part of 'framework.dart';
 
-/// Manages the component tree and rebuilding process
+/// Manages the widget tree and rebuilding process
 class BuildOwner {
   BuildOwner([this.onNeedsBuild]);
 

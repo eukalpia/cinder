@@ -1,4 +1,4 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 /// Demonstrates using ScrollController.ensureVisible for keyboard navigation.
 ///
@@ -8,7 +8,7 @@ void main() {
   runApp(const SelectableListDemo());
 }
 
-class SelectableListDemo extends StatefulComponent {
+class SelectableListDemo extends StatefulWidget {
   const SelectableListDemo({super.key});
 
   @override
@@ -39,7 +39,7 @@ class _SelectableListDemoState extends State<SelectableListDemo> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Focusable(
       focused: true,
       onKeyEvent: (event) {

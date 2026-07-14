@@ -1,10 +1,10 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() async {
   await runApp(const TextTabsDemo());
 }
 
-class TextTabsDemo extends StatefulComponent {
+class TextTabsDemo extends StatefulWidget {
   const TextTabsDemo({super.key});
 
   @override
@@ -15,7 +15,7 @@ class _TextTabsDemoState extends State<TextTabsDemo> {
   int selectedTab = 0;
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Focusable(
       focused: true,
       onKeyEvent: (event) {
@@ -85,7 +85,7 @@ class _TextTabsDemoState extends State<TextTabsDemo> {
     );
   }
 
-  Component _buildTab(String label, int index) {
+  Widget _buildTab(String label, int index) {
     final isSelected = selectedTab == index;
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 2),
@@ -104,7 +104,7 @@ class _TextTabsDemoState extends State<TextTabsDemo> {
     );
   }
 
-  Component _buildContent() {
+  Widget _buildContent() {
     switch (selectedTab) {
       case 0:
         return _buildBasicTextDemo();
@@ -119,7 +119,7 @@ class _TextTabsDemoState extends State<TextTabsDemo> {
     }
   }
 
-  Component _buildBasicTextDemo() {
+  Widget _buildBasicTextDemo() {
     return Padding(
       padding: EdgeInsets.all(1),
       child: Column(
@@ -153,7 +153,7 @@ class _TextTabsDemoState extends State<TextTabsDemo> {
     );
   }
 
-  Component _buildStyledTextDemo() {
+  Widget _buildStyledTextDemo() {
     return Padding(
       padding: EdgeInsets.all(1),
       child: Column(
@@ -204,7 +204,7 @@ class _TextTabsDemoState extends State<TextTabsDemo> {
     );
   }
 
-  Component _buildLayoutTextDemo() {
+  Widget _buildLayoutTextDemo() {
     return Padding(
       padding: EdgeInsets.all(1),
       child: Column(
@@ -290,7 +290,7 @@ class _TextTabsDemoState extends State<TextTabsDemo> {
     );
   }
 
-  Component _buildColorTextDemo() {
+  Widget _buildColorTextDemo() {
     return Padding(
       padding: EdgeInsets.all(1),
       child: Column(

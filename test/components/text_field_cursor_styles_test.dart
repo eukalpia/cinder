@@ -1,10 +1,10 @@
 import 'package:test/test.dart';
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() {
   group('TextField Cursor Styles', () {
     test('visual development - all cursor styles', () async {
-      await testNocterm(
+      await testCinder(
         'cursor styles visual test',
         (tester) async {
           // Create a column with different cursor styles
@@ -68,7 +68,7 @@ void main() {
     });
 
     test('cursor renders correctly at different positions', () async {
-      await testNocterm(
+      await testCinder(
         'cursor position test',
         (tester) async {
           final controller = TextEditingController(text: 'Hello World');
@@ -121,7 +121,7 @@ void main() {
     });
 
     test('empty field shows cursor correctly', () async {
-      await testNocterm(
+      await testCinder(
         'empty field cursor test',
         (tester) async {
           await tester.pumpComponent(
@@ -154,7 +154,7 @@ void main() {
     });
 
     test('cursor style changes dynamically', () async {
-      await testNocterm(
+      await testCinder(
         'dynamic cursor style test',
         (tester) async {
           final controller = TextEditingController(text: 'Dynamic cursor');
@@ -188,7 +188,7 @@ void main() {
     });
 
     test('non-blinking cursor', () async {
-      await testNocterm(
+      await testCinder(
         'non-blinking cursor test',
         (tester) async {
           await tester.pumpComponent(

@@ -5093,9 +5093,9 @@
     TerminalBinding_initServiceExtensions_closure0: function TerminalBinding_initServiceExtensions_closure0(t0) {
       this.$this = t0;
     },
-    _TerminalBinding_NoctermBinding_SchedulerBinding: function _TerminalBinding_NoctermBinding_SchedulerBinding() {
+    _TerminalBinding_CinderBinding_SchedulerBinding: function _TerminalBinding_CinderBinding_SchedulerBinding() {
     },
-    _TerminalBinding_NoctermBinding_SchedulerBinding_HotReloadBinding: function _TerminalBinding_NoctermBinding_SchedulerBinding_HotReloadBinding() {
+    _TerminalBinding_CinderBinding_SchedulerBinding_HotReloadBinding: function _TerminalBinding_CinderBinding_SchedulerBinding_HotReloadBinding() {
     },
     Buffer$(width, height) {
       var t1, t2, t3, _i, _list0, _i0, _null = null,
@@ -5274,7 +5274,7 @@
       if ($.debugMode) {
         $.debugRepaintRainbowEnabled = true;
         try {
-          t1 = $.NoctermBinding__instance;
+          t1 = $.CinderBinding__instance;
           t1.toString;
           binding = t1;
           if (binding instanceof A.TerminalBinding)
@@ -5284,7 +5284,7 @@
       } else {
         $.debugRepaintRainbowEnabled = false;
         try {
-          t1 = $.NoctermBinding__instance;
+          t1 = $.CinderBinding__instance;
           t1.toString;
           binding0 = t1;
           if (binding0 instanceof A.TerminalBinding)
@@ -5506,17 +5506,17 @@
       _.child = t3;
       _.key = t4;
     },
-    NoctermError_dumpErrorToConsole(details) {
-      if ($.NoctermError__errorCount === 0)
+    CinderError_dumpErrorToConsole(details) {
+      if ($.CinderError__errorCount === 0)
         A.print(details.toString$0(0));
       else
         A.print("Another exception: " + A.S(details.exception));
-      $.NoctermError__errorCount = $.NoctermError__errorCount + 1;
+      $.CinderError__errorCount = $.CinderError__errorCount + 1;
     },
-    NoctermError_reportError(details) {
-      A.NoctermError_dumpErrorToConsole(details);
+    CinderError_reportError(details) {
+      A.CinderError_dumpErrorToConsole(details);
     },
-    NoctermErrorDetails: function NoctermErrorDetails(t0, t1, t2, t3, t4) {
+    CinderErrorDetails: function CinderErrorDetails(t0, t1, t2, t3, t4) {
       var _ = this;
       _.exception = t0;
       _.stack = t1;
@@ -5524,7 +5524,7 @@
       _.context = t3;
       _.informationCollector = t4;
     },
-    NoctermTimeline_startSync($name) {
+    CinderTimeline_startSync($name) {
     },
     FrameTiming: function FrameTiming(t0, t1, t2, t3, t4, t5) {
       var _ = this;
@@ -5558,16 +5558,16 @@
       t3.set$_component(t2._as(A.Element.prototype.get$component.call(t1)));
       return t1;
     },
-    NoctermBinding: function NoctermBinding() {
+    CinderBinding: function CinderBinding() {
     },
-    NoctermBinding_registerServiceExtension_closure: function NoctermBinding_registerServiceExtension_closure(t0) {
+    CinderBinding_registerServiceExtension_closure: function CinderBinding_registerServiceExtension_closure(t0) {
       this.callback = t0;
     },
-    NoctermBinding_registerBoolServiceExtension_closure: function NoctermBinding_registerBoolServiceExtension_closure(t0, t1) {
+    CinderBinding_registerBoolServiceExtension_closure: function CinderBinding_registerBoolServiceExtension_closure(t0, t1) {
       this.setter = t0;
       this.getter = t1;
     },
-    NoctermBinding_drawFrame_closure: function NoctermBinding_drawFrame_closure() {
+    CinderBinding_drawFrame_closure: function CinderBinding_drawFrame_closure() {
     },
     BuildOwner: function BuildOwner(t0, t1, t2, t3, t4) {
       var _ = this;
@@ -6415,10 +6415,10 @@
               A.print("WebBackend: _connect() called");
               t1 = init.G;
               t2 = type$.nullable_JavaScriptObject;
-              bridge = t2._as(t1.noctermBridge);
+              bridge = t2._as(t1.cinderBridge);
               if (bridge == null) {
-                A.print("WebBackend: ERROR - noctermBridge is null!");
-                A.throwExpression(A.StateError$("noctermBridge not found. The host (nocterm_web) must call WebBackend.initializeHost() before loading the guest app."));
+                A.print("WebBackend: ERROR - cinderBridge is null!");
+                A.throwExpression(A.StateError$("cinderBridge not found. The host (cinder_web) must call WebBackend.initializeHost() before loading the guest app."));
               }
               A.print("WebBackend: bridge found, registering callbacks...");
               if (typeof A.web_backend_WebBackend__handleHostInput$closure() == "function")
@@ -6452,9 +6452,9 @@
               A.print("WebBackend: callbacks registered successfully");
               t3 = new A.StringBuffer("");
               terminal = new A.Terminal(backend, t3);
-              bridge = t2._as(t1.noctermBridge);
+              bridge = t2._as(t1.cinderBridge);
               if (bridge == null)
-                A.throwExpression(A.StateError$("noctermBridge not initialized. The host must call WebBackend.initializeHost() first."));
+                A.throwExpression(A.StateError$("cinderBridge not initialized. The host must call WebBackend.initializeHost() first."));
               w = A._asDoubleQ(bridge.width);
               if (w == null)
                 w = null;
@@ -6475,8 +6475,8 @@
               t8 = A._setArrayType([], type$.JSArray_of_void_Function_FrameTiming);
               t9 = A._setArrayType([], type$.JSArray_of_void_Function_Duration);
               t10 = type$.void_Function_Duration;
-              binding = $.NoctermBinding__instance = new A.TerminalBinding(terminal, t2, t4, new A.InputParser(t5), t6, new A.MouseTracker(A.LinkedHashSet_LinkedHashSet$_empty(type$.MouseTrackerAnnotation)), t1, t7, null, t8, 0, null, B.Duration_33333, true, B.SchedulerPhase_0, false, null, null, null, null, null, B.Duration_0, A.LinkedHashMap_LinkedHashMap$_empty(type$.int, type$._FrameCallbackEntry), 0, t9, A.ListQueue$(t10), null);
-              binding.super$_TerminalBinding_NoctermBinding_SchedulerBinding$initializeBinding();
+              binding = $.CinderBinding__instance = new A.TerminalBinding(terminal, t2, t4, new A.InputParser(t5), t6, new A.MouseTracker(A.LinkedHashSet_LinkedHashSet$_empty(type$.MouseTrackerAnnotation)), t1, t7, null, t8, 0, null, B.Duration_33333, true, B.SchedulerPhase_0, false, null, null, null, null, null, B.Duration_0, A.LinkedHashMap_LinkedHashMap$_empty(type$.int, type$._FrameCallbackEntry), 0, t9, A.ListQueue$(t10), null);
+              binding.super$_TerminalBinding_CinderBinding_SchedulerBinding$initializeBinding();
               B.JSArray_methods.add$1(t9, t10._as(binding.get$_drawFrameCallback()));
               $.TerminalBinding__instance = binding;
               t10 = type$.JSArray_RenderObject;
@@ -11697,7 +11697,7 @@
   A.WebBackend.prototype = {
     writeRaw$1(data) {
       var onOutput,
-        bridge = type$.nullable_JavaScriptObject._as(init.G.noctermBridge);
+        bridge = type$.nullable_JavaScriptObject._as(init.G.cinderBridge);
       if (bridge != null) {
         onOutput = type$.nullable_JavaScriptFunction._as(bridge.onOutput);
         if (onOutput != null)
@@ -11720,7 +11720,7 @@
         } catch (exception) {
           e = A.unwrapException(exception);
           stack = A.getTraceFromException(exception);
-          A.NoctermError_dumpErrorToConsole(new A.NoctermErrorDetails(e, stack, "nocterm scheduler", "during frame timing callback", null));
+          A.CinderError_dumpErrorToConsole(new A.CinderErrorDetails(e, stack, "cinder scheduler", "during frame timing callback", null));
         }
       }
     },
@@ -11740,11 +11740,11 @@
     },
     handleBeginFrame$1(rawTimeStamp) {
       var localTransientCallbacks, id, entry, t1, localTransientCallbacks0, t2, t3, _this = this;
-      A.NoctermTimeline_startSync("Frame #" + ++_this.SchedulerBinding__frameNumber);
+      A.CinderTimeline_startSync("Frame #" + ++_this.SchedulerBinding__frameNumber);
       _this.SchedulerBinding__currentSystemFrameTimeStamp = _this.SchedulerBinding__currentFrameTimeStamp = rawTimeStamp;
       _this.SchedulerBinding__hasScheduledFrame = false;
       try {
-        A.NoctermTimeline_startSync("Animate");
+        A.CinderTimeline_startSync("Animate");
         _this.SchedulerBinding__schedulerPhase = B.SchedulerPhase_1;
         t1 = _this.SchedulerBinding__transientCallbacks;
         localTransientCallbacks0 = A.LinkedHashMap_LinkedHashMap(type$.int, type$._FrameCallbackEntry);
@@ -11777,7 +11777,7 @@
         frameStartMicros = 1000 * t1._value + t1._microsecond;
       _this.SchedulerBinding_currentFramePaintEnd = _this.SchedulerBinding_currentFrameLayoutEnd = _this.SchedulerBinding_currentFrameBuildEnd = null;
       try {
-        A.NoctermTimeline_startSync("Build");
+        A.CinderTimeline_startSync("Build");
         t1 = type$.void_Function_Duration;
         t2 = A.List_List$_of(_this.SchedulerBinding__persistentCallbacks, t1);
         t3 = t2.length;
@@ -11848,7 +11848,7 @@
         stack = A.getTraceFromException(exception0);
         contextMessage = new A.StringBuffer("during frame callback");
         t1 = contextMessage._contents;
-        A.NoctermError_reportError(new A.NoctermErrorDetails(exception, stack, "nocterm scheduler", t1.charCodeAt(0) == 0 ? t1 : t1, null));
+        A.CinderError_reportError(new A.CinderErrorDetails(exception, stack, "cinder scheduler", t1.charCodeAt(0) == 0 ? t1 : t1, null));
       } finally {
       }
     },
@@ -12353,12 +12353,12 @@
           rootNeedsWork = rootRender._needsLayout || rootRender._needsPaint;
       }
       if (t1 && t3 && t2 && !rootNeedsWork && _this._previousBuffer != null) {
-        _this.super$NoctermBinding$drawFrame();
+        _this.super$CinderBinding$drawFrame();
         return;
       }
       profiling = _this._enableDetailedProfiling;
       t1 = Date.now();
-      _this.super$NoctermBinding$drawFrame();
+      _this.super$CinderBinding$drawFrame();
       t10 = _this.SchedulerBinding_currentFrameBuildEnd = 1000 * Date.now();
       t2 = _this.terminal.__Terminal__size_A;
       t2 === $ && A.throwLateFieldNI("_size");
@@ -12401,7 +12401,7 @@
       }
     },
     initServiceExtensions$0() {
-      this.super$NoctermBinding$initServiceExtensions();
+      this.super$CinderBinding$initServiceExtensions();
       this.registerBoolServiceExtension$3$getter$name$setter(new A.TerminalBinding_initServiceExtensions_closure(), "repaintRainbow", new A.TerminalBinding_initServiceExtensions_closure0(this));
     }
   };
@@ -12652,13 +12652,13 @@
     },
     $signature: 50
   };
-  A._TerminalBinding_NoctermBinding_SchedulerBinding.prototype = {
+  A._TerminalBinding_CinderBinding_SchedulerBinding.prototype = {
     initializeBinding$0() {
-      this.super$NoctermBinding$initializeBinding();
+      this.super$CinderBinding$initializeBinding();
       $.SchedulerBinding__instance = this;
     }
   };
-  A._TerminalBinding_NoctermBinding_SchedulerBinding_HotReloadBinding.prototype = {};
+  A._TerminalBinding_CinderBinding_SchedulerBinding_HotReloadBinding.prototype = {};
   A.Cell.prototype = {
     $eq(_, other) {
       var _this = this;
@@ -14289,7 +14289,7 @@
     }
   };
   A.Positioned.prototype = {};
-  A.NoctermErrorDetails.prototype = {
+  A.CinderErrorDetails.prototype = {
     toString$0(_) {
       var _this = this,
         t1 = "\u2550\u2550\u2561 Exception caught by " + _this.library + " \u255e\u2550\u2550\n" + ("The following exception was thrown " + _this.context + ":\n") + (A.S(_this.exception) + "\n"),
@@ -14311,7 +14311,7 @@
       return "FrameTiming(#" + _this.frameNumber + ", total: " + B.JSInt_methods._tdivFast$1(_this.totalDuration._duration, _1000) + "ms, build: " + B.JSInt_methods._tdivFast$1(_this.buildDuration._duration, _1000) + "ms, layout: " + B.JSInt_methods._tdivFast$1(_this.layoutDuration._duration, _1000) + "ms, paint: " + B.JSInt_methods._tdivFast$1(_this.paintDuration._duration, _1000) + "ms, composite: " + B.JSInt_methods._tdivFast$1(_this.compositingDuration._duration, _1000) + "ms)";
     }
   };
-  A.NoctermBinding.prototype = {
+  A.CinderBinding.prototype = {
     initializeBinding$0() {
       this.initServiceExtensions$0();
     },
@@ -14320,16 +14320,16 @@
     registerServiceExtension$2$callback$name(callback, $name) {
       var t1;
       type$.Future_Map_String_dynamic_Function_Map_String_String._as(callback);
-      t1 = "ext.nocterm." + $name;
+      t1 = "ext.cinder." + $name;
       if (!B.JSString_methods.startsWith$1(t1, "ext."))
         A.throwExpression(A.ArgumentError$value(t1, "method", "Must begin with ext."));
       if ($._extensions.$index(0, t1) != null)
         A.throwExpression(A.ArgumentError$("Extension already registered: " + t1, null));
-      $._extensions.$indexSet(0, t1, $.Zone__current.bindBinaryCallback$3$1(new A.NoctermBinding_registerServiceExtension_closure(callback), type$.Future_ServiceExtensionResponse, type$.String, type$.Map_String_String));
+      $._extensions.$indexSet(0, t1, $.Zone__current.bindBinaryCallback$3$1(new A.CinderBinding_registerServiceExtension_closure(callback), type$.Future_ServiceExtensionResponse, type$.String, type$.Map_String_String));
     },
     registerBoolServiceExtension$3$getter$name$setter(getter, $name, setter) {
       type$.Future_bool_Function._as(getter);
-      this.registerServiceExtension$2$callback$name(new A.NoctermBinding_registerBoolServiceExtension_closure(type$.Future_void_Function_bool._as(setter), getter), $name);
+      this.registerServiceExtension$2$callback$name(new A.CinderBinding_registerBoolServiceExtension_closure(type$.Future_void_Function_bool._as(setter), getter), $name);
     },
     get$buildOwner() {
       var t1 = this._buildOwner;
@@ -14346,15 +14346,15 @@
       var t1 = this.get$buildOwner(),
         t2 = this._rootElement;
       t2.toString;
-      t1.buildScope$2(t2, new A.NoctermBinding_drawFrame_closure());
+      t1.buildScope$2(t2, new A.CinderBinding_drawFrame_closure());
       this.get$buildOwner()._inactiveElements._unmountAll$0();
     }
   };
-  A.NoctermBinding_registerServiceExtension_closure.prototype = {
+  A.CinderBinding_registerServiceExtension_closure.prototype = {
     call$2(method, parameters) {
-      return this.$call$body$NoctermBinding_registerServiceExtension_closure(A._asString(method), type$.Map_String_String._as(parameters));
+      return this.$call$body$CinderBinding_registerServiceExtension_closure(A._asString(method), type$.Map_String_String._as(parameters));
     },
-    $call$body$NoctermBinding_registerServiceExtension_closure(method, parameters) {
+    $call$body$CinderBinding_registerServiceExtension_closure(method, parameters) {
       var $async$goto = 0,
         $async$completer = A._makeAsyncAwaitCompleter(type$.ServiceExtensionResponse),
         $async$returnValue, $async$self = this, $async$temp1;
@@ -14384,11 +14384,11 @@
     },
     $signature: 31
   };
-  A.NoctermBinding_registerBoolServiceExtension_closure.prototype = {
+  A.CinderBinding_registerBoolServiceExtension_closure.prototype = {
     call$1(parameters) {
-      return this.$call$body$NoctermBinding_registerBoolServiceExtension_closure(type$.Map_String_String._as(parameters));
+      return this.$call$body$CinderBinding_registerBoolServiceExtension_closure(type$.Map_String_String._as(parameters));
     },
-    $call$body$NoctermBinding_registerBoolServiceExtension_closure(parameters) {
+    $call$body$CinderBinding_registerBoolServiceExtension_closure(parameters) {
       var $async$goto = 0,
         $async$completer = A._makeAsyncAwaitCompleter(type$.Map_String_dynamic),
         $async$returnValue, $async$self = this, $async$temp1, $async$temp2;
@@ -14428,7 +14428,7 @@
     },
     $signature: 32
   };
-  A.NoctermBinding_drawFrame_closure.prototype = {
+  A.CinderBinding_drawFrame_closure.prototype = {
     call$0() {
     },
     $signature: 0
@@ -14544,7 +14544,7 @@
         e = A.unwrapException(exception);
         stack = A.getTraceFromException(exception);
         built = new A.ErrorComponent(e, stack, null);
-        A.NoctermError_reportError(new A.NoctermErrorDetails(e, stack, "nocterm framework", "while building " + A.getRuntimeTypeOfDartObject(_this).toString$0(0), null));
+        A.CinderError_reportError(new A.CinderErrorDetails(e, stack, "cinder framework", "while building " + A.getRuntimeTypeOfDartObject(_this).toString$0(0), null));
       } finally {
         _this._dirty = false;
       }
@@ -15467,7 +15467,7 @@
     },
     _reportException$3(method, exception, stack) {
       type$.StackTrace._as(stack);
-      A.NoctermError_reportError(new A.NoctermErrorDetails(exception, stack, "nocterm rendering", "during " + method + "()", new A.RenderObject__reportException_closure(this)));
+      A.CinderError_reportError(new A.CinderErrorDetails(exception, stack, "cinder rendering", "during " + method + "()", new A.RenderObject__reportException_closure(this)));
       this._lastError = exception;
       this._lastStackTrace = stack;
     },
@@ -16788,10 +16788,10 @@
       t4 = A.Color$(_4278979604);
       t8 = A.BoxBorder$all(A.Color$(_4280953402));
       t3 = A.Row$(A._setArrayType([new A.SizedBox(heroWidth, _null, t6, _null), new A.SizedBox(1, _null, _null, _null), new A.SizedBox(sidebarWidth, _null, A.Column$(A._setArrayType([new A.SizedBox(_null, t5, A.Container$(A.Column$(A._setArrayType([A.Text$("\u25a4 Stats", new A.TextStyle(A.Color$(4285164170), _null, _null, _null, _null, false)), A.Text$(B.JSString_methods.$mul("\u2500", t3 - 4), new A.TextStyle(A.Color$(_4280953402), _null, _null, _null, _null, false)), new A.SizedBox(_null, 1, _null, _null), t2._buildStatRow$3("Widgets", "50+", A.Color$(_4294929309)), t2._buildStatRow$3("Themes", "6", A.Color$(_4282964987)), t2._buildStatRow$3("Tests", "\u2713", A.Color$(_4280144289)), t2._buildStatRow$3("Reload", "\u2605", A.Color$(_4294942531))], t7), B.CrossAxisAlignment_0, B.MainAxisSize_0), new A.BoxDecoration(t4, _null, t8, _null, _null, _null, _null, B.BoxShape_0, _null), _null, new A.EdgeInsets(1, 1, 1, 1), _null), _null), new A.SizedBox(_null, 1, _null, _null), new A.SizedBox(_null, t5, t2._buildCodePanel$1(t3), _null)], t7), B.CrossAxisAlignment_2, B.MainAxisSize_1), _null)], t7), B.MainAxisAlignment_0, B.MainAxisSize_1);
-      t5 = A.Row$(A._setArrayType([A.Expanded$(t2._buildFeatureCard$5("\u26a1", "setState()", "Reactive updates", A.Color$(_4294929309), 0)), new A.SizedBox(1, _null, _null, _null), A.Expanded$(t2._buildFeatureCard$5("\u25a3", "50+ Widgets", "Row, Column...", A.Color$(4294888023), 1)), new A.SizedBox(1, _null, _null, _null), A.Expanded$(t2._buildFeatureCard$5("\u25c8", "6 Themes", "Nord, Dracula...", A.Color$(_4282964987), 2)), new A.SizedBox(1, _null, _null, _null), A.Expanded$(t2._buildFeatureCard$5("\u2605", "Hot Reload", "Instant updates", A.Color$(_4294942531), 3)), new A.SizedBox(1, _null, _null, _null), A.Expanded$(t2._buildFeatureCard$5("\u2713", "Testing", "testNocterm()", A.Color$(_4280144289), 4))], t7), B.MainAxisAlignment_0, B.MainAxisSize_1);
+      t5 = A.Row$(A._setArrayType([A.Expanded$(t2._buildFeatureCard$5("\u26a1", "setState()", "Reactive updates", A.Color$(_4294929309), 0)), new A.SizedBox(1, _null, _null, _null), A.Expanded$(t2._buildFeatureCard$5("\u25a3", "50+ Widgets", "Row, Column...", A.Color$(4294888023), 1)), new A.SizedBox(1, _null, _null, _null), A.Expanded$(t2._buildFeatureCard$5("\u25c8", "6 Themes", "Nord, Dracula...", A.Color$(_4282964987), 2)), new A.SizedBox(1, _null, _null, _null), A.Expanded$(t2._buildFeatureCard$5("\u2605", "Hot Reload", "Instant updates", A.Color$(_4294942531), 3)), new A.SizedBox(1, _null, _null, _null), A.Expanded$(t2._buildFeatureCard$5("\u2713", "Testing", "testCinder()", A.Color$(_4280144289), 4))], t7), B.MainAxisAlignment_0, B.MainAxisSize_1);
       t8 = A.Color$(_4278979604);
       t4 = A.BoxBorder$all(A.Color$(_4280953402));
-      return A.Container$(A.Column$(A._setArrayType([new A.SizedBox(_null, heroHeight, t3, _null), new A.SizedBox(_null, 1, _null, _null), new A.SizedBox(_null, 6, t5, _null), new A.SizedBox(_null, 1, _null, _null), A.Container$(A.Row$(A._setArrayType([A.Row$(A._setArrayType([A.Text$("\u2726 ", new A.TextStyle(t2._glow$2(A.Color$(4291197149), 2), _null, _null, _null, _null, false)), A.Text$("nocterm", new A.TextStyle(A.Color$(4294967295), _null, B.FontWeight_1, _null, _null, false)), A.Text$(" v0.3.5", new A.TextStyle(A.Color$(_4283058778), _null, _null, _null, _null, false))], t7), B.MainAxisAlignment_0, B.MainAxisSize_0), A.Row$(t2._buildWave$0(), B.MainAxisAlignment_0, B.MainAxisSize_0), A.Text$("[q] quit", new A.TextStyle(A.Color$(_4283058778), _null, _null, _null, _null, false))], t7), B.MainAxisAlignment_3, B.MainAxisSize_1), new A.BoxDecoration(t8, _null, t4, _null, _null, _null, _null, B.BoxShape_0, _null), _null, new A.EdgeInsets(2, 1, 2, 1), _null)], t7), B.CrossAxisAlignment_2, B.MainAxisSize_1), new A.BoxDecoration(t1, _null, _null, _null, _null, _null, _null, B.BoxShape_0, _null), _null, new A.EdgeInsets(1, 1, 1, 1), _null);
+      return A.Container$(A.Column$(A._setArrayType([new A.SizedBox(_null, heroHeight, t3, _null), new A.SizedBox(_null, 1, _null, _null), new A.SizedBox(_null, 6, t5, _null), new A.SizedBox(_null, 1, _null, _null), A.Container$(A.Row$(A._setArrayType([A.Row$(A._setArrayType([A.Text$("\u2726 ", new A.TextStyle(t2._glow$2(A.Color$(4291197149), 2), _null, _null, _null, _null, false)), A.Text$("cinder", new A.TextStyle(A.Color$(4294967295), _null, B.FontWeight_1, _null, _null, false)), A.Text$(" v0.3.5", new A.TextStyle(A.Color$(_4283058778), _null, _null, _null, _null, false))], t7), B.MainAxisAlignment_0, B.MainAxisSize_0), A.Row$(t2._buildWave$0(), B.MainAxisAlignment_0, B.MainAxisSize_0), A.Text$("[q] quit", new A.TextStyle(A.Color$(_4283058778), _null, _null, _null, _null, false))], t7), B.MainAxisAlignment_3, B.MainAxisSize_1), new A.BoxDecoration(t8, _null, t4, _null, _null, _null, _null, B.BoxShape_0, _null), _null, new A.EdgeInsets(2, 1, 2, 1), _null)], t7), B.CrossAxisAlignment_2, B.MainAxisSize_1), new A.BoxDecoration(t1, _null, _null, _null, _null, _null, _null, B.BoxShape_0, _null), _null, new A.EdgeInsets(1, 1, 1, 1), _null);
     },
     $signature: 44
   };
@@ -16821,12 +16821,12 @@
     _.super$LegacyJavaScriptObject$toString = _.toString$0;
     _ = A.SchedulerBinding.prototype;
     _.super$SchedulerBinding$handleDrawFrame = _.handleDrawFrame$0;
-    _ = A._TerminalBinding_NoctermBinding_SchedulerBinding.prototype;
-    _.super$_TerminalBinding_NoctermBinding_SchedulerBinding$initializeBinding = _.initializeBinding$0;
-    _ = A.NoctermBinding.prototype;
-    _.super$NoctermBinding$initializeBinding = _.initializeBinding$0;
-    _.super$NoctermBinding$initServiceExtensions = _.initServiceExtensions$0;
-    _.super$NoctermBinding$drawFrame = _.drawFrame$0;
+    _ = A._TerminalBinding_CinderBinding_SchedulerBinding.prototype;
+    _.super$_TerminalBinding_CinderBinding_SchedulerBinding$initializeBinding = _.initializeBinding$0;
+    _ = A.CinderBinding.prototype;
+    _.super$CinderBinding$initializeBinding = _.initializeBinding$0;
+    _.super$CinderBinding$initServiceExtensions = _.initServiceExtensions$0;
+    _.super$CinderBinding$drawFrame = _.drawFrame$0;
     _ = A.BuildableElement.prototype;
     _.super$BuildableElement$_firstBuild = _._firstBuild$0;
     _ = A.Element.prototype;
@@ -16876,7 +16876,7 @@
     _instance_1_u(_ = A._DebugOverlayState.prototype, "get$_onDebugModeChanged", "_onDebugModeChanged$1", 26);
     _instance_1_u(_, "get$_onFrameTiming", "_onFrameTiming$1", 27);
     _static_1(A, "framework__InactiveElements__deactivateRecursively$closure", "_InactiveElements__deactivateRecursively", 1);
-    _instance_0_u(A.NoctermBinding.prototype, "get$onNeedsBuild", "onNeedsBuild$0", 0);
+    _instance_0_u(A.CinderBinding.prototype, "get$onNeedsBuild", "onNeedsBuild$0", 0);
     _instance_1_u(A.LayoutBuilderElement.prototype, "get$_layoutCallback", "_layoutCallback$1", 12);
   })();
   (function inheritance() {
@@ -16885,7 +16885,7 @@
       _inherit = hunkHelpers.inherit,
       _inheritMany = hunkHelpers.inheritMany;
     _inherit(A.Object, null);
-    _inheritMany(A.Object, [A.JS_CONST, J.Interceptor, A.SafeToStringHook, J.ArrayIterator, A.Iterable, A.CastIterator, A.Error, A.Closure, A.SentinelValue, A.ListIterator, A.WhereIterator, A.SkipIterator, A.EmptyIterator, A.FixedLengthListMixin, A._Record, A.TypeErrorDecoder, A.NullThrownFromJavaScriptException, A.ExceptionAndStackTrace, A._StackTrace, A.MapBase, A.LinkedHashMapCell, A.LinkedHashMapKeyIterator, A.LinkedHashMapValueIterator, A.JSSyntaxRegExp, A._MatchImplementation, A._AllMatchesIterator, A.StringMatch, A._StringAllMatchesIterator, A.Rti, A._FunctionParameters, A._Type, A._TimerImpl, A._AsyncAwaitCompleter, A.AsyncError, A.Stream, A._BufferingStreamSubscription, A._BroadcastStreamController, A._Completer, A._FutureListener, A._Future, A._AsyncCallbackEntry, A._DelayedEvent, A._DelayedDone, A._PendingEvents, A._DoneStreamSubscription, A._StreamIterator, A._Zone, A._HashMapKeyIterator, A.SetBase, A._HashSetIterator, A._LinkedHashSetCell, A._LinkedHashSetIterator, A.ListBase, A._ListQueueIterator, A.Codec, A.Converter, A._Base64Encoder, A._JsonStringifier, A._Utf8Encoder, A._Utf8Decoder, A.DateTime, A.Duration, A._Enum, A.OutOfMemoryError, A.StackOverflowError, A._Exception, A.FormatException, A.Null, A._StringStackTrace, A.RuneIterator, A.StringBuffer, A.ServiceExtensionResponse, A.NullRejectionException, A.StringCharacterRange, A.Breaks, A.Terminal, A.WebBackend, A.HotReloadBinding, A.SchedulerBinding, A.NoctermBinding, A.Cell, A.Buffer, A.Component, A.ParentData, A.RenderObject, A.State, A.BorderSide, A.BoxBorder, A.BoxDecoration, A._BorderCharacters, A.Element, A.AlignmentGeometry, A.NoctermErrorDetails, A.FrameTiming, A.BuildOwner, A._InactiveElements, A.HitTestResult, A.PipelineOwner, A.BoxConstraints, A.Offset, A.EdgeInsets, A.RenderObjectWithChildMixin, A.ContainerRenderObjectMixin, A.IndexedSlot, A.TerminalCanvas, A.InputEvent, A.InputParser, A.ModifierKeys, A.KeyboardEvent, A.LogicalKey, A.MouseEvent, A.Rect, A.MouseTracker, A.Size, A.Color, A.HSVColor, A.TextStyle, A.TextLayoutConfig, A.TextLayoutResult, A.TuiThemeData]);
+    _inheritMany(A.Object, [A.JS_CONST, J.Interceptor, A.SafeToStringHook, J.ArrayIterator, A.Iterable, A.CastIterator, A.Error, A.Closure, A.SentinelValue, A.ListIterator, A.WhereIterator, A.SkipIterator, A.EmptyIterator, A.FixedLengthListMixin, A._Record, A.TypeErrorDecoder, A.NullThrownFromJavaScriptException, A.ExceptionAndStackTrace, A._StackTrace, A.MapBase, A.LinkedHashMapCell, A.LinkedHashMapKeyIterator, A.LinkedHashMapValueIterator, A.JSSyntaxRegExp, A._MatchImplementation, A._AllMatchesIterator, A.StringMatch, A._StringAllMatchesIterator, A.Rti, A._FunctionParameters, A._Type, A._TimerImpl, A._AsyncAwaitCompleter, A.AsyncError, A.Stream, A._BufferingStreamSubscription, A._BroadcastStreamController, A._Completer, A._FutureListener, A._Future, A._AsyncCallbackEntry, A._DelayedEvent, A._DelayedDone, A._PendingEvents, A._DoneStreamSubscription, A._StreamIterator, A._Zone, A._HashMapKeyIterator, A.SetBase, A._HashSetIterator, A._LinkedHashSetCell, A._LinkedHashSetIterator, A.ListBase, A._ListQueueIterator, A.Codec, A.Converter, A._Base64Encoder, A._JsonStringifier, A._Utf8Encoder, A._Utf8Decoder, A.DateTime, A.Duration, A._Enum, A.OutOfMemoryError, A.StackOverflowError, A._Exception, A.FormatException, A.Null, A._StringStackTrace, A.RuneIterator, A.StringBuffer, A.ServiceExtensionResponse, A.NullRejectionException, A.StringCharacterRange, A.Breaks, A.Terminal, A.WebBackend, A.HotReloadBinding, A.SchedulerBinding, A.CinderBinding, A.Cell, A.Buffer, A.Component, A.ParentData, A.RenderObject, A.State, A.BorderSide, A.BoxBorder, A.BoxDecoration, A._BorderCharacters, A.Element, A.AlignmentGeometry, A.CinderErrorDetails, A.FrameTiming, A.BuildOwner, A._InactiveElements, A.HitTestResult, A.PipelineOwner, A.BoxConstraints, A.Offset, A.EdgeInsets, A.RenderObjectWithChildMixin, A.ContainerRenderObjectMixin, A.IndexedSlot, A.TerminalCanvas, A.InputEvent, A.InputParser, A.ModifierKeys, A.KeyboardEvent, A.LogicalKey, A.MouseEvent, A.Rect, A.MouseTracker, A.Size, A.Color, A.HSVColor, A.TextStyle, A.TextLayoutConfig, A.TextLayoutResult, A.TuiThemeData]);
     _inheritMany(J.Interceptor, [J.JSBool, J.JSNull, J.JavaScriptObject, J.JavaScriptBigInt, J.JavaScriptSymbol, J.JSNumber, J.JSString]);
     _inheritMany(J.JavaScriptObject, [J.LegacyJavaScriptObject, J.JSArray, A.NativeByteBuffer, A.NativeTypedData]);
     _inheritMany(J.LegacyJavaScriptObject, [J.PlainJavaScriptObject, J.UnknownJavaScriptObject, J.JavaScriptFunction]);
@@ -16898,8 +16898,8 @@
     _inherit(A._CastListBase, A.__CastListBase__CastIterableBase_ListMixin);
     _inherit(A.CastList, A._CastListBase);
     _inheritMany(A.Error, [A.LateError, A.TypeError, A.JsNoSuchMethodError, A.UnknownJsTypeError, A.RuntimeError, A._Error, A.JsonUnsupportedObjectError, A.AssertionError, A.ArgumentError, A.UnsupportedError, A.UnimplementedError, A.StateError, A.ConcurrentModificationError, A.FlutterError]);
-    _inheritMany(A.Closure, [A.Closure0Args, A.Closure2Args, A.TearOffClosure, A.initHooks_closure, A.initHooks_closure1, A._AsyncRun__initializeScheduleImmediate_internalCallback, A._AsyncRun__initializeScheduleImmediate_closure, A._awaitOnObject_closure, A._Future__propagateToListeners_handleWhenCompleteCallback_closure, A.Stream_length_closure, A._RootZone_bindUnaryCallbackGuarded_closure, A.promiseToFuture_closure, A.promiseToFuture_closure0, A.dartify_convert, A.TerminalBinding__startInputHandling_closure, A.TerminalBinding__startResizeHandling_closure, A.TerminalBinding__startSignalHandling_closure, A.TerminalBinding__findRenderObjectInTree_closure, A.TerminalBinding__dispatchKeyToElement_closure, A.TerminalBinding__dispatchMouseWheelAtPosition_closure, A.TerminalBinding_runEventLoop_closure0, A.TerminalBinding_runEventLoop_closure, A.TerminalBinding_startDetailedProfiling_closure, A.TerminalBinding__drawFrameCallback_findRootRenderObject, A.TerminalBinding__drawFrameCallback_findRootRenderObject_closure, A.TerminalBinding__drawFrameCallback_findRenderObject, A.TerminalBinding__drawFrameCallback_findRenderObject_closure, A.TerminalBinding_initServiceExtensions_closure0, A._DebugOverlayState__onDebugModeChanged_closure, A._DebugOverlayState__buildOverlay_closure, A.NoctermBinding_registerBoolServiceExtension_closure, A._InactiveElements__unmount_closure, A.Element_detachRenderObject_closure, A.Element_updateChildren_replaceWithNullIfForgotten, A.RenderLayoutBuilder_performLayout_closure, A.ParentDataElement__applyParentData_applyParentDataToChild, A.RenderTUIErrorBox__wrapText_closure, A.MultiChildRenderObjectElement_mount_closure, A.MultiChildRenderObjectElement__findLastRenderObjectDescendant_closure, A.TextLayoutEngine_justifyLine_closure, A._BentoFullDemoState_initState_closure, A._BentoFullDemoState_build_closure, A._BentoFullDemoState__buildCodePanel_closure, A._BentoFullDemoState__buildFeatureCard_lerp]);
-    _inheritMany(A.Closure0Args, [A.nullFuture_closure, A._AsyncRun__scheduleImmediateJsOverride_internalCallback, A._AsyncRun__scheduleImmediateWithSetImmediate_internalCallback, A._TimerImpl_internalCallback, A._TimerImpl$periodic_closure, A._Future__addListener_closure, A._Future__prependListeners_closure, A._Future__chainCoreFuture_closure, A._Future__asyncCompleteWithValue_closure, A._Future__asyncCompleteErrorObject_closure, A._Future__propagateToListeners_handleWhenCompleteCallback, A._Future__propagateToListeners_handleValueCallback, A._Future__propagateToListeners_handleError, A.Stream_length_closure0, A._BufferingStreamSubscription__sendDone_sendDone, A._PendingEvents_schedule_closure, A._rootHandleError_closure, A._RootZone_bindCallbackGuarded_closure, A._Utf8Decoder__decoder_closure, A._Utf8Decoder__decoderNonfatal_closure, A.TerminalBinding__batchCharacterEvents_flushCharBuffer, A.TerminalBinding_scheduleFrameImpl_closure, A.TerminalBinding_scheduleFrameImpl_closure0, A.TerminalBinding_initServiceExtensions_closure, A._DebugOverlayState__onDebugModeChanged__closure, A._DebugOverlayState__onDebugModeChanged_closure0, A.NoctermBinding_drawFrame_closure, A.LayoutBuilderElement__layoutCallback_closure, A.RenderObject_invokeLayoutCallback_closure, A.RenderObject__reportException_closure, A._BentoFullDemoState_initState__closure]);
+    _inheritMany(A.Closure, [A.Closure0Args, A.Closure2Args, A.TearOffClosure, A.initHooks_closure, A.initHooks_closure1, A._AsyncRun__initializeScheduleImmediate_internalCallback, A._AsyncRun__initializeScheduleImmediate_closure, A._awaitOnObject_closure, A._Future__propagateToListeners_handleWhenCompleteCallback_closure, A.Stream_length_closure, A._RootZone_bindUnaryCallbackGuarded_closure, A.promiseToFuture_closure, A.promiseToFuture_closure0, A.dartify_convert, A.TerminalBinding__startInputHandling_closure, A.TerminalBinding__startResizeHandling_closure, A.TerminalBinding__startSignalHandling_closure, A.TerminalBinding__findRenderObjectInTree_closure, A.TerminalBinding__dispatchKeyToElement_closure, A.TerminalBinding__dispatchMouseWheelAtPosition_closure, A.TerminalBinding_runEventLoop_closure0, A.TerminalBinding_runEventLoop_closure, A.TerminalBinding_startDetailedProfiling_closure, A.TerminalBinding__drawFrameCallback_findRootRenderObject, A.TerminalBinding__drawFrameCallback_findRootRenderObject_closure, A.TerminalBinding__drawFrameCallback_findRenderObject, A.TerminalBinding__drawFrameCallback_findRenderObject_closure, A.TerminalBinding_initServiceExtensions_closure0, A._DebugOverlayState__onDebugModeChanged_closure, A._DebugOverlayState__buildOverlay_closure, A.CinderBinding_registerBoolServiceExtension_closure, A._InactiveElements__unmount_closure, A.Element_detachRenderObject_closure, A.Element_updateChildren_replaceWithNullIfForgotten, A.RenderLayoutBuilder_performLayout_closure, A.ParentDataElement__applyParentData_applyParentDataToChild, A.RenderTUIErrorBox__wrapText_closure, A.MultiChildRenderObjectElement_mount_closure, A.MultiChildRenderObjectElement__findLastRenderObjectDescendant_closure, A.TextLayoutEngine_justifyLine_closure, A._BentoFullDemoState_initState_closure, A._BentoFullDemoState_build_closure, A._BentoFullDemoState__buildCodePanel_closure, A._BentoFullDemoState__buildFeatureCard_lerp]);
+    _inheritMany(A.Closure0Args, [A.nullFuture_closure, A._AsyncRun__scheduleImmediateJsOverride_internalCallback, A._AsyncRun__scheduleImmediateWithSetImmediate_internalCallback, A._TimerImpl_internalCallback, A._TimerImpl$periodic_closure, A._Future__addListener_closure, A._Future__prependListeners_closure, A._Future__chainCoreFuture_closure, A._Future__asyncCompleteWithValue_closure, A._Future__asyncCompleteErrorObject_closure, A._Future__propagateToListeners_handleWhenCompleteCallback, A._Future__propagateToListeners_handleValueCallback, A._Future__propagateToListeners_handleError, A.Stream_length_closure0, A._BufferingStreamSubscription__sendDone_sendDone, A._PendingEvents_schedule_closure, A._rootHandleError_closure, A._RootZone_bindCallbackGuarded_closure, A._Utf8Decoder__decoder_closure, A._Utf8Decoder__decoderNonfatal_closure, A.TerminalBinding__batchCharacterEvents_flushCharBuffer, A.TerminalBinding_scheduleFrameImpl_closure, A.TerminalBinding_scheduleFrameImpl_closure0, A.TerminalBinding_initServiceExtensions_closure, A._DebugOverlayState__onDebugModeChanged__closure, A._DebugOverlayState__onDebugModeChanged_closure0, A.CinderBinding_drawFrame_closure, A.LayoutBuilderElement__layoutCallback_closure, A.RenderObject_invokeLayoutCallback_closure, A.RenderObject__reportException_closure, A._BentoFullDemoState_initState__closure]);
     _inheritMany(A.EfficientLengthIterable, [A.ListIterable, A.EmptyIterable, A.LinkedHashMapKeysIterable, A.LinkedHashMapValuesIterable, A._HashMapKeyIterable]);
     _inheritMany(A.ListIterable, [A.SubListIterable, A.MappedListIterable, A.ReversedListIterable, A.ListQueue]);
     _inherit(A.EfficientLengthSkipIterable, A.SkipIterable);
@@ -16909,7 +16909,7 @@
     _inherit(A.NullError, A.TypeError);
     _inheritMany(A.TearOffClosure, [A.StaticClosure, A.BoundClosure]);
     _inheritMany(A.MapBase, [A.JsLinkedHashMap, A._HashMap]);
-    _inheritMany(A.Closure2Args, [A.JsLinkedHashMap_addAll_closure, A.initHooks_closure0, A._awaitOnObject_closure0, A._wrapJsFunctionForAsync_closure, A._Future__propagateToListeners_handleWhenCompleteCallback_closure0, A._RootZone_bindBinaryCallback_closure, A.MapBase_mapToString_closure, A._JsonStringifier_writeMap_closure, A.SchedulerBinding__removeCompletedCallbacks_closure, A._DebugOverlayState__averageFrameTime_closure, A._DebugOverlayState__buildOverlay_closure0, A.NoctermBinding_registerServiceExtension_closure, A.BuildOwner_buildScope_closure, A.BuildOwner_buildScope_closure0, A._InactiveElements__unmountAll_closure, A.Element_updateChildren_slotFor, A.PipelineOwner_flushLayout_closure, A.PipelineOwner_flushLayout_closure0, A.PipelineOwner_flushPaint_closure, A.TextLayoutEngine__layoutNoWrap_closure, A.TextLayoutEngine__layoutWithWrap_closure, A.TextLayoutEngine_justifyLine_closure0, A._BentoFullDemoState_build_closure0]);
+    _inheritMany(A.Closure2Args, [A.JsLinkedHashMap_addAll_closure, A.initHooks_closure0, A._awaitOnObject_closure0, A._wrapJsFunctionForAsync_closure, A._Future__propagateToListeners_handleWhenCompleteCallback_closure0, A._RootZone_bindBinaryCallback_closure, A.MapBase_mapToString_closure, A._JsonStringifier_writeMap_closure, A.SchedulerBinding__removeCompletedCallbacks_closure, A._DebugOverlayState__averageFrameTime_closure, A._DebugOverlayState__buildOverlay_closure0, A.CinderBinding_registerServiceExtension_closure, A.BuildOwner_buildScope_closure, A.BuildOwner_buildScope_closure0, A._InactiveElements__unmountAll_closure, A.Element_updateChildren_slotFor, A.PipelineOwner_flushLayout_closure, A.PipelineOwner_flushLayout_closure0, A.PipelineOwner_flushPaint_closure, A.TextLayoutEngine__layoutNoWrap_closure, A.TextLayoutEngine__layoutWithWrap_closure, A.TextLayoutEngine_justifyLine_closure0, A._BentoFullDemoState_build_closure0]);
     _inheritMany(A.NativeTypedData, [A.NativeByteData, A.NativeTypedArray]);
     _inheritMany(A.NativeTypedArray, [A._NativeTypedArrayOfDouble_NativeTypedArray_ListMixin, A._NativeTypedArrayOfInt_NativeTypedArray_ListMixin]);
     _inherit(A._NativeTypedArrayOfDouble_NativeTypedArray_ListMixin_FixedLengthListMixin, A._NativeTypedArrayOfDouble_NativeTypedArray_ListMixin);
@@ -16938,9 +16938,9 @@
     _inherit(A.Utf8Codec, A.Encoding);
     _inheritMany(A.ArgumentError, [A.RangeError, A.IndexError]);
     _inheritMany(A._Enum, [A.SchedulerPhase, A.Axis, A.MainAxisAlignment, A.MainAxisSize, A.CrossAxisAlignment, A.VerticalDirection, A.FlexFit, A.BoxBorderStyle, A.BoxShape, A.DecorationPosition, A.TextDirection, A.StackFit, A.Clip, A._ElementLifecycle, A.MouseButton, A.FontWeight, A.TextOverflow, A.TextAlign, A.Brightness]);
-    _inherit(A._TerminalBinding_NoctermBinding_SchedulerBinding, A.NoctermBinding);
-    _inherit(A._TerminalBinding_NoctermBinding_SchedulerBinding_HotReloadBinding, A._TerminalBinding_NoctermBinding_SchedulerBinding);
-    _inherit(A.TerminalBinding, A._TerminalBinding_NoctermBinding_SchedulerBinding_HotReloadBinding);
+    _inherit(A._TerminalBinding_CinderBinding_SchedulerBinding, A.CinderBinding);
+    _inherit(A._TerminalBinding_CinderBinding_SchedulerBinding_HotReloadBinding, A._TerminalBinding_CinderBinding_SchedulerBinding);
+    _inherit(A.TerminalBinding, A._TerminalBinding_CinderBinding_SchedulerBinding_HotReloadBinding);
     _inheritMany(A.Component, [A.RenderObjectComponent, A.ProxyComponent, A.StatelessComponent, A.StatefulComponent]);
     _inheritMany(A.RenderObjectComponent, [A.SingleChildRenderObjectComponent, A.Flex, A.MultiChildRenderObjectComponent, A.LayoutBuilder]);
     _inheritMany(A.SingleChildRenderObjectComponent, [A.Text, A.SizedBox, A.Padding, A.Align, A.DecoratedBox]);
@@ -16975,8 +16975,8 @@
     _mixin(A._NativeTypedArrayOfDouble_NativeTypedArray_ListMixin_FixedLengthListMixin, A.FixedLengthListMixin);
     _mixin(A._NativeTypedArrayOfInt_NativeTypedArray_ListMixin, A.ListBase);
     _mixin(A._NativeTypedArrayOfInt_NativeTypedArray_ListMixin_FixedLengthListMixin, A.FixedLengthListMixin);
-    _mixinHard(A._TerminalBinding_NoctermBinding_SchedulerBinding, A.SchedulerBinding);
-    _mixin(A._TerminalBinding_NoctermBinding_SchedulerBinding_HotReloadBinding, A.HotReloadBinding);
+    _mixinHard(A._TerminalBinding_CinderBinding_SchedulerBinding, A.SchedulerBinding);
+    _mixin(A._TerminalBinding_CinderBinding_SchedulerBinding_HotReloadBinding, A.HotReloadBinding);
     _mixinHard(A._RenderConstrainedBox_RenderObject_RenderObjectWithChildMixin, A.RenderObjectWithChildMixin);
     _mixinHard(A._RenderPadding_RenderObject_RenderObjectWithChildMixin, A.RenderObjectWithChildMixin);
     _mixinHard(A._RenderPositionedBox_RenderObject_RenderObjectWithChildMixin, A.RenderObjectWithChildMixin);
@@ -17539,8 +17539,8 @@
     $.TerminalBinding__instance = null;
     $.debugMode = false;
     $._debugModeListeners = A._setArrayType([], A.findType("JSArray<~(bool)>"));
-    $.NoctermError__errorCount = 0;
-    $.NoctermBinding__instance = null;
+    $.CinderError__errorCount = 0;
+    $.CinderBinding__instance = null;
     $.debugRepaintRainbowEnabled = false;
     $.debugCurrentRepaintColor = B.HSVColor_zUf;
   })();

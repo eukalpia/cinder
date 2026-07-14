@@ -1,10 +1,10 @@
-import 'package:nocterm/nocterm.dart' hide TextAlign;
+import 'package:cinder/cinder.dart' hide TextAlign;
 import 'render_paragraph.dart';
 
 // Re-export text related enums and classes
 export 'render_paragraph.dart' show TextOverflow, TextAlign;
-export 'package:nocterm/src/painting/inline_span.dart';
-export 'package:nocterm/src/painting/text_span.dart';
+export 'package:cinder/src/painting/inline_span.dart';
+export 'package:cinder/src/painting/text_span.dart';
 
 /// A widget that displays rich text.
 ///
@@ -15,7 +15,7 @@ export 'package:nocterm/src/painting/text_span.dart';
 /// This is a simplified version of Flutter's RichText adapted for terminal
 /// rendering, without support for text direction, text scaling, or gesture
 /// recognition.
-class RichText extends SingleChildRenderObjectComponent {
+class RichText extends SingleChildRenderObjectWidget {
   /// Creates a rich text widget.
   ///
   /// The [text] parameter must not be null.

@@ -1,11 +1,11 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('AutoScrollController with reverse ListView', () {
     test('reverse ListView with AutoScrollController initial position',
         () async {
-      await testNocterm(
+      await testCinder(
         'reverse auto-scroll initial',
         (tester) async {
           final scrollController = AutoScrollController();
@@ -47,7 +47,7 @@ void main() {
     });
 
     test('auto-scrolls in reverse ListView when content is added', () async {
-      await testNocterm(
+      await testCinder(
         'reverse auto-scroll on add',
         (tester) async {
           final scrollController = AutoScrollController();
@@ -120,7 +120,7 @@ void main() {
     });
 
     test('reverse ListView auto-scroll behavior when scrolling up', () async {
-      await testNocterm(
+      await testCinder(
         'reverse auto-scroll manual scroll',
         (tester) async {
           final scrollController = AutoScrollController(autoScrollThreshold: 5);

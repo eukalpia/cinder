@@ -1,4 +1,4 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 /// Demo showing AutoScrollController working correctly with reverse ListView
 /// for a chat-like interface.
@@ -6,7 +6,7 @@ void main() async {
   await runApp(ChatDemoReverse());
 }
 
-class ChatDemoReverse extends StatefulComponent {
+class ChatDemoReverse extends StatefulWidget {
   const ChatDemoReverse({super.key});
 
   @override
@@ -54,7 +54,7 @@ class _ChatDemoReverseState extends State<ChatDemoReverse> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Focusable(
       focused: true,
       onKeyEvent: (event) {

@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 
-import 'package:nocterm/nocterm.dart' hide isNotEmpty;
-import 'package:nocterm/src/components/image.dart' as img;
+import 'package:cinder/cinder.dart' hide isNotEmpty;
+import 'package:cinder/src/components/image.dart' as img;
 import 'package:test/test.dart';
 
 void main() {
@@ -137,7 +137,7 @@ void main() {
     });
 
     test('renders placeholder while loading', () async {
-      await testNocterm(
+      await testCinder(
         'image placeholder',
         (tester) async {
           await tester.pumpComponent(
@@ -159,7 +159,7 @@ void main() {
     });
 
     test('renders error widget on failure', () async {
-      await testNocterm(
+      await testCinder(
         'image error',
         (tester) async {
           await tester.pumpComponent(
@@ -188,7 +188,7 @@ void main() {
       // For this test, we'll create raw RGBA and use MemoryImage
       // The actual sixel output would require a real terminal
 
-      await testNocterm(
+      await testCinder(
         'memory image render',
         (tester) async {
           // Create a simple 8x16 solid color image (1 cell worth)
@@ -227,7 +227,7 @@ void main() {
 
   group('RenderImage', () {
     test('calculates size from image dimensions', () async {
-      await testNocterm(
+      await testCinder(
         'render image size',
         (tester) async {
           // Test that Image widget respects size constraints

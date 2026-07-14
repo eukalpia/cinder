@@ -1,10 +1,10 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() async {
   await runApp(const ClipboardDemoApp());
 }
 
-class ClipboardDemoApp extends StatefulComponent {
+class ClipboardDemoApp extends StatefulWidget {
   const ClipboardDemoApp({super.key});
 
   @override
@@ -24,7 +24,7 @@ class _ClipboardDemoAppState extends State<ClipboardDemoApp> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Focusable(
       focused: true,
       onKeyEvent: (event) {

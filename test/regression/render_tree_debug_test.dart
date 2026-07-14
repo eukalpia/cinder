@@ -1,9 +1,9 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 void main() {
   test('Column properly removes old children from render tree', () async {
-    await testNocterm('render tree update', (tester) async {
+    await testCinder('render tree update', (tester) async {
       // Start with a column containing one Text widget
       await tester.pumpComponent(
         Column(children: [

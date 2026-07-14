@@ -5,7 +5,7 @@ import '../gestures/hit_test.dart';
 import '../gestures/tap.dart';
 import '../gestures/long_press.dart';
 import '../rendering/mouse_tracker.dart';
-import 'package:nocterm/src/rendering/mouse_region.dart';
+import 'package:cinder/src/rendering/mouse_region.dart';
 
 /// A widget that detects gestures.
 ///
@@ -30,7 +30,7 @@ import 'package:nocterm/src/rendering/mouse_region.dart';
 ///   ),
 /// )
 /// ```
-class GestureDetector extends StatefulComponent {
+class GestureDetector extends StatefulWidget {
   const GestureDetector({
     super.key,
     this.onTap,
@@ -73,7 +73,7 @@ class GestureDetector extends StatefulComponent {
   final HitTestBehavior behavior;
 
   /// The child widget.
-  final Component? child;
+  final Widget? child;
 
   @override
   State<GestureDetector> createState() => _GestureDetectorState();
@@ -91,8 +91,8 @@ class _GestureDetectorState extends State<GestureDetector> {
   }
 
   @override
-  void didUpdateComponent(GestureDetector oldComponent) {
-    super.didUpdateComponent(oldComponent);
+  void didUpdateWidget(GestureDetector oldWidget) {
+    super.didUpdateWidget(oldWidget);
     _syncRecognizers();
   }
 
@@ -106,39 +106,39 @@ class _GestureDetectorState extends State<GestureDetector> {
 
   void _syncRecognizers() {
     // Tap recognizer
-    if (component.onTap != null ||
-        component.onTapDown != null ||
-        component.onTapUp != null ||
-        component.onTapCancel != null) {
+    if (widget.onTap != null ||
+        widget.onTapDown != null ||
+        widget.onTapUp != null ||
+        widget.onTapCancel != null) {
       _tapRecognizer ??= TapGestureRecognizer();
       _tapRecognizer!
-        ..onTap = component.onTap
-        ..onTapDown = component.onTapDown
-        ..onTapUp = component.onTapUp
-        ..onTapCancel = component.onTapCancel;
+        ..onTap = widget.onTap
+        ..onTapDown = widget.onTapDown
+        ..onTapUp = widget.onTapUp
+        ..onTapCancel = widget.onTapCancel;
     } else {
       _tapRecognizer?.dispose();
       _tapRecognizer = null;
     }
 
     // Double tap recognizer
-    if (component.onDoubleTap != null) {
+    if (widget.onDoubleTap != null) {
       _doubleTapRecognizer ??= DoubleTapGestureRecognizer();
-      _doubleTapRecognizer!.onDoubleTap = component.onDoubleTap;
+      _doubleTapRecognizer!.onDoubleTap = widget.onDoubleTap;
     } else {
       _doubleTapRecognizer?.dispose();
       _doubleTapRecognizer = null;
     }
 
     // Long press recognizer
-    if (component.onLongPress != null ||
-        component.onLongPressStart != null ||
-        component.onLongPressEnd != null) {
+    if (widget.onLongPress != null ||
+        widget.onLongPressStart != null ||
+        widget.onLongPressEnd != null) {
       _longPressRecognizer ??= LongPressGestureRecognizer();
       _longPressRecognizer!
-        ..onLongPress = component.onLongPress
-        ..onLongPressStart = component.onLongPressStart
-        ..onLongPressEnd = component.onLongPressEnd;
+        ..onLongPress = widget.onLongPress
+        ..onLongPressStart = widget.onLongPressStart
+        ..onLongPressEnd = widget.onLongPressEnd;
     } else {
       _longPressRecognizer?.dispose();
       _longPressRecognizer = null;
@@ -174,20 +174,20 @@ class _GestureDetectorState extends State<GestureDetector> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     // Use MouseRegion to capture mouse events
     return _GestureDetectorMouseRegion(
       onPointerDown: _handlePointerDown,
       onPointerUp: _handlePointerUp,
       onPointerMove: _handlePointerMove,
-      behavior: component.behavior,
-      child: component.child,
+      behavior: widget.behavior,
+      child: widget.child,
     );
   }
 }
 
 /// Internal widget that wraps the child and handles mouse events.
-class _GestureDetectorMouseRegion extends SingleChildRenderObjectComponent {
+class _GestureDetectorMouseRegion extends SingleChildRenderObjectWidget {
   const _GestureDetectorMouseRegion({
     required this.onPointerDown,
     required this.onPointerUp,

@@ -7,14 +7,14 @@ import 'dart:developer' as developer;
 ///
 /// Example:
 /// ```dart
-/// NoctermTimeline.startSync('renderFrame');
+/// CinderTimeline.startSync('renderFrame');
 /// try {
 ///   // ... rendering work ...
 /// } finally {
-///   NoctermTimeline.finishSync();
+///   CinderTimeline.finishSync();
 /// }
 /// ```
-abstract final class NoctermTimeline {
+abstract final class CinderTimeline {
   static final _BlockBuffer _buffer = _BlockBuffer();
 
   /// Whether to emit events to dart:developer Timeline (DevTools).

@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:nocterm/src/binding/scheduler_binding.dart';
+import 'package:cinder/src/binding/scheduler_binding.dart';
 
 /// Signature for callbacks passed to [Ticker].
 ///

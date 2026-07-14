@@ -4,7 +4,7 @@ description: Understanding terminal basics for building TUIs
 icon: lightbulb
 ---
 
-Understanding a few terminal concepts will help you build better TUIs. This guide explains what happens when your Nocterm app runs.
+Understanding a few terminal concepts will help you build better TUIs. This guide explains what happens when your Cinder app runs.
 
 ## The alternate screen
 
@@ -17,11 +17,11 @@ Your terminal has two screens:
 When a TUI starts, it switches to the alternate screen. When it exits, it switches back. Your command history and scrollback stay intact.
 
 Try this:
-1. Run a Nocterm app
+1. Run a Cinder app
 2. Exit with `Ctrl+C`
 3. Your terminal looks exactly like it did before
 
-Nocterm automatically switches to the alternate screen when you call `runApp()`. You don't need to do anything.
+Cinder automatically switches to the alternate screen when you call `runApp()`. You don't need to do anything.
 
 ## Raw mode vs cooked mode
 
@@ -45,15 +45,15 @@ In raw mode:
 
 TUIs need raw mode to respond to each key press and implement their own controls.
 
-Nocterm switches to raw mode when your app starts and restores cooked mode when it exits. You don't configure this manually.
+Cinder switches to raw mode when your app starts and restores cooked mode when it exits. You don't configure this manually.
 
 ## Terminal size
 
 Terminals are grids measured in columns and rows. A typical terminal is 80 columns wide and 24 rows tall, but users can resize their windows.
 
-When the user resizes the terminal, your app needs to redraw its UI. Nocterm handles this automatically:
+When the user resizes the terminal, your app needs to redraw its UI. Cinder handles this automatically:
 - It detects resize events
-- Rebuilds your component tree
+- Rebuilds your widget tree
 - Redraws the UI to fit the new size
 
 Your components receive the available space through their constraints, just like in Flutter.
@@ -69,9 +69,9 @@ This is why TUI layout works differently from GUI apps:
 - Text wrapping happens at character boundaries
 - Wide characters (like emoji or Chinese characters) can take up 2 cells
 
-When you use `Column`, `Row`, and other layout components, Nocterm calculates positions in character cells and renders each cell with the correct character and style.
+When you use `Column`, `Row`, and other layout components, Cinder calculates positions in character cells and renders each cell with the correct character and style.
 
-## What Nocterm handles for you
+## What Cinder handles for you
 
 You don't need to worry about most terminal mechanics:
 - ✅ Alternate screen switching
@@ -80,7 +80,7 @@ You don't need to worry about most terminal mechanics:
 - ✅ Cursor positioning
 - ✅ Rendering optimization
 
-Focus on building your UI. Nocterm handles the terminal.
+Focus on building your UI. Cinder handles the terminal.
 
 ## Next steps
 

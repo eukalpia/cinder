@@ -1,10 +1,10 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart' hide isNotEmpty;
 
 void main() {
   group('Overflow Handling', () {
     test('horizontal overflow in constrained container', () async {
-      await testNocterm(
+      await testCinder(
         'horizontal overflow',
         (tester) async {
           await tester.pumpComponent(
@@ -35,7 +35,7 @@ void main() {
     });
 
     test('vertical overflow in constrained container', () async {
-      await testNocterm(
+      await testCinder(
         'vertical overflow',
         (tester) async {
           await tester.pumpComponent(
@@ -70,7 +70,7 @@ void main() {
     });
 
     test('combined horizontal and vertical overflow', () async {
-      await testNocterm(
+      await testCinder(
         'combined overflow',
         (tester) async {
           await tester.pumpComponent(
@@ -122,7 +122,7 @@ void main() {
     });
 
     test('overflow with nested containers', () async {
-      await testNocterm(
+      await testCinder(
         'nested overflow',
         (tester) async {
           await tester.pumpComponent(
@@ -161,7 +161,7 @@ void main() {
     });
 
     test('overflow with flexible widgets', () async {
-      await testNocterm(
+      await testCinder(
         'flexible overflow',
         (tester) async {
           await tester.pumpComponent(
@@ -205,7 +205,7 @@ void main() {
 
     test('overflow visual test',
         skip: 'Run with debugPrintAfterPump for visual inspection', () async {
-      await testNocterm(
+      await testCinder(
         'overflow visual',
         (tester) async {
           await tester.pumpComponent(

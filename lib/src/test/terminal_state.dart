@@ -1,4 +1,4 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 /// Represents the state of a terminal at a point in time.
 /// Provides methods for querying and asserting on terminal content.

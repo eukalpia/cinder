@@ -1,4 +1,4 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart' hide isEmpty;
 
 void main() {
@@ -6,7 +6,7 @@ void main() {
     // Ctrl+C is intentionally reserved for app termination in TUI applications.
     // Copy functionality would need an alternative keybinding if supported.
     test('copy selected text with Ctrl+C', () async {
-      await testNocterm(
+      await testCinder(
         'TextField copy test',
         (tester) async {
           final controller = TextEditingController(text: 'Hello, World!');
@@ -40,7 +40,7 @@ void main() {
     });
 
     test('cut selected text with Ctrl+X', () async {
-      await testNocterm(
+      await testCinder(
         'TextField cut test',
         (tester) async {
           final controller = TextEditingController(text: 'Cut this text');
@@ -82,7 +82,7 @@ void main() {
     });
 
     test('paste text with Ctrl+V', () async {
-      await testNocterm(
+      await testCinder(
         'TextField paste test',
         (tester) async {
           final controller = TextEditingController(text: '');
@@ -114,7 +114,7 @@ void main() {
     });
 
     test('paste replaces selected text', () async {
-      await testNocterm(
+      await testCinder(
         'TextField paste replaces selection',
         (tester) async {
           final controller = TextEditingController(text: 'Replace me');
@@ -155,7 +155,7 @@ void main() {
     // Tests cut-paste workflow since Ctrl+C is reserved for app termination.
     // This verifies clipboard integration using Ctrl+X (cut) instead of Ctrl+C (copy).
     test('cut-paste workflow', () async {
-      await testNocterm(
+      await testCinder(
         'TextField cut-paste workflow',
         (tester) async {
           final controller = TextEditingController(text: 'Original text');
@@ -210,7 +210,7 @@ void main() {
     });
 
     test('paste handles Unicode correctly', () async {
-      await testNocterm(
+      await testCinder(
         'TextField paste Unicode',
         (tester) async {
           final controller = TextEditingController(text: '');
@@ -242,7 +242,7 @@ void main() {
     });
 
     test('paste handles multi-line text in single-line field', () async {
-      await testNocterm(
+      await testCinder(
         'TextField paste multi-line in single-line field',
         (tester) async {
           final controller = TextEditingController(text: '');

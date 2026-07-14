@@ -1,10 +1,10 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() async {
   await runApp(const SimpleTextFieldDemo());
 }
 
-class SimpleTextFieldDemo extends StatefulComponent {
+class SimpleTextFieldDemo extends StatefulWidget {
   const SimpleTextFieldDemo({super.key});
 
   @override
@@ -57,7 +57,7 @@ class _SimpleTextFieldDemoState extends State<SimpleTextFieldDemo> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Focusable(
       focused: true, // Always capture keys at the top level
       onKeyEvent: _handleGlobalKey,

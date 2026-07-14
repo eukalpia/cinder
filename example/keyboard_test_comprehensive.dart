@@ -1,11 +1,11 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() async {
   await runApp(const KeyboardTestApp());
 }
 
 /// Comprehensive keyboard test application
-class KeyboardTestApp extends StatefulComponent {
+class KeyboardTestApp extends StatefulWidget {
   const KeyboardTestApp({super.key});
 
   @override
@@ -90,7 +90,7 @@ class _KeyboardTestAppState extends State<KeyboardTestApp> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Focusable(
       focused: !_textFieldFocused,
       onKeyEvent: (event) {

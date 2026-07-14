@@ -1,10 +1,10 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() async {
   await runApp(const Navigator(home: ScrollDemo()));
 }
 
-class ScrollDemo extends StatefulComponent {
+class ScrollDemo extends StatefulWidget {
   const ScrollDemo({super.key});
 
   @override
@@ -28,7 +28,7 @@ class _ScrollDemoState extends State<ScrollDemo> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Focusable(
       focused: true,
       onKeyEvent: (event) {
@@ -57,7 +57,7 @@ class _ScrollDemoState extends State<ScrollDemo> {
     );
   }
 
-  Component _buildTabBar() {
+  Widget _buildTabBar() {
     return Container(
       decoration: BoxDecoration(
         border: BoxBorder.all(color: Colors.cyan),
@@ -74,7 +74,7 @@ class _ScrollDemoState extends State<ScrollDemo> {
     );
   }
 
-  Component _buildTab(String label, int index) {
+  Widget _buildTab(String label, int index) {
     final isSelected = selectedTab == index;
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 1),
@@ -93,7 +93,7 @@ class _ScrollDemoState extends State<ScrollDemo> {
     );
   }
 
-  Component _buildContent() {
+  Widget _buildContent() {
     // Use a Container with key to force rebuild when switching tabs
     switch (selectedTab) {
       case 0:
@@ -121,7 +121,7 @@ class _ScrollDemoState extends State<ScrollDemo> {
     }
   }
 
-  Component _buildSingleChildScrollViewDemo() {
+  Widget _buildSingleChildScrollViewDemo() {
     return Row(
       children: [
         // Vertical scroll example
@@ -192,7 +192,7 @@ class _ScrollDemoState extends State<ScrollDemo> {
     );
   }
 
-  Component _buildListViewDemo() {
+  Widget _buildListViewDemo() {
     return Container(
       decoration: BoxDecoration(
         border: BoxBorder.all(color: Colors.magenta),
@@ -223,7 +223,7 @@ class _ScrollDemoState extends State<ScrollDemo> {
     );
   }
 
-  Component _buildListViewBuilderDemo() {
+  Widget _buildListViewBuilderDemo() {
     return Row(
       children: [
         // Standard builder
@@ -293,7 +293,7 @@ class _ScrollDemoState extends State<ScrollDemo> {
     );
   }
 
-  Component _buildListViewWithScrollbar() {
+  Widget _buildListViewWithScrollbar() {
     return Scrollbar(
       controller: scrollController4,
       thumbVisibility: true,
@@ -316,7 +316,7 @@ class _ScrollDemoState extends State<ScrollDemo> {
     );
   }
 
-  Component _buildScrollbarDemo() {
+  Widget _buildScrollbarDemo() {
     return Row(
       children: [
         // SingleChildScrollView with scrollbar

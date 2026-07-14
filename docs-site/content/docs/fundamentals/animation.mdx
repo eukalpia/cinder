@@ -1,20 +1,20 @@
 ---
 title: Animation
-description: Flutter-like animation system for smooth, declarative animations in Nocterm
+description: Flutter-like animation system for smooth, declarative animations in Cinder
 icon: play
 ---
 
-Nocterm includes a complete animation system modeled after Flutter's. You can create smooth animations using `AnimationController`, `Tween`s, and `Curve`s to bring your terminal UIs to life.
+Cinder includes a complete animation system modeled after Flutter's. You can create smooth animations using `AnimationController`, `Tween`s, and `Curve`s to bring your terminal UIs to life.
 
 ## Quick start
 
 Here's a simple fade-in animation:
 
 ```dart
-class FadeIn extends StatefulComponent {
+class FadeIn extends StatefulWidget {
   const FadeIn({required this.child, super.key});
 
-  final Component child;
+  final Widget child;
 
   @override
   State<FadeIn> createState() => _FadeInState();
@@ -41,7 +41,7 @@ class _FadeInState extends State<FadeIn>
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {
@@ -51,13 +51,13 @@ class _FadeInState extends State<FadeIn>
           child: child,
         );
       },
-      child: component.child,
+      child: widget.child,
     );
   }
 }
 ```
 
-This creates a component that fades in over 500ms when added to the tree.
+This creates a widget that fades in over 500ms when added to the tree.
 
 ## AnimationController
 
@@ -408,7 +408,7 @@ ListenableBuilder(
 Here's a loading indicator that pulses:
 
 ```dart
-class PulsingIndicator extends StatefulComponent {
+class PulsingIndicator extends StatefulWidget {
   const PulsingIndicator({super.key});
 
   @override
@@ -446,7 +446,7 @@ class _PulsingIndicatorState extends State<PulsingIndicator>
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: _colorAnimation,
       builder: (context, child) {
@@ -532,5 +532,5 @@ _controller.addStatusListener((status) async {
 ## Next steps
 
 - [State Management](/docs/fundamentals/state) - Learn about state and setState
-- [Components](/docs/fundamentals/components) - Review component types
+- [Components](/docs/fundamentals/components) - Review widget types
 - [Theming](/docs/fundamentals/theming) - Style your animated components

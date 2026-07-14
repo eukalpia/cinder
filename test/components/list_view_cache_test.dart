@@ -18,13 +18,13 @@
 // 2. Reverse mode with prepended items (the exact bug scenario)
 // 3. Cache is preserved when itemCount stays the same (performance)
 
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('ListView cache invalidation', () {
     test('renders new items when itemCount increases', () async {
-      await testNocterm(
+      await testCinder(
         'itemCount increase',
         (tester) async {
           // Start with 3 items
@@ -68,7 +68,7 @@ void main() {
     });
 
     test('removes items when itemCount decreases', () async {
-      await testNocterm(
+      await testCinder(
         'itemCount decrease',
         (tester) async {
           // Start with 5 items
@@ -116,7 +116,7 @@ void main() {
       // With reverse: true (chat UI pattern), new items prepend at index 0
       // and all existing indices shift. The cache must be invalidated
       // so new items at index 0 are rendered.
-      await testNocterm(
+      await testCinder(
         'reverse mode new items',
         (tester) async {
           List<String> messages = ['Message 1', 'Message 2'];
@@ -165,7 +165,7 @@ void main() {
 
     test('handles rapid itemCount changes', () async {
       // Simulate chat: 3 -> 4 -> 5 -> 6 items rapidly
-      await testNocterm(
+      await testCinder(
         'rapid itemCount changes',
         (tester) async {
           for (int count = 3; count <= 8; count++) {
@@ -194,7 +194,7 @@ void main() {
 
   group('ListView cache preservation', () {
     test('preserves cache when itemCount unchanged', () async {
-      await testNocterm(
+      await testCinder(
         'cache preserved on scroll',
         (tester) async {
           final scrollController = ScrollController();
@@ -235,7 +235,7 @@ void main() {
 
     test('preserves cache during parent rebuild without itemCount change',
         () async {
-      await testNocterm(
+      await testCinder(
         'cache preserved on parent rebuild',
         (tester) async {
           int buildCount = 0;
@@ -305,7 +305,7 @@ void main() {
     test('new items appear at visual bottom with reverse: true', () async {
       // With reverse: true, index 0 is at the visual bottom
       // New items (at index 0) should appear at bottom
-      await testNocterm(
+      await testCinder(
         'reverse mode visual position',
         (tester) async {
           await tester.pumpComponent(
@@ -333,7 +333,7 @@ void main() {
 
     test('scroll position maintained when items added in reverse mode',
         () async {
-      await testNocterm(
+      await testCinder(
         'reverse mode scroll position',
         (tester) async {
           final scrollController = ScrollController();
@@ -378,7 +378,7 @@ void main() {
 
     test('multiple rapid additions in reverse mode', () async {
       // Simulate receiving multiple chat messages quickly
-      await testNocterm(
+      await testCinder(
         'rapid additions reverse mode',
         (tester) async {
           List<String> messages = ['Initial'];
@@ -427,7 +427,7 @@ void main() {
   group('ListView edge cases', () {
     test('handles itemCount from null to number', () async {
       // Infinite list -> finite list
-      await testNocterm(
+      await testCinder(
         'null to finite itemCount',
         (tester) async {
           // Initially infinite (null itemCount)
@@ -473,7 +473,7 @@ void main() {
 
     test('handles itemCount from number to null', () async {
       // Finite list -> infinite list
-      await testNocterm(
+      await testCinder(
         'finite to null itemCount',
         (tester) async {
           // Initially 5 items
@@ -515,7 +515,7 @@ void main() {
 
     test('handles itemCount change from 0 to n', () async {
       // Empty list -> populated list
-      await testNocterm(
+      await testCinder(
         'empty to populated',
         (tester) async {
           // Initially empty
@@ -556,7 +556,7 @@ void main() {
 
     test('handles itemCount change from n to 0', () async {
       // Populated list -> empty list
-      await testNocterm(
+      await testCinder(
         'populated to empty',
         (tester) async {
           // Initially 5 items
@@ -603,7 +603,7 @@ void main() {
       // The bug was that when itemCount changed, the _itemOffsets and
       // _itemExtents caches weren't invalidated, causing new items
       // (especially at index 0 in reverse mode) to not render.
-      await testNocterm(
+      await testCinder(
         'CRITICAL regression test',
         (tester) async {
           // Simulate chat UI: messages list that grows
@@ -654,7 +654,7 @@ void main() {
 
     test('cache invalidation occurs when itemCount changes', () async {
       // Verify the fix: caches should be invalidated when itemCount changes
-      await testNocterm(
+      await testCinder(
         'cache invalidation verification',
         (tester) async {
           final List<int> builtIndices = [];
@@ -710,9 +710,9 @@ void main() {
     });
   });
 
-  group('ListView with StatefulComponent for state changes', () {
+  group('ListView with StatefulWidget for state changes', () {
     test('renders new items when state changes with stateful parent', () async {
-      await testNocterm(
+      await testCinder(
         'stateful parent state change',
         (tester) async {
           await tester.pumpComponent(_DynamicListView());
@@ -737,7 +737,7 @@ void main() {
     });
 
     test('renders new items with reverse mode using stateful parent', () async {
-      await testNocterm(
+      await testCinder(
         'stateful reverse mode',
         (tester) async {
           await tester.pumpComponent(_DynamicChatView());
@@ -765,7 +765,7 @@ void main() {
 }
 
 /// Helper widget that can dynamically add items
-class _DynamicListView extends StatefulComponent {
+class _DynamicListView extends StatefulWidget {
   @override
   State<_DynamicListView> createState() => _DynamicListViewState();
 }
@@ -780,7 +780,7 @@ class _DynamicListViewState extends State<_DynamicListView> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return SizedBox(
       width: 30,
       height: 10,
@@ -793,7 +793,7 @@ class _DynamicListViewState extends State<_DynamicListView> {
 }
 
 /// Helper widget that simulates a chat with reverse list
-class _DynamicChatView extends StatefulComponent {
+class _DynamicChatView extends StatefulWidget {
   @override
   State<_DynamicChatView> createState() => _DynamicChatViewState();
 }
@@ -808,7 +808,7 @@ class _DynamicChatViewState extends State<_DynamicChatView> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return SizedBox(
       width: 30,
       height: 10,

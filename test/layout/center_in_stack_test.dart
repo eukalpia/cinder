@@ -1,10 +1,10 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('Center in Stack', () {
     test('Center should properly center its child within Stack', () async {
-      await testNocterm(
+      await testCinder(
         'center in stack',
         (tester) async {
           // A 20x10 Stack with a Center containing a small "X" Text
@@ -49,7 +49,7 @@ void main() {
     });
 
     test('Center should expand to fill bounded constraints', () async {
-      await testNocterm(
+      await testCinder(
         'center expands in bounded',
         (tester) async {
           // When inside a Stack with bounded constraints,
@@ -95,7 +95,7 @@ void main() {
     });
 
     test('Center without Stack should still work correctly', () async {
-      await testNocterm(
+      await testCinder(
         'standalone center',
         (tester) async {
           // Verify standalone Center still works

@@ -1,21 +1,21 @@
 ---
 title: State Management
-description: Managing state in your Nocterm apps
+description: Managing state in your Cinder apps
 icon: database
 ---
 
-State is data that changes over time. This guide shows you how to manage state in Nocterm apps using `setState()` and other patterns.
+State is data that changes over time. This guide shows you how to manage state in Cinder apps using `setState()` and other patterns.
 
 ## Using setState
 
-The `setState()` method tells Nocterm to rebuild your component with new state.
+The `setState()` method tells Cinder to rebuild your widget with new state.
 
 ### Basic usage
 
 Call `setState()` with a function that updates your state:
 
 ```dart
-class Counter extends StatefulComponent {
+class Counter extends StatefulWidget {
   const Counter({super.key});
 
   @override
@@ -32,7 +32,7 @@ class _CounterState extends State<Counter> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Focusable(
       focused: true,
       onKeyEvent: (event) {
@@ -50,13 +50,13 @@ class _CounterState extends State<Counter> {
 
 When you call `setState()`:
 1. The function you pass runs and updates state
-2. Nocterm marks the component as needing rebuild
+2. Cinder marks the widget as needing rebuild
 3. The `build()` method runs with the new state
 4. The UI updates
 
 ### What setState does
 
-`setState()` schedules a rebuild. It doesn't rebuild immediately—Nocterm batches updates for efficiency.
+`setState()` schedules a rebuild. It doesn't rebuild immediately—Cinder batches updates for efficiency.
 
 Update state inside the `setState()` function:
 
@@ -93,7 +93,7 @@ void _loadData() async {
 }
 ```
 
-Always check `mounted` before calling `setState()` in async callbacks. The component might be removed from the tree before the operation completes.
+Always check `mounted` before calling `setState()` in async callbacks. The widget might be removed from the tree before the operation completes.
 
 ## Lifting state up
 
@@ -104,7 +104,7 @@ When multiple components need the same state, move it to their common parent.
 Two components that both need a counter:
 
 ```dart
-class App extends StatefulComponent {
+class App extends StatefulWidget {
   const App({super.key});
 
   @override
@@ -123,7 +123,7 @@ class _AppState extends State<App> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Column(
       children: [
         CounterDisplay(count: _count),
@@ -137,18 +137,18 @@ class _AppState extends State<App> {
   }
 }
 
-class CounterDisplay extends StatelessComponent {
+class CounterDisplay extends StatelessWidget {
   const CounterDisplay({required this.count, super.key});
 
   final int count;
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Text('Count: $count');
   }
 }
 
-class CounterControls extends StatelessComponent {
+class CounterControls extends StatelessWidget {
   const CounterControls({
     required this.onIncrement,
     required this.onDecrement,
@@ -159,7 +159,7 @@ class CounterControls extends StatelessComponent {
   final VoidCallback onDecrement;
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Focusable(
       focused: true,
       onKeyEvent: (event) {
@@ -231,7 +231,7 @@ class _CounterState extends State<Counter> {
   int _count = 0;
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     final isEven = _count % 2 == 0;  // Calculate in build
     return Text('Count: $_count (${isEven ? 'even' : 'odd'})');
   }
@@ -258,27 +258,27 @@ Never call `setState()` during `build()`:
 ```dart
 // Wrong - infinite loop
 @override
-Component build(BuildContext context) {
+Widget build(BuildContext context) {
   setState(() => _count++);  // Don't do this!
   return Text('Count: $_count');
 }
 ```
 
-If you need to respond to changes, use lifecycle methods like `didUpdateComponent()` or `didChangeDependencies()`.
+If you need to respond to changes, use lifecycle methods like `didUpdateWidget()` or `didChangeDependencies()`.
 
 ## Advanced: Riverpod
 
-For complex state management, Nocterm supports Riverpod. Riverpod provides:
+For complex state management, Cinder supports Riverpod. Riverpod provides:
 - Global state accessible from anywhere
 - Reactive dependencies
 - Automatic cleanup
 
 This is an advanced topic. For most apps, `setState()` and lifting state up are sufficient.
 
-See the Riverpod documentation for details on using providers with Nocterm.
+See the Riverpod documentation for details on using providers with Cinder.
 
 ## Next steps
 
 - [Hot Reload](/docs/fundamentals/hot-reload) - Fast development with hot reload
-- [Components](/docs/fundamentals/components) - Review component types
+- [Components](/docs/fundamentals/components) - Review widget types
 - [Building UIs](/docs/fundamentals/building-uis) - Compose components

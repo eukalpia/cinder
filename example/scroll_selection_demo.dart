@@ -1,10 +1,10 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() async {
   await runApp(const Navigator(home: ScrollSelectionDemo()));
 }
 
-class ScrollSelectionDemo extends StatefulComponent {
+class ScrollSelectionDemo extends StatefulWidget {
   const ScrollSelectionDemo({super.key});
 
   @override
@@ -21,7 +21,7 @@ class _ScrollSelectionDemoState extends State<ScrollSelectionDemo> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return SelectionArea(
       onSelectionCompleted: ClipboardManager.copy,
       child: Column(

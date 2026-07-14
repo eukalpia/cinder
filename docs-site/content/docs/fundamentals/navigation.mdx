@@ -1,17 +1,17 @@
 ---
 title: Navigation
-description: Managing screens and navigation in your Nocterm apps
+description: Managing screens and navigation in your Cinder apps
 icon: compass
 ---
 
-Navigation in Nocterm uses a stack-based system. You push routes onto the stack to navigate forward and pop them to go back. This works similarly to Flutter's navigation.
+Navigation in Cinder uses a stack-based system. You push routes onto the stack to navigate forward and pop them to go back. This works similarly to Flutter's navigation.
 
 ## Quick start
 
-Use the `Navigator` component to manage screens in your app:
+Use the `Navigator` widget to manage screens in your app:
 
 ```dart
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() {
   runApp(
@@ -26,18 +26,18 @@ void main() {
 }
 ```
 
-The `Navigator` component:
+The `Navigator` widget:
 - Manages a stack of routes
 - Handles keyboard navigation (ESC to go back)
-- Supports named routes and direct component pushing
+- Supports named routes and direct widget pushing
 - Provides modal dialogs
 
 ## Navigator properties
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `home` | `Component?` | Initial screen to display |
-| `routes` | `Map<String, Component Function(BuildContext)>?` | Named routes map |
+| `home` | `Widget?` | Initial screen to display |
+| `routes` | `Map<String, Widget Function(BuildContext)>?` | Named routes map |
 | `initialRoute` | `String?` | Route path for deep linking |
 | `onGenerateRoute` | `RouteFactory?` | Factory for dynamic routes |
 | `onUnknownRoute` | `RouteFactory?` | Fallback for unknown routes |
@@ -72,7 +72,7 @@ Navigator.of(context).push(PageRoute(
 
 ### pushComponent
 
-Push a component directly (creates a route for you):
+Push a widget directly (creates a route for you):
 
 ```dart
 Navigator.of(context).pushComponent(
@@ -105,7 +105,7 @@ Navigator.of(context).pushReplacement(PageRoute(
 // Or by name
 Navigator.of(context).pushReplacementNamed('/new');
 
-// Or with a component
+// Or with a widget
 Navigator.of(context).pushReplacementComponent(const NewPage());
 ```
 
@@ -171,7 +171,7 @@ if (result != null) {
 In the pushed page, pass the result to `pop()`:
 
 ```dart
-class InputPage extends StatefulComponent {
+class InputPage extends StatefulWidget {
   const InputPage({super.key});
 
   @override
@@ -182,7 +182,7 @@ class _InputPageState extends State<InputPage> {
   String _input = '';
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Column(
       children: [
         const Text('Enter text:'),
@@ -220,23 +220,23 @@ if (result == true) {
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `builder` | `Component Function(BuildContext)` | required | Dialog content |
+| `builder` | `Widget Function(BuildContext)` | required | Dialog content |
 | `barrierDismissible` | `bool` | `true` | ESC dismisses dialog |
 | `decoration` | `BoxDecoration?` | double border | Dialog border style |
 | `alignment` | `Alignment` | `center` | Position on screen |
 | `width` | `double?` | auto | Fixed width |
 | `height` | `double?` | auto | Fixed height |
 
-Example dialog component:
+Example dialog widget:
 
 ```dart
-class ConfirmDialog extends StatelessComponent {
+class ConfirmDialog extends StatelessWidget {
   final String message;
 
   const ConfirmDialog({required this.message, super.key});
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(2),
       child: Column(
@@ -401,7 +401,7 @@ Navigator(
 
 ### LoggingNavigatorObserver
 
-Nocterm includes a built-in logging observer for debugging:
+Cinder includes a built-in logging observer for debugging:
 
 ```dart
 Navigator(
@@ -460,11 +460,11 @@ Pass data to routes using arguments:
 Navigator.of(context).pushNamed('/user', arguments: userId);
 
 // Access in the target page
-class UserPage extends StatelessComponent {
+class UserPage extends StatelessWidget {
   const UserPage({super.key});
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     // Get arguments from route settings
     final route = ModalRoute.of(context);
     final userId = route?.settings.arguments as String?;

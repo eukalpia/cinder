@@ -1,8 +1,8 @@
 /**
- * Embedded Demo Host for nocterm landing page
+ * Embedded Demo Host for cinder landing page
  *
  * This creates mini xterm.js terminals that can display different
- * compiled nocterm demos inline on the landing page.
+ * compiled cinder demos inline on the landing page.
  */
 
 // Load xterm.js CSS dynamically
@@ -24,7 +24,7 @@ class EmbeddedDemoHost {
     };
     this.terminal = null;
     this.fitAddon = null;
-    this.bridgeId = `nocterm_bridge_${containerId}`;
+    this.bridgeId = `cinder_bridge_${containerId}`;
     this.isInitialized = false;
   }
 
@@ -115,11 +115,11 @@ class EmbeddedDemoHost {
 
   initializeBridge() {
     // Each embedded demo gets its own bridge namespace
-    if (!window.noctermBridges) {
-      window.noctermBridges = {};
+    if (!window.cinderBridges) {
+      window.cinderBridges = {};
     }
 
-    window.noctermBridges[this.bridgeId] = {
+    window.cinderBridges[this.bridgeId] = {
       width: this.options.cols,
       height: this.options.rows,
       onOutput: null,
@@ -130,7 +130,7 @@ class EmbeddedDemoHost {
   }
 
   sendInputToGuest(data) {
-    const bridge = window.noctermBridges[this.bridgeId];
+    const bridge = window.cinderBridges[this.bridgeId];
     if (bridge && bridge.onInput) {
       bridge.onInput(data);
     }
@@ -145,11 +145,11 @@ class EmbeddedDemoHost {
   async loadApp(scriptPath) {
     return new Promise((resolve, reject) => {
       // Set up the bridge reference for the guest app
-      window.currentNoctermBridge = window.noctermBridges[this.bridgeId];
-      window.currentNoctermBridgeId = this.bridgeId;
+      window.currentCinderBridge = window.cinderBridges[this.bridgeId];
+      window.currentCinderBridgeId = this.bridgeId;
 
       // Set up output handler
-      window.noctermBridges[this.bridgeId].onOutput = (data) => {
+      window.cinderBridges[this.bridgeId].onOutput = (data) => {
         this.writeToTerminal(data);
       };
 
@@ -180,8 +180,8 @@ class EmbeddedDemoHost {
     if (this.terminal) {
       this.terminal.dispose();
     }
-    if (window.noctermBridges && window.noctermBridges[this.bridgeId]) {
-      delete window.noctermBridges[this.bridgeId];
+    if (window.cinderBridges && window.cinderBridges[this.bridgeId]) {
+      delete window.cinderBridges[this.bridgeId];
     }
   }
 }

@@ -4,15 +4,15 @@ description: Managing focus in your application
 icon: bullseye
 ---
 
-Focus determines which component receives keyboard input. This guide explains how to manage focus in your app.
+Focus determines which widget receives keyboard input. This guide explains how to manage focus in your app.
 
 ## Focus system
 
-Only one component can have focus at a time. The focused component receives all keyboard events.
+Only one widget can have focus at a time. The focused widget receives all keyboard events.
 
 ```dart
 Focusable(
-  focused: true,  // This component has focus
+  focused: true,  // This widget has focus
   onKeyEvent: (event) {
     // Receives keyboard events
     return true;
@@ -23,10 +23,10 @@ Focusable(
 
 ## Managing focus state
 
-Track which component is focused:
+Track which widget is focused:
 
 ```dart
-class App extends StatefulComponent {
+class App extends StatefulWidget {
   const App({super.key});
 
   @override
@@ -37,7 +37,7 @@ class _AppState extends State<App> {
   int _focusedIndex = 0;
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Column(
       children: [
         Focusable(
@@ -100,7 +100,7 @@ onKeyEvent: (event) {
 
 ## Visual focus indicators
 
-Show users which component has focus:
+Show users which widget has focus:
 
 ```dart
 Container(
@@ -159,7 +159,7 @@ Don't let focused items scroll off-screen. Scroll to keep them visible.
 
 ### One focus at a time
 
-Only one component should have `focused: true`:
+Only one widget should have `focused: true`:
 
 ```dart
 // Good
@@ -212,7 +212,7 @@ class FormState extends State<MyForm> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Column(
       children: [
         for (var i = 0; i < _fieldCount; i++)

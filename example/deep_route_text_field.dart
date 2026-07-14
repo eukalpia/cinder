@@ -1,4 +1,4 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() {
   // Super performant
@@ -11,7 +11,7 @@ void main() {
   ));
 }
 
-class NoNavigation extends StatefulComponent {
+class NoNavigation extends StatefulWidget {
   const NoNavigation({super.key});
   @override
   State<NoNavigation> createState() => _NoNavigationState();
@@ -20,7 +20,7 @@ class NoNavigation extends StatefulComponent {
 class _NoNavigationState extends State<NoNavigation> {
   final controller = TextEditingController();
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Focusable(
       focused: true,
       onKeyEvent: (event) {
@@ -34,7 +34,7 @@ class _NoNavigationState extends State<NoNavigation> {
   }
 }
 
-class MyAppWithNavigation extends StatefulComponent {
+class MyAppWithNavigation extends StatefulWidget {
   const MyAppWithNavigation({super.key, this.depth = 0});
   final int depth;
   @override
@@ -44,20 +44,20 @@ class MyAppWithNavigation extends StatefulComponent {
 class _MyAppWithNavigationState extends State<MyAppWithNavigation> {
   final controller = TextEditingController();
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Focusable(
       focused: true,
       onKeyEvent: (event) {
         if (event.logicalKey == LogicalKey.tab) {
           Navigator.of(context).push(PageRoute(
               builder: (context) =>
-                  MyAppWithNavigation(depth: component.depth + 1),
-              settings: RouteSettings(name: 'depth_${component.depth}')));
+                  MyAppWithNavigation(depth: widget.depth + 1),
+              settings: RouteSettings(name: 'depth_${widget.depth}')));
           return true;
         }
         return false;
       },
-      child: component.depth == 5 || component.depth == 0
+      child: widget.depth == 5 || widget.depth == 0
           ? Container(
               decoration: BoxDecoration(
                 border: BoxBorder.all(color: Colors.gray),
@@ -66,7 +66,7 @@ class _MyAppWithNavigationState extends State<MyAppWithNavigation> {
               height: 100,
               child: TextField(controller: controller, focused: true),
             )
-          : Text('Depth: ${component.depth}'),
+          : Text('Depth: ${widget.depth}'),
     );
   }
 }

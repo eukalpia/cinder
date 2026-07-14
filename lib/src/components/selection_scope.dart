@@ -46,8 +46,8 @@ class SelectionScope extends InheritedComponent {
   /// Returns the [SelectionScope] from the closest ancestor, or null if
   /// no [SelectionScope] ancestor exists.
   ///
-  /// This method registers the calling component as a dependent of the
-  /// [SelectionScope], so the component will rebuild when the selection
+  /// This method registers the calling widget as a dependent of the
+  /// [SelectionScope], so the widget will rebuild when the selection
   /// state changes.
   static SelectionScope? maybeOf(BuildContext context) {
     return context.dependOnInheritedComponentOfExactType<SelectionScope>();
@@ -63,7 +63,7 @@ class SelectionScope extends InheritedComponent {
   }
 
   @override
-  bool updateShouldNotify(SelectionScope oldComponent) {
-    return isActive != oldComponent.isActive;
+  bool updateShouldNotify(SelectionScope oldWidget) {
+    return isActive != oldWidget.isActive;
   }
 }

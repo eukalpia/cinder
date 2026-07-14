@@ -1,10 +1,10 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() async {
   await runApp(const SubmitDemo());
 }
 
-class SubmitDemo extends StatefulComponent {
+class SubmitDemo extends StatefulWidget {
   const SubmitDemo();
 
   @override
@@ -28,7 +28,7 @@ class _SubmitDemoState extends State<SubmitDemo> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Container(
       width: 60,
       height: 20,

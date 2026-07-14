@@ -1,10 +1,10 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('Nested Row/Column behavior', () {
     test('Row inside Row - basic nesting', () async {
-      await testNocterm(
+      await testCinder(
         'row in row',
         (tester) async {
           print('\n=== Testing Row inside Row ===');
@@ -55,7 +55,7 @@ void main() {
     });
 
     test('Column inside Column - basic nesting', () async {
-      await testNocterm(
+      await testCinder(
         'column in column',
         (tester) async {
           print('\n=== Testing Column inside Column ===');
@@ -108,7 +108,7 @@ void main() {
     });
 
     test('Row inside Column - mixed nesting', () async {
-      await testNocterm(
+      await testCinder(
         'row in column',
         (tester) async {
           print('\n=== Testing Row inside Column ===');
@@ -167,7 +167,7 @@ void main() {
     });
 
     test('Column inside Row - mixed nesting opposite', () async {
-      await testNocterm(
+      await testCinder(
         'column in row',
         (tester) async {
           print('\n=== Testing Column inside Row ===');
@@ -227,7 +227,7 @@ void main() {
     });
 
     test('Nested with Expanded - Row with expanded inner Row', () async {
-      await testNocterm(
+      await testCinder(
         'expanded nested row',
         (tester) async {
           print('\n=== Testing Expanded in nested Row ===');
@@ -292,7 +292,7 @@ void main() {
     });
 
     test('Deep nesting - 3 levels', () async {
-      await testNocterm(
+      await testCinder(
         'deep nesting',
         (tester) async {
           print('\n=== Testing 3-level deep nesting ===');
@@ -372,7 +372,7 @@ void main() {
     });
 
     test('MainAxisSize.min behavior in nested flex', () async {
-      await testNocterm(
+      await testCinder(
         'mainAxisSize min',
         (tester) async {
           print('\n=== Testing MainAxisSize.min in nested flex ===');
@@ -427,7 +427,7 @@ void main() {
     });
 
     test('CrossAxisAlignment in nested flex', () async {
-      await testNocterm(
+      await testCinder(
         'cross axis alignment',
         (tester) async {
           print('\n=== Testing CrossAxisAlignment in nested flex ===');

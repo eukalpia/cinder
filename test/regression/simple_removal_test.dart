@@ -1,27 +1,27 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
-class FirstWidget extends StatelessComponent {
+class FirstWidget extends StatelessWidget {
   const FirstWidget();
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Text('FIRST');
   }
 }
 
-class SecondWidget extends StatelessComponent {
+class SecondWidget extends StatelessWidget {
   const SecondWidget();
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Text('SECOND');
   }
 }
 
 void main() {
   test('Direct widget replacement in Column', () async {
-    await testNocterm('direct replacement', (tester) async {
+    await testCinder('direct replacement', (tester) async {
       // Create a Column with FirstWidget
       await tester.pumpComponent(
         Column(children: [FirstWidget()]),
@@ -47,11 +47,11 @@ void main() {
   });
 
   test('Widget replacement via setState', () async {
-    await testNocterm('stateful replacement', (tester) async {
+    await testCinder('stateful replacement', (tester) async {
       bool showFirst = true;
 
       // Helper to build the column
-      Component buildColumn() {
+      Widget buildColumn() {
         return Column(
           children: [
             showFirst ? FirstWidget() : SecondWidget(),

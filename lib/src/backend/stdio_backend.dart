@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:nocterm/src/size.dart';
+import 'package:cinder/src/size.dart';
 
 import 'terminal_backend.dart';
 import 'win32_ansi_stdin.dart';
@@ -154,7 +154,7 @@ class StdioBackend implements TerminalBackend {
     // sequences (disable mouse tracking, leave alternate screen, show cursor,
     // etc.) are actually written to the terminal. Without this, macOS terminals
     // can be left in a bad state (e.g., echo mode off, stuck in alt screen).
-    // See: https://github.com/Norbert515/nocterm/issues/57
+    // See: https://github.com/eukalpia/cinder/issues/57
     Future.wait<void>([stdout.flush(), stderr.flush()])
         .then((_) => exit(exitCode))
         .catchError((_) => exit(exitCode));

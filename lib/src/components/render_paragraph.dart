@@ -1,6 +1,6 @@
 import 'package:characters/characters.dart';
-import 'package:nocterm/nocterm.dart' hide TextAlign;
-import 'package:nocterm/src/framework/terminal_canvas.dart';
+import 'package:cinder/cinder.dart' hide TextAlign;
+import 'package:cinder/src/framework/terminal_canvas.dart';
 
 import '../text/text_layout_engine.dart';
 import '../utils/unicode_width.dart';

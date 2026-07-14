@@ -1,16 +1,16 @@
 import 'package:test/test.dart';
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() {
   test('navigation demo dialog receives focus correctly',
       skip: 'Known issue: Dialog focus management not working correctly',
       () async {
-    await testNocterm(
+    await testCinder(
       'navigation demo test',
       (tester) async {
         print('\n=== Testing Navigation Demo Focus ===\n');
 
-        // Track which component received events
+        // Track which widget received events
         final List<String> eventLog = [];
 
         // Create a modified navigation demo
@@ -90,7 +90,7 @@ void main() {
         await tester.sendKey(LogicalKey.keyA);
         await tester.pump();
 
-        // Check which component received the event
+        // Check which widget received the event
         print('Event log after A key: $eventLog');
 
         // The dialog should receive the event, NOT the main page

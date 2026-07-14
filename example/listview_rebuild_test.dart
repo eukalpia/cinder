@@ -1,11 +1,11 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 /// Test to verify ListView items rebuild when state changes (e.g., selection)
 void main() {
   runApp(const ListViewRebuildTest());
 }
 
-class ListViewRebuildTest extends StatefulComponent {
+class ListViewRebuildTest extends StatefulWidget {
   const ListViewRebuildTest({super.key});
 
   @override
@@ -17,7 +17,7 @@ class _ListViewRebuildTestState extends State<ListViewRebuildTest> {
   final ScrollController _scrollController = ScrollController();
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Focusable(
       focused: true,
       onKeyEvent: _handleKeyEvent,

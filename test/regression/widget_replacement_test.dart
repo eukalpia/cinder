@@ -1,11 +1,11 @@
 import 'dart:async';
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('Widget Replacement', () {
     test('can replace widget with different type', () async {
-      await testNocterm(
+      await testCinder(
         'widget replacement',
         (tester) async {
           // Initial state with Text widget
@@ -33,7 +33,7 @@ void main() {
     });
 
     test('stateful widget replacement', () async {
-      await testNocterm(
+      await testCinder(
         'stateful replacement',
         (tester) async {
           await tester.pumpComponent(const StatefulReplacementTest());
@@ -50,7 +50,7 @@ void main() {
     });
 
     test('conditional widget rendering', () async {
-      await testNocterm(
+      await testCinder(
         'conditional rendering',
         (tester) async {
           // Show first widget
@@ -70,7 +70,7 @@ void main() {
     });
 
     test('list widget replacement', () async {
-      await testNocterm(
+      await testCinder(
         'list replacement',
         (tester) async {
           // Initial list
@@ -113,7 +113,7 @@ void main() {
     });
 
     test('nested widget replacement', () async {
-      await testNocterm(
+      await testCinder(
         'nested replacement',
         (tester) async {
           // Initial nested structure
@@ -156,7 +156,7 @@ void main() {
     // Visual test for manual inspection
     test('replacement visual test',
         skip: 'Run with debugPrintAfterPump for visual inspection', () async {
-      await testNocterm(
+      await testCinder(
         'replacement visual',
         (tester) async {
           // Show different phases visually
@@ -186,13 +186,13 @@ void main() {
 }
 
 // Test helper components
-class TestReplacementComponent extends StatelessComponent {
+class TestReplacementComponent extends StatelessWidget {
   final int phase;
 
   const TestReplacementComponent({required this.phase});
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -219,7 +219,7 @@ class TestReplacementComponent extends StatelessComponent {
   }
 }
 
-class StatefulReplacementTest extends StatefulComponent {
+class StatefulReplacementTest extends StatefulWidget {
   const StatefulReplacementTest({super.key});
 
   @override
@@ -231,7 +231,7 @@ class _StatefulReplacementTestState extends State<StatefulReplacementTest> {
   int state = 0;
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -252,13 +252,13 @@ class _StatefulReplacementTestState extends State<StatefulReplacementTest> {
   }
 }
 
-class ConditionalWidget extends StatelessComponent {
+class ConditionalWidget extends StatelessWidget {
   final bool showFirst;
 
   const ConditionalWidget({required this.showFirst});
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Center(
       child: showFirst
           ? const Text('First Widget')

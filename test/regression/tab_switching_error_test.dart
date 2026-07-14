@@ -1,11 +1,11 @@
 import 'package:test/test.dart';
-import 'package:nocterm/nocterm.dart';
-import 'package:nocterm/src/components/error_widget.dart';
+import 'package:cinder/cinder.dart';
+import 'package:cinder/src/components/error_widget.dart';
 
 void main() {
   group('Tab Switching Error Handling', () {
     test('error appears and disappears when switching tabs', () async {
-      await testNocterm(
+      await testCinder(
         'tab switching with error',
         (tester) async {
           await tester.pumpComponent(
@@ -75,7 +75,7 @@ void main() {
     });
 
     test('paint error shows error box when switching tabs', () async {
-      await testNocterm(
+      await testCinder(
         'tab switching with paint error',
         (tester) async {
           await tester.pumpComponent(
@@ -113,7 +113,7 @@ void main() {
 }
 
 /// A widget with two pages that can be switched using Tab key
-class _TabbedPageWidget extends StatefulComponent {
+class _TabbedPageWidget extends StatefulWidget {
   const _TabbedPageWidget();
 
   @override
@@ -130,7 +130,7 @@ class _TabbedPageWidgetState extends State<_TabbedPageWidget> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Focusable(
       focused: true,
       onKeyEvent: (event) {
@@ -186,7 +186,7 @@ class _TabbedPageWidgetState extends State<_TabbedPageWidget> {
 }
 
 /// A widget with paint error on page 2
-class _TabbedPageWithPaintError extends StatefulComponent {
+class _TabbedPageWithPaintError extends StatefulWidget {
   const _TabbedPageWithPaintError();
 
   @override
@@ -204,7 +204,7 @@ class _TabbedPageWithPaintErrorState extends State<_TabbedPageWithPaintError> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Focusable(
       focused: true,
       onKeyEvent: (event) {

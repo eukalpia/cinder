@@ -1,5 +1,5 @@
-import 'package:nocterm/nocterm.dart';
-import 'package:nocterm/src/components/selection_state.dart';
+import 'package:cinder/cinder.dart';
+import 'package:cinder/src/components/selection_state.dart';
 import 'package:quiver/strings.dart' hide isEmpty;
 import 'package:test/test.dart' hide isEmpty;
 
@@ -7,7 +7,7 @@ void main() {
   group('SelectionArea', () {
     test('selection completion inserts newline when moving to a new row',
         () async {
-      await testNocterm(
+      await testCinder(
         'selection completion',
         (tester) async {
           String? lastChanged;
@@ -56,7 +56,7 @@ void main() {
     });
 
     test('clears selection when text content changes', () async {
-      await testNocterm(
+      await testCinder(
         'clears selection on text change',
         (tester) async {
           String? lastChanged;
@@ -110,7 +110,7 @@ void main() {
 
     test('starts selection when pressing on whitespace and dragging into text',
         () async {
-      await testNocterm(
+      await testCinder(
         'drag from whitespace',
         (tester) async {
           String? lastChanged;
@@ -163,7 +163,7 @@ void main() {
     });
 
     test('selection crosses a non-selectable gap between widgets', () async {
-      await testNocterm(
+      await testCinder(
         'cross boundary selection',
         (tester) async {
           String? completed;
@@ -206,7 +206,7 @@ void main() {
     });
 
     test('selection updates on mouse release position', () async {
-      await testNocterm(
+      await testCinder(
         'selection release update',
         (tester) async {
           String? completed;
@@ -240,7 +240,7 @@ void main() {
     });
 
     test('drag below last line clamps selection to end', () async {
-      await testNocterm(
+      await testCinder(
         'drag below last line',
         (tester) async {
           String? completed;
@@ -278,7 +278,7 @@ void main() {
     });
 
     test('reanchors when anchored selectable is replaced', () async {
-      await testNocterm(
+      await testCinder(
         'reanchor on replace',
         (tester) async {
           String? lastChanged;
@@ -324,7 +324,7 @@ void main() {
     });
 
     test('selectionColor setter updates cached selectables', () async {
-      await testNocterm(
+      await testCinder(
         'selectionColor setter',
         (tester) async {
           RenderSelectionArea? renderObject;
@@ -365,7 +365,7 @@ void main() {
     });
 
     test('onEnter clears left button pressed state', () async {
-      await testNocterm(
+      await testCinder(
         'onEnter clears left button pressed',
         (tester) async {
           String? lastChanged;
@@ -405,7 +405,7 @@ void main() {
     });
 
     test('onHover with left button down triggers selection start', () async {
-      await testNocterm(
+      await testCinder(
         'hover left button down',
         (tester) async {
           String? lastChanged;
@@ -447,7 +447,7 @@ void main() {
     });
 
     test('onExit finalizes selection when leaving region', () async {
-      await testNocterm(
+      await testCinder(
         'exit finalizes selection',
         (tester) async {
           String? completed;
@@ -495,7 +495,7 @@ void main() {
     });
 
     test('anchor context removed clears selection', () async {
-      await testNocterm(
+      await testCinder(
         'anchor context removed',
         (tester) async {
           String? lastChanged;
@@ -540,7 +540,7 @@ void main() {
     });
 
     test('onExit handles left button release when invoked directly', () async {
-      await testNocterm(
+      await testCinder(
         'onExit direct',
         (tester) async {
           RenderSelectionArea? renderObject;
@@ -578,7 +578,7 @@ void main() {
     });
 
     test('dispose cleans drag state when unmounted mid-drag', () async {
-      await testNocterm(
+      await testCinder(
         'dispose mid-drag cleanup',
         (tester) async {
           await tester.pumpComponent(
@@ -603,7 +603,7 @@ void main() {
 
     test('ListView items with multiple selectables use positional sort',
         () async {
-      await testNocterm(
+      await testCinder(
         'listview positional sort',
         (tester) async {
           String? completed;
@@ -643,7 +643,7 @@ void main() {
     });
 
     test('ListView returns to lazy mode after selection drag ends', () async {
-      await testNocterm(
+      await testCinder(
         'listview lazy restore',
         (tester) async {
           await tester.pumpComponent(
@@ -670,7 +670,7 @@ void main() {
             element.visitChildren(findViewport);
           }
 
-          findViewport(NoctermTestBinding.instance.rootElement!);
+          findViewport(CinderTestBinding.instance.rootElement!);
           expect(viewport, isNotNull);
 
           final initialCount = tester.findAllComponents<Text>().length;
@@ -692,7 +692,7 @@ void main() {
     });
 
     test('nearest selectable uses left-side distance', () async {
-      await testNocterm(
+      await testCinder(
         'nearest selectable left',
         (tester) async {
           String? lastChanged;
@@ -727,7 +727,7 @@ void main() {
     });
 
     test('multiline selection inserts newlines', () async {
-      await testNocterm(
+      await testCinder(
         'multiline newlines',
         (tester) async {
           String? completed;
@@ -759,7 +759,7 @@ void main() {
     });
 
     test('multiline selection inserts spaces for same-row widgets', () async {
-      await testNocterm(
+      await testCinder(
         'multiline spaces',
         (tester) async {
           RenderSelectionArea? renderObject;
@@ -794,7 +794,7 @@ void main() {
     });
 
     test('excludes offscreen text from selection output', () async {
-      await testNocterm(
+      await testCinder(
         'offscreen exclusion',
         (tester) async {
           String? completed;
@@ -846,7 +846,7 @@ void main() {
     // --- New coverage tests ---
 
     test('backward selection across three widgets', () async {
-      await testNocterm(
+      await testCinder(
         'backward selection',
         (tester) async {
           String? completed;
@@ -894,7 +894,7 @@ void main() {
 
     test('horizontal flex does not expand selection to sibling row items',
         () async {
-      await testNocterm(
+      await testCinder(
         'row group expansion',
         (tester) async {
           String? completed;
@@ -939,7 +939,7 @@ void main() {
     });
 
     test('selectionColor same-value early return and actual update', () async {
-      await testNocterm(
+      await testCinder(
         'selection color update',
         (tester) async {
           String? lastChanged;
@@ -1002,7 +1002,7 @@ void main() {
     });
 
     test('null onSelectionCompleted callback', () async {
-      await testNocterm(
+      await testCinder(
         'null completed callback',
         (tester) async {
           String? lastChanged;
@@ -1038,7 +1038,7 @@ void main() {
     });
 
     test('anchor below and focus above selectable', () async {
-      await testNocterm(
+      await testCinder(
         'anchor below focus above',
         (tester) async {
           String? completed;
@@ -1094,7 +1094,7 @@ void main() {
     });
 
     test('anchor above and focus below selectable', () async {
-      await testNocterm(
+      await testCinder(
         'anchor above focus below',
         (tester) async {
           String? completed;
@@ -1150,7 +1150,7 @@ void main() {
     });
 
     test('empty selectables during pointer move', () async {
-      await testNocterm(
+      await testCinder(
         'empty selectables',
         (tester) async {
           String? lastChanged;
@@ -1184,7 +1184,7 @@ void main() {
     });
 
     test('wheel scroll during active drag', () async {
-      await testNocterm(
+      await testCinder(
         'wheel during drag',
         (tester) async {
           String? lastChanged;
@@ -1241,7 +1241,7 @@ void main() {
     });
 
     test('SingleChildScrollView viewport clipping', () async {
-      await testNocterm(
+      await testCinder(
         'viewport clipping',
         (tester) async {
           String? completed;
@@ -1287,7 +1287,7 @@ void main() {
     });
 
     test('ListView context selection', () async {
-      await testNocterm(
+      await testCinder(
         'listview selection',
         (tester) async {
           String? completed;
@@ -1326,7 +1326,7 @@ void main() {
     });
 
     test('multiline wrapped text selection', () async {
-      await testNocterm(
+      await testCinder(
         'multiline wrapped text',
         (tester) async {
           String? completed;
@@ -1372,7 +1372,7 @@ void main() {
     });
 
     test('mouse exit during drag triggers selection completed', () async {
-      await testNocterm(
+      await testCinder(
         'mouse exit during drag',
         (tester) async {
           String? completed;
@@ -1414,7 +1414,7 @@ void main() {
     });
 
     test('onHover button state transitions', () async {
-      await testNocterm(
+      await testCinder(
         'hover button transitions',
         (tester) async {
           String? lastChanged;
@@ -1456,7 +1456,7 @@ void main() {
     });
 
     test('context entries become empty after anchor set', () async {
-      await testNocterm(
+      await testCinder(
         'empty context after anchor',
         (tester) async {
           String? lastChanged;
@@ -1518,7 +1518,7 @@ void main() {
     test(
         'drag to the bottom edge auto-scrolls the viewport; mid-viewport '
         'motion does not', () async {
-      await testNocterm(
+      await testCinder(
         'edge auto-scroll bottom',
         (tester) async {
           final controller = ScrollController();
@@ -1574,7 +1574,7 @@ void main() {
     });
 
     test('edge auto-scroll stops once the drag is released', () async {
-      await testNocterm(
+      await testCinder(
         'edge auto-scroll stops on release',
         (tester) async {
           final controller = ScrollController();
@@ -1621,7 +1621,7 @@ void main() {
   });
 }
 
-class _SelectionRebuildHarness extends StatefulComponent {
+class _SelectionRebuildHarness extends StatefulWidget {
   const _SelectionRebuildHarness({required this.onSelectionChanged});
 
   final ValueChanged<String> onSelectionChanged;
@@ -1649,10 +1649,10 @@ class _SelectionRebuildHarnessState extends State<_SelectionRebuildHarness> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return SelectionArea(
       key: const ValueKey('selection-area'),
-      onSelectionChanged: component.onSelectionChanged,
+      onSelectionChanged: widget.onSelectionChanged,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1664,7 +1664,7 @@ class _SelectionRebuildHarnessState extends State<_SelectionRebuildHarness> {
   }
 }
 
-class _SelectionAreaSwapHarness extends StatefulComponent {
+class _SelectionAreaSwapHarness extends StatefulWidget {
   const _SelectionAreaSwapHarness({required this.onSelectionChanged});
 
   final ValueChanged<String> onSelectionChanged;
@@ -1692,9 +1692,9 @@ class _SelectionAreaSwapHarnessState extends State<_SelectionAreaSwapHarness> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return SelectionArea(
-      onSelectionChanged: component.onSelectionChanged,
+      onSelectionChanged: widget.onSelectionChanged,
       child: _useListView
           ? ListView.builder(
               itemCount: 3,
@@ -1711,7 +1711,7 @@ class _SelectionAreaSwapHarnessState extends State<_SelectionAreaSwapHarness> {
   }
 }
 
-class _SelectionAreaUnmountHarness extends StatefulComponent {
+class _SelectionAreaUnmountHarness extends StatefulWidget {
   const _SelectionAreaUnmountHarness();
 
   static _SelectionAreaUnmountHarnessState? lastState;
@@ -1738,7 +1738,7 @@ class _SelectionAreaUnmountHarnessState
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     if (!_mountedSelectionArea) {
       return const SizedBox(height: 2);
     }
@@ -1749,7 +1749,7 @@ class _SelectionAreaUnmountHarnessState
   }
 }
 
-class _RenderSelectionAreaHarness extends SingleChildRenderObjectComponent {
+class _RenderSelectionAreaHarness extends SingleChildRenderObjectWidget {
   const _RenderSelectionAreaHarness({
     required super.child,
     this.onCreated,

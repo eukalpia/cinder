@@ -1,11 +1,11 @@
 import 'package:test/test.dart';
-import 'package:nocterm/nocterm.dart' hide TextAlign;
-import 'package:nocterm/src/components/basic.dart' show TextAlign;
+import 'package:cinder/cinder.dart' hide TextAlign;
+import 'package:cinder/src/components/basic.dart' show TextAlign;
 
 void main() {
   group('Text Alignment Fix', () {
     test('text alignment with proper constraints', () async {
-      await testNocterm(
+      await testCinder(
         'proper alignment',
         (tester) async {
           await tester.pumpComponent(
@@ -62,7 +62,7 @@ void main() {
     });
 
     test('text alignment with SizedBox wrapper', () async {
-      await testNocterm(
+      await testCinder(
         'sized box alignment',
         (tester) async {
           await tester.pumpComponent(
@@ -100,7 +100,7 @@ void main() {
     });
 
     test('text alignment with Expanded', () async {
-      await testNocterm(
+      await testCinder(
         'expanded alignment',
         (tester) async {
           await tester.pumpComponent(

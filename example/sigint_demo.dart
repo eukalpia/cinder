@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() async {
   await runApp(const SigintDemo());
@@ -13,7 +13,7 @@ void main() async {
 /// - Visual feedback showing current state
 /// - Auto-reset timer that clears warning after inactivity
 /// - Using shutdownApp() API for safe exit
-class SigintDemo extends StatefulComponent {
+class SigintDemo extends StatefulWidget {
   const SigintDemo({super.key});
 
   @override
@@ -96,7 +96,7 @@ class _SigintDemoState extends State<SigintDemo> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Focusable(
       focused: true,
       onKeyEvent: (event) {

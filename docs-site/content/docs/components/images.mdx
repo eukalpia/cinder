@@ -11,7 +11,7 @@ import { Callout } from 'fumadocs-ui/components/callout';
   See the [terminal compatibility table](#terminal-compatibility) below.
 </Callout>
 
-The `Image` component displays images directly in the terminal using various image protocols.
+The `Image` widget displays images directly in the terminal using various image protocols.
 
 ## Basic usage
 
@@ -68,7 +68,7 @@ Image.network(
 
 ## Image protocols
 
-Terminals use different protocols to display images. Nocterm supports four protocols:
+Terminals use different protocols to display images. Cinder supports four protocols:
 
 ### Kitty Graphics Protocol
 
@@ -116,7 +116,7 @@ Image.file(
 
 ## Auto-detection
 
-By default, Nocterm auto-detects the best available protocol:
+By default, Cinder auto-detects the best available protocol:
 
 ```dart
 // Protocol is auto-detected based on terminal capabilities
@@ -202,13 +202,13 @@ The Image widget supports common image formats:
 Here's a more complete example showing images in a list:
 
 ```dart
-class ImageGallery extends StatelessComponent {
+class ImageGallery extends StatelessWidget {
   final List<String> imagePaths;
 
   const ImageGallery({required this.imagePaths});
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return ListView.builder(
       itemCount: imagePaths.length,
       itemBuilder: (context, index) {

@@ -1,0 +1,10 @@
+name: cinder_nested
+description: Nested widget support for cinder
+version: 0.0.1
+repository: https://github.com/norbert515/cinder
+
+environment:
+  sdk: ">=3.5.0 <4.0.0"
+
+dependencies:
+  cinder: ^0.2.0

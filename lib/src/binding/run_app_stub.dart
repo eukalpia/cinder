@@ -1,8 +1,8 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 /// Stub implementation - should never be called.
 Future<void> runAppImpl(
-  Component app, {
+  Widget app, {
   bool enableHotReload = true,
   TerminalBackend? backend,
 }) {

@@ -1,9 +1,9 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 void main() {
   test('ListView dynamic add simple', () async {
-    await testNocterm(
+    await testCinder(
       'dynamic add test',
       (tester) async {
         final scrollController = ScrollController();

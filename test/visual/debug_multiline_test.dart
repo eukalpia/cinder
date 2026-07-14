@@ -1,9 +1,9 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart' hide isEmpty;
 
 void main() {
   test('multiline text rendering', () async {
-    await testNocterm(
+    await testCinder(
       'multiline text test',
       (tester) async {
         // Test 1: Simple multiline text

@@ -1,10 +1,10 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() {
   runApp(const OverlayDemo());
 }
 
-class OverlayDemo extends StatefulComponent {
+class OverlayDemo extends StatefulWidget {
   const OverlayDemo({super.key});
 
   @override
@@ -87,7 +87,7 @@ class _OverlayDemoState extends State<OverlayDemo> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Overlay(
       initialEntries: [
         OverlayEntry(

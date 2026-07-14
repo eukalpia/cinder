@@ -1,8 +1,8 @@
-import 'package:nocterm/src/foundation/persistent_hash_map.dart';
+import 'package:cinder/src/foundation/persistent_hash_map.dart';
 import 'package:test/test.dart';
 
 /// Direct unit tests for the persistent HAMT used by the framework for
-/// inherited-component lookups. Exercises the trie internals (deep levels,
+/// inherited-widget lookups. Exercises the trie internals (deep levels,
 /// node inflation, collision nodes) that incidental framework usage
 /// never reaches.
 void main() {

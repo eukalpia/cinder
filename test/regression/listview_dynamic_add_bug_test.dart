@@ -1,4 +1,4 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -7,14 +7,14 @@ void main() {
         skip:
             'Known bug: ListView maxScrollExtent not updating when items added',
         () async {
-      await testNocterm(
+      await testCinder(
         'ListView dynamic add bug reproduction',
         (tester) async {
           // Initial items that will fill the viewport
           final items = <String>['Item 1', 'Item 2', 'Item 3'];
           final scrollController = ScrollController();
 
-          // Build the ListView as a simple stateful component
+          // Build the ListView as a simple stateful widget
           await tester.pumpComponent(
             _TestListView(
               items: items,
@@ -83,7 +83,7 @@ void main() {
     });
 
     test('comparison: ListView with known itemCount works correctly', () async {
-      await testNocterm(
+      await testCinder(
         'ListView with itemCount specified',
         (tester) async {
           final scrollController = ScrollController();
@@ -145,7 +145,7 @@ void main() {
 }
 
 // Helper widget for testing
-class _TestListView extends StatelessComponent {
+class _TestListView extends StatelessWidget {
   final List<String> items;
   final ScrollController scrollController;
 
@@ -155,7 +155,7 @@ class _TestListView extends StatelessComponent {
   });
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Column(
       children: [
         Text('Items: ${items.length}'),

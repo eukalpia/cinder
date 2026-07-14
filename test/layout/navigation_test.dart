@@ -1,10 +1,10 @@
 import 'package:test/test.dart';
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() {
   group('Navigation', () {
     test('basic push and pop', () async {
-      await testNocterm(
+      await testCinder(
         'push and pop navigation',
         (tester) async {
           final navigator = Navigator(
@@ -40,7 +40,7 @@ void main() {
     });
 
     test('deep linking', () async {
-      await testNocterm(
+      await testCinder(
         'deep linking navigation',
         (tester) async {
           final navigator = Navigator(
@@ -82,7 +82,7 @@ void main() {
     });
 
     test('push replacement', () async {
-      await testNocterm(
+      await testCinder(
         'push replacement navigation',
         (tester) async {
           final navigator = Navigator(
@@ -121,7 +121,7 @@ void main() {
     });
 
     test('modal dialog', () async {
-      await testNocterm(
+      await testCinder(
         'modal dialog navigation',
         (tester) async {
           final navigator = Navigator(
@@ -170,7 +170,7 @@ void main() {
     });
 
     test('pop behavior configuration', () async {
-      await testNocterm(
+      await testCinder(
         'pop behavior test',
         (tester) async {
           bool canPopCalled = false;
@@ -216,7 +216,7 @@ void main() {
     });
 
     test('navigator observers', () async {
-      await testNocterm(
+      await testCinder(
         'navigator observers test',
         (tester) async {
           final events = <String>[];
@@ -277,7 +277,7 @@ void main() {
     });
 
     test('return values from pushed routes', () async {
-      await testNocterm(
+      await testCinder(
         'return values test',
         (tester) async {
           final navigator = Navigator(

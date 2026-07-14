@@ -1,13 +1,13 @@
 import 'dart:async';
 
-import 'package:nocterm/nocterm.dart'
+import 'package:cinder/cinder.dart'
     hide StdioBackend, SocketBackend, WebBackend;
-import 'package:nocterm/src/backend/web_backend.dart';
-import 'package:nocterm/src/backend/terminal.dart' as term;
+import 'package:cinder/src/backend/web_backend.dart';
+import 'package:cinder/src/backend/terminal.dart' as term;
 
 /// Run a TUI application on web platform.
 Future<void> runAppImpl(
-  Component app, {
+  Widget app, {
   bool enableHotReload = true,
   TerminalBackend? backend,
 }) async {
@@ -16,7 +16,7 @@ Future<void> runAppImpl(
 
   final effectiveBackend = backend ?? WebBackend();
   final terminal = term.Terminal(effectiveBackend);
-  // TerminalBinding is exported from package:nocterm/nocterm.dart
+  // TerminalBinding is exported from package:cinder/cinder.dart
   final binding = TerminalBinding(terminal);
 
   binding.initialize();

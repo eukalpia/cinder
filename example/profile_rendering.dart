@@ -1,10 +1,10 @@
 import 'dart:async';
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 /// Profiling app to measure where CPU time goes during active rendering.
 ///
 /// Run with: dart run example/profile_rendering.dart
-/// In another terminal: nocterm logs
+/// In another terminal: cinder logs
 ///
 /// This enables detailed profiling that measures time spent in:
 /// - Buffer allocation
@@ -21,7 +21,7 @@ void main() {
   runApp(const ProfilingApp());
 }
 
-class ProfilingApp extends StatefulComponent {
+class ProfilingApp extends StatefulWidget {
   const ProfilingApp({super.key});
 
   @override
@@ -52,7 +52,7 @@ class _ProfilingAppState extends State<ProfilingApp> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     // Build a moderately complex UI similar to vide_cli
     return Focusable(
       focused: true,
@@ -111,7 +111,7 @@ class _ProfilingAppState extends State<ProfilingApp> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text('Press Q to quit'),
-                const Text('Watch nocterm logs for profiling data'),
+                const Text('Watch cinder logs for profiling data'),
               ],
             ),
           ),

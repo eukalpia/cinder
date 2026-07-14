@@ -1,10 +1,10 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('TUI Color Rendering', () {
     test('basic foreground colors', () async {
-      await testNocterm(
+      await testCinder(
         'foreground colors',
         (tester) async {
           await tester.pumpComponent(
@@ -37,7 +37,7 @@ void main() {
     });
 
     test('background colors', () async {
-      await testNocterm(
+      await testCinder(
         'background colors',
         (tester) async {
           await tester.pumpComponent(
@@ -76,7 +76,7 @@ void main() {
     });
 
     test('text styles', () async {
-      await testNocterm(
+      await testCinder(
         'text styles',
         (tester) async {
           await tester.pumpComponent(
@@ -126,7 +126,7 @@ void main() {
     });
 
     test('RGB colors', () async {
-      await testNocterm(
+      await testCinder(
         'RGB colors',
         (tester) async {
           await tester.pumpComponent(
@@ -159,7 +159,7 @@ void main() {
     });
 
     test('combined styles', () async {
-      await testNocterm(
+      await testCinder(
         'combined styles',
         (tester) async {
           await tester.pumpComponent(
@@ -206,7 +206,7 @@ void main() {
     });
 
     test('color in containers', () async {
-      await testNocterm(
+      await testCinder(
         'colors in containers',
         (tester) async {
           await tester.pumpComponent(
@@ -259,7 +259,7 @@ void main() {
     // Visual test for manual inspection
     test('colors visual test',
         skip: 'Run with debugPrintAfterPump for visual inspection', () async {
-      await testNocterm(
+      await testCinder(
         'colors visual',
         (tester) async {
           await tester.pumpComponent(

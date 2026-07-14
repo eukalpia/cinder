@@ -1,4 +1,4 @@
-/// Nocterm benchmark suite.
+/// Cinder benchmark suite.
 ///
 /// Run with: dart run benchmark/benchmark.dart [filter]
 /// Examples:
@@ -14,9 +14,9 @@ import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:characters/characters.dart';
-import 'package:nocterm/nocterm.dart';
-import 'package:nocterm/src/framework/terminal_canvas.dart';
-import 'package:nocterm/src/utils/unicode_width.dart';
+import 'package:cinder/cinder.dart';
+import 'package:cinder/src/framework/terminal_canvas.dart';
+import 'package:cinder/src/utils/unicode_width.dart';
 
 // ---------------------------------------------------------------------------
 // Benchmark infrastructure
@@ -484,11 +484,11 @@ BenchmarkSuite canvasSuite() {
 // ---------------------------------------------------------------------------
 
 BenchmarkSuite widgetPipelineSuite(String label, Size size) {
-  NoctermTestBinding? binding;
+  CinderTestBinding? binding;
 
   Benchmark widgetBench(
     String name,
-    Component Function() buildWidget, {
+    Widget Function() buildWidget, {
     int warmup = 20,
     int iterations = 200,
     int samples = 10,
@@ -503,7 +503,7 @@ BenchmarkSuite widgetPipelineSuite(String label, Size size) {
       iterations: iterations,
       samples: samples,
       setup: () async {
-        binding = NoctermTestBinding(size: size);
+        binding = CinderTestBinding(size: size);
       },
       teardown: () async {
         binding?.shutdown();
@@ -531,7 +531,7 @@ BenchmarkSuite widgetPipelineSuite(String label, Size size) {
     widgetBench(
       'Nested Containers (5 deep)',
       () {
-        Component child = Text('inner');
+        Widget child = Text('inner');
         for (int i = 0; i < 5; i++) {
           child = Container(
             padding: EdgeInsets.all(1),
@@ -583,7 +583,7 @@ BenchmarkSuite widgetPipelineSuite(String label, Size size) {
 
     // setState rebuild
     () {
-      NoctermTestBinding? stateBinding;
+      CinderTestBinding? stateBinding;
       _RebuildCounter? counter;
 
       return Benchmark.async(
@@ -596,7 +596,7 @@ BenchmarkSuite widgetPipelineSuite(String label, Size size) {
         iterations: 200,
         samples: 10,
         setup: () async {
-          stateBinding = NoctermTestBinding(size: size);
+          stateBinding = CinderTestBinding(size: size);
           final widget = _RebuildCounterWidget();
           stateBinding!.attachRootComponent(widget);
           await stateBinding!.pump();
@@ -614,7 +614,7 @@ BenchmarkSuite widgetPipelineSuite(String label, Size size) {
 }
 
 // Helper widget for setState benchmark
-class _RebuildCounterWidget extends StatefulComponent {
+class _RebuildCounterWidget extends StatefulWidget {
   @override
   State<_RebuildCounterWidget> createState() => _RebuildCounter();
 }
@@ -629,7 +629,7 @@ class _RebuildCounter extends State<_RebuildCounterWidget> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Column(
       children: List.generate(
         5,
@@ -672,7 +672,7 @@ Future<void> main(List<String> args) async {
 
   if (!ci) {
     print('');
-    print('nocterm benchmark suite');
+    print('cinder benchmark suite');
     print('========================');
     if (baseline.isNotEmpty && !save) {
       print('Comparing against baseline (${baseline.length} benchmarks)');

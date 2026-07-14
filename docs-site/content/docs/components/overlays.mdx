@@ -8,10 +8,10 @@ Overlays display content on top of your main UI. This guide covers the overlay s
 
 ## Overlay system
 
-The `Overlay` component stacks entries on top of your main content:
+The `Overlay` widget stacks entries on top of your main content:
 
 ```dart
-class App extends StatefulComponent {
+class App extends StatefulWidget {
   const App({super.key});
 
   @override
@@ -44,7 +44,7 @@ class _AppState extends State<App> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Focusable(
       focused: true,
       onKeyEvent: (event) {
@@ -178,11 +178,11 @@ void main() {
 Define routes for your pages:
 
 ```dart
-class HomePage extends StatelessComponent {
+class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Focusable(
       focused: true,
       onKeyEvent: (event) {
@@ -199,11 +199,11 @@ class HomePage extends StatelessComponent {
   }
 }
 
-class DetailPage extends StatelessComponent {
+class DetailPage extends StatelessWidget {
   const DetailPage({super.key});
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Focusable(
       focused: true,
       onKeyEvent: (event) {

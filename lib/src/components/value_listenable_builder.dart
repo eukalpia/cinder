@@ -1,10 +1,10 @@
-import 'package:nocterm/src/framework/framework.dart';
-import 'package:nocterm/src/framework/value_listenable.dart';
+import 'package:cinder/src/framework/framework.dart';
+import 'package:cinder/src/framework/value_listenable.dart';
 
-typedef ValueComponentBuilder<T> = Component Function(
-    BuildContext context, T value, Component? child);
+typedef ValueComponentBuilder<T> = Widget Function(
+    BuildContext context, T value, Widget? child);
 
-class ValueListenableBuilder<T> extends StatefulComponent {
+class ValueListenableBuilder<T> extends StatefulWidget {
   const ValueListenableBuilder({
     super.key,
     required this.valueListenable,
@@ -16,10 +16,10 @@ class ValueListenableBuilder<T> extends StatefulComponent {
 
   final ValueComponentBuilder<T> builder;
 
-  final Component? child;
+  final Widget? child;
 
   @override
-  State<StatefulComponent> createState() => _ValueListenableBuilderState<T>();
+  State<StatefulWidget> createState() => _ValueListenableBuilderState<T>();
 }
 
 class _ValueListenableBuilderState<T> extends State<ValueListenableBuilder<T>> {
@@ -28,34 +28,34 @@ class _ValueListenableBuilderState<T> extends State<ValueListenableBuilder<T>> {
   @override
   void initState() {
     super.initState();
-    value = component.valueListenable.value;
-    component.valueListenable.addListener(_valueChanged);
+    value = widget.valueListenable.value;
+    widget.valueListenable.addListener(_valueChanged);
   }
 
   @override
-  void didUpdateComponent(ValueListenableBuilder<T> oldComponent) {
-    super.didUpdateComponent(oldComponent);
-    if (oldComponent.valueListenable != component.valueListenable) {
-      oldComponent.valueListenable.removeListener(_valueChanged);
-      value = component.valueListenable.value;
-      component.valueListenable.addListener(_valueChanged);
+  void didUpdateWidget(ValueListenableBuilder<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.valueListenable != widget.valueListenable) {
+      oldWidget.valueListenable.removeListener(_valueChanged);
+      value = widget.valueListenable.value;
+      widget.valueListenable.addListener(_valueChanged);
     }
   }
 
   @override
   void dispose() {
-    component.valueListenable.removeListener(_valueChanged);
+    widget.valueListenable.removeListener(_valueChanged);
     super.dispose();
   }
 
   void _valueChanged() {
     setState(() {
-      value = component.valueListenable.value;
+      value = widget.valueListenable.value;
     });
   }
 
   @override
-  Component build(BuildContext context) {
-    return component.builder(context, value, component.child);
+  Widget build(BuildContext context) {
+    return widget.builder(context, value, widget.child);
   }
 }

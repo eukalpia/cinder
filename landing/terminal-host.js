@@ -1,23 +1,23 @@
 /**
- * nocterm xterm.js Host Integration
+ * cinder xterm.js Host Integration
  *
- * This file bridges xterm.js (terminal UI) with nocterm apps (compiled to JS).
+ * This file bridges xterm.js (terminal UI) with cinder apps (compiled to JS).
  *
  * Architecture:
  * - xterm.js handles rendering and user input
- * - nocterm app handles application logic
- * - This bridge connects them via window.noctermBridge
+ * - cinder app handles application logic
+ * - This bridge connects them via window.cinderBridge
  *
  * Flow:
- * 1. Host initializes the bridge (window.noctermBridge)
+ * 1. Host initializes the bridge (window.cinderBridge)
  * 2. Host creates xterm.js terminal
- * 3. Host loads nocterm app (guest)
+ * 3. Host loads cinder app (guest)
  * 4. Guest registers callbacks on the bridge
- * 5. User types in xterm.js → bridge → nocterm app
- * 6. Nocterm app outputs → bridge → xterm.js
+ * 5. User types in xterm.js → bridge → cinder app
+ * 6. Cinder app outputs → bridge → xterm.js
  */
 
-class NoctermTerminalHost {
+class CinderTerminalHost {
   constructor(containerId) {
     this.containerId = containerId;
     this.terminal = null;
@@ -31,7 +31,7 @@ class NoctermTerminalHost {
   }
 
   /**
-   * Initialize the terminal and nocterm bridge
+   * Initialize the terminal and cinder bridge
    */
   async initialize() {
     // Create xterm.js terminal with reasonable initial size for TUI apps
@@ -66,15 +66,15 @@ class NoctermTerminalHost {
     // Don't auto-fit - keep the fixed size we specified
     // The terminal will be centered in the container via CSS
 
-    // Initialize the nocterm bridge BEFORE loading the app
-    // This creates window.noctermBridge that the guest will use
+    // Initialize the cinder bridge BEFORE loading the app
+    // This creates window.cinderBridge that the guest will use
     this.initializeBridge();
 
     // Set the terminal size on the bridge
     // The guest app will read this on startup
     this.updateBridgeSize();
 
-    // Wire up xterm.js input to nocterm bridge
+    // Wire up xterm.js input to cinder bridge
     this.terminal.onData(data => {
       console.log('xterm.js onData fired!');
       this.sendInputToGuest(data);
@@ -92,22 +92,22 @@ class NoctermTerminalHost {
     // Note: We don't auto-resize on window resize
     // TUI apps work best with a fixed size
 
-    console.log('nocterm terminal host initialized');
+    console.log('cinder terminal host initialized');
     console.log(`Terminal size: ${this.terminal.cols}x${this.terminal.rows}`);
   }
 
   /**
-   * Initialize the nocterm bridge object on window.
+   * Initialize the cinder bridge object on window.
    * This must be called BEFORE loading the guest app.
    */
   initializeBridge() {
     // Create the bridge object
-    window.noctermBridge = {
+    window.cinderBridge = {
       // Size (host writes, guest reads)
       width: null,
       height: null,
 
-      // Guest → Host: Output from nocterm app
+      // Guest → Host: Output from cinder app
       onOutput: null,
 
       // Host → Guest: Input, resize, shutdown
@@ -118,11 +118,11 @@ class NoctermTerminalHost {
 
     // Set up the output handler
     // The guest will call this when it has output to display
-    window.noctermBridge.onOutput = (data) => {
+    window.cinderBridge.onOutput = (data) => {
       this.writeToTerminal(data);
     };
 
-    console.log('nocterm bridge initialized');
+    console.log('cinder bridge initialized');
   }
 
   /**
@@ -130,7 +130,7 @@ class NoctermTerminalHost {
    * The guest app reads this to know the current size.
    */
   updateBridgeSize() {
-    if (!window.noctermBridge) {
+    if (!window.cinderBridge) {
       console.error('Bridge not initialized');
       return;
     }
@@ -138,17 +138,17 @@ class NoctermTerminalHost {
     const cols = this.terminal.cols;
     const rows = this.terminal.rows;
 
-    window.noctermBridge.width = cols;
-    window.noctermBridge.height = rows;
+    window.cinderBridge.width = cols;
+    window.cinderBridge.height = rows;
 
     console.log(`Bridge size updated: ${cols}x${rows}`);
   }
 
   /**
-   * Send input from xterm.js to the nocterm app via the bridge.
+   * Send input from xterm.js to the cinder app via the bridge.
    */
   sendInputToGuest(data) {
-    if (!window.noctermBridge) {
+    if (!window.cinderBridge) {
       console.error('Bridge not initialized');
       return;
     }
@@ -157,9 +157,9 @@ class NoctermTerminalHost {
     console.log('Input received:', JSON.stringify(data), 'bytes:', [...data].map(c => c.charCodeAt(0)));
 
     // Call the guest's input handler if it's been registered
-    if (window.noctermBridge.onInput) {
+    if (window.cinderBridge.onInput) {
       console.log('Calling onInput...');
-      window.noctermBridge.onInput(data);
+      window.cinderBridge.onInput(data);
       console.log('onInput called successfully');
     } else {
       // Guest hasn't registered yet - queue the input
@@ -168,7 +168,7 @@ class NoctermTerminalHost {
   }
 
   /**
-   * Write output from nocterm app to xterm.js.
+   * Write output from cinder app to xterm.js.
    * This is called by the bridge's onOutput callback.
    */
   writeToTerminal(data) {
@@ -184,25 +184,25 @@ class NoctermTerminalHost {
    * Handle terminal resize events.
    */
   handleResize(cols, rows) {
-    if (!window.noctermBridge) {
+    if (!window.cinderBridge) {
       console.error('Bridge not initialized');
       return;
     }
 
     // Update size on bridge
-    window.noctermBridge.width = cols;
-    window.noctermBridge.height = rows;
+    window.cinderBridge.width = cols;
+    window.cinderBridge.height = rows;
 
     // Notify the guest app about the resize
-    if (window.noctermBridge.onResize) {
-      window.noctermBridge.onResize(cols, rows);
+    if (window.cinderBridge.onResize) {
+      window.cinderBridge.onResize(cols, rows);
     }
 
     console.log(`Terminal resized: ${cols}x${rows}`);
   }
 
   /**
-   * Load a nocterm app (compiled JS file).
+   * Load a cinder app (compiled JS file).
    * The app will automatically connect to the bridge.
    */
   async loadApp(scriptPath) {
@@ -210,13 +210,13 @@ class NoctermTerminalHost {
       const script = document.createElement('script');
       script.src = scriptPath;
       script.onload = () => {
-        console.log(`Loaded nocterm app: ${scriptPath}`);
+        console.log(`Loaded cinder app: ${scriptPath}`);
         this.appLoaded = true;
 
         // Wait a bit for the app to initialize
         setTimeout(() => {
           // Check if the app connected
-          if (window.noctermBridge.onInput) {
+          if (window.cinderBridge.onInput) {
             console.log('Guest app connected to bridge');
             resolve();
           } else {
@@ -226,7 +226,7 @@ class NoctermTerminalHost {
         }, 100);
       };
       script.onerror = (error) => {
-        console.error(`Failed to load nocterm app: ${scriptPath}`, error);
+        console.error(`Failed to load cinder app: ${scriptPath}`, error);
         reject(error);
       };
       document.head.appendChild(script);
@@ -237,8 +237,8 @@ class NoctermTerminalHost {
    * Request the guest app to shut down.
    */
   shutdown() {
-    if (window.noctermBridge && window.noctermBridge.onShutdown) {
-      window.noctermBridge.onShutdown();
+    if (window.cinderBridge && window.cinderBridge.onShutdown) {
+      window.cinderBridge.onShutdown();
     }
   }
 
@@ -246,10 +246,10 @@ class NoctermTerminalHost {
    * Reset the bridge for loading a new app.
    */
   reset() {
-    if (window.noctermBridge) {
-      window.noctermBridge.onInput = null;
-      window.noctermBridge.onResize = null;
-      window.noctermBridge.onShutdown = null;
+    if (window.cinderBridge) {
+      window.cinderBridge.onInput = null;
+      window.cinderBridge.onResize = null;
+      window.cinderBridge.onShutdown = null;
     }
     this.appLoaded = false;
     console.log('Bridge reset');
@@ -263,8 +263,8 @@ class NoctermTerminalHost {
       this.terminal.dispose();
       this.terminal = null;
     }
-    if (window.noctermBridge) {
-      delete window.noctermBridge;
+    if (window.cinderBridge) {
+      delete window.cinderBridge;
     }
     console.log('Terminal host disposed');
   }
@@ -280,4 +280,4 @@ class NoctermTerminalHost {
 }
 
 // Make the class globally available
-window.NoctermTerminalHost = NoctermTerminalHost;
+window.CinderTerminalHost = CinderTerminalHost;

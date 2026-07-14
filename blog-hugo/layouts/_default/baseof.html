@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{{ block "title" . }}{{ .Title }} - Nocterm Blog{{ end }}</title>
+    <title>{{ block "title" . }}{{ .Title }} - Cinder Blog{{ end }}</title>
     <meta name="description" content="{{ with .Description }}{{ . }}{{ else }}{{ .Site.Params.description }}{{ end }}" />
 
     {{- $image := .Params.image | default .Site.Params.defaultImage -}}
@@ -56,11 +56,11 @@
       {{- end }}
       "author": {
         "@type": "Person",
-        "name": "{{ .Params.author | default "Nocterm Team" }}"
+        "name": "{{ .Params.author | default "Cinder Team" }}"
       },
       "publisher": {
         "@type": "Organization",
-        "name": "Nocterm",
+        "name": "Cinder",
         "logo": {
           "@type": "ImageObject",
           "url": "{{ "/images/logo.png" | absURL }}"

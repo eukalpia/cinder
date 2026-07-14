@@ -1,10 +1,10 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('Overlay Background', () {
     test('overlay entries use terminal default background', () async {
-      await testNocterm(
+      await testCinder(
         'default background test',
         (tester) async {
           // Create an overlay with entries
@@ -51,7 +51,7 @@ void main() {
 
     test('opaque overlay entries also use terminal default background',
         () async {
-      await testNocterm(
+      await testCinder(
         'opaque overlay test',
         (tester) async {
           final overlayKey = GlobalKey<OverlayState>();
@@ -94,7 +94,7 @@ void main() {
     });
 
     test('containers with explicit colors still work', () async {
-      await testNocterm(
+      await testCinder(
         'explicit color test',
         (tester) async {
           await tester.pumpComponent(

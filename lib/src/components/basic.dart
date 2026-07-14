@@ -1,5 +1,5 @@
-import 'package:nocterm/nocterm.dart' hide TextAlign;
-import 'package:nocterm/src/framework/terminal_canvas.dart';
+import 'package:cinder/cinder.dart' hide TextAlign;
+import 'package:cinder/src/framework/terminal_canvas.dart';
 
 import 'render_text.dart';
 
@@ -28,7 +28,7 @@ export 'decorated_box.dart'
         TitleAlignment;
 
 /// A run of text with a single style
-class Text extends SingleChildRenderObjectComponent {
+class Text extends SingleChildRenderObjectWidget {
   const Text(
     this.data, {
     super.key,
@@ -71,7 +71,7 @@ class Text extends SingleChildRenderObjectComponent {
 }
 
 /// A box with a specified size
-class SizedBox extends SingleChildRenderObjectComponent {
+class SizedBox extends SingleChildRenderObjectWidget {
   const SizedBox({
     super.key,
     this.width,
@@ -126,7 +126,7 @@ class SizedBox extends SingleChildRenderObjectComponent {
 }
 
 /// Apply padding around a child
-class Padding extends SingleChildRenderObjectComponent {
+class Padding extends SingleChildRenderObjectWidget {
   const Padding({
     super.key,
     required this.padding,
@@ -147,7 +147,7 @@ class Padding extends SingleChildRenderObjectComponent {
 }
 
 /// Align a child within its parent
-class Align extends SingleChildRenderObjectComponent {
+class Align extends SingleChildRenderObjectWidget {
   const Align({
     super.key,
     this.alignment = Alignment.center,
@@ -208,7 +208,7 @@ class Column extends Flex {
 }
 
 /// Display children in a one-dimensional array
-class Flex extends RenderObjectComponent {
+class Flex extends RenderObjectWidget {
   const Flex({
     super.key,
     required this.direction,
@@ -228,7 +228,7 @@ class Flex extends RenderObjectComponent {
   final TextDirection? textDirection;
   final VerticalDirection verticalDirection;
   final TextBaseline? textBaseline;
-  final List<Component> children;
+  final List<Widget> children;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
@@ -279,14 +279,14 @@ class Flexible extends ParentDataComponent<FlexParentData> {
   }) : super(data: FlexParentData(flex: flex, fit: fit));
 }
 
-/// Proxy component that wraps a single child
-abstract class ProxyComponent extends Component {
+/// Proxy widget that wraps a single child
+abstract class ProxyComponent extends Widget {
   const ProxyComponent({super.key, required this.child});
 
-  final Component child;
+  final Widget child;
 }
 
-/// Component that applies parent data to its child
+/// Widget that applies parent data to its child
 class ParentDataComponent<T extends ParentData> extends ProxyComponent {
   const ParentDataComponent({
     super.key,
@@ -302,7 +302,7 @@ class ParentDataComponent<T extends ParentData> extends ProxyComponent {
 
 // BoxDecoration and related classes are now in decorated_box.dart
 
-class LimitedBox extends StatelessComponent {
+class LimitedBox extends StatelessWidget {
   const LimitedBox({
     super.key,
     this.maxWidth = double.infinity,
@@ -312,10 +312,10 @@ class LimitedBox extends StatelessComponent {
 
   final double maxWidth;
   final double maxHeight;
-  final Component? child;
+  final Widget? child;
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     // For now, just pass through the child
     // In a full implementation, this would limit the size
     return child ?? const SizedBox();
@@ -330,7 +330,7 @@ class LimitedBox extends StatelessComponent {
 /// to the constraints it receives from its parent. The constraints are applied
 /// using the [BoxConstraints.enforce] method, which ensures the final constraints
 /// respect both the additional constraints and the parent's constraints.
-class ConstrainedBox extends SingleChildRenderObjectComponent {
+class ConstrainedBox extends SingleChildRenderObjectWidget {
   /// Creates a widget that imposes additional constraints on its child.
   const ConstrainedBox({
     super.key,
@@ -353,7 +353,7 @@ class ConstrainedBox extends SingleChildRenderObjectComponent {
   }
 }
 
-class Transform extends StatelessComponent {
+class Transform extends StatelessWidget {
   const Transform({
     super.key,
     required this.transform,
@@ -361,10 +361,10 @@ class Transform extends StatelessComponent {
   });
 
   final Matrix4 transform;
-  final Component? child;
+  final Widget? child;
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     // For now, just pass through the child
     // In a full implementation, this would apply transform
     return child ?? const SizedBox();
@@ -642,7 +642,7 @@ class RenderPositionedBox extends RenderObject
 }
 
 /// A widget that centers its child within itself
-class Center extends StatelessComponent {
+class Center extends StatelessWidget {
   const Center({
     super.key,
     this.widthFactor,
@@ -652,10 +652,10 @@ class Center extends StatelessComponent {
 
   final double? widthFactor;
   final double? heightFactor;
-  final Component child;
+  final Widget child;
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Align(
       alignment: Alignment.center,
       widthFactor: widthFactor,

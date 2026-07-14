@@ -1,4 +1,4 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 /// Regression test for ContainerRenderObjectMixin.move() not marking layout.
@@ -12,7 +12,7 @@ import 'package:test/test.dart';
 void main() {
   test('reordering keyed const children in a Row swaps their offsets',
       () async {
-    await testNocterm('row const reorder', (tester) async {
+    await testCinder('row const reorder', (tester) async {
       await tester.pumpComponent(const _SwappableRow(aFirst: true));
 
       expect(tester.terminalState.findText('AAA').single.x, 0);
@@ -38,7 +38,7 @@ void main() {
   });
 }
 
-class _SwappableRow extends StatefulComponent {
+class _SwappableRow extends StatefulWidget {
   const _SwappableRow({required this.aFirst});
 
   final bool aFirst;
@@ -51,14 +51,14 @@ class _SwappableRowState extends State<_SwappableRow> {
   static const _a = Text('AAA', key: ValueKey('a'));
   static const _b = Text('BB', key: ValueKey('b'));
 
-  late bool _aFirst = component.aFirst;
+  late bool _aFirst = widget.aFirst;
 
   void swap() {
     setState(() => _aFirst = !_aFirst);
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Row(children: _aFirst ? const [_a, _b] : const [_b, _a]);
   }
 }

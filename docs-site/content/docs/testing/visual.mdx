@@ -4,7 +4,7 @@ description: Debug tests with visual output
 icon: eye
 ---
 
-Visual testing lets you see what your component looks like during tests. This helps debug layout and rendering issues.
+Visual testing lets you see what your widget looks like during tests. This helps debug layout and rendering issues.
 
 ## debugPrintAfterPump
 
@@ -12,8 +12,8 @@ Enable visual output with `debugPrintAfterPump`:
 
 ```dart
 test('visual check', () async {
-  await testNocterm(
-    'see component',
+  await testCinder(
+    'see widget',
     (tester) async {
       await tester.pumpComponent(MyComponent());
 
@@ -30,11 +30,11 @@ When enabled, the terminal state prints after each `pumpComponent()` call.
 
 Use visual testing during development:
 
-### Step 1: Create component with visual test
+### Step 1: Create widget with visual test
 
 ```dart
-test('new component visual', () async {
-  await testNocterm(
+test('new widget visual', () async {
+  await testCinder(
     'see layout',
     (tester) async {
       await tester.pumpComponent(
@@ -67,8 +67,8 @@ Check:
 Once you know what the output looks like, write assertions:
 
 ```dart
-test('component layout', () async {
-  await testNocterm(
+test('widget layout', () async {
+  await testCinder(
     'correct layout',
     (tester) async {
       await tester.pumpComponent(MyComponent());
@@ -87,7 +87,7 @@ test('component layout', () async {
 
 ```dart
 test('develop new feature', () async {
-  await testNocterm(
+  await testCinder(
     'feature visual',
     (tester) async {
       await tester.pumpComponent(NewFeature());
@@ -103,7 +103,7 @@ test('develop new feature', () async {
 
 ```dart
 test('debug failing test', () async {
-  await testNocterm(
+  await testCinder(
     'why is this failing?',
     (tester) async {
       await tester.pumpComponent(BrokenComponent());
@@ -119,7 +119,7 @@ test('debug failing test', () async {
 
 ```dart
 test('complex layout', () async {
-  await testNocterm(
+  await testCinder(
     'verify alignment',
     (tester) async {
       await tester.pumpComponent(
@@ -143,14 +143,14 @@ With `debugPrintAfterPump: true`, you'll see output like:
 ```
 Terminal State (80x24):
 ┌──────────────────────────────────────────────────────────────┐
-│  Hello, Nocterm!                                             │
+│  Hello, Cinder!                                             │
 │                                                              │
 │  Count: 0                                                    │
 │  Press SPACE to increment                                    │
 └──────────────────────────────────────────────────────────────┘
 ```
 
-This shows exactly what your component renders.
+This shows exactly what your widget renders.
 
 ## Testing at different sizes
 
@@ -158,7 +158,7 @@ Test how components look at different terminal sizes:
 
 ```dart
 test('small terminal', () async {
-  await testNocterm(
+  await testCinder(
     'fits in 40x10',
     (tester) async {
       await tester.pumpComponent(ResponsiveComponent());
@@ -169,7 +169,7 @@ test('small terminal', () async {
 });
 
 test('large terminal', () async {
-  await testNocterm(
+  await testCinder(
     'uses space in 120x40',
     (tester) async {
       await tester.pumpComponent(ResponsiveComponent());
@@ -198,10 +198,10 @@ Visual output + assertions = robust tests:
 
 ```dart
 test('complete test', () async {
-  await testNocterm(
+  await testCinder(
     'layout and assertions',
     (tester) async {
-      await tester.pumpComponent(Component());
+      await tester.pumpComponent(Widget());
 
       // Assertions verify behavior
       expect(tester.terminalState, containsText('Expected'));
@@ -222,7 +222,7 @@ test('visual spec', () async {
   //   │ Title   │
   //   │ Content │
   //   └─────────┘
-  await testNocterm(
+  await testCinder(
     'matches spec',
     (tester) async {
       await tester.pumpComponent(Card()),

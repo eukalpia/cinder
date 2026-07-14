@@ -1,10 +1,10 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() {
   runApp(MarkdownDemo());
 }
 
-class MarkdownDemo extends StatefulComponent {
+class MarkdownDemo extends StatefulWidget {
   @override
   State<MarkdownDemo> createState() => _MarkdownDemoState();
 }
@@ -56,7 +56,7 @@ Use backticks for `inline code` snippets within your text.
 
 ## Links
 
-Visit [Nocterm Documentation](https://nocterm.dev) for more information.
+Visit [Cinder Documentation](https://cinder.dev) for more information.
 Links are displayed as: text [url]
 
 ## Images
@@ -89,7 +89,7 @@ Here's a Dart example:
 
 ```dart
 void main() {
-  print('Hello from Nocterm!');
+  print('Hello from Cinder!');
   
   final widget = MarkdownText(
     'Your **markdown** content here',
@@ -151,7 +151,7 @@ echo "Hello, Terminal!"
   ];
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Focusable(
       focused: true,
       onKeyEvent: (event) {

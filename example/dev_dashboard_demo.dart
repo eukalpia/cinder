@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 /// Example dev dashboard - optimized for screenshots.
 /// Shows a rich, visually interesting dashboard layout.
@@ -8,7 +8,7 @@ void main() async {
   await runApp(const DevDashboard());
 }
 
-class DevDashboard extends StatefulComponent {
+class DevDashboard extends StatefulWidget {
   const DevDashboard({super.key});
 
   @override
@@ -102,7 +102,7 @@ class _DevDashboardState extends State<DevDashboard> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Focusable(
       focused: true,
       onKeyEvent: (e) {
@@ -156,7 +156,7 @@ class _DevDashboardState extends State<DevDashboard> {
     );
   }
 
-  Component _buildHeader() {
+  Widget _buildHeader() {
     return Container(
       height: 3,
       decoration: BoxDecoration(
@@ -192,7 +192,7 @@ class _DevDashboardState extends State<DevDashboard> {
     );
   }
 
-  Component _buildMetricsRow() {
+  Widget _buildMetricsRow() {
     return Row(
       children: [
         Expanded(
@@ -226,7 +226,7 @@ class _DevDashboardState extends State<DevDashboard> {
     );
   }
 
-  Component _buildMetricCard(
+  Widget _buildMetricCard(
       String label, String value, String unit, Color color, String trend) {
     return Container(
       padding: EdgeInsets.all(1),
@@ -262,7 +262,7 @@ class _DevDashboardState extends State<DevDashboard> {
     );
   }
 
-  Component _buildRequestsPanel() {
+  Widget _buildRequestsPanel() {
     return Container(
       decoration: BoxDecoration(
         color: Color(0xFF161b22),
@@ -376,7 +376,7 @@ class _DevDashboardState extends State<DevDashboard> {
     );
   }
 
-  Component _buildFlagsPanel() {
+  Widget _buildFlagsPanel() {
     return Container(
       decoration: BoxDecoration(
         color: Color(0xFF161b22),
@@ -445,7 +445,7 @@ class _DevDashboardState extends State<DevDashboard> {
     );
   }
 
-  Component _buildActionsPanel() {
+  Widget _buildActionsPanel() {
     return Container(
       decoration: BoxDecoration(
         color: Color(0xFF161b22),
@@ -520,7 +520,7 @@ class _DevDashboardState extends State<DevDashboard> {
     );
   }
 
-  Component _buildFooter() {
+  Widget _buildFooter() {
     return Container(
       height: 2,
       decoration: BoxDecoration(
@@ -534,7 +534,7 @@ class _DevDashboardState extends State<DevDashboard> {
           Text('[Q] Quit  [R] Restart  [T] Tests  [B] Build',
               style: TextStyle(color: Color(0xFF484f58))),
           Row(children: [
-            Text('nocterm', style: TextStyle(color: Color(0xFF484f58))),
+            Text('cinder', style: TextStyle(color: Color(0xFF484f58))),
             Text(' v0.4.4', style: TextStyle(color: Color(0xFF30363d))),
           ]),
         ],

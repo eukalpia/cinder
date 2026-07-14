@@ -1,10 +1,10 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('TextField Vertical Selection', () {
     test('Shift+Up/Down should extend selection in multiline fields', () async {
-      await testNocterm(
+      await testCinder(
         'vertical selection',
         (tester) async {
           final controller =
@@ -86,7 +86,7 @@ void main() {
     });
 
     test('vertical movement without shift should collapse selection', () async {
-      await testNocterm(
+      await testCinder(
         'collapse selection on vertical movement',
         (tester) async {
           final controller = TextEditingController(

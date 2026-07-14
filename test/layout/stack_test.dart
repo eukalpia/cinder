@@ -1,10 +1,10 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('Stack', () {
     test('Positioned.fill should fill entire Stack', () async {
-      await testNocterm(
+      await testCinder(
         'positioned fill background',
         (tester) async {
           await tester.pumpComponent(
@@ -51,7 +51,7 @@ void main() {
     });
 
     test('Stack sizing with different child configurations', () async {
-      await testNocterm(
+      await testCinder(
         'stack sizing test',
         (tester) async {
           print('\n=== Test 1: Stack with explicit size ===');
@@ -128,7 +128,7 @@ void main() {
     });
 
     test('Positioned.fill constraints', () async {
-      await testNocterm(
+      await testCinder(
         'positioned fill constraints',
         (tester) async {
           print('\n=== Testing Positioned.fill constraints ===');

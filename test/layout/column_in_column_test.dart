@@ -1,10 +1,10 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('Column inside Column - detailed analysis', () {
     test('Simple Column in Column - constraint flow', () async {
-      await testNocterm(
+      await testCinder(
         'column in column constraints',
         (tester) async {
           print('\n=== Column in Column - Constraint Flow ===');
@@ -60,7 +60,7 @@ void main() {
     });
 
     test('Column in Column with IntrinsicHeight wrapper', () async {
-      await testNocterm(
+      await testCinder(
         'column with intrinsic height',
         (tester) async {
           print('\n=== Column in Column with IntrinsicHeight ===');
@@ -121,7 +121,7 @@ void main() {
     });
 
     test('Column in Column with Expanded wrapper', () async {
-      await testNocterm(
+      await testCinder(
         'column with expanded',
         (tester) async {
           print('\n=== Column in Column with Expanded ===');
@@ -188,7 +188,7 @@ void main() {
     });
 
     test('Column in Column with Flexible wrapper', () async {
-      await testNocterm(
+      await testCinder(
         'column with flexible',
         (tester) async {
           print('\n=== Column in Column with Flexible ===');
@@ -247,7 +247,7 @@ void main() {
     });
 
     test('Comparing MainAxisSize.max vs MainAxisSize.min', () async {
-      await testNocterm(
+      await testCinder(
         'mainAxisSize comparison',
         (tester) async {
           print('\n=== MainAxisSize.max vs MainAxisSize.min ===');

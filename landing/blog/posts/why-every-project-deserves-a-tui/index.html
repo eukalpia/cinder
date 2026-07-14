@@ -3,14 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Why Every Project Deserves a TUI - Nocterm Blog</title>
+    <title>Why Every Project Deserves a TUI - Cinder Blog</title>
     <meta name="description" content="Dev tools don&#39;t have to be scattered scripts and forgotten commands. Build a TUI for your team." />
     <meta property="og:title" content="Why Every Project Deserves a TUI" />
     <meta property="og:description" content="Dev tools don&#39;t have to be scattered scripts and forgotten commands. Build a TUI for your team." />
     <meta property="og:type" content="article" />
-    <meta property="og:url" content="https://nocterm.dev/blog/posts/why-every-project-deserves-a-tui/" />
-    <meta property="og:site_name" content="Nocterm" />
-    <meta property="og:image" content="https://nocterm.dev/images/og-default.png" />
+    <meta property="og:url" content="https://cinder.dev/blog/posts/why-every-project-deserves-a-tui/" />
+    <meta property="og:site_name" content="Cinder" />
+    <meta property="og:image" content="https://cinder.dev/images/og-default.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="article:published_time" content="2026-01-27T00:00:00Z" />
@@ -26,10 +26,10 @@
     <meta name="twitter:creator" content="@noraborys" />
     <meta name="twitter:title" content="Why Every Project Deserves a TUI" />
     <meta name="twitter:description" content="Dev tools don&#39;t have to be scattered scripts and forgotten commands. Build a TUI for your team." />
-    <meta name="twitter:image" content="https://nocterm.dev/images/og-default.png" />
+    <meta name="twitter:image" content="https://cinder.dev/images/og-default.png" />
 
     
-    <link rel="canonical" href="https://nocterm.dev/blog/posts/why-every-project-deserves-a-tui/" />
+    <link rel="canonical" href="https://cinder.dev/blog/posts/why-every-project-deserves-a-tui/" />
 
     
     <script type="application/ld+json">
@@ -38,7 +38,7 @@
       "@type": "BlogPosting",
       "headline": "Why Every Project Deserves a TUI",
       "description": "Dev tools don\u0027t have to be scattered scripts and forgotten commands. Build a TUI for your team.",
-      "image": "https:\/\/nocterm.dev\/images\/og-default.png",
+      "image": "https:\/\/cinder.dev\/images\/og-default.png",
       "datePublished": "2026-01-27T00:00:00Z",
       "dateModified": "2026-01-27T00:00:00Z",
       "author": {
@@ -47,15 +47,15 @@
       },
       "publisher": {
         "@type": "Organization",
-        "name": "Nocterm",
+        "name": "Cinder",
         "logo": {
           "@type": "ImageObject",
-          "url": "https:\/\/nocterm.dev\/images\/logo.png"
+          "url": "https:\/\/cinder.dev\/images\/logo.png"
         }
       },
       "mainEntityOfPage": {
         "@type": "WebPage",
-        "@id": "https:\/\/nocterm.dev\/blog\/posts\/why-every-project-deserves-a-tui\/"
+        "@id": "https:\/\/cinder.dev\/blog\/posts\/why-every-project-deserves-a-tui\/"
       }
     }
     </script>
@@ -95,13 +95,13 @@
       <header class="blog-header">
   <a href="/" class="blog-brand">
     <span class="blog-brand-icon">✦</span>
-    <span class="blog-brand-name">Nocterm</span>
+    <span class="blog-brand-name">Cinder</span>
   </a>
   <nav class="blog-nav">
     <a href="/">Home</a>
-    <a href="https://docs.nocterm.dev">Docs</a>
+    <a href="https://github.com/eukalpia/cinder">Docs</a>
     <a href="/blog/" class="active">Blog</a>
-    <a href="https://github.com/Norbert515/nocterm">GitHub</a>
+    <a href="https://github.com/eukalpia/cinder">GitHub</a>
   </nav>
 </header>
 
@@ -170,7 +170,7 @@
 <p>Tools like <code>lazygit</code>, <code>k9s</code>, and <code>btop</code> are popular for exactly this reason. Keyboard-first, fast, and I never have to leave my terminal.</p>
 <h2 id="why-i-like-dart-for-this">Why I like Dart for this</h2>
 <p>For Flutter projects, Dart is a natural choice. I can share models, API clients, whatever. No need to rewrite stuff in another language just for a dev tool.</p>
-<p>I've been building <a href="https://nocterm.dev">Nocterm</a>, a TUI framework that uses Flutter-like APIs. If I know Flutter, I already know how to build with it.</p>
+<p>I've been building <a href="https://cinder.dev">Cinder</a>, a TUI framework that uses Flutter-like APIs. If I know Flutter, I already know how to build with it.</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-dart" data-lang="dart"><span class="line"><span class="cl"><span class="kd">class</span> <span class="nc">MyDashboard</span> <span class="kd">extends</span> <span class="n">StatefulComponent</span> <span class="p">{</span>
 </span></span><span class="line"><span class="cl">  <span class="err">@</span><span class="n">override</span>
 </span></span><span class="line"><span class="cl">  <span class="n">State</span><span class="o">&lt;</span><span class="n">MyDashboard</span><span class="o">&gt;</span> <span class="n">createState</span><span class="p">()</span> <span class="o">=&gt;</span> <span class="n">_MyDashboardState</span><span class="p">();</span>
@@ -261,7 +261,7 @@
 <p>Dev tools should take mental load off, not add to it. A TUI that shows what's available, what's running, what you can do next. That's what makes coming back to a project after two weeks actually pleasant.</p>
 <p>It doesn't need to replace the <code>justfile</code> or <code>Makefile</code>. I think of it as a layer on top. The TUI can call those same commands, but with context and visibility.</p>
 <hr>
-<p>The example dev dashboard from this post is in the <a href="https://github.com/Norbert515/nocterm">Nocterm repo</a> under <code>example/dev_dashboard_demo.dart</code> if you want to poke around.</p>
+<p>The example dev dashboard from this post is in the <a href="https://github.com/eukalpia/cinder">Cinder repo</a> under <code>example/dev_dashboard_demo.dart</code> if you want to poke around.</p>
 
 </article>
 
@@ -274,13 +274,13 @@
       <footer class="blog-footer">
   <div class="brand">
     <span class="brand-icon">✦</span>
-    <span class="brand-name">Nocterm</span>
+    <span class="brand-name">Cinder</span>
     <span class="brand-version">v0.4.3</span>
   </div>
   <nav class="blog-footer-links">
-    <a href="https://docs.nocterm.dev">Docs</a>
-    <a href="https://github.com/Norbert515/nocterm">GitHub</a>
-    <a href="https://pub.dev/packages/nocterm">pub.dev</a>
+    <a href="https://github.com/eukalpia/cinder">Docs</a>
+    <a href="https://github.com/eukalpia/cinder">GitHub</a>
+    <a href="https://pub.dev/packages/cinder">pub.dev</a>
     <a href="/blog/">Blog</a>
   </nav>
 </footer>

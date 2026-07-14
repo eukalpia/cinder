@@ -1,26 +1,26 @@
-import 'package:nocterm/src/utils/terminal_color_support_internal.dart';
+import 'package:cinder/src/utils/terminal_color_support_internal.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('detectTruecolorFromEnv', () {
-    test('NOCTERM_TRUECOLOR overrides to true', () {
+    test('CINDER_TRUECOLOR overrides to true', () {
       expect(
-        detectTruecolorFromEnv({'NOCTERM_TRUECOLOR': '1'}),
+        detectTruecolorFromEnv({'CINDER_TRUECOLOR': '1'}),
         isTrue,
       );
       expect(
-        detectTruecolorFromEnv({'NOCTERM_TRUECOLOR': 'true'}),
+        detectTruecolorFromEnv({'CINDER_TRUECOLOR': 'true'}),
         isTrue,
       );
     });
 
-    test('NOCTERM_TRUECOLOR overrides to false', () {
+    test('CINDER_TRUECOLOR overrides to false', () {
       expect(
-        detectTruecolorFromEnv({'NOCTERM_TRUECOLOR': '0'}),
+        detectTruecolorFromEnv({'CINDER_TRUECOLOR': '0'}),
         isFalse,
       );
       expect(
-        detectTruecolorFromEnv({'NOCTERM_TRUECOLOR': 'off'}),
+        detectTruecolorFromEnv({'CINDER_TRUECOLOR': 'off'}),
         isFalse,
       );
     });

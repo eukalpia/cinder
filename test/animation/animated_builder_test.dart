@@ -1,4 +1,4 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 /// A fake ticker provider for testing animations.
@@ -99,7 +99,7 @@ class TestNotifier extends ChangeNotifier {
 void main() {
   group('AnimatedBuilder', () {
     test('rebuilds when animation changes value', () async {
-      await testNocterm(
+      await testCinder(
         'animated builder rebuild',
         (tester) async {
           final vsync = FakeTickerProvider();
@@ -153,7 +153,7 @@ void main() {
     });
 
     test('passes child through correctly', () async {
-      await testNocterm(
+      await testCinder(
         'animated builder child',
         (tester) async {
           final vsync = FakeTickerProvider();
@@ -190,7 +190,7 @@ void main() {
     });
 
     test('child is not rebuilt on animation change', () async {
-      await testNocterm(
+      await testCinder(
         'animated builder child stable',
         (tester) async {
           final vsync = FakeTickerProvider();
@@ -238,7 +238,7 @@ void main() {
     });
 
     test('works with different animation values', () async {
-      await testNocterm(
+      await testCinder(
         'animated builder different values',
         (tester) async {
           final vsync = FakeTickerProvider();
@@ -300,7 +300,7 @@ void main() {
     });
 
     test('works with driven animations (Tween)', () async {
-      await testNocterm(
+      await testCinder(
         'animated builder with tween',
         (tester) async {
           final vsync = FakeTickerProvider();
@@ -361,7 +361,7 @@ void main() {
     });
 
     test('works with curved animations', () async {
-      await testNocterm(
+      await testCinder(
         'animated builder with curve',
         (tester) async {
           final vsync = FakeTickerProvider();
@@ -398,7 +398,7 @@ void main() {
 
   group('ListenableBuilder', () {
     test('rebuilds when listenable notifies', () async {
-      await testNocterm(
+      await testCinder(
         'listenable builder rebuild',
         (tester) async {
           final notifier = TestNotifier();
@@ -445,7 +445,7 @@ void main() {
     });
 
     test('passes child through correctly', () async {
-      await testNocterm(
+      await testCinder(
         'listenable builder child',
         (tester) async {
           final notifier = TestNotifier();
@@ -478,7 +478,7 @@ void main() {
 
   group('Animation.drive', () {
     test('creates driven animation', () async {
-      await testNocterm(
+      await testCinder(
         'animation drive',
         (tester) async {
           final vsync = FakeTickerProvider();
@@ -506,7 +506,7 @@ void main() {
     });
 
     test('chains multiple drives', () async {
-      await testNocterm(
+      await testCinder(
         'animation chain drives',
         (tester) async {
           final vsync = FakeTickerProvider();
@@ -532,7 +532,7 @@ void main() {
 
   group('Animatable.animate', () {
     test('creates animation from animatable', () async {
-      await testNocterm(
+      await testCinder(
         'animatable animate',
         (tester) async {
           final vsync = FakeTickerProvider();
@@ -560,7 +560,7 @@ void main() {
 
   group('Animation status', () {
     test('status matches controller status', () async {
-      await testNocterm(
+      await testCinder(
         'animation status',
         (tester) async {
           final vsync = FakeTickerProvider();

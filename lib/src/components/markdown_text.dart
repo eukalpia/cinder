@@ -2,8 +2,8 @@ import 'dart:math' as math;
 
 import 'package:characters/characters.dart';
 import 'package:markdown/markdown.dart' as md;
-import 'package:nocterm/nocterm.dart';
-import 'package:nocterm/src/utils/unicode_width.dart';
+import 'package:cinder/cinder.dart';
+import 'package:cinder/src/utils/unicode_width.dart';
 
 /// A widget that displays markdown-formatted text.
 ///
@@ -28,7 +28,7 @@ import 'package:nocterm/src/utils/unicode_width.dart';
 /// - Images are shown as [Image: alt text]
 /// - Tables are rendered with basic ASCII formatting
 /// - No font size changes (headers use bold/colors instead)
-class MarkdownText extends StatefulComponent {
+class MarkdownText extends StatefulWidget {
   /// Creates a markdown text widget.
   ///
   /// The [data] parameter must not be null.
@@ -72,39 +72,39 @@ class _MarkdownTextState extends State<MarkdownText> {
 
   List<InlineSpan> _parseMarkdown({int? maxWidth}) {
     final effectiveStyleSheet =
-        component.styleSheet ?? MarkdownStyleSheet.terminal();
+        widget.styleSheet ?? MarkdownStyleSheet.terminal();
     final document = md.Document(
       extensionSet: md.ExtensionSet.gitHubFlavored,
       encodeHtml: false,
     );
-    final nodes = document.parse(component.data);
+    final nodes = document.parse(widget.data);
 
     final visitor = _MarkdownVisitor(effectiveStyleSheet, maxWidth: maxWidth);
     return visitor.visitNodes(nodes);
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
         final maxWidth =
             constraints.maxWidth.isFinite ? constraints.maxWidth.toInt() : null;
 
-        if (component.data != _lastData ||
-            component.styleSheet != _lastStyleSheet ||
+        if (widget.data != _lastData ||
+            widget.styleSheet != _lastStyleSheet ||
             maxWidth != _lastMaxWidth) {
-          _lastData = component.data;
-          _lastStyleSheet = component.styleSheet;
+          _lastData = widget.data;
+          _lastStyleSheet = widget.styleSheet;
           _lastMaxWidth = maxWidth;
           _spans = _parseMarkdown(maxWidth: maxWidth);
         }
 
         return RichText(
           text: TextSpan(children: _spans),
-          textAlign: component.textAlign,
-          softWrap: component.softWrap,
-          overflow: component.overflow,
-          maxLines: component.maxLines,
+          textAlign: widget.textAlign,
+          softWrap: widget.softWrap,
+          overflow: widget.overflow,
+          maxLines: widget.maxLines,
         );
       },
     );

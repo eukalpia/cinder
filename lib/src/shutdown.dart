@@ -1,6 +1,6 @@
 import 'binding/terminal_binding.dart';
 
-/// Safely shut down the nocterm application with proper terminal cleanup.
+/// Safely shut down the cinder application with proper terminal cleanup.
 ///
 /// This function ensures that all terminal state (cursor visibility, mouse tracking,
 /// alternate screen) is properly restored before the application exits.
@@ -16,7 +16,7 @@ import 'binding/terminal_binding.dart';
 /// ## Usage
 ///
 /// ```dart
-/// import 'package:nocterm/nocterm.dart';
+/// import 'package:cinder/cinder.dart';
 ///
 /// Focusable(
 ///   onKeyEvent: (event) {

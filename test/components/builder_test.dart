@@ -1,10 +1,10 @@
 import 'package:test/test.dart';
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() {
   group('Builder', () {
-    test('builds component from builder callback', () async {
-      await testNocterm(
+    test('builds widget from builder callback', () async {
+      await testCinder(
         'basic builder',
         (tester) async {
           await tester.pumpComponent(
@@ -23,7 +23,7 @@ void main() {
     });
 
     test('provides BuildContext to builder callback', () async {
-      await testNocterm(
+      await testCinder(
         'builder context',
         (tester) async {
           BuildContext? capturedContext;
@@ -48,7 +48,7 @@ void main() {
     });
 
     test('can access inherited widgets through context', () async {
-      await testNocterm(
+      await testCinder(
         'builder inherited access',
         (tester) async {
           await tester.pumpComponent(
@@ -76,7 +76,7 @@ void main() {
     });
 
     test('rebuilds when parent rebuilds', () async {
-      await testNocterm(
+      await testCinder(
         'builder rebuilds',
         (tester) async {
           var buildCount = 0;
@@ -101,7 +101,7 @@ void main() {
     });
 
     test('works nested inside other components', () async {
-      await testNocterm(
+      await testCinder(
         'nested builder',
         (tester) async {
           await tester.pumpComponent(
@@ -127,8 +127,8 @@ void main() {
       );
     });
 
-    test('can return complex component trees', () async {
-      await testNocterm(
+    test('can return complex widget trees', () async {
+      await testCinder(
         'complex builder output',
         (tester) async {
           await tester.pumpComponent(
@@ -155,7 +155,7 @@ void main() {
     });
 
     test('visual development - builder in layout', () async {
-      await testNocterm(
+      await testCinder(
         'visual builder demo',
         (tester) async {
           await tester.pumpComponent(

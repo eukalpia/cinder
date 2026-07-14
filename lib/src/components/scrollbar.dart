@@ -1,14 +1,14 @@
 import 'dart:math' as math;
 
-import 'package:nocterm/nocterm.dart';
-import 'package:nocterm/src/framework/terminal_canvas.dart';
+import 'package:cinder/cinder.dart';
+import 'package:cinder/src/framework/terminal_canvas.dart';
 
 /// A scrollbar that can be optionally shown for scrollable widgets.
 ///
 /// Typically used by wrapping a scrollable widget like [SingleChildScrollView]
 /// or [ListView]. The scrollbar automatically detects whether the scrollable
 /// is reversed from the controller's axis direction.
-class Scrollbar extends StatefulComponent {
+class Scrollbar extends StatefulWidget {
   const Scrollbar({
     super.key,
     required this.child,
@@ -24,7 +24,7 @@ class Scrollbar extends StatefulComponent {
   ///
   /// The scrollbar will be painted on top of this child. The child should be
   /// a scrollable widget.
-  final Component child;
+  final Widget child;
 
   /// The [ScrollController] used to control the scrollable widget.
   ///
@@ -63,31 +63,31 @@ class _ScrollbarState extends State<Scrollbar> {
   @override
   void initState() {
     super.initState();
-    _controller = component.controller;
+    _controller = widget.controller;
   }
 
   @override
-  void didUpdateComponent(Scrollbar oldWidget) {
-    super.didUpdateComponent(oldWidget);
-    if (component.controller != oldWidget.controller) {
-      _controller = component.controller;
+  void didUpdateWidget(Scrollbar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.controller != oldWidget.controller) {
+      _controller = widget.controller;
     }
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return _ScrollbarRenderObjectWidget(
       controller: _controller,
-      thumbVisibility: component.thumbVisibility,
-      thickness: component.thickness,
-      trackColor: component.trackColor,
-      thumbColor: component.thumbColor,
-      child: component.child,
+      thumbVisibility: widget.thumbVisibility,
+      thickness: widget.thickness,
+      trackColor: widget.trackColor,
+      thumbColor: widget.thumbColor,
+      child: widget.child,
     );
   }
 }
 
-class _ScrollbarRenderObjectWidget extends SingleChildRenderObjectComponent {
+class _ScrollbarRenderObjectWidget extends SingleChildRenderObjectWidget {
   const _ScrollbarRenderObjectWidget({
     required this.controller,
     required this.thumbVisibility,

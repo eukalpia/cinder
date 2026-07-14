@@ -82,7 +82,7 @@ expect(tester.terminalState, isNotEmpty);
 Compare against saved snapshot:
 
 ```dart
-expect(tester.terminalState, matchesSnapshot('my-component'));
+expect(tester.terminalState, matchesSnapshot('my-widget'));
 ```
 
 First run creates the snapshot file. Subsequent runs compare against it.
@@ -121,10 +121,10 @@ expect(
 
 ```dart
 test('displays welcome message', () async {
-  await testNocterm('welcome', (tester) async {
+  await testCinder('welcome', (tester) async {
     await tester.pumpComponent(WelcomeScreen());
 
-    expect(tester.terminalState, containsText('Welcome to Nocterm'));
+    expect(tester.terminalState, containsText('Welcome to Cinder'));
     expect(tester.terminalState, hasTextAt(0, 0, 'Welcome'));
   });
 });
@@ -134,7 +134,7 @@ test('displays welcome message', () async {
 
 ```dart
 test('shows error in red', () async {
-  await testNocterm('error style', (tester) async {
+  await testCinder('error style', (tester) async {
     await tester.pumpComponent(ErrorMessage(message: 'Failed'));
 
     expect(
@@ -149,7 +149,7 @@ test('shows error in red', () async {
 
 ```dart
 test('empty list shows placeholder', () async {
-  await testNocterm('empty', (tester) async {
+  await testCinder('empty', (tester) async {
     await tester.pumpComponent(ItemList(items: []));
 
     expect(tester.terminalState, containsText('No items'));
@@ -161,7 +161,7 @@ test('empty list shows placeholder', () async {
 
 ```dart
 test('title in correct position', () async {
-  await testNocterm('layout', (tester) async {
+  await testCinder('layout', (tester) async {
     await tester.pumpComponent(
       Container(
         margin: EdgeInsets.all(2),
@@ -178,11 +178,11 @@ test('title in correct position', () async {
 ### Snapshot testing
 
 ```dart
-test('component matches snapshot', () async {
-  await testNocterm('snapshot', (tester) async {
+test('widget matches snapshot', () async {
+  await testCinder('snapshot', (tester) async {
     await tester.pumpComponent(ComplexComponent());
 
-    expect(tester.terminalState, matchesSnapshot('complex-component'));
+    expect(tester.terminalState, matchesSnapshot('complex-widget'));
   });
 });
 ```

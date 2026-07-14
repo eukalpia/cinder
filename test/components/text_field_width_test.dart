@@ -1,11 +1,11 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('TextField Width Calculations', () {
     test('correctly calculates available width with padding and borders',
         () async {
-      await testNocterm(
+      await testCinder(
         'width with padding and borders',
         (tester) async {
           final controller = TextEditingController(text: '');
@@ -49,7 +49,7 @@ void main() {
     });
 
     test('handles Unicode characters with correct visual width', () async {
-      await testNocterm(
+      await testCinder(
         'unicode width handling',
         (tester) async {
           final controller = TextEditingController(text: '');
@@ -88,7 +88,7 @@ void main() {
     });
 
     test('scrolls correctly with mixed width characters', () async {
-      await testNocterm(
+      await testCinder(
         'mixed width scrolling',
         (tester) async {
           final controller = TextEditingController(text: '');
@@ -127,7 +127,7 @@ void main() {
     });
 
     test('horizontal scrolling maintains cursor visibility', () async {
-      await testNocterm(
+      await testCinder(
         'cursor visibility during scrolling',
         (tester) async {
           final controller = TextEditingController(text: '');

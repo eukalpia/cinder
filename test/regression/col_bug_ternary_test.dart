@@ -1,26 +1,26 @@
 import 'package:test/test.dart';
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
-class FirstWidget extends StatelessComponent {
+class FirstWidget extends StatelessWidget {
   const FirstWidget();
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Text('1');
   }
 }
 
-class SecondWidget extends StatelessComponent {
+class SecondWidget extends StatelessWidget {
   const SecondWidget();
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Text('2');
   }
 }
 
-// Example component for testing
-class ColumnBugDemo extends StatefulComponent {
+// Example widget for testing
+class ColumnBugDemo extends StatefulWidget {
   const ColumnBugDemo();
 
   @override
@@ -41,7 +41,7 @@ class _ColumnBugDemoState extends State<ColumnBugDemo> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     print('Building with first=$first');
     return Column(
       children: [
@@ -54,7 +54,7 @@ class _ColumnBugDemoState extends State<ColumnBugDemo> {
 void main() {
   group('Column Bug Ternary', () {
     test('ternary column replacement', () async {
-      await testNocterm('debug output', (tester) async {
+      await testCinder('debug output', (tester) async {
         await tester.pumpComponent(
           const ColumnBugDemo(),
         );

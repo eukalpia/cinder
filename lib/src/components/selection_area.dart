@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
-import 'package:nocterm/nocterm.dart' hide TextAlign;
+import 'package:cinder/cinder.dart' hide TextAlign;
 
 import '../rendering/mouse_region.dart';
 import '../rendering/mouse_tracker.dart';
@@ -26,7 +26,7 @@ import 'selection_state.dart';
 /// Selection is driven from the top: the [SelectionArea] captures pointer
 /// events, walks its render subtree to discover [Selectable] render objects,
 /// and tells each one which character range to highlight.
-class SelectionArea extends StatefulComponent {
+class SelectionArea extends StatefulWidget {
   const SelectionArea({
     super.key,
     required this.child,
@@ -36,7 +36,7 @@ class SelectionArea extends StatefulComponent {
   });
 
   /// The child widget tree containing [Text] widgets to make selectable.
-  final Component child;
+  final Widget child;
 
   /// The color used to highlight selected text.
   /// If null, defaults to [TuiThemeData.selectionColor].
@@ -103,9 +103,9 @@ class _SelectionAreaState extends State<SelectionArea> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     final theme = TuiTheme.of(context);
-    final effectiveColor = component.selectionColor ?? theme.selectionColor;
+    final effectiveColor = widget.selectionColor ?? theme.selectionColor;
 
     return SelectionScope(
       isActive: _isActive,
@@ -113,19 +113,19 @@ class _SelectionAreaState extends State<SelectionArea> {
       updateRange: _updateRange,
       child: _SelectionAreaWidget(
         selectionColor: effectiveColor,
-        onSelectionChanged: component.onSelectionChanged,
-        onSelectionCompleted: component.onSelectionCompleted,
+        onSelectionChanged: widget.onSelectionChanged,
+        onSelectionCompleted: widget.onSelectionCompleted,
         onDragStarted: _onDragStarted,
         onDragEnded: _onDragEnded,
         onRangeUpdated: _updateRange,
-        child: component.child,
+        child: widget.child,
       ),
     );
   }
 }
 
-/// Internal single-child render object component.
-class _SelectionAreaWidget extends SingleChildRenderObjectComponent {
+/// Internal single-child render object widget.
+class _SelectionAreaWidget extends SingleChildRenderObjectWidget {
   const _SelectionAreaWidget({
     required super.child,
     required this.selectionColor,
@@ -612,7 +612,7 @@ class RenderSelectionArea extends RenderMouseRegion {
 
   void _startExternalDragTracking() {
     if (_externalDragSubscription != null) return;
-    final binding = NoctermBinding.instance;
+    final binding = CinderBinding.instance;
     if (binding is! TerminalBinding) return;
     _externalDragSubscription =
         binding.mouseEvents.listen(_handleExternalMouseEvent);

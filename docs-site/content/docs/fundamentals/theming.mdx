@@ -4,14 +4,14 @@ description: Applying consistent colors and styles across your app
 icon: palette
 ---
 
-Nocterm includes a theming system that makes it easy to apply consistent colors across your app. You can use built-in themes, customize them, or create your own.
+Cinder includes a theming system that makes it easy to apply consistent colors across your app. You can use built-in themes, customize them, or create your own.
 
 ## Quick start
 
 Wrap your app in `TuiTheme` to provide a theme:
 
 ```dart
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() {
   runApp(
@@ -23,14 +23,14 @@ void main() {
 }
 ```
 
-Access theme colors in any component:
+Access theme colors in any widget:
 
 ```dart
-class MyComponent extends StatelessComponent {
+class MyComponent extends StatelessWidget {
   const MyComponent({super.key});
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     final theme = TuiTheme.of(context);
 
     return Container(
@@ -48,12 +48,12 @@ class MyComponent extends StatelessComponent {
 
 ## Auto-detection
 
-`NoctermApp` can automatically detect your terminal's brightness and apply an appropriate theme:
+`CinderApp` can automatically detect your terminal's brightness and apply an appropriate theme:
 
 ```dart
 void main() {
   runApp(
-    NoctermApp(
+    CinderApp(
       // No theme specified - auto-detects terminal brightness
       child: MyApp(),
     ),
@@ -61,7 +61,7 @@ void main() {
 }
 ```
 
-When no `theme` is provided, nocterm will:
+When no `theme` is provided, cinder will:
 1. Query the terminal for its background color (OSC 11)
 2. Check the `COLORFGBG` environment variable
 3. On macOS, check the system Dark Mode setting
@@ -75,7 +75,7 @@ final theme = TuiThemeData.fromTerminal();  // Returns dark or light theme
 
 ## Built-in themes
 
-Nocterm includes six popular themes:
+Cinder includes six popular themes:
 
 | Theme | Description |
 |-------|-------------|
@@ -184,7 +184,7 @@ theme.outlineVariant
 
 Many built-in components automatically use theme colors:
 
-| Component | Theme Colors Used |
+| Widget | Theme Colors Used |
 |-----------|------------------|
 | `DecoratedBox` / `Container` | `outline` for default border color |
 | `Divider` | `outline` for line color |
@@ -195,13 +195,13 @@ Many built-in components automatically use theme colors:
 For custom components, access the theme via `TuiTheme.of(context)`:
 
 ```dart
-class StatusBadge extends StatelessComponent {
+class StatusBadge extends StatelessWidget {
   const StatusBadge({required this.status, super.key});
 
   final String status;
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     final theme = TuiTheme.of(context);
 
     // Choose color based on status
@@ -320,7 +320,7 @@ final customTheme = TuiThemeData.dark.copyWith(
 Change themes at runtime using state management:
 
 ```dart
-class ThemeSwitcher extends StatefulComponent {
+class ThemeSwitcher extends StatefulWidget {
   const ThemeSwitcher({super.key});
 
   @override
@@ -339,7 +339,7 @@ class _ThemeSwitcherState extends State<ThemeSwitcher> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return TuiTheme(
       data: _theme,
       child: Focusable(
@@ -407,14 +407,14 @@ Test your app with different themes to ensure colors work in all contexts:
 
 ```dart
 // In tests, try different themes
-await testNocterm('renders in dark theme', (tester) async {
+await testCinder('renders in dark theme', (tester) async {
   await tester.pumpComponent(
     TuiTheme(data: TuiThemeData.dark, child: MyComponent()),
   );
   // Verify appearance
 });
 
-await testNocterm('renders in light theme', (tester) async {
+await testCinder('renders in light theme', (tester) async {
   await tester.pumpComponent(
     TuiTheme(data: TuiThemeData.light, child: MyComponent()),
   );

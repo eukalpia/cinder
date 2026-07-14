@@ -4,11 +4,11 @@ import 'dart:io';
 
 import 'package:hotreloader/hotreloader.dart';
 
-import '../foundation/nocterm_error.dart';
+import '../foundation/cinder_error.dart';
 import '../framework/framework.dart';
 
 /// Mixin that adds hot reload support to TUI bindings
-mixin HotReloadBinding on NoctermBinding {
+mixin HotReloadBinding on CinderBinding {
   HotReloader? _reloader;
 
   /// Initialize hot reload support
@@ -59,9 +59,9 @@ mixin HotReloadBinding on NoctermBinding {
         onAfterReload: (ctx) {
           switch (ctx.result) {
             case HotReloadResult.Failed:
-              NoctermError.reportError(NoctermErrorDetails(
+              CinderError.reportError(CinderErrorDetails(
                 exception: Exception('Compilation error during hot reload'),
-                library: 'nocterm hot reload',
+                library: 'cinder hot reload',
                 context: 'during hot reload compilation',
               ));
             case HotReloadResult.Succeeded:
@@ -89,10 +89,10 @@ mixin HotReloadBinding on NoctermBinding {
         await performReassemble();
         print('[HotReload] Application reassembled successfully');
       } catch (e, stack) {
-        NoctermError.reportError(NoctermErrorDetails(
+        CinderError.reportError(CinderErrorDetails(
           exception: e,
           stack: stack,
-          library: 'nocterm hot reload',
+          library: 'cinder hot reload',
           context: 'during reassemble',
         ));
       }

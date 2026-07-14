@@ -1,11 +1,11 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('TextField Mouse Interaction', () {
     group('click to position cursor', () {
       test('click positions cursor at correct character', () async {
-        await testNocterm(
+        await testCinder(
           'click positions cursor',
           (tester) async {
             final controller = TextEditingController(text: 'Hello World');
@@ -45,7 +45,7 @@ void main() {
       });
 
       test('click at end of text positions cursor at text length', () async {
-        await testNocterm(
+        await testCinder(
           'click at end',
           (tester) async {
             final controller = TextEditingController(text: 'Hello');
@@ -77,7 +77,7 @@ void main() {
 
     group('click on empty field', () {
       test('click on empty field keeps cursor at 0', () async {
-        await testNocterm(
+        await testCinder(
           'click on empty field',
           (tester) async {
             final controller = TextEditingController(text: '');
@@ -109,7 +109,7 @@ void main() {
 
     group('drag to select', () {
       test('drag selects text range', () async {
-        await testNocterm(
+        await testCinder(
           'drag selects text',
           (tester) async {
             final controller = TextEditingController(text: 'Hello World');
@@ -148,7 +148,7 @@ void main() {
       });
 
       test('backward drag selects text in reverse', () async {
-        await testNocterm(
+        await testCinder(
           'backward drag',
           (tester) async {
             final controller = TextEditingController(text: 'Hello World');
@@ -189,7 +189,7 @@ void main() {
 
     group('double-click to select word', () {
       test('double-click selects word', () async {
-        await testNocterm(
+        await testCinder(
           'double-click selects word',
           (tester) async {
             final controller = TextEditingController(text: 'Hello World');
@@ -225,7 +225,7 @@ void main() {
       });
 
       test('double-click selects second word', () async {
-        await testNocterm(
+        await testCinder(
           'double-click second word',
           (tester) async {
             final controller = TextEditingController(text: 'Hello World');
@@ -263,7 +263,7 @@ void main() {
 
     group('click triggers focus', () {
       test('click on unfocused field triggers onFocusChange', () async {
-        await testNocterm(
+        await testCinder(
           'click triggers focus',
           (tester) async {
             final controller = TextEditingController(text: 'Hello');
@@ -299,7 +299,7 @@ void main() {
 
     group('multi-line click positioning', () {
       test('click on different lines positions cursor correctly', () async {
-        await testNocterm(
+        await testCinder(
           'multiline click',
           (tester) async {
             final controller =
@@ -346,7 +346,7 @@ void main() {
       });
 
       test('click at specific position within a line', () async {
-        await testNocterm(
+        await testCinder(
           'multiline click position within line',
           (tester) async {
             final controller = TextEditingController(text: 'AAA\nBBBBB\nCC');
@@ -379,7 +379,7 @@ void main() {
 
     group('click after keyboard selection clears selection', () {
       test('click collapses keyboard selection', () async {
-        await testNocterm(
+        await testCinder(
           'click clears selection',
           (tester) async {
             final controller = TextEditingController(text: 'Hello World');
@@ -421,7 +421,7 @@ void main() {
       });
 
       test('click collapses shift-arrow selection', () async {
-        await testNocterm(
+        await testCinder(
           'click clears shift-arrow selection',
           (tester) async {
             final controller = TextEditingController(text: 'Hello World');
@@ -469,7 +469,7 @@ void main() {
 
     group('drag across lines in multi-line field', () {
       test('drag select across multiple lines', () async {
-        await testNocterm(
+        await testCinder(
           'multi-line drag select',
           (tester) async {
             final controller =
@@ -514,7 +514,7 @@ void main() {
 
     group('edge cases', () {
       test('mouse up clears drag anchor', () async {
-        await testNocterm(
+        await testCinder(
           'mouse up clears drag',
           (tester) async {
             final controller = TextEditingController(text: 'Hello World Test');
@@ -560,7 +560,7 @@ void main() {
       });
 
       test('wheel events are ignored during mouse interaction', () async {
-        await testNocterm(
+        await testCinder(
           'wheel events ignored',
           (tester) async {
             final controller = TextEditingController(text: 'Hello World');
@@ -600,7 +600,7 @@ void main() {
 
     group('with decoration', () {
       test('click accounts for border and padding', () async {
-        await testNocterm(
+        await testCinder(
           'click with decoration',
           (tester) async {
             final controller = TextEditingController(text: 'Hello');

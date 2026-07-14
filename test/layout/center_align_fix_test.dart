@@ -1,10 +1,10 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('Center and Align sizing behavior', () {
     test('Center in Column should not cause overflow', () async {
-      await testNocterm(
+      await testCinder(
         'center in column no overflow',
         (tester) async {
           await tester.pumpComponent(
@@ -24,7 +24,7 @@ void main() {
     });
 
     test('Align with factors behaves correctly', () async {
-      await testNocterm(
+      await testCinder(
         'align with width and height factors',
         (tester) async {
           await tester.pumpComponent(
@@ -60,7 +60,7 @@ void main() {
     });
 
     test('Multiple Centers in Column layout correctly', () async {
-      await testNocterm(
+      await testCinder(
         'multiple centers',
         (tester) async {
           await tester.pumpComponent(

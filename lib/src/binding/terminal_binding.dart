@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:nocterm/nocterm.dart';
-import 'package:nocterm/src/framework/terminal_canvas.dart';
-import 'package:nocterm/src/navigation/render_theater.dart';
-import 'package:nocterm/src/rendering/scrollable_render_object.dart';
-import 'package:nocterm/src/image/image_cleanup.dart';
+import 'package:cinder/cinder.dart';
+import 'package:cinder/src/framework/terminal_canvas.dart';
+import 'package:cinder/src/navigation/render_theater.dart';
+import 'package:cinder/src/rendering/scrollable_render_object.dart';
+import 'package:cinder/src/image/image_cleanup.dart';
 
 import '../backend/terminal.dart' as term;
 import '../buffer.dart' as buf;
@@ -16,7 +16,7 @@ import '../rendering/mouse_tracker.dart';
 import 'hot_reload_mixin.dart';
 
 /// Terminal UI binding that handles terminal input/output and event loop
-class TerminalBinding extends NoctermBinding
+class TerminalBinding extends CinderBinding
     with SchedulerBinding, HotReloadBinding {
   TerminalBinding(this.terminal) {
     _instance = this;
@@ -103,7 +103,7 @@ class TerminalBinding extends NoctermBinding
   Timer? _perfLogTimer;
 
   /// Start logging performance stats every [interval] seconds.
-  /// Stats are printed to the nocterm log (view with `nocterm logs`).
+  /// Stats are printed to the cinder log (view with `cinder logs`).
   void startPerformanceLogging(
       {Duration interval = const Duration(seconds: 5)}) {
     _perfLogTimer?.cancel();
@@ -114,7 +114,7 @@ class TerminalBinding extends NoctermBinding
           'builds=${stats['builds']!.toStringAsFixed(1)}/s, '
           'layouts=${stats['layouts']!.toStringAsFixed(1)}/s, '
           'paints=${stats['paints']!.toStringAsFixed(1)}/s';
-      // Use print which goes to nocterm logs
+      // Use print which goes to cinder logs
       print(msg);
     });
   }
@@ -257,7 +257,7 @@ class TerminalBinding extends NoctermBinding
             continue; // Event was handled by debug system
           }
 
-          // Route the event through the component tree
+          // Route the event through the widget tree
           _routeKeyboardEvent(keyEvent);
 
           // Note: Ctrl+C (SIGINT) is routed through the event system first,
@@ -268,7 +268,7 @@ class TerminalBinding extends NoctermBinding
           // Add to mouse event stream
           _mouseEventController.add(mouseEvent);
 
-          // Route the mouse event through the component tree
+          // Route the mouse event through the widget tree
           _routeMouseEvent(mouseEvent);
         } else if (event is PasteInputEvent) {
           // Handle bracketed paste (or batched characters): copy to clipboard then send Ctrl+V
@@ -503,10 +503,10 @@ class TerminalBinding extends NoctermBinding
         // Add to keyboard event stream for monitoring
         _keyboardEventController.add(ctrlCEvent);
 
-        // Route through component tree - components can intercept by returning true
+        // Route through widget tree - components can intercept by returning true
         final handled = _routeKeyboardEvent(ctrlCEvent);
 
-        // If no component handled it, perform default shutdown
+        // If no widget handled it, perform default shutdown
         if (!handled) {
           _performImmediateShutdown();
           terminal.backend.requestExit(0);
@@ -602,8 +602,8 @@ class TerminalBinding extends NoctermBinding
     return false;
   }
 
-  /// Route a keyboard event through the component tree
-  /// Returns true if the event was handled by a component
+  /// Route a keyboard event through the widget tree
+  /// Returns true if the event was handled by a widget
   bool _routeKeyboardEvent(KeyboardEvent event) {
     if (rootElement == null) return false;
 
@@ -612,7 +612,7 @@ class TerminalBinding extends NoctermBinding
     return _dispatchKeyToElement(rootElement!, event);
   }
 
-  /// Route a mouse event through the component tree
+  /// Route a mouse event through the widget tree
   void _routeMouseEvent(MouseEvent event) {
     if (rootElement == null) {
       return;
@@ -1110,7 +1110,7 @@ class TerminalBinding extends NoctermBinding
   bool _enableDetailedProfiling = false;
 
   /// Enable detailed profiling that measures time spent in each render phase.
-  /// Results are printed every 5 seconds to nocterm logs.
+  /// Results are printed every 5 seconds to cinder logs.
   void startDetailedProfiling() {
     _enableDetailedProfiling = true;
     _profileFrames = 0;
@@ -1195,7 +1195,7 @@ class TerminalBinding extends NoctermBinding
 
   /// Find the focused [RenderTextField] by walking the element tree.
   ///
-  /// Looks for a [FocusableElement] whose [Focusable] component has
+  /// Looks for a [FocusableElement] whose [Focusable] widget has
   /// `focused == true` and which contains a [RenderTextField] in its
   /// subtree. Returns `null` if no focused text field is found.
   RenderTextField? _findFocusedRenderTextField() {
@@ -1206,7 +1206,7 @@ class TerminalBinding extends NoctermBinding
     FocusableElement? focusedElement;
     void findFocused(Element element) {
       if (focusedElement != null) return;
-      if (element is FocusableElement && element.component.focused) {
+      if (element is FocusableElement && element.widget.focused) {
         focusedElement = element;
         return;
       }
@@ -1440,7 +1440,7 @@ class TerminalBinding extends NoctermBinding
 
   /// Request application shutdown with proper cleanup
   ///
-  /// This is the recommended way to exit a nocterm application.
+  /// This is the recommended way to exit a cinder application.
   /// It ensures all terminal cleanup (including mouse tracking disable)
   /// happens before the process exits.
   ///

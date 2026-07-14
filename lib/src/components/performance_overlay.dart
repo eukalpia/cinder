@@ -1,6 +1,6 @@
 import 'dart:collection';
 
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 /// A visual overlay that displays real-time performance metrics.
 ///
@@ -8,7 +8,7 @@ import 'package:nocterm/nocterm.dart';
 ///
 /// Example:
 /// ```dart
-/// NoctermApp(
+/// CinderApp(
 ///   child: Stack(
 ///     children: [
 ///       MyApp(),
@@ -17,7 +17,7 @@ import 'package:nocterm/nocterm.dart';
 ///   ),
 /// )
 /// ```
-class PerformanceOverlay extends StatefulComponent {
+class PerformanceOverlay extends StatefulWidget {
   const PerformanceOverlay({
     super.key,
     this.maxSamples = 60,
@@ -69,7 +69,7 @@ class _PerformanceOverlayState extends State<PerformanceOverlay> {
       if (timing.isSlowFrame) {
         _slowFrameCount++;
       }
-      while (_recentFrames.length > component.maxSamples) {
+      while (_recentFrames.length > widget.maxSamples) {
         _recentFrames.removeFirst();
       }
     });
@@ -90,7 +90,7 @@ class _PerformanceOverlayState extends State<PerformanceOverlay> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     if (_lastFrame == null) {
       return const SizedBox();
     }
@@ -102,20 +102,20 @@ class _PerformanceOverlayState extends State<PerformanceOverlay> {
     final totalHeight = lines.length + 2;
 
     return Positioned(
-      top: component.position == OverlayPosition.topLeft ||
-              component.position == OverlayPosition.topRight
+      top: widget.position == OverlayPosition.topLeft ||
+              widget.position == OverlayPosition.topRight
           ? 0.0
           : null,
-      bottom: component.position == OverlayPosition.bottomLeft ||
-              component.position == OverlayPosition.bottomRight
+      bottom: widget.position == OverlayPosition.bottomLeft ||
+              widget.position == OverlayPosition.bottomRight
           ? 0.0
           : null,
-      left: component.position == OverlayPosition.topLeft ||
-              component.position == OverlayPosition.bottomLeft
+      left: widget.position == OverlayPosition.topLeft ||
+              widget.position == OverlayPosition.bottomLeft
           ? 0.0
           : null,
-      right: component.position == OverlayPosition.topRight ||
-              component.position == OverlayPosition.bottomRight
+      right: widget.position == OverlayPosition.topRight ||
+              widget.position == OverlayPosition.bottomRight
           ? 0.0
           : null,
       child: Container(

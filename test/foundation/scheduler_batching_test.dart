@@ -1,4 +1,4 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -7,7 +7,7 @@ void main() {
       int buildCount = 0;
       late TestBatchingComponentState state;
 
-      await testNocterm(
+      await testCinder(
         'batching test',
         (tester) async {
           await tester.pumpComponent(
@@ -42,7 +42,7 @@ void main() {
       int renderCount = 0;
       late TestEventComponentState state;
 
-      await testNocterm(
+      await testCinder(
         'rapid events test',
         (tester) async {
           await tester.pumpComponent(
@@ -79,7 +79,7 @@ void main() {
     test('post-frame callbacks execute after frame', () async {
       final executionOrder = <String>[];
 
-      await testNocterm(
+      await testCinder(
         'post-frame callback test',
         (tester) async {
           await tester.pumpComponent(
@@ -98,7 +98,7 @@ void main() {
     test('frame phases execute in correct order', () async {
       final phases = <SchedulerPhase>[];
 
-      await testNocterm(
+      await testCinder(
         'frame phase test',
         (tester) async {
           // Register callbacks in different phases
@@ -130,8 +130,8 @@ void main() {
   });
 }
 
-// Test component that counts builds
-class TestBatchingComponent extends StatefulComponent {
+// Test widget that counts builds
+class TestBatchingComponent extends StatefulWidget {
   const TestBatchingComponent({
     super.key,
     required this.onBuild,
@@ -149,7 +149,7 @@ class TestBatchingComponentState extends State<TestBatchingComponent> {
   @override
   void initState() {
     super.initState();
-    component.onStateCreated(this);
+    widget.onStateCreated(this);
   }
 
   void triggerSetState() {
@@ -157,14 +157,14 @@ class TestBatchingComponentState extends State<TestBatchingComponent> {
   }
 
   @override
-  Component build(BuildContext context) {
-    component.onBuild();
+  Widget build(BuildContext context) {
+    widget.onBuild();
     return const Text('Test');
   }
 }
 
-// Test component for rapid events
-class TestEventComponent extends StatefulComponent {
+// Test widget for rapid events
+class TestEventComponent extends StatefulWidget {
   const TestEventComponent({
     super.key,
     required this.onRender,
@@ -185,7 +185,7 @@ class TestEventComponentState extends State<TestEventComponent> {
   @override
   void initState() {
     super.initState();
-    component.onStateCreated(this);
+    widget.onStateCreated(this);
   }
 
   void handleEvent(int value) {
@@ -195,14 +195,14 @@ class TestEventComponentState extends State<TestEventComponent> {
   }
 
   @override
-  Component build(BuildContext context) {
-    component.onRender();
+  Widget build(BuildContext context) {
+    widget.onRender();
     return Text('Value: $_value');
   }
 }
 
-// Test component for post-frame callbacks
-class TestCallbackComponent extends StatefulComponent {
+// Test widget for post-frame callbacks
+class TestCallbackComponent extends StatefulWidget {
   const TestCallbackComponent({
     super.key,
     required this.onBuild,
@@ -221,13 +221,13 @@ class TestCallbackComponentState extends State<TestCallbackComponent> {
   void initState() {
     super.initState();
     SchedulerBinding.instance.addPostFrameCallback((_) {
-      component.onPostFrame();
+      widget.onPostFrame();
     });
   }
 
   @override
-  Component build(BuildContext context) {
-    component.onBuild();
+  Widget build(BuildContext context) {
+    widget.onBuild();
     return const Text('Test');
   }
 }

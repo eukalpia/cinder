@@ -1,11 +1,11 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 /// A helper widget for testing that provides setState functionality
-class StatefulBuilder extends StatefulComponent {
+class StatefulBuilder extends StatefulWidget {
   const StatefulBuilder({super.key, required this.builder});
 
-  final Component Function(BuildContext, StateSetter) builder;
+  final Widget Function(BuildContext, StateSetter) builder;
 
   @override
   State<StatefulBuilder> createState() => _StatefulBuilderState();
@@ -13,20 +13,20 @@ class StatefulBuilder extends StatefulComponent {
 
 class _StatefulBuilderState extends State<StatefulBuilder> {
   @override
-  Component build(BuildContext context) {
-    return component.builder(context, setState);
+  Widget build(BuildContext context) {
+    return widget.builder(context, setState);
   }
 }
 
-/// Simple test component that displays two pieces of text
-class TwoTexts extends StatelessComponent {
+/// Simple test widget that displays two pieces of text
+class TwoTexts extends StatelessWidget {
   const TwoTexts({required this.text1, required this.text2});
 
   final String text1;
   final String text2;
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Column(
       children: [
         Text(text1),
@@ -40,7 +40,7 @@ void main() {
   group('Theme showcase content update', () {
     test('Text widget updates when string changes via StatefulBuilder',
         () async {
-      await testNocterm(
+      await testCinder(
         'text updates on setState',
         (tester) async {
           String textValue = 'Initial Text';
@@ -74,7 +74,7 @@ void main() {
     });
 
     test('theme name updates when index changes', () async {
-      await testNocterm(
+      await testCinder(
         'theme name updates',
         (tester) async {
           const themes = ['Dark (Default)', 'Light', 'Nord'];
@@ -128,8 +128,8 @@ void main() {
       );
     });
 
-    test('TwoTexts component updates when props change', () async {
-      await testNocterm(
+    test('TwoTexts widget updates when props change', () async {
+      await testCinder(
         'TwoTexts updates',
         (tester) async {
           String t1 = 'First';
@@ -166,7 +166,7 @@ void main() {
     });
 
     test('Column with direct Text children updates', () async {
-      await testNocterm(
+      await testCinder(
         'Column direct Text updates',
         (tester) async {
           String textValue = 'Initial';
@@ -180,7 +180,7 @@ void main() {
                     textValue = 'Changed';
                   });
                 };
-                // Direct Column with Text - no intermediate StatelessComponent
+                // Direct Column with Text - no intermediate StatelessWidget
                 return Column(
                   children: [
                     Text(textValue),
@@ -204,7 +204,7 @@ void main() {
     });
 
     test('TuiTheme wrapper prevents Column text updates', () async {
-      await testNocterm(
+      await testCinder(
         'TuiTheme blocks updates',
         (tester) async {
           String textValue = 'Before';

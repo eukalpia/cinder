@@ -3,7 +3,7 @@
 // value-equal BoxConstraints on a clean render object must not re-run
 // performLayout.
 
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 void main() {

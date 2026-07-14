@@ -1,10 +1,10 @@
 import 'package:meta/meta.dart';
-import 'package:nocterm/src/animation/animation.dart';
-import 'package:nocterm/src/animation/curves.dart';
-import 'package:nocterm/src/style.dart';
+import 'package:cinder/src/animation/animation.dart';
+import 'package:cinder/src/animation/curves.dart';
+import 'package:cinder/src/style.dart';
 
 // Note: Animatable is defined in animation.dart and re-exported here for convenience.
-export 'package:nocterm/src/animation/animation.dart' show Animatable;
+export 'package:cinder/src/animation/animation.dart' show Animatable;
 
 /// A linear interpolation between two values.
 ///

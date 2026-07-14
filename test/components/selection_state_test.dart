@@ -1,4 +1,4 @@
-import 'package:nocterm/src/components/selection_state.dart';
+import 'package:cinder/src/components/selection_state.dart';
 import 'package:test/test.dart';
 
 void main() {

@@ -1,10 +1,10 @@
-import 'package:nocterm/nocterm.dart' hide isNotEmpty;
+import 'package:cinder/cinder.dart' hide isNotEmpty;
 import 'package:test/test.dart';
 
 void main() {
   group('ConstrainedBox', () {
     test('applies minimum constraints', () async {
-      await testNocterm(
+      await testCinder(
         'minimum constraints',
         (tester) async {
           await tester.pumpComponent(
@@ -32,7 +32,7 @@ void main() {
     });
 
     test('applies maximum constraints', () async {
-      await testNocterm(
+      await testCinder(
         'maximum constraints',
         (tester) async {
           await tester.pumpComponent(
@@ -58,7 +58,7 @@ void main() {
     });
 
     test('combines with parent constraints using enforce()', () async {
-      await testNocterm(
+      await testCinder(
         'enforce combines constraints',
         (tester) async {
           await tester.pumpComponent(
@@ -89,7 +89,7 @@ void main() {
     });
 
     test('handles null child', () async {
-      await testNocterm(
+      await testCinder(
         'null child',
         (tester) async {
           await tester.pumpComponent(
@@ -121,7 +121,7 @@ void main() {
     });
 
     test('visual test - see constrained boxes in action', () async {
-      await testNocterm(
+      await testCinder(
         'visual constrained box',
         (tester) async {
           await tester.pumpComponent(

@@ -1,11 +1,11 @@
 import 'package:test/test.dart';
-import 'package:nocterm/nocterm.dart' hide TextAlign;
-import 'package:nocterm/src/components/basic.dart' show TextAlign;
+import 'package:cinder/cinder.dart' hide TextAlign;
+import 'package:cinder/src/components/basic.dart' show TextAlign;
 
 void main() {
   group('Text Alignment Debug', () {
     test('debug constraints passing', () async {
-      await testNocterm(
+      await testCinder(
         'constraints debug',
         (tester) async {
           // Simple case - Text directly in a Container

@@ -1,4 +1,4 @@
-import 'package:nocterm/src/image/kitty_encoder.dart';
+import 'package:cinder/src/image/kitty_encoder.dart';
 
 /// Available image display protocols.
 enum ImageProtocol {
@@ -61,7 +61,7 @@ class ImageCleanupManager {
   /// Register an image for cleanup tracking.
   ///
   /// Returns an [ImageRegistration] that should be disposed when the
-  /// image component is unmounted.
+  /// image widget is unmounted.
   ImageRegistration registerImage({
     required int x,
     required int y,

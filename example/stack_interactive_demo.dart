@@ -1,10 +1,10 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() {
   runApp(const StackInteractiveDemo());
 }
 
-class StackInteractiveDemo extends StatefulComponent {
+class StackInteractiveDemo extends StatefulWidget {
   const StackInteractiveDemo({super.key});
 
   @override
@@ -18,7 +18,7 @@ class _StackInteractiveDemoState extends State<StackInteractiveDemo> {
   final List<String> items = ['Apple', 'Banana', 'Cherry', 'Date'];
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Focusable(
       focused: true,
       onKeyEvent: (event) {

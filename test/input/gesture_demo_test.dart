@@ -1,4 +1,4 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 import '../../example/gesture_demo.dart';
@@ -9,7 +9,7 @@ void main() {
           'Known issue: GestureDemo uses nested constraints that need refactoring',
       () {
     test('visual development - initial render', () async {
-      await testNocterm(
+      await testCinder(
         'gesture demo renders correctly',
         (tester) async {
           await tester.pumpComponent(const GestureDemoApp());
@@ -20,7 +20,7 @@ void main() {
     });
 
     test('renders all zones and labels', () async {
-      await testNocterm(
+      await testCinder(
         'all zones visible',
         (tester) async {
           await tester.pumpComponent(const GestureDemoApp());
@@ -38,7 +38,7 @@ void main() {
     });
 
     test('tap zone interaction', () async {
-      await testNocterm(
+      await testCinder(
         'tap updates state',
         (tester) async {
           bool tapped = false;
@@ -57,7 +57,7 @@ void main() {
     });
 
     test('double-tap detection', () async {
-      await testNocterm(
+      await testCinder(
         'double tap increments counter',
         (tester) async {
           int doubleTapCount = 0;
@@ -80,7 +80,7 @@ void main() {
     });
 
     test('long press detection', () async {
-      await testNocterm(
+      await testCinder(
         'long press triggers callback',
         (tester) async {
           bool longPressStarted = false;
@@ -106,7 +106,7 @@ void main() {
     });
 
     test('hover region detection', () async {
-      await testNocterm(
+      await testCinder(
         'hover changes state',
         (tester) async {
           bool isHovering = false;
@@ -128,7 +128,7 @@ void main() {
     });
 
     test('combined zone - tap and hover', () async {
-      await testNocterm(
+      await testCinder(
         'combined zone handles multiple gestures',
         (tester) async {
           bool isHovering = false;
@@ -153,7 +153,7 @@ void main() {
     });
 
     test('visual test - demo app renders', () async {
-      await testNocterm(
+      await testCinder(
         'gesture demo at default size',
         (tester) async {
           await tester.pumpComponent(const GestureDemoApp());
@@ -167,7 +167,7 @@ void main() {
     });
 
     test('position tracking in callbacks', () async {
-      await testNocterm(
+      await testCinder(
         'tap provides position details',
         (tester) async {
           Offset? tapPosition;
@@ -193,7 +193,7 @@ void main() {
 }
 
 // Helper test components
-class _TestTapComponent extends StatefulComponent {
+class _TestTapComponent extends StatefulWidget {
   const _TestTapComponent({required this.onTapCallback});
 
   final VoidCallback onTapCallback;
@@ -206,13 +206,13 @@ class _TestTapComponentState extends State<_TestTapComponent> {
   int tapCount = 0;
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Container(
       width: 100,
       height: 50,
       child: GestureDetector(
         onTap: () {
-          component.onTapCallback();
+          widget.onTapCallback();
           setState(() {
             tapCount++;
           });
@@ -230,7 +230,7 @@ class _TestTapComponentState extends State<_TestTapComponent> {
   }
 }
 
-class _TestDoubleTapComponent extends StatefulComponent {
+class _TestDoubleTapComponent extends StatefulWidget {
   const _TestDoubleTapComponent({required this.onDoubleTapCallback});
 
   final VoidCallback onDoubleTapCallback;
@@ -244,13 +244,13 @@ class _TestDoubleTapComponentState extends State<_TestDoubleTapComponent> {
   int doubleTapCount = 0;
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Container(
       width: 100,
       height: 50,
       child: GestureDetector(
         onDoubleTap: () {
-          component.onDoubleTapCallback();
+          widget.onDoubleTapCallback();
           setState(() {
             doubleTapCount++;
           });
@@ -268,7 +268,7 @@ class _TestDoubleTapComponentState extends State<_TestDoubleTapComponent> {
   }
 }
 
-class _TestLongPressComponent extends StatelessComponent {
+class _TestLongPressComponent extends StatelessWidget {
   const _TestLongPressComponent({
     required this.onLongPressStartCallback,
     required this.onLongPressCallback,
@@ -278,7 +278,7 @@ class _TestLongPressComponent extends StatelessComponent {
   final VoidCallback onLongPressCallback;
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Container(
       width: 100,
       height: 50,
@@ -296,7 +296,7 @@ class _TestLongPressComponent extends StatelessComponent {
   }
 }
 
-class _TestHoverComponent extends StatelessComponent {
+class _TestHoverComponent extends StatelessWidget {
   const _TestHoverComponent({
     required this.onEnterCallback,
     required this.onExitCallback,
@@ -306,7 +306,7 @@ class _TestHoverComponent extends StatelessComponent {
   final VoidCallback onExitCallback;
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Container(
       width: 100,
       height: 50,
@@ -324,7 +324,7 @@ class _TestHoverComponent extends StatelessComponent {
   }
 }
 
-class _TestCombinedComponent extends StatelessComponent {
+class _TestCombinedComponent extends StatelessWidget {
   const _TestCombinedComponent({
     required this.onEnterCallback,
     required this.onTapCallback,
@@ -334,7 +334,7 @@ class _TestCombinedComponent extends StatelessComponent {
   final VoidCallback onTapCallback;
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Container(
       width: 100,
       height: 50,
@@ -354,13 +354,13 @@ class _TestCombinedComponent extends StatelessComponent {
   }
 }
 
-class _TestPositionComponent extends StatelessComponent {
+class _TestPositionComponent extends StatelessWidget {
   const _TestPositionComponent({required this.onTapDownCallback});
 
   final Function(TapDownDetails) onTapDownCallback;
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Container(
       width: 100,
       height: 50,

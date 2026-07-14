@@ -3,7 +3,7 @@
 
 import 'dart:async';
 
-import 'package:nocterm/src/size.dart';
+import 'package:cinder/src/size.dart';
 
 import 'terminal_backend.dart';
 

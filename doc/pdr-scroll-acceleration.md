@@ -1,12 +1,12 @@
-# PDR: Scroll Acceleration for nocterm
+# PDR: Scroll Acceleration for cinder
 
 ## Overview
 
-Add macOS-style scroll acceleration to nocterm's scrollable components (ListView, SingleChildScrollView). When enabled, scroll speed increases with rapid scrolling gestures and stays precise for slower movements.
+Add macOS-style scroll acceleration to cinder's scrollable components (ListView, SingleChildScrollView). When enabled, scroll speed increases with rapid scrolling gestures and stays precise for slower movements.
 
 ## Motivation
 
-Modern terminal UIs like OpenCode/Crush provide smooth, natural scrolling that mimics native OS behavior. Currently, nocterm scrolls by a fixed 3 lines per wheel event (`list_view.dart:463`), which feels mechanical and doesn't adapt to user intent.
+Modern terminal UIs like OpenCode/Crush provide smooth, natural scrolling that mimics native OS behavior. Currently, cinder scrolls by a fixed 3 lines per wheel event (`list_view.dart:463`), which feels mechanical and doesn't adapt to user intent.
 
 ## Current Implementation
 
@@ -120,7 +120,7 @@ class ScrollConfiguration {
 
 ### 4. Alternative: Smooth Animation Approach
 
-For even smoother scrolling, consider using nocterm's animation system:
+For even smoother scrolling, consider using cinder's animation system:
 
 ```dart
 class AnimatedScrollController extends ScrollController {
@@ -175,7 +175,7 @@ The acceleration algorithm uses a simple velocity model:
 3. **`lib/src/components/single_child_scroll_view.dart`**
    - Same updates as ListView
 
-4. **`lib/nocterm.dart`**
+4. **`lib/cinder.dart`**
    - Export new `AcceleratedScrollController`
 
 5. **New file: `lib/src/components/scroll_configuration.dart`**
@@ -201,7 +201,7 @@ The acceleration algorithm uses a simple velocity model:
 
 1. Should acceleration be enabled by default?
 2. Should we support pixel-level scrolling for terminals that support it (Kitty, Ghostty)?
-3. Should there be per-component acceleration settings?
+3. Should there be per-widget acceleration settings?
 
 ## References
 

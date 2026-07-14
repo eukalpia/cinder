@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 /// Interactive TUI demo for displaying images with different protocols.
 ///
@@ -35,7 +35,7 @@ void main(List<String> args) async {
   await runApp(ImageDemo(imagePath: imagePath));
 }
 
-class ImageDemo extends StatefulComponent {
+class ImageDemo extends StatefulWidget {
   final String imagePath;
 
   const ImageDemo({super.key, required this.imagePath});
@@ -81,7 +81,7 @@ class _ImageDemoState extends State<ImageDemo> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     final protocol = _protocols[_selectedIndex];
 
     return Focusable(
@@ -138,7 +138,7 @@ class _ImageDemoState extends State<ImageDemo> {
                   ),
                   const Spacer(),
                   Text(
-                    component.imagePath,
+                    widget.imagePath,
                     style: const TextStyle(color: Colors.grey),
                   ),
                 ],
@@ -186,7 +186,7 @@ class _ImageDemoState extends State<ImageDemo> {
                   ),
                   padding: const EdgeInsets.all(1),
                   child: Image.file(
-                    component.imagePath,
+                    widget.imagePath,
                     // No width/height specified - will expand to fill available space
                     fit: BoxFit.contain,
                     protocol: protocol,

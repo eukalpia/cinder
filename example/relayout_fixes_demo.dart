@@ -1,4 +1,4 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 /// Interactive demo for the relayout fixes (post-0.6.0 layout-skip contract).
 ///
@@ -28,7 +28,7 @@ void main() {
   runApp(const RelayoutFixesDemo());
 }
 
-class RelayoutFixesDemo extends StatefulComponent {
+class RelayoutFixesDemo extends StatefulWidget {
   const RelayoutFixesDemo({super.key});
 
   @override
@@ -70,7 +70,7 @@ class _RelayoutFixesDemoState extends State<RelayoutFixesDemo> {
   // rebuilds - only the state they read changes.
   int _counter = 0;
   // ignore: prefer_function_declarations_over_variables
-  late final Component Function(BuildContext, int) _itemBuilder =
+  late final Widget Function(BuildContext, int) _itemBuilder =
       (context, index) => Text('item $index -> counter=$_counter');
   // ignore: prefer_function_declarations_over_variables
   late final LayoutBuilderCallback _layoutBuilder =
@@ -102,7 +102,7 @@ class _RelayoutFixesDemoState extends State<RelayoutFixesDemo> {
     }
   }
 
-  Component _panel(String title, Component child, {double height = 7}) {
+  Widget _panel(String title, Widget child, {double height = 7}) {
     return SizedBox(
       width: 38,
       height: height,
@@ -122,7 +122,7 @@ class _RelayoutFixesDemoState extends State<RelayoutFixesDemo> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Focusable(
       focused: true,
       onKeyEvent: _handleKeyEvent,

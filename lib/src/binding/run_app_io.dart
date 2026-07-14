@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:nocterm/nocterm.dart'
+import 'package:cinder/cinder.dart'
     hide StdioBackend, SocketBackend, WebBackend;
-import 'package:nocterm/src/backend/socket_backend.dart';
-import 'package:nocterm/src/backend/stdio_backend.dart';
-import 'package:nocterm/src/backend/terminal.dart' as term;
+import 'package:cinder/src/backend/socket_backend.dart';
+import 'package:cinder/src/backend/stdio_backend.dart';
+import 'package:cinder/src/backend/terminal.dart' as term;
 
 (File?, bool) _useShellMode() {
 // Check for shell mode
@@ -28,7 +28,7 @@ import 'package:nocterm/src/backend/terminal.dart' as term;
 
 /// Run a TUI application on native platforms (Linux, macOS, Windows).
 Future<void> runAppImpl(
-  Component app, {
+  Widget app, {
   bool enableHotReload = true,
   TerminalBackend? backend,
 }) async {
@@ -59,7 +59,7 @@ Future<void> runAppImpl(
 }
 
 Future<void> _runApp(
-  Component app,
+  Widget app,
   TerminalBackend backend,
   bool enableHotReload,
   bool isShellMode,

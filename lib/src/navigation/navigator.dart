@@ -11,12 +11,12 @@ import 'navigator_observer.dart';
 import 'overlay.dart';
 
 /// A widget that manages a stack of routes using an overlay
-class Navigator extends StatefulComponent {
+class Navigator extends StatefulWidget {
   /// The initial home route
-  final Component? home;
+  final Widget? home;
 
   /// Map of named routes
-  final Map<String, Component Function(BuildContext)>? routes;
+  final Map<String, Widget Function(BuildContext)>? routes;
 
   /// Initial route path for deep linking
   final String? initialRoute;
@@ -85,17 +85,17 @@ class NavigatorState extends State<Navigator> {
   }
 
   void _initializeRoutes() {
-    if (component.initialRoute != null) {
-      _buildInitialRouteStack(component.initialRoute!);
-    } else if (component.home != null) {
+    if (widget.initialRoute != null) {
+      _buildInitialRouteStack(widget.initialRoute!);
+    } else if (widget.home != null) {
       final route = PageRoute(
-        builder: (context) => component.home!,
+        builder: (context) => widget.home!,
         settings: const RouteSettings(name: '/'),
       );
       _installRoute(route);
-    } else if (component.routes != null && component.routes!.containsKey('/')) {
+    } else if (widget.routes != null && widget.routes!.containsKey('/')) {
       final route = PageRoute(
-        builder: component.routes!['/']!,
+        builder: widget.routes!['/']!,
         settings: const RouteSettings(name: '/'),
       );
       _installRoute(route);
@@ -103,7 +103,7 @@ class NavigatorState extends State<Navigator> {
 
     // Notify observers
     for (final route in _routes) {
-      for (final observer in component.observers) {
+      for (final observer in widget.observers) {
         observer.didPush(route, null);
       }
     }
@@ -114,12 +114,11 @@ class NavigatorState extends State<Navigator> {
         initialRoute.split('/').where((s) => s.isNotEmpty).toList();
 
     // Always start with home route if available
-    if (component.home != null ||
-        (component.routes?.containsKey('/') ?? false)) {
+    if (widget.home != null || (widget.routes?.containsKey('/') ?? false)) {
       final homeRoute = PageRoute(
-        builder: component.home != null
-            ? (context) => component.home!
-            : component.routes!['/']!,
+        builder: widget.home != null
+            ? (context) => widget.home!
+            : widget.routes!['/']!,
         settings: const RouteSettings(name: '/'),
       );
       _installRoute(homeRoute);
@@ -138,8 +137,8 @@ class NavigatorState extends State<Navigator> {
 
   Route? _createRoute(RouteSettings settings) {
     // Try named routes first
-    if (settings.name != null && component.routes != null) {
-      final builder = component.routes![settings.name];
+    if (settings.name != null && widget.routes != null) {
+      final builder = widget.routes![settings.name];
       if (builder != null) {
         return PageRoute(
           builder: builder,
@@ -149,14 +148,14 @@ class NavigatorState extends State<Navigator> {
     }
 
     // Try onGenerateRoute
-    if (component.onGenerateRoute != null) {
-      final route = component.onGenerateRoute!(settings);
+    if (widget.onGenerateRoute != null) {
+      final route = widget.onGenerateRoute!(settings);
       if (route != null) return route;
     }
 
     // Fall back to onUnknownRoute
-    if (component.onUnknownRoute != null) {
-      return component.onUnknownRoute!(settings);
+    if (widget.onUnknownRoute != null) {
+      return widget.onUnknownRoute!(settings);
     }
 
     return null;
@@ -178,7 +177,7 @@ class NavigatorState extends State<Navigator> {
     }
 
     // Notify observers
-    for (final observer in component.observers) {
+    for (final observer in widget.observers) {
       observer.didPush(
           route, _routes.length > 1 ? _routes[_routes.length - 2] : null);
     }
@@ -188,10 +187,10 @@ class NavigatorState extends State<Navigator> {
     return completer.future;
   }
 
-  /// Push a component directly onto the navigation stack.
-  Future<T?> pushComponent<T>(Component component, {String? name}) {
+  /// Push a widget directly onto the navigation stack.
+  Future<T?> pushComponent<T>(Widget widget, {String? name}) {
     final route = PageRoute<T>(
-      builder: (context) => component,
+      builder: (context) => widget,
       settings: RouteSettings(name: name),
     );
     return push(route);
@@ -234,7 +233,7 @@ class NavigatorState extends State<Navigator> {
     }
 
     // Notify observers
-    for (final observer in component.observers) {
+    for (final observer in widget.observers) {
       observer.didReplace(newRoute: newRoute, oldRoute: oldRoute);
     }
 
@@ -267,11 +266,11 @@ class NavigatorState extends State<Navigator> {
     return pushReplacement<T, TO>(route as Route<T>, result: result);
   }
 
-  /// Push a component and replace the current top route
-  Future<T?> pushReplacementComponent<T, TO>(Component component,
+  /// Push a widget and replace the current top route
+  Future<T?> pushReplacementComponent<T, TO>(Widget widget,
       {String? name, TO? result}) {
     final route = PageRoute<T>(
-      builder: (context) => component,
+      builder: (context) => widget,
       settings: RouteSettings(name: name),
     );
     return pushReplacement<T, TO>(route, result: result);
@@ -295,7 +294,7 @@ class NavigatorState extends State<Navigator> {
     route.dispose();
 
     // Notify observers
-    for (final observer in component.observers) {
+    for (final observer in widget.observers) {
       observer.didPop(route, _routes.isNotEmpty ? _routes.last : null);
     }
 
@@ -318,8 +317,8 @@ class NavigatorState extends State<Navigator> {
     if (!currentRoute.canPop()) return false;
 
     // Check PopBehavior's canPop
-    if (component.popBehavior.canPop != null) {
-      return component.popBehavior.canPop!(currentRoute);
+    if (widget.popBehavior.canPop != null) {
+      return widget.popBehavior.canPop!(currentRoute);
     }
 
     return true;
@@ -340,7 +339,7 @@ class NavigatorState extends State<Navigator> {
   /// The [barrierAnimationDuration] controls the duration of the fade animation.
   /// Defaults to 200ms.
   Future<T?> showDialog<T>({
-    required Component Function(BuildContext) builder,
+    required Widget Function(BuildContext) builder,
     bool barrierDismissible = true,
     Color? barrierColor = const Color.fromARGB(128, 0, 0, 0),
     bool animateBarrier = true,
@@ -365,7 +364,7 @@ class NavigatorState extends State<Navigator> {
   }
 
   bool _handleKeyPress(LogicalKey key) {
-    if (component.popBehavior.shouldPop(key)) {
+    if (widget.popBehavior.shouldPop(key)) {
       // Check if current route is modal with barrierDismissible
       final currentRoute = _routes.last;
       if (currentRoute is ModalRoute && !currentRoute.barrierDismissible) {
@@ -373,8 +372,8 @@ class NavigatorState extends State<Navigator> {
       }
 
       // Handle async pop confirmation
-      if (component.popBehavior.onPopInvoked != null) {
-        component.popBehavior.onPopInvoked!(currentRoute).then((shouldPop) {
+      if (widget.popBehavior.onPopInvoked != null) {
+        widget.popBehavior.onPopInvoked!(currentRoute).then((shouldPop) {
           if (shouldPop && canPop()) {
             pop();
           }
@@ -390,7 +389,7 @@ class NavigatorState extends State<Navigator> {
   }
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     // Get all overlay entries from all routes
     final List<OverlayEntry> allEntries = [];
     for (final route in _routes) {

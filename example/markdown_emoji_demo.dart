@@ -1,14 +1,14 @@
-import 'package:nocterm/nocterm.dart';
+import 'package:cinder/cinder.dart';
 
 void main() {
   runApp(const MarkdownEmojiDemo());
 }
 
-class MarkdownEmojiDemo extends StatelessComponent {
+class MarkdownEmojiDemo extends StatelessWidget {
   const MarkdownEmojiDemo({super.key});
 
   @override
-  Component build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Center(
       child: DecoratedBox(
         decoration: BoxDecoration(
