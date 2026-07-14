@@ -7,6 +7,10 @@ on:
     paths:
       - .github/scripts/cinder_breaking_refactor.py
       - .github/workflows/cinder_refactor.yml
+      - lib/**
+      - test/**
+      - example/**
+      - benchmark/**
       - packages/cinder_nested/**
       - packages/cinder_provider/**
       - packages/cinder_riverpod/**
@@ -91,20 +95,20 @@ jobs:
           for package in \
             packages/cinder_nested \
             packages/cinder_provider \
-            packages/cinder_riverpod \
-            packages/cinder_bloc
+            packages/cinder_bloc \
+            packages/cinder_riverpod
           do
             if [ ! -d "$package" ]; then
               continue
             fi
             echo "===== $package =====" >> /tmp/cinder-packages.log
             (
-              cd "$package" &&
-              dart pub get &&
+              cd "$package" || exit 1
+              dart pub get || exit 1
               dart format --output=none --set-exit-if-changed lib test example 2>/dev/null || true
-              dart analyze
+              dart analyze || exit 1
               if find test -name '*_test.dart' -print -quit 2>/dev/null | grep -q .; then
-                dart test -r expanded
+                dart test -r expanded || exit 1
               fi
             ) >> /tmp/cinder-packages.log 2>&1
             current=$?
