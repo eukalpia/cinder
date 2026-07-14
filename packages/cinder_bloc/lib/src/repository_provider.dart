@@ -6,25 +6,22 @@ import 'package:cinder_provider/provider.dart';
 class RepositoryProvider<T> extends SingleChildStatelessWidget {
   RepositoryProvider({
     required T Function(BuildContext context) create,
-    Key? key,
-    Widget? child,
-    bool lazy = true,
+    super.key,
+    super.child,
+    this.lazy = true,
     void Function(T value)? dispose,
   })  : _create = create,
         _value = null,
-        _dispose = dispose,
-        lazy = lazy,
-        super(key: key, child: child);
+        _dispose = dispose;
 
   RepositoryProvider.value({
     required T value,
-    Key? key,
-    Widget? child,
+    super.key,
+    super.child,
   })  : _value = value,
         _create = null,
         _dispose = null,
-        lazy = true,
-        super(key: key, child: child);
+        lazy = true;
 
   final T Function(BuildContext context)? _create;
   final T? _value;
@@ -47,9 +44,10 @@ class RepositoryProvider<T> extends SingleChildStatelessWidget {
       return Provider<T>.value(value: value, child: child);
     }
 
+    final disposer = _dispose;
     return Provider<T>(
       create: _create!,
-      dispose: _dispose == null ? null : (_, value) => _dispose!(value),
+      dispose: disposer == null ? null : (_, value) => disposer(value),
       lazy: lazy,
       child: child,
     );
@@ -59,8 +57,8 @@ class RepositoryProvider<T> extends SingleChildStatelessWidget {
 /// Merges multiple repository providers into one widget tree.
 class MultiRepositoryProvider extends MultiProvider {
   MultiRepositoryProvider({
-    Key? key,
-    required List<SingleChildWidget> providers,
-    required Widget child,
-  }) : super(key: key, providers: providers, child: child);
+    super.key,
+    required super.providers,
+    required super.child,
+  });
 }
