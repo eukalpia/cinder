@@ -1,0 +1,520 @@
+--- a/lib/cinder.dart
++++ b/lib/cinder.dart
+@@ -30,6 +30,7 @@
+ export 'src/components/auto_scroll_controller.dart';
+ export 'src/components/single_child_scroll_view.dart';
+ export 'src/components/list_view.dart';
++export 'src/components/anchored_list_view.dart';
+ export 'src/components/text_field.dart';
+ export 'src/components/terminal_xterm.dart';
+ export 'cinder_test.dart';
+@@ -62,6 +63,7 @@
+ // Mouse and Gesture Support
+ export 'src/components/mouse_region.dart';
+ export 'src/components/gesture_detector.dart';
++export 'src/components/context_menu.dart';
+ export 'src/gestures/events.dart';
+ export 'src/gestures/hit_test.dart';
+ export 'src/gestures/recognizer.dart';
+--- /dev/null
++++ b/lib/src/components/anchored_list_view.dart
+@@ -0,0 +1,1106 @@
++import 'dart:math' as math;
++
++import 'package:cinder/cinder.dart';
++import 'package:cinder/src/framework/terminal_canvas.dart';
++
++import '../rendering/extent_index.dart';
++import '../rendering/scrollable_render_object.dart';
++
++/// Builds an anchored-list item identified by a stable application ID.
++typedef AnchoredItemBuilder<T extends Object> = Widget? Function(
++  BuildContext context,
++  int index,
++  T itemId,
++);
++
++/// Resolves the sticky-header item for the first visible item.
++typedef StickyHeaderIndexResolver = int? Function(int firstVisibleIndex);
++
++/// Reports the current visible item range.
++typedef VisibleRangeChanged = void Function(int firstIndex, int lastIndex);
++
++/// A stable scroll position expressed in content identity rather than pixels.
++class ListAnchor<T extends Object> {
++  const ListAnchor({
++    required this.itemId,
++    this.localOffset = 0.0,
++  });
++
++  final T itemId;
++  final double localOffset;
++
++  @override
++  bool operator ==(Object other) {
++    return identical(this, other) ||
++        other is ListAnchor<T> &&
++            other.itemId == itemId &&
++            other.localOffset == localOffset;
++  }
++
++  @override
++  int get hashCode => Object.hash(itemId, localOffset);
++
++  @override
++  String toString() => 'ListAnchor($itemId, localOffset: $localOffset)';
++}
++
++abstract class _AnchoredListDelegate {
++  ListAnchor<Object>? captureAnchor();
++  bool restoreAnchor(ListAnchor<Object> anchor);
++  bool jumpToItem(Object itemId, {double alignment, double localOffset});
++  bool ensureItemVisible(Object itemId);
++  bool invalidateItemExtent(Object itemId);
++}
++
++/// Controls an [AnchoredListView] using stable item IDs.
++///
++/// The controller also stores named anchors, which makes preserving a separate
++/// message position for each chat a one-line operation.
++class AnchoredListController extends ScrollController {
++  AnchoredListController({
++    super.initialScrollOffset,
++    this.followNewItems = true,
++    this.autoScrollThreshold = 2.0,
++  });
++
++  final bool followNewItems;
++  final double autoScrollThreshold;
++
++  _AnchoredListDelegate? _delegate;
++  final Map<Object, ListAnchor<Object>> _savedPositions =
++      <Object, ListAnchor<Object>>{};
++
++  ListAnchor<Object>? get anchor => _delegate?.captureAnchor();
++
++  void _attachAnchoredDelegate(_AnchoredListDelegate delegate) {
++    _delegate = delegate;
++  }
++
++  void _detachAnchoredDelegate(_AnchoredListDelegate delegate) {
++    if (identical(_delegate, delegate)) _delegate = null;
++  }
++
++  bool jumpToItem(
++    Object itemId, {
++    double alignment = 0.0,
++    double localOffset = 0.0,
++  }) {
++    return _delegate?.jumpToItem(
++          itemId,
++          alignment: alignment,
++          localOffset: localOffset,
++        ) ??
++        false;
++  }
++
++  bool ensureItemVisible(Object itemId) {
++    return _delegate?.ensureItemVisible(itemId) ?? false;
++  }
++
++  /// Invalidates a cached measurement, for example after media finishes loading.
++  bool invalidateItemExtent(Object itemId) {
++    return _delegate?.invalidateItemExtent(itemId) ?? false;
++  }
++
++  bool savePosition(Object bucket) {
++    final current = anchor;
++    if (current == null) return false;
++    _savedPositions[bucket] = current;
++    return true;
++  }
++
++  bool restorePosition(Object bucket) {
++    final saved = _savedPositions[bucket];
++    if (saved == null) return false;
++    return _delegate?.restoreAnchor(saved) ?? false;
++  }
++
++  void forgetPosition(Object bucket) {
++    _savedPositions.remove(bucket);
++  }
++}
++
++/// Selection state keyed by item ID, independent of render-object lifetime.
++class AnchoredSelectionController<T extends Object> extends ChangeNotifier {
++  final Set<T> _selected = <T>{};
++
++  Set<T> get selectedItems => Set<T>.unmodifiable(_selected);
++  bool get isEmpty => _selected.isEmpty;
++  bool get isNotEmpty => _selected.isNotEmpty;
++  int get length => _selected.length;
++
++  bool isSelected(T itemId) => _selected.contains(itemId);
++
++  void select(T itemId) {
++    if (_selected.add(itemId)) notifyListeners();
++  }
++
++  void deselect(T itemId) {
++    if (_selected.remove(itemId)) notifyListeners();
++  }
++
++  void toggle(T itemId) {
++    if (!_selected.remove(itemId)) _selected.add(itemId);
++    notifyListeners();
++  }
++
++  void selectOnly(T itemId) {
++    if (_selected.length == 1 && _selected.contains(itemId)) return;
++    _selected
++      ..clear()
++      ..add(itemId);
++    notifyListeners();
++  }
++
++  void selectRange(List<T> orderedIds, T first, T last) {
++    final firstIndex = orderedIds.indexOf(first);
++    final lastIndex = orderedIds.indexOf(last);
++    if (firstIndex < 0 || lastIndex < 0) return;
++    final start = math.min(firstIndex, lastIndex);
++    final end = math.max(firstIndex, lastIndex);
++    var changed = false;
++    for (var index = start; index <= end; index++) {
++      changed = _selected.add(orderedIds[index]) || changed;
++    }
++    if (changed) notifyListeners();
++  }
++
++  void clear() {
++    if (_selected.isEmpty) return;
++    _selected.clear();
++    notifyListeners();
++  }
++}
++
++/// A lazy, stable-ID, variable-extent viewport designed for chat history.
++///
++/// Unlike [ListView], this widget never derives scroll position from the set of
++/// currently mounted render objects. Measurements are retained in a Fenwick
++/// extent index, allowing O(log n) jumps and stable anchors across prepend,
++/// append, render-object eviction, and late media relayout.
++class AnchoredListView<T extends Object> extends StatefulWidget {
++  const AnchoredListView.builder({
++    super.key,
++    required this.itemIds,
++    required this.itemBuilder,
++    this.controller,
++    this.selectionController,
++    this.reverse = false,
++    this.padding,
++    this.estimatedItemExtent = 1.0,
++    this.cacheExtent = 10.0,
++    this.maxCachedExtents = 200000,
++    this.keyboardScrollable = false,
++    this.hasMoreBefore = false,
++    this.hasMoreAfter = false,
++    this.onLoadMoreBefore,
++    this.onLoadMoreAfter,
++    this.loadMoreItemThreshold = 8,
++    this.stickyHeaderIndexResolver,
++    this.stickyHeaderBuilder,
++    this.onVisibleRangeChanged,
++  })  : assert(estimatedItemExtent > 0),
++        assert(cacheExtent >= 0),
++        assert(loadMoreItemThreshold >= 0),
++        assert(
++          stickyHeaderBuilder == null || stickyHeaderIndexResolver != null,
++          'stickyHeaderBuilder requires stickyHeaderIndexResolver.',
++        );
++
++  final List<T> itemIds;
++  final AnchoredItemBuilder<T> itemBuilder;
++  final AnchoredListController? controller;
++  final AnchoredSelectionController<T>? selectionController;
++  final bool reverse;
++  final EdgeInsets? padding;
++  final double estimatedItemExtent;
++  final double cacheExtent;
++  final int maxCachedExtents;
++  final bool keyboardScrollable;
++
++  final bool hasMoreBefore;
++  final bool hasMoreAfter;
++  final VoidCallback? onLoadMoreBefore;
++  final VoidCallback? onLoadMoreAfter;
++  final int loadMoreItemThreshold;
++
++  final StickyHeaderIndexResolver? stickyHeaderIndexResolver;
++  final AnchoredItemBuilder<T>? stickyHeaderBuilder;
++  final VisibleRangeChanged? onVisibleRangeChanged;
++
++  @override
++  State<AnchoredListView<T>> createState() => _AnchoredListViewState<T>();
++}
++
++class _AnchoredListViewState<T extends Object>
++    extends State<AnchoredListView<T>> {
++  AnchoredListController? _internalController;
++  int? _firstVisibleIndex;
++  int? _lastVisibleIndex;
++  bool _beforeRequestArmed = true;
++  bool _afterRequestArmed = true;
++  bool _visibleUpdateScheduled = false;
++  (int, int)? _pendingVisibleRange;
++
++  AnchoredListController get _controller =>
++      widget.controller ?? _internalController!;
++
++  @override
++  void initState() {
++    super.initState();
++    if (widget.controller == null) {
++      _internalController = AnchoredListController();
++    }
++    widget.selectionController?.addListener(_handleSelectionChanged);
++  }
++
++  @override
++  void didUpdateWidget(AnchoredListView<T> oldWidget) {
++    super.didUpdateWidget(oldWidget);
++    if (!identical(widget.controller, oldWidget.controller)) {
++      if (oldWidget.controller == null) {
++        _internalController?.dispose();
++        _internalController = null;
++      }
++      if (widget.controller == null) {
++        _internalController = AnchoredListController();
++      }
++    }
++    if (!identical(widget.selectionController, oldWidget.selectionController)) {
++      oldWidget.selectionController?.removeListener(_handleSelectionChanged);
++      widget.selectionController?.addListener(_handleSelectionChanged);
++    }
++    if (widget.itemIds.length != oldWidget.itemIds.length) {
++      _beforeRequestArmed = true;
++      _afterRequestArmed = true;
++    }
++  }
++
++  @override
++  void dispose() {
++    widget.selectionController?.removeListener(_handleSelectionChanged);
++    _internalController?.dispose();
++    super.dispose();
++  }
++
++  void _handleSelectionChanged() {
++    if (mounted) setState(() {});
++  }
++
++  bool _handleKeyEvent(KeyboardEvent event) {
++    if (event.logicalKey == LogicalKey.arrowUp) {
++      _controller.scrollUp();
++      return true;
++    }
++    if (event.logicalKey == LogicalKey.arrowDown) {
++      _controller.scrollDown();
++      return true;
++    }
++    if (event.logicalKey == LogicalKey.pageUp) {
++      _controller.pageUp();
++      return true;
++    }
++    if (event.logicalKey == LogicalKey.pageDown) {
++      _controller.pageDown();
++      return true;
++    }
++    if (event.logicalKey == LogicalKey.home) {
++      _controller.scrollToStart();
++      return true;
++    }
++    if (event.logicalKey == LogicalKey.end) {
++      _controller.scrollToEnd();
++      return true;
++    }
++    return false;
++  }
++
++  void _handleVisibleRange(int firstIndex, int lastIndex) {
++    _pendingVisibleRange = (firstIndex, lastIndex);
++    if (_visibleUpdateScheduled) return;
++    _visibleUpdateScheduled = true;
++
++    void apply() {
++      _visibleUpdateScheduled = false;
++      if (!mounted) return;
++      final range = _pendingVisibleRange;
++      _pendingVisibleRange = null;
++      if (range == null) return;
++      final (first, last) = range;
++
++      final stickyChanged = first != _firstVisibleIndex;
++      _firstVisibleIndex = first;
++      _lastVisibleIndex = last;
++      widget.onVisibleRangeChanged?.call(first, last);
++
++      final beforeNear = first <= widget.loadMoreItemThreshold;
++      if (!beforeNear) _beforeRequestArmed = true;
++      if (beforeNear &&
++          widget.hasMoreBefore &&
++          _beforeRequestArmed &&
++          widget.onLoadMoreBefore != null) {
++        _beforeRequestArmed = false;
++        widget.onLoadMoreBefore!();
++      }
++
++      final afterNear =
++          last >= widget.itemIds.length - 1 - widget.loadMoreItemThreshold;
++      if (!afterNear) _afterRequestArmed = true;
++      if (afterNear &&
++          widget.hasMoreAfter &&
++          _afterRequestArmed &&
++          widget.onLoadMoreAfter != null) {
++        _afterRequestArmed = false;
++        widget.onLoadMoreAfter!();
++      }
++
++      if (stickyChanged && widget.stickyHeaderBuilder != null) {
++        setState(() {});
++      }
++    }
++
++    try {
++      TerminalBinding.instance.addPostFrameCallback((_) => apply());
++    } catch (_) {
++      apply();
++    }
++  }
++
++  @override
++  Widget build(BuildContext context) {
++    Widget viewport = _AnchoredListViewport<T>(
++      itemIds: widget.itemIds,
++      itemBuilder: widget.itemBuilder,
++      controller: _controller,
++      reverse: widget.reverse,
++      padding: widget.padding,
++      estimatedItemExtent: widget.estimatedItemExtent,
++      cacheExtent: widget.cacheExtent,
++      maxCachedExtents: widget.maxCachedExtents,
++      onVisibleRangeChanged: _handleVisibleRange,
++    );
++
++    final firstVisible = _firstVisibleIndex;
++    final resolver = widget.stickyHeaderIndexResolver;
++    final stickyBuilder = widget.stickyHeaderBuilder;
++    if (firstVisible != null && resolver != null && stickyBuilder != null) {
++      final stickyIndex = resolver(firstVisible);
++      if (stickyIndex != null &&
++          stickyIndex >= 0 &&
++          stickyIndex < widget.itemIds.length) {
++        viewport = Stack(
++          children: <Widget>[
++            viewport,
++            Positioned(
++              left: widget.padding?.left ?? 0.0,
++              top: widget.padding?.top ?? 0.0,
++              right: widget.padding?.right ?? 0.0,
++              child: stickyBuilder(
++                    context,
++                    stickyIndex,
++                    widget.itemIds[stickyIndex],
++                  ) ??
++                  const SizedBox.shrink(),
++            ),
++          ],
++        );
++      }
++    }
++
++    if (widget.keyboardScrollable) {
++      viewport = Focusable(
++        focused: true,
++        onKeyEvent: _handleKeyEvent,
++        child: viewport,
++      );
++    }
++    return viewport;
++  }
++}
++
++class _AnchoredListViewport<T extends Object> extends RenderObjectWidget {
++  const _AnchoredListViewport({
++    required this.itemIds,
++    required this.itemBuilder,
++    required this.controller,
++    required this.reverse,
++    required this.padding,
++    required this.estimatedItemExtent,
++    required this.cacheExtent,
++    required this.maxCachedExtents,
++    required this.onVisibleRangeChanged,
++  });
++
++  final List<T> itemIds;
++  final AnchoredItemBuilder<T> itemBuilder;
++  final AnchoredListController controller;
++  final bool reverse;
++  final EdgeInsets? padding;
++  final double estimatedItemExtent;
++  final double cacheExtent;
++  final int maxCachedExtents;
++  final VisibleRangeChanged onVisibleRangeChanged;
++
++  @override
++  Element createElement() => _AnchoredListViewportElement<T>(this);
++
++  @override
++  RenderAnchoredListViewport<T> createRenderObject(BuildContext context) {
++    return RenderAnchoredListViewport<T>(
++      itemIds: itemIds,
++      controller: controller,
++      reverse: reverse,
++      padding: padding,
++      estimatedItemExtent: estimatedItemExtent,
++      cacheExtent: cacheExtent,
++      maxCachedExtents: maxCachedExtents,
++      onVisibleRangeChanged: onVisibleRangeChanged,
++    );
++  }
++
++  @override
++  void updateRenderObject(
++    BuildContext context,
++    RenderAnchoredListViewport<T> renderObject,
++  ) {
++    renderObject
++      ..controller = controller
++      ..reverse = reverse
++      ..padding = padding
++      ..estimatedItemExtent = estimatedItemExtent
++      ..cacheExtent = cacheExtent
++      ..onVisibleRangeChanged = onVisibleRangeChanged
++      ..itemIds = itemIds;
++  }
++}
++
++class _AnchoredListViewportElement<T extends Object>
++    extends RenderObjectElement {
++  _AnchoredListViewportElement(_AnchoredListViewport<T> super.widget);
++
++  @override
++  _AnchoredListViewport<T> get widget =>
++      super.widget as _AnchoredListViewport<T>;
++
++  @override
++  RenderAnchoredListViewport<T> get renderObject =>
++      super.renderObject as RenderAnchoredListViewport<T>;
++
++  final Map<T, Element> _children = <T, Element>{};
++  bool _needsChildUpdate = false;
++  final Set<T> _updatedThisLayout = <T>{};
++
++  @override
++  void mount(Element? parent, Object? newSlot) {
++    super.mount(parent, newSlot);
++    renderObject._element = this;
++  }
++
++  
