@@ -25,6 +25,8 @@ export 'src/listenable_provider.dart'
 export 'src/provider.dart'
     show
         InheritedProvider,
+        InheritedContext,
+        StartListening,
         MultiProvider,
         Provider,
         ProviderNotFoundException,
