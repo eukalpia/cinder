@@ -1,0 +1,56 @@
+name: Graphics and Icons
+
+on:
+  push:
+    branches: [dev, test, main]
+    paths:
+      - 'lib/src/components/icon.dart'
+      - 'lib/src/components/image.dart'
+      - 'lib/src/image/**'
+      - 'packages/cinder_material_icons/**'
+      - 'packages/cinder_lucide/**'
+      - 'test/components/icon_test.dart'
+      - 'test/image/**'
+      - 'tool/generate_icon_packs.py'
+      - '.github/workflows/graphics.yml'
+  pull_request:
+    branches: [dev, test, main]
+    paths:
+      - 'lib/src/components/icon.dart'
+      - 'lib/src/components/image.dart'
+      - 'lib/src/image/**'
+      - 'packages/cinder_material_icons/**'
+      - 'packages/cinder_lucide/**'
+      - 'test/components/icon_test.dart'
+      - 'test/image/**'
+      - 'tool/generate_icon_packs.py'
+      - '.github/workflows/graphics.yml'
+
+concurrency:
+  group: graphics-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+      - name: Resolve dependencies
+        run: |
+          dart pub get
+          (cd packages/cinder_material_icons && dart pub get)
+          (cd packages/cinder_lucide && dart pub get)
+      - name: Analyze graphics APIs
+        run: |
+          dart analyze --fatal-infos lib/src/components/icon.dart lib/src/components/image.dart lib/src/image test/components/icon_test.dart test/image
+          (cd packages/cinder_material_icons && dart analyze --fatal-infos)
+          (cd packages/cinder_lucide && dart analyze --fatal-infos)
+      - name: Run graphics tests
+        run: |
+          dart test test/components/icon_test.dart test/image --reporter expanded
+          (cd packages/cinder_material_icons && dart test --reporter expanded)
+          (cd packages/cinder_lucide && dart test --reporter expanded)

@@ -737,6 +737,7 @@ class RenderListViewport extends RenderObject with ScrollableRenderObjectMixin {
 
   /// Tracks the average item extent for estimating total scroll extent
   double? _averageItemExtent;
+  double? _lastPaintedScrollOffset;
 
   /// Adds a child to [_allChildren], skipping duplicates.
   void _addToAllChildren(RenderObject renderObject) {
@@ -1265,6 +1266,28 @@ class RenderListViewport extends RenderObject with ScrollableRenderObjectMixin {
   void paint(TerminalCanvas canvas, Offset offset) {
     super.paint(canvas, offset);
     final effectivePadding = padding ?? EdgeInsets.zero;
+
+    final previousOffset = _lastPaintedScrollOffset;
+    final currentOffset = _controller.offset;
+    if (scrollDirection == Axis.vertical && previousOffset != null) {
+      final rawDelta = currentOffset - previousOffset;
+      final roundedDelta = rawDelta.round();
+      final viewportHeight = size.height.floor();
+      if (roundedDelta != 0 &&
+          (rawDelta - roundedDelta).abs() < 0.0001 &&
+          roundedDelta.abs() < viewportHeight) {
+        owner?.requestTerminalScroll(
+          TerminalScrollRequest(
+            left: offset.dx.round(),
+            top: offset.dy.round(),
+            width: size.width.round(),
+            height: viewportHeight,
+            lines: _reverse ? -roundedDelta : roundedDelta,
+          ),
+        );
+      }
+    }
+    _lastPaintedScrollOffset = currentOffset;
 
     // Create clipped canvas for viewport
     final clippedCanvas = canvas.clip(

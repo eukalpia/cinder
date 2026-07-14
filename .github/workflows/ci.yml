@@ -56,6 +56,8 @@ jobs:
           - cinder_provider
           - cinder_riverpod
           - cinder_bloc
+          - cinder_material_icons
+          - cinder_lucide
     steps:
       - uses: actions/checkout@v6
         with:
