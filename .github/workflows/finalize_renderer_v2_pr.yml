@@ -1,0 +1,39 @@
+name: Renderer V2 finalizer diagnostics
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/scripts/finalize_renderer_v2.py'
+      - '.github/workflows/finalize_renderer_v2_pr.yml'
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: dev
+          fetch-depth: 0
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+      - name: Apply final architecture
+        run: python3 .github/scripts/finalize_renderer_v2.py
+      - name: Format finalizer targets
+        run: |
+          dart format \
+            lib/src/buffer.dart \
+            lib/src/rendering/frame_diff.dart \
+            lib/src/framework/terminal_canvas.dart \
+            lib/src/binding/terminal_binding.dart \
+            lib/src/utils/escape_codes.dart \
+            test/rendering/buffer_v2_test.dart \
+            test/rendering/frame_diff_test.dart \
+            benchmark/renderer_v2_benchmark.dart
+      - run: dart pub get
+      - name: Analyze finalizer targets
+        run: dart analyze lib/src/buffer.dart lib/src/rendering/frame_diff.dart lib/src/framework/terminal_canvas.dart lib/src/binding/terminal_binding.dart lib/src/utils/escape_codes.dart test/rendering benchmark/renderer_v2_benchmark.dart
+      - name: Test renderer contracts
+        run: dart test test/rendering/buffer_v2_test.dart test/rendering/frame_diff_test.dart --reporter expanded
