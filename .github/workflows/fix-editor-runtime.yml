@@ -17,7 +17,7 @@ jobs:
       - uses: dart-lang/setup-dart@v1
         with:
           sdk: stable
-      - name: Apply pointer-state and history-test fixes
+      - name: Apply pointer-state and history fixes
         shell: bash
         run: |
           set -euo pipefail
@@ -32,6 +32,30 @@ jobs:
                   raise SystemExit(f'{path}: expected {count} occurrence(s), found {actual}: {old!r}')
               file.write_text(text.replace(old, new, count))
 
+          replace(
+              'lib/src/framework/render_object.dart',
+              '''  Offset operator +(Offset other) => Offset(dx + other.dx, dy + other.dy);
+  Offset operator -(Offset other) => Offset(dx - other.dx, dy - other.dy);
+
+  @override
+  String toString() => 'Offset($dx, $dy)';
+''',
+              '''  Offset operator +(Offset other) => Offset(dx + other.dx, dy + other.dy);
+  Offset operator -(Offset other) => Offset(dx - other.dx, dy - other.dy);
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        other is Offset && other.dx == dx && other.dy == dy;
+  }
+
+  @override
+  int get hashCode => Object.hash(dx, dy);
+
+  @override
+  String toString() => 'Offset($dx, $dy)';
+''',
+          )
           replace(
               'lib/src/components/gesture_detector.dart',
               '''    final target = Set<MouseButton>.of(event.buttons)
@@ -121,6 +145,7 @@ jobs:
         run: |
           set -euo pipefail
           dart format \
+            lib/src/framework/render_object.dart \
             lib/src/components/gesture_detector.dart \
             lib/src/test/cinder_tester.dart \
             test/layout/anchored_list_view_test.dart
@@ -137,5 +162,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
-          git commit -m "fix: normalize pointer buttons and history jump assertions"
+          git commit -m "fix: preserve pointer taps and stable history jumps"
           git push
