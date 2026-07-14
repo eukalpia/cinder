@@ -61,7 +61,22 @@ jobs:
         run: dart format lib test example benchmark
 
       - name: Analyze root package
-        run: dart analyze lib test example benchmark
+        shell: bash
+        run: |
+          set +e
+          dart analyze lib test example benchmark >/tmp/cinder-analyze.log 2>&1
+          status=$?
+          cat /tmp/cinder-analyze.log
+          if [ "$status" -ne 0 ]; then
+            git reset --hard HEAD
+            cp /tmp/cinder-analyze.log validation_failure.log
+            git config user.name "Cinder Migration Bot"
+            git config user.email "actions@users.noreply.github.com"
+            git add validation_failure.log
+            git commit -m "[cinder-refactor] capture analyzer failure"
+            git push origin HEAD:agent/flutter-core-breaking-refactor
+            exit "$status"
+          fi
 
       - name: Run root tests
         run: dart test -r expanded
@@ -79,7 +94,7 @@ jobs:
       - name: Commit migration
         shell: bash
         run: |
-          rm -f migration_failure.log
+          rm -f migration_failure.log validation_failure.log
           git config user.name "Cinder Migration Bot"
           git config user.email "actions@users.noreply.github.com"
           git add -A
