@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - .github/scripts/cinder_breaking_refactor.py
+      - .github/scripts/cinder_post_migration_fixes.py
       - .github/workflows/cinder_refactor.yml
       - lib/**
       - test/**
@@ -58,6 +59,7 @@ jobs:
             git push origin HEAD:agent/flutter-core-breaking-refactor
             exit "$status"
           fi
+          python3 .github/scripts/cinder_post_migration_fixes.py
 
       - name: Install dependencies
         run: dart pub get
