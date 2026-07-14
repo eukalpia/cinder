@@ -34,7 +34,8 @@ jobs:
           fi
           mapfile -t files < <(git diff --name-only --diff-filter=ACMR "$base" HEAD | grep -E '^(lib|test|example|benchmark)/.*\.dart$' || true)
           if [ "${#files[@]}" -gt 0 ]; then
-            dart format --output=none --set-exit-if-changed "${files[@]}"
+            dart format "${files[@]}"
+            git diff --exit-code -- "${files[@]}"
           else
             echo "No changed root Dart files."
           fi
@@ -76,7 +77,8 @@ jobs:
           prefix="packages/${{ matrix.package }}/"
           mapfile -t files < <(git diff --name-only --diff-filter=ACMR "$base" HEAD | grep -E "^${prefix}.*\.dart$" || true)
           if [ "${#files[@]}" -gt 0 ]; then
-            dart format --output=none --set-exit-if-changed "${files[@]}"
+            dart format "${files[@]}"
+            git diff --exit-code -- "${files[@]}"
           else
             echo "No changed Dart files in ${{ matrix.package }}."
           fi
