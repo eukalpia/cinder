@@ -1,16 +1,20 @@
 name: cinder_riverpod
-description: Riverpod support for cinder - A reactive caching and data-binding framework
-version: 0.0.1
-homepage: https://cinder.dev
-repository: https://github.com/norbert515/cinder
+description: Riverpod integration for Cinder.
+version: 1.0.0-dev.1
+homepage: https://github.com/eukalpia/cinder
+repository: https://github.com/eukalpia/cinder
 
 environment:
-  sdk: ">=3.5.0 <4.0.0"
+  sdk: ">=3.7.0 <4.0.0"
 
 dependencies:
-  cinder: ^0.2.0
-  riverpod: ^2.5.1
-  meta: ^1.3.0
+  cinder: ^1.0.0-dev.1
+  riverpod: ^3.3.2
+  meta: ^1.15.0
 
 dev_dependencies:
   test: ^1.25.6
+
+dependency_overrides:
+  cinder:
+    path: ../..
