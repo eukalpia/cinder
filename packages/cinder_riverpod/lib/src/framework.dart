@@ -1,4 +1,7 @@
-// ignore_for_file: invalid_use_of_internal_member
+// Riverpod's public API does not expose the scheduler Vsync/Task bridge used
+// by framework integrations. This adapter intentionally follows Riverpod's
+// Flutter integration at this single boundary.
+// ignore_for_file: implementation_imports, invalid_use_of_internal_member
 
 import 'dart:async';
 import 'dart:collection';
@@ -57,7 +60,9 @@ class ProviderScope extends StatefulWidget {
     return scope.container;
   }
 
-  static _InheritedProviderScopeElement scopeElementOf(
+  /// Internal element bridge used by [ProviderContext].
+  @internal
+  static ProviderScopeElement scopeElementOf(
     BuildContext context, {
     bool listen = true,
   }) {
@@ -68,7 +73,7 @@ class ProviderScope extends StatefulWidget {
     final element = context
         .getElementForInheritedWidgetOfExactType<_InheritedProviderScope>();
 
-    if (element is! _InheritedProviderScopeElement) {
+    if (element is! ProviderScopeElement) {
       throw StateError(
         'ProviderScope not found. Wrap the Cinder app with ProviderScope.',
       );
@@ -227,13 +232,18 @@ class _InheritedProviderScope extends InheritedWidget {
   }
 
   @override
-  _InheritedProviderScopeElement createElement() {
-    return _InheritedProviderScopeElement(this);
+  ProviderScopeElement createElement() {
+    return ProviderScopeElement(this);
   }
 }
 
-class _InheritedProviderScopeElement extends InheritedElement {
-  _InheritedProviderScopeElement(_InheritedProviderScope super.widget);
+/// Internal dependency-tracking element for the Cinder Riverpod adapter.
+///
+/// The type is public only to avoid leaking a private type through the
+/// cross-library context extension. It is hidden from the package barrel.
+@internal
+class ProviderScopeElement extends InheritedElement {
+  ProviderScopeElement(InheritedWidget super.widget);
 
   @override
   _InheritedProviderScope get widget => super.widget as _InheritedProviderScope;
@@ -242,6 +252,7 @@ class _InheritedProviderScopeElement extends InheritedElement {
 
   final _dependents = HashMap<Element, ProviderDependencies>();
 
+  @override
   ProviderDependencies getDependencies(Element dependent) {
     return _dependents.putIfAbsent(
       dependent,
