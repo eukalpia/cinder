@@ -7,10 +7,17 @@ on:
       - 'lib/src/buffer.dart'
       - 'lib/src/rendering/frame_diff.dart'
       - 'lib/src/framework/terminal_canvas.dart'
+      - 'lib/src/framework/render_object.dart'
       - 'lib/src/binding/terminal_binding.dart'
+      - 'lib/src/components/repaint_boundary.dart'
+      - 'lib/src/components/list_view.dart'
+      - 'lib/src/components/image.dart'
+      - 'lib/src/image/**'
       - 'lib/src/utils/escape_codes.dart'
       - 'test/rendering/**'
+      - 'test/image/**'
       - 'benchmark/renderer_v2_benchmark.dart'
+      - 'benchmark/renderer_v2_layers_benchmark.dart'
       - '.github/workflows/renderer_v2.yml'
   pull_request:
     branches: [dev, test, main]
@@ -18,10 +25,17 @@ on:
       - 'lib/src/buffer.dart'
       - 'lib/src/rendering/frame_diff.dart'
       - 'lib/src/framework/terminal_canvas.dart'
+      - 'lib/src/framework/render_object.dart'
       - 'lib/src/binding/terminal_binding.dart'
+      - 'lib/src/components/repaint_boundary.dart'
+      - 'lib/src/components/list_view.dart'
+      - 'lib/src/components/image.dart'
+      - 'lib/src/image/**'
       - 'lib/src/utils/escape_codes.dart'
       - 'test/rendering/**'
+      - 'test/image/**'
       - 'benchmark/renderer_v2_benchmark.dart'
+      - 'benchmark/renderer_v2_layers_benchmark.dart'
       - '.github/workflows/renderer_v2.yml'
 
 concurrency:
@@ -39,8 +53,32 @@ jobs:
           sdk: stable
       - run: dart pub get
       - name: Analyze Renderer V2
-        run: dart analyze lib/src/buffer.dart lib/src/rendering/frame_diff.dart lib/src/framework/terminal_canvas.dart lib/src/binding/terminal_binding.dart lib/src/utils/escape_codes.dart test/rendering benchmark/renderer_v2_benchmark.dart
+        run: >-
+          dart analyze
+          lib/src/buffer.dart
+          lib/src/rendering/frame_diff.dart
+          lib/src/framework/terminal_canvas.dart
+          lib/src/framework/render_object.dart
+          lib/src/binding/terminal_binding.dart
+          lib/src/components/repaint_boundary.dart
+          lib/src/components/list_view.dart
+          lib/src/components/image.dart
+          lib/src/image
+          lib/src/utils/escape_codes.dart
+          test/rendering
+          test/image
+          benchmark/renderer_v2_benchmark.dart
+          benchmark/renderer_v2_layers_benchmark.dart
       - name: Renderer correctness and contracts
-        run: dart test test/rendering/buffer_v2_test.dart test/rendering/frame_diff_test.dart --reporter expanded
-      - name: Renderer microbenchmark
-        run: dart run benchmark/renderer_v2_benchmark.dart
+        run: >-
+          dart test
+          test/rendering/buffer_v2_test.dart
+          test/rendering/frame_diff_test.dart
+          test/rendering/repaint_boundary_test.dart
+          test/rendering/scroll_region_test.dart
+          test/image/image_pipeline_test.dart
+          --reporter expanded
+      - name: Renderer microbenchmarks
+        run: |
+          dart run benchmark/renderer_v2_benchmark.dart
+          dart run benchmark/renderer_v2_layers_benchmark.dart

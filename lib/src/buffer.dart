@@ -1,9 +1,11 @@
 import 'dart:collection';
+import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:characters/characters.dart';
 import 'package:cinder/src/rectangle.dart';
 
+import 'image/image_cleanup.dart';
 import 'style.dart';
 import 'utils/unicode_width.dart';
 
@@ -87,14 +89,43 @@ class PendingImage {
     required this.y,
     required this.width,
     required this.height,
-    required this.sixelData,
+    required this.protocol,
+    required this.encodedData,
+    this.imageId,
   });
 
   final int x;
   final int y;
   final int width;
   final int height;
-  final String sixelData;
+  final ImageProtocol protocol;
+  final String encodedData;
+  final int? imageId;
+
+  /// Compatibility alias retained for older internal callers.
+  String get sixelData => encodedData;
+
+  PendingImage translated(int dx, int dy) {
+    return PendingImage(
+      x: x + dx,
+      y: y + dy,
+      width: width,
+      height: height,
+      protocol: protocol,
+      encodedData: encodedData,
+      imageId: imageId,
+    );
+  }
+
+  bool samePlacement(PendingImage other) {
+    return x == other.x &&
+        y == other.y &&
+        width == other.width &&
+        height == other.height &&
+        protocol == other.protocol &&
+        imageId == other.imageId &&
+        encodedData == other.encodedData;
+  }
 }
 
 /// A reusable, flat terminal frame buffer with per-row dirty spans.
@@ -260,8 +291,10 @@ class Buffer {
     int y,
     int imageWidth,
     int imageHeight,
-    String sixelData,
-  ) {
+    String encodedData, {
+    required ImageProtocol protocol,
+    int? imageId,
+  }) {
     if (!contains(x, y)) return;
 
     final clampedWidth = (x + imageWidth > width) ? width - x : imageWidth;
@@ -280,9 +313,175 @@ class Buffer {
         y: y,
         width: clampedWidth,
         height: clampedHeight,
-        sixelData: sixelData,
+        protocol: protocol,
+        encodedData: encodedData,
+        imageId: imageId,
       ),
     );
+  }
+
+  /// Resets dirty-span metadata without modifying cell contents.
+  void resetDirtyTracking() {
+    for (var y = 0; y < height; y++) {
+      _dirtyStart[y] = width;
+      _dirtyEnd[y] = -1;
+    }
+  }
+
+  /// Clears the complete storage. Used when a full tree repaint is required.
+  void clearAll() {
+    for (final cell in _flatCells) {
+      cell.reset();
+    }
+    pendingImages.clear();
+    resetDirtyTracking();
+  }
+
+  /// Synchronizes this reusable back buffer with [source].
+  ///
+  /// Only the union of the two buffers' previous dirty spans can differ when
+  /// the buffers alternate as front/back frames, so unchanged rows are skipped.
+  /// The copied cells are not marked dirty: only subsequent paint damage should
+  /// participate in the terminal diff.
+  void synchronizeFrom(Buffer source) {
+    if (source.width != width || source.height != height) {
+      throw ArgumentError('Buffers must have identical dimensions.');
+    }
+
+    for (var y = 0; y < height; y++) {
+      final sourceDirty = source.isRowDirty(y);
+      final targetDirty = isRowDirty(y);
+      if (!sourceDirty && !targetDirty) continue;
+
+      final start = math.min(
+        sourceDirty ? source.dirtyStartForRow(y) : width,
+        targetDirty ? dirtyStartForRow(y) : width,
+      );
+      final end = math.max(
+        sourceDirty ? source.dirtyEndForRow(y) : -1,
+        targetDirty ? dirtyEndForRow(y) : -1,
+      );
+      for (var x = start; x <= end; x++) {
+        _flatCells[_index(x, y)].copyFrom(source.getCell(x, y));
+      }
+    }
+
+    pendingImages
+      ..clear()
+      ..addAll(source.pendingImages);
+    resetDirtyTracking();
+  }
+
+  /// Copies a rectangular layer into this buffer.
+  void blit(
+    Buffer source, {
+    required int destinationX,
+    required int destinationY,
+    int sourceX = 0,
+    int sourceY = 0,
+    int? copyWidth,
+    int? copyHeight,
+    bool markDirty = true,
+  }) {
+    final w = copyWidth ?? source.width;
+    final h = copyHeight ?? source.height;
+
+    final destinationRight = destinationX + w;
+    final destinationBottom = destinationY + h;
+    pendingImages.removeWhere((image) {
+      final imageRight = image.x + image.width;
+      final imageBottom = image.y + image.height;
+      return image.x < destinationRight &&
+          imageRight > destinationX &&
+          image.y < destinationBottom &&
+          imageBottom > destinationY;
+    });
+
+    for (var y = 0; y < h; y++) {
+      final sy = sourceY + y;
+      final dy = destinationY + y;
+      if (sy < 0 || sy >= source.height || dy < 0 || dy >= height) continue;
+      for (var x = 0; x < w; x++) {
+        final sx = sourceX + x;
+        final dx = destinationX + x;
+        if (sx < 0 || sx >= source.width || dx < 0 || dx >= width) continue;
+        _flatCells[_index(dx, dy)].copyFrom(source.getCell(sx, sy));
+        if (markDirty) markDirtyCell(dx, dy);
+      }
+    }
+
+    // Protocol images are terminal overlays rather than ordinary cells. Carry
+    // fully-contained overlays along when a cached layer is composited.
+    final sourceRight = sourceX + w;
+    final sourceBottom = sourceY + h;
+    for (final image in source.pendingImages) {
+      final imageRight = image.x + image.width;
+      final imageBottom = image.y + image.height;
+      if (image.x < sourceX ||
+          image.y < sourceY ||
+          imageRight > sourceRight ||
+          imageBottom > sourceBottom) {
+        continue;
+      }
+
+      final translated = image.translated(
+        destinationX - sourceX,
+        destinationY - sourceY,
+      );
+      if (translated.x < 0 ||
+          translated.y < 0 ||
+          translated.x + translated.width > width ||
+          translated.y + translated.height > height) {
+        continue;
+      }
+      if (!pendingImages.any(translated.samePlacement)) {
+        pendingImages.add(translated);
+      }
+    }
+  }
+
+  /// Mutates a vertical terminal scroll region in-place.
+  ///
+  /// Positive [lines] scrolls content up; negative values scroll down.
+  void scrollRegion(int top, int bottom, int lines, {bool markDirty = false}) {
+    final clippedTop = top.clamp(0, height);
+    final clippedBottom = bottom.clamp(0, height);
+    final regionHeight = clippedBottom - clippedTop;
+    if (regionHeight <= 0 || lines == 0) return;
+
+    final amount = lines.abs().clamp(0, regionHeight);
+    if (lines > 0) {
+      for (var y = clippedTop; y < clippedBottom - amount; y++) {
+        for (var x = 0; x < width; x++) {
+          _flatCells[_index(x, y)].copyFrom(getCell(x, y + amount));
+        }
+      }
+      for (var y = clippedBottom - amount; y < clippedBottom; y++) {
+        for (var x = 0; x < width; x++) {
+          _flatCells[_index(x, y)].reset();
+        }
+      }
+    } else {
+      for (var y = clippedBottom - 1; y >= clippedTop + amount; y--) {
+        for (var x = 0; x < width; x++) {
+          _flatCells[_index(x, y)].copyFrom(getCell(x, y - amount));
+        }
+      }
+      for (var y = clippedTop; y < clippedTop + amount; y++) {
+        for (var x = 0; x < width; x++) {
+          _flatCells[_index(x, y)].reset();
+        }
+      }
+    }
+
+    if (markDirty) markDirtyRect(0, clippedTop, width, clippedBottom);
+  }
+
+  bool hasImageInRegion(int top, int bottom) {
+    return pendingImages.any((image) {
+      final imageBottom = image.y + image.height;
+      return image.y < bottom && imageBottom > top;
+    });
   }
 
   void clearPendingImages() => pendingImages.clear();

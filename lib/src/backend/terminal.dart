@@ -252,13 +252,14 @@ class Terminal {
   /// ```dart
   /// terminal.writeSixel(sixelData, 10, 5);
   /// ```
-  void writeSixel(String sixelData, int x, int y) {
-    // Move cursor to the target position
+  /// Writes a pre-encoded inline image protocol sequence at a cell position.
+  void writeInlineImage(String encodedData, int x, int y) {
     moveCursor(x, y);
+    write(encodedData);
+  }
 
-    // Write the sixel data directly
-    // The sixel data is a complete escape sequence that will be
-    // interpreted by the terminal to render the image
-    write(sixelData);
+  /// Backwards-compatible Sixel-specific name.
+  void writeSixel(String sixelData, int x, int y) {
+    writeInlineImage(sixelData, x, y);
   }
 }

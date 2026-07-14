@@ -17,6 +17,12 @@ class EscapeCodes {
 
   /// End a synchronized terminal update. Unsupported terminals ignore it.
   static const endSynchronizedOutput = '\x1b[?2026l';
+
+  static String setScrollRegion(int top, int bottom) =>
+      '\x1b[${top + 1};${bottom}r';
+  static const resetScrollRegion = '\x1b[r';
+  static String scrollUp(int lines) => '\x1b[${lines}S';
+  static String scrollDown(int lines) => '\x1b[${lines}T';
 }
 
 class _Disable {

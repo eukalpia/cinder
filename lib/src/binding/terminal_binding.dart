@@ -54,6 +54,8 @@ class TerminalBinding extends CinderBinding
 
   /// Reusable back buffer painted for the next frame.
   buf.Buffer? _nextBuffer;
+  buf.Buffer? _pendingFrameBuffer;
+  List<buf.PendingImage> _activeImages = const <buf.PendingImage>[];
 
   int _lastComparedCells = 0;
   int _lastAnsiRuns = 0;
@@ -62,6 +64,12 @@ class TerminalBinding extends CinderBinding
 
   /// Number of cells compared by the most recent differential frame.
   int get lastComparedCells => _lastComparedCells;
+
+  /// Enables DECSTBM/CSI S/T acceleration for full-width vertical viewports.
+  bool enableHardwareScrollRegions = true;
+
+  int _lastPartialPaintBoundaries = 0;
+  int get lastPartialPaintBoundaries => _lastPartialPaintBoundaries;
 
   /// Number of cursor-positioned ANSI runs emitted by the most recent frame.
   int get lastAnsiRuns => _lastAnsiRuns;
@@ -984,9 +992,63 @@ class TerminalBinding extends CinderBinding
       buffer = buf.Buffer(width, height);
       _nextBuffer = buffer;
     } else {
-      buffer.clear();
+      buffer.clearAll();
     }
     return buffer;
+  }
+
+  buf.Buffer _preparePartialBuffer(int width, int height) {
+    final previous = _previousBuffer;
+    var buffer = _nextBuffer;
+    if (previous == null ||
+        previous.width != width ||
+        previous.height != height ||
+        buffer == null ||
+        buffer.width != width ||
+        buffer.height != height) {
+      return _prepareNextBuffer(width, height);
+    }
+    buffer.synchronizeFrom(previous);
+    return buffer;
+  }
+
+  List<RenderObject> _topmostDirtyBoundaries(List<RenderObject> nodes) {
+    final boundaries = nodes.where((node) => node.isRepaintBoundary).toSet();
+    return boundaries.where((node) {
+      RenderObject? ancestor = node.parent;
+      while (ancestor != null) {
+        if (boundaries.contains(ancestor)) return false;
+        ancestor = ancestor.parent;
+      }
+      return true;
+    }).toList()
+      ..sort((a, b) => a.depth.compareTo(b.depth));
+  }
+
+  void _applyHardwareScrollRequests(buf.Buffer previous, int screenWidth) {
+    final requests = pipelineOwner.takeTerminalScrollRequests();
+    if (!enableHardwareScrollRegions) return;
+    for (final request in requests) {
+      final top = request.top.clamp(0, previous.height);
+      final bottom = (request.top + request.height).clamp(0, previous.height);
+      final lines = request.lines;
+      final fullWidth = request.left == 0 && request.width == screenWidth;
+      if (!fullWidth ||
+          top >= bottom ||
+          lines == 0 ||
+          lines.abs() >= bottom - top) {
+        continue;
+      }
+      if (previous.hasImageInRegion(top, bottom)) continue;
+
+      terminal.write(EscapeCodes.setScrollRegion(top, bottom));
+      terminal.moveCursor(0, top);
+      terminal.write(lines > 0
+          ? EscapeCodes.scrollUp(lines)
+          : EscapeCodes.scrollDown(-lines));
+      terminal.write(EscapeCodes.resetScrollRegion);
+      previous.scrollRegion(top, bottom, lines);
+    }
   }
 
   /// Renders only the cells that changed since the previous frame.
@@ -1086,8 +1148,8 @@ class TerminalBinding extends CinderBinding
       terminal.write(TextStyle.reset);
     }
 
-    // Render pending sixel images
-    _renderPendingImages(buffer);
+    // A full-screen clear removes native image overlays, so re-emit them.
+    _renderPendingImages(buffer, force: true);
 
     // Intentionally do NOT flush here. See _renderFullDiff for the full
     // rationale; the same split-frame issue applies here on the
@@ -1161,19 +1223,20 @@ class TerminalBinding extends CinderBinding
     return (value * 100 / total).toStringAsFixed(1);
   }
 
-  /// Renders all pending sixel images from the buffer.
-  void _renderPendingImages(buf.Buffer buffer) {
-    // First, clear any regions that need cleanup (from unmounted images)
+  /// Reconciles terminal image overlays with the current frame.
+  void _renderPendingImages(buf.Buffer buffer, {bool force = false}) {
     final cleanups = ImageCleanupManager.instance.consumePendingCleanups();
     for (final region in cleanups) {
       _clearImageRegion(region.x, region.y, region.width, region.height);
     }
 
-    // Then render new sixel images
     for (final image in buffer.pendingImages) {
-      terminal.writeSixel(image.sixelData, image.x, image.y);
+      final alreadyVisible = _activeImages.any(image.samePlacement);
+      if (force || !alreadyVisible) {
+        terminal.writeInlineImage(image.encodedData, image.x, image.y);
+      }
     }
-    buffer.clearPendingImages();
+    _activeImages = List<buf.PendingImage>.unmodifiable(buffer.pendingImages);
   }
 
   /// Clears an image region by writing spaces.
@@ -1328,7 +1391,8 @@ class TerminalBinding extends CinderBinding
 
     // Get current terminal size (may have been updated by resize event)
     final size = terminal.size;
-    final buffer = _prepareNextBuffer(size.width.toInt(), size.height.toInt());
+    final width = size.width.toInt();
+    final height = size.height.toInt();
     final screenRect = Rect.fromLTWH(
       0,
       0,
@@ -1358,27 +1422,50 @@ class TerminalBinding extends CinderBinding
         renderObject.attach(pipelineOwner);
       }
 
+      final layoutWasDirty =
+          renderObject.needsLayout || pipelineOwner.hasNodesToLayout;
+
       // Layout phase
       renderObject.layout(
         BoxConstraints.tight(
           Size(size.width.toDouble(), size.height.toDouble()),
         ),
       );
-
-      // Flush layout pipeline
       pipelineOwner.flushLayout();
 
       t3 = DateTime.now().microsecondsSinceEpoch;
-      // Report layout end time to scheduler for FrameTiming
       currentFrameLayoutEnd = t3;
 
-      // Flush paint pipeline
-      pipelineOwner.flushPaint();
+      final dirtyPaintNodes = pipelineOwner.takeNodesNeedingPaint();
+      final boundaries = _topmostDirtyBoundaries(dirtyPaintNodes);
+      final canPartialPaint = _previousBuffer != null &&
+          !layoutWasDirty &&
+          dirtyPaintNodes.isNotEmpty &&
+          boundaries.length == dirtyPaintNodes.toSet().length &&
+          boundaries.every((node) =>
+              node is RenderRepaintBoundary && node.lastPaintOffset != null);
 
-      // Paint phase - paint directly to buffer
+      final buffer = canPartialPaint
+          ? _preparePartialBuffer(width, height)
+          : _prepareNextBuffer(width, height);
       final canvas = TerminalCanvas(buffer, screenRect);
-      renderObject.paintWithContext(canvas, Offset.zero);
+
+      if (canPartialPaint) {
+        _lastPartialPaintBoundaries = boundaries.length;
+        for (final node in boundaries.cast<RenderRepaintBoundary>()) {
+          node.paintWithContext(canvas, node.lastPaintOffset!);
+        }
+      } else {
+        _lastPartialPaintBoundaries = 0;
+        renderObject.paintWithContext(canvas, Offset.zero);
+        pipelineOwner.clearPaintQueue();
+      }
+
+      _pendingFrameBuffer = buffer;
     }
+
+    final buffer = _pendingFrameBuffer ?? _prepareNextBuffer(width, height);
+    _pendingFrameBuffer = null;
 
     t4 = DateTime.now().microsecondsSinceEpoch;
     // Report paint end time to scheduler for FrameTiming
@@ -1388,6 +1475,12 @@ class TerminalBinding extends CinderBinding
     // atomically. Unsupported terminals safely ignore private mode 2026.
     terminal.write(EscapeCodes.beginSynchronizedOutput);
     try {
+      final previous = _previousBuffer;
+      if (previous != null) {
+        _applyHardwareScrollRequests(previous, width);
+      } else {
+        pipelineOwner.takeTerminalScrollRequests();
+      }
       _renderDifferential(buffer);
 
       // Keep IME composition anchored after all cursor-moving diff runs.
