@@ -14,25 +14,32 @@ jobs:
         with:
           ref: feature/renderer-v2-layers
           fetch-depth: 0
-      - name: Reconstruct patch
+      - name: Decode payload parts
+        shell: bash
         run: |
-          python3 - <<'PY'
-          import base64, gzip
+          set +e
+          mkdir -p /tmp/phase2-payload
+          python3 - <<'PY' > /tmp/phase2-payload/report.txt 2>&1
+          import base64, gzip, traceback
           from pathlib import Path
 
-          root = Path('.')
-          outputs = []
-          for name in ('part1.txt', 'patch.gz.b64'):
-              text = (root / '.github/phase2_payload' / name).read_text().strip()
-              text += '=' * (-len(text) % 4)
-              outputs.append(gzip.decompress(base64.b64decode(text)))
-
-          patch = b''.join(outputs)
-          Path('/tmp/renderer-v2-phase2.patch').write_bytes(patch)
-          print(f'patch bytes: {len(patch)}')
+          root = Path('.github/phase2_payload')
+          for index, name in enumerate(('part1.txt', 'patch.gz.b64'), 1):
+              try:
+                  text = (root / name).read_text().strip()
+                  text += '=' * (-len(text) % 4)
+                  raw = base64.b64decode(text, validate=False)
+                  print(name, 'base64_bytes=', len(raw), 'magic=', raw[:4])
+                  decoded = gzip.decompress(raw)
+                  out = Path(f'/tmp/phase2-payload/part{index}.patch')
+                  out.write_bytes(decoded)
+                  print(name, 'decoded_bytes=', len(decoded), 'prefix=', decoded[:100])
+              except Exception:
+                  print(name, 'FAILED')
+                  traceback.print_exc()
           PY
-          git apply --check --whitespace=nowarn /tmp/renderer-v2-phase2.patch
+          cat /tmp/phase2-payload/report.txt
       - uses: actions/upload-artifact@v4
         with:
-          name: renderer-v2-phase2-patch
-          path: /tmp/renderer-v2-phase2.patch
+          name: renderer-v2-phase2-payload
+          path: /tmp/phase2-payload
