@@ -110,7 +110,8 @@ class TextField extends StatefulWidget {
   const TextField({
     super.key,
     this.controller,
-    this.focused = false,
+    this.focusNode,
+    this.autofocus = false,
     this.onFocusChange,
     this.decoration,
     this.style,
@@ -147,7 +148,8 @@ class TextField extends StatefulWidget {
         assert(maxLength == null || maxLength > 0);
 
   final TextEditingController? controller;
-  final bool focused;
+  final FocusNode? focusNode;
+  final bool autofocus;
   final ValueChanged<bool>? onFocusChange;
   final InputDecoration? decoration;
   final TextStyle? style;
@@ -199,6 +201,9 @@ class TextField extends StatefulWidget {
 class _TextFieldState extends State<TextField> {
   late TextEditingController _controller;
   bool _controllerIsInternal = false;
+  late FocusNode _focusNode;
+  bool _focusNodeIsInternal = false;
+  bool _hasFocus = false;
   Timer? _cursorTimer;
   bool _cursorVisible = true;
   int _viewOffset = 0; // For horizontal scrolling
@@ -206,19 +211,48 @@ class _TextFieldState extends State<TextField> {
   // Reference to the render object for cursor movement
   RenderTextField? _renderTextField;
 
+  void _initFocusNode() {
+    _focusNodeIsInternal = widget.focusNode == null;
+    _focusNode = widget.focusNode ?? FocusNode(debugLabel: 'TextField');
+    _hasFocus = _focusNode.hasFocus;
+    _focusNode.addListener(_handleFocusChanged);
+  }
+
+  void _disposeFocusNode() {
+    _focusNode.removeListener(_handleFocusChanged);
+    if (_focusNodeIsInternal) {
+      _focusNode.dispose();
+    }
+  }
+
+  void _handleFocusChanged() {
+    final hasFocus = _focusNode.hasFocus;
+    if (hasFocus == _hasFocus) return;
+
+    _hasFocus = hasFocus;
+    if (hasFocus && widget.showCursor) {
+      _startCursorBlink();
+    } else {
+      _stopCursorBlink();
+    }
+    widget.onFocusChange?.call(hasFocus);
+    if (mounted) setState(() {});
+  }
+
   void _handleSelectionChangeFromRenderObject(TextSelection newSelection) {
     setState(() {
       _controller.selection = newSelection;
     });
-    // Request focus if not already focused (e.g., user clicked in the field)
-    if (!widget.focused) {
-      widget.onFocusChange?.call(true);
+    // Mouse selection should focus the field, matching Flutter TextField.
+    if (!_focusNode.hasFocus) {
+      _focusNode.requestFocus();
     }
   }
 
   @override
   void initState() {
     super.initState();
+    _initFocusNode();
 
     if (widget.controller == null) {
       _controller = TextEditingController();
@@ -229,7 +263,7 @@ class _TextFieldState extends State<TextField> {
 
     _controller.addListener(_handleControllerChanged);
 
-    if (widget.focused && widget.showCursor) {
+    if (_hasFocus && widget.showCursor) {
       _startCursorBlink();
     }
   }
@@ -237,6 +271,7 @@ class _TextFieldState extends State<TextField> {
   @override
   void dispose() {
     _stopCursorBlink();
+    _disposeFocusNode();
     _controller.removeListener(_handleControllerChanged);
 
     if (_controllerIsInternal) {
@@ -258,10 +293,16 @@ class _TextFieldState extends State<TextField> {
   void didUpdateWidget(TextField oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    // Handle focus changes or blink rate changes
-    if (widget.focused != oldWidget.focused ||
-        widget.cursorBlinkRate != oldWidget.cursorBlinkRate) {
-      if (widget.focused && widget.showCursor) {
+    final focusNodeChanged = !identical(widget.focusNode, oldWidget.focusNode);
+    if (focusNodeChanged) {
+      _disposeFocusNode();
+      _initFocusNode();
+    }
+
+    if (focusNodeChanged ||
+        widget.cursorBlinkRate != oldWidget.cursorBlinkRate ||
+        widget.showCursor != oldWidget.showCursor) {
+      if (_hasFocus && widget.showCursor) {
         _startCursorBlink();
       } else {
         _stopCursorBlink();
@@ -880,7 +921,7 @@ class _TextFieldState extends State<TextField> {
   @override
   Widget build(BuildContext context) {
     final decoration = widget.decoration ?? const InputDecoration();
-    final isFocused = widget.focused;
+    final isFocused = _hasFocus;
 
     // Prepare display text (for obscuring only)
     final actualText = _controller.text;
@@ -974,9 +1015,11 @@ class _TextFieldState extends State<TextField> {
       );
     }
 
-    // Wrap with Focusable for keyboard input
-    return Focusable(
-      focused: isFocused,
+    // Focus owns traversal and keyboard dispatch for the field.
+    return Focus(
+      focusNode: _focusNode,
+      autofocus: widget.autofocus,
+      canRequestFocus: widget.enabled,
       onKeyEvent: _handleKeyEvent,
       child: content,
     );

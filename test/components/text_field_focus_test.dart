@@ -57,13 +57,13 @@ void main() {
 
       final field1 = TextField(
         controller: controller1,
-        focused: true,
+        autofocus: true,
         onFocusChange: (focused) {},
       );
 
       final field2 = TextField(
         controller: controller2,
-        focused: false,
+        autofocus: false,
         onFocusChange: (focused) {},
       );
 
@@ -74,7 +74,7 @@ void main() {
 
     test('TextField calls onFocusChange when tapped', () {
       final field = TextField(
-        focused: false,
+        autofocus: false,
         onFocusChange: (focused) {},
       );
 
@@ -88,13 +88,13 @@ void main() {
       // Text should be managed regardless of focus state
       final fieldFocused = TextField(
         controller: controller,
-        focused: true,
+        autofocus: true,
         onFocusChange: (_) {},
       );
 
       final fieldUnfocused = TextField(
         controller: controller,
-        focused: false,
+        autofocus: false,
         onFocusChange: (_) {},
       );
 
@@ -110,7 +110,7 @@ void main() {
     test('TextField no longer uses FocusNode', () {
       // Verify that TextField constructor doesn't accept FocusNode
       final field = TextField(
-        focused: true,
+        autofocus: true,
         onFocusChange: (_) {},
       );
 

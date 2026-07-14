@@ -50,11 +50,13 @@ void main() {
       firstNode.requestFocus();
       await tester.pump();
       expect(firstNode.hasPrimaryFocus, isTrue);
-      expect(focusChanges, containsAll(<String>[
-        'first:true',
-        'first:false',
-        'second:true',
-      ]));
+      expect(
+          focusChanges,
+          containsAll(<String>[
+            'first:true',
+            'first:false',
+            'second:true',
+          ]));
     });
 
     firstNode.dispose();

@@ -15,7 +15,7 @@ void main() {
             decoration: BoxDecoration(border: BoxBorder.all()),
             child: TextField(
               controller: controller,
-              focused: true,
+              autofocus: true,
               // No selectionColor or cursorColor specified - using defaults
             ),
           ),

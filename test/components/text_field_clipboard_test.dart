@@ -14,7 +14,7 @@ void main() {
           await tester.pumpWidget(
             TextField(
               controller: controller,
-              focused: true,
+              autofocus: true,
               decoration: InputDecoration(
                 border: BoxBorder.all(),
               ),
@@ -48,7 +48,7 @@ void main() {
           await tester.pumpWidget(
             TextField(
               controller: controller,
-              focused: true,
+              autofocus: true,
               decoration: InputDecoration(
                 border: BoxBorder.all(),
               ),
@@ -93,7 +93,7 @@ void main() {
           await tester.pumpWidget(
             TextField(
               controller: controller,
-              focused: true,
+              autofocus: true,
               decoration: InputDecoration(
                 border: BoxBorder.all(),
               ),
@@ -125,7 +125,7 @@ void main() {
           await tester.pumpWidget(
             TextField(
               controller: controller,
-              focused: true,
+              autofocus: true,
               decoration: InputDecoration(
                 border: BoxBorder.all(),
               ),
@@ -163,7 +163,7 @@ void main() {
           await tester.pumpWidget(
             TextField(
               controller: controller,
-              focused: true,
+              autofocus: true,
               decoration: InputDecoration(
                 border: BoxBorder.all(),
               ),
@@ -221,7 +221,7 @@ void main() {
           await tester.pumpWidget(
             TextField(
               controller: controller,
-              focused: true,
+              autofocus: true,
               decoration: InputDecoration(
                 border: BoxBorder.all(),
               ),
@@ -253,7 +253,7 @@ void main() {
           await tester.pumpWidget(
             TextField(
               controller: controller,
-              focused: true,
+              autofocus: true,
               maxLines: 1, // Single-line field
               decoration: InputDecoration(
                 border: BoxBorder.all(),

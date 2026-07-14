@@ -15,7 +15,7 @@ void main() async {
       await tester.pumpWidget(
         TextField(
           controller: controller,
-          focused: true,
+          autofocus: true,
         ),
       );
 

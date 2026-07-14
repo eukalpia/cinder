@@ -16,7 +16,7 @@ void main() {
                 height: 1,
                 child: TextField(
                   controller: controller,
-                  focused: true,
+                  autofocus: true,
                   maxLines: 1,
                   showCursor: true,
                   cursorBlinkRate: null,
@@ -56,7 +56,7 @@ void main() {
                 height: 1,
                 child: TextField(
                   controller: controller,
-                  focused: true,
+                  autofocus: true,
                   maxLines: 1,
                   showCursor: true,
                   cursorBlinkRate: null,
@@ -88,7 +88,7 @@ void main() {
                 height: 1,
                 child: TextField(
                   controller: controller,
-                  focused: true,
+                  autofocus: true,
                   maxLines: 1,
                   showCursor: true,
                   cursorBlinkRate: null,
@@ -120,7 +120,7 @@ void main() {
                 height: 1,
                 child: TextField(
                   controller: controller,
-                  focused: true,
+                  autofocus: true,
                   maxLines: 1,
                   showCursor: true,
                   cursorBlinkRate: null,
@@ -159,7 +159,7 @@ void main() {
                 height: 1,
                 child: TextField(
                   controller: controller,
-                  focused: true,
+                  autofocus: true,
                   maxLines: 1,
                   showCursor: true,
                   cursorBlinkRate: null,
@@ -200,7 +200,7 @@ void main() {
                 height: 1,
                 child: TextField(
                   controller: controller,
-                  focused: true,
+                  autofocus: true,
                   maxLines: 1,
                   showCursor: true,
                   cursorBlinkRate: null,
@@ -236,7 +236,7 @@ void main() {
                 height: 1,
                 child: TextField(
                   controller: controller,
-                  focused: true,
+                  autofocus: true,
                   maxLines: 1,
                   showCursor: true,
                   cursorBlinkRate: null,
@@ -275,7 +275,7 @@ void main() {
                 height: 1,
                 child: TextField(
                   controller: controller,
-                  focused: false,
+                  autofocus: false,
                   onFocusChange: (focused) {
                     focusChanged = focused;
                   },
@@ -311,7 +311,7 @@ void main() {
                 height: 5,
                 child: TextField(
                   controller: controller,
-                  focused: true,
+                  autofocus: true,
                   maxLines: 5,
                   showCursor: true,
                   cursorBlinkRate: null,
@@ -357,7 +357,7 @@ void main() {
                 height: 5,
                 child: TextField(
                   controller: controller,
-                  focused: true,
+                  autofocus: true,
                   maxLines: 5,
                   showCursor: true,
                   cursorBlinkRate: null,
@@ -390,7 +390,7 @@ void main() {
                 height: 1,
                 child: TextField(
                   controller: controller,
-                  focused: true,
+                  autofocus: true,
                   maxLines: 1,
                   showCursor: true,
                   cursorBlinkRate: null,
@@ -432,7 +432,7 @@ void main() {
                 height: 1,
                 child: TextField(
                   controller: controller,
-                  focused: true,
+                  autofocus: true,
                   maxLines: 1,
                   showCursor: true,
                   cursorBlinkRate: null,
@@ -481,7 +481,7 @@ void main() {
                 height: 5,
                 child: TextField(
                   controller: controller,
-                  focused: true,
+                  autofocus: true,
                   maxLines: 5,
                   showCursor: true,
                   cursorBlinkRate: null,
@@ -525,7 +525,7 @@ void main() {
                 height: 1,
                 child: TextField(
                   controller: controller,
-                  focused: true,
+                  autofocus: true,
                   maxLines: 1,
                   showCursor: true,
                   cursorBlinkRate: null,
@@ -571,7 +571,7 @@ void main() {
                 height: 1,
                 child: TextField(
                   controller: controller,
-                  focused: true,
+                  autofocus: true,
                   maxLines: 1,
                   showCursor: true,
                   cursorBlinkRate: null,
@@ -608,7 +608,7 @@ void main() {
             await tester.pumpWidget(
               TextField(
                 controller: controller,
-                focused: true,
+                autofocus: true,
                 maxLines: 1,
                 width: 30,
                 showCursor: true,

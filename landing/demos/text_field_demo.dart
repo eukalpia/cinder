@@ -38,7 +38,7 @@ class _TextFieldDemoState extends State<TextFieldDemo> {
                 width: 30,
                 child: TextField(
                   controller: _controller,
-                  focused: true,
+                  autofocus: true,
                   onSubmitted: (value) {
                     if (value.isNotEmpty) {
                       setState(() {

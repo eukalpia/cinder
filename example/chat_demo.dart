@@ -211,7 +211,7 @@ class _ChatDemoState extends State<ChatDemo> {
                   Expanded(
                     child: TextField(
                       controller: textController,
-                      focused: true,
+                      autofocus: true,
                       style: TextStyle(color: Colors.white),
                       placeholder: 'Type a message...',
                       onSubmitted: (_) => _sendMessage(),

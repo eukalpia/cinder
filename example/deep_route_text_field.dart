@@ -29,7 +29,7 @@ class _NoNavigationState extends State<NoNavigation> {
         }
         return false;
       },
-      child: TextField(controller: controller, focused: true),
+      child: TextField(controller: controller, autofocus: true),
     );
   }
 }
@@ -64,7 +64,7 @@ class _MyAppWithNavigationState extends State<MyAppWithNavigation> {
               ),
               width: 100,
               height: 100,
-              child: TextField(controller: controller, focused: true),
+              child: TextField(controller: controller, autofocus: true),
             )
           : Text('Depth: ${widget.depth}'),
     );

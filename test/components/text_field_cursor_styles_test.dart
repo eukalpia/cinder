@@ -22,7 +22,7 @@ void main() {
                     style: TextStyle(color: Colors.yellow)),
                 TextField(
                   controller: TextEditingController(text: 'Block cursor'),
-                  focused: true,
+                  autofocus: true,
                   cursorStyle: CursorStyle.block,
                   cursorColor: Colors.white,
                   width: 30,
@@ -78,7 +78,7 @@ void main() {
           await tester.pumpWidget(
             TextField(
               controller: controller,
-              focused: true,
+              autofocus: true,
               cursorStyle: CursorStyle.underline,
               width: 20,
             ),
@@ -92,7 +92,7 @@ void main() {
           await tester.pumpWidget(
             TextField(
               controller: controller,
-              focused: true,
+              autofocus: true,
               cursorStyle: CursorStyle.underline,
               width: 20,
             ),
@@ -107,7 +107,7 @@ void main() {
           await tester.pumpWidget(
             TextField(
               controller: controller,
-              focused: true,
+              autofocus: true,
               cursorStyle: CursorStyle.underline,
               width: 20,
             ),
@@ -130,7 +130,7 @@ void main() {
                 Text('Empty fields with different cursor styles:'),
                 const SizedBox(height: 1),
                 TextField(
-                  focused: true,
+                  autofocus: true,
                   cursorStyle: CursorStyle.block,
                   placeholder: 'Block cursor...',
                   width: 25,
@@ -163,7 +163,7 @@ void main() {
           await tester.pumpWidget(
             TextField(
               controller: controller,
-              focused: true,
+              autofocus: true,
               cursorStyle: CursorStyle.block,
               width: 20,
             ),
@@ -175,7 +175,7 @@ void main() {
           await tester.pumpWidget(
             TextField(
               controller: controller,
-              focused: true,
+              autofocus: true,
               cursorStyle: CursorStyle.underline,
               width: 20,
             ),
@@ -200,7 +200,7 @@ void main() {
                 Text('Static block cursor:'),
                 TextField(
                   controller: TextEditingController(text: 'No blinking'),
-                  focused: true,
+                  autofocus: true,
                   cursorStyle: CursorStyle.block,
                   cursorBlinkRate: null, // Non-blinking
                   width: 25,

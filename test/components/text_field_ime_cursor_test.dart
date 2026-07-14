@@ -40,7 +40,7 @@ void main() {
               controller: controller,
               width: 20,
               maxLines: 6,
-              focused: true,
+              autofocus: true,
             ),
           );
 

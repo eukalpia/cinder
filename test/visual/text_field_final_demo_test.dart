@@ -23,7 +23,7 @@ void main() {
                 controller: multiLineController,
                 width: 60,
                 maxLines: 4,
-                focused: true,
+                autofocus: true,
                 decoration: const InputDecoration(
                   border: BoxBorder(),
                   contentPadding: EdgeInsets.symmetric(horizontal: 1),
