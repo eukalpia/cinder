@@ -79,13 +79,15 @@ class FocusManager {
   }
 
   List<FocusNode> _traversableNodes({FocusScopeNode? scope}) {
-    return _nodes.where((node) {
-      if (node is FocusScopeNode) return false;
-      if (!_canRequestFocus(node) || node.skipTraversal) return false;
-      if (!_ancestorsAllowTraversal(node)) return false;
-      if (scope != null && !node.ancestors.contains(scope)) return false;
-      return true;
-    }).toList(growable: false);
+    return _nodes
+        .where((node) {
+          if (node is FocusScopeNode) return false;
+          if (!_canRequestFocus(node) || node.skipTraversal) return false;
+          if (!_ancestorsAllowTraversal(node)) return false;
+          if (scope != null && !node.ancestors.contains(scope)) return false;
+          return true;
+        })
+        .toList(growable: false);
   }
 
   @internal
@@ -168,8 +170,8 @@ class FocusNode implements Listenable {
     this.onKeyEvent,
     bool canRequestFocus = true,
     bool skipTraversal = false,
-  })  : _canRequestFocus = canRequestFocus,
-        _skipTraversal = skipTraversal;
+  }) : _canRequestFocus = canRequestFocus,
+       _skipTraversal = skipTraversal;
 
   final String? debugLabel;
   KeyEventHandler? onKeyEvent;
@@ -232,9 +234,7 @@ class FocusNode implements Listenable {
   }
 
   /// Removes focus from this node.
-  void unfocus({
-    UnfocusDisposition disposition = UnfocusDisposition.scope,
-  }) {
+  void unfocus({UnfocusDisposition disposition = UnfocusDisposition.scope}) {
     final scope = nearestScope;
     if (disposition == UnfocusDisposition.previouslyFocusedChild &&
         scope?.focusedChild != null &&
@@ -353,7 +353,8 @@ class FocusScopeNode extends FocusNode {
 
   /// Requests focus for [node], or the remembered/first traversable descendant.
   void requestScopeFocus([FocusNode? node]) {
-    final target = node ??
+    final target =
+        node ??
         FocusManager.instance.firstTraversableDescendant(this) ??
         (canRequestFocus ? this : null);
     target?.requestFocus();
@@ -459,11 +460,13 @@ class _FocusState extends State<Focus> {
   void _scheduleAutofocus() {
     if (!widget.autofocus || _autofocusScheduled) return;
     _autofocusScheduled = true;
-    SchedulerBinding.instance.addPostFrameCallback((_) {
-      if (mounted && _node.attached && !_node.hasFocus) {
-        _node.requestFocus();
-      }
-    });
+
+    // The node is already attached when didChangeDependencies reaches here.
+    // Requesting focus synchronously makes the first key event deterministic
+    // and avoids requiring an extra frame after pumpWidget/runApp.
+    if (_node.attached && !_node.hasFocus) {
+      _node.requestFocus();
+    }
   }
 
   void _handleFocusChange() {
