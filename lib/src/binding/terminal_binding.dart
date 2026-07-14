@@ -48,8 +48,20 @@ class TerminalBinding extends CinderBinding
   final _mouseTracker = MouseTracker();
   final _oscEventsController = StreamController<String>.broadcast();
 
-  /// Previous frame's buffer for differential rendering.
+  /// Front buffer currently represented by the physical terminal.
   buf.Buffer? _previousBuffer;
+
+  /// Reusable back buffer painted for the next frame.
+  buf.Buffer? _nextBuffer;
+
+  int _lastComparedCells = 0;
+  int _lastAnsiRuns = 0;
+
+  /// Number of cells compared by the most recent differential frame.
+  int get lastComparedCells => _lastComparedCells;
+
+  /// Number of cursor-positioned ANSI runs emitted by the most recent frame.
+  int get lastAnsiRuns => _lastAnsiRuns;
 
   // Event-driven loop support
   final _eventLoopController = StreamController<void>.broadcast();
@@ -104,13 +116,15 @@ class TerminalBinding extends CinderBinding
 
   /// Start logging performance stats every [interval] seconds.
   /// Stats are printed to the cinder log (view with `cinder logs`).
-  void startPerformanceLogging(
-      {Duration interval = const Duration(seconds: 5)}) {
+  void startPerformanceLogging({
+    Duration interval = const Duration(seconds: 5),
+  }) {
     _perfLogTimer?.cancel();
     _statsStartTime = DateTime.now();
     _perfLogTimer = Timer.periodic(interval, (_) {
       final stats = getPerformanceStats();
-      final msg = 'PERF: fps=${stats['fps']!.toStringAsFixed(1)}, '
+      final msg =
+          'PERF: fps=${stats['fps']!.toStringAsFixed(1)}, '
           'builds=${stats['builds']!.toStringAsFixed(1)}/s, '
           'layouts=${stats['layouts']!.toStringAsFixed(1)}/s, '
           'paints=${stats['paints']!.toStringAsFixed(1)}/s';
@@ -334,8 +348,10 @@ class TerminalBinding extends CinderBinding
 
         if (foundTerminator && end < bytes.length) {
           // Extract OSC content
-          final oscContent =
-              utf8.decode(bytes.sublist(i + 2, end), allowMalformed: true);
+          final oscContent = utf8.decode(
+            bytes.sublist(i + 2, end),
+            allowMalformed: true,
+          );
 
           // Handle OSC sequence based on command number
           _handleOscSequence(oscContent);
@@ -443,7 +459,8 @@ class TerminalBinding extends CinderBinding
       if (event is KeyboardInputEvent) {
         final keyEvent = event.event;
         // Check if this is a simple printable character (no modifiers except shift)
-        final isPrintable = keyEvent.character != null &&
+        final isPrintable =
+            keyEvent.character != null &&
             keyEvent.character!.isNotEmpty &&
             !keyEvent.isControlPressed &&
             !keyEvent.isAltPressed &&
@@ -480,8 +497,9 @@ class TerminalBinding extends CinderBinding
             _lastKnownSize!.height != newSize.height) {
           _lastKnownSize = newSize;
           terminal.updateSize(newSize);
-          // Clear previous buffer to force full redraw on resize
+          // Drop both buffers to force a correctly sized full redraw.
           _previousBuffer = null;
+          _nextBuffer = null;
           scheduleFrame();
         }
       });
@@ -624,8 +642,12 @@ class TerminalBinding extends CinderBinding
       // Find the render object at the mouse position
       final renderObject = _findRenderObjectInTree(rootElement!);
       if (renderObject != null) {
-        _dispatchMouseWheelAtPosition(rootElement!, event,
-            Offset(event.x.toDouble(), event.y.toDouble()), Offset.zero);
+        _dispatchMouseWheelAtPosition(
+          rootElement!,
+          event,
+          Offset(event.x.toDouble(), event.y.toDouble()),
+          Offset.zero,
+        );
       }
     }
 
@@ -691,8 +713,12 @@ class TerminalBinding extends CinderBinding
   }
 
   /// Dispatch a mouse wheel event to scrollable RenderObjects at a specific position
-  bool _dispatchMouseWheelAtPosition(Element element, MouseEvent event,
-      Offset mousePos, Offset currentOffset) {
+  bool _dispatchMouseWheelAtPosition(
+    Element element,
+    MouseEvent event,
+    Offset mousePos,
+    Offset currentOffset,
+  ) {
     // TODO: This is a hack to handle RenderTheater specially for Navigator
     // Should be properly integrated into the render object hierarchy
     if (element.renderObject is RenderTheater) {
@@ -700,7 +726,11 @@ class TerminalBinding extends CinderBinding
       if (multiChildRenderObject.children.isNotEmpty) {
         final child = multiChildRenderObject.children.last;
         return _dispatchMouseWheelAtPosition(
-            child, event, mousePos, currentOffset);
+          child,
+          event,
+          mousePos,
+          currentOffset,
+        );
       }
     }
 
@@ -754,7 +784,11 @@ class TerminalBinding extends CinderBinding
     for (final child in children.reversed) {
       if (!handled) {
         handled = _dispatchMouseWheelAtPosition(
-            child, event, mousePos, childrenOffset);
+          child,
+          event,
+          mousePos,
+          childrenOffset,
+        );
       }
     }
 
@@ -937,6 +971,17 @@ class TerminalBinding extends CinderBinding
     super.handleDrawFrame();
   }
 
+  buf.Buffer _prepareNextBuffer(int width, int height) {
+    var buffer = _nextBuffer;
+    if (buffer == null || buffer.width != width || buffer.height != height) {
+      buffer = buf.Buffer(width, height);
+      _nextBuffer = buffer;
+    } else {
+      buffer.clear();
+    }
+    return buffer;
+  }
+
   /// Renders only the cells that changed since the previous frame.
   void _renderDifferential(buf.Buffer buffer) {
     final previous = _previousBuffer;
@@ -953,80 +998,95 @@ class TerminalBinding extends CinderBinding
     _renderFullDiff(buffer, previous);
   }
 
-  /// Full buffer diff - compare every cell.
+  /// Dirty-span differential renderer.
+  ///
+  /// Only the union of rows touched by the current and previous frame is
+  /// inspected. Consecutive changed cells are emitted as one cursor-positioned
+  /// ANSI run instead of one cursor move and write per cell.
   void _renderFullDiff(buf.Buffer buffer, buf.Buffer previous) {
-    TextStyle? currentStyle;
+    _lastComparedCells = 0;
+    _lastAnsiRuns = 0;
 
-    for (int y = 0; y < buffer.height; y++) {
-      for (int x = 0; x < buffer.width; x++) {
+    for (var y = 0; y < buffer.height; y++) {
+      final currentDirty = buffer.isRowDirty(y);
+      final previousDirty = previous.isRowDirty(y);
+      if (!currentDirty && !previousDirty) continue;
+
+      final start = currentDirty && previousDirty
+          ? (buffer.dirtyStartForRow(y) < previous.dirtyStartForRow(y)
+                ? buffer.dirtyStartForRow(y)
+                : previous.dirtyStartForRow(y))
+          : currentDirty
+          ? buffer.dirtyStartForRow(y)
+          : previous.dirtyStartForRow(y);
+      final end = currentDirty && previousDirty
+          ? (buffer.dirtyEndForRow(y) > previous.dirtyEndForRow(y)
+                ? buffer.dirtyEndForRow(y)
+                : previous.dirtyEndForRow(y))
+          : currentDirty
+          ? buffer.dirtyEndForRow(y)
+          : previous.dirtyEndForRow(y);
+
+      var x = start;
+      while (x <= end) {
+        _lastComparedCells++;
         final cell = buffer.getCell(x, y);
-        final prevCell = previous.getCell(x, y);
-
-        // Skip unchanged cells
-        if (cell == prevCell) {
+        final oldCell = previous.getCell(x, y);
+        if (cell.matches(oldCell) ||
+            cell.char == '\u200B' ||
+            cell.isImagePlaceholder) {
+          x++;
           continue;
         }
 
-        // Skip zero-width space markers (used for wide character tracking)
-        if (cell.char == '\u200B') {
-          continue;
-        }
+        final runStart = x;
+        final output = StringBuffer();
+        TextStyle? activeStyle;
 
-        // Skip image placeholder cells - these will be rendered via sixel
-        if (cell.isImagePlaceholder) {
-          continue;
-        }
+        while (x <= end) {
+          _lastComparedCells++;
+          final next = buffer.getCell(x, y);
+          final old = previous.getCell(x, y);
+          if (next.matches(old) ||
+              next.char == '\u200B' ||
+              next.isImagePlaceholder) {
+            break;
+          }
 
-        // Cell changed - move cursor and write
-        terminal.moveCursor(x, y);
-
-        // Handle style
-        final hasStyle = cell.style.color != null ||
-            cell.style.backgroundColor != null ||
-            cell.style.fontWeight == FontWeight.bold ||
-            cell.style.fontWeight == FontWeight.dim ||
-            cell.style.fontStyle == FontStyle.italic ||
-            cell.style.decoration?.hasUnderline == true ||
-            cell.style.reverse;
-
-        if (hasStyle) {
-          if (currentStyle != cell.style) {
-            if (currentStyle != null) {
-              terminal.write(TextStyle.reset);
+          final hasStyle = _hasVisibleStyle(next.style);
+          if (hasStyle) {
+            if (activeStyle != next.style) {
+              if (activeStyle != null) output.write(TextStyle.reset);
+              output.write(next.style.toAnsi());
+              activeStyle = next.style;
             }
-            terminal.write(cell.style.toAnsi());
-            currentStyle = cell.style;
+          } else if (activeStyle != null) {
+            output.write(TextStyle.reset);
+            activeStyle = null;
           }
-          terminal.write(cell.char);
-        } else {
-          if (currentStyle != null) {
-            terminal.write(TextStyle.reset);
-            currentStyle = null;
-          }
-          terminal.write(cell.char);
+
+          output.write(next.char);
+          x += next.width > 1 ? next.width : 1;
         }
+
+        if (activeStyle != null) output.write(TextStyle.reset);
+        terminal.moveCursor(runStart, y);
+        terminal.write(output.toString());
+        _lastAnsiRuns++;
       }
     }
 
-    // Reset style at end of frame
-    if (currentStyle != null) {
-      terminal.write(TextStyle.reset);
-    }
-
-    // Render pending sixel images
     _renderPendingImages(buffer);
+  }
 
-    // Intentionally do NOT flush here. Flushing inside the differential
-    // render causes the frame to be split into two pipe writes: the cell
-    // diff first (leaving the terminal cursor on whatever cell the diff
-    // happened to write last), then any subsequent write from the caller.
-    // On terminals that follow the cursor for IME composition windows
-    // (e.g. Windows Terminal with Chinese / Japanese / Korean IMEs), this
-    // split causes the IME composition window to flicker between the
-    // last streaming cell and the input field's caret.
-    //
-    // Letting the caller flush once after rendering the frame keeps the
-    // cursor at a single, stable position for the whole frame.
+  bool _hasVisibleStyle(TextStyle style) {
+    return style.color != null ||
+        style.backgroundColor != null ||
+        style.fontWeight == FontWeight.bold ||
+        style.fontWeight == FontWeight.dim ||
+        style.fontStyle == FontStyle.italic ||
+        style.decoration?.hasUnderline == true ||
+        style.reverse;
   }
 
   /// Full redraw (used for first frame or after resize).
@@ -1057,7 +1117,8 @@ class TerminalBinding extends CinderBinding
         }
 
         // Handle style
-        final hasStyle = cell.style.color != null ||
+        final hasStyle =
+            cell.style.color != null ||
             cell.style.backgroundColor != null ||
             cell.style.fontWeight == FontWeight.bold ||
             cell.style.fontWeight == FontWeight.dim ||
@@ -1260,10 +1321,7 @@ class TerminalBinding extends CinderBinding
     final imePosition = renderTextField.getImeCursorPosition();
     if (imePosition != null) {
       // Move the physical terminal cursor to the text field's cursor position.
-      terminal.moveCursor(
-        imePosition.dx.round(),
-        imePosition.dy.round(),
-      );
+      terminal.moveCursor(imePosition.dx.round(), imePosition.dy.round());
 
       // Show the terminal cursor so that IME composition windows
       // (e.g. Chinese Pinyin) appear at the correct screen position.
@@ -1337,9 +1395,13 @@ class TerminalBinding extends CinderBinding
 
     // Get current terminal size (may have been updated by resize event)
     final size = terminal.size;
-    final buffer = buf.Buffer(size.width.toInt(), size.height.toInt());
-    final screenRect =
-        Rect.fromLTWH(0, 0, size.width.toDouble(), size.height.toDouble());
+    final buffer = _prepareNextBuffer(size.width.toInt(), size.height.toInt());
+    final screenRect = Rect.fromLTWH(
+      0,
+      0,
+      size.width.toDouble(),
+      size.height.toDouble(),
+    );
 
     t2 = DateTime.now().microsecondsSinceEpoch;
 
@@ -1364,8 +1426,11 @@ class TerminalBinding extends CinderBinding
       }
 
       // Layout phase
-      renderObject.layout(BoxConstraints.tight(
-          Size(size.width.toDouble(), size.height.toDouble())));
+      renderObject.layout(
+        BoxConstraints.tight(
+          Size(size.width.toDouble(), size.height.toDouble()),
+        ),
+      );
 
       // Flush layout pipeline
       pipelineOwner.flushLayout();
@@ -1405,8 +1470,11 @@ class TerminalBinding extends CinderBinding
       _profileDiffTime += (t5 - t4);
     }
 
-    // Store buffer for next frame comparison
+    // Swap reusable front/back buffers. The old front becomes the next
+    // paint target and will clear only the spans it touched previously.
+    final reusable = _previousBuffer;
     _previousBuffer = buffer;
+    _nextBuffer = reusable;
 
     // Rotate rainbow debug color for next frame
     if (debugRepaintRainbowEnabled) {

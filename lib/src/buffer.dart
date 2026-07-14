@@ -12,11 +12,8 @@ import 'utils/unicode_width.dart';
 /// Cinder deliberately mutates existing cells instead of allocating a new
 /// object for every painted terminal position on every frame.
 class Cell {
-  Cell({
-    this.char = ' ',
-    TextStyle? style,
-    this.isImagePlaceholder = false,
-  }) : style = style ?? const TextStyle();
+  Cell({this.char = ' ', TextStyle? style, this.isImagePlaceholder = false})
+    : style = style ?? const TextStyle();
 
   String char;
   TextStyle style;
@@ -107,13 +104,13 @@ class PendingImage {
 /// once, reuses cells, and records only the horizontal span touched on each row.
 class Buffer {
   Buffer(this.width, this.height)
-      : _flatCells = List<Cell>.generate(
-          width * height,
-          (_) => Cell(),
-          growable: false,
-        ),
-        _dirtyStart = Int32List(height),
-        _dirtyEnd = Int32List(height) {
+    : _flatCells = List<Cell>.generate(
+        width * height,
+        (_) => Cell(),
+        growable: false,
+      ),
+      _dirtyStart = Int32List(height),
+      _dirtyEnd = Int32List(height) {
     for (var y = 0; y < height; y++) {
       _dirtyStart[y] = width;
       _dirtyEnd[y] = -1;
@@ -140,8 +137,7 @@ class Buffer {
 
   int _index(int x, int y) => y * width + x;
 
-  bool contains(int x, int y) =>
-      x >= 0 && x < width && y >= 0 && y < height;
+  bool contains(int x, int y) => x >= 0 && x < width && y >= 0 && y < height;
 
   Cell getCell(int x, int y) {
     if (!contains(x, y)) return _outOfBoundsCell;
@@ -217,19 +213,9 @@ class Buffer {
       if (charWidth == 2 && currentX + 1 >= width) break;
 
       if (y >= 0 && y < height && currentX >= 0) {
-        writeCell(
-          currentX,
-          y,
-          char: grapheme,
-          style: effectiveStyle,
-        );
+        writeCell(currentX, y, char: grapheme, style: effectiveStyle);
         if (charWidth == 2 && currentX + 1 < width) {
-          writeCell(
-            currentX + 1,
-            y,
-            char: '\u200B',
-            style: effectiveStyle,
-          );
+          writeCell(currentX + 1, y, char: '\u200B', style: effectiveStyle);
         }
       }
       currentX += charWidth;
@@ -284,22 +270,19 @@ class Buffer {
 
     for (var cy = y; cy < y + clampedHeight; cy++) {
       for (var cx = x; cx < x + clampedWidth; cx++) {
-        writeCell(
-          cx,
-          cy,
-          char: ' ',
-          isImagePlaceholder: true,
-        );
+        writeCell(cx, cy, char: ' ', isImagePlaceholder: true);
       }
     }
 
-    pendingImages.add(PendingImage(
-      x: x,
-      y: y,
-      width: clampedWidth,
-      height: clampedHeight,
-      sixelData: sixelData,
-    ));
+    pendingImages.add(
+      PendingImage(
+        x: x,
+        y: y,
+        width: clampedWidth,
+        height: clampedHeight,
+        sixelData: sixelData,
+      ),
+    );
   }
 
   void clearPendingImages() => pendingImages.clear();
