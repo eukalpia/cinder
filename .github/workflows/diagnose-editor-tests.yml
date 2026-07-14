@@ -1,0 +1,39 @@
+name: Diagnose editor runtime tests
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+      - run: dart pub get
+      - name: Capture focused runtime output
+        shell: bash
+        run: |
+          set +e
+          dart test --reporter expanded \
+            test/components/text_field_editor_contract_test.dart \
+            test/input/pointer_buttons_and_context_menu_test.dart \
+            test/layout/anchored_list_view_test.dart \
+            test/components/text_field_focus_test.dart \
+            > editor-runtime.log 2>&1
+          status=$?
+          echo "test_exit=$status" >> editor-runtime.log
+          cat editor-runtime.log
+          exit 0
+      - uses: actions/upload-artifact@v4
+        with:
+          name: editor-runtime-diagnostics
+          path: editor-runtime.log
+          retention-days: 1
