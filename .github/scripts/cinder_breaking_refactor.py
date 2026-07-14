@@ -56,9 +56,6 @@ IDENTIFIER_REPLACEMENTS: tuple[tuple[str, str], ...] = (
     (r"\bdidUpdateComponent\b", "didUpdateWidget"),
     (r"\bnewComponent\b", "newWidget"),
     (r"\boldComponent\b", "oldWidget"),
-    # Compound identifiers are part of the public API too:
-    # InheritedComponent, ProxyComponent, ParentDataComponent,
-    # findAncestorComponentOfExactType, etc.
     (r"Component", "Widget"),
     (r"\bcomponent\b", "widget"),
 )
@@ -128,6 +125,22 @@ def transform_text(path: Path) -> None:
     transformed = transformed.replace(
         "https://docs.cinder.dev", "https://github.com/eukalpia/cinder"
     )
+
+    relative = path.relative_to(ROOT).as_posix()
+    if relative.startswith("packages/cinder_riverpod/lib/src/"):
+        transformed = transformed.replace(
+            "import 'package:riverpod/riverpod.dart';",
+            "import 'package:riverpod/src/internals.dart';",
+        )
+
+    if relative == "packages/cinder_riverpod/lib/cinder_riverpod.dart":
+        public_export = "export 'package:riverpod/riverpod.dart';"
+        legacy_export = "export 'package:riverpod/legacy.dart';"
+        if legacy_export not in transformed:
+            transformed = transformed.replace(
+                public_export,
+                f"{public_export}\n{legacy_export}",
+            )
 
     if path.as_posix().endswith("lib/nocterm.dart") or path.as_posix().endswith(
         "lib/cinder.dart"
