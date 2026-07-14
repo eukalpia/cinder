@@ -48,5 +48,20 @@ jobs:
           fi
           git commit --no-verify -m "style: format focus system"
           git push origin HEAD:agent/flutter-focus-system
-      - run: dart analyze lib test
+      - name: Analyze focus system
+        shell: bash
+        run: |
+          set +e
+          dart analyze lib test >/tmp/focus-analyze.log 2>&1
+          status=$?
+          cat /tmp/focus-analyze.log
+          if [ "$status" -ne 0 ]; then
+            cp /tmp/focus-analyze.log focus_validation_failure.log
+            git config user.name "Cinder Focus Bot"
+            git config user.email "actions@users.noreply.github.com"
+            git add focus_validation_failure.log
+            git commit --no-verify -m "test: capture focus analyzer failure"
+            git push origin HEAD:agent/flutter-focus-system
+            exit "$status"
+          fi
       - run: dart test -r expanded test/focus test/input/keyboard_listener_default_focus_test.dart
