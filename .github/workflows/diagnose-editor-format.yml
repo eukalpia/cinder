@@ -1,19 +1,16 @@
-name: Diagnose editor formatting
+name: Apply resolved project formatting
 
 on:
   push:
     branches:
       - feature/editor-anchored-list-pointer-api
-  pull_request:
-    branches:
-      - main
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  diagnose:
+  format:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -24,31 +21,20 @@ jobs:
           sdk: stable
       - name: Install dependencies
         run: dart pub get
-      - name: Reproduce formatting gate
+      - name: Format with resolved package language version
         shell: bash
         run: |
-          set +e
-          base="${{ github.event.pull_request.base.sha }}"
-          if [ -z "$base" ]; then
-            base="$(git merge-base origin/main HEAD)"
-          fi
+          set -euo pipefail
+          base="$(git merge-base origin/main HEAD)"
           mapfile -t files < <(git diff --name-only --diff-filter=ACMR "$base" HEAD | grep -E '^(lib|test|example|benchmark)/.*\.dart$' || true)
-          printf '%s\n' "${files[@]}" > format-input-files.txt
-          dart --version > format-diagnostics.txt 2>&1
-          dart format "${files[@]}" >> format-diagnostics.txt 2>&1
-          status=$?
-          echo "format_exit=$status" >> format-diagnostics.txt
-          git diff --name-only -- "${files[@]}" > format-changed-files.txt
-          git diff -- "${files[@]}" > format-changes.patch
-          cat format-diagnostics.txt
-          cat format-changed-files.txt
-          exit 0
-      - uses: actions/upload-artifact@v4
-        with:
-          name: editor-format-diagnostics
-          path: |
-            format-input-files.txt
-            format-diagnostics.txt
-            format-changed-files.txt
-            format-changes.patch
-          retention-days: 1
+          dart format "${files[@]}"
+          rm -f .github/workflows/diagnose-editor-format.yml
+      - name: Commit formatting
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "style: format with resolved package language version"
+          git push
