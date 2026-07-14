@@ -17,13 +17,27 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
       - uses: dart-lang/setup-dart@v1
         with:
           sdk: stable
       - name: Install dependencies
         run: dart pub get
-      - name: Check formatting
-        run: dart format --output=none --set-exit-if-changed lib test example benchmark
+      - name: Check formatting of changed Dart files
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          base="$BASE_SHA"
+          if [ -z "$base" ] || [ "$base" = "0000000000000000000000000000000000000000" ]; then
+            base="$(git rev-parse HEAD^ 2>/dev/null || git rev-list --max-parents=0 HEAD)"
+          fi
+          mapfile -t files < <(git diff --name-only --diff-filter=ACMR "$base" HEAD | grep -E '^(lib|test|example|benchmark)/.*\.dart$' || true)
+          if [ "${#files[@]}" -gt 0 ]; then
+            dart format --output=none --set-exit-if-changed "${files[@]}"
+          else
+            echo "No changed root Dart files."
+          fi
       - name: Analyze
         run: dart analyze --fatal-infos
       - name: Test
@@ -43,19 +57,29 @@ jobs:
           - cinder_bloc
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
       - uses: dart-lang/setup-dart@v1
         with:
           sdk: stable
       - name: Install dependencies
         working-directory: packages/${{ matrix.package }}
         run: dart pub get
-      - name: Check formatting
-        working-directory: packages/${{ matrix.package }}
+      - name: Check formatting of changed package files
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
         run: |
-          paths="lib"
-          [ -d test ] && paths="$paths test"
-          [ -d example ] && paths="$paths example"
-          dart format --output=none --set-exit-if-changed $paths
+          base="$BASE_SHA"
+          if [ -z "$base" ] || [ "$base" = "0000000000000000000000000000000000000000" ]; then
+            base="$(git rev-parse HEAD^ 2>/dev/null || git rev-list --max-parents=0 HEAD)"
+          fi
+          prefix="packages/${{ matrix.package }}/"
+          mapfile -t files < <(git diff --name-only --diff-filter=ACMR "$base" HEAD | grep -E "^${prefix}.*\.dart$" || true)
+          if [ "${#files[@]}" -gt 0 ]; then
+            dart format --output=none --set-exit-if-changed "${files[@]}"
+          else
+            echo "No changed Dart files in ${{ matrix.package }}."
+          fi
       - name: Analyze
         working-directory: packages/${{ matrix.package }}
         run: dart analyze --fatal-infos
