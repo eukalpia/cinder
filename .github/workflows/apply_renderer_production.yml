@@ -77,6 +77,7 @@ jobs:
           apply_patch('image-docs.patch', payload / 'image_docs_patch.b64')
           extract_tar(payload / 'docs.b64')
           apply_patch('fix1.patch', payload / 'fix1.b64')
+          apply_patch('fix2.patch', payload / 'fix2.b64')
           PY
 
       - name: Generate complete Material and Lucide catalogs
