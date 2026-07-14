@@ -8,25 +8,21 @@ enum MenuOpenTrigger { programmatic, secondaryTap, keyboard }
 
 /// Details reported whenever a menu opens.
 class MenuOpenDetails {
-  const MenuOpenDetails({
-    required this.position,
-    required this.trigger,
-  });
+  const MenuOpenDetails({required this.position, required this.trigger});
 
   final Offset position;
   final MenuOpenTrigger trigger;
 }
 
-typedef MenuAnchorBuilder = Widget Function(
-  BuildContext context,
-  MenuController controller,
-  Widget? child,
-);
+typedef MenuAnchorBuilder =
+    Widget Function(
+      BuildContext context,
+      MenuController controller,
+      Widget? child,
+    );
 
-typedef ContextMenuBuilder = Widget Function(
-  BuildContext context,
-  MenuController controller,
-);
+typedef ContextMenuBuilder =
+    Widget Function(BuildContext context, MenuController controller);
 
 abstract class _MenuControllerDelegate {
   bool get isOpen;
@@ -199,10 +195,9 @@ class _MenuAnchorState extends State<MenuAnchor>
     );
     overlay.insert(_entry!);
     _controller._notifyStateChanged();
-    widget.onOpen?.call(MenuOpenDetails(
-      position: effectivePosition,
-      trigger: trigger,
-    ));
+    widget.onOpen?.call(
+      MenuOpenDetails(position: effectivePosition, trigger: trigger),
+    );
   }
 
   @override
@@ -229,11 +224,8 @@ class _MenuAnchorState extends State<MenuAnchor>
 
   @override
   Widget build(BuildContext context) {
-    Widget result = widget.builder?.call(
-          context,
-          _controller,
-          widget.child,
-        ) ??
+    Widget result =
+        widget.builder?.call(context, _controller, widget.child) ??
         widget.child ??
         const SizedBox.shrink();
 
@@ -304,10 +296,7 @@ class ContextMenuRegion extends StatelessWidget {
 }
 
 class _AnchorGeometry extends SingleChildRenderObjectWidget {
-  const _AnchorGeometry({
-    required this.onPaintRect,
-    super.child,
-  });
+  const _AnchorGeometry({required this.onPaintRect, super.child});
 
   final ValueChanged<Rect> onPaintRect;
 
@@ -402,10 +391,12 @@ class _RenderViewportMenuPositioner extends RenderObject
 
   @override
   void performLayout() {
-    size = constraints.constrain(Size(
-      constraints.hasBoundedWidth ? constraints.maxWidth : 0.0,
-      constraints.hasBoundedHeight ? constraints.maxHeight : 0.0,
-    ));
+    size = constraints.constrain(
+      Size(
+        constraints.hasBoundedWidth ? constraints.maxWidth : 0.0,
+        constraints.hasBoundedHeight ? constraints.maxHeight : 0.0,
+      ),
+    );
     final menu = child;
     if (menu == null) return;
     menu.layout(constraints.loosen(), parentUsesSize: true);

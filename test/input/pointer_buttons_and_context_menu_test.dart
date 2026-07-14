@@ -16,11 +16,7 @@ void main() {
             onSecondaryTap: () => secondaryTaps++,
             onMiddleTapDown: (details) => middleDown = details,
             onMiddleTap: () => middleTaps++,
-            child: const SizedBox(
-              width: 20,
-              height: 5,
-              child: Text('target'),
-            ),
+            child: const SizedBox(width: 20, height: 5, child: Text('target')),
           ),
         );
 
@@ -55,21 +51,17 @@ void main() {
           ),
         );
 
-        await tester.mouseMove(
-          2,
-          2,
-          8,
-          4,
-          button: MouseButton.right,
-        );
+        await tester.mouseMove(2, 2, 8, 4, button: MouseButton.right);
 
         expect(starts, hasLength(1));
         expect(updates, isNotEmpty);
         expect(ends, hasLength(1));
         expect(starts.single.button, MouseButton.right);
         expect(starts.single.buttons, contains(MouseButton.right));
-        expect(updates.every((event) => event.button == MouseButton.right),
-            isTrue);
+        expect(
+          updates.every((event) => event.button == MouseButton.right),
+          isTrue,
+        );
         expect(ends.single.button, MouseButton.right);
       });
     });
@@ -88,9 +80,7 @@ void main() {
                 decoration: BoxDecoration(border: BoxBorder.all()),
                 child: const Text('Context action'),
               ),
-              child: const SizedBox.expand(
-                child: Text('workspace'),
-              ),
+              child: const SizedBox.expand(child: Text('workspace')),
             ),
           ),
         ],
@@ -108,10 +98,12 @@ void main() {
     test('Shift+F10 opens the focused context menu', () async {
       await testCinder('context menu keyboard open', (tester) async {
         await tester.pumpWidget(app(autofocus: true));
-        await tester.sendKeyEvent(const KeyboardEvent(
-          logicalKey: LogicalKey.f10,
-          modifiers: ModifierKeys(shift: true),
-        ));
+        await tester.sendKeyEvent(
+          const KeyboardEvent(
+            logicalKey: LogicalKey.f10,
+            modifiers: ModifierKeys(shift: true),
+          ),
+        );
         expect(tester.terminalState, containsText('Context action'));
       });
     });

@@ -6,10 +6,8 @@ import 'dart:collection';
 /// sums and offset-to-index lookups are O(log n), so a lazy viewport never has
 /// to walk from item zero merely because child render objects were recycled.
 class ExtentIndex<T extends Object> {
-  ExtentIndex({
-    double estimatedExtent = 1.0,
-    this.maxCachedExtents = 200000,
-  }) : _estimatedExtent = estimatedExtent > 0 ? estimatedExtent : 1.0;
+  ExtentIndex({double estimatedExtent = 1.0, this.maxCachedExtents = 200000})
+    : _estimatedExtent = estimatedExtent > 0 ? estimatedExtent : 1.0;
 
   final int maxCachedExtents;
   double _estimatedExtent;

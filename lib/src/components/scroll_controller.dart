@@ -5,9 +5,8 @@ import 'package:cinder/cinder.dart';
 /// Manages the scroll position and provides methods to programmatically
 /// control scrolling.
 class ScrollController extends ChangeNotifier {
-  ScrollController({
-    double initialScrollOffset = 0.0,
-  }) : _offset = initialScrollOffset;
+  ScrollController({double initialScrollOffset = 0.0})
+    : _offset = initialScrollOffset;
 
   double _offset;
   double _minScrollExtent = 0.0;
@@ -152,10 +151,7 @@ class ScrollController extends ChangeNotifier {
   /// - If the item is above the viewport, scrolls up to show it at the top.
   /// - If the item is already fully visible, does not scroll.
   /// - If the item is larger than the viewport, scrolls to show the start of the item.
-  void ensureVisible({
-    required double itemOffset,
-    required double itemExtent,
-  }) {
+  void ensureVisible({required double itemOffset, required double itemExtent}) {
     final itemStart = itemOffset;
     final itemEnd = itemOffset + itemExtent;
     final viewportStart = offset;
@@ -240,10 +236,7 @@ class ScrollController extends ChangeNotifier {
     final (itemOffset, itemExtent) = itemInfo;
 
     // Use the existing ensureVisible logic
-    ensureVisible(
-      itemOffset: itemOffset,
-      itemExtent: itemExtent,
-    );
+    ensureVisible(itemOffset: itemOffset, itemExtent: itemExtent);
   }
 }
 

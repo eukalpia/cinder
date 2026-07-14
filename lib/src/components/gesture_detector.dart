@@ -211,20 +211,24 @@ class _GestureDetectorState extends State<GestureDetector> {
 
       if (!sequence.dragging) {
         sequence.dragging = true;
-        widget.onDragStart?.call(DragStartDetails(
+        widget.onDragStart?.call(
+          DragStartDetails(
+            globalPosition: position,
+            localPosition: position,
+            button: entry.key,
+            buttons: event.buttons,
+          ),
+        );
+      }
+      widget.onDragUpdate?.call(
+        DragUpdateDetails(
           globalPosition: position,
           localPosition: position,
+          delta: delta,
           button: entry.key,
           buttons: event.buttons,
-        ));
-      }
-      widget.onDragUpdate?.call(DragUpdateDetails(
-        globalPosition: position,
-        localPosition: position,
-        delta: delta,
-        button: entry.key,
-        buttons: event.buttons,
-      ));
+        ),
+      );
       sequence.lastPosition = position;
     }
   }
@@ -235,12 +239,14 @@ class _GestureDetectorState extends State<GestureDetector> {
     widget.onPointerUp?.call(event);
 
     if (sequence?.dragging ?? false) {
-      widget.onDragEnd?.call(DragEndDetails(
-        globalPosition: position,
-        localPosition: position,
-        button: event.button,
-        buttons: event.buttons,
-      ));
+      widget.onDragEnd?.call(
+        DragEndDetails(
+          globalPosition: position,
+          localPosition: position,
+          button: event.button,
+          buttons: event.buttons,
+        ),
+      );
     }
 
     switch (event.button) {
@@ -324,11 +330,11 @@ class _RenderGestureDetector extends RenderMouseRegion {
     required void Function(MouseEvent) onPointerUp,
     required void Function(MouseEvent) onPointerMove,
     required HitTestBehavior behavior,
-  })  : _onPointerDown = onPointerDown,
-        _onPointerUp = onPointerUp,
-        _onPointerMove = onPointerMove,
-        _behavior = behavior,
-        super(opaque: behavior == HitTestBehavior.opaque);
+  }) : _onPointerDown = onPointerDown,
+       _onPointerUp = onPointerUp,
+       _onPointerMove = onPointerMove,
+       _behavior = behavior,
+       super(opaque: behavior == HitTestBehavior.opaque);
 
   void Function(MouseEvent) _onPointerDown;
   void Function(MouseEvent) get onPointerDown => _onPointerDown;
@@ -375,18 +381,14 @@ class _RenderGestureDetector extends RenderMouseRegion {
       ..remove(MouseButton.wheelDown);
 
     for (final button in target.difference(_pressedButtons)) {
-      _onPointerDown(event.copyWith(
-        button: button,
-        pressed: true,
-        buttons: target,
-      ));
+      _onPointerDown(
+        event.copyWith(button: button, pressed: true, buttons: target),
+      );
     }
     for (final button in _pressedButtons.difference(target)) {
-      _onPointerUp(event.copyWith(
-        button: button,
-        pressed: false,
-        buttons: target,
-      ));
+      _onPointerUp(
+        event.copyWith(button: button, pressed: false, buttons: target),
+      );
     }
 
     _pressedButtons
@@ -402,11 +404,13 @@ class _RenderGestureDetector extends RenderMouseRegion {
         final released = Set<MouseButton>.of(_pressedButtons);
         _pressedButtons.clear();
         for (final button in released) {
-          _onPointerUp(event.copyWith(
-            button: button,
-            pressed: false,
-            buttons: const <MouseButton>{},
-          ));
+          _onPointerUp(
+            event.copyWith(
+              button: button,
+              pressed: false,
+              buttons: const <MouseButton>{},
+            ),
+          );
         }
       },
       onHover: (event) {

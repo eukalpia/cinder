@@ -54,14 +54,15 @@ void main() {
     test('modifier-specific delete runs before ordinary backspace', () async {
       final controller = TextEditingController(text: 'hello world');
       await testCinder('word delete ordering', (tester) async {
-        await tester.pumpWidget(TextField(
-          controller: controller,
-          autofocus: true,
-        ));
-        await tester.sendKeyEvent(const KeyboardEvent(
-          logicalKey: LogicalKey.backspace,
-          modifiers: ModifierKeys(ctrl: true),
-        ));
+        await tester.pumpWidget(
+          TextField(controller: controller, autofocus: true),
+        );
+        await tester.sendKeyEvent(
+          const KeyboardEvent(
+            logicalKey: LogicalKey.backspace,
+            modifiers: ModifierKeys(ctrl: true),
+          ),
+        );
         expect(controller.text, 'hello ');
       });
       controller.dispose();
@@ -72,30 +73,36 @@ void main() {
       var appShortcutCount = 0;
 
       await testCinder('shortcut ownership', (tester) async {
-        await tester.pumpWidget(TextField(
-          controller: controller,
-          autofocus: true,
-          onAppKeyEvent: (_) {
-            appShortcutCount++;
-            return true;
-          },
-        ));
+        await tester.pumpWidget(
+          TextField(
+            controller: controller,
+            autofocus: true,
+            onAppKeyEvent: (_) {
+              appShortcutCount++;
+              return true;
+            },
+          ),
+        );
 
         controller.selection = const TextSelection(
           baseOffset: 0,
           extentOffset: 4,
         );
-        await tester.sendKeyEvent(const KeyboardEvent(
-          logicalKey: LogicalKey.keyC,
-          modifiers: ModifierKeys(ctrl: true),
-        ));
+        await tester.sendKeyEvent(
+          const KeyboardEvent(
+            logicalKey: LogicalKey.keyC,
+            modifiers: ModifierKeys(ctrl: true),
+          ),
+        );
         expect(appShortcutCount, 0);
 
         controller.selection = const TextSelection.collapsed(offset: 7);
-        await tester.sendKeyEvent(const KeyboardEvent(
-          logicalKey: LogicalKey.keyC,
-          modifiers: ModifierKeys(ctrl: true),
-        ));
+        await tester.sendKeyEvent(
+          const KeyboardEvent(
+            logicalKey: LogicalKey.keyC,
+            modifiers: ModifierKeys(ctrl: true),
+          ),
+        );
         expect(appShortcutCount, 1);
       });
       controller.dispose();
@@ -130,17 +137,21 @@ void main() {
       final submitted = <String>[];
 
       await testCinder('composer enter behavior', (tester) async {
-        await tester.pumpWidget(TextField(
-          controller: controller,
-          autofocus: true,
-          maxLines: 5,
-          onSubmitted: submitted.add,
-        ));
+        await tester.pumpWidget(
+          TextField(
+            controller: controller,
+            autofocus: true,
+            maxLines: 5,
+            onSubmitted: submitted.add,
+          ),
+        );
 
-        await tester.sendKeyEvent(const KeyboardEvent(
-          logicalKey: LogicalKey.enter,
-          modifiers: ModifierKeys(shift: true),
-        ));
+        await tester.sendKeyEvent(
+          const KeyboardEvent(
+            logicalKey: LogicalKey.enter,
+            modifiers: ModifierKeys(shift: true),
+          ),
+        );
         expect(controller.text, 'message\n');
         expect(submitted, isEmpty);
 
@@ -155,22 +166,26 @@ void main() {
       var submitCount = 0;
 
       await testCinder('configurable submit', (tester) async {
-        await tester.pumpWidget(TextField(
-          controller: controller,
-          autofocus: true,
-          maxLines: 5,
-          submitMode: TextFieldSubmitMode.controlOrMetaEnter,
-          onSubmitted: (_) => submitCount++,
-        ));
+        await tester.pumpWidget(
+          TextField(
+            controller: controller,
+            autofocus: true,
+            maxLines: 5,
+            submitMode: TextFieldSubmitMode.controlOrMetaEnter,
+            onSubmitted: (_) => submitCount++,
+          ),
+        );
 
         await tester.sendEnter();
         expect(controller.text, 'message\n');
         expect(submitCount, 0);
 
-        await tester.sendKeyEvent(const KeyboardEvent(
-          logicalKey: LogicalKey.enter,
-          modifiers: ModifierKeys(ctrl: true),
-        ));
+        await tester.sendKeyEvent(
+          const KeyboardEvent(
+            logicalKey: LogicalKey.enter,
+            modifiers: ModifierKeys(ctrl: true),
+          ),
+        );
         expect(submitCount, 1);
       });
       controller.dispose();
@@ -183,27 +198,29 @@ void main() {
       ('Cyrillic', 'Привет'),
       ('CJK', '你好'),
     ]) {
-      test('Backspace preserves grapheme boundaries for ${sample.$1}', () async {
-        final controller = TextEditingController(text: sample.$2);
-        final expected = switch (sample.$1) {
-          'emoji' => 'A',
-          'combining character' => 'A',
-          'Arabic' => 'مرحب',
-          'Cyrillic' => 'Приве',
-          'CJK' => '你',
-          _ => throw StateError('missing expectation'),
-        };
+      test(
+        'Backspace preserves grapheme boundaries for ${sample.$1}',
+        () async {
+          final controller = TextEditingController(text: sample.$2);
+          final expected = switch (sample.$1) {
+            'emoji' => 'A',
+            'combining character' => 'A',
+            'Arabic' => 'مرحب',
+            'Cyrillic' => 'Приве',
+            'CJK' => '你',
+            _ => throw StateError('missing expectation'),
+          };
 
-        await testCinder('unicode ${sample.$1}', (tester) async {
-          await tester.pumpWidget(TextField(
-            controller: controller,
-            autofocus: true,
-          ));
-          await tester.sendBackspace();
-          expect(controller.text, expected);
-        });
-        controller.dispose();
-      });
+          await testCinder('unicode ${sample.$1}', (tester) async {
+            await tester.pumpWidget(
+              TextField(controller: controller, autofocus: true),
+            );
+            await tester.sendBackspace();
+            expect(controller.text, expected);
+          });
+          controller.dispose();
+        },
+      );
     }
   });
 }

@@ -8,8 +8,8 @@ class CinderTester {
   CinderTester._({
     required CinderTestBinding binding,
     bool debugPrintAfterPump = false,
-  })  : _binding = binding,
-        _debugPrintAfterPump = debugPrintAfterPump;
+  }) : _binding = binding,
+       _debugPrintAfterPump = debugPrintAfterPump;
 
   final CinderTestBinding _binding;
 
@@ -41,10 +41,7 @@ class CinderTester {
       );
     }
 
-    return TerminalState(
-      buffer: buffer,
-      size: _binding.size,
-    );
+    return TerminalState(buffer: buffer, size: _binding.size);
   }
 
   /// Get the number of frames that have been rendered
@@ -121,9 +118,7 @@ class CinderTester {
 
   /// Send a key press by logical key
   Future<void> sendKey(LogicalKey key) async {
-    await sendKeyEvent(KeyboardEvent(
-      logicalKey: key,
-    ));
+    await sendKeyEvent(KeyboardEvent(logicalKey: key));
   }
 
   /// Send common key combinations
@@ -156,18 +151,19 @@ class CinderTester {
   Future<void> secondaryTap(int x, int y) =>
       tap(x, y, button: MouseButton.right);
 
-  Future<void> middleTap(int x, int y) =>
-      tap(x, y, button: MouseButton.middle);
+  Future<void> middleTap(int x, int y) => tap(x, y, button: MouseButton.middle);
 
   /// Simulate mouse hover at the given position.
   Future<void> hover(int x, int y) async {
-    await sendMouseEvent(MouseEvent(
-      button: MouseButton.left,
-      x: x,
-      y: y,
-      pressed: false,
-      isMotion: true,
-    ));
+    await sendMouseEvent(
+      MouseEvent(
+        button: MouseButton.left,
+        x: x,
+        y: y,
+        pressed: false,
+        isMotion: true,
+      ),
+    );
   }
 
   /// Simulate a mouse press at the given position without releasing.
@@ -176,12 +172,7 @@ class CinderTester {
     int y, {
     MouseButton button = MouseButton.left,
   }) async {
-    await sendMouseEvent(MouseEvent(
-      button: button,
-      x: x,
-      y: y,
-      pressed: true,
-    ));
+    await sendMouseEvent(MouseEvent(button: button, x: x, y: y, pressed: true));
   }
 
   /// Simulate a mouse release at the given position.
@@ -190,12 +181,9 @@ class CinderTester {
     int y, {
     MouseButton button = MouseButton.left,
   }) async {
-    await sendMouseEvent(MouseEvent(
-      button: button,
-      x: x,
-      y: y,
-      pressed: false,
-    ));
+    await sendMouseEvent(
+      MouseEvent(button: button, x: x, y: y, pressed: false),
+    );
   }
 
   /// Simulate a button drag from one position to another.
@@ -216,13 +204,9 @@ class CinderTester {
       final t = i / steps;
       final x = (startX + (endX - startX) * t).round();
       final y = (startY + (endY - startY) * t).round();
-      await sendMouseEvent(MouseEvent(
-        button: button,
-        x: x,
-        y: y,
-        pressed: true,
-        isMotion: true,
-      ));
+      await sendMouseEvent(
+        MouseEvent(button: button, x: x, y: y, pressed: true, isMotion: true),
+      );
     }
 
     await release(endX, endY, button: button);
@@ -278,16 +262,19 @@ class CinderTester {
 
   void _printDebugOutput() {
     print(
-        '\n╔═ Terminal Output ═══════════════════════════════════════════════════════════╗');
+      '\n╔═ Terminal Output ═══════════════════════════════════════════════════════════╗',
+    );
     final lines = renderToString(showBorders: false).split('\n');
     for (final line in lines) {
       // Pad or truncate line to fit within 78 chars
-      final displayLine =
-          line.length > 78 ? line.substring(0, 78) : line.padRight(78);
+      final displayLine = line.length > 78
+          ? line.substring(0, 78)
+          : line.padRight(78);
       print('║$displayLine║');
     }
     print(
-        '╚══════════════════════════════════════════════════════════════════════════════╝');
+      '╚══════════════════════════════════════════════════════════════════════════════╝',
+    );
   }
 }
 

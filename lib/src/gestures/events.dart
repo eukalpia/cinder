@@ -109,9 +109,7 @@ typedef GestureDragUpdateCallback = void Function(DragUpdateDetails details);
 typedef GestureDragEndCallback = void Function(DragEndDetails details);
 typedef GesturePointerCallback = void Function(MouseEvent event);
 typedef GestureLongPressCallback = void Function();
-typedef GestureLongPressStartCallback = void Function(
-  LongPressStartDetails details,
-);
-typedef GestureLongPressEndCallback = void Function(
-  LongPressEndDetails details,
-);
+typedef GestureLongPressStartCallback =
+    void Function(LongPressStartDetails details);
+typedef GestureLongPressEndCallback =
+    void Function(LongPressEndDetails details);

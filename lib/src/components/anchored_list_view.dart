@@ -7,11 +7,8 @@ import '../rendering/extent_index.dart';
 import '../rendering/scrollable_render_object.dart';
 
 /// Builds an anchored-list item identified by a stable application ID.
-typedef AnchoredItemBuilder<T extends Object> = Widget? Function(
-  BuildContext context,
-  int index,
-  T itemId,
-);
+typedef AnchoredItemBuilder<T extends Object> =
+    Widget? Function(BuildContext context, int index, T itemId);
 
 /// Resolves the sticky-header item for the first visible item.
 typedef StickyHeaderIndexResolver = int? Function(int firstVisibleIndex);
@@ -21,10 +18,7 @@ typedef VisibleRangeChanged = void Function(int firstIndex, int lastIndex);
 
 /// A stable scroll position expressed in content identity rather than pixels.
 class ListAnchor<T extends Object> {
-  const ListAnchor({
-    required this.itemId,
-    this.localOffset = 0.0,
-  });
+  const ListAnchor({required this.itemId, this.localOffset = 0.0});
 
   final T itemId;
   final double localOffset;
@@ -199,13 +193,13 @@ class AnchoredListView<T extends Object> extends StatefulWidget {
     this.stickyHeaderIndexResolver,
     this.stickyHeaderBuilder,
     this.onVisibleRangeChanged,
-  })  : assert(estimatedItemExtent > 0),
-        assert(cacheExtent >= 0),
-        assert(loadMoreItemThreshold >= 0),
-        assert(
-          stickyHeaderBuilder == null || stickyHeaderIndexResolver != null,
-          'stickyHeaderBuilder requires stickyHeaderIndexResolver.',
-        );
+  }) : assert(estimatedItemExtent > 0),
+       assert(cacheExtent >= 0),
+       assert(loadMoreItemThreshold >= 0),
+       assert(
+         stickyHeaderBuilder == null || stickyHeaderIndexResolver != null,
+         'stickyHeaderBuilder requires stickyHeaderIndexResolver.',
+       );
 
   final List<T> itemIds;
   final AnchoredItemBuilder<T> itemBuilder;
@@ -395,7 +389,8 @@ class _AnchoredListViewState<T extends Object>
               left: widget.padding?.left ?? 0.0,
               top: widget.padding?.top ?? 0.0,
               right: widget.padding?.right ?? 0.0,
-              child: stickyBuilder(
+              child:
+                  stickyBuilder(
                     context,
                     stickyIndex,
                     widget.itemIds[stickyIndex],
@@ -496,7 +491,7 @@ class _AnchoredListViewportElement<T extends Object>
     renderObject._element = this;
   }
 
-   @override
+  @override
   void unmount() {
     renderObject._element = null;
     for (final child in _children.values.toList()) {
@@ -513,7 +508,9 @@ class _AnchoredListViewportElement<T extends Object>
   void update(Widget newWidget) {
     super.update(newWidget);
     final validIds = widget.itemIds.toSet();
-    final removed = _children.keys.where((id) => !validIds.contains(id)).toList();
+    final removed = _children.keys
+        .where((id) => !validIds.contains(id))
+        .toList();
     for (final id in removed) {
       final child = _children.remove(id);
       if (child?.mounted ?? false) {
@@ -581,7 +578,9 @@ class _AnchoredListViewportElement<T extends Object>
   }
 
   void removeInvisibleChildren(Set<T> retainedIds) {
-    final removed = _children.keys.where((id) => !retainedIds.contains(id)).toList();
+    final removed = _children.keys
+        .where((id) => !retainedIds.contains(id))
+        .toList();
     for (final id in removed) {
       final child = _children.remove(id);
       if (child?.mounted ?? false) {
@@ -631,16 +630,16 @@ class RenderAnchoredListViewport<T extends Object> extends RenderObject
     required double cacheExtent,
     required int maxCachedExtents,
     required VisibleRangeChanged onVisibleRangeChanged,
-  })  : _itemIds = List<T>.of(itemIds),
-        _controller = controller,
-        _reverse = reverse,
-        _padding = padding,
-        _cacheExtent = cacheExtent,
-        _onVisibleRangeChanged = onVisibleRangeChanged,
-        _extentIndex = ExtentIndex<T>(
-          estimatedExtent: estimatedItemExtent,
-          maxCachedExtents: maxCachedExtents,
-        ) {
+  }) : _itemIds = List<T>.of(itemIds),
+       _controller = controller,
+       _reverse = reverse,
+       _padding = padding,
+       _cacheExtent = cacheExtent,
+       _onVisibleRangeChanged = onVisibleRangeChanged,
+       _extentIndex = ExtentIndex<T>(
+         estimatedExtent: estimatedItemExtent,
+         maxCachedExtents: maxCachedExtents,
+       ) {
     _extentIndex.syncItems(_itemIds);
     _controller.addListener(_handleScrollUpdate);
     _controller.attach(this);
@@ -649,8 +648,7 @@ class RenderAnchoredListViewport<T extends Object> extends RenderObject
 
   _AnchoredListViewportElement<T>? _element;
   final ExtentIndex<T> _extentIndex;
-  final List<_AnchoredChildInfo<T>> _builtChildren =
-      <_AnchoredChildInfo<T>>[];
+  final List<_AnchoredChildInfo<T>> _builtChildren = <_AnchoredChildInfo<T>>[];
   final List<_AnchoredChildInfo<T>> _visibleChildren =
       <_AnchoredChildInfo<T>>[];
 
@@ -814,7 +812,8 @@ class RenderAnchoredListViewport<T extends Object> extends RenderObject
     if (index == null) return false;
     final itemOffset = _extentIndex.offsetOfIndex(index);
     final itemExtent = _extentIndex.extentAt(index);
-    final target = itemOffset -
+    final target =
+        itemOffset -
         math.max(0.0, _controller.viewportDimension - itemExtent) *
             alignment.clamp(0.0, 1.0).toDouble() +
         localOffset;
@@ -902,10 +901,9 @@ class RenderAnchoredListViewport<T extends Object> extends RenderObject
 
     final effectivePadding = padding ?? EdgeInsets.zero;
     final innerConstraints = constraints.deflate(effectivePadding);
-    size = constraints.constrain(Size(
-      constraints.maxWidth,
-      constraints.maxHeight,
-    ));
+    size = constraints.constrain(
+      Size(constraints.maxWidth, constraints.maxHeight),
+    );
 
     final viewportExtent = innerConstraints.maxHeight;
     final crossAxisExtent = innerConstraints.maxWidth;
@@ -938,8 +936,7 @@ class RenderAnchoredListViewport<T extends Object> extends RenderObject
       layoutScrollOffset = _targetForAnchor(_pendingAnchor);
     }
 
-    final cacheStart =
-        math.max(0.0, layoutScrollOffset - _cacheExtent);
+    final cacheStart = math.max(0.0, layoutScrollOffset - _cacheExtent);
     final cacheEnd = layoutScrollOffset + viewportExtent + _cacheExtent;
     var index = _extentIndex.indexAtOffset(cacheStart);
     var currentPosition = _extentIndex.offsetOfIndex(index);
@@ -956,11 +953,13 @@ class RenderAnchoredListViewport<T extends Object> extends RenderObject
 
       final parentData = renderObject.parentData as AnchoredListParentData;
       final extent = parentData.extent ?? renderObject.size.height;
-      _builtChildren.add(_AnchoredChildInfo<T>(
-        itemId: id,
-        index: index,
-        renderObject: renderObject,
-      ));
+      _builtChildren.add(
+        _AnchoredChildInfo<T>(
+          itemId: id,
+          index: index,
+          renderObject: renderObject,
+        ),
+      );
       retainedIds.add(id);
       currentPosition += extent;
       index++;
@@ -985,7 +984,8 @@ class RenderAnchoredListViewport<T extends Object> extends RenderObject
 
     final finalOffset = _controller.offset;
     for (final child in _builtChildren) {
-      final parentData = child.renderObject.parentData as AnchoredListParentData;
+      final parentData =
+          child.renderObject.parentData as AnchoredListParentData;
       final start = parentData.layoutOffset ?? 0.0;
       final extent = parentData.extent ?? child.renderObject.size.height;
       if (start + extent > finalOffset &&
@@ -1027,13 +1027,15 @@ class RenderAnchoredListViewport<T extends Object> extends RenderObject
       if (roundedDelta != 0 &&
           (rawDelta - roundedDelta).abs() < 0.0001 &&
           roundedDelta.abs() < viewportHeight) {
-        owner?.requestTerminalScroll(TerminalScrollRequest(
-          left: offset.dx.round(),
-          top: offset.dy.round(),
-          width: size.width.round(),
-          height: viewportHeight,
-          lines: _reverse ? -roundedDelta : roundedDelta,
-        ));
+        owner?.requestTerminalScroll(
+          TerminalScrollRequest(
+            left: offset.dx.round(),
+            top: offset.dy.round(),
+            width: size.width.round(),
+            height: viewportHeight,
+            lines: _reverse ? -roundedDelta : roundedDelta,
+          ),
+        );
       }
     }
     _lastPaintedScrollOffset = currentOffset;
@@ -1045,7 +1047,8 @@ class RenderAnchoredListViewport<T extends Object> extends RenderObject
         size.height - effectivePadding.top - effectivePadding.bottom;
 
     for (final child in _visibleChildren) {
-      final parentData = child.renderObject.parentData as AnchoredListParentData;
+      final parentData =
+          child.renderObject.parentData as AnchoredListParentData;
       final start = parentData.layoutOffset ?? 0.0;
       final extent = parentData.extent ?? child.renderObject.size.height;
       var childPosition = start - _controller.offset;
@@ -1085,7 +1088,8 @@ class RenderAnchoredListViewport<T extends Object> extends RenderObject
   bool hitTestChildren(HitTestResult result, {required Offset position}) {
     for (var i = _visibleChildren.length - 1; i >= 0; i--) {
       final child = _visibleChildren[i];
-      final parentData = child.renderObject.parentData as AnchoredListParentData;
+      final parentData =
+          child.renderObject.parentData as AnchoredListParentData;
       final childOffset = parentData.offset;
       final bounds = Rect.fromLTWH(
         childOffset.dx,
