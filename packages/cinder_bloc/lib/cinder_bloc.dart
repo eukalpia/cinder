@@ -1,5 +1,3 @@
-library cinder_bloc;
-
 export 'package:bloc/bloc.dart';
 
 export 'src/bloc_builder.dart';
