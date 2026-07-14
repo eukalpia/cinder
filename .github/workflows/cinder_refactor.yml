@@ -7,6 +7,10 @@ on:
     paths:
       - .github/scripts/cinder_breaking_refactor.py
       - .github/workflows/cinder_refactor.yml
+      - packages/cinder_nested/**
+      - packages/cinder_provider/**
+      - packages/cinder_riverpod/**
+      - packages/cinder_bloc/**
   workflow_dispatch:
 
 permissions:
@@ -87,8 +91,12 @@ jobs:
           for package in \
             packages/cinder_nested \
             packages/cinder_provider \
-            packages/cinder_riverpod
+            packages/cinder_riverpod \
+            packages/cinder_bloc
           do
+            if [ ! -d "$package" ]; then
+              continue
+            fi
             echo "===== $package =====" >> /tmp/cinder-packages.log
             (
               cd "$package" &&
@@ -134,5 +142,9 @@ jobs:
           git config user.email "actions@users.noreply.github.com"
           git add -A
           git diff --cached --stat
+          if git diff --cached --quiet; then
+            echo "No generated migration changes to commit."
+            exit 0
+          fi
           git commit --no-verify -m "[cinder-refactor] complete Flutter-style API migration"
           git push origin HEAD:agent/flutter-core-breaking-refactor
