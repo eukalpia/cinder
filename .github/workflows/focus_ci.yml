@@ -13,10 +13,12 @@ on:
       - lib/cinder.dart
       - test/focus/**
       - test/input/**
+      - test/components/text_field_focus_test.dart
       - example/**
       - benchmark/**
       - packages/**
       - .github/scripts/focus_system_fixes.py
+      - .github/scripts/text_field_callsite_fixes.py
       - .github/workflows/focus_ci.yml
 
 permissions:
@@ -40,7 +42,9 @@ jobs:
           sdk: stable
       - run: dart pub get
       - name: Apply focus and TextField migration
-        run: python3 .github/scripts/focus_system_fixes.py
+        run: |
+          python3 .github/scripts/focus_system_fixes.py
+          python3 .github/scripts/text_field_callsite_fixes.py
       - name: Format migrated Dart sources
         run: dart format lib test example benchmark packages
       - name: Commit generated fixes when needed
@@ -75,7 +79,7 @@ jobs:
         shell: bash
         run: |
           set +e
-          dart test -r expanded test/focus test/input/keyboard_listener_default_focus_test.dart >/tmp/focus-test.log 2>&1
+          dart test -r expanded test/focus test/components/text_field_focus_test.dart test/input/keyboard_listener_default_focus_test.dart >/tmp/focus-test.log 2>&1
           status=$?
           cat /tmp/focus-test.log
           if [ "$status" -ne 0 ]; then
