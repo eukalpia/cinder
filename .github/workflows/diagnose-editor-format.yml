@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - feature/editor-anchored-list-pointer-api
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
@@ -23,7 +26,10 @@ jobs:
         shell: bash
         run: |
           set +e
-          base="$(git merge-base origin/main HEAD)"
+          base="${{ github.event.pull_request.base.sha }}"
+          if [ -z "$base" ]; then
+            base="$(git merge-base origin/main HEAD)"
+          fi
           mapfile -t files < <(git diff --name-only --diff-filter=ACMR "$base" HEAD | grep -E '^(lib|test|example|benchmark)/.*\.dart$' || true)
           printf '%s\n' "${files[@]}" > format-input-files.txt
           dart --version > format-diagnostics.txt 2>&1
