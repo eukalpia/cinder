@@ -118,7 +118,10 @@ def transform_text(path: Path) -> None:
         "lib/cinder.dart"
     ):
         transformed = re.sub(
-            r"^export 'src/(?:app|frame)\.dart';\s*\n", "", transformed, flags=re.MULTILINE
+            r"^export 'src/(?:app|frame)\.dart';\s*\n",
+            "",
+            transformed,
+            flags=re.MULTILINE,
         )
 
     if transformed != original:
@@ -155,8 +158,6 @@ def rename_brand_paths() -> None:
         new_name = re.sub("nocterm", "cinder", path.name, flags=re.IGNORECASE)
         destination = path.with_name(new_name)
         if destination.exists():
-            # Merge directories when the repository already has a generic
-            # destination (for example lib/src/widgets).
             if path.is_dir() and destination.is_dir():
                 for child in list(path.iterdir()):
                     target = destination / child.name
@@ -172,12 +173,11 @@ def rename_brand_paths() -> None:
 def write_notice() -> None:
     notice = ROOT / "NOTICE.md"
     notice.write_text(
-        """# Cinder attribution\n\n"
+        "# Cinder attribution\n\n"
         "Cinder is a substantially modified fork of Nocterm.\n\n"
         "Original project copyright (c) 2025 Norbert Kozsir.\n"
         "Cinder modifications copyright (c) 2026 eukalpia contributors.\n\n"
-        "The original MIT license is retained in `LICENSE`.\n"
-        """,
+        "The original MIT license is retained in `LICENSE`.\n",
         encoding="utf-8",
     )
 
@@ -193,7 +193,13 @@ def update_root_pubspec() -> None:
         count=1,
         flags=re.MULTILINE,
     )
-    text = re.sub(r"^version:\s*.*$", "version: 1.0.0-dev.1", text, count=1, flags=re.MULTILINE)
+    text = re.sub(
+        r"^version:\s*.*$",
+        "version: 1.0.0-dev.1",
+        text,
+        count=1,
+        flags=re.MULTILINE,
+    )
     text = re.sub(
         r"^repository:\s*.*$",
         "repository: https://github.com/eukalpia/cinder",
@@ -230,7 +236,7 @@ def assert_no_legacy_public_api() -> None:
     )
     failures: list[str] = []
     for path in iter_text_files():
-        if path.parts[-3:] == (".github", "scripts", path.name):
+        if ".github" in path.parts and "scripts" in path.parts:
             continue
         try:
             text = path.read_text(encoding="utf-8")
