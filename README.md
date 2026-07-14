@@ -4,42 +4,42 @@
 
 **A Flutter-style terminal UI framework for Dart.**
 
-Build interactive terminal applications with widgets, elements, render objects,
-stateful lifecycles, focus traversal, animations, navigation, testing utilities,
-and familiar state-management integrations.
+Build interactive terminal applications with familiar widgets, stateful lifecycles,
+focus traversal, navigation, animation, testing, and first-party state-management
+integrations — without bringing Flutter or Node.js into your CLI runtime.
 
 [![CI](https://github.com/eukalpia/cinder/actions/workflows/ci.yml/badge.svg)](https://github.com/eukalpia/cinder/actions/workflows/ci.yml)
 [![Benchmark](https://github.com/eukalpia/cinder/actions/workflows/benchmark.yml/badge.svg)](https://github.com/eukalpia/cinder/actions/workflows/benchmark.yml)
 [![Dart](https://img.shields.io/badge/Dart-%3E%3D3.5-0175C2?logo=dart)](https://dart.dev)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-[Quick start](#quick-start) · [Focus](#focus-and-keyboard-input) · [State management](#state-management) · [Testing](#testing) · [Contributing](#contributing)
+[Quick start](#quick-start) · [Focus](#focus-and-keyboard-input) · [State management](#state-management) · [Testing](#testing) · [Architecture](#architecture)
 
 </div>
 
 > [!IMPORTANT]
-> Cinder `1.0.0-dev.1` is a breaking development release. The legacy Nocterm
+> Cinder `1.0.0-dev.1` is a breaking development line. The legacy Nocterm
 > `Component`, `App`, `Frame`, and manual `TextField(focused: ...)` APIs are not
-> retained. New applications should use the Cinder APIs documented below.
+> retained.
 
 ## Why Cinder?
 
-Cinder brings Flutter's declarative programming model to terminal interfaces:
+Cinder brings Flutter's declarative programming model to terminal applications:
 
 - immutable `Widget` configurations;
 - persistent `Element` instances;
-- a render-object layout and painting pipeline;
 - `StatelessWidget`, `StatefulWidget`, and `State<T>`;
 - `BuildContext`-based dependency lookup;
-- `InheritedWidget`, Provider, Riverpod, and BLoC integrations;
-- `FocusNode`, `FocusScopeNode`, autofocus, and Tab traversal;
+- render-object layout and painting;
+- frame scheduling and coalesced rebuilds;
+- keyboard, mouse, gestures, focus, selection, and navigation;
 - deterministic widget tests with a virtual terminal;
-- frame scheduling, tickers, animations, navigation, gestures, and mouse input.
+- Provider, Riverpod, and BLoC integrations.
 
-If you already understand Flutter's widget lifecycle, Cinder should feel
-immediately familiar while remaining a pure Dart terminal framework.
-
-![Cinder terminal demo](doc/assets/demo.gif)
+A Flutter developer should recognize the core programming model immediately.
+Terminal-specific concepts still matter — cells instead of pixels, keyboard-first
+interaction, terminal capabilities, and alternate-screen behavior — but the
+framework itself does not require learning a completely different UI paradigm.
 
 ## Project status
 
@@ -58,11 +58,11 @@ The current development line is **Cinder 1.0**.
 | BLoC integration | Available |
 | Widget testing utilities | Available |
 | Renderer V2 dirty-region pipeline | Planned |
-| Stable `1.0.0` pub.dev release | Planned |
+| Stable `1.0.0` release | Planned |
 
 ## Installation
 
-Until the stable Cinder 1.0 packages are published, depend on the repository:
+Until the stable packages are published, depend on the repository directly:
 
 ```yaml
 dependencies:
@@ -72,13 +72,13 @@ dependencies:
       ref: main
 ```
 
-Then fetch dependencies:
+Then install dependencies:
 
 ```bash
 dart pub get
 ```
 
-For framework development, clone the repository and bootstrap the root package:
+For framework development:
 
 ```bash
 git clone https://github.com/eukalpia/cinder.git
@@ -171,7 +171,17 @@ class _ToggleState extends State<Toggle> {
 
   @override
   Widget build(BuildContext context) {
-    return Text(enabled ? 'Enabled' : 'Disabled');
+    return Focus(
+      autofocus: true,
+      onKeyEvent: (event) {
+        if (event.logicalKey == LogicalKey.enter) {
+          setState(() => enabled = !enabled);
+          return true;
+        }
+        return false;
+      },
+      child: Text(enabled ? 'Enabled' : 'Disabled'),
+    );
   }
 }
 ```
@@ -188,8 +198,8 @@ Cinder supports the familiar lifecycle methods:
 
 ## Focus and keyboard input
 
-Cinder 1.0 uses a real focus tree instead of coordinating widgets with boolean
-flags.
+Cinder uses a real focus tree rather than coordinating interactive widgets with
+boolean flags.
 
 ```dart
 class SearchBox extends StatefulWidget {
@@ -231,7 +241,7 @@ Available focus primitives include:
 - `FocusNode.requestFocus()` and `unfocus()`
 - `FocusNode.nextFocus()` and `previousFocus()`
 - `FocusScope` and `FocusScopeNode`
-- `autofocus`
+- autofocus
 - Tab and Shift+Tab traversal
 - `skipTraversal`
 - `canRequestFocus`
@@ -240,30 +250,29 @@ Available focus primitives include:
 ## Layout and widgets
 
 Cinder includes terminal-oriented equivalents of familiar Flutter building
-blocks, including:
+blocks:
 
 - `Row`, `Column`, `Stack`, `Center`, `Container`, and `Spacer`;
 - text, rich text, Markdown, ASCII text, and selection widgets;
 - `ListView`, `SingleChildScrollView`, scroll controllers, and scrollbars;
 - `TextField`, keyboard listeners, focus scopes, and modal barriers;
-- images and terminal image protocols;
 - overlays, routes, navigator observers, and navigation;
 - mouse regions, gesture detectors, taps, and long presses;
 - progress indicators, dividers, clipping, themes, and debug overlays;
-- xterm and PTY-oriented terminal components.
+- terminal image protocols, xterm, and PTY-oriented components.
 
 Browse [`example/`](example/) for runnable applications and focused demos.
 
 ## State management
 
-The monorepo contains first-party Cinder integrations:
+The monorepo contains first-party integrations:
 
 | Package | Purpose | Upstream dependency |
 | --- | --- | --- |
 | `cinder_nested` | Composable single-child widget infrastructure | — |
 | `cinder_provider` | Provider-style dependency injection and state | Cinder native |
 | `cinder_riverpod` | Riverpod containers, watches, listeners, overrides, refresh, and invalidation | Riverpod `3.3.2` |
-| `cinder_bloc` | Flutter BLoC-style providers, builders, listeners, consumers, selectors, and context extensions | BLoC `9.2.1` |
+| `cinder_bloc` | BLoC-style providers, builders, listeners, consumers, selectors, and context extensions | BLoC `9.2.1` |
 
 During monorepo development, reference packages by path:
 
@@ -275,7 +284,7 @@ dependencies:
     path: ../cinder/packages/cinder_bloc
 ```
 
-### BLoC example
+### BLoC
 
 ```dart
 BlocProvider(
@@ -286,7 +295,7 @@ BlocProvider(
 )
 ```
 
-### Riverpod example
+### Riverpod
 
 ```dart
 final counterProvider = StateProvider<int>((ref) => 0);
@@ -296,6 +305,20 @@ ProviderScope(
     builder: (context) {
       final count = context.watch(counterProvider);
       return Text('Count: $count');
+    },
+  ),
+)
+```
+
+### Provider
+
+```dart
+Provider<ApiClient>(
+  create: (_) => ApiClient(),
+  child: Builder(
+    builder: (context) {
+      final client = context.read<ApiClient>();
+      return Text(client.status);
     },
   ),
 )
@@ -343,27 +366,45 @@ Useful tester APIs include:
 - `pump()` and `pumpAndSettle()`
 - `sendKeyEvent()`, `sendKey()`, and `enterText()`
 - mouse press, release, hover, movement, and tap helpers
-- `terminalState`, snapshots, and text matchers
+- terminal snapshots and text matchers
 - widget and state lookup
 
-Run the full root suite:
+Run the root suite:
 
 ```bash
 dart test
 ```
 
-Run static analysis and formatting checks:
+Run formatting and analysis:
 
 ```bash
 dart format --output=none --set-exit-if-changed lib test example benchmark packages
 dart analyze lib test example benchmark
 ```
 
-## Repository structure
+## Architecture
+
+```text
+Widget tree
+    ↓
+Element tree
+    ↓
+RenderObject tree
+    ↓
+Layout
+    ↓
+Paint
+    ↓
+Terminal buffer
+    ↓
+Differential terminal output
+```
+
+Repository layout:
 
 ```text
 cinder/
-├── lib/                     # Core public API and framework implementation
+├── lib/
 │   └── src/
 │       ├── binding/         # Application, scheduler, and terminal bindings
 │       ├── framework/       # Widgets, elements, state, and render-object glue
@@ -378,10 +419,10 @@ cinder/
 │   ├── cinder_provider/
 │   ├── cinder_riverpod/
 │   └── cinder_bloc/
-├── example/                 # Runnable examples
-├── test/                    # Root framework test suite
-├── benchmark/               # Performance benchmarks
-└── docs-site/               # Documentation website sources
+├── example/
+├── test/
+├── benchmark/
+└── docs-site/
 ```
 
 ## Branch model
@@ -394,21 +435,18 @@ Cinder uses three long-lived branches:
 | `test` | Release-candidate validation and stabilization |
 | `main` | Reviewed, tested, publishable project state |
 
-The normal promotion flow is:
+Promotion flow:
 
 ```text
 feature/* → dev → test → main
 ```
 
-Direct feature work should not target `main`. Changes move forward only after
-formatting, analyzer, tests, and relevant benchmarks pass.
+Direct feature work should not target `main`.
 
-## Breaking migration from Nocterm
+## Migration from Nocterm
 
 Cinder is an independent continuation of the Nocterm codebase and intentionally
 does not include a legacy compatibility layer.
-
-Major API changes include:
 
 ```text
 package:nocterm/nocterm.dart  → package:cinder/cinder.dart
@@ -419,25 +457,45 @@ InheritedComponent            → InheritedWidget
 TextField(focused: ...)       → TextField(focusNode: ..., autofocus: ...)
 ```
 
-Applications should migrate directly to the new API instead of mixing both
-runtimes or maintaining aliases.
+Applications should migrate directly to the new API instead of mixing runtimes
+or maintaining aliases.
 
 ## Performance
 
 Benchmarks live in [`benchmark/`](benchmark/) and run in GitHub Actions. Cinder
-uses frame coalescing so repeated state changes and input events can be batched
-into a single scheduled frame.
+already coalesces repeated state changes and input events into scheduled frames.
 
-Performance claims should be based on reproducible benchmark runs for a
-specific terminal, backend, viewport, and workload. The planned Renderer V2
-work will focus on reusable buffers, dirty regions, repaint boundaries, and
-row-span output diffs.
+The planned Renderer V2 will focus on:
+
+- reusable flat front/back buffers;
+- dirty-region painting;
+- repaint boundaries and cached layers;
+- row-span output diffs;
+- terminal scroll-region optimization;
+- synchronized output where supported.
+
+Performance claims should always be tied to reproducible workloads, viewport
+sizes, terminals, and benchmark configurations.
+
+## Roadmap
+
+- [x] Flutter-style widget vocabulary
+- [x] remove the parallel legacy runtime
+- [x] Provider integration
+- [x] Riverpod 3 integration
+- [x] BLoC integration
+- [x] `FocusManager`, `FocusNode`, and traversal
+- [x] migrate `TextField` to focus nodes
+- [ ] Renderer V2
+- [ ] broader production widget kit
+- [ ] semantics and non-interactive output mode
+- [ ] stable `1.0.0` release
 
 ## Contributing
 
 1. Create a feature or fix branch from `dev`.
 2. Add or update tests for behavioral changes.
-3. Run formatting, analyzer, and tests locally.
+3. Run formatting, analyzer, tests, and relevant benchmarks.
 4. Open a pull request into `dev`.
 5. Promote validated changes through `test` before `main`.
 
@@ -447,13 +505,12 @@ Install repository-managed Git hooks with:
 dart run hooksman
 ```
 
-Please keep public APIs Flutter-like where doing so is appropriate for a
-terminal environment, and document deliberate differences.
+Keep public APIs Flutter-like where appropriate for a terminal environment, and
+document deliberate differences.
 
 ## License and attribution
 
 Cinder is distributed under the [MIT License](LICENSE).
 
-The project is derived from the Nocterm codebase. Original copyright and fork
-attribution are preserved in [`NOTICE.md`](NOTICE.md) and the repository
-history.
+The project is derived from Nocterm. Original copyright and fork attribution are
+preserved in [`NOTICE.md`](NOTICE.md), the license files, and repository history.
