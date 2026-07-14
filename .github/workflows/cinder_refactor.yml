@@ -37,7 +37,22 @@ jobs:
           sdk: stable
 
       - name: Apply breaking migration
-        run: python3 .github/scripts/cinder_breaking_refactor.py
+        shell: bash
+        run: |
+          set +e
+          python3 .github/scripts/cinder_breaking_refactor.py >/tmp/cinder-migration.log 2>&1
+          status=$?
+          cat /tmp/cinder-migration.log
+          if [ "$status" -ne 0 ]; then
+            git reset --hard HEAD
+            cp /tmp/cinder-migration.log migration_failure.log
+            git config user.name "Cinder Migration Bot"
+            git config user.email "actions@users.noreply.github.com"
+            git add migration_failure.log
+            git commit -m "[cinder-refactor] capture migration failure"
+            git push origin HEAD:agent/flutter-core-breaking-refactor
+            exit "$status"
+          fi
 
       - name: Install dependencies
         run: dart pub get
@@ -64,6 +79,7 @@ jobs:
       - name: Commit migration
         shell: bash
         run: |
+          rm -f migration_failure.log
           git config user.name "Cinder Migration Bot"
           git config user.email "actions@users.noreply.github.com"
           git add -A
