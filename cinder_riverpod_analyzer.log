@@ -1,0 +1,10 @@
+Analyzing cinder_riverpod...
+
+   info - lib/cinder_riverpod.dart:1:1 - Dangling library doc comment. Add a 'library' directive after the library comment. - dangling_library_doc_comments
+   info - lib/src/framework.dart:7:8 - Import of a library in the 'lib/src' directory of another package. Try importing a public library that exports this library, or removing the import. - implementation_imports
+   info - lib/src/framework.dart:60:10 - Invalid use of a private type in a public API. Try making the private type public, or making the API that uses the private type also be private. - library_private_types_in_public_api
+   info - lib/src/framework.dart:245:24 - The member 'getDependencies' overrides an inherited member but isn't annotated with '@override'. Try adding the '@override' annotation. - annotate_overrides
+   info - lib/src/provider_context.dart:4:8 - Import of a library in the 'lib/src' directory of another package. Try importing a public library that exports this library, or removing the import. - implementation_imports
+   info - lib/src/provider_dependencies.dart:2:8 - Import of a library in the 'lib/src' directory of another package. Try importing a public library that exports this library, or removing the import. - implementation_imports
+
+6 issues found.
