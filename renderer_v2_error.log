@@ -1,0 +1,12 @@
+Analyzing buffer.dart, frame_diff.dart, terminal_canvas.dart, terminal_binding.dart, escape_codes.dart, rendering, renderer_v2_benchmark.dart...
+
+  error - benchmark/renderer_v2_benchmark.dart:15:18 - The name '_' is already defined. Try renaming one of the declarations. - duplicate_definition
+           - The first definition of this name at benchmark/renderer_v2_benchmark.dart:15:15.
+  error - benchmark/renderer_v2_benchmark.dart:15:21 - The name '_' is already defined. Try renaming one of the declarations. - duplicate_definition
+           - The first definition of this name at benchmark/renderer_v2_benchmark.dart:15:15.
+  error - benchmark/renderer_v2_benchmark.dart:28:20 - The name '_' is already defined. Try renaming one of the declarations. - duplicate_definition
+           - The first definition of this name at benchmark/renderer_v2_benchmark.dart:28:17.
+  error - benchmark/renderer_v2_benchmark.dart:28:23 - The name '_' is already defined. Try renaming one of the declarations. - duplicate_definition
+           - The first definition of this name at benchmark/renderer_v2_benchmark.dart:28:17.
+
+4 issues found.
