@@ -1,0 +1,563 @@
+
++      final roundedDelta = rawDelta.round();
++      final viewportHeight = size.height.floor();
++      if (roundedDelta != 0 &&
++          (rawDelta - roundedDelta).abs() < 0.0001 &&
++          roundedDelta.abs() < viewportHeight) {
++        owner?.requestTerminalScroll(TerminalScrollRequest(
++          left: offset.dx.round(),
++          top: offset.dy.round(),
++          width: size.width.round(),
++          height: viewportHeight,
++          lines: _reverse ? -roundedDelta : roundedDelta,
++        ));
++      }
++    }
++    _lastPaintedScrollOffset = currentOffset;
++
++    final clipped = canvas.clip(
++      Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height),
++    );
++    final viewportExtent =
++        size.height - effectivePadding.top - effectivePadding.bottom;
++
++    for (final child in _visibleChildren) {
++      final parentData = child.renderObject.parentData as AnchoredListParentData;
++      final start = parentData.layoutOffset ?? 0.0;
++      final extent = parentData.extent ?? child.renderObject.size.height;
++      var childPosition = start - _controller.offset;
++      if (_reverse) {
++        childPosition = viewportExtent - childPosition - extent;
++      }
++      final childOffset = Offset(
++        offset.dx + effectivePadding.left,
++        offset.dy + effectivePadding.top + childPosition,
++      );
++      parentData.offset = childOffset - offset;
++      child.renderObject.paint(clipped, childOffset);
++    }
++  }
++
++  @override
++  void visitChildren(RenderObjectVisitor visitor) {
++    for (final child in _builtChildren) {
++      visitor(child.renderObject);
++    }
++  }
++
++  @override
++  bool hitTest(HitTestResult result, {required Offset position}) {
++    if (!Rect.fromLTWH(0, 0, size.width, size.height).contains(position)) {
++      return false;
++    }
++    final hitChild = hitTestChildren(result, position: position);
++    if (hitChild || hitTestSelf(position)) {
++      result.add(this);
++      return true;
++    }
++    return false;
++  }
++
++  @override
++  bool hitTestChildren(HitTestResult result, {required Offset position}) {
++    for (var i = _visibleChildren.length - 1; i >= 0; i--) {
++      final child = _visibleChildren[i];
++      final parentData = child.renderObject.parentData as AnchoredListParentData;
++      final childOffset = parentData.offset;
++      final bounds = Rect.fromLTWH(
++        childOffset.dx,
++        childOffset.dy,
++        child.renderObject.size.width,
++        child.renderObject.size.height,
++      );
++      if (!bounds.contains(position)) continue;
++      if (child.renderObject.hitTest(
++        result,
++        position: position - childOffset,
++      )) {
++        return true;
++      }
++    }
++    return false;
++  }
++}
+--- /dev/null
++++ b/lib/src/components/context_menu.dart
+@@ -0,0 +1,438 @@
++import 'dart:math' as math;
++
++import 'package:cinder/cinder.dart';
++import 'package:cinder/src/framework/terminal_canvas.dart';
++
++/// How a menu was opened.
++enum MenuOpenTrigger { programmatic, secondaryTap, keyboard }
++
++/// Details reported whenever a menu opens.
++class MenuOpenDetails {
++  const MenuOpenDetails({
++    required this.position,
++    required this.trigger,
++  });
++
++  final Offset position;
++  final MenuOpenTrigger trigger;
++}
++
++typedef MenuAnchorBuilder = Widget Function(
++  BuildContext context,
++  MenuController controller,
++  Widget? child,
++);
++
++typedef ContextMenuBuilder = Widget Function(
++  BuildContext context,
++  MenuController controller,
++);
++
++abstract class _MenuControllerDelegate {
++  bool get isOpen;
++  void open({Offset? position, MenuOpenTrigger trigger});
++  void close();
++}
++
++/// Controls a [MenuAnchor] or [ContextMenuRegion].
++class MenuController extends ChangeNotifier {
++  _MenuControllerDelegate? _delegate;
++
++  bool get isOpen => _delegate?.isOpen ?? false;
++
++  void open({
++    Offset? position,
++    MenuOpenTrigger trigger = MenuOpenTrigger.programmatic,
++  }) {
++    _delegate?.open(position: position, trigger: trigger);
++  }
++
++  void close() => _delegate?.close();
++
++  void toggle({Offset? position}) {
++    if (isOpen) {
++      close();
++    } else {
++      open(position: position);
++    }
++  }
++
++  void _attach(_MenuControllerDelegate delegate) {
++    _delegate = delegate;
++  }
++
++  void _detach(_MenuControllerDelegate delegate) {
++    if (identical(_delegate, delegate)) _delegate = null;
++  }
++
++  void _notifyStateChanged() => notifyListeners();
++}
++
++/// Places a menu in the nearest [Overlay] and keeps it inside the viewport.
++class MenuAnchor extends StatefulWidget {
++  const MenuAnchor({
++    super.key,
++    this.controller,
++    required this.menuBuilder,
++    this.builder,
++    this.child,
++    this.alignmentOffset = Offset.zero,
++    this.openOnSecondaryTap = false,
++    this.focusNode,
++    this.autofocus = false,
++    this.onOpen,
++    this.onClose,
++  });
++
++  final MenuController? controller;
++  final ContextMenuBuilder menuBuilder;
++  final MenuAnchorBuilder? builder;
++  final Widget? child;
++  final Offset alignmentOffset;
++  final bool openOnSecondaryTap;
++  final FocusNode? focusNode;
++  final bool autofocus;
++  final ValueChanged<MenuOpenDetails>? onOpen;
++  final VoidCallback? onClose;
++
++  @override
++  State<MenuAnchor> createState() => _MenuAnchorState();
++}
++
++class _MenuAnchorState extends State<MenuAnchor>
++    implements _MenuControllerDelegate {
++  MenuController? _internalController;
++  OverlayEntry? _entry;
++  Rect? _anchorRect;
++  Offset? _secondaryPosition;
++
++  MenuController get _controller => widget.controller ?? _internalController!;
++
++  @override
++  bool get isOpen => _entry != null;
++
++  @override
++  void initState() {
++    super.initState();
++    if (widget.controller == null) _internalController = MenuController();
++    _controller._attach(this);
++  }
++
++  @override
++  void didUpdateWidget(MenuAnchor oldWidget) {
++    super.didUpdateWidget(oldWidget);
++    if (!identical(widget.controller, oldWidget.controller)) {
++      final oldController = oldWidget.controller ?? _internalController!;
++      oldController._detach(this);
++      if (oldWidget.controller == null) {
++        _internalController?.dispose();
++        _internalController = null;
++      }
++      if (widget.controller == null) _internalController = MenuController();
++      _controller._attach(this);
++    }
++    if (isOpen && widget.menuBuilder != oldWidget.menuBuilder) {
++      _entry?.markNeedsBuild();
++    }
++  }
++
++  @override
++  void dispose() {
++    _entry?.remove();
++    _entry = null;
++    _controller._detach(this);
++    _internalController?.dispose();
++    super.dispose();
++  }
++
++  @override
++  void open({
++    Offset? position,
++    MenuOpenTrigger trigger = MenuOpenTrigger.programmatic,
++  }) {
++    final overlay = Overlay.maybeOf(context);
++    if (overlay == null) return;
++
++    final rect = _anchorRect;
++    final fallback = rect == null
++        ? Offset.zero
++        : Offset(rect.left, rect.bottom) + widget.alignmentOffset;
++    final effectivePosition = position ?? fallback;
++
++    if (_entry != null) {
++      _entry!.remove();
++      _entry = null;
++    }
++
++    _entry = OverlayEntry(
++      builder: (overlayContext) {
++        return Stack(
++          fit: StackFit.expand,
++          clipBehavior: Clip.hardEdge,
++          children: <Widget>[
++            Positioned.fill(
++              child: GestureDetector(
++                behavior: HitTestBehavior.opaque,
++                onTap: close,
++                onSecondaryTap: close,
++                onMiddleTap: close,
++                child: const SizedBox.expand(),
++              ),
++            ),
++            _ViewportMenuPositioner(
++              desiredPosition: effectivePosition,
++              child: Focus(
++                autofocus: true,
++                onKeyEvent: (event) {
++                  if (event.logicalKey == LogicalKey.escape) {
++                    close();
++                    return true;
++                  }
++                  return false;
++                },
++                child: widget.menuBuilder(overlayContext, _controller),
++              ),
++            ),
++          ],
++        );
++      },
++    );
++    overlay.insert(_entry!);
++    _controller._notifyStateChanged();
++    widget.onOpen?.call(MenuOpenDetails(
++      position: effectivePosition,
++      trigger: trigger,
++    ));
++  }
++
++  @override
++  void close() {
++    final entry = _entry;
++    if (entry == null) return;
++    _entry = null;
++    entry.remove();
++    _controller._notifyStateChanged();
++    widget.onClose?.call();
++  }
++
++  bool _handleKey(KeyboardEvent event) {
++    if (event.logicalKey == LogicalKey.f10 && event.isShiftPressed) {
++      open(trigger: MenuOpenTrigger.keyboard);
++      return true;
++    }
++    if (event.logicalKey == LogicalKey.escape && isOpen) {
++      close();
++      return true;
++    }
++    return false;
++  }
++
++  @override
++  Widget build(BuildContext context) {
++    Widget result = widget.builder?.call(
++          context,
++          _controller,
++          widget.child,
++        ) ??
++        widget.child ??
++        const SizedBox.shrink();
++
++    if (widget.openOnSecondaryTap) {
++      result = GestureDetector(
++        onSecondaryTapDown: (details) {
++          _secondaryPosition = details.globalPosition;
++        },
++        onSecondaryTap: () {
++          open(
++            position: _secondaryPosition,
++            trigger: MenuOpenTrigger.secondaryTap,
++          );
++        },
++        child: result,
++      );
++    }
++
++    return Focus(
++      focusNode: widget.focusNode,
++      autofocus: widget.autofocus,
++      onKeyEvent: _handleKey,
++      child: _AnchorGeometry(
++        onPaintRect: (rect) => _anchorRect = rect,
++        child: result,
++      ),
++    );
++  }
++}
++
++/// Opens a viewport-safe context menu on right click or Shift+F10.
++class ContextMenuRegion extends StatelessWidget {
++  const ContextMenuRegion({
++    super.key,
++    required this.menuBuilder,
++    required this.child,
++    this.controller,
++    this.enabled = true,
++    this.focusNode,
++    this.autofocus = false,
++    this.onOpen,
++    this.onClose,
++  });
++
++  final ContextMenuBuilder menuBuilder;
++  final Widget child;
++  final MenuController? controller;
++  final bool enabled;
++  final FocusNode? focusNode;
++  final bool autofocus;
++  final ValueChanged<MenuOpenDetails>? onOpen;
++  final VoidCallback? onClose;
++
++  @override
++  Widget build(BuildContext context) {
++    if (!enabled) return child;
++    return MenuAnchor(
++      controller: controller,
++      menuBuilder: menuBuilder,
++      openOnSecondaryTap: true,
++      focusNode: focusNode,
++      autofocus: autofocus,
++      onOpen: onOpen,
++      onClose: onClose,
++      child: child,
++    );
++  }
++}
++
++class _AnchorGeometry extends SingleChildRenderObjectWidget {
++  const _AnchorGeometry({
++    required this.onPaintRect,
++    super.child,
++  });
++
++  final ValueChanged<Rect> onPaintRect;
++
++  @override
++  RenderObject createRenderObject(BuildContext context) {
++    return _RenderAnchorGeometry(onPaintRect);
++  }
++
++  @override
++  void updateRenderObject(
++    BuildContext context,
++    _RenderAnchorGeometry renderObject,
++  ) {
++    renderObject.onPaintRect = onPaintRect;
++  }
++}
++
++class _RenderAnchorGeometry extends RenderObject
++    with RenderObjectWithChildMixin<RenderObject> {
++  _RenderAnchorGeometry(this._onPaintRect);
++
++  ValueChanged<Rect> _onPaintRect;
++  ValueChanged<Rect> get onPaintRect => _onPaintRect;
++  set onPaintRect(ValueChanged<Rect> value) => _onPaintRect = value;
++
++  @override
++  void setupParentData(RenderObject child) {
++    if (child.parentData is! BoxParentData) child.parentData = BoxParentData();
++  }
++
++  @override
++  void performLayout() {
++    if (child == null) {
++      size = constraints.constrain(Size.zero);
++      return;
++    }
++    child!.layout(constraints, parentUsesSize: true);
++    size = child!.size;
++  }
++
++  @override
++  void paint(TerminalCanvas canvas, Offset offset) {
++    super.paint(canvas, offset);
++    _onPaintRect(Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height));
++    if (child != null) child!.paintWithContext(canvas, offset);
++  }
++
++  @override
++  bool hitTestChildren(HitTestResult result, {required Offset position}) {
++    return child?.hitTest(result, position: position) ?? false;
++  }
++}
++
++class _ViewportMenuPositioner extends SingleChildRenderObjectWidget {
++  const _ViewportMenuPositioner({
++    required this.desiredPosition,
++    required super.child,
++  });
++
++  final Offset desiredPosition;
++
++  @override
++  RenderObject createRenderObject(BuildContext context) {
++    return _RenderViewportMenuPositioner(desiredPosition);
++  }
++
++  @override
++  void updateRenderObject(
++    BuildContext context,
++    _RenderViewportMenuPositioner renderObject,
++  ) {
++    renderObject.desiredPosition = desiredPosition;
++  }
++}
++
++class _RenderViewportMenuPositioner extends RenderObject
++    with RenderObjectWithChildMixin<RenderObject> {
++  _RenderViewportMenuPositioner(this._desiredPosition);
++
++  Offset _desiredPosition;
++  Offset get desiredPosition => _desiredPosition;
++  set desiredPosition(Offset value) {
++    if (value == _desiredPosition) return;
++    _desiredPosition = value;
++    markNeedsLayout();
++  }
++
++  @override
++  void setupParentData(RenderObject child) {
++    if (child.parentData is! BoxParentData) child.parentData = BoxParentData();
++  }
++
++  @override
++  void performLayout() {
++    size = constraints.constrain(Size(
++      constraints.hasBoundedWidth ? constraints.maxWidth : 0.0,
++      constraints.hasBoundedHeight ? constraints.maxHeight : 0.0,
++    ));
++    final menu = child;
++    if (menu == null) return;
++    menu.layout(constraints.loosen(), parentUsesSize: true);
++
++    final maxX = math.max(0.0, size.width - menu.size.width);
++    final maxY = math.max(0.0, size.height - menu.size.height);
++    final parentData = menu.parentData as BoxParentData;
++    parentData.offset = Offset(
++      desiredPosition.dx.clamp(0.0, maxX).toDouble(),
++      desiredPosition.dy.clamp(0.0, maxY).toDouble(),
++    );
++  }
++
++  @override
++  void paint(TerminalCanvas canvas, Offset offset) {
++    super.paint(canvas, offset);
++    final menu = child;
++    if (menu == null) return;
++    final parentData = menu.parentData as BoxParentData;
++    menu.paintWithContext(canvas, offset + parentData.offset);
++  }
++
++  @override
++  bool hitTestChildren(HitTestResult result, {required Offset position}) {
++    final menu = child;
++    if (menu == null) return false;
++    final parentData = menu.parentData as BoxParentData;
++    return menu.hitTest(result, position: position - parentData.offset);
++  }
++}
+--- a/lib/src/components/gesture_detector.dart
++++ b/lib/src/components/gesture_detector.dart
+@@ -1,35 +1,13 @@
+ import '../framework/framework.dart';
+-import '../keyboard/mouse_event.dart';
+ import '../gestures/events.dart';
+ import '../gestures/hit_test.dart';
+-import '../gestures/tap.dart';
+ import '../gestures/long_press.dart';
++import '../gestures/tap.dart';
++import '../keyboard/mouse_event.dart';
+ import '../rendering/mouse_tracker.dart';
+ import 'package:cinder/src/rendering/mouse_region.dart';
+ 
+-/// A widget that detects gestures.
+-///
+-/// Attempts to recognize gestures that correspond to its non-null callbacks.
+-///
+-/// If this widget has a child, it defers to that child for sizing behavior.
+-/// If it does not have a child, it grows to fit the parent instead.
+-///
+-/// By default, [GestureDetector] uses [HitTestBehavior.deferToChild] for
+-/// determining hit test behavior.
+-///
+-/// Example:
+-/// ```dart
+-/// GestureDetector(
+-///   onTap: () => print('Tapped!'),
+-///   onDoubleTap: () => print('Double tapped!'),
+-///   onLongPress: () => print('Long pressed!'),
+-///   child: Container(
+-///     width: 20,
+-///     height: 5,
+-///     child: Text('Click me'),
+-///   ),
+-/// )
+-/// ```
++/// Detects taps, button-specific taps, and button-aware drag gestures.
+ class GestureDetector extends StatefulWidget {
