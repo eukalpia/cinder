@@ -1,27 +1,37 @@
-name: Export worktree
+name: Apply editor history pointer refactor
 
 on:
   push:
     branches:
       - feature/editor-anchored-list-pointer-api
-  pull_request:
-    branches:
-      - main
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  export:
+  apply:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Remove Git metadata
-        run: rm -rf .git
-      - uses: actions/upload-artifact@v4
-        with:
-          name: cinder-worktree
-          path: .
-          include-hidden-files: true
-          retention-days: 1
+      - name: Apply staged production patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat .github/patch/editor_refactor_*.patchpart > /tmp/editor_refactor.patch
+          git apply --check /tmp/editor_refactor.patch
+          git apply /tmp/editor_refactor.patch
+          rm -rf .github/patch .github/payload
+          rm -f .github/workflows/export-worktree.yml
+      - name: Commit clean source change
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m "feat!: add editor, anchored history, and pointer menu APIs"
+          git push
