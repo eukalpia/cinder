@@ -14,7 +14,7 @@ concurrency:
   group: finalize-renderer-v2
   cancel-in-progress: true
 
-# Final execution after renderer, focus, root, and Riverpod fixes.
+# Final execution with all competing branch-writing workflows removed.
 jobs:
   finalize:
     runs-on: ubuntu-latest
