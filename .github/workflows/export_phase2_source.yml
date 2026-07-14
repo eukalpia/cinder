@@ -1,0 +1,26 @@
+name: Export Renderer V2 phase 2 source
+
+on:
+  pull_request:
+    branches: [dev]
+    paths:
+      - '.github/workflows/export_phase2_source.yml'
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Create source archive
+        run: |
+          tar \
+            --exclude=.git \
+            --exclude=.dart_tool \
+            --exclude=build \
+            -czf cinder-phase2-source.tar.gz .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cinder-phase2-source
+          path: cinder-phase2-source.tar.gz
