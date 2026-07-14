@@ -27,7 +27,7 @@ extension SelectContext on BuildContext {
     R Function(S state) selector,
   ) {
     return provider.SelectContext(this).select<B, R>(
-          (bloc) => selector(bloc.state),
-        );
+      (bloc) => selector(bloc.state),
+    );
   }
 }
