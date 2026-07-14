@@ -8,8 +8,8 @@ import '../rendering/scrollable_render_object.dart';
 import 'selection_state.dart';
 
 /// Signature for a function that creates a widget for a given index.
-typedef IndexedWidgetBuilder =
-    Widget? Function(BuildContext context, int index);
+typedef IndexedWidgetBuilder = Widget? Function(
+    BuildContext context, int index);
 
 /// Signature for a function that provides the item count.
 typedef ItemCountGetter = int Function();
@@ -34,9 +34,9 @@ class ListView extends StatefulWidget {
     this.keyboardScrollable = false,
     this.cacheExtent = 5.0,
     List<Widget> children = const [],
-  }) : itemCount = children.length,
-       itemBuilder = ((context, index) => children[index]),
-       separatorBuilder = null;
+  })  : itemCount = children.length,
+        itemBuilder = ((context, index) => children[index]),
+        separatorBuilder = null;
 
   /// Creates a scrollable, linear array of widgets that are created on demand.
   ///
@@ -547,16 +547,16 @@ class RenderListViewport extends RenderObject with ScrollableRenderObjectMixin {
     bool hasSeparators = false,
     bool selectionDragActive = false,
     SelectionRange? Function(Object context)? selectionRangeFor,
-  }) : _scrollDirection = scrollDirection,
-       _reverse = reverse,
-       _controller = controller,
-       _padding = padding,
-       _itemExtent = itemExtent,
-       _lazy = lazy,
-       _cacheExtent = cacheExtent,
-       _hasSeparators = hasSeparators,
-       _selectionDragActive = selectionDragActive,
-       _selectionRangeFor = selectionRangeFor {
+  })  : _scrollDirection = scrollDirection,
+        _reverse = reverse,
+        _controller = controller,
+        _padding = padding,
+        _itemExtent = itemExtent,
+        _lazy = lazy,
+        _cacheExtent = cacheExtent,
+        _hasSeparators = hasSeparators,
+        _selectionDragActive = selectionDragActive,
+        _selectionRangeFor = selectionRangeFor {
     _controller.addListener(_handleScrollUpdate);
     _controller.attach(this);
     // Selection drag state is a global, so we subscribe explicitly -
@@ -777,8 +777,7 @@ class RenderListViewport extends RenderObject with ScrollableRenderObjectMixin {
     if (renderObject == null) return null;
 
     renderObject.layout(childConstraints, parentUsesSize: true);
-    final childExtent =
-        extentOverride ??
+    final childExtent = extentOverride ??
         (scrollDirection == Axis.vertical
             ? renderObject.size.height
             : renderObject.size.width);
@@ -989,8 +988,7 @@ class RenderListViewport extends RenderObject with ScrollableRenderObjectMixin {
       final renderObject = child.renderObject;
       final parentData = renderObject.parentData as ListViewParentData;
       final layoutOffset = parentData.layoutOffset ?? 0.0;
-      final childExtent =
-          parentData.extent ??
+      final childExtent = parentData.extent ??
           (scrollDirection == Axis.vertical
               ? renderObject.size.height
               : renderObject.size.width);
@@ -1355,8 +1353,7 @@ class RenderListViewport extends RenderObject with ScrollableRenderObjectMixin {
 
       // In reverse mode, flip the position
       if (_reverse) {
-        final childExtent =
-            parentData.extent ??
+        final childExtent = parentData.extent ??
             (scrollDirection == Axis.vertical
                 ? child.renderObject.size.height
                 : child.renderObject.size.width);
@@ -1422,8 +1419,7 @@ class RenderListViewport extends RenderObject with ScrollableRenderObjectMixin {
       double childPosition = layoutOffset - scrollOffset;
 
       // Get child extent (needed for reverse mode and bounds checking)
-      final childExtent =
-          parentData.extent ??
+      final childExtent = parentData.extent ??
           (scrollDirection == Axis.vertical
               ? child.renderObject.size.height
               : child.renderObject.size.width);

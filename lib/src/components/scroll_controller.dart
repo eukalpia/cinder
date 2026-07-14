@@ -6,7 +6,7 @@ import 'package:cinder/cinder.dart';
 /// control scrolling.
 class ScrollController extends ChangeNotifier {
   ScrollController({double initialScrollOffset = 0.0})
-    : _offset = initialScrollOffset;
+      : _offset = initialScrollOffset;
 
   double _offset;
   double _minScrollExtent = 0.0;

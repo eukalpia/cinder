@@ -16,8 +16,8 @@ class TextEditingValue {
   const TextEditingValue({required this.text, required this.selection});
 
   const TextEditingValue.empty()
-    : text = '',
-      selection = const TextSelection.collapsed(offset: 0);
+      : text = '',
+        selection = const TextSelection.collapsed(offset: 0);
 
   final String text;
   final TextSelection selection;
@@ -46,8 +46,8 @@ class TextSelection {
   const TextSelection({required this.baseOffset, required this.extentOffset});
 
   const TextSelection.collapsed({required int offset})
-    : baseOffset = offset,
-      extentOffset = offset;
+      : baseOffset = offset,
+        extentOffset = offset;
 
   final int baseOffset;
   final int extentOffset;
@@ -78,10 +78,10 @@ class TextSelection {
 /// Controls the text being edited and owns its undo/redo history.
 class TextEditingController {
   TextEditingController({String? text, this.historyLimit = 100})
-    : _value = TextEditingValue(
-        text: text ?? '',
-        selection: TextSelection.collapsed(offset: text?.length ?? 0),
-      );
+      : _value = TextEditingValue(
+          text: text ?? '',
+          selection: TextSelection.collapsed(offset: text?.length ?? 0),
+        );
 
   TextEditingValue _value;
   final List<TextEditingValue> _undoStack = <TextEditingValue>[];
@@ -281,17 +281,17 @@ class TextField extends StatefulWidget {
     this.showCursor = true,
     this.width,
     this.height,
-  }) : assert(maxLines == null || maxLines > 0),
-       assert(minLines == null || minLines > 0),
-       assert(
-         (maxLines == null) || (minLines == null) || (maxLines >= minLines),
-         "minLines can't be greater than maxLines",
-       ),
-       assert(
-         !obscureText || maxLines == 1,
-         'Obscured fields cannot be multiline.',
-       ),
-       assert(maxLength == null || maxLength > 0);
+  })  : assert(maxLines == null || maxLines > 0),
+        assert(minLines == null || minLines > 0),
+        assert(
+          (maxLines == null) || (minLines == null) || (maxLines >= minLines),
+          "minLines can't be greater than maxLines",
+        ),
+        assert(
+          !obscureText || maxLines == 1,
+          'Obscured fields cannot be multiline.',
+        ),
+        assert(maxLength == null || maxLength > 0);
 
   final TextEditingController? controller;
   final FocusNode? focusNode;
@@ -488,8 +488,7 @@ class _TextFieldState extends State<TextField> {
       widget.controller,
       oldWidget.controller,
     );
-    final draftChanged =
-        widget.draftKey != oldWidget.draftKey ||
+    final draftChanged = widget.draftKey != oldWidget.draftKey ||
         !identical(widget.draftStore, oldWidget.draftStore);
 
     if (controllerChanged || draftChanged) {
@@ -566,13 +565,11 @@ class _TextFieldState extends State<TextField> {
 
       // Account for borders and padding to get actual content width
       final decoration = widget.decoration ?? const InputDecoration();
-      final padding =
-          decoration.contentPadding ??
+      final padding = decoration.contentPadding ??
           const EdgeInsets.symmetric(horizontal: 1);
       final horizontalPadding = padding.left + padding.right;
-      final borderWidth = decoration.border != null
-          ? 2.0
-          : 0.0; // 1 on each side
+      final borderWidth =
+          decoration.border != null ? 2.0 : 0.0; // 1 on each side
       // Reserve 1 column for cursor display
       final maxVisibleWidth =
           (widget.width! - borderWidth - horizontalPadding - 1).toInt();
@@ -637,9 +634,8 @@ class _TextFieldState extends State<TextField> {
 
     // Modifier-specific editor commands must precede their unmodified keys.
     if (controlOrMeta && key == LogicalKey.keyZ) {
-      final changed = event.isShiftPressed
-          ? _controller.redo()
-          : _controller.undo();
+      final changed =
+          event.isShiftPressed ? _controller.redo() : _controller.undo();
       if (changed) _renderTextField?.resetTargetColumn();
       return changed || _dispatchAppShortcut(event);
     }
@@ -789,8 +785,7 @@ class _TextFieldState extends State<TextField> {
 
   bool _handleEnter(KeyboardEvent event) {
     final isCtrlJ = event.matches(LogicalKey.keyJ, ctrl: true);
-    final shouldSubmit =
-        !isCtrlJ &&
+    final shouldSubmit = !isCtrlJ &&
         switch (widget.submitMode) {
           TextFieldSubmitMode.enter => !event.modifiers.hasAnyModifier,
           TextFieldSubmitMode.controlOrMetaEnter =>
@@ -917,8 +912,7 @@ class _TextFieldState extends State<TextField> {
       newOffset = clampedStart + char.length;
     } else {
       // Insert at cursor position
-      newText =
-          text.substring(0, clampedExtentOffset) +
+      newText = text.substring(0, clampedExtentOffset) +
           char +
           text.substring(clampedExtentOffset);
       newOffset = clampedExtentOffset + char.length;
@@ -1119,9 +1113,8 @@ class _TextFieldState extends State<TextField> {
       chars[charIndex == chars.length ? charIndex - 1 : charIndex] = temp;
 
       final newText = chars.join();
-      final newOffset = pos < text.length
-          ? math.min(pos + 1, newText.length)
-          : pos;
+      final newOffset =
+          pos < text.length ? math.min(pos + 1, newText.length) : pos;
       _replaceEditingValue(newText, TextSelection.collapsed(offset: newOffset));
     }
   }
@@ -1233,8 +1226,7 @@ class _TextFieldState extends State<TextField> {
 
     // Handle view offset for single-line fields
     if (widget.maxLines == 1 && widget.width != null) {
-      final padding =
-          decoration.contentPadding ??
+      final padding = decoration.contentPadding ??
           const EdgeInsets.symmetric(horizontal: 1);
       final horizontalPadding = padding.left + padding.right;
       final borderWidth = decoration.border != null ? 2.0 : 0.0;
@@ -1305,8 +1297,7 @@ class _TextFieldState extends State<TextField> {
       content = Container(
         width: widget.width,
         height: widget.height ?? (widget.maxLines ?? 1).toDouble() + 2,
-        padding:
-            decoration.contentPadding ??
+        padding: decoration.contentPadding ??
             const EdgeInsets.symmetric(horizontal: 1),
         decoration: BoxDecoration(
           border: isFocused
@@ -1433,21 +1424,21 @@ class RenderTextField extends RenderObject with MouseTrackerAnnotationProvider {
     bool obscureText = false,
     String obscuringCharacter = '•',
     this.onSelectionChange,
-  }) : _text = text,
-       _placeholder = placeholder,
-       _style = style,
-       _placeholderStyle = placeholderStyle,
-       _selection = selection,
-       _viewOffset = viewOffset,
-       _cursorVisible = cursorVisible,
-       _cursorColor = cursorColor,
-       _cursorStyle = cursorStyle,
-       _selectionColor = selectionColor,
-       _textAlign = textAlign,
-       _maxLines = maxLines,
-       _isFocused = isFocused,
-       _obscureText = obscureText,
-       _obscuringCharacter = obscuringCharacter {
+  })  : _text = text,
+        _placeholder = placeholder,
+        _style = style,
+        _placeholderStyle = placeholderStyle,
+        _selection = selection,
+        _viewOffset = viewOffset,
+        _cursorVisible = cursorVisible,
+        _cursorColor = cursorColor,
+        _cursorStyle = cursorStyle,
+        _selectionColor = selectionColor,
+        _textAlign = textAlign,
+        _maxLines = maxLines,
+        _isFocused = isFocused,
+        _obscureText = obscureText,
+        _obscuringCharacter = obscuringCharacter {
     _updateMouseAnnotation();
   }
 
@@ -1872,9 +1863,8 @@ class RenderTextField extends RenderObject with MouseTrackerAnnotationProvider {
     // For obscured text, the layout lines contain obscuring characters (e.g. '•')
     // which may have different byte lengths than the real text. We must pass the
     // obscured text so character index computation matches the visual layout.
-    final textForHitTest = _obscureText
-        ? _obscuringCharacter * _text.length
-        : _text;
+    final textForHitTest =
+        _obscureText ? _obscuringCharacter * _text.length : _text;
 
     final charIndex = selection_utils.getCharacterIndexAtLocalPosition(
       localPos: Offset(localX, localY),
@@ -2023,9 +2013,8 @@ class RenderTextField extends RenderObject with MouseTrackerAnnotationProvider {
   @override
   void performLayout() {
     // Use TextLayoutEngine for proper Unicode text wrapping
-    String textToLayout = _text.isEmpty && _placeholder != null
-        ? _placeholder!
-        : _text;
+    String textToLayout =
+        _text.isEmpty && _placeholder != null ? _placeholder! : _text;
 
     // Apply text obscuring if needed
     if (_obscureText && _text.isNotEmpty) {
@@ -2034,9 +2023,8 @@ class RenderTextField extends RenderObject with MouseTrackerAnnotationProvider {
 
     // Reserve 1 column for the cursor block to be displayed within bounds
     // This ensures the cursor doesn't appear to go "into the wall" at line ends
-    final availableWidth = constraints.maxWidth.isFinite
-        ? constraints.maxWidth.toInt()
-        : 80;
+    final availableWidth =
+        constraints.maxWidth.isFinite ? constraints.maxWidth.toInt() : 80;
     final maxWidth = (availableWidth - 1)
         .clamp(1, double.infinity)
         .toInt(); // Reserve space for cursor
@@ -2074,8 +2062,7 @@ class RenderTextField extends RenderObject with MouseTrackerAnnotationProvider {
       final line = lines[i];
 
       // Calculate horizontal offset based on text alignment
-      final xOffset =
-          offset.dx +
+      final xOffset = offset.dx +
           TextLayoutEngine.calculateAlignmentOffset(
             line,
             alignmentWidth,
@@ -2162,9 +2149,8 @@ class RenderTextField extends RenderObject with MouseTrackerAnnotationProvider {
             offset + Offset(visualColumn.toDouble(), i.toDouble());
 
         // Get the character at cursor position (or space if at end)
-        final charAtCursor = positionInLine < line.length
-            ? line[positionInLine]
-            : ' ';
+        final charAtCursor =
+            positionInLine < line.length ? line[positionInLine] : ' ';
 
         _drawCursorAtPosition(
           canvas,

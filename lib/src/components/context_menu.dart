@@ -14,15 +14,14 @@ class MenuOpenDetails {
   final MenuOpenTrigger trigger;
 }
 
-typedef MenuAnchorBuilder =
-    Widget Function(
-      BuildContext context,
-      MenuController controller,
-      Widget? child,
-    );
+typedef MenuAnchorBuilder = Widget Function(
+  BuildContext context,
+  MenuController controller,
+  Widget? child,
+);
 
-typedef ContextMenuBuilder =
-    Widget Function(BuildContext context, MenuController controller);
+typedef ContextMenuBuilder = Widget Function(
+    BuildContext context, MenuController controller);
 
 abstract class _MenuControllerDelegate {
   bool get isOpen;
@@ -224,8 +223,7 @@ class _MenuAnchorState extends State<MenuAnchor>
 
   @override
   Widget build(BuildContext context) {
-    Widget result =
-        widget.builder?.call(context, _controller, widget.child) ??
+    Widget result = widget.builder?.call(context, _controller, widget.child) ??
         widget.child ??
         const SizedBox.shrink();
 

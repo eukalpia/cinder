@@ -8,8 +8,8 @@ class CinderTester {
   CinderTester._({
     required CinderTestBinding binding,
     bool debugPrintAfterPump = false,
-  }) : _binding = binding,
-       _debugPrintAfterPump = debugPrintAfterPump;
+  })  : _binding = binding,
+        _debugPrintAfterPump = debugPrintAfterPump;
 
   final CinderTestBinding _binding;
 
@@ -267,9 +267,8 @@ class CinderTester {
     final lines = renderToString(showBorders: false).split('\n');
     for (final line in lines) {
       // Pad or truncate line to fit within 78 chars
-      final displayLine = line.length > 78
-          ? line.substring(0, 78)
-          : line.padRight(78);
+      final displayLine =
+          line.length > 78 ? line.substring(0, 78) : line.padRight(78);
       print('║$displayLine║');
     }
     print(

@@ -330,11 +330,11 @@ class _RenderGestureDetector extends RenderMouseRegion {
     required void Function(MouseEvent) onPointerUp,
     required void Function(MouseEvent) onPointerMove,
     required HitTestBehavior behavior,
-  }) : _onPointerDown = onPointerDown,
-       _onPointerUp = onPointerUp,
-       _onPointerMove = onPointerMove,
-       _behavior = behavior,
-       super(opaque: behavior == HitTestBehavior.opaque);
+  })  : _onPointerDown = onPointerDown,
+        _onPointerUp = onPointerUp,
+        _onPointerMove = onPointerMove,
+        _behavior = behavior,
+        super(opaque: behavior == HitTestBehavior.opaque);
 
   void Function(MouseEvent) _onPointerDown;
   void Function(MouseEvent) get onPointerDown => _onPointerDown;
