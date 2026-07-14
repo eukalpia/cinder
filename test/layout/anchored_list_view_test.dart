@@ -3,7 +3,8 @@ import 'package:cinder/src/rendering/extent_index.dart';
 import 'package:test/test.dart';
 
 class _HistoryHost extends StatefulWidget {
-  const _HistoryHost({required this.controller, required this.initialIds});
+  const _HistoryHost(
+      {super.key, required this.controller, required this.initialIds});
 
   final AnchoredListController controller;
   final List<int> initialIds;

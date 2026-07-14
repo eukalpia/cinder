@@ -54,7 +54,7 @@ void main() {
         await tester.mouseMove(2, 2, 8, 4, button: MouseButton.right);
 
         expect(starts, hasLength(1));
-        expect(updates, isNotEmpty);
+        expect(updates.length, greaterThan(0));
         expect(ends, hasLength(1));
         expect(starts.single.button, MouseButton.right);
         expect(starts.single.buttons, contains(MouseButton.right));

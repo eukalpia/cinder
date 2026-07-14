@@ -230,7 +230,6 @@ class _AnchoredListViewState<T extends Object>
     extends State<AnchoredListView<T>> {
   AnchoredListController? _internalController;
   int? _firstVisibleIndex;
-  int? _lastVisibleIndex;
   bool _beforeRequestArmed = true;
   bool _afterRequestArmed = true;
   bool _visibleUpdateScheduled = false;
@@ -324,7 +323,6 @@ class _AnchoredListViewState<T extends Object>
 
       final stickyChanged = first != _firstVisibleIndex;
       _firstVisibleIndex = first;
-      _lastVisibleIndex = last;
       widget.onVisibleRangeChanged?.call(first, last);
 
       final beforeNear = first <= widget.loadMoreItemThreshold;
@@ -560,6 +558,7 @@ class _AnchoredListViewportElement<T extends Object>
       }
       existing.deactivate();
       existing.unmount();
+      // ignore: invalid_use_of_protected_member
       final element = replacement.createElement();
       _children[id] = element;
       element.mount(this, id);
@@ -568,6 +567,7 @@ class _AnchoredListViewportElement<T extends Object>
 
     final child = widget.itemBuilder(this, index, id);
     if (child == null) return null;
+    // ignore: invalid_use_of_protected_member
     final element = child.createElement();
     _children[id] = element;
     element.mount(this, id);
@@ -714,7 +714,6 @@ class RenderAnchoredListViewport<T extends Object> extends RenderObject
   }
 
   VisibleRangeChanged _onVisibleRangeChanged;
-  VisibleRangeChanged get onVisibleRangeChanged => _onVisibleRangeChanged;
   set onVisibleRangeChanged(VisibleRangeChanged value) {
     _onVisibleRangeChanged = value;
   }

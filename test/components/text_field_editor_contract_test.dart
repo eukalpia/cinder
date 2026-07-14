@@ -2,7 +2,7 @@ import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
 class _DraftHost extends StatefulWidget {
-  const _DraftHost({required this.store});
+  const _DraftHost({super.key, required this.store});
 
   final MemoryTextDraftStore store;
 
@@ -29,7 +29,7 @@ class _DraftHostState extends State<_DraftHost> {
       autofocus: true,
       maxLines: 4,
       draftKey: chatId,
-      draftStoree: widget.store,
+      draftStore: widget.store,
     );
   }
 }
@@ -119,7 +119,7 @@ void main() {
 
         key.currentState!.showChat('beta');
         await tester.pump();
-        expect(key.currentState!.controller.text, isEmpty);
+        expect(key.currentState!.controller.text, '');
 
         await tester.enterText('beta draft');
         key.currentState!.showChat('alpha');
@@ -153,7 +153,7 @@ void main() {
           ),
         );
         expect(controller.text, 'message\n');
-        expect(submitted, isEmpty);
+        expect(submitted, hasLength(0));
 
         await tester.sendEnter();
         expect(submitted, <String>['message\n']);

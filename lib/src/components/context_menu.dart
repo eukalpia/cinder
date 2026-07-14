@@ -317,7 +317,6 @@ class _RenderAnchorGeometry extends RenderObject
   _RenderAnchorGeometry(this._onPaintRect);
 
   ValueChanged<Rect> _onPaintRect;
-  ValueChanged<Rect> get onPaintRect => _onPaintRect;
   set onPaintRect(ValueChanged<Rect> value) => _onPaintRect = value;
 
   @override
