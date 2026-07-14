@@ -83,7 +83,7 @@ class _TextFieldDemoState extends State<TextFieldDemo> {
               ),
               child: TextField(
                 controller: _singleLineController,
-                focused: _focusedField == 0,
+                autofocus: _focusedField == 0,
                 width: 50,
                 height: 1,
                 placeholder: 'Enter text...',
@@ -106,7 +106,7 @@ class _TextFieldDemoState extends State<TextFieldDemo> {
               ),
               child: TextField(
                 controller: _multiLineController,
-                focused: _focusedField == 1,
+                autofocus: _focusedField == 1,
                 width: 50,
                 height: 4,
                 maxLines: 4,
@@ -126,7 +126,7 @@ class _TextFieldDemoState extends State<TextFieldDemo> {
               ),
               child: TextField(
                 controller: _passwordController,
-                focused: _focusedField == 2,
+                autofocus: _focusedField == 2,
                 width: 30,
                 height: 1,
                 obscureText: true,
@@ -145,7 +145,7 @@ class _TextFieldDemoState extends State<TextFieldDemo> {
               ),
               child: TextField(
                 controller: _emojiController,
-                focused: _focusedField == 3,
+                autofocus: _focusedField == 3,
                 width: 40,
                 height: 1,
                 placeholder: 'Try emojis: 🦄 🌈 💖',
@@ -163,7 +163,7 @@ class _TextFieldDemoState extends State<TextFieldDemo> {
               ),
               child: TextField(
                 controller: _chineseController,
-                focused: _focusedField == 4,
+                autofocus: _focusedField == 4,
                 width: 40,
                 height: 1,
                 placeholder: '输入中文文字...',
@@ -181,7 +181,7 @@ class _TextFieldDemoState extends State<TextFieldDemo> {
               ),
               child: TextField(
                 controller: _maxLengthController,
-                focused: _focusedField == 5,
+                autofocus: _focusedField == 5,
                 width: 30,
                 height: 1,
                 maxLength: 10,

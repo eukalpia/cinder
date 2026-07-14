@@ -39,7 +39,7 @@ void main() {
       expect(firstNode.hasPrimaryFocus, isTrue);
       await tester.enterText('A');
       expect(firstController.text, 'A');
-      expect(secondController.text, isEmpty);
+      expect(secondController.text, '');
 
       await tester.sendTab();
       expect(secondNode.hasPrimaryFocus, isTrue);
