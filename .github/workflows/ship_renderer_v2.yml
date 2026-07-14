@@ -33,26 +33,21 @@ jobs:
             test/rendering/buffer_v2_test.dart \
             test/rendering/frame_diff_test.dart \
             benchmark/renderer_v2_benchmark.dart
-      - name: Remove one-shot infrastructure
+      - name: Keep workflow cleanup for the GitHub API commit
         shell: bash
         run: |
-          rm -f \
-            .github/scripts/finalize_renderer_v2.py \
-            .github/workflows/finalize_renderer_v2.yml \
-            .github/workflows/finalize_renderer_v2_pr.yml \
-            .github/workflows/capture_package_error.yml \
-            .github/workflows/fix_renderer_benchmark.yml \
-            .github/workflows/fix_riverpod_api.yml \
-            .github/workflows/riverpod_validation.yml \
-            .github/workflows/ship_renderer_v2.yml \
-            renderer_v2_error.log \
-            integration_package_error.log \
-            cinder_riverpod_analyzer.log
-          rm -rf ci_diagnostics
+          # GitHub's Actions token cannot create commits that modify workflow
+          # files. Restore .github exactly, then commit only the already
+          # validated production implementation, tests, benchmark, and docs.
+          git restore --source=HEAD --staged --worktree .github
       - name: Commit production Renderer V2
         run: |
           git config user.name "Cinder Renderer Bot"
           git config user.email "actions@users.noreply.github.com"
-          git add -A
+          git add README.md lib test benchmark packages
+          if git diff --cached --quiet; then
+            echo "No production changes to commit."
+            exit 0
+          fi
           git commit --no-verify -m "perf!: ship validated Renderer V2 pipeline"
           git push origin HEAD:dev
