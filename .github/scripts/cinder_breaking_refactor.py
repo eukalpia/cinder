@@ -31,10 +31,6 @@ TEXT_SUFFIXES = {
     ".ps1",
 }
 
-# .github is deliberately excluded. GitHub's workflow token can push source
-# changes with contents:write, but cannot update workflow files without the
-# separate workflow permission. Those files are rebranded through the GitHub
-# API after the source migration lands.
 SKIP_DIRS = {
     ".git",
     ".github",
@@ -60,7 +56,10 @@ IDENTIFIER_REPLACEMENTS: tuple[tuple[str, str], ...] = (
     (r"\bdidUpdateComponent\b", "didUpdateWidget"),
     (r"\bnewComponent\b", "newWidget"),
     (r"\boldComponent\b", "oldWidget"),
-    (r"\bComponent\b", "Widget"),
+    # Compound identifiers are part of the public API too:
+    # InheritedComponent, ProxyComponent, ParentDataComponent,
+    # findAncestorComponentOfExactType, etc.
+    (r"Component", "Widget"),
     (r"\bcomponent\b", "widget"),
 )
 
@@ -242,16 +241,15 @@ def update_root_pubspec() -> None:
 
 def assert_no_legacy_public_api() -> None:
     forbidden = (
-        "class Component",
-        "class StatelessComponent",
-        "class StatefulComponent",
-        "class RenderObjectComponent",
+        "Component",
         "export 'src/app.dart'",
         "export 'src/frame.dart'",
         "package:nocterm",
     )
     failures: list[str] = []
     for path in iter_text_files():
+        if path.suffix.lower() != ".dart":
+            continue
         try:
             text = path.read_text(encoding="utf-8")
         except UnicodeDecodeError:
