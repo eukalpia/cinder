@@ -39,7 +39,7 @@ Changed 33 dependencies!
 1 package has newer versions incompatible with dependency constraints.
 Try `dart pub outdated` for more information.
 Changed lib/nested.dart
-Formatted 1 file (1 changed) in 0.00 seconds.
+Formatted 1 file (1 changed) in 0.01 seconds.
 Analyzing cinder_nested...
 No issues found!
 ===== packages/cinder_provider =====
@@ -225,6 +225,9 @@ TEST: riverpod basic functionality
   
 ] 52;c;\00:00 +0 -1: test/watch_test.dart: context.watch watch with multiple providers
 TEST: multiple watches
+00:00 +0 -1: test/basic_integration_test.dart: Riverpod integration - basic read and overrides
+  ✓ PASSED
+00:00 +0 -1: test/watch_test.dart: context.watch watch with multiple providers
   ✗ FAILED
     Error: Expected: <2>
   Actual: <1>
@@ -247,7 +250,9 @@ TEST: multiple watches
 <asynchronous suspension>
 
 00:00 +0 -2: test/basic_integration_test.dart: Riverpod integration - basic read and overrides
-00:00 +0 -2: test/watch_test.dart: context.watch watch with multiple providers [E]
+00:00 +1 -2: test/basic_integration_test.dart: Riverpod integration - nested scopes
+] 52;c;\TEST: nested provider scopes
+00:00 +1 -2: test/watch_test.dart: context.watch watch with multiple providers [E]
   Expected: <2>
     Actual: <1>
   
@@ -258,7 +263,7 @@ TEST: multiple watches
   ===== asynchronous gap ===========================
   test/watch_test.dart 69:7                         main.<fn>.<fn>
   
-] 52;c;\00:00 +0 -2: test/watch_test.dart: context.watch watch with computed provider
+] 52;c;\00:00 +1 -2: test/watch_test.dart: context.watch watch with computed provider
 TEST: computed provider
   ✗ FAILED
     Error: Expected: <2>
@@ -281,8 +286,8 @@ TEST: computed provider
 #8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
 <asynchronous suspension>
 
-00:00 +0 -3: test/basic_integration_test.dart: Riverpod integration - basic read and overrides
-00:00 +0 -3: test/watch_test.dart: context.watch watch with computed provider [E]
+00:00 +1 -3: test/basic_integration_test.dart: Riverpod integration - nested scopes
+00:00 +1 -3: test/watch_test.dart: context.watch watch with computed provider [E]
   Expected: <2>
     Actual: <1>
   
@@ -293,15 +298,21 @@ TEST: computed provider
   ===== asynchronous gap ===========================
   test/watch_test.dart 132:7                        main.<fn>.<fn>
   
-] 52;c;\00:00 +0 -3: test/watch_test.dart: context.watch nested ProviderScopes with watch
+] 52;c;\00:00 +1 -3: test/watch_test.dart: context.watch nested ProviderScopes with watch
 TEST: nested scopes
+00:00 +1 -3: test/basic_integration_test.dart: Riverpod integration - nested scopes
   ✓ PASSED
-00:00 +1 -3: test/basic_integration_test.dart: Riverpod integration - basic read and overrides
-] 52;c;\00:00 +1 -3: test/watch_test.dart: context.watch watch does not create duplicate subscriptions
+00:00 +2 -3: test/watch_test.dart: context.watch nested ProviderScopes with watch
+] 52;c;\00:00 +2 -3: test/basic_integration_test.dart: Riverpod integration - multiple providers
+TEST: multiple providers
+00:00 +2 -3: test/watch_test.dart: context.watch nested ProviderScopes with watch
+  ✓ PASSED
+00:00 +3 -3: test/basic_integration_test.dart: Riverpod integration - multiple providers
+] 52;c;\00:00 +3 -3: test/watch_test.dart: context.watch watch does not create duplicate subscriptions
 TEST: no duplicate subscriptions
-00:00 +1 -3: test/basic_integration_test.dart: Riverpod integration - basic read and overrides
+00:00 +3 -3: test/basic_integration_test.dart: Riverpod integration - multiple providers
   ✓ PASSED
-00:00 +2 -3: test/watch_test.dart: context.watch watch does not create duplicate subscriptions
+00:00 +4 -3: test/watch_test.dart: context.watch watch does not create duplicate subscriptions
   ✗ FAILED
     Error: Expected: <2>
   Actual: <1>
@@ -323,9 +334,7 @@ TEST: no duplicate subscriptions
 #8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
 <asynchronous suspension>
 
-00:00 +2 -4: test/basic_integration_test.dart: Riverpod integration - nested scopes
-TEST: nested provider scopes
-] 52;c;\00:00 +2 -4: test/watch_test.dart: context.watch watch does not create duplicate subscriptions [E]
+00:00 +4 -4: test/watch_test.dart: context.watch watch does not create duplicate subscriptions [E]
   Expected: <2>
     Actual: <1>
   
@@ -336,8 +345,8 @@ TEST: nested provider scopes
   ===== asynchronous gap ===========================
   test/watch_test.dart 229:7                        main.<fn>.<fn>
   
-] 52;c;\00:00 +2 -4: test/watch_test.dart: context.listen listen receives updates without rebuilding
-TEST: listen without rebuild
+00:00 +4 -4: test/watch_test.dart: context.listen listen receives updates without rebuilding
+] 52;c;\TEST: listen without rebuild
   ✗ FAILED
     Error: Expected: contains text "Last value: 1"
   Actual: <Instance of 'TerminalState'>
@@ -387,8 +396,7 @@ TEST: listen without rebuild
 #8      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
 <asynchronous suspension>
 
-00:00 +2 -5: test/basic_integration_test.dart: Riverpod integration - nested scopes
-00:00 +2 -5: test/watch_test.dart: context.listen listen receives updates without rebuilding [E]
+00:00 +4 -5: test/watch_test.dart: context.listen listen receives updates without rebuilding [E]
   Expected: contains text "Last value: 1"
     Actual: <Instance of 'TerminalState'>
      Which: actual content:
@@ -427,14 +435,12 @@ TEST: listen without rebuild
   ===== asynchronous gap ===========================
   test/watch_test.dart 292:7                        main.<fn>.<fn>
   
-00:00 +2 -5: test/basic_integration_test.dart: Riverpod integration - nested scopes
-  ✓ PASSED
-00:00 +3 -5: test/basic_integration_test.dart: Riverpod integration - multiple providers
-TEST: multiple providers
-] 52;c;\  ✓ PASSED
 00:00 +4 -5: test/simple_watch_test.dart: Basic watch functionality
 TEST: basic watch
-] 52;c;\
+] 52;c;\00:00 +4 -5: test/simple_test.dart: Basic Riverpod integration works
+TEST: basic provider read
+] 52;c;\00:00 +4 -5: test/simple_watch_test.dart: Basic watch functionality
+
 ╔═ Terminal Output ═══════════════════════════════════════════════════════════╗
 ║                                    Count: 0                                  ║
 ║                              Press up to increment                           ║
@@ -464,11 +470,10 @@ TEST: basic watch
 ╚══════════════════════════════════════════════════════════════════════════════╝
   ✓ PASSED
 00:00 +5 -5: test/simple_test.dart: Basic Riverpod integration works
-TEST: basic provider read
-] 52;c;\  ✓ PASSED
+  ✓ PASSED
 00:00 +6 -5: test/simple_test.dart: StateProvider can be modified
-] 52;c;\TEST: state provider modification
-  ✗ FAILED
+TEST: state provider modification
+] 52;c;\  ✗ FAILED
     Error: Expected: contains text "Count: 1"
   Actual: <Instance of 'TerminalState'>
    Which: actual content:
@@ -576,8 +581,8 @@ TEST: provider scope basic
 00:00 +8 -6: test/riverpod_test.dart: cinder_riverpod ProviderScope provides container to descendants
   ✓ PASSED
 00:00 +9 -6: test/riverpod_test.dart: cinder_riverpod watch triggers rebuilds
-TEST: watch rebuilds
-] 52;c;\  ✗ FAILED
+] 52;c;\TEST: watch rebuilds
+  ✗ FAILED
     Error: Expected: contains text "Counter: 1"
   Actual: <Instance of 'TerminalState'>
    Which: actual content:
