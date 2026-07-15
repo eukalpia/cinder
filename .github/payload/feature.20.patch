@@ -1,0 +1,85 @@
+est('trusted display text rejects control characters', () {
++      expect(
++        () => TerminalText.trusted('\x1b[31m'),
++        throwsArgumentError,
++      );
++      expect(TerminalText.trusted('framework label').trusted, isTrue);
++    });
++
++    test('safe terminal text stores sanitized content', () {
++      final widget = TerminalText.safe('status: \x1b[32mok');
++      expect(widget.data, 'status: ␛[32mok');
++      expect(widget.trusted, isFalse);
++    });
++
++    test('terminal diff is a final defense for raw Cell writes', () {
++      final previous = Buffer(8, 1);
++      final current = Buffer(8, 1);
++      current.writeCell(0, 0, char: '\x1b[2J');
++
++      final output = StringBuffer();
++      emitFrameDiff(
++        current: current,
++        previous: previous,
++        emitRun: (x, y, data) => output.write(data),
++      );
++
++      expect(output.toString().contains('\x1b'), isFalse);
++      expect(output.toString(), contains('�'));
++    });
++
++    test('fuzz: raw Cell values never become terminal commands', () {
++      final random = Random(0xFEEDC1);
++      for (var sample = 0; sample < 1000; sample++) {
++        final previous = Buffer(4, 1);
++        final current = Buffer(4, 1);
++        final length = 1 + random.nextInt(8);
++        final input = String.fromCharCodes(
++          List<int>.generate(length, (_) => random.nextInt(0x10000)),
++        );
++        current.writeCell(0, 0, char: input);
++        final output = StringBuffer();
++        emitFrameDiff(
++          current: current,
++          previous: previous,
++          emitRun: (x, y, data) => output.write(data),
++        );
++        expect(output.toString().contains('\x1b'), isFalse);
++        expect(output.toString().contains('\x9b'), isFalse);
++        expect(output.toString().contains('\x9d'), isFalse);
++      }
++    });
++
++    test('fuzz: sanitized output never contains terminal controls', () {
++      final random = Random(0xC1D3E);
++      for (var sample = 0; sample < 5000; sample++) {
++        final length = random.nextInt(256);
++        final codeUnits = List<int>.generate(
++          length,
++          (_) => random.nextInt(0x10000),
++          growable: false,
++        );
++        final input = String.fromCharCodes(codeUnits);
++        final output = TerminalTextSanitizer.sanitize(input);
++        expect(
++          TerminalTextSanitizer.isDisplaySafe(output),
++          isTrue,
++          reason: 'unsafe output for sample $sample',
++        );
++        expect(output.contains('\x1b'), isFalse);
++        expect(output.contains('\x9b'), isFalse);
++        expect(output.contains('\x9d'), isFalse);
++      }
++    });
++  });
++
++  test('canvas is a final sanitization boundary', () async {
++    await testCinder('canvas is a final sanitization boundary', (tester) async {
++      await tester.pumpWidget(
++        const Text('before\x1b[2J\x1b[Hafter'),
++      );
++
++      expect(tester.terminalState.containsText('before␛[2J␛[Hafter'), isTrue);
++    });
++  });
++}
