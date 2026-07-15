@@ -35,10 +35,13 @@ jobs:
           if [ "${#files[@]}" -gt 0 ]; then
             dart format "${files[@]}"
           fi
+          {
+            echo "Dart: $(dart --version 2>&1)"
+            echo 'Changed by formatter:'
+            git diff --name-only
+          } > .github/format-report.txt
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          if ! git diff --quiet; then
-            git add -A
-            git commit -m 'style: format safe terminal and application widgets'
-            git push origin HEAD:feat/safe-terminal-and-app-widgets
-          fi
+          git add -A
+          git commit -m 'style: format safe terminal and application widgets'
+          git push origin HEAD:feat/safe-terminal-and-app-widgets
