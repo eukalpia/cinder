@@ -1,6 +1,6 @@
 name: cinder_bloc
 description: Flutter-style BLoC widgets and context extensions for Cinder.
-version: 1.0.0-dev.1
+version: 1.0.0-dev.2
 repository: https://github.com/eukalpia/cinder
 
 environment:
@@ -8,9 +8,9 @@ environment:
 
 dependencies:
   bloc: ^9.2.1
-  cinder: ^1.0.0-dev.1
-  cinder_nested: ^1.0.0-dev.1
-  cinder_provider: ^1.0.0-dev.1
+  cinder: ^1.0.0-dev.2
+  cinder_nested: ^1.0.0-dev.2
+  cinder_provider: ^1.0.0-dev.2
 
 dev_dependencies:
   lints: ^5.0.0

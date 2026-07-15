@@ -1,6 +1,6 @@
 name: cinder_riverpod
 description: Riverpod integration for Cinder.
-version: 1.0.0-dev.1
+version: 1.0.0-dev.2
 homepage: https://github.com/eukalpia/cinder
 repository: https://github.com/eukalpia/cinder
 
@@ -8,7 +8,7 @@ environment:
   sdk: ">=3.7.0 <4.0.0"
 
 dependencies:
-  cinder: ^1.0.0-dev.1
+  cinder: ^1.0.0-dev.2
   riverpod: ^3.3.2
   meta: ^1.15.0
 
