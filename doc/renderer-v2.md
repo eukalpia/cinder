@@ -1,40 +1,60 @@
-# Renderer V2 architecture
+# Renderer V2 implementation notes
 
-Renderer V2 is Cinder's terminal-cell rendering pipeline.
+Renderer V2 is Cinder's current reusable terminal-cell renderer implementation.
 
-## Frame storage
+The normative Cinder 1.0 rendering contract now lives in:
+
+- [`renderer.md`](renderer.md)
+- [`rendering/overview.md`](rendering/overview.md)
+- [`rendering/frame-pipeline.md`](rendering/frame-pipeline.md)
+- [`rendering/cell-buffer.md`](rendering/cell-buffer.md)
+- [`rendering/damage-tracking.md`](rendering/damage-tracking.md)
+- [`rendering/layout-and-paint.md`](rendering/layout-and-paint.md)
+- [`rendering/compositing.md`](rendering/compositing.md)
+- [`rendering/terminal-diff.md`](rendering/terminal-diff.md)
+- [`rendering/images.md`](rendering/images.md)
+- [`rendering/scroll-regions.md`](rendering/scroll-regions.md)
+- [`rendering/performance-contract.md`](rendering/performance-contract.md)
+- [`rendering/custom-render-objects.md`](rendering/custom-render-objects.md)
+
+This file is implementation-oriented. When it differs from the normative specification, the difference is a tracked implementation gap for stable 1.0.
+
+## Current frame storage
 
 - flat mutable cell arrays;
 - reusable front/back buffers;
-- per-row dirty spans;
+- one dirty span per row;
 - stable cell identities and cached grapheme widths;
-- image overlay metadata kept alongside placeholder cells.
+- `\u200B` continuation markers for width-2 graphemes;
+- image overlay metadata alongside placeholder cells.
 
-## Diff and output
+The 1.0 specification formalizes `TerminalCell`, `CellKind`, wide-cell normalization, hyperlink/selection metadata, multiple spans, and row hashes.
 
-- compare only the union of dirty row spans;
-- merge cheap unchanged gaps into one cursor-positioned run;
+## Current diff/output
+
+- compare union of current/previous dirty row spans;
+- merge cheap unchanged gaps into cursor-positioned runs;
 - batch ANSI style transitions;
-- preserve wide-grapheme continuation and removal semantics;
-- wrap frames in synchronized output when supported.
+- preserve wide continuation/removal semantics;
+- wrap frames in synchronized output when supported;
+- flush once after frame operations.
 
-## Cached layers
+Stable 1.0 additionally requires an explicit frame-payload builder and one backend `present` transaction.
 
-`RepaintBoundary` stops paint invalidation at the nearest boundary. Its subtree
-is painted into a reusable local `Buffer`; unchanged frames blit the cached layer
-without calling descendant paint methods. Dirty boundaries can be painted
-directly into a synchronized back buffer without walking the root tree.
+## Current cached layers
 
-## Scroll regions
+`RepaintBoundary` stops invalidation at the nearest boundary. Its subtree paints into a reusable local `Buffer`; clean frames blit cached content without descendant paint. Dirty topmost boundaries can paint into a synchronized back buffer without a root walk.
 
-Full-width vertical list viewports can request DECSTBM scroll regions and CSI
-`S`/`T` operations. Requests are rejected when the viewport is partial-width,
-the delta is fractional or too large, or an active protocol image intersects the
-region. Rejected requests use ordinary dirty-span rendering.
+Stable 1.0 adds explicit compositing dirtiness, layer-local damage, transactional promotion, and cache memory policy.
 
-## Contracts
+## Current scroll regions
 
-Dedicated tests cover cached paint counts, boundary invalidation, alternating
-buffer synchronization, image metadata compositing, scroll mutation, escape
-sequences, Unicode width, and differential output. Benchmarks cover single-cell
-updates and repeated cached-panel composites at a 200x60 viewport.
+Full-width vertical viewports may request DECSTBM plus CSI `S`/`T`. Partial-width, invalid delta, or intersecting protocol-image requests fall back to ordinary damage diff.
+
+Stable 1.0 adds deterministic multi-request policy, byte-cost gating, failure transaction rules, and rejection metrics.
+
+## Current validation
+
+Tests cover cached paints, invalidation, alternating synchronization, image metadata composition, scroll mutation, escapes, Unicode width, and differential output. Benchmarks cover single-cell update and repeated cached-panel composition at 200×60.
+
+The release-gate workload matrix is in [`rendering/performance-contract.md`](rendering/performance-contract.md).
