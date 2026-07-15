@@ -59,26 +59,7 @@ jobs:
             --exclude=.github/workflows/export-source.yml \
             /tmp/feature.patch
 
-          python3 - <<'PY'
-          from pathlib import Path
-
-          path = Path('CHANGELOG.md')
-          text = path.read_text(encoding='utf-8')
-          entry = '''# Unreleased
-
-- Add explicit `TerminalText.safe` / `TerminalText.trusted` trust boundaries.
-- Sanitize untrusted output at text, Markdown, canvas, buffer, cell, diff, and full-frame layers.
-- Validate OSC title/icon metadata and Kitty, iTerm2, and Sixel image payloads.
-- Harden failure-tolerant terminal state recovery and add fuzz/security tests.
-- Add first-party application widgets for navigation, data, AI/developer workflows, and forms.
-- Add `VirtualListView`, `SplitView`, `TreeView`, `DiffView`, and `CommandPalette` as the primary IDE building blocks.
-
----
-
-'''
-          if not text.startswith('# Unreleased'):
-              path.write_text(entry + text, encoding='utf-8')
-          PY
+          python3 -c 'from pathlib import Path; p=Path("CHANGELOG.md"); t=p.read_text(encoding="utf-8"); e="# Unreleased\n\n- Add explicit `TerminalText.safe` / `TerminalText.trusted` trust boundaries.\n- Sanitize untrusted output at text, Markdown, canvas, buffer, cell, diff, and full-frame layers.\n- Validate OSC title/icon metadata and Kitty, iTerm2, and Sixel image payloads.\n- Harden failure-tolerant terminal state recovery and add fuzz/security tests.\n- Add first-party application widgets for navigation, data, AI/developer workflows, and forms.\n- Add `VirtualListView`, `SplitView`, `TreeView`, `DiffView`, and `CommandPalette` as the primary IDE building blocks.\n\n---\n\n"; p.write_text(e+t, encoding="utf-8") if not t.startswith("# Unreleased") else None'
 
           mapfile -t dart_files < <(
             git diff --cached --name-only --diff-filter=ACMR \
