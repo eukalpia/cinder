@@ -21,6 +21,30 @@ void main() {
     });
   });
 
+  test('unicode mode forces monochrome text presentation', () {
+    const data = IconData.terminal('⚠️', asciiFallback: '!');
+    expect(
+      data.resolveGlyph(
+        mode: IconRenderMode.unicode,
+        usePrivateUseGlyphs: false,
+        fallbackGlyph: '?',
+      ),
+      '⚠︎',
+    );
+  });
+
+  test('emoji mode preserves the declared emoji presentation', () {
+    const data = IconData.terminal('⚠️', asciiFallback: '!');
+    expect(
+      data.resolveGlyph(
+        mode: IconRenderMode.emoji,
+        usePrivateUseGlyphs: false,
+        fallbackGlyph: '?',
+      ),
+      '⚠️',
+    );
+  });
+
   test('font mode renders the original private-use code point', () {
     const data = IconData(
       0xe001,
@@ -38,6 +62,31 @@ void main() {
     );
   });
 
+  test('auto prefers a real icon-font glyph when explicitly enabled', () {
+    const data = IconData(
+      0xe001,
+      fontFamily: 'ExampleIcons',
+      unicodeFallback: '⚠️',
+      asciiFallback: '!',
+    );
+    expect(
+      data.resolveGlyph(
+        mode: IconRenderMode.auto,
+        usePrivateUseGlyphs: true,
+        fallbackGlyph: '?',
+      ),
+      String.fromCharCode(0xe001),
+    );
+    expect(
+      data.resolveGlyph(
+        mode: IconRenderMode.auto,
+        usePrivateUseGlyphs: false,
+        fallbackGlyph: '?',
+      ),
+      '⚠︎',
+    );
+  });
+
   test('matchTextDirection mirrors terminal arrow fallbacks', () {
     expect(
       TerminalIcons.arrowLeft.resolveGlyph(
@@ -46,7 +95,7 @@ void main() {
         fallbackGlyph: '?',
         textDirection: TextDirection.rtl,
       ),
-      '→',
+      '→︎',
     );
   });
 }

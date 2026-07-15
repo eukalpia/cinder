@@ -14,6 +14,9 @@ abstract class Colors {
   // Prevent instantiation
   Colors._();
 
+  /// A fully transparent color.
+  static const Color transparent = Color.fromARGB(0, 0, 0, 0);
+
   /// Completely opaque black.
   static const Color black = Color.fromRGB(24, 24, 28);
 
@@ -43,6 +46,48 @@ abstract class Colors {
 
   /// Completely opaque gray (American spelling).
   static const Color gray = grey;
+
+  /// Material-style pink.
+  static const Color pink = Color(0xE91E63);
+
+  /// Material-style purple.
+  static const Color purple = Color(0x9C27B0);
+
+  /// Material-style deep purple.
+  static const Color deepPurple = Color(0x673AB7);
+
+  /// Material-style indigo.
+  static const Color indigo = Color(0x3F51B5);
+
+  /// Material-style light blue.
+  static const Color lightBlue = Color(0x03A9F4);
+
+  /// Material-style teal.
+  static const Color teal = Color(0x009688);
+
+  /// Material-style light green.
+  static const Color lightGreen = Color(0x8BC34A);
+
+  /// Material-style lime.
+  static const Color lime = Color(0xCDDC39);
+
+  /// Material-style amber.
+  static const Color amber = Color(0xFFC107);
+
+  /// Material-style orange.
+  static const Color orange = Color(0xFF9800);
+
+  /// Material-style deep orange.
+  static const Color deepOrange = Color(0xFF5722);
+
+  /// Material-style brown.
+  static const Color brown = Color(0x795548);
+
+  /// Material-style blue-grey.
+  static const Color blueGrey = Color(0x607D8B);
+
+  /// Material-style blue-gray (American spelling).
+  static const Color blueGray = blueGrey;
 
   // Bright/bold terminal colors
 
@@ -77,8 +122,39 @@ abstract class Colors {
 /// While terminals don't support true alpha blending, we can pre-blend colors
 /// knowing what's behind them in the buffer.
 class Color {
-  /// The terminal's default color (resets to terminal default)
+  /// The terminal's default color (resets to terminal default).
   static const Color defaultColor = Color._default();
+
+  /// A fully transparent color.
+  static const Color transparent = Colors.transparent;
+
+  /// Convenience aliases for the named palette.
+  ///
+  /// Flutter exposes chromatic colors through [Colors]. Cinder additionally
+  /// provides non-conflicting aliases such as `Color.black` and `Color.white`.
+  /// The names `red`, `green`, and `blue` remain channel accessors, so use
+  /// `Colors.red`, `Colors.green`, and `Colors.blue` for those colors.
+  static const Color black = Colors.black;
+  static const Color white = Colors.white;
+  static const Color grey = Colors.grey;
+  static const Color gray = Colors.gray;
+  static const Color yellow = Colors.yellow;
+  static const Color cyan = Colors.cyan;
+  static const Color magenta = Colors.magenta;
+  static const Color pink = Colors.pink;
+  static const Color purple = Colors.purple;
+  static const Color deepPurple = Colors.deepPurple;
+  static const Color indigo = Colors.indigo;
+  static const Color lightBlue = Colors.lightBlue;
+  static const Color teal = Colors.teal;
+  static const Color lightGreen = Colors.lightGreen;
+  static const Color lime = Colors.lime;
+  static const Color amber = Colors.amber;
+  static const Color orange = Colors.orange;
+  static const Color deepOrange = Colors.deepOrange;
+  static const Color brown = Colors.brown;
+  static const Color blueGrey = Colors.blueGrey;
+  static const Color blueGray = Colors.blueGray;
 
   /// The alpha channel of this color in an 8 bit value, 0 to 255.
   ///
@@ -100,14 +176,17 @@ class Color {
 
   /// Creates a color from an integer value.
   ///
-  /// The value should be in 0xRRGGBB format where:
-  /// - RR is the red widget (0-255)
-  /// - GG is the green widget (0-255)
-  /// - BB is the blue widget (0-255)
+  /// Six-digit values use `0xRRGGBB` and default to full opacity. Eight-digit
+  /// values use Flutter-compatible `0xAARRGGBB` ordering.
   ///
-  /// The alpha channel defaults to 255 (fully opaque).
+  /// Examples:
+  /// ```dart
+  /// const Color(0xFF0000);   // opaque red
+  /// const Color(0x80FF0000); // 50% red
+  /// ```
   const Color(int value)
-      : alpha = 255,
+      : assert(value >= 0 && value <= 0xFFFFFFFF),
+        alpha = value > 0xFFFFFF ? (value >> 24) & 0xFF : 255,
         red = (value >> 16) & 0xFF,
         green = (value >> 8) & 0xFF,
         blue = value & 0xFF,
@@ -145,6 +224,33 @@ class Color {
         assert(green >= 0 && green <= 255),
         assert(blue >= 0 && blue <= 255),
         isDefault = false;
+
+  /// Creates a color from red, green, blue, and opacity components.
+  ///
+  /// This mirrors Flutter's `Color.fromRGBO` constructor. [opacity] is clamped
+  /// to the inclusive range from 0.0 to 1.0.
+  factory Color.fromRGBO(int red, int green, int blue, double opacity) {
+    assert(red >= 0 && red <= 255);
+    assert(green >= 0 && green <= 255);
+    assert(blue >= 0 && blue <= 255);
+    assert(opacity >= 0.0 && opacity <= 1.0);
+    return Color.fromARGB(
+      (opacity.clamp(0.0, 1.0) * 255).round(),
+      red,
+      green,
+      blue,
+    );
+  }
+
+  /// Returns this color encoded as Flutter-compatible `0xAARRGGBB`.
+  int toARGB32() =>
+      ((alpha & 0xFF) << 24) |
+      ((red & 0xFF) << 16) |
+      ((green & 0xFF) << 8) |
+      (blue & 0xFF);
+
+  /// Legacy integer representation in `0xAARRGGBB` order.
+  int get value => toARGB32();
 
   /// Converts this color to an ANSI escape code.
   ///
