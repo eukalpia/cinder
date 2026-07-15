@@ -1,0 +1,448 @@
+l field in _fields.values) {
++      field.removeListener(_changed);
++    }
++    _fields.clear();
++    super.dispose();
++  }
++}
++
++/// Provides a [FormController] to descendant fields.
++class Form extends StatefulWidget {
++  const Form({
++    super.key,
++    required this.child,
++    this.controller,
++    this.onChanged,
++  });
++
++  final Widget child;
++  final FormController? controller;
++  final VoidCallback? onChanged;
++
++  static FormController? maybeOf(BuildContext context) {
++    return context.dependOnInheritedWidgetOfExactType<_FormScope>()?.controller;
++  }
++
++  static FormController of(BuildContext context) {
++    final controller = maybeOf(context);
++    assert(controller != null, 'No Form found in this context.');
++    return controller!;
++  }
++
++  @override
++  State<Form> createState() => _FormState();
++}
++
++class _FormState extends State<Form> {
++  FormController? _owned;
++  late FormController _controller;
++
++  @override
++  void initState() {
++    super.initState();
++    _attach();
++  }
++
++  void _attach() {
++    _owned = widget.controller == null ? FormController() : null;
++    _controller = widget.controller ?? _owned!;
++    _controller.addListener(_changed);
++  }
++
++  void _detach() {
++    _controller.removeListener(_changed);
++    _owned?.dispose();
++    _owned = null;
++  }
++
++  @override
++  void didUpdateWidget(Form oldWidget) {
++    super.didUpdateWidget(oldWidget);
++    if (!identical(oldWidget.controller, widget.controller)) {
++      _detach();
++      _attach();
++    }
++  }
++
++  void _changed() {
++    widget.onChanged?.call();
++    if (mounted) setState(() {});
++  }
++
++  @override
++  Widget build(BuildContext context) {
++    return _FormScope(controller: _controller, child: widget.child);
++  }
++
++  @override
++  void dispose() {
++    _detach();
++    super.dispose();
++  }
++}
++
++class _FormScope extends InheritedWidget {
++  const _FormScope({required this.controller, required super.child});
++
++  final FormController controller;
++
++  @override
++  bool updateShouldNotify(_FormScope oldWidget) {
++    return !identical(oldWidget.controller, controller);
++  }
++}
++
++/// Generic form field with validation and error presentation.
++class FormField<T> extends StatefulWidget {
++  const FormField({
++    super.key,
++    required this.id,
++    required this.builder,
++    this.controller,
++    this.initialValue,
++    this.validators = const [],
++    this.label,
++    this.helperText,
++    this.showError = true,
++    this.onChanged,
++  });
++
++  final Object id;
++  final FormFieldBuilder<T> builder;
++  final FormFieldController<T>? controller;
++  final T? initialValue;
++  final List<Validator<T>> validators;
++  final String? label;
++  final String? helperText;
++  final bool showError;
++  final ValueChanged<T?>? onChanged;
++
++  @override
++  State<FormField<T>> createState() => _FormFieldState<T>();
++}
++
++class _FormFieldState<T> extends State<FormField<T>> {
++  FormFieldController<T>? _owned;
++  late FormFieldController<T> _controller;
++  FormController? _form;
++
++  @override
++  void initState() {
++    super.initState();
++    _attachController();
++  }
++
++  void _attachController() {
++    _owned = widget.controller == null
++        ? FormFieldController<T>(
++            initialValue: widget.initialValue,
++            validators: widget.validators,
++          )
++        : null;
++    _controller = widget.controller ?? _owned!;
++    _controller.validators = widget.validators;
++    _controller.addListener(_changed);
++  }
++
++  void _detachController() {
++    _form?.unregister(widget.id, _controller);
++    _controller.removeListener(_changed);
++    _owned?.dispose();
++    _owned = null;
++  }
++
++  @override
++  void didChangeDependencies() {
++    super.didChangeDependencies();
++    final form = Form.maybeOf(context);
++    if (!identical(form, _form)) {
++      _form?.unregister(widget.id, _controller);
++      _form = form;
++      _form?.register(widget.id, _controller);
++    }
++  }
++
++  @override
++  void didUpdateWidget(FormField<T> oldWidget) {
++    super.didUpdateWidget(oldWidget);
++    if (!identical(oldWidget.controller, widget.controller)) {
++      _detachController();
++      _attachController();
++      _form?.register(widget.id, _controller);
++    } else {
++      _controller.validators = widget.validators;
++    }
++    if (oldWidget.id != widget.id) {
++      _form?.unregister(oldWidget.id, _controller);
++      _form?.register(widget.id, _controller);
++    }
++  }
++
++  void _changed() {
++    widget.onChanged?.call(_controller.value);
++    if (mounted) setState(() {});
++  }
++
++  @override
++  Widget build(BuildContext context) {
++    return Column(
++      crossAxisAlignment: CrossAxisAlignment.stretch,
++      children: [
++        if (widget.label != null)
++          TerminalText.safe(
++            widget.label!,
++            style: const TextStyle(fontWeight: FontWeight.bold),
++          ),
++        widget.builder(context, _controller),
++        if (widget.showError && _controller.errorText != null)
++          TerminalText.safe(
++            _controller.errorText!,
++            style: const TextStyle(color: Colors.red),
++          )
++        else if (widget.helperText != null)
++          TerminalText.safe(
++            widget.helperText!,
++            style: const TextStyle(color: Colors.grey),
++          ),
++      ],
++    );
++  }
++
++  @override
++  void dispose() {
++    _detachController();
++    super.dispose();
++  }
++}
++
++class AutocompleteItem<T> {
++  const AutocompleteItem({required this.value, required this.label});
++  final T value;
++  final String label;
++}
++
++/// Text input with filtered suggestion selection.
++class Autocomplete<T> extends StatefulWidget {
++  const Autocomplete({
++    super.key,
++    required this.options,
++    required this.onSelected,
++    this.controller,
++    this.displayStringForOption,
++    this.placeholder = 'Type to search…',
++    this.maxSuggestions = 8,
++    this.autofocus = false,
++  });
++
++  final List<T> options;
++  final ValueChanged<T> onSelected;
++  final TextEditingController? controller;
++  final String Function(T option)? displayStringForOption;
++  final String placeholder;
++  final int maxSuggestions;
++  final bool autofocus;
++
++  @override
++  State<Autocomplete<T>> createState() => _AutocompleteState<T>();
++}
++
++class _AutocompleteState<T> extends State<Autocomplete<T>> {
++  TextEditingController? _owned;
++  late TextEditingController _controller;
++  String _query = '';
++  int _selected = 0;
++
++  @override
++  void initState() {
++    super.initState();
++    _owned = widget.controller == null ? TextEditingController() : null;
++    _controller = widget.controller ?? _owned!;
++    _query = _controller.text;
++  }
++
++  String _label(T option) {
++    return widget.displayStringForOption?.call(option) ?? option.toString();
++  }
++
++  List<T> _suggestions() {
++    final query = _query.trim().toLowerCase();
++    final options = query.isEmpty
++        ? widget.options
++        : widget.options
++            .where((option) => _label(option).toLowerCase().contains(query))
++            .toList();
++    return options.take(widget.maxSuggestions).toList(growable: false);
++  }
++
++  void _select(T option) {
++    final label = _label(option);
++    _controller.text = label;
++    setState(() {
++      _query = label;
++      _selected = 0;
++    });
++    widget.onSelected(option);
++  }
++
++  bool _key(KeyboardEvent event) {
++    final suggestions = _suggestions();
++    if (event.logicalKey == LogicalKey.arrowDown) {
++      if (suggestions.isNotEmpty) {
++        setState(
++            () => _selected = (_selected + 1).clamp(0, suggestions.length - 1));
++      }
++      return true;
++    }
++    if (event.logicalKey == LogicalKey.arrowUp) {
++      if (suggestions.isNotEmpty) {
++        setState(
++            () => _selected = (_selected - 1).clamp(0, suggestions.length - 1));
++      }
++      return true;
++    }
++    if (event.logicalKey == LogicalKey.enter && suggestions.isNotEmpty) {
++      _select(suggestions[_selected.clamp(0, suggestions.length - 1)]);
++      return true;
++    }
++    return false;
++  }
++
++  @override
++  Widget build(BuildContext context) {
++    final suggestions = _suggestions();
++    return Column(
++      crossAxisAlignment: CrossAxisAlignment.stretch,
++      children: [
++        TextField(
++          controller: _controller,
++          autofocus: widget.autofocus,
++          placeholder: widget.placeholder,
++          onChanged: (value) => setState(() {
++            _query = value;
++            _selected = 0;
++          }),
++          onKeyEvent: _key,
++        ),
++        if (_query.isNotEmpty && suggestions.isNotEmpty)
++          Container(
++            decoration: BoxDecoration(
++              border: BoxBorder.all(color: TuiTheme.of(context).outline),
++            ),
++            child: Column(
++              crossAxisAlignment: CrossAxisAlignment.stretch,
++              children: [
++                for (var index = 0; index < suggestions.length; index++)
++                  GestureDetector(
++                    behavior: HitTestBehavior.opaque,
++                    onTap: () => _select(suggestions[index]),
++                    child: Container(
++                      color: index == _selected
++                          ? const Color.fromRGB(43, 49, 67)
++                          : null,
++                      child: TerminalText.safe(
++                        _label(suggestions[index]),
++                        softWrap: false,
++                        maxLines: 1,
++                        overflow: TextOverflow.ellipsis,
++                      ),
++                    ),
++                  ),
++              ],
++            ),
++          ),
++      ],
++    );
++  }
++
++  @override
++  void dispose() {
++    _owned?.dispose();
++    super.dispose();
++  }
++}
++
++/// Alias-style autocomplete with typeahead naming.
++class TypeAhead<T> extends Autocomplete<T> {
++  const TypeAhead({
++    super.key,
++    required super.options,
++    required super.onSelected,
++    super.controller,
++    super.displayStringForOption,
++    super.placeholder,
++    super.maxSuggestions,
++    super.autofocus,
++  });
++}
++
++class MultiSelectItem<T> {
++  const MultiSelectItem({
++    required this.value,
++    required this.label,
++    this.enabled = true,
++  });
++
++  final T value;
++  final String label;
++  final bool enabled;
++}
++
++/// Keyboard-selectable multi-choice list.
++class MultiSelect<T> extends StatefulWidget {
++  const MultiSelect({
++    super.key,
++    required this.items,
++    required this.values,
++    required this.onChanged,
++    this.autofocus = false,
++    this.itemExtent = 1,
++  });
++
++  final List<MultiSelectItem<T>> items;
++  final Set<T> values;
++  final ValueChanged<Set<T>> onChanged;
++  final bool autofocus;
++  final double itemExtent;
++
++  @override
++  State<MultiSelect<T>> createState() => _MultiSelectState<T>();
++}
++
++class _MultiSelectState<T> extends State<MultiSelect<T>> {
++  int _selected = 0;
++
++  void _toggle(MultiSelectItem<T> item) {
++    if (!item.enabled) return;
++    final values = Set<T>.of(widget.values);
++    if (!values.add(item.value)) values.remove(item.value);
++    widget.onChanged(Set<T>.unmodifiable(values));
++  }
++
++  bool _key(KeyboardEvent event) {
++    if (widget.items.isEmpty) return false;
++    if (event.logicalKey == LogicalKey.arrowDown) {
++      setState(
++        () => _selected = (_selected + 1).clamp(0, widget.items.length - 1),
++      );
++      return true;
++    }
++    if (event.logicalKey == LogicalKey.arrowUp) {
++      setState(
++        () => _selected = (_selected - 1).clamp(0, widget.items.length - 1),
++      );
++      return true;
++    }
++    if (event.logicalKey == LogicalKey.space ||
++        event.logicalKey == LogicalKey.enter) {
++      _toggle(widget.items[_selected.clamp(0, widget.items.length - 1)]);
++      return true;
++    }
++    return false;
++  }
++
++  @override
++  Widget build(BuildContext context) {
++    return Focus(
++      autofocus: widget.autofocus,
++      onKeyEvent: _key,
++      child: VirtualL
