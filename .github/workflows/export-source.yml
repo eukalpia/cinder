@@ -1,0 +1,21 @@
+name: Export Source
+
+on:
+  push:
+    branches:
+      - feat/safe-terminal-and-app-widgets
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cinder-source
+          path: .
+          include-hidden-files: true
+          retention-days: 1
