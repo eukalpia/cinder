@@ -1,0 +1,373 @@
+minal.backend.writeRaw('\x1B[?1000l'); // Disable basic mouse tracking
+-      // Pop kitty keyboard mode and reset modifyOtherKeys
+-      terminal.backend.writeRaw(EscapeCodes.disable.kittyKeyboard);
+-      terminal.backend.writeRaw(EscapeCodes.disable.modifyOtherKeys);
+-      terminal.restoreColors(); // Restore terminal colors
+-      terminal.flush();
+-
+-      // Restore terminal
+-      terminal.showCursor();
+-      terminal.leaveAlternateScreen();
+-      terminal.clear();
+-    } catch (_) {
+-      // Ignore any errors during cleanup
+-    }
+-
+-    // Restore terminal mode in its own try-catch to ensure it runs
+-    // even if writing escape codes above fails
+-    try {
+-      terminal.backend.disableRawMode();
+-    } catch (_) {
+-      // Ignore errors when running without a proper terminal
+-    }
++    _recoverTerminalState();
+   }
+ 
+   /// Handle global debug key combinations.
+@@ -852,18 +866,15 @@ class TerminalBinding extends CinderBinding
+     await exitCompleter.future;
+   }
+ 
+-  /// Shutdown the terminal and cleanup
++  /// Shutdown the terminal and cleanup.
+   void shutdown() {
+-    // Prevent multiple shutdowns
+     if (_shouldExit) return;
+-
+     _shouldExit = true;
++
++    pendingFrameTimer?.cancel();
+     _inputSubscription?.cancel();
+     _resizeSubscription?.cancel();
+-
+-    // Don't cancel shutdown subscription here - let it stay active
+-    // so it can handle additional signals if needed
+-    // _shutdownSubscription?.cancel();
++    _shutdownSubscription?.cancel();
+ 
+     try {
+       _inputController.close();
+@@ -874,56 +885,25 @@ class TerminalBinding extends CinderBinding
+     try {
+       _mouseEventController.close();
+     } catch (_) {}
+-
+-    // Wake up event loop one last time before closing
+     if (!_eventLoopController.isClosed) {
+-      _eventLoopController.add(null);
+-      _eventLoopController.close();
++      try {
++        _eventLoopController.add(null);
++      } catch (_) {}
++      try {
++        _eventLoopController.close();
++      } catch (_) {}
+     }
+-
+-    // Stop hot reload if it was initialized
+-    shutdownWithHotReload();
+-
+-    // Try to cleanup terminal, but handle errors gracefully
+     try {
+-      // IMPORTANT: Disable mouse tracking and bracketed paste BEFORE leaving alternate screen
+-      // This ensures the terminal properly processes the disable commands
+-      terminal.backend.writeRaw(EscapeCodes.disable.motionTracking);
+-      terminal.backend.writeRaw(EscapeCodes.disable.sgrMouseMode);
+-      terminal.backend.writeRaw(EscapeCodes.disable.buttonEventTracking);
+-      terminal.backend.writeRaw(EscapeCodes.disable.basicMouseTracking);
+-      terminal.backend.writeRaw(EscapeCodes.disable.bracketedPasteMode);
+-      // Pop kitty keyboard mode and reset modifyOtherKeys
+-      terminal.backend.writeRaw(EscapeCodes.disable.kittyKeyboard);
+-      terminal.backend.writeRaw(EscapeCodes.disable.modifyOtherKeys);
+-
+-      // Restore terminal (this includes leaving alternate screen)
+-      terminal.showCursor();
+-      terminal.leaveAlternateScreen();
+-
+-      // CRITICAL: Disable mouse tracking again after leaving alternate screen
+-      // Some terminals restore previous state when switching buffers
+-      terminal.backend.writeRaw(EscapeCodes.disable.motionTracking);
+-      terminal.backend.writeRaw(EscapeCodes.disable.sgrMouseMode);
+-      terminal.backend.writeRaw(EscapeCodes.disable.buttonEventTracking);
+-      terminal.backend.writeRaw(EscapeCodes.disable.basicMouseTracking);
+-
+-      terminal.clear();
+-
+-      // Final flush to ensure all cleanup is complete
+-      terminal.flush();
+-    } catch (e) {
+-      // If backend is already closed, we can't write to it
+-      // This can happen during signal-based shutdown
+-      // The important thing is we tried to cleanup
+-    }
+-
+-    // Restore raw mode via backend
++      _oscEventsController.close();
++    } catch (_) {}
+     try {
+-      terminal.backend.disableRawMode();
+-    } catch (e) {
+-      // Ignore errors when running without a proper terminal
+-    }
++      shutdownWithHotReload();
++    } catch (_) {}
++    try {
++      ImageCleanupManager.instance.clearAllImages();
++    } catch (_) {}
++
++    _recoverTerminalState();
+   }
+ 
+   @override
+@@ -1129,13 +1109,13 @@ class TerminalBinding extends CinderBinding
+             terminal.write(cell.style.toAnsi());
+             currentStyle = cell.style;
+           }
+-          terminal.write(cell.char);
++          terminal.write(TerminalTextSanitizer.sanitizeCell(cell.char));
+         } else {
+           if (currentStyle != null) {
+             terminal.write(TextStyle.reset);
+             currentStyle = null;
+           }
+-          terminal.write(cell.char);
++          terminal.write(TerminalTextSanitizer.sanitizeCell(cell.char));
+         }
+       }
+       if (y < buffer.height - 1) {
+@@ -1233,7 +1213,12 @@ class TerminalBinding extends CinderBinding
+     for (final image in buffer.pendingImages) {
+       final alreadyVisible = _activeImages.any(image.samePlacement);
+       if (force || !alreadyVisible) {
+-        terminal.writeInlineImage(image.encodedData, image.x, image.y);
++        terminal.writeInlineImage(
++          image.encodedData,
++          image.x,
++          image.y,
++          protocol: image.protocol,
++        );
+       }
+     }
+     _activeImages = List<buf.PendingImage>.unmodifiable(buffer.pendingImages);
+diff --git a/lib/src/buffer.dart b/lib/src/buffer.dart
+index e643f64..e99eb3e 100644
+--- a/lib/src/buffer.dart
++++ b/lib/src/buffer.dart
+@@ -8,14 +8,23 @@ import 'package:cinder/src/rectangle.dart';
+ import 'image/image_cleanup.dart';
+ import 'style.dart';
+ import 'utils/unicode_width.dart';
++import 'security/terminal_sanitizer.dart';
+ 
+ /// A mutable terminal cell reused across frames.
+ ///
+ /// Cinder deliberately mutates existing cells instead of allocating a new
+ /// object for every painted terminal position on every frame.
+ class Cell {
+-  Cell({this.char = ' ', TextStyle? style, this.isImagePlaceholder = false})
+-      : style = style ?? const TextStyle();
++  Cell({String char = ' ', TextStyle? style, this.isImagePlaceholder = false})
++      : char = _normalizeCellChar(char),
++        style = style ?? const TextStyle();
++
++  static String _normalizeCellChar(String value) {
++    // The current renderer uses U+200B exclusively as the private continuation
++    // marker for the second column of a width-2 grapheme. It is never emitted.
++    if (value == '\u200B') return value;
++    return TerminalTextSanitizer.sanitizeCell(value);
++  }
+ 
+   String char;
+   TextStyle style;
+@@ -36,8 +45,9 @@ class Cell {
+     required TextStyle style,
+     bool isImagePlaceholder = false,
+   }) {
+-    if (this.char != char) {
+-      this.char = char;
++    final safeChar = _normalizeCellChar(char);
++    if (this.char != safeChar) {
++      this.char = safeChar;
+       _cachedWidth = null;
+     }
+     this.style = style;
+@@ -234,6 +244,7 @@ class Buffer {
+   }
+ 
+   void setString(int x, int y, String text, {TextStyle? style}) {
++    text = TerminalTextSanitizer.sanitize(text);
+     var currentX = x;
+     final effectiveStyle = style ?? const TextStyle();
+ 
+diff --git a/lib/src/components/application/command_palette.dart b/lib/src/components/application/command_palette.dart
+new file mode 100644
+index 0000000..d4070d0
+--- /dev/null
++++ b/lib/src/components/application/command_palette.dart
+@@ -0,0 +1,340 @@
++import 'package:cinder/cinder.dart';
++
++class CommandItem {
++  const CommandItem({
++    required this.id,
++    required this.label,
++    required this.action,
++    this.description,
++    this.keywords = const [],
++    this.shortcut,
++    this.enabled = true,
++  });
++
++  final String id;
++  final String label;
++  final String? description;
++  final List<String> keywords;
++  final String? shortcut;
++  final bool enabled;
++  final VoidCallback action;
++}
++
++class CommandPaletteController extends ChangeNotifier {
++  String _query = '';
++  int _selectedIndex = 0;
++
++  String get query => _query;
++  int get selectedIndex => _selectedIndex;
++
++  set query(String value) {
++    if (_query == value) return;
++    _query = value;
++    _selectedIndex = 0;
++    notifyListeners();
++  }
++
++  set selectedIndex(int value) {
++    final next = value < 0 ? 0 : value;
++    if (_selectedIndex == next) return;
++    _selectedIndex = next;
++    notifyListeners();
++  }
++
++  void reset() {
++    _query = '';
++    _selectedIndex = 0;
++    notifyListeners();
++  }
++}
++
++class _ScoredCommand {
++  const _ScoredCommand(this.command, this.score);
++  final CommandItem command;
++  final int score;
++}
++
++/// Searchable keyboard-first command launcher.
++class CommandPalette extends StatefulWidget {
++  const CommandPalette({
++    super.key,
++    required this.commands,
++    this.controller,
++    this.placeholder = 'Type a command…',
++    this.emptyMessage = 'No matching commands',
++    this.width = 70,
++    this.height = 18,
++    this.onSelected,
++    this.onDismiss,
++    this.autofocus = true,
++    this.selectedColor,
++  });
++
++  final List<CommandItem> commands;
++  final CommandPaletteController? controller;
++  final String placeholder;
++  final String emptyMessage;
++  final double width;
++  final double height;
++  final ValueChanged<CommandItem>? onSelected;
++  final VoidCallback? onDismiss;
++  final bool autofocus;
++  final Color? selectedColor;
++
++  @override
++  State<CommandPalette> createState() => _CommandPaletteState();
++}
++
++class _CommandPaletteState extends State<CommandPalette> {
++  CommandPaletteController? _ownedController;
++  late CommandPaletteController _controller;
++  late TextEditingController _textController;
++  final ScrollController _scrollController = ScrollController();
++
++  @override
++  void initState() {
++    super.initState();
++    _attachController();
++    _textController = TextEditingController(text: _controller.query);
++  }
++
++  void _attachController() {
++    _ownedController =
++        widget.controller == null ? CommandPaletteController() : null;
++    _controller = widget.controller ?? _ownedController!;
++    _controller.addListener(_handleControllerChanged);
++  }
++
++  void _detachController() {
++    _controller.removeListener(_handleControllerChanged);
++    _ownedController?.dispose();
++    _ownedController = null;
++  }
++
++  @override
++  void didUpdateWidget(CommandPalette oldWidget) {
++    super.didUpdateWidget(oldWidget);
++    if (!identical(widget.controller, oldWidget.controller)) {
++      _detachController();
++      _attachController();
++      _textController.text = _controller.query;
++    }
++  }
++
++  void _handleControllerChanged() {
++    if (_textController.text != _controller.query) {
++      _textController.text = _controller.query;
++    }
++    if (mounted) setState(() {});
++  }
++
++  static int _score(String query, String candidate) {
++    if (query.isEmpty) return 0;
++    final needle = query.toLowerCase();
++    final haystack = candidate.toLowerCase();
++    final exact = haystack.indexOf(needle);
++    if (exact >= 0) return 10000 - exact * 10 - haystack.length;
++
++    var score = 0;
++    var queryIndex = 0;
++    var previousMatch = -2;
++    for (var index = 0;
++        index < haystack.length && queryIndex < needle.length;
++        index++) {
++      if (haystack.codeUnitAt(index) != needle.codeUnitAt(queryIndex)) continue;
++      score += previousMatch + 1 == index ? 20 : 5;
++      if (index == 0 || ' /_-'.contains(haystack[index - 1])) score += 15;
++      previousMatch = index;
++      queryIndex++;
++    }
++    return queryIndex == needle.length ? score : -1;
++  }
++
++  List<CommandItem> _filteredCommands() {
++    final query = _controller.query.trim();
++    if (query.isEmpty) {
++      return widget.commands.where((command) => command.enabled).toList();
++    }
++
++    final scored = <_ScoredCommand>[];
++    for (final command in widget.commands) {
++      if (!command.enabled) continue;
++      final searchable = <String>[
++        command.label,
++        command.description ?? '',
++        command.id,
++        ...comman
