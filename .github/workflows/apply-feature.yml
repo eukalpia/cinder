@@ -1,11 +1,12 @@
 name: Apply Feature Payload
 
 on:
-  push:
+  pull_request:
     branches:
-      - feat/safe-terminal-and-app-widgets
+      - main
     paths:
       - '.github/workflows/apply-feature.yml'
+      - '.github/payload/**'
 
 permissions:
   contents: write
@@ -37,5 +38,3 @@ jobs:
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git commit -m "feat: add safe terminal output and application widgets"
           git push origin HEAD:feat/safe-terminal-and-app-widgets
-
-# Triggered after workflow registration.
