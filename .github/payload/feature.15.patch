@@ -1,0 +1,416 @@
+Changed?.call(_controller.ratio);
++    if (mounted) setState(() {});
++  }
++
++  bool _handleKeyEvent(KeyboardEvent event) {
++    if (widget.axis == Axis.horizontal) {
++      if (event.logicalKey == LogicalKey.arrowLeft) {
++        _controller.nudge(-widget.keyboardStep);
++        return true;
++      }
++      if (event.logicalKey == LogicalKey.arrowRight) {
++        _controller.nudge(widget.keyboardStep);
++        return true;
++      }
++    } else {
++      if (event.logicalKey == LogicalKey.arrowUp) {
++        _controller.nudge(-widget.keyboardStep);
++        return true;
++      }
++      if (event.logicalKey == LogicalKey.arrowDown) {
++        _controller.nudge(widget.keyboardStep);
++        return true;
++      }
++    }
++    if (event.logicalKey == LogicalKey.home) {
++      _controller.ratio = _minimumRatio();
++      return true;
++    }
++    if (event.logicalKey == LogicalKey.end) {
++      _controller.ratio = _maximumRatio();
++      return true;
++    }
++    return false;
++  }
++
++  double _minimumRatio() {
++    if (_availableExtent <= 0) return _controller.minRatio;
++    return math.max(
++      _controller.minRatio,
++      widget.minFirstExtent / _availableExtent,
++    );
++  }
++
++  double _maximumRatio() {
++    if (_availableExtent <= 0) return _controller.maxRatio;
++    return math.min(
++      _controller.maxRatio,
++      1 - widget.minSecondExtent / _availableExtent,
++    );
++  }
++
++  void _beginDrag(TapDownDetails details) {
++    _lastDragCoordinate = widget.axis == Axis.horizontal
++        ? details.globalPosition.dx
++        : details.globalPosition.dy;
++  }
++
++  void _endDrag(TapUpDetails details) {
++    _lastDragCoordinate = null;
++  }
++
++  void _handleDividerHover(MouseEvent event) {
++    if (!(event.pressed || event.isPrimaryButtonDown)) {
++      _lastDragCoordinate = null;
++      return;
++    }
++    final coordinate = widget.axis == Axis.horizontal
++        ? event.x.toDouble()
++        : event.y.toDouble();
++    final previous = _lastDragCoordinate;
++    _lastDragCoordinate = coordinate;
++    if (previous == null || _availableExtent <= 0) return;
++    _controller.ratio += (coordinate - previous) / _availableExtent;
++  }
++
++  Widget _buildDivider() {
++    final character =
++        widget.dividerCharacter ?? (widget.axis == Axis.horizontal ? '│' : '─');
++    final color = widget.dividerColor ?? Colors.grey;
++    final divider = Container(
++      width: widget.axis == Axis.horizontal ? widget.dividerExtent : null,
++      height: widget.axis == Axis.vertical ? widget.dividerExtent : null,
++      alignment: Alignment.center,
++      child: Text(
++        character,
++        style: TextStyle(color: color),
++        overflow: TextOverflow.clip,
++      ),
++    );
++
++    return MouseRegion(
++      onHover: _handleDividerHover,
++      child: GestureDetector(
++        behavior: HitTestBehavior.opaque,
++        onTapDown: _beginDrag,
++        onTapUp: _endDrag,
++        onTapCancel: () => _lastDragCoordinate = null,
++        onDoubleTap: _controller.reset,
++        child: divider,
++      ),
++    );
++  }
++
++  @override
++  Widget build(BuildContext context) {
++    return Focus(
++      autofocus: widget.autofocus,
++      onKeyEvent: _handleKeyEvent,
++      child: LayoutBuilder(
++        builder: (context, constraints) {
++          final totalExtent = widget.axis == Axis.horizontal
++              ? constraints.maxWidth
++              : constraints.maxHeight;
++          final finiteTotal = totalExtent.isFinite ? totalExtent : 0.0;
++          _availableExtent = math.max(0, finiteTotal - widget.dividerExtent);
++          final minRatio = _minimumRatio();
++          final maxRatio = math.max(minRatio, _maximumRatio());
++          final ratio = _controller.ratio.clamp(minRatio, maxRatio);
++          final firstExtent = _availableExtent * ratio;
++
++          if (widget.axis == Axis.horizontal) {
++            return Row(
++              crossAxisAlignment: CrossAxisAlignment.stretch,
++              children: [
++                SizedBox(width: firstExtent, child: widget.first),
++                _buildDivider(),
++                Expanded(child: widget.second),
++              ],
++            );
++          }
++
++          return Column(
++            crossAxisAlignment: CrossAxisAlignment.stretch,
++            children: [
++              SizedBox(height: firstExtent, child: widget.first),
++              _buildDivider(),
++              Expanded(child: widget.second),
++            ],
++          );
++        },
++      ),
++    );
++  }
++
++  @override
++  void dispose() {
++    _detachController();
++    super.dispose();
++  }
++}
++
++/// Applies minimum and maximum extent constraints to a split pane.
++class ResizablePane extends StatelessWidget {
++  const ResizablePane({
++    super.key,
++    required this.child,
++    this.axis = Axis.horizontal,
++    this.minExtent = 0,
++    this.maxExtent = double.infinity,
++  })  : assert(minExtent >= 0),
++        assert(maxExtent >= minExtent);
++
++  final Widget child;
++  final Axis axis;
++  final double minExtent;
++  final double maxExtent;
++
++  @override
++  Widget build(BuildContext context) {
++    return ConstrainedBox(
++      constraints: axis == Axis.horizontal
++          ? BoxConstraints(minWidth: minExtent, maxWidth: maxExtent)
++          : BoxConstraints(minHeight: minExtent, maxHeight: maxExtent),
++      child: child,
++    );
++  }
++}
+diff --git a/lib/src/components/application/tree_view.dart b/lib/src/components/application/tree_view.dart
+new file mode 100644
+index 0000000..ed86072
+--- /dev/null
++++ b/lib/src/components/application/tree_view.dart
+@@ -0,0 +1,336 @@
++import 'package:cinder/cinder.dart';
++
++/// Immutable data node for [TreeView].
++class TreeNode<T> {
++  const TreeNode({
++    required this.id,
++    required this.label,
++    this.value,
++    this.children = const [],
++    this.disabled = false,
++    this.leading,
++  });
++
++  final Object id;
++  final String label;
++  final T? value;
++  final List<TreeNode<T>> children;
++  final bool disabled;
++  final Widget? leading;
++
++  bool get isLeaf => children.isEmpty;
++}
++
++/// Flattened visible tree entry passed to custom builders.
++class TreeViewEntry<T> {
++  const TreeViewEntry({
++    required this.node,
++    required this.depth,
++    required this.expanded,
++    required this.selected,
++    required this.parentId,
++  });
++
++  final TreeNode<T> node;
++  final int depth;
++  final bool expanded;
++  final bool selected;
++  final Object? parentId;
++}
++
++typedef TreeViewItemBuilder<T> = Widget Function(
++  BuildContext context,
++  TreeViewEntry<T> entry,
++);
++
++class TreeViewController<T> extends ChangeNotifier {
++  TreeViewController({
++    Iterable<Object> expandedIds = const [],
++    Object? selectedId,
++  })  : _expandedIds = Set<Object>.of(expandedIds),
++        _selectedId = selectedId;
++
++  final Set<Object> _expandedIds;
++  Object? _selectedId;
++
++  Set<Object> get expandedIds => Set<Object>.unmodifiable(_expandedIds);
++  Object? get selectedId => _selectedId;
++
++  bool isExpanded(Object id) => _expandedIds.contains(id);
++
++  void setExpanded(Object id, bool expanded) {
++    final changed = expanded ? _expandedIds.add(id) : _expandedIds.remove(id);
++    if (changed) notifyListeners();
++  }
++
++  void toggle(Object id) => setExpanded(id, !isExpanded(id));
++
++  void select(Object? id) {
++    if (_selectedId == id) return;
++    _selectedId = id;
++    notifyListeners();
++  }
++
++  void expandAll(Iterable<TreeNode<T>> roots) {
++    void visit(TreeNode<T> node) {
++      if (node.children.isNotEmpty) _expandedIds.add(node.id);
++      for (final child in node.children) {
++        visit(child);
++      }
++    }
++
++    for (final root in roots) {
++      visit(root);
++    }
++    notifyListeners();
++  }
++
++  void collapseAll() {
++    if (_expandedIds.isEmpty) return;
++    _expandedIds.clear();
++    notifyListeners();
++  }
++}
++
++/// A virtualized, keyboard-first expandable tree.
++class TreeView<T> extends StatefulWidget {
++  const TreeView({
++    super.key,
++    required this.nodes,
++    this.controller,
++    this.itemBuilder,
++    this.onSelected,
++    this.onActivated,
++    this.indent = 2,
++    this.cacheExtent = 8,
++    this.autofocus = false,
++    this.showRootLines = false,
++    this.selectedColor,
++    this.textStyle,
++  })  : assert(indent >= 0),
++        assert(cacheExtent >= 0);
++
++  final List<TreeNode<T>> nodes;
++  final TreeViewController<T>? controller;
++  final TreeViewItemBuilder<T>? itemBuilder;
++  final ValueChanged<TreeNode<T>>? onSelected;
++  final ValueChanged<TreeNode<T>>? onActivated;
++  final int indent;
++  final double cacheExtent;
++  final bool autofocus;
++  final bool showRootLines;
++  final Color? selectedColor;
++  final TextStyle? textStyle;
++
++  @override
++  State<TreeView<T>> createState() => _TreeViewState<T>();
++}
++
++class _TreeViewState<T> extends State<TreeView<T>> {
++  TreeViewController<T>? _ownedController;
++  late TreeViewController<T> _controller;
++  final ScrollController _scrollController = ScrollController();
++
++  @override
++  void initState() {
++    super.initState();
++    _attachController();
++  }
++
++  void _attachController() {
++    _ownedController =
++        widget.controller == null ? TreeViewController<T>() : null;
++    _controller = widget.controller ?? _ownedController!;
++    _controller.addListener(_handleControllerChanged);
++  }
++
++  void _detachController() {
++    _controller.removeListener(_handleControllerChanged);
++    _ownedController?.dispose();
++    _ownedController = null;
++  }
++
++  @override
++  void didUpdateWidget(TreeView<T> oldWidget) {
++    super.didUpdateWidget(oldWidget);
++    if (!identical(widget.controller, oldWidget.controller)) {
++      _detachController();
++      _attachController();
++    }
++  }
++
++  void _handleControllerChanged() {
++    if (mounted) setState(() {});
++  }
++
++  List<TreeViewEntry<T>> _flatten() {
++    final entries = <TreeViewEntry<T>>[];
++
++    void visit(TreeNode<T> node, int depth, Object? parentId) {
++      final expanded = _controller.isExpanded(node.id);
++      entries.add(TreeViewEntry<T>(
++        node: node,
++        depth: depth,
++        expanded: expanded,
++        selected: _controller.selectedId == node.id,
++        parentId: parentId,
++      ));
++      if (!expanded) return;
++      for (final child in node.children) {
++        visit(child, depth + 1, node.id);
++      }
++    }
++
++    for (final node in widget.nodes) {
++      visit(node, 0, null);
++    }
++    return entries;
++  }
++
++  void _selectEntry(List<TreeViewEntry<T>> entries, int index) {
++    if (entries.isEmpty) return;
++    final target = entries[index.clamp(0, entries.length - 1)];
++    if (target.node.disabled) return;
++    _controller.select(target.node.id);
++    widget.onSelected?.call(target.node);
++    _scrollController.ensureIndexVisible(index: index);
++  }
++
++  bool _handleKeyEvent(KeyboardEvent event) {
++    final entries = _flatten();
++    if (entries.isEmpty) return false;
++    var index = entries.indexWhere((entry) => entry.selected);
++    if (index < 0) index = 0;
++    final current = entries[index];
++
++    if (event.logicalKey == LogicalKey.arrowDown) {
++      _selectEntry(entries, index + 1);
++      return true;
++    }
++    if (event.logicalKey == LogicalKey.arrowUp) {
++      _selectEntry(entries, index - 1);
++      return true;
++    }
++    if (event.logicalKey == LogicalKey.home) {
++      _selectEntry(entries, 0);
++      return true;
++    }
++    if (event.logicalKey == LogicalKey.end) {
++      _selectEntry(entries, entries.length - 1);
++      return true;
++    }
++    if (event.logicalKey == LogicalKey.arrowRight) {
++      if (current.node.children.isNotEmpty && !current.expanded) {
++        _controller.setExpanded(current.node.id, true);
++      } else if (index + 1 < entries.length &&
++          entries[index + 1].parentId == current.node.id) {
++        _selectEntry(entries, index + 1);
++      }
++      return true;
++    }
++    if (event.logicalKey == LogicalKey.arrowLeft) {
++      if (current.expanded) {
++        _controller.setExpa
