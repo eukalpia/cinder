@@ -28,18 +28,27 @@ jobs:
       - uses: dart-lang/setup-dart@v1
         with:
           sdk: stable
-      - name: Format every changed Dart file
+      - name: Collect changed Dart files
         shell: bash
         run: |
           set -euo pipefail
           git fetch origin main
-          mapfile -t files < <(
-            git diff --name-only --diff-filter=ACMR origin/main HEAD \
-              | grep -E '^(lib|test|example|benchmark|packages)/.*\.dart$' || true
-          )
+          git diff --name-only --diff-filter=ACMR origin/main HEAD \
+            | grep -E '^(lib|test|example|benchmark|packages)/.*\.dart$' \
+            > /tmp/changed-dart-files.txt || true
+          cat /tmp/changed-dart-files.txt
+      - name: Run Dart formatter
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t files < /tmp/changed-dart-files.txt
           if [ "${#files[@]}" -gt 0 ]; then
             dart format "${files[@]}"
           fi
+      - name: Commit formatter result
+        shell: bash
+        run: |
+          set -euo pipefail
           {
             echo "Dart: $(dart --version 2>&1)"
             echo 'Changed by formatter:'
@@ -49,4 +58,6 @@ jobs:
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add -A
           git commit -m 'style: format safe terminal and application widgets'
-          git push origin HEAD:feat/safe-terminal-and-app-widgets
+      - name: Push formatter result
+        shell: bash
+        run: git push origin HEAD:feat/safe-terminal-and-app-widgets
