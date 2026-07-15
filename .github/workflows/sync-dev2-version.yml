@@ -1,14 +1,8 @@
 name: One-shot dev.2 version sync
 
 on:
-  push:
-    branches:
-      - agent/sync-dev2-versions
-    paths:
-      - .github/workflows/sync-dev2-version.yml
   pull_request:
-    branches:
-      - main
+    branches: [main]
     types: [opened, synchronize, reopened]
     paths:
       - .github/workflows/sync-dev2-version.yml
@@ -18,7 +12,7 @@ permissions:
 
 jobs:
   sync:
-    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+    if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -27,82 +21,61 @@ jobs:
           ref: agent/sync-dev2-versions
           fetch-depth: 0
 
-      - name: Synchronize release metadata
+      - name: Apply exact release metadata patch
         shell: bash
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          import re
-          import subprocess
 
-          old = b'1.0.0-dev.1'
-          new = b'1.0.0-dev.2'
-          workflow = Path('.github/workflows/sync-dev2-version.yml')
-
-          tracked = subprocess.check_output(['git', 'ls-files', '-z']).split(b'\0')
-          changed = []
-          for raw_path in tracked:
-              if not raw_path:
-                  continue
-              path = Path(raw_path.decode())
-              if path in {Path('CHANGELOG.md'), workflow}:
-                  continue
-              data = path.read_bytes()
-              if old not in data:
-                  continue
-              path.write_bytes(data.replace(old, new))
-              changed.append(str(path))
-
-          changelog = Path('CHANGELOG.md')
-          text = changelog.read_text(encoding='utf-8')
-          pattern = re.compile(
-              r'\A# 0\.8\.0\n\n## 1\.0\.0-dev\.2\n\n'
-              r'(?P<notes>(?:- [^\n]+\n)+)\n+## Bug Fixes'
-          )
-          match = pattern.search(text)
-          if match is None:
-              raise SystemExit('Unexpected CHANGELOG.md header; refusing a destructive rewrite.')
-
-          notes = match.group('notes').rstrip()
-          replacement = (
-              '# 1.0.0-dev.2\n\n'
-              f'{notes}\n\n'
-              '---\n\n'
-              '# 0.8.0\n\n'
-              '## Bug Fixes'
-          )
-          changelog.write_text(pattern.sub(replacement, text, count=1), encoding='utf-8')
+          old = '1.0.0-dev.1'
+          new = '1.0.0-dev.2'
 
           manifests = [Path('pubspec.yaml'), *sorted(Path('packages').glob('*/pubspec.yaml'))]
           if len(manifests) != 7:
-              raise SystemExit(f'Expected 7 package manifests, found {len(manifests)}.')
+              raise SystemExit(f'Expected 7 manifests, found {len(manifests)}')
+
+          targets = [Path('README.md'), *manifests]
+          for path in targets:
+              text = path.read_text(encoding='utf-8')
+              if old not in text:
+                  raise SystemExit(f'Expected {old} in {path}')
+              path.write_text(text.replace(old, new), encoding='utf-8')
+
+          changelog = Path('CHANGELOG.md')
+          text = changelog.read_text(encoding='utf-8')
+          prefix = '# 0.8.0\n\n## 1.0.0-dev.2\n\n'
+          marker = '\n\n## Bug Fixes'
+          if not text.startswith(prefix):
+              raise SystemExit('Unexpected CHANGELOG.md prefix')
+          marker_index = text.find(marker, len(prefix))
+          if marker_index < 0:
+              raise SystemExit('Could not find the 0.8.0 Bug Fixes section')
+
+          release_notes = text[len(prefix):marker_index].rstrip()
+          remainder = text[marker_index:]
+          rebuilt = (
+              '# 1.0.0-dev.2\n\n'
+              f'{release_notes}\n\n'
+              '---\n\n'
+              '# 0.8.0'
+              f'{remainder}'
+          )
+          changelog.write_text(rebuilt, encoding='utf-8')
+
           for manifest in manifests:
-              manifest_text = manifest.read_text(encoding='utf-8')
-              if 'version: 1.0.0-dev.2' not in manifest_text:
-                  raise SystemExit(f'{manifest} did not receive the dev.2 package version.')
-              if '1.0.0-dev.1' in manifest_text:
-                  raise SystemExit(f'{manifest} still contains dev.1 metadata.')
+              current = manifest.read_text(encoding='utf-8')
+              if 'version: 1.0.0-dev.2' not in current or old in current:
+                  raise SystemExit(f'Invalid synchronized manifest: {manifest}')
 
           readme = Path('README.md').read_text(encoding='utf-8')
-          if 'Cinder `1.0.0-dev.2`' not in readme or '1.0.0-dev.1' in readme:
-              raise SystemExit('README version banner was not synchronized.')
+          if 'Cinder `1.0.0-dev.2`' not in readme or old in readme:
+              raise SystemExit('README banner is not synchronized')
 
-          first_line = changelog.read_text(encoding='utf-8').splitlines()[0]
-          if first_line != '# 1.0.0-dev.2':
-              raise SystemExit(f'Unexpected changelog first line: {first_line!r}')
-
-          print('Updated version references in:')
-          for path in changed:
-              print(f'  - {path}')
+          if changelog.read_text(encoding='utf-8').splitlines()[0] != '# 1.0.0-dev.2':
+              raise SystemExit('CHANGELOG does not start with dev.2')
           PY
 
           rm .github/workflows/sync-dev2-version.yml
-
-          if git grep -n '1.0.0-dev.1' -- . ':!CHANGELOG.md'; then
-            echo 'Stale dev.1 references remain.' >&2
-            exit 1
-          fi
-
           git diff --check
           git diff --stat
 
