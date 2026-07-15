@@ -1,0 +1,109 @@
+name: One-shot dev.2 version sync
+
+on:
+  push:
+    branches:
+      - agent/sync-dev2-versions
+    paths:
+      - .github/workflows/sync-dev2-version.yml
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: agent/sync-dev2-versions
+          fetch-depth: 0
+
+      - name: Synchronize release metadata
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          import subprocess
+
+          old = b'1.0.0-dev.1'
+          new = b'1.0.0-dev.2'
+          workflow = Path('.github/workflows/sync-dev2-version.yml')
+
+          tracked = subprocess.check_output(['git', 'ls-files', '-z']).split(b'\0')
+          changed = []
+          for raw_path in tracked:
+              if not raw_path:
+                  continue
+              path = Path(raw_path.decode())
+              if path in {Path('CHANGELOG.md'), workflow}:
+                  continue
+              data = path.read_bytes()
+              if old not in data:
+                  continue
+              path.write_bytes(data.replace(old, new))
+              changed.append(str(path))
+
+          changelog = Path('CHANGELOG.md')
+          text = changelog.read_text(encoding='utf-8')
+          pattern = re.compile(
+              r'\A# 0\.8\.0\n\n## 1\.0\.0-dev\.2\n\n'
+              r'(?P<notes>(?:- [^\n]+\n)+)\n+## Bug Fixes'
+          )
+          match = pattern.search(text)
+          if match is None:
+              raise SystemExit('Unexpected CHANGELOG.md header; refusing a destructive rewrite.')
+
+          notes = match.group('notes').rstrip()
+          replacement = (
+              '# 1.0.0-dev.2\n\n'
+              f'{notes}\n\n'
+              '---\n\n'
+              '# 0.8.0\n\n'
+              '## Bug Fixes'
+          )
+          changelog.write_text(pattern.sub(replacement, text, count=1), encoding='utf-8')
+
+          manifests = [Path('pubspec.yaml'), *sorted(Path('packages').glob('*/pubspec.yaml'))]
+          if len(manifests) != 7:
+              raise SystemExit(f'Expected 7 package manifests, found {len(manifests)}.')
+          for manifest in manifests:
+              manifest_text = manifest.read_text(encoding='utf-8')
+              if 'version: 1.0.0-dev.2' not in manifest_text:
+                  raise SystemExit(f'{manifest} did not receive the dev.2 package version.')
+              if '1.0.0-dev.1' in manifest_text:
+                  raise SystemExit(f'{manifest} still contains dev.1 metadata.')
+
+          readme = Path('README.md').read_text(encoding='utf-8')
+          if 'Cinder `1.0.0-dev.2`' not in readme or '1.0.0-dev.1' in readme:
+              raise SystemExit('README version banner was not synchronized.')
+
+          first_line = changelog.read_text(encoding='utf-8').splitlines()[0]
+          if first_line != '# 1.0.0-dev.2':
+              raise SystemExit(f'Unexpected changelog first line: {first_line!r}')
+
+          print('Updated version references in:')
+          for path in changed:
+              print(f'  - {path}')
+          PY
+
+          rm .github/workflows/sync-dev2-version.yml
+
+          if git grep -n '1.0.0-dev.1' -- . ':!CHANGELOG.md'; then
+            echo 'Stale dev.1 references remain.' >&2
+            exit 1
+          fi
+
+          git diff --check
+          git diff --stat
+
+      - name: Commit synchronized metadata
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add README.md CHANGELOG.md pubspec.yaml packages/*/pubspec.yaml .github/workflows/sync-dev2-version.yml
+          git commit -m "chore: sync 1.0.0-dev.2 metadata"
+          git push origin HEAD:agent/sync-dev2-versions
