@@ -1,31 +1,75 @@
 name: Apply Feature Payload
 
 on:
-  pull_request:
+  push:
     branches:
-      - main
+      - feat/safe-terminal-and-app-widgets
     paths:
       - '.github/workflows/apply-feature.yml'
       - '.github/payload/**'
+  workflow_dispatch:
 
 permissions:
   contents: write
 
+concurrency:
+  group: apply-safe-terminal-and-widgets
+  cancel-in-progress: false
+
 jobs:
   apply:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v6
         with:
           ref: feat/safe-terminal-and-app-widgets
           fetch-depth: 0
+
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+
+      - name: Merge current main
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git merge --no-edit origin/main
+
       - name: Apply feature patch
         shell: bash
         run: |
           set -euo pipefail
           cat .github/payload/feature.*.patch > /tmp/feature.patch
-          echo "28c6be9ec4cb82295efb4a85e946949b4722a2960ab431f00444c731ea0bf23e  /tmp/feature.patch" | sha256sum -c -
-          git apply --index /tmp/feature.patch
+          echo "0d6ec4be6acba114fb35c04018b1b80e8064c2c97ecda68345bf144c45b9c5e5  /tmp/feature.patch" | sha256sum -c -
+
+          # CHANGELOG changed on main after this payload was prepared. Apply every
+          # runtime/test/doc change and merge the release note explicitly below.
+          git apply --index --whitespace=fix --exclude=CHANGELOG.md /tmp/feature.patch
+
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('CHANGELOG.md')
+          text = path.read_text(encoding='utf-8')
+          entry = '''# Unreleased
+
+- Add explicit `TerminalText.safe` / `TerminalText.trusted` trust boundaries.
+- Sanitize untrusted output at text, Markdown, canvas, buffer, cell, diff, and full-frame layers.
+- Validate OSC title/icon metadata and Kitty, iTerm2, and Sixel image payloads.
+- Harden failure-tolerant terminal state recovery and add fuzz/security tests.
+- Add first-party application widgets for navigation, data, AI/developer workflows, and forms.
+- Add `VirtualListView`, `SplitView`, `TreeView`, `DiffView`, and `CommandPalette` as the primary IDE building blocks.
+
+---
+
+'''
+          if not text.startswith('# Unreleased'):
+              path.write_text(entry + text, encoding='utf-8')
+          PY
 
           rm -rf .github/payload
           rm -f .github/workflows/apply-feature.yml
@@ -33,8 +77,28 @@ jobs:
           rm -f .github/workflows/export-dart-sdk.yml
           rm -f .github/workflows/export-dart-env.yml
 
+          mapfile -t dart_files < <(
+            git diff --cached --name-only --diff-filter=ACMR \
+              | grep -E '^(lib|test|example|benchmark)/.*\.dart$' || true
+          )
+          if [ "${#dart_files[@]}" -gt 0 ]; then
+            dart format "${dart_files[@]}"
+          fi
+
           git add -A
-          git config user.name github-actions[bot]
-          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+
+      - name: Validate implementation
+        shell: bash
+        run: |
+          set -euo pipefail
+          dart pub get
+          dart analyze --fatal-infos
+          dart test --reporter expanded
+
+      - name: Commit final implementation
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --cached --check
           git commit -m "feat: add safe terminal output and application widgets"
           git push origin HEAD:feat/safe-terminal-and-app-widgets
