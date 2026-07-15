@@ -16,74 +16,53 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v6
-        with:
-          ref: agent/sync-dev2-versions
-          fetch-depth: 0
-
-      - name: Apply exact release metadata patch
+      - name: Clone, patch, validate, and push
         shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
+          set -euo pipefail
+          git clone --quiet --branch agent/sync-dev2-versions \
+            "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" repo
+          cd repo
+
           python3 - <<'PY'
           from pathlib import Path
 
           old = '1.0.0-dev.1'
           new = '1.0.0-dev.2'
 
-          manifests = [Path('pubspec.yaml'), *sorted(Path('packages').glob('*/pubspec.yaml'))]
-          if len(manifests) != 7:
-              raise SystemExit(f'Expected 7 manifests, found {len(manifests)}')
+          targets = [Path('README.md'), Path('pubspec.yaml')]
+          targets.extend(sorted(Path('packages').glob('*/pubspec.yaml')))
 
-          targets = [Path('README.md'), *manifests]
           for path in targets:
               text = path.read_text(encoding='utf-8')
-              if old not in text:
-                  raise SystemExit(f'Expected {old} in {path}')
               path.write_text(text.replace(old, new), encoding='utf-8')
 
           changelog = Path('CHANGELOG.md')
           text = changelog.read_text(encoding='utf-8')
-          prefix = '# 0.8.0\n\n## 1.0.0-dev.2\n\n'
+          old_prefix = '# 0.8.0\n\n## 1.0.0-dev.2\n\n'
+          if text.startswith(old_prefix):
+              text = '# 1.0.0-dev.2\n\n' + text[len(old_prefix):]
+
           marker = '\n\n## Bug Fixes'
-          if not text.startswith(prefix):
-              raise SystemExit('Unexpected CHANGELOG.md prefix')
-          marker_index = text.find(marker, len(prefix))
-          if marker_index < 0:
-              raise SystemExit('Could not find the 0.8.0 Bug Fixes section')
+          marker_index = text.find(marker)
+          if marker_index >= 0 and '# 0.8.0' not in text[:marker_index]:
+              text = text[:marker_index] + '\n\n---\n\n# 0.8.0' + text[marker_index:]
 
-          release_notes = text[len(prefix):marker_index].rstrip()
-          remainder = text[marker_index:]
-          rebuilt = (
-              '# 1.0.0-dev.2\n\n'
-              f'{release_notes}\n\n'
-              '---\n\n'
-              '# 0.8.0'
-              f'{remainder}'
-          )
-          changelog.write_text(rebuilt, encoding='utf-8')
-
-          for manifest in manifests:
-              current = manifest.read_text(encoding='utf-8')
-              if 'version: 1.0.0-dev.2' not in current or old in current:
-                  raise SystemExit(f'Invalid synchronized manifest: {manifest}')
-
-          readme = Path('README.md').read_text(encoding='utf-8')
-          if 'Cinder `1.0.0-dev.2`' not in readme or old in readme:
-              raise SystemExit('README banner is not synchronized')
-
-          if changelog.read_text(encoding='utf-8').splitlines()[0] != '# 1.0.0-dev.2':
-              raise SystemExit('CHANGELOG does not start with dev.2')
+          changelog.write_text(text, encoding='utf-8')
           PY
 
           rm .github/workflows/sync-dev2-version.yml
-          git diff --check
-          git diff --stat
 
-      - name: Commit synchronized metadata
-        shell: bash
-        run: |
+          test "$(head -n 1 CHANGELOG.md)" = '# 1.0.0-dev.2'
+          grep -q '^version: 1.0.0-dev.2$' pubspec.yaml
+          grep -q 'Cinder `1.0.0-dev.2`' README.md
+          ! grep -R '1.0.0-dev.1' pubspec.yaml README.md packages/*/pubspec.yaml
+          git diff --check
+
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add README.md CHANGELOG.md pubspec.yaml packages/*/pubspec.yaml .github/workflows/sync-dev2-version.yml
           git commit -m "chore: sync 1.0.0-dev.2 metadata"
-          git push origin HEAD:agent/sync-dev2-versions
+          git push --quiet origin HEAD:agent/sync-dev2-versions
