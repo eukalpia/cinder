@@ -1,0 +1,44 @@
+name: Format Feature Changes
+
+on:
+  push:
+    branches:
+      - feat/safe-terminal-and-app-widgets
+    paths:
+      - '.github/workflows/format-fix.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: feat/safe-terminal-and-app-widgets
+          fetch-depth: 0
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+      - name: Format every changed Dart file
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          mapfile -t files < <(
+            git diff --name-only --diff-filter=ACMR origin/main HEAD \
+              | grep -E '^(lib|test|example|benchmark|packages)/.*\.dart$' || true
+          )
+          if [ "${#files[@]}" -gt 0 ]; then
+            dart format "${files[@]}"
+          fi
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          if ! git diff --quiet; then
+            git add -A
+            git commit -m 'style: format safe terminal and application widgets'
+            git push origin HEAD:feat/safe-terminal-and-app-widgets
+          fi
