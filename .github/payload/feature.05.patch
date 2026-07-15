@@ -1,0 +1,428 @@
+child: Column(
++                  crossAxisAlignment: CrossAxisAlignment.stretch,
++                  children: [
++                    Row(
++                      children: [
++                        Expanded(
++                          child: TerminalText.safe(
++                            entry.title,
++                            style: const TextStyle(fontWeight: FontWeight.bold),
++                            softWrap: false,
++                            maxLines: 1,
++                            overflow: TextOverflow.ellipsis,
++                          ),
++                        ),
++                        if (entry.timestamp != null)
++                          TerminalText.safe(
++                            entry.timestamp!.toIso8601String(),
++                            style: const TextStyle(color: Colors.grey),
++                            softWrap: false,
++                          ),
++                      ],
++                    ),
++                    TerminalText.safe(
++                      entry.description ?? '',
++                      style: const TextStyle(color: Colors.grey),
++                      softWrap: false,
++                      maxLines: 1,
++                      overflow: TextOverflow.ellipsis,
++                    ),
++                  ],
++                ),
++              ),
++            ],
++          ),
++        );
++      },
++    );
++  }
++}
++
++enum LogLevel { trace, debug, info, warning, error, fatal }
++
++class LogViewEntry {
++  const LogViewEntry({
++    required this.message,
++    this.level = LogLevel.info,
++    this.timestamp,
++    this.source,
++  });
++
++  final String message;
++  final LogLevel level;
++  final DateTime? timestamp;
++  final String? source;
++}
++
++class LogViewController extends ChangeNotifier {
++  LogViewController({this.maxEntries = 10000});
++
++  final int maxEntries;
++  final List<LogViewEntry> _entries = [];
++  List<LogViewEntry> get entries => List.unmodifiable(_entries);
++
++  void add(LogViewEntry entry) {
++    _entries.add(entry);
++    if (_entries.length > maxEntries) {
++      _entries.removeRange(0, _entries.length - maxEntries);
++    }
++    notifyListeners();
++  }
++
++  void addAll(Iterable<LogViewEntry> entries) {
++    _entries.addAll(entries);
++    if (_entries.length > maxEntries) {
++      _entries.removeRange(0, _entries.length - maxEntries);
++    }
++    notifyListeners();
++  }
++
++  void clear() {
++    if (_entries.isEmpty) return;
++    _entries.clear();
++    notifyListeners();
++  }
++}
++
++/// High-volume, sanitized log viewer.
++class LogView extends StatefulWidget {
++  const LogView({
++    super.key,
++    required this.controller,
++    this.followTail = true,
++    this.showTimestamp = true,
++    this.showSource = true,
++  });
++
++  final LogViewController controller;
++  final bool followTail;
++  final bool showTimestamp;
++  final bool showSource;
++
++  @override
++  State<LogView> createState() => _LogViewState();
++}
++
++class _LogViewState extends State<LogView> {
++  final ScrollController _scroll = ScrollController();
++
++  @override
++  void initState() {
++    super.initState();
++    widget.controller.addListener(_changed);
++  }
++
++  @override
++  void didUpdateWidget(LogView oldWidget) {
++    super.didUpdateWidget(oldWidget);
++    if (!identical(oldWidget.controller, widget.controller)) {
++      oldWidget.controller.removeListener(_changed);
++      widget.controller.addListener(_changed);
++    }
++  }
++
++  void _changed() {
++    if (widget.followTail && widget.controller.entries.isNotEmpty) {
++      _scroll.ensureIndexVisible(index: widget.controller.entries.length - 1);
++    }
++    if (mounted) setState(() {});
++  }
++
++  Color _color(LogLevel level) {
++    switch (level) {
++      case LogLevel.trace:
++      case LogLevel.debug:
++        return Colors.grey;
++      case LogLevel.info:
++        return Colors.cyan;
++      case LogLevel.warning:
++        return Colors.yellow;
++      case LogLevel.error:
++      case LogLevel.fatal:
++        return Colors.red;
++    }
++  }
++
++  @override
++  Widget build(BuildContext context) {
++    final entries = widget.controller.entries;
++    return VirtualListView.builder(
++      controller: _scroll,
++      itemCount: entries.length,
++      itemExtent: 1,
++      itemBuilder: (context, index) {
++        final entry = entries[index];
++        return Row(
++          children: [
++            if (widget.showTimestamp && entry.timestamp != null) ...[
++              TerminalText.safe(
++                entry.timestamp!.toIso8601String(),
++                style: const TextStyle(color: Colors.grey),
++                softWrap: false,
++              ),
++              const Text(' '),
++            ],
++            SizedBox(
++              width: 7,
++              child: Text(
++                entry.level.name.toUpperCase(),
++                style: TextStyle(color: _color(entry.level)),
++                softWrap: false,
++              ),
++            ),
++            if (widget.showSource && entry.source != null) ...[
++              TerminalText.safe(
++                '[${entry.source}]',
++                style: const TextStyle(color: Colors.grey),
++                softWrap: false,
++              ),
++              const Text(' '),
++            ],
++            Expanded(
++              child: TerminalText.safe(
++                entry.message,
++                softWrap: false,
++                maxLines: 1,
++                overflow: TextOverflow.ellipsis,
++              ),
++            ),
++          ],
++        );
++      },
++    );
++  }
++
++  @override
++  void dispose() {
++    widget.controller.removeListener(_changed);
++    _scroll.dispose();
++    super.dispose();
++  }
++}
++
++/// Search box plus a virtualized generic result list.
++class SearchableList<T> extends StatefulWidget {
++  const SearchableList({
++    super.key,
++    required this.items,
++    required this.searchText,
++    required this.itemBuilder,
++    this.placeholder = 'Search…',
++    this.emptyMessage = 'No results',
++    this.itemExtent,
++  });
++
++  final List<T> items;
++  final String Function(T item) searchText;
++  final Widget Function(BuildContext context, T item, int index) itemBuilder;
++  final String placeholder;
++  final String emptyMessage;
++  final double? itemExtent;
++
++  @override
++  State<SearchableList<T>> createState() => _SearchableListState<T>();
++}
++
++class _SearchableListState<T> extends State<SearchableList<T>> {
++  final TextEditingController _controller = TextEditingController();
++  String _query = '';
++
++  @override
++  Widget build(BuildContext context) {
++    final query = _query.trim().toLowerCase();
++    final items = query.isEmpty
++        ? widget.items
++        : widget.items
++            .where(
++                (item) => widget.searchText(item).toLowerCase().contains(query))
++            .toList();
++    return Column(
++      crossAxisAlignment: CrossAxisAlignment.stretch,
++      children: [
++        TextField(
++          controller: _controller,
++          placeholder: widget.placeholder,
++          onChanged: (value) => setState(() => _query = value),
++        ),
++        const Divider(),
++        Expanded(
++          child: items.isEmpty
++              ? Center(child: TerminalText.safe(widget.emptyMessage))
++              : VirtualListView.builder(
++                  itemCount: items.length,
++                  itemExtent: widget.itemExtent,
++                  itemBuilder: (context, index) =>
++                      widget.itemBuilder(context, items[index], index),
++                ),
++        ),
++      ],
++    );
++  }
++
++  @override
++  void dispose() {
++    _controller.dispose();
++    super.dispose();
++  }
++}
++
++/// Convenience facade for an unbounded builder-backed list.
++class InfiniteList extends StatelessWidget {
++  const InfiniteList({
++    super.key,
++    required this.itemBuilder,
++    this.controller,
++    this.itemExtent,
++    this.reverse = false,
++    this.cacheExtent = 5,
++  });
++
++  final IndexedWidgetBuilder itemBuilder;
++  final ScrollController? controller;
++  final double? itemExtent;
++  final bool reverse;
++  final double cacheExtent;
++
++  @override
++  Widget build(BuildContext context) {
++    return VirtualListView.infinite(
++      controller: controller,
++      itemBuilder: itemBuilder,
++      itemExtent: itemExtent,
++      reverse: reverse,
++      cacheExtent: cacheExtent,
++    );
++  }
++}
+diff --git a/lib/src/components/application/developer_widgets.dart b/lib/src/components/application/developer_widgets.dart
+new file mode 100644
+index 0000000..470553d
+--- /dev/null
++++ b/lib/src/components/application/developer_widgets.dart
+@@ -0,0 +1,1153 @@
++import 'dart:async';
++
++import 'package:cinder/cinder.dart';
++
++enum ChatRole { user, assistant, system, tool }
++
++class ChatMessage {
++  const ChatMessage({
++    required this.id,
++    required this.role,
++    required this.content,
++    this.timestamp,
++    this.streaming = false,
++    this.title,
++  });
++
++  final Object id;
++  final ChatRole role;
++  final String content;
++  final DateTime? timestamp;
++  final bool streaming;
++  final String? title;
++
++  ChatMessage copyWith({
++    String? content,
++    bool? streaming,
++    String? title,
++  }) {
++    return ChatMessage(
++      id: id,
++      role: role,
++      content: content ?? this.content,
++      timestamp: timestamp,
++      streaming: streaming ?? this.streaming,
++      title: title ?? this.title,
++    );
++  }
++}
++
++/// Owns a chat transcript and coalesces streaming deltas to frame cadence.
++class ChatViewController extends ChangeNotifier {
++  ChatViewController({
++    Iterable<ChatMessage> messages = const [],
++    this.maxMessages = 10000,
++    this.streamBatchInterval = const Duration(milliseconds: 16),
++  }) : _messages = List.of(messages);
++
++  final int maxMessages;
++  final Duration streamBatchInterval;
++  final List<ChatMessage> _messages;
++  final Map<Object, StringBuffer> _pendingDeltas = {};
++  Timer? _flushTimer;
++
++  List<ChatMessage> get messages => List.unmodifiable(_messages);
++
++  void add(ChatMessage message) {
++    flushPendingDeltas();
++    _messages.removeWhere((item) => item.id == message.id);
++    _messages.add(message);
++    _trim();
++    notifyListeners();
++  }
++
++  void replace(ChatMessage message) {
++    flushPendingDeltas();
++    final index = _messages.indexWhere((item) => item.id == message.id);
++    if (index < 0) {
++      add(message);
++      return;
++    }
++    _messages[index] = message;
++    notifyListeners();
++  }
++
++  void appendDelta(Object id, String delta) {
++    if (delta.isEmpty) return;
++    (_pendingDeltas[id] ??= StringBuffer()).write(delta);
++    _flushTimer ??= Timer(streamBatchInterval, flushPendingDeltas);
++  }
++
++  void finishStreaming(Object id) {
++    flushPendingDeltas();
++    final index = _messages.indexWhere((item) => item.id == id);
++    if (index < 0) return;
++    _messages[index] = _messages[index].copyWith(streaming: false);
++    notifyListeners();
++  }
++
++  void remove(Object id) {
++    _pendingDeltas.remove(id);
++    final before = _messages.length;
++    _messages.removeWhere((item) => item.id == id);
++    if (_messages.length != before) notifyListeners();
++  }
++
++  void clear() {
++    _flushTimer?.cancel();
++    _flushTimer = null;
++    _pendingDeltas.clear();
++    if (_messages.isEmpty) return;
++    _messages.clear();
++    notifyListeners();
++  }
++
++  void flushPendingDeltas() {
++    _flushTimer?.cancel();
++    _flushTimer = null;
++    if (_pendingDeltas.isEmpty) return;
++    var changed = false;
++    for (final entry in _pendingDeltas.entries) {
++      final index = _messages.indexWhere((item) => item.id == entry.key);
++      if (index < 0) continue;
++      final message = _messages[index];
++      _messages[index] = message.copyWith(
++        content: '${message.content}${entry.value}',
++        streaming: true,
++      );
++      changed = true;
++    }
++    _pendingDeltas.clear();
++    if (changed) notifyListeners();
++  }
++
++  void _trim() {
++    if (_messages.length <= maxMessages) return;
++    _messages.removeRange(
