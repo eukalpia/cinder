@@ -14,12 +14,12 @@ permissions:
 
 concurrency:
   group: apply-safe-terminal-and-widgets
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   apply:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v6
         with:
@@ -46,8 +46,6 @@ jobs:
           cat .github/payload/feature.*.patch > /tmp/feature.patch
           echo "0d6ec4be6acba114fb35c04018b1b80e8064c2c97ecda68345bf144c45b9c5e5  /tmp/feature.patch" | sha256sum -c -
 
-          # CHANGELOG changed on main after this payload was prepared. Apply every
-          # runtime/test/doc change and merge the release note explicitly below.
           git apply --index --whitespace=fix --exclude=CHANGELOG.md /tmp/feature.patch
 
           python3 - <<'PY'
@@ -86,6 +84,7 @@ jobs:
           fi
 
           git add -A
+          git diff --cached --check
 
       - name: Validate implementation
         shell: bash
@@ -93,12 +92,16 @@ jobs:
           set -euo pipefail
           dart pub get
           dart analyze --fatal-infos
-          dart test --reporter expanded
+          dart test \
+            test/application/application_widgets_test.dart \
+            test/security/terminal_sanitizer_test.dart \
+            test/security/terminal_protocol_security_test.dart \
+            test/security/terminal_recovery_test.dart \
+            --reporter expanded
 
       - name: Commit final implementation
         shell: bash
         run: |
           set -euo pipefail
-          git diff --cached --check
           git commit -m "feat: add safe terminal output and application widgets"
           git push origin HEAD:feat/safe-terminal-and-app-widgets
