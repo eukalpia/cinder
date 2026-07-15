@@ -26,6 +26,17 @@ jobs:
           ref: feat/safe-terminal-and-app-widgets
           fetch-depth: 0
 
+      - name: Publish run diagnostic
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          printf '%s\n' "$GITHUB_RUN_ID" > .github/apply-run-id.txt
+          git add .github/apply-run-id.txt
+          git commit -m "ci: record feature apply run"
+          git push origin HEAD:feat/safe-terminal-and-app-widgets
+
       - uses: dart-lang/setup-dart@v1
         with:
           sdk: stable
@@ -34,14 +45,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git config user.name github-actions[bot]
-          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-
           cat .github/payload/feature.*.patch > /tmp/feature.patch
           echo "0d6ec4be6acba114fb35c04018b1b80e8064c2c97ecda68345bf144c45b9c5e5  /tmp/feature.patch" | sha256sum -c -
 
-          # Do not modify workflow files from GITHUB_TOKEN. They are cleaned up
-          # through the repository API after this implementation commit lands.
           git apply --index --whitespace=fix \
             --exclude=CHANGELOG.md \
             --exclude=.github/workflows/export-source.yml \
