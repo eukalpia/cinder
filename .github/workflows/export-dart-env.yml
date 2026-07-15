@@ -1,0 +1,28 @@
+name: Export Dart Environment
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+      - name: Resolve dependencies
+        run: dart pub get
+      - name: Package dependency environment
+        run: |
+          tar -czf /tmp/cinder-dart-env.tar.gz .dart_tool "$HOME/.pub-cache"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cinder-dart-env
+          path: /tmp/cinder-dart-env.tar.gz
+          retention-days: 1
