@@ -1,6 +1,6 @@
 name: cinder_provider
 description: Provider-style dependency injection and state management for Cinder.
-version: 1.0.0-dev.1
+version: 1.0.0-dev.2
 repository: https://github.com/eukalpia/cinder
 
 environment:
@@ -8,8 +8,8 @@ environment:
 
 dependencies:
   meta: ^1.17.0
-  cinder: ^1.0.0-dev.1
-  cinder_nested: ^1.0.0-dev.1
+  cinder: ^1.0.0-dev.2
+  cinder_nested: ^1.0.0-dev.2
 
 dev_dependencies:
   test: ^1.25.6

@@ -9,9 +9,7 @@
 
 ---
 
-# 0.8.0
-
-## 1.0.0-dev.2
+# 1.0.0-dev.2
 
 - Renderer V2 cached repaint layers and damage-only partial painting.
 - Safe terminal scroll-region acceleration for vertical viewports.
@@ -19,6 +17,9 @@
 - Protocol-aware Kitty, iTerm2, Sixel, and Unicode image rendering.
 - Renderer, icon, image, documentation, and benchmark coverage.
 
+---
+
+# 0.8.0
 
 ## Bug Fixes
 - **IME composition (Windows/CJK)**: Emit each rendered frame in a single pipe write so the terminal never anchors the IME composition window to a transient streaming cell — fixes IME window flickering across the screen during chat/log streaming

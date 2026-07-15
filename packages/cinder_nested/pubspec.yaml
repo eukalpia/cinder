@@ -1,13 +1,13 @@
 name: cinder_nested
 description: Nested widget support for Cinder.
-version: 1.0.0-dev.1
+version: 1.0.0-dev.2
 repository: https://github.com/eukalpia/cinder
 
 environment:
   sdk: ">=3.5.0 <4.0.0"
 
 dependencies:
-  cinder: ^1.0.0-dev.1
+  cinder: ^1.0.0-dev.2
 
 dev_dependencies:
   test: ^1.25.6
