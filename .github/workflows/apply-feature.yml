@@ -30,23 +30,22 @@ jobs:
         with:
           sdk: stable
 
-      - name: Merge current main
-        shell: bash
-        run: |
-          set -euo pipefail
-          git fetch origin main
-          git config user.name github-actions[bot]
-          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git merge --no-edit origin/main
-
       - name: Apply feature patch
         shell: bash
         run: |
           set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+
           cat .github/payload/feature.*.patch > /tmp/feature.patch
           echo "0d6ec4be6acba114fb35c04018b1b80e8064c2c97ecda68345bf144c45b9c5e5  /tmp/feature.patch" | sha256sum -c -
 
-          git apply --index --whitespace=fix --exclude=CHANGELOG.md /tmp/feature.patch
+          # Do not modify workflow files from GITHUB_TOKEN. They are cleaned up
+          # through the repository API after this implementation commit lands.
+          git apply --index --whitespace=fix \
+            --exclude=CHANGELOG.md \
+            --exclude=.github/workflows/export-source.yml \
+            /tmp/feature.patch
 
           python3 - <<'PY'
           from pathlib import Path
@@ -69,12 +68,6 @@ jobs:
               path.write_text(entry + text, encoding='utf-8')
           PY
 
-          rm -rf .github/payload
-          rm -f .github/workflows/apply-feature.yml
-          rm -f .github/workflows/export-source.yml
-          rm -f .github/workflows/export-dart-sdk.yml
-          rm -f .github/workflows/export-dart-env.yml
-
           mapfile -t dart_files < <(
             git diff --cached --name-only --diff-filter=ACMR \
               | grep -E '^(lib|test|example|benchmark)/.*\.dart$' || true
@@ -83,7 +76,9 @@ jobs:
             dart format "${dart_files[@]}"
           fi
 
-          git add -A
+          git add CHANGELOG.md
+          git add -u
+          git add README.md doc lib test
           git diff --cached --check
 
       - name: Validate implementation
@@ -99,7 +94,7 @@ jobs:
             test/security/terminal_recovery_test.dart \
             --reporter expanded
 
-      - name: Commit final implementation
+      - name: Commit implementation
         shell: bash
         run: |
           set -euo pipefail
