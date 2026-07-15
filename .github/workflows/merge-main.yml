@@ -1,0 +1,80 @@
+name: Synchronize Main
+
+on:
+  push:
+    branches:
+      - feat/safe-terminal-and-app-widgets
+    paths:
+      - '.github/workflows/merge-main.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: synchronize-safe-terminal-branch
+  cancel-in-progress: false
+
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: feat/safe-terminal-and-app-widgets
+          fetch-depth: 0
+
+      - name: Merge current main and resolve release metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git fetch origin main
+
+          if git merge-base --is-ancestor origin/main HEAD; then
+            echo 'main is already an ancestor'
+            exit 0
+          fi
+
+          git merge --no-commit origin/main || true
+
+          for file in README.md CHANGELOG.md; do
+            if git ls-files -u -- "$file" | grep -q .; then
+              git checkout --ours -- "$file"
+            fi
+          done
+
+          python3 - <<'PY'
+          from pathlib import Path
+
+          readme = Path('README.md')
+          readme_text = readme.read_text(encoding='utf-8')
+          readme.write_text(
+              readme_text.replace('Cinder `1.0.0-dev.1`', 'Cinder `1.0.0-dev.2`'),
+              encoding='utf-8',
+          )
+
+          changelog = Path('CHANGELOG.md')
+          text = changelog.read_text(encoding='utf-8')
+          old_start = '# 0.8.0\n\n## 1.0.0-dev.2\n\n'
+          marker = '\n\n## Bug Fixes'
+          if old_start in text:
+              prefix, rest = text.split(old_start, 1)
+              release, history = rest.split(marker, 1)
+              text = (
+                  prefix
+                  + '# 1.0.0-dev.2\n\n'
+                  + release.rstrip()
+                  + '\n\n---\n\n# 0.8.0'
+                  + marker
+                  + history
+              )
+          changelog.write_text(text, encoding='utf-8')
+          PY
+
+          git add -A
+          git diff --cached --check
+          git commit -m 'merge: synchronize main release metadata'
+          git push origin HEAD:feat/safe-terminal-and-app-widgets
