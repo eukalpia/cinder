@@ -1,0 +1,361 @@
+;
++
++  static final RegExp _kittyHeader = RegExp(r'^[A-Za-z0-9_,=.+-]*$');
++  static final RegExp _base64 = RegExp(r'^[A-Za-z0-9+/]*={0,2}$');
++  static final RegExp _itermArguments = RegExp(r'^[A-Za-z0-9_=/+;,.% -]*$');
++
++  static bool isValid(String payload, ImageProtocol protocol) {
++    if (payload.isEmpty) return false;
++    switch (protocol) {
++      case ImageProtocol.kitty:
++        return _isValidKitty(payload);
++      case ImageProtocol.iterm2:
++        return _isValidITerm2(payload);
++      case ImageProtocol.sixel:
++        return _isValidSixel(payload);
++      case ImageProtocol.unicodeBlocks:
++        return false;
++    }
++  }
++
++  static String requireValid(String payload, ImageProtocol protocol) {
++    if (!isValid(payload, protocol)) {
++      throw ArgumentError.value(
++        '<${payload.length} code units>',
++        'payload',
++        'Invalid or mixed terminal image protocol payload for ${protocol.name}.',
++      );
++    }
++    return payload;
++  }
++
++  static bool _isValidKitty(String payload) {
++    const start = '\x1b_G';
++    const end = '\x1b\\';
++    var offset = 0;
++    var chunks = 0;
++
++    while (offset < payload.length) {
++      if (!payload.startsWith(start, offset)) return false;
++      final terminator = payload.indexOf(end, offset + start.length);
++      if (terminator < 0) return false;
++      final body = payload.substring(offset + start.length, terminator);
++      if (body.isEmpty || _containsControl(body)) return false;
++
++      final separator = body.indexOf(';');
++      if (separator < 0 || body.indexOf(';', separator + 1) >= 0) return false;
++      final header = body.substring(0, separator);
++      final encoded = body.substring(separator + 1);
++      if (!_kittyHeader.hasMatch(header) || !_base64.hasMatch(encoded)) {
++        return false;
++      }
++      if (!header.split(',').every(_isValidKittyParameter)) return false;
++
++      chunks++;
++      offset = terminator + end.length;
++    }
++    return chunks > 0 && offset == payload.length;
++  }
++
++  static bool _isValidKittyParameter(String parameter) {
++    final equals = parameter.indexOf('=');
++    if (equals <= 0 || equals == parameter.length - 1) return false;
++    final key = parameter.substring(0, equals);
++    final value = parameter.substring(equals + 1);
++    return RegExp(r'^[A-Za-z][A-Za-z0-9]*$').hasMatch(key) &&
++        RegExp(r'^[A-Za-z0-9.+-]+$').hasMatch(value);
++  }
++
++  static bool _isValidITerm2(String payload) {
++    const prefix = '\x1b]1337;File=';
++    if (!payload.startsWith(prefix)) return false;
++
++    int terminatorLength;
++    if (payload.endsWith('\x07')) {
++      terminatorLength = 1;
++    } else if (payload.endsWith('\x1b\\')) {
++      terminatorLength = 2;
++    } else {
++      return false;
++    }
++
++    final body = payload.substring(
++      prefix.length,
++      payload.length - terminatorLength,
++    );
++    if (_containsControl(body)) return false;
++    final separator = body.indexOf(':');
++    if (separator <= 0 || body.indexOf(':', separator + 1) >= 0) return false;
++    final arguments = body.substring(0, separator);
++    final encoded = body.substring(separator + 1);
++    return _itermArguments.hasMatch(arguments) &&
++        arguments.split(';').every((part) =>
++            part.isNotEmpty && part.contains('=') && !part.startsWith('=')) &&
++        _base64.hasMatch(encoded);
++  }
++
++  static bool _isValidSixel(String payload) {
++    const prefix = '\x1bPq';
++    const suffix = '\x1b\\';
++    if (!payload.startsWith(prefix) || !payload.endsWith(suffix)) return false;
++    final body =
++        payload.substring(prefix.length, payload.length - suffix.length);
++    if (body.isEmpty) return false;
++    for (final codeUnit in body.codeUnits) {
++      // Cinder's encoder emits printable seven-bit Sixel syntax only.
++      if (codeUnit < 0x20 || codeUnit > 0x7E) return false;
++    }
++    return true;
++  }
++
++  static bool _containsControl(String value) {
++    for (final codeUnit in value.codeUnits) {
++      if (codeUnit < 0x20 ||
++          codeUnit == 0x7F ||
++          (codeUnit >= 0x80 && codeUnit <= 0x9F)) {
++        return true;
++      }
++    }
++    return false;
++  }
++}
+diff --git a/lib/src/security/terminal_sanitizer.dart b/lib/src/security/terminal_sanitizer.dart
+new file mode 100644
+index 0000000..bfad097
+--- /dev/null
++++ b/lib/src/security/terminal_sanitizer.dart
+@@ -0,0 +1,217 @@
++import 'package:characters/characters.dart';
++
++/// Sanitizes untrusted text before it reaches Cinder's terminal cell buffer.
++///
++/// The sanitizer neutralizes terminal control characters and Unicode controls
++/// that can alter cursor position, colors, clipboard state, terminal title,
++/// screen buffers, image protocols, or the visual order of trusted UI text.
++final class TerminalTextSanitizer {
++  const TerminalTextSanitizer._();
++
++  static const Map<int, String> _namedUnicodeControls = <int, String>{
++    0x00AD: 'SHY',
++    0x034F: 'CGJ',
++    0x061C: 'ALM',
++    0x180E: 'MVS',
++    0x200B: 'ZWSP',
++    0x200E: 'LRM',
++    0x200F: 'RLM',
++    0x202A: 'LRE',
++    0x202B: 'RLE',
++    0x202C: 'PDF',
++    0x202D: 'LRO',
++    0x202E: 'RLO',
++    0x2060: 'WJ',
++    0x2061: 'F(A)',
++    0x2062: 'INVISIBLE_TIMES',
++    0x2063: 'INVISIBLE_SEPARATOR',
++    0x2064: 'INVISIBLE_PLUS',
++    0x2066: 'LRI',
++    0x2067: 'RLI',
++    0x2068: 'FSI',
++    0x2069: 'PDI',
++    0x206A: 'ISS',
++    0x206B: 'ASS',
++    0x206C: 'IAFS',
++    0x206D: 'AAFS',
++    0x206E: 'NADS',
++    0x206F: 'NODS',
++    0xFEFF: 'BOM',
++    0xFFF9: 'IAA',
++    0xFFFA: 'IAS',
++    0xFFFB: 'IAT',
++  };
++
++  /// Returns true when [input] can be placed in a terminal cell buffer without
++  /// creating terminal commands or visually reordering trusted UI text.
++  static bool isDisplaySafe(String input) {
++    for (var index = 0; index < input.length; index++) {
++      final codeUnit = input.codeUnitAt(index);
++      if (_isUnsafeCodeUnit(codeUnit)) return false;
++      if (_isHighSurrogate(codeUnit)) {
++        if (index + 1 >= input.length ||
++            !_isLowSurrogate(input.codeUnitAt(index + 1))) {
++          return false;
++        }
++        final scalar = _surrogateScalar(codeUnit, input.codeUnitAt(index + 1));
++        if (_supplementaryControlName(scalar) != null) return false;
++        index++;
++      } else if (_isLowSurrogate(codeUnit)) {
++        return false;
++      }
++    }
++    return true;
++  }
++
++  /// Sanitizes [input] into display-only text.
++  ///
++  /// Newlines are preserved, tabs become spaces, CRLF is normalized, C0
++  /// controls become Unicode control pictures, C1 controls and dangerous
++  /// zero-width/bidirectional controls become visible labels.
++  static String sanitize(String input, {int tabWidth = 4}) {
++    if (input.isEmpty || isDisplaySafe(input)) return input;
++    if (tabWidth < 0) {
++      throw ArgumentError.value(tabWidth, 'tabWidth', 'must be non-negative');
++    }
++
++    final output = StringBuffer();
++    for (var index = 0; index < input.length; index++) {
++      final codeUnit = input.codeUnitAt(index);
++
++      if (_isHighSurrogate(codeUnit)) {
++        if (index + 1 < input.length &&
++            _isLowSurrogate(input.codeUnitAt(index + 1))) {
++          final low = input.codeUnitAt(index + 1);
++          final scalar = _surrogateScalar(codeUnit, low);
++          final controlName = _supplementaryControlName(scalar);
++          if (controlName != null) {
++            output.write('⟦$controlName⟧');
++            index++;
++          } else {
++            output
++              ..writeCharCode(codeUnit)
++              ..writeCharCode(low);
++            index++;
++          }
++        } else {
++          output.write('�');
++        }
++        continue;
++      }
++      if (_isLowSurrogate(codeUnit)) {
++        output.write('�');
++        continue;
++      }
++
++      if (codeUnit == 0x0D) {
++        if (index + 1 < input.length && input.codeUnitAt(index + 1) == 0x0A) {
++          output.write('\n');
++          index++;
++        } else {
++          output.write('␍');
++        }
++        continue;
++      }
++
++      if (codeUnit == 0x0A) {
++        output.write('\n');
++        continue;
++      }
++
++      if (codeUnit == 0x09) {
++        output.write(' ' * tabWidth);
++        continue;
++      }
++
++      if (codeUnit >= 0x00 && codeUnit <= 0x1F) {
++        output.writeCharCode(0x2400 + codeUnit);
++        continue;
++      }
++
++      if (codeUnit == 0x7F) {
++        output.write('␡');
++        continue;
++      }
++
++      if (codeUnit >= 0x80 && codeUnit <= 0x9F) {
++        output.write(
++            '⟦U+${codeUnit.toRadixString(16).toUpperCase().padLeft(4, '0')}⟧');
++        continue;
++      }
++
++      final namedControl = _namedUnicodeControls[codeUnit];
++      if (namedControl != null) {
++        output.write('⟦$namedControl⟧');
++        continue;
++      }
++
++      if (codeUnit == 0x2028 || codeUnit == 0x2029) {
++        output.write('\n');
++        continue;
++      }
++
++      output.writeCharCode(codeUnit);
++    }
++
++    return output.toString();
++  }
++
++  /// Converts arbitrary content into exactly one display-safe grapheme.
++  ///
++  /// This is the final defense for low-level cell writers. High-level text APIs
++  /// should use [sanitize] so the complete escaped evidence remains visible.
++  static String sanitizeCell(String input) {
++    if (input.isEmpty) return ' ';
++    final sanitized = sanitize(input);
++    final graphemes = sanitized.characters;
++    if (graphemes.length != 1) return '�';
++    final grapheme = graphemes.first;
++    return isDisplaySafe(grapheme) ? grapheme : '�';
++  }
++
++  /// Validates framework-generated display text.
++  ///
++  /// Trusted text is not a path for raw ANSI. Framework terminal commands must
++  /// be emitted by the backend encoder, never stored in terminal cells.
++  static String requireDisplaySafe(String input) {
++    if (!isDisplaySafe(input)) {
++      throw ArgumentError.value(
++        input,
++        'input',
++        'Trusted terminal text contains control or bidi characters. '
++            'Use TerminalText.safe for untrusted content and EscapeCodes/backend '
++            'APIs for framework terminal commands.',
++      );
++    }
++    return input;
++  }
++
++  static int _surrogateScalar(int high, int low) =>
++      0x10000 + ((high - 0xD800) << 10) + (low - 0xDC00);
++
++  static String? _supplementaryControlName(int scalar) {
++    if (scalar >= 0x1BCA0 && scalar <= 0x1BCAF) {
++      return 'SHORTHAND_FORMAT_U+${scalar.toRadixString(16).toUpperCase()}';
++    }
++    if (scalar >= 0x13430 && scalar <= 0x1343F) {
++      return 'HIEROGLYPH_FORMAT_U+${scalar.toRadixString(16).toUpperCase()}';
++    }
++    return null;
++  }
++
++  static bool _isHighSurrogate(int codeUnit) =>
++      codeUnit >= 0xD800 && codeUnit <= 0xDBFF;
++
++  static bool _isLowSurrogate(int codeUnit) =>
++      codeUnit >= 0xDC00 && codeUnit <= 0xDFFF;
++
++  static bool _isUnsafeCodeUnit(int codeUnit) {
++    if (codeUnit == 0x0A) return false;
++    if (codeUnit == 0x09) return true;
++    if (codeUnit == 0x0D) return true;
++    if (codeUnit <= 0x1F || codeUnit == 0x7F) return true;
++    if (codeUnit >= 0x80 && codeUnit <= 0x9F) return true;
++    if (_namedUnicodeControls.containsKey(codeUnit)) return true;
++    return codeUnit == 0x2028 || codeUnit == 0x2029;
++  }
++}
+diff --git a/lib/src/security/terminal_text.dart b/lib/src/security/terminal_text.dart
+new file mode 100644
+index 0000000..1875306
+--- /dev/null
++++ b/lib/src/security/terminal_text.dart
+@@ -0,0 +1,57 @@
++import 'package:cinder/cinder.dart' hide TextAlign;
++
++import '../components/render_text.dart' show TextAlign, TextOverflow;
++
++/// A text widget with an explicit terminal trust boundary.
++///
++/// Use [TerminalText.safe] for LLM, shell, Git, file, network, Markdown, log,
++/// and other untrusted output. Use [TerminalText.trusted] only for
++/// framework-generated display text that contains no terminal control bytes.
++class TerminalText extends StatelessWidget {
++
