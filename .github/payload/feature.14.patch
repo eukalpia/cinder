@@ -306,118 +306,118 @@
 +    return iterator.moveNext() ? iterator.current : null;
 +  }
 +}
-+diff --git a/lib/src/components/application/split_view.dart b/lib/src/components/application/split_view.dart
-+new file mode 100644
-+index 0000000..ebb4847
-+--- /dev/null
-++++ b/lib/src/components/application/split_view.dart
-+@@ -0,0 +1,285 @@
-++import 'dart:math' as math;
-++
-++import 'package:cinder/cinder.dart';
-++
-++/// Controls the divider position of a [SplitView].
-++class SplitViewController extends ChangeNotifier {
-++  SplitViewController({
-++    double ratio = 0.5,
-++    this.minRatio = 0.05,
-++    this.maxRatio = 0.95,
-++  })  : assert(minRatio >= 0 && minRatio < maxRatio),
-++        assert(maxRatio <= 1),
-++        _ratio = ratio.clamp(minRatio, maxRatio);
-++
-++  final double minRatio;
-++  final double maxRatio;
-++  double _ratio;
-++
-++  double get ratio => _ratio;
-++
-++  set ratio(double value) {
-++    final next = value.clamp(minRatio, maxRatio);
-++    if (_ratio == next) return;
-++    _ratio = next;
-++    notifyListeners();
-++  }
-++
-++  void nudge(double delta) => ratio = _ratio + delta;
-++  void reset([double value = 0.5]) => ratio = value;
-++}
-++
-++/// A two-pane layout with keyboard and mouse-resizable divider.
-++class SplitView extends StatefulWidget {
-++  const SplitView({
-++    super.key,
-++    required this.first,
-++    required this.second,
-++    this.axis = Axis.horizontal,
-++    this.controller,
-++    this.initialRatio = 0.5,
-++    this.dividerExtent = 1.0,
-++    this.minFirstExtent = 1.0,
-++    this.minSecondExtent = 1.0,
-++    this.dividerColor,
-++    this.dividerCharacter,
-++    this.autofocus = false,
-++    this.keyboardStep = 0.05,
-++    this.onChanged,
-++  })  : assert(initialRatio > 0 && initialRatio < 1),
-++        assert(dividerExtent >= 1),
-++        assert(minFirstExtent >= 0),
-++        assert(minSecondExtent >= 0),
-++        assert(keyboardStep > 0);
-++
-++  final Widget first;
-++  final Widget second;
-++  final Axis axis;
-++  final SplitViewController? controller;
-++  final double initialRatio;
-++  final double dividerExtent;
-++  final double minFirstExtent;
-++  final double minSecondExtent;
-++  final Color? dividerColor;
-++  final String? dividerCharacter;
-++  final bool autofocus;
-++  final double keyboardStep;
-++  final ValueChanged<double>? onChanged;
-++
-++  @override
-++  State<SplitView> createState() => _SplitViewState();
-++}
-++
-++class _SplitViewState extends State<SplitView> {
-++  SplitViewController? _ownedController;
-++  late SplitViewController _controller;
-++  double _availableExtent = 0;
-++  double? _lastDragCoordinate;
-++
-++  @override
-++  void initState() {
-++    super.initState();
-++    _attachController();
-++  }
-++
-++  void _attachController() {
-++    _ownedController = widget.controller == null
-++        ? SplitViewController(ratio: widget.initialRatio)
-++        : null;
-++    _controller = widget.controller ?? _ownedController!;
-++    _controller.addListener(_handleControllerChanged);
-++  }
-++
-++  void _detachController() {
-++    _controller.removeListener(_handleControllerChanged);
-++    _ownedController?.dispose();
-++    _ownedController = null;
-++  }
-++
-++  @override
-++  void didUpdateWidget(SplitView oldWidget) {
-++    super.didUpdateWidget(oldWidget);
-++    if (!identical(widget.controller, oldWidget.controller)) {
-++      _detachController();
-++      _attachController();
-++    }
-++  }
-++
-++  void _handleControllerChanged() {
-++    widget.on
+diff --git a/lib/src/components/application/split_view.dart b/lib/src/components/application/split_view.dart
+new file mode 100644
+index 0000000..ebb4847
+--- /dev/null
++++ b/lib/src/components/application/split_view.dart
+@@ -0,0 +1,285 @@
++import 'dart:math' as math;
++
++import 'package:cinder/cinder.dart';
++
++/// Controls the divider position of a [SplitView].
++class SplitViewController extends ChangeNotifier {
++  SplitViewController({
++    double ratio = 0.5,
++    this.minRatio = 0.05,
++    this.maxRatio = 0.95,
++  })  : assert(minRatio >= 0 && minRatio < maxRatio),
++        assert(maxRatio <= 1),
++        _ratio = ratio.clamp(minRatio, maxRatio);
++
++  final double minRatio;
++  final double maxRatio;
++  double _ratio;
++
++  double get ratio => _ratio;
++
++  set ratio(double value) {
++    final next = value.clamp(minRatio, maxRatio);
++    if (_ratio == next) return;
++    _ratio = next;
++    notifyListeners();
++  }
++
++  void nudge(double delta) => ratio = _ratio + delta;
++  void reset([double value = 0.5]) => ratio = value;
++}
++
++/// A two-pane layout with keyboard and mouse-resizable divider.
++class SplitView extends StatefulWidget {
++  const SplitView({
++    super.key,
++    required this.first,
++    required this.second,
++    this.axis = Axis.horizontal,
++    this.controller,
++    this.initialRatio = 0.5,
++    this.dividerExtent = 1.0,
++    this.minFirstExtent = 1.0,
++    this.minSecondExtent = 1.0,
++    this.dividerColor,
++    this.dividerCharacter,
++    this.autofocus = false,
++    this.keyboardStep = 0.05,
++    this.onChanged,
++  })  : assert(initialRatio > 0 && initialRatio < 1),
++        assert(dividerExtent >= 1),
++        assert(minFirstExtent >= 0),
++        assert(minSecondExtent >= 0),
++        assert(keyboardStep > 0);
++
++  final Widget first;
++  final Widget second;
++  final Axis axis;
++  final SplitViewController? controller;
++  final double initialRatio;
++  final double dividerExtent;
++  final double minFirstExtent;
++  final double minSecondExtent;
++  final Color? dividerColor;
++  final String? dividerCharacter;
++  final bool autofocus;
++  final double keyboardStep;
++  final ValueChanged<double>? onChanged;
++
++  @override
++  State<SplitView> createState() => _SplitViewState();
++}
++
++class _SplitViewState extends State<SplitView> {
++  SplitViewController? _ownedController;
++  late SplitViewController _controller;
++  double _availableExtent = 0;
++  double? _lastDragCoordinate;
++
++  @override
++  void initState() {
++    super.initState();
++    _attachController();
++  }
++
++  void _attachController() {
++    _ownedController = widget.controller == null
++        ? SplitViewController(ratio: widget.initialRatio)
++        : null;
++    _controller = widget.controller ?? _ownedController!;
++    _controller.addListener(_handleControllerChanged);
++  }
++
++  void _detachController() {
++    _controller.removeListener(_handleControllerChanged);
++    _ownedController?.dispose();
++    _ownedController = null;
++  }
++
++  @override
++  void didUpdateWidget(SplitView oldWidget) {
++    super.didUpdateWidget(oldWidget);
++    if (!identical(widget.controller, oldWidget.controller)) {
++      _detachController();
++      _attachController();
++    }
++  }
++
++  void _handleControllerChanged() {
++    widget.on
