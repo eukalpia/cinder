@@ -37,3 +37,5 @@ jobs:
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git commit -m "feat: add safe terminal output and application widgets"
           git push origin HEAD:feat/safe-terminal-and-app-widgets
+
+# Triggered after workflow registration.
