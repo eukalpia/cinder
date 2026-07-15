@@ -7,6 +7,12 @@ on:
     paths:
       - '.github/workflows/apply-feature.yml'
       - '.github/payload/**'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/apply-feature.yml'
+      - '.github/payload/**'
   workflow_dispatch:
 
 permissions:
