@@ -1,0 +1,402 @@
+              ),
++              ),
++            ),
++          );
++
++          expect(form.fieldCount, 1);
++          expect(form.validate(), isFalse);
++          await tester.sendKey(LogicalKey.space);
++          expect(form.validate(), isTrue);
++          expect(form.value<bool>('accepted'), isTrue);
++        },
++        size: const Size(50, 8),
++      );
++      form.dispose();
++    });
++
++    test('Autocomplete selects a keyboard suggestion', () async {
++      String? selected;
++      await testCinder(
++        'autocomplete keyboard selection',
++        (tester) async {
++          await tester.pumpWidget(
++            Autocomplete<String>(
++              autofocus: true,
++              options: const ['alpha', 'beta'],
++              onSelected: (value) => selected = value,
++            ),
++          );
++          await tester.enterText('be');
++          await tester.sendEnter();
++          expect(selected, 'beta');
++        },
++        size: const Size(50, 10),
++      );
++    });
++
++    test('KeyRecorder captures a chord', () async {
++      KeyChord? chord;
++      await testCinder(
++        'key recorder',
++        (tester) async {
++          await tester.pumpWidget(
++            KeyRecorder(
++              autofocus: true,
++              value: null,
++              onChanged: (value) => chord = value,
++            ),
++          );
++          await tester.sendEnter();
++          await tester.sendKeyEvent(
++            const KeyboardEvent(
++              logicalKey: LogicalKey.keyS,
++              modifiers: ModifierKeys(ctrl: true, shift: true),
++            ),
++          );
++          expect(chord?.label, 'Ctrl+Shift+S');
++        },
++        size: const Size(40, 6),
++      );
++    });
++  });
++}
+diff --git a/test/security/terminal_protocol_security_test.dart b/test/security/terminal_protocol_security_test.dart
+new file mode 100644
+index 0000000..6a661fa
+--- /dev/null
++++ b/test/security/terminal_protocol_security_test.dart
+@@ -0,0 +1,170 @@
++import 'dart:async';
++import 'dart:typed_data';
++
++import 'package:cinder/cinder.dart';
++import 'package:cinder/src/image/iterm2_encoder.dart';
++import 'package:cinder/src/image/kitty_encoder.dart';
++import 'package:cinder/src/image/sixel_encoder.dart';
++import 'package:test/test.dart';
++
++void main() {
++  group('terminal metadata', () {
++    test('title and icon payloads cannot terminate their OSC sequence', () {
++      final backend = _RecordingBackend();
++      final terminal = Terminal(backend, size: const Size(80, 24));
++
++      terminal.setWindowTitle('safe\x07\x1b]52;c;attack\x07\nnext');
++      terminal.setIconName('icon\x1b[2J');
++      terminal.setTitleAndIcon('both\u202Etxt');
++      terminal.flush();
++
++      final output = backend.output.toString();
++      expect(_count(output, '\x1b]2;'), 1);
++      expect(_count(output, '\x1b]1;'), 1);
++      expect(_count(output, '\x1b]0;'), 1);
++      expect(output, contains('safe␇␛]52;c;attack␇ next'));
++      expect(output, contains('icon␛[2J'));
++      expect(output, contains('both⟦RLO⟧txt'));
++      // Only Cinder's three OSC terminators remain executable.
++      expect(_count(output, '\x07'), 3);
++    });
++  });
++
++  group('terminal image payload validation', () {
++    test('accepts payloads produced by first-party encoders', () {
++      final bytes = Uint8List.fromList(<int>[1, 2, 3, 4]);
++      final kitty = KittyEncoder.encodePng(
++        imageBytes: bytes,
++        displayColumns: 2,
++        displayRows: 1,
++      );
++      final iterm = ITerm2Encoder.encode(
++        imageBytes: bytes,
++        width: '2',
++        height: '1',
++      );
++      final sixel = SixelEncoder.encode(
++        pixels: Uint8List.fromList(<int>[255, 0, 0, 255]),
++        width: 1,
++        height: 1,
++        palette: const <Color>[Color.fromRGB(255, 0, 0)],
++        indexedPixels: Uint8List.fromList(<int>[0]),
++      );
++
++      expect(
++        TerminalImagePayloadValidator.isValid(kitty, ImageProtocol.kitty),
++        isTrue,
++      );
++      expect(
++        TerminalImagePayloadValidator.isValid(iterm, ImageProtocol.iterm2),
++        isTrue,
++      );
++      expect(
++        TerminalImagePayloadValidator.isValid(sixel, ImageProtocol.sixel),
++        isTrue,
++      );
++    });
++
++    test('rejects appended commands and protocol confusion', () {
++      final kitty = KittyEncoder.encodePng(
++        imageBytes: Uint8List.fromList(<int>[1, 2, 3]),
++      );
++      expect(
++        TerminalImagePayloadValidator.isValid(
++          '$kitty\x1b[2J',
++          ImageProtocol.kitty,
++        ),
++        isFalse,
++      );
++      expect(
++        TerminalImagePayloadValidator.isValid(kitty, ImageProtocol.sixel),
++        isFalse,
++      );
++      expect(
++        TerminalImagePayloadValidator.isValid(
++          '\x1bPq~\x1b\\\x1b]52;c;AAAA\x07',
++          ImageProtocol.sixel,
++        ),
++        isFalse,
++      );
++    });
++
++    test('Terminal refuses unvalidated native image output', () {
++      final backend = _RecordingBackend();
++      final terminal = Terminal(backend, size: const Size(80, 24));
++      final valid = KittyEncoder.encodePng(
++        imageBytes: Uint8List.fromList(<int>[1, 2, 3]),
++      );
++
++      terminal.writeInlineImage(
++        valid,
++        2,
++        3,
++        protocol: ImageProtocol.kitty,
++      );
++      terminal.flush();
++      expect(backend.output.toString(), contains(valid));
++
++      expect(
++        () => terminal.writeInlineImage(
++          '$valid\x1b[?1049h',
++          0,
++          0,
++          protocol: ImageProtocol.kitty,
++        ),
++        throwsArgumentError,
++      );
++    });
++  });
++}
++
++int _count(String value, String pattern) {
++  var count = 0;
++  var offset = 0;
++  while (true) {
++    final next = value.indexOf(pattern, offset);
++    if (next < 0) return count;
++    count++;
++    offset = next + pattern.length;
++  }
++}
++
++class _RecordingBackend implements TerminalBackend {
++  final StringBuffer output = StringBuffer();
++
++  @override
++  void writeRaw(String data) => output.write(data);
++
++  @override
++  Size getSize() => const Size(80, 24);
++
++  @override
++  bool get supportsSize => true;
++
++  @override
++  Stream<List<int>>? get inputStream => null;
++
++  @override
++  Stream<Size>? get resizeStream => null;
++
++  @override
++  Stream<void>? get shutdownStream => null;
++
++  @override
++  void enableRawMode() {}
++
++  @override
++  void disableRawMode() {}
++
++  @override
++  bool get isAvailable => true;
++
++  @override
++  void requestExit([int exitCode = 0]) {}
++
++  @override
++  void notifySizeChanged(Size newSize) {}
++
++  @override
++  void dispose() {}
++}
+diff --git a/test/security/terminal_recovery_test.dart b/test/security/terminal_recovery_test.dart
+new file mode 100644
+index 0000000..3d2e2f2
+--- /dev/null
++++ b/test/security/terminal_recovery_test.dart
+@@ -0,0 +1,83 @@
++import 'dart:async';
++
++import 'package:cinder/cinder.dart';
++import 'package:test/test.dart';
++
++void main() {
++  test('shutdown restores terminal modes even when one write fails', () {
++    final backend = _RecoveryBackend();
++    final terminal = Terminal(backend, size: const Size(80, 24));
++    terminal.enterAlternateScreen();
++    terminal.flush();
++    backend.clear();
++
++    final binding = TerminalBinding(terminal);
++    backend.failNextWrite = true;
++    binding.shutdown();
++
++    final output = backend.output.toString();
++    // The first recovery write deliberately failed; later cleanup still ran.
++    expect(output, contains(EscapeCodes.resetScrollRegion));
++    expect(output, contains(TextStyle.reset));
++    expect(output, contains(EscapeCodes.disable.motionTracking));
++    expect(output, contains(EscapeCodes.disable.sgrMouseMode));
++    expect(output, contains(EscapeCodes.disable.bracketedPasteMode));
++    expect(output, contains(EscapeCodes.disable.kittyKeyboard));
++    expect(output, contains(EscapeCodes.disable.modifyOtherKeys));
++    expect(output, contains(EscapeCodes.showCursor));
++    expect(output, contains(EscapeCodes.mainBuffer));
++    expect(backend.rawModeDisabled, isTrue);
++
++    CinderBinding.resetInstance();
++  });
++}
++
++class _RecoveryBackend implements TerminalBackend {
++  final StringBuffer output = StringBuffer();
++  bool failNextWrite = false;
++  bool rawModeDisabled = false;
++
++  void clear() => output.clear();
++
++  @override
++  void writeRaw(String data) {
++    if (failNextWrite) {
++      failNextWrite = false;
++      throw StateError('injected terminal write failure');
++    }
++    output.write(data);
++  }
++
++  @override
++  Size getSize() => const Size(80, 24);
++
++  @override
++  bool get supportsSize => true;
++
++  @override
++  Stream<List<int>>? get inputStream => null;
++
++  @override
++  Stream<Size>? get resizeStream => null;
++
++  @override
++  Stream<void>? get shutdownStream => null;
++
++  @override
++  void enableRawMode() {}
++
++  @override
++  void disableRawMode() => rawModeDisabled = true;
++
++  @override
++  bool get isAvailable => true;
++
++  @override
++  void requestExit([int exitCode = 0]) {}
++
++  @override
++  void notifySizeChanged(Size newSize) {}
++
++  @override
++  void dispose() {}
++}
+diff --git a/test/security/terminal_sanitizer_test.dart b/test/security/terminal_sanitizer_test.dart
+new file mode 100644
+index 0000000..03729fa
+--- /dev/null
++++ b/test/security/terminal_sanitizer_test.dart
+@@ -0,0 +1,153 @@
++import 'dart:math';
++
++import 'package:cinder/cinder.dart';
++import 'package:cinder/src/rendering/frame_diff.dart';
++import 'package:test/test.dart';
++
++void main() {
++  group('TerminalTextSanitizer', () {
++    test('neutralizes ANSI, OSC, DCS, and alternate-screen injection', () {
++      final input = <String>[
++        '\x1b[31mred\x1b[0m',
++        '\x1b]52;c;YXR0YWNr\x07',
++        '\x1b]8;;https://evil.example\x07click\x1b]8;;\x07',
++        '\x1b]0;fake title\x07',
++        '\x1b[8;200;300t',
++        '\x1b[2J\x1b[Hfake approval',
++        '\x1b[?1049h',
++        '\x1b_Gf=100;AAAA\x1b\\',
++        '\x1bPq"1;1;1;1#0;2;0;0;0~\x1b\\',
++      ].join('\n');
++
++      final output = TerminalTextSanitizer.sanitize(input);
++
++      expect(output.contains('\x1b'), isFalse);
++      expect(output, contains('␛[31mred␛[0m'));
++      expect(output, contains('␛]52'));
++      expect(output, contains('fake approval'));
++    });
++
++    test('normalizes controls while preserving Unicode graphemes', () {
++      const input = 'A\r\nB\tC\u0000👨‍👩‍👧‍👦界';
++      final output = TerminalTextSanitizer.sanitize(input, tabWidth: 2);
++
++      expect(output, 'A\nB  C␀👨‍👩‍👧‍👦界');
++    });
++
++    test('makes bidi overrides and hidden separators visible', () {
++      const input = 'safe\u202Eexe.txt\u202C\u200Bend';
++      expect(
++        TerminalTextSanitizer.sanitize(input),
++        'safe⟦RLO⟧exe.txt⟦PDF⟧⟦ZWSP⟧end',
++      );
++    });
++
++    test('neutralizes additional invisible format controls', () {
++      final shorthand = String.fromCharCode(0x1BCA0);
++      const input = 'a\u00ADb\u034Fc\u180Ed\u206Ae\uFFF9f';
++      expect(
++        TerminalTextSanitizer.sanitize('$input$shorthand'),
++        contains('a⟦SHY⟧b⟦CGJ⟧c⟦MVS⟧d⟦ISS⟧e⟦IAA⟧f'
++            '⟦SHORTHAND_FORMAT_U+1BCA0⟧'),
++      );
++    });
++
++    test('rejects malformed UTF-16 and preserves valid surrogate pairs', () {
++      final malformed = String.fromCharCodes([0xD800, 0x61, 0xDC00]);
++      expect(TerminalTextSanitizer.isDisplaySafe(malformed), isFalse);
++      expect(TerminalTextSanitizer.sanitize(malformed), '�a�');
++      expect(TerminalTextSanitizer.sanitize('😀'), '😀');
++    });
++
++    test('cell sanitizer never permits multi-cell control payloads', () {
++      expect(TerminalTextSanitizer.sanitizeCell('A'), 'A');
++      expect(TerminalTextSanitizer.sanitizeCell('👨‍👩‍👧‍👦'), '👨‍👩‍👧‍👦');
++      expect(TerminalTextSanitizer.sanitizeCell('abc'), '�');
++      expect(TerminalTextSanitizer.sanitizeCell('\x1b[2J'), '�');
++    });
++
++    t
