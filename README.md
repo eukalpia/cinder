@@ -15,7 +15,7 @@ integrations — without bringing Flutter or Node.js into your CLI runtime.
 [![Dart](https://img.shields.io/badge/Dart-%3E%3D3.5-0175C2?logo=dart)](https://dart.dev)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-[Quick start](#quick-start) · [Icons](#material-and-lucide-icons) · [Images](#terminal-images) · [Focus](#focus-and-keyboard-input) · [State management](#state-management) · [Testing](#testing) · [Architecture](#architecture)
+[Quick start](#quick-start) · [Application widgets](#application-widgets) · [Safe output](#safe-terminal-output) · [Icons](#material-and-lucide-icons) · [Images](#terminal-images) · [Testing](#testing) · [Architecture](#architecture)
 
 </div>
 
@@ -62,6 +62,8 @@ The current development line is **Cinder 1.0**.
 | Riverpod 3 integration | Available |
 | BLoC integration | Available |
 | Widget testing utilities | Available |
+| Safe terminal text, metadata, and image-protocol boundaries | Available |
+| IDE/AI application widget kit | Available |
 | Renderer V2 reusable dirty-span pipeline | Available |
 | Repaint boundaries and cached layers | Available |
 | Hardware terminal scroll regions | Available with safe fallback |
@@ -144,6 +146,39 @@ Run the application:
 ```bash
 dart run bin/main.dart
 ```
+
+## Application widgets
+
+Cinder includes a first-party application layer for IDEs, AI agents, Git clients,
+and dashboards. The primary building blocks are:
+
+- `VirtualListView` for large transcripts, logs, trees, and tables;
+- `SplitView` / `ResizablePane` for editor-style workspaces;
+- `TreeView` for projects, tasks, and structured data;
+- `DiffView` for unified and side-by-side review;
+- `CommandPalette` for fuzzy keyboard-first actions.
+
+The package also exports tabs, dialogs, drawers, menus, notifications, data grids,
+property inspectors, timelines, chat/tool/approval widgets, code and terminal
+views, forms, autocomplete, selection controls, key recording, and shortcut
+editing. See [`doc/application-widgets.md`](doc/application-widgets.md) for the
+complete catalog and usage examples.
+
+## Safe terminal output
+
+Untrusted strings from LLMs, shells, Git, files, Markdown, logs, plugins, and
+servers are inert display data:
+
+```dart
+TerminalText.safe(modelOutput)
+TerminalText.trusted(frameworkGeneratedLabel)
+```
+
+Cinder neutralizes C0/C1/ANSI/OSC/DCS/APC controls and dangerous bidi/invisible
+format controls before layout, then enforces the boundary again at cells and
+terminal diff encoding. Window-title metadata is sanitized, native Kitty/iTerm2/
+Sixel payloads are protocol-validated, and shutdown restores terminal modes even
+when an output operation fails. See [`doc/security.md`](doc/security.md).
 
 ## Material and Lucide icons
 

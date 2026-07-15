@@ -1,4 +1,5 @@
 import '../buffer.dart';
+import '../security/terminal_sanitizer.dart';
 import '../style.dart';
 
 /// Receives one cursor-positioned terminal output run.
@@ -67,13 +68,13 @@ FrameDiffStats emitFrameDiff({
     final start = currentDirty && previousDirty
         ? _min(current.dirtyStartForRow(y), previous.dirtyStartForRow(y))
         : currentDirty
-            ? current.dirtyStartForRow(y)
-            : previous.dirtyStartForRow(y);
+        ? current.dirtyStartForRow(y)
+        : previous.dirtyStartForRow(y);
     final end = currentDirty && previousDirty
         ? _max(current.dirtyEndForRow(y), previous.dirtyEndForRow(y))
         : currentDirty
-            ? current.dirtyEndForRow(y)
-            : previous.dirtyEndForRow(y);
+        ? current.dirtyEndForRow(y)
+        : previous.dirtyEndForRow(y);
 
     var scan = start;
     while (scan <= end) {
@@ -157,8 +158,9 @@ FrameDiffStats emitFrameDiff({
       continue;
     }
 
-    output.write(cell.char);
-    final width = cell.width > 1 ? cell.width : 1;
+    final safeChar = TerminalTextSanitizer.sanitizeCell(cell.char);
+    output.write(safeChar);
+    final width = safeChar == cell.char && cell.width > 1 ? cell.width : 1;
     writtenCells += width;
     x += width;
   }

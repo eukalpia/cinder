@@ -8,6 +8,7 @@ import '../buffer.dart';
 import '../image/image_cleanup.dart';
 import '../style.dart';
 import '../utils/unicode_width.dart';
+import '../security/terminal_sanitizer.dart';
 import 'framework.dart';
 
 /// Canvas for drawing to the terminal
@@ -63,6 +64,7 @@ class TerminalCanvas {
 
   /// Draw text at the given position
   void drawText(Offset position, String text, {TextStyle? style}) {
+    text = TerminalTextSanitizer.sanitize(text);
     final x = position.dx.round();
     final y = position.dy.round();
 

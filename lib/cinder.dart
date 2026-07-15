@@ -7,6 +7,9 @@ export 'src/backend/web_backend_export.dart';
 export 'src/buffer.dart';
 export 'src/style.dart';
 export 'src/shutdown.dart' show shutdownApp;
+export 'src/security/terminal_sanitizer.dart';
+export 'src/security/terminal_image_payload_validator.dart';
+export 'src/security/terminal_text.dart';
 export 'src/components/progress_bar.dart';
 export 'src/components/icon.dart';
 export 'src/components/repaint_boundary.dart';
@@ -57,6 +60,15 @@ export 'src/components/rich_text.dart';
 export 'src/framework/listenable.dart';
 export 'src/framework/value_listenable.dart';
 export 'src/components/value_listenable_builder.dart';
+export 'src/components/application/virtual_list_view.dart';
+export 'src/components/application/split_view.dart';
+export 'src/components/application/tree_view.dart';
+export 'src/components/application/diff_view.dart';
+export 'src/components/application/command_palette.dart';
+export 'src/components/application/navigation_widgets.dart';
+export 'src/components/application/data_widgets.dart';
+export 'src/components/application/developer_widgets.dart';
+export 'src/components/application/form_widgets.dart';
 // LayoutBuilder is exported via framework.dart (it's a part file)
 
 // Mouse and Gesture Support

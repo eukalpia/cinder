@@ -140,7 +140,8 @@ class TerminalBinding extends CinderBinding
     _statsStartTime = DateTime.now();
     _perfLogTimer = Timer.periodic(interval, (_) {
       final stats = getPerformanceStats();
-      final msg = 'PERF: fps=${stats['fps']!.toStringAsFixed(1)}, '
+      final msg =
+          'PERF: fps=${stats['fps']!.toStringAsFixed(1)}, '
           'builds=${stats['builds']!.toStringAsFixed(1)}/s, '
           'layouts=${stats['layouts']!.toStringAsFixed(1)}/s, '
           'paints=${stats['paints']!.toStringAsFixed(1)}/s';
@@ -475,7 +476,8 @@ class TerminalBinding extends CinderBinding
       if (event is KeyboardInputEvent) {
         final keyEvent = event.event;
         // Check if this is a simple printable character (no modifiers except shift)
-        final isPrintable = keyEvent.character != null &&
+        final isPrintable =
+            keyEvent.character != null &&
             keyEvent.character!.isNotEmpty &&
             !keyEvent.isControlPressed &&
             !keyEvent.isAltPressed &&
@@ -548,19 +550,64 @@ class TerminalBinding extends CinderBinding
     }
   }
 
-  /// Perform immediate synchronous shutdown for signal handlers
+  void _bestEffortWriteRaw(String data) {
+    try {
+      terminal.backend.writeRaw(data);
+    } catch (_) {
+      // Recovery must continue even when one terminal write fails.
+    }
+  }
+
+  /// Restores every terminal mode that Cinder may have changed.
+  ///
+  /// Each operation is isolated so an unavailable/closed backend cannot prevent
+  /// later cleanup attempts. The method is intentionally idempotent.
+  void _recoverTerminalState() {
+    _bestEffortWriteRaw(EscapeCodes.endSynchronizedOutput);
+    _bestEffortWriteRaw(EscapeCodes.resetScrollRegion);
+    _bestEffortWriteRaw(TextStyle.reset);
+
+    for (final sequence in EscapeCodes.disable.values) {
+      _bestEffortWriteRaw(sequence);
+    }
+
+    try {
+      terminal.restoreColors();
+    } catch (_) {}
+    try {
+      terminal.showCursor();
+    } catch (_) {}
+    try {
+      terminal.leaveAlternateScreen();
+    } catch (_) {}
+
+    // Some terminals restore private modes while switching buffers. Disable
+    // them again after returning to the main screen.
+    for (final sequence in EscapeCodes.disable.values) {
+      _bestEffortWriteRaw(sequence);
+    }
+    _bestEffortWriteRaw(EscapeCodes.endSynchronizedOutput);
+    _bestEffortWriteRaw(EscapeCodes.resetScrollRegion);
+    _bestEffortWriteRaw(TextStyle.reset);
+
+    try {
+      terminal.flush();
+    } catch (_) {}
+    try {
+      terminal.backend.disableRawMode();
+    } catch (_) {}
+  }
+
+  /// Perform immediate synchronous shutdown for signal handlers.
   void _performImmediateShutdown() {
-    // Prevent multiple shutdowns
     if (_shouldExit) return;
     _shouldExit = true;
 
-    // Cancel all subscriptions immediately
     pendingFrameTimer?.cancel();
     _inputSubscription?.cancel();
     _resizeSubscription?.cancel();
     _shutdownSubscription?.cancel();
 
-    // Close all controllers
     try {
       _inputController.close();
     } catch (_) {}
@@ -576,45 +623,14 @@ class TerminalBinding extends CinderBinding
     try {
       _oscEventsController.close();
     } catch (_) {}
-
-    // Stop hot reload if it was initialized
     try {
       shutdownWithHotReload();
     } catch (_) {}
-
-    // Clear all images before leaving alternate screen
     try {
       ImageCleanupManager.instance.clearAllImages();
     } catch (_) {}
 
-    // Perform terminal cleanup synchronously
-    try {
-      // IMPORTANT: Disable mouse tracking BEFORE leaving alternate screen
-      terminal.backend.writeRaw('\x1B[?1003l'); // Disable all motion tracking
-      terminal.backend.writeRaw('\x1B[?1006l'); // Disable SGR mouse mode
-      terminal.backend.writeRaw('\x1B[?1002l'); // Disable button event tracking
-      terminal.backend.writeRaw('\x1B[?1000l'); // Disable basic mouse tracking
-      // Pop kitty keyboard mode and reset modifyOtherKeys
-      terminal.backend.writeRaw(EscapeCodes.disable.kittyKeyboard);
-      terminal.backend.writeRaw(EscapeCodes.disable.modifyOtherKeys);
-      terminal.restoreColors(); // Restore terminal colors
-      terminal.flush();
-
-      // Restore terminal
-      terminal.showCursor();
-      terminal.leaveAlternateScreen();
-      terminal.clear();
-    } catch (_) {
-      // Ignore any errors during cleanup
-    }
-
-    // Restore terminal mode in its own try-catch to ensure it runs
-    // even if writing escape codes above fails
-    try {
-      terminal.backend.disableRawMode();
-    } catch (_) {
-      // Ignore errors when running without a proper terminal
-    }
+    _recoverTerminalState();
   }
 
   /// Handle global debug key combinations.
@@ -852,18 +868,15 @@ class TerminalBinding extends CinderBinding
     await exitCompleter.future;
   }
 
-  /// Shutdown the terminal and cleanup
+  /// Shutdown the terminal and cleanup.
   void shutdown() {
-    // Prevent multiple shutdowns
     if (_shouldExit) return;
-
     _shouldExit = true;
+
+    pendingFrameTimer?.cancel();
     _inputSubscription?.cancel();
     _resizeSubscription?.cancel();
-
-    // Don't cancel shutdown subscription here - let it stay active
-    // so it can handle additional signals if needed
-    // _shutdownSubscription?.cancel();
+    _shutdownSubscription?.cancel();
 
     try {
       _inputController.close();
@@ -874,56 +887,25 @@ class TerminalBinding extends CinderBinding
     try {
       _mouseEventController.close();
     } catch (_) {}
-
-    // Wake up event loop one last time before closing
     if (!_eventLoopController.isClosed) {
-      _eventLoopController.add(null);
-      _eventLoopController.close();
+      try {
+        _eventLoopController.add(null);
+      } catch (_) {}
+      try {
+        _eventLoopController.close();
+      } catch (_) {}
     }
-
-    // Stop hot reload if it was initialized
-    shutdownWithHotReload();
-
-    // Try to cleanup terminal, but handle errors gracefully
     try {
-      // IMPORTANT: Disable mouse tracking and bracketed paste BEFORE leaving alternate screen
-      // This ensures the terminal properly processes the disable commands
-      terminal.backend.writeRaw(EscapeCodes.disable.motionTracking);
-      terminal.backend.writeRaw(EscapeCodes.disable.sgrMouseMode);
-      terminal.backend.writeRaw(EscapeCodes.disable.buttonEventTracking);
-      terminal.backend.writeRaw(EscapeCodes.disable.basicMouseTracking);
-      terminal.backend.writeRaw(EscapeCodes.disable.bracketedPasteMode);
-      // Pop kitty keyboard mode and reset modifyOtherKeys
-      terminal.backend.writeRaw(EscapeCodes.disable.kittyKeyboard);
-      terminal.backend.writeRaw(EscapeCodes.disable.modifyOtherKeys);
-
-      // Restore terminal (this includes leaving alternate screen)
-      terminal.showCursor();
-      terminal.leaveAlternateScreen();
-
-      // CRITICAL: Disable mouse tracking again after leaving alternate screen
-      // Some terminals restore previous state when switching buffers
-      terminal.backend.writeRaw(EscapeCodes.disable.motionTracking);
-      terminal.backend.writeRaw(EscapeCodes.disable.sgrMouseMode);
-      terminal.backend.writeRaw(EscapeCodes.disable.buttonEventTracking);
-      terminal.backend.writeRaw(EscapeCodes.disable.basicMouseTracking);
-
-      terminal.clear();
-
-      // Final flush to ensure all cleanup is complete
-      terminal.flush();
-    } catch (e) {
-      // If backend is already closed, we can't write to it
-      // This can happen during signal-based shutdown
-      // The important thing is we tried to cleanup
-    }
-
-    // Restore raw mode via backend
+      _oscEventsController.close();
+    } catch (_) {}
     try {
-      terminal.backend.disableRawMode();
-    } catch (e) {
-      // Ignore errors when running without a proper terminal
-    }
+      shutdownWithHotReload();
+    } catch (_) {}
+    try {
+      ImageCleanupManager.instance.clearAllImages();
+    } catch (_) {}
+
+    _recoverTerminalState();
   }
 
   @override
@@ -1021,8 +1003,7 @@ class TerminalBinding extends CinderBinding
         ancestor = ancestor.parent;
       }
       return true;
-    }).toList()
-      ..sort((a, b) => a.depth.compareTo(b.depth));
+    }).toList()..sort((a, b) => a.depth.compareTo(b.depth));
   }
 
   void _applyHardwareScrollRequests(buf.Buffer previous, int screenWidth) {
@@ -1043,9 +1024,11 @@ class TerminalBinding extends CinderBinding
 
       terminal.write(EscapeCodes.setScrollRegion(top, bottom));
       terminal.moveCursor(0, top);
-      terminal.write(lines > 0
-          ? EscapeCodes.scrollUp(lines)
-          : EscapeCodes.scrollDown(-lines));
+      terminal.write(
+        lines > 0
+            ? EscapeCodes.scrollUp(lines)
+            : EscapeCodes.scrollDown(-lines),
+      );
       terminal.write(EscapeCodes.resetScrollRegion);
       previous.scrollRegion(top, bottom, lines);
     }
@@ -1113,7 +1096,8 @@ class TerminalBinding extends CinderBinding
         }
 
         // Handle style
-        final hasStyle = cell.style.color != null ||
+        final hasStyle =
+            cell.style.color != null ||
             cell.style.backgroundColor != null ||
             cell.style.fontWeight == FontWeight.bold ||
             cell.style.fontWeight == FontWeight.dim ||
@@ -1129,13 +1113,13 @@ class TerminalBinding extends CinderBinding
             terminal.write(cell.style.toAnsi());
             currentStyle = cell.style;
           }
-          terminal.write(cell.char);
+          terminal.write(TerminalTextSanitizer.sanitizeCell(cell.char));
         } else {
           if (currentStyle != null) {
             terminal.write(TextStyle.reset);
             currentStyle = null;
           }
-          terminal.write(cell.char);
+          terminal.write(TerminalTextSanitizer.sanitizeCell(cell.char));
         }
       }
       if (y < buffer.height - 1) {
@@ -1233,7 +1217,12 @@ class TerminalBinding extends CinderBinding
     for (final image in buffer.pendingImages) {
       final alreadyVisible = _activeImages.any(image.samePlacement);
       if (force || !alreadyVisible) {
-        terminal.writeInlineImage(image.encodedData, image.x, image.y);
+        terminal.writeInlineImage(
+          image.encodedData,
+          image.x,
+          image.y,
+          protocol: image.protocol,
+        );
       }
     }
     _activeImages = List<buf.PendingImage>.unmodifiable(buffer.pendingImages);
@@ -1438,12 +1427,15 @@ class TerminalBinding extends CinderBinding
 
       final dirtyPaintNodes = pipelineOwner.takeNodesNeedingPaint();
       final boundaries = _topmostDirtyBoundaries(dirtyPaintNodes);
-      final canPartialPaint = _previousBuffer != null &&
+      final canPartialPaint =
+          _previousBuffer != null &&
           !layoutWasDirty &&
           dirtyPaintNodes.isNotEmpty &&
           boundaries.length == dirtyPaintNodes.toSet().length &&
-          boundaries.every((node) =>
-              node is RenderRepaintBoundary && node.lastPaintOffset != null);
+          boundaries.every(
+            (node) =>
+                node is RenderRepaintBoundary && node.lastPaintOffset != null,
+          );
 
       final buffer = canPartialPaint
           ? _preparePartialBuffer(width, height)
