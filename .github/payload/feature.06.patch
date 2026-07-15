@@ -1,0 +1,416 @@
+0, _messages.length - maxMessages);
++  }
++
++  @override
++  void dispose() {
++    _flushTimer?.cancel();
++    _pendingDeltas.clear();
++    super.dispose();
++  }
++}
++
++/// Virtualized, selectable chat transcript suitable for LLM applications.
++class ChatView extends StatefulWidget {
++  const ChatView({
++    super.key,
++    required this.controller,
++    this.followTail = true,
++    this.showTimestamps = true,
++    this.emptyMessage = 'Start a conversation',
++    this.messageBuilder,
++    this.onMessageSelected,
++  });
++
++  final ChatViewController controller;
++  final bool followTail;
++  final bool showTimestamps;
++  final String emptyMessage;
++  final Widget Function(BuildContext context, ChatMessage message, int index)?
++      messageBuilder;
++  final ValueChanged<ChatMessage>? onMessageSelected;
++
++  @override
++  State<ChatView> createState() => _ChatViewState();
++}
++
++class _ChatViewState extends State<ChatView> {
++  final ScrollController _scrollController = ScrollController();
++
++  @override
++  void initState() {
++    super.initState();
++    widget.controller.addListener(_changed);
++  }
++
++  @override
++  void didUpdateWidget(ChatView oldWidget) {
++    super.didUpdateWidget(oldWidget);
++    if (!identical(oldWidget.controller, widget.controller)) {
++      oldWidget.controller.removeListener(_changed);
++      widget.controller.addListener(_changed);
++    }
++  }
++
++  void _changed() {
++    if (widget.followTail && widget.controller.messages.isNotEmpty) {
++      _scrollController.ensureIndexVisible(
++        index: widget.controller.messages.length - 1,
++      );
++    }
++    if (mounted) setState(() {});
++  }
++
++  String _roleLabel(ChatRole role) {
++    switch (role) {
++      case ChatRole.user:
++        return 'You';
++      case ChatRole.assistant:
++        return 'Assistant';
++      case ChatRole.system:
++        return 'System';
++      case ChatRole.tool:
++        return 'Tool';
++    }
++  }
++
++  Color _roleColor(ChatRole role) {
++    switch (role) {
++      case ChatRole.user:
++        return Colors.blue;
++      case ChatRole.assistant:
++        return Colors.cyan;
++      case ChatRole.system:
++        return Colors.yellow;
++      case ChatRole.tool:
++        return Colors.green;
++    }
++  }
++
++  Widget _defaultMessage(BuildContext context, ChatMessage message) {
++    return RepaintBoundary(
++      child: GestureDetector(
++        behavior: HitTestBehavior.opaque,
++        onTap: widget.onMessageSelected == null
++            ? null
++            : () => widget.onMessageSelected!(message),
++        child: Container(
++          margin: const EdgeInsets.only(bottom: 1),
++          decoration: BoxDecoration(
++            color: const Color.fromRGB(22, 25, 34),
++            border: BoxBorder.all(color: _roleColor(message.role)),
++            title: BorderTitle(
++              text:
++                  ' ${TerminalTextSanitizer.sanitize(message.title ?? _roleLabel(message.role))} ',
++            ),
++          ),
++          padding: const EdgeInsets.all(1),
++          child: Column(
++            crossAxisAlignment: CrossAxisAlignment.stretch,
++            children: [
++              SelectionArea(
++                child: StreamingMessage(
++                  data: message.content,
++                  streaming: message.streaming,
++                ),
++              ),
++              if (widget.showTimestamps && message.timestamp != null)
++                Align(
++                  alignment: Alignment.bottomRight,
++                  child: TerminalText.safe(
++                    message.timestamp!.toIso8601String(),
++                    style: const TextStyle(color: Colors.grey),
++                    softWrap: false,
++                  ),
++                ),
++            ],
++          ),
++        ),
++      ),
++    );
++  }
++
++  @override
++  Widget build(BuildContext context) {
++    final messages = widget.controller.messages;
++    if (messages.isEmpty) {
++      return Center(child: TerminalText.safe(widget.emptyMessage));
++    }
++    return VirtualListView.builder(
++      controller: _scrollController,
++      itemCount: messages.length,
++      cacheExtent: 6,
++      itemBuilder: (context, index) {
++        final message = messages[index];
++        return widget.messageBuilder?.call(context, message, index) ??
++            _defaultMessage(context, message);
++      },
++    );
++  }
++
++  @override
++  void dispose() {
++    widget.controller.removeListener(_changed);
++    _scrollController.dispose();
++    super.dispose();
++  }
++}
++
++/// A repaint-isolated Markdown message with an optional streaming cursor.
++class StreamingMessage extends StatelessWidget {
++  const StreamingMessage({
++    super.key,
++    required this.data,
++    this.streaming = false,
++    this.cursor = '▋',
++    this.styleSheet,
++  });
++
++  final String data;
++  final bool streaming;
++  final String cursor;
++  final MarkdownStyleSheet? styleSheet;
++
++  @override
++  Widget build(BuildContext context) {
++    return RepaintBoundary(
++      child: Column(
++        crossAxisAlignment: CrossAxisAlignment.stretch,
++        children: [
++          MarkdownText(data, styleSheet: styleSheet),
++          if (streaming)
++            Text(cursor, style: const TextStyle(color: Colors.cyan)),
++        ],
++      ),
++    );
++  }
++}
++
++enum ToolCallStatus { queued, running, succeeded, failed, cancelled }
++
++/// Collapsible presentation for an agent tool call.
++class ToolCallCard extends StatefulWidget {
++  const ToolCallCard({
++    super.key,
++    required this.toolName,
++    required this.status,
++    this.input,
++    this.output,
++    this.error,
++    this.initiallyExpanded = false,
++    this.onCancel,
++  });
++
++  final String toolName;
++  final ToolCallStatus status;
++  final String? input;
++  final String? output;
++  final String? error;
++  final bool initiallyExpanded;
++  final VoidCallback? onCancel;
++
++  @override
++  State<ToolCallCard> createState() => _ToolCallCardState();
++}
++
++class _ToolCallCardState extends State<ToolCallCard> {
++  late bool _expanded = widget.initiallyExpanded;
++
++  String _marker() {
++    switch (widget.status) {
++      case ToolCallStatus.queued:
++        return '○';
++      case ToolCallStatus.running:
++        return '◐';
++      case ToolCallStatus.succeeded:
++        return '✓';
++      case ToolCallStatus.failed:
++        return '✗';
++      case ToolCallStatus.cancelled:
++        return '■';
++    }
++  }
++
++  Color _color() {
++    switch (widget.status) {
++      case ToolCallStatus.queued:
++        return Colors.grey;
++      case ToolCallStatus.running:
++        return Colors.cyan;
++      case ToolCallStatus.succeeded:
++        return Colors.green;
++      case ToolCallStatus.failed:
++        return Colors.red;
++      case ToolCallStatus.cancelled:
++        return Colors.yellow;
++    }
++  }
++
++  @override
++  Widget build(BuildContext context) {
++    return Container(
++      decoration: BoxDecoration(
++        color: const Color.fromRGB(20, 23, 31),
++        border: BoxBorder.all(color: _color()),
++      ),
++      child: Column(
++        crossAxisAlignment: CrossAxisAlignment.stretch,
++        children: [
++          GestureDetector(
++            behavior: HitTestBehavior.opaque,
++            onTap: () => setState(() => _expanded = !_expanded),
++            child: Row(
++              children: [
++                Text('${_marker()} ', style: TextStyle(color: _color())),
++                Expanded(
++                  child: TerminalText.safe(
++                    widget.toolName,
++                    style: const TextStyle(fontWeight: FontWeight.bold),
++                    softWrap: false,
++                    maxLines: 1,
++                    overflow: TextOverflow.ellipsis,
++                  ),
++                ),
++                if (widget.status == ToolCallStatus.running &&
++                    widget.onCancel != null)
++                  GestureDetector(
++                    onTap: widget.onCancel,
++                    child: const Text('[stop]'),
++                  ),
++                const SizedBox(width: 1),
++                Text(_expanded ? '▴' : '▾'),
++              ],
++            ),
++          ),
++          if (_expanded) ...[
++            const Divider(),
++            if (widget.input != null) ...[
++              const Text('Input',
++                  style: TextStyle(
++                      color: Colors.grey, fontWeight: FontWeight.bold)),
++              TerminalText.safe(widget.input!),
++            ],
++            if (widget.output != null) ...[
++              const Text('Output',
++                  style: TextStyle(
++                      color: Colors.grey, fontWeight: FontWeight.bold)),
++              SelectionArea(child: TerminalText.safe(widget.output!)),
++            ],
++            if (widget.error != null) ...[
++              const Text('Error',
++                  style: TextStyle(
++                      color: Colors.red, fontWeight: FontWeight.bold)),
++              TerminalText.safe(
++                widget.error!,
++                style: const TextStyle(color: Colors.red),
++              ),
++            ],
++          ],
++        ],
++      ),
++    );
++  }
++}
++
++/// Collapsible model reasoning/status block.
++class ThinkingBlock extends StatefulWidget {
++  const ThinkingBlock({
++    super.key,
++    required this.content,
++    this.label = 'Thinking',
++    this.initiallyExpanded = false,
++    this.active = false,
++  });
++
++  final String content;
++  final String label;
++  final bool initiallyExpanded;
++  final bool active;
++
++  @override
++  State<ThinkingBlock> createState() => _ThinkingBlockState();
++}
++
++class _ThinkingBlockState extends State<ThinkingBlock> {
++  late bool _expanded = widget.initiallyExpanded;
++
++  @override
++  Widget build(BuildContext context) {
++    return Container(
++      decoration: BoxDecoration(
++        border: BoxBorder.all(color: Colors.grey),
++      ),
++      child: Column(
++        crossAxisAlignment: CrossAxisAlignment.stretch,
++        children: [
++          GestureDetector(
++            behavior: HitTestBehavior.opaque,
++            onTap: () => setState(() => _expanded = !_expanded),
++            child: Row(
++              children: [
++                Text(widget.active ? '◐ ' : '◇ ',
++                    style: const TextStyle(color: Colors.grey)),
++                Expanded(
++                  child: TerminalText.safe(
++                    widget.label,
++                    style: const TextStyle(
++                      color: Colors.grey,
++                      fontWeight: FontWeight.bold,
++                    ),
++                  ),
++                ),
++                Text(_expanded ? '▴' : '▾'),
++              ],
++            ),
++          ),
++          if (_expanded) ...[
++            const Divider(),
++            TerminalText.safe(
++              widget.content,
++              style: const TextStyle(
++                color: Colors.grey,
++                fontStyle: FontStyle.italic,
++              ),
++            ),
++          ],
++        ],
++      ),
++    );
++  }
++}
++
++enum ApprovalRisk { low, medium, high, critical }
++
++/// Explicit, keyboard-friendly approval prompt for agent operations.
++class ApprovalDialog extends StatelessWidget {
++  const ApprovalDialog({
++    super.key,
++    required this.title,
++    required this.command,
++    required this.onApprove,
++    required this.onDeny,
++    this.description,
++    this.scope,
++    this.risk = ApprovalRisk.medium,
++    this.reversible,
++    this.onAlwaysApprove,
++  });
++
++  final String title;
++  final String command;
++  final String? description;
++  final String? scope;
++  final ApprovalRisk risk;
++  final bool? reversible;
++  final VoidCallback onApprove;
++  final VoidCallback onDeny;
++  final VoidCallback? onAlwaysApprove;
++
++  Color _riskColor() {
++    switch (risk) {
++      case ApprovalRisk.low:
++        return Colors.green;
++      case ApprovalRisk.medium:
++        return Colors.yellow;
++      case ApprovalRisk.high:
++      case ApprovalRisk.critical:
++        ret
