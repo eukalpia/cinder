@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - feat/safe-terminal-and-app-widgets
+  pull_request:
+    branches:
+      - main
 
 permissions:
   contents: read
