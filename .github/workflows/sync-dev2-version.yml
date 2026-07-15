@@ -6,12 +6,19 @@ on:
       - agent/sync-dev2-versions
     paths:
       - .github/workflows/sync-dev2-version.yml
+  pull_request:
+    branches:
+      - main
+    types: [opened, synchronize, reopened]
+    paths:
+      - .github/workflows/sync-dev2-version.yml
 
 permissions:
   contents: write
 
 jobs:
   sync:
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
