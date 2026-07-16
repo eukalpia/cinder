@@ -2,7 +2,7 @@ import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 
 export const baseOptions: BaseLayoutProps = {
   nav: {
-    title: 'Nocterm',
+    title: 'Cinder',
   },
   links: [
     {
@@ -12,7 +12,7 @@ export const baseOptions: BaseLayoutProps = {
     },
     {
       text: 'GitHub',
-      url: 'https://github.com/Norbert515/nocterm',
+      url: 'https://github.com/eukalpia/cinder',
     },
   ],
 };

@@ -17,7 +17,8 @@ class LogsCommand extends CliCommand {
     argParser.addOption(
       'mode',
       abbr: 'm',
-      help: 'Output mode: "get" fetches buffered logs and exits, '
+      help:
+          'Output mode: "get" fetches buffered logs and exits, '
           '"listen" streams continuously (default)',
       allowed: ['get', 'listen'],
       defaultsTo: 'listen',
@@ -30,7 +31,7 @@ Stream logs from a running cinder app via WebSocket.
 
 Modes:
   listen  - Stream logs continuously in real-time (default). Press Ctrl+C to exit.
-  get     - Fetch all buffered logs and exit immediately. Ideal for LLM agents.
+  get     - Fetch all buffered logs and exit immediately. Useful for scripts and CI.
 
 Examples:
   cinder logs              # Stream logs continuously

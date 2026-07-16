@@ -1,8 +1,7 @@
 /**
  * Embeddable cinder terminal for landing page demos
  *
- * This is a smaller, inline version of CinderTerminalHost
- * designed for embedding interactive demos within the landing page.
+ * Hosts the interactive examples embedded on the landing page.
  */
 
 class EmbeddedTerminal {

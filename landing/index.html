@@ -8,7 +8,7 @@
     </title>
     <meta
       name="description"
-      content="Cinder is a modern TUI (Terminal User Interface) framework for Dart. Build rich, interactive terminal applications with Flutter-like APIs: StatefulComponent, setState(), Row, Column, and hot reload. The best ncurses alternative for Dart developers."
+      content="Cinder is a Flutter-style terminal UI framework for Dart with widgets, stateful lifecycles, focus, navigation, testing, and differential rendering."
     />
     <meta
       name="keywords"
@@ -22,7 +22,7 @@
     />
     <meta
       property="og:description"
-      content="Build rich terminal user interfaces with Flutter-like APIs. StatefulComponent, setState(), Row, Column, hot reload, and 45+ components. The modern alternative to ncurses."
+      content="Build terminal applications with StatefulWidget, setState(), Row, Column, ListView, focus, navigation, and hot reload."
     />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://cinder.dev" />
@@ -35,7 +35,7 @@
     />
     <meta
       name="twitter:description"
-      content="Build rich terminal user interfaces with Flutter-like APIs. StatefulComponent, setState(), hot reload, and 45+ components."
+      content="Build terminal applications in Dart with Flutter-style widgets, state, testing, and hot reload."
     />
 
     <!-- Canonical -->
@@ -89,7 +89,6 @@
         <nav class="site-nav">
           <a href="/" class="active">Home</a>
           <a href="https://github.com/eukalpia/cinder">Docs</a>
-          <a href="/blog/">Blog</a>
           <a href="https://github.com/eukalpia/cinder" data-plausible-location="nav">GitHub</a>
         </nav>
       </header>
@@ -106,20 +105,20 @@
           <div class="hero-content">
             <h1 class="sr-only">Cinder</h1>
             <pre class="ascii-title" aria-hidden="true">
-███╗   ██╗ ██████╗  ██████╗████████╗███████╗██████╗ ███╗   ███╗
-████╗  ██║██╔═══██╗██╔════╝╚══██╔══╝██╔════╝██╔══██╗████╗ ████║
-██╔██╗ ██║██║   ██║██║        ██║   █████╗  ██████╔╝██╔████╔██║
-██║╚██╗██║██║   ██║██║        ██║   ██╔══╝  ██╔══██╗██║╚██╔╝██║
-██║ ╚████║╚██████╔╝╚██████╗   ██║   ███████╗██║  ██║██║ ╚═╝ ██║
-╚═╝  ╚═══╝ ╚═════╝  ╚═════╝   ╚═╝   ╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝</pre
+ ██████╗██╗███╗   ██╗██████╗ ███████╗██████╗
+██╔════╝██║████╗  ██║██╔══██╗██╔════╝██╔══██╗
+██║     ██║██╔██╗ ██║██║  ██║█████╗  ██████╔╝
+██║     ██║██║╚██╗██║██║  ██║██╔══╝  ██╔══██╗
+╚██████╗██║██║ ╚████║██████╔╝███████╗██║  ██║
+ ╚═════╝╚═╝╚═╝  ╚═══╝╚═════╝ ╚══════╝╚═╝  ╚═╝</pre
             >
             <div class="hero-divider">
               ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
             </div>
             <p class="hero-tagline">Build terminal UIs the Flutter way</p>
             <p class="hero-features">
-              StatefulComponent • setState() • Row • Column •
-              <strong>hot reload</strong>
+              StatefulWidget • setState() • Row • Column •
+              <strong>Renderer V2</strong>
             </p>
             <div class="hero-cta">
               <a
@@ -147,8 +146,8 @@
             <div class="panel-divider"></div>
             <dl class="stats-list">
               <div class="stat-row">
-                <dt>Components</dt>
-                <dd class="stat-value">45+</dd>
+                <dt>API</dt>
+                <dd class="stat-value">Widgets</dd>
               </div>
               <div class="stat-row">
                 <dt>Themes</dt>
@@ -159,8 +158,8 @@
                 <dd class="stat-value">65+</dd>
               </div>
               <div class="stat-row">
-                <dt>Hot Reload</dt>
-                <dd class="stat-value"><i data-lucide="flame" class="stat-icon"></i></dd>
+                <dt>Renderer</dt>
+                <dd class="stat-value">V2</dd>
               </div>
             </dl>
           </div>
@@ -169,23 +168,26 @@
           <div class="panel code-panel" data-nav>
             <h2 class="panel-title"><i data-lucide="file-code" class="panel-icon"></i> Code</h2>
             <div class="panel-divider"></div>
-            <pre
-              class="code-block"
-            ><code><span class="keyword">class</span> <span class="class-name">Counter</span> <span class="keyword">extends</span> <span class="type">StatefulComponent</span> <span class="punctuation">{</span>
-  <span class="keyword">int</span> <span class="variable">count</span> <span class="operator">=</span> <span class="number">0</span>;
+            <pre class="code-block"><code>class Counter extends StatefulWidget {
+  const Counter({super.key});
 
-  <span class="type">Component</span> <span class="function">build</span><span class="punctuation">(</span><span class="type">BuildContext</span> <span class="variable">ctx</span><span class="punctuation">)</span> <span class="punctuation">{</span>
-    <span class="keyword">return</span> <span class="type">Column</span><span class="punctuation">(</span>
-      <span class="variable">children</span><span class="punctuation">:</span> <span class="punctuation">[</span>
-        <span class="type">Text</span><span class="punctuation">(</span><span class="string">'Count: $count'</span><span class="punctuation">),</span>
-        <span class="type">Button</span><span class="punctuation">(</span>
-          <span class="variable">onPressed</span><span class="punctuation">:</span> <span class="punctuation">()</span> <span class="operator">=></span> <span class="function">setState</span><span class="punctuation">(()</span> <span class="operator">=></span> <span class="variable">count</span><span class="operator">++</span><span class="punctuation">),</span>
-          <span class="variable">child</span><span class="punctuation">:</span> <span class="type">Text</span><span class="punctuation">(</span><span class="string">'+'</span><span class="punctuation">),</span>
-        <span class="punctuation">),</span>
-      <span class="punctuation">],</span>
-    <span class="punctuation">);</span>
-  <span class="punctuation">}</span>
-<span class="punctuation">}</span></code></pre>
+  State&lt;Counter&gt; createState() =&gt; _CounterState();
+}
+
+class _CounterState extends State&lt;Counter&gt; {
+  int count = 0;
+
+  Widget build(BuildContext context) {
+    return KeyboardListener(
+      onKeyEvent: (key) {
+        if (key != LogicalKey.enter) return false;
+        setState(() =&gt; count++);
+        return true;
+      },
+      child: Text('Count: $count — press Enter'),
+    );
+  }
+}</code></pre>
           </div>
         </aside>
       </div>
@@ -199,9 +201,9 @@
         </article>
 
         <article class="feature-card" data-nav style="--card-index: 1">
-          <h3><i data-lucide="blocks" class="feature-icon"></i> 45+ Components</h3>
+          <h3><i data-lucide="blocks" class="feature-icon"></i> Widget Toolkit</h3>
           <div class="feature-divider"></div>
-          <p>Row, Column, ListView...</p>
+          <p>Layout, input, navigation, media</p>
         </article>
 
         <article class="feature-card" data-nav style="--card-index: 2">
@@ -231,8 +233,8 @@
             <div class="why-content">
               <h3>Flutter Patterns</h3>
               <p>
-                StatefulComponent, setState(), Column, Row, Expanded, ListView —
-                the same APIs you already know.
+                StatefulWidget, State, BuildContext, Row, Column, Expanded,
+                and ListView — the same model you already know.
               </p>
             </div>
           </div>
@@ -241,8 +243,8 @@
             <div class="why-content">
               <h3>Declarative</h3>
               <p>
-                Component-based design with a virtual terminal. Code that's easy
-                to read, test, and maintain.
+                A persistent widget tree backed by a virtual terminal. Code that
+                is straightforward to read, test, and maintain.
               </p>
             </div>
           </div>
@@ -359,238 +361,6 @@
             <div class="usecase-icon"><i data-lucide="gamepad-2"></i></div>
             <h3>Games</h3>
             <p>Roguelikes, text adventures, puzzle games with animations</p>
-          </div>
-        </div>
-      </section>
-
-      <!-- Row 6: Built With -->
-      <section class="builtwith-section">
-        <div class="marquee-container">
-          <div class="marquee-inner">
-            <div class="marquee-track">
-              <span class="marquee-label">Built with Cinder</span>
-              <span class="marquee-sep">—</span>
-              <a
-                href="https://github.com/Norbert515/vide_cli"
-                class="marquee-item"
-                data-nav
-                target="_blank"
-                rel="noopener"
-                >vide</a
-              >
-              <span class="marquee-sep">·</span>
-              <a
-                href="https://github.com/mrgnhnt96/snake"
-                class="marquee-item"
-                data-nav
-                target="_blank"
-                rel="noopener"
-                >snake</a
-              >
-              <span class="marquee-sep">·</span>
-              <a
-                href="https://github.com/mrgnhnt96/minesweeper"
-                class="marquee-item"
-                data-nav
-                target="_blank"
-                rel="noopener"
-                >minesweeper</a
-              >
-              <span class="marquee-sep">·</span>
-              <a
-                href="https://github.com/eukalpia/cinder_3d"
-                class="marquee-item"
-                data-nav
-                target="_blank"
-                rel="noopener"
-                >cinder_3d</a
-              >
-              <span class="marquee-sep">·</span>
-              <span class="marquee-label">Built with Cinder</span>
-              <span class="marquee-sep">—</span>
-              <a
-                href="https://github.com/Norbert515/vide_cli"
-                class="marquee-item"
-                target="_blank"
-                rel="noopener"
-                >vide</a
-              >
-              <span class="marquee-sep">·</span>
-              <a
-                href="https://github.com/mrgnhnt96/snake"
-                class="marquee-item"
-                target="_blank"
-                rel="noopener"
-                >snake</a
-              >
-              <span class="marquee-sep">·</span>
-              <a
-                href="https://github.com/mrgnhnt96/minesweeper"
-                class="marquee-item"
-                target="_blank"
-                rel="noopener"
-                >minesweeper</a
-              >
-              <span class="marquee-sep">·</span>
-              <a
-                href="https://github.com/eukalpia/cinder_3d"
-                class="marquee-item"
-                target="_blank"
-                rel="noopener"
-                >cinder_3d</a
-              >
-              <span class="marquee-sep">·</span>
-              <span class="marquee-label">Built with Cinder</span>
-              <span class="marquee-sep">—</span>
-              <a
-                href="https://github.com/Norbert515/vide_cli"
-                class="marquee-item"
-                target="_blank"
-                rel="noopener"
-                >vide</a
-              >
-              <span class="marquee-sep">·</span>
-              <a
-                href="https://github.com/mrgnhnt96/snake"
-                class="marquee-item"
-                target="_blank"
-                rel="noopener"
-                >snake</a
-              >
-              <span class="marquee-sep">·</span>
-              <a
-                href="https://github.com/mrgnhnt96/minesweeper"
-                class="marquee-item"
-                target="_blank"
-                rel="noopener"
-                >minesweeper</a
-              >
-              <span class="marquee-sep">·</span>
-              <a
-                href="https://github.com/eukalpia/cinder_3d"
-                class="marquee-item"
-                target="_blank"
-                rel="noopener"
-                >cinder_3d</a
-              >
-              <span class="marquee-sep">·</span>
-            </div>
-            <div class="marquee-track" aria-hidden="true">
-              <span class="marquee-label">Built with Cinder</span>
-              <span class="marquee-sep">—</span>
-              <a
-                href="https://github.com/Norbert515/vide_cli"
-                class="marquee-item"
-                tabindex="-1"
-                target="_blank"
-                rel="noopener"
-                >vide</a
-              >
-              <span class="marquee-sep">·</span>
-              <a
-                href="https://github.com/mrgnhnt96/snake"
-                class="marquee-item"
-                tabindex="-1"
-                target="_blank"
-                rel="noopener"
-                >snake</a
-              >
-              <span class="marquee-sep">·</span>
-              <a
-                href="https://github.com/mrgnhnt96/minesweeper"
-                class="marquee-item"
-                tabindex="-1"
-                target="_blank"
-                rel="noopener"
-                >minesweeper</a
-              >
-              <span class="marquee-sep">·</span>
-              <a
-                href="https://github.com/eukalpia/cinder_3d"
-                class="marquee-item"
-                tabindex="-1"
-                target="_blank"
-                rel="noopener"
-                >cinder_3d</a
-              >
-              <span class="marquee-sep">·</span>
-              <span class="marquee-label">Built with Cinder</span>
-              <span class="marquee-sep">—</span>
-              <a
-                href="https://github.com/Norbert515/vide_cli"
-                class="marquee-item"
-                tabindex="-1"
-                target="_blank"
-                rel="noopener"
-                >vide</a
-              >
-              <span class="marquee-sep">·</span>
-              <a
-                href="https://github.com/mrgnhnt96/snake"
-                class="marquee-item"
-                tabindex="-1"
-                target="_blank"
-                rel="noopener"
-                >snake</a
-              >
-              <span class="marquee-sep">·</span>
-              <a
-                href="https://github.com/mrgnhnt96/minesweeper"
-                class="marquee-item"
-                tabindex="-1"
-                target="_blank"
-                rel="noopener"
-                >minesweeper</a
-              >
-              <span class="marquee-sep">·</span>
-              <a
-                href="https://github.com/eukalpia/cinder_3d"
-                class="marquee-item"
-                tabindex="-1"
-                target="_blank"
-                rel="noopener"
-                >cinder_3d</a
-              >
-              <span class="marquee-sep">·</span>
-              <span class="marquee-label">Built with Cinder</span>
-              <span class="marquee-sep">—</span>
-              <a
-                href="https://github.com/Norbert515/vide_cli"
-                class="marquee-item"
-                tabindex="-1"
-                target="_blank"
-                rel="noopener"
-                >vide</a
-              >
-              <span class="marquee-sep">·</span>
-              <a
-                href="https://github.com/mrgnhnt96/snake"
-                class="marquee-item"
-                tabindex="-1"
-                target="_blank"
-                rel="noopener"
-                >snake</a
-              >
-              <span class="marquee-sep">·</span>
-              <a
-                href="https://github.com/mrgnhnt96/minesweeper"
-                class="marquee-item"
-                tabindex="-1"
-                target="_blank"
-                rel="noopener"
-                >minesweeper</a
-              >
-              <span class="marquee-sep">·</span>
-              <a
-                href="https://github.com/eukalpia/cinder_3d"
-                class="marquee-item"
-                tabindex="-1"
-                target="_blank"
-                rel="noopener"
-                >cinder_3d</a
-              >
-              <span class="marquee-sep">·</span>
-            </div>
           </div>
         </div>
       </section>
@@ -722,7 +492,7 @@
         <div class="brand">
           <span class="brand-icon">✦</span>
           <span class="brand-name">Cinder</span>
-          <span class="brand-version">v0.7.0</span>
+          <span class="brand-version">v1.0.0-dev.2</span>
         </div>
         <div class="wave-container" id="wave" aria-hidden="true"></div>
         <nav class="bottom-links">
@@ -734,7 +504,6 @@
           <a href="https://pub.dev/packages/cinder" class="link" data-nav
             >pub.dev</a
           >
-          <a href="/blog/" class="link" data-nav>Blog</a>
         </nav>
       </footer>
     </main>
@@ -746,14 +515,14 @@
         "@type": "SoftwareApplication",
         "name": "Cinder",
         "alternateName": "Cinder TUI Framework",
-        "description": "Cinder is a modern TUI (Terminal User Interface) framework for Dart. Build rich, interactive terminal applications using Flutter-like APIs including StatefulComponent, setState(), Row, Column, ListView, and more. Features hot reload, 45+ components, 6 themes, and comprehensive testing support. The best alternative to ncurses for Dart developers.",
+        "description": "Cinder is a Flutter-style terminal UI framework for Dart with widgets, stateful lifecycles, focus, navigation, testing, and differential rendering.",
         "applicationCategory": "DeveloperApplication",
         "applicationSubCategory": "Terminal User Interface Framework",
         "operatingSystem": "Cross-platform (macOS, Linux, Windows)",
         "programmingLanguage": "Dart",
         "url": "https://cinder.dev",
         "downloadUrl": "https://pub.dev/packages/cinder",
-        "softwareVersion": "0.7.0",
+        "softwareVersion": "1.0.0-dev.2",
         "author": {
           "@type": "Organization",
           "name": "Cinder"
@@ -764,17 +533,14 @@
           "priceCurrency": "USD"
         },
         "featureList": [
-          "Flutter-like declarative API",
-          "Hot reload support",
-          "45+ built-in components",
-          "6 color themes",
-          "Mouse support",
-          "Animations",
-          "Built-in testing framework",
-          "Markdown rendering",
-          "Differential rendering"
+          "Flutter-style Widget and Element API",
+          "Stateful lifecycles and hot reload",
+          "Keyboard, mouse, focus, and navigation",
+          "Built-in widget testing",
+          "Markdown, images, and icon packs",
+          "Renderer V2 differential output"
         ],
-        "keywords": "TUI framework, Dart, Flutter, terminal UI, ncurses alternative, CLI, terminal user interface, command line interface, StatefulComponent, setState, hot reload"
+        "keywords": "TUI framework, Dart, Flutter, terminal UI, CLI framework, StatefulWidget, Widget, setState, Renderer V2, hot reload"
       }
     </script>
 
@@ -796,89 +562,68 @@
       const demoCode = {
         0: {
           filename: "text_field_demo.dart",
-          code: `<span class="kw">class</span> <span class="type">TextFieldDemo</span> <span class="kw">extends</span> <span class="type">StatefulComponent</span> {
-  <span class="kw">final</span> _controller = <span class="type">TextEditingController</span>();
-  <span class="kw">final</span> <span class="type">List</span>&lt;<span class="type">String</span>&gt; _messages = [];
+          code: `<span class="kw">class</span> <span class="type">TextFieldDemo</span> <span class="kw">extends</span> <span class="type">StatefulWidget</span> {
+  <span class="kw">const</span> TextFieldDemo({<span class="kw">super</span>.key});
 
-  <span class="type">Component</span> <span class="fn">build</span>(<span class="type">BuildContext</span> context) {
-    <span class="kw">return</span> <span class="type">Column</span>(children: [
-      <span class="type">TextField</span>(
-        controller: _controller,
-        onSubmitted: (value) {
-          <span class="fn">setState</span>(() => _messages.add(value));
-          _controller.<span class="fn">clear</span>();
-        },
-        placeholder: <span class="str">'Type here...'</span>,
-      ),
-      <span class="kw">for</span> (<span class="kw">var</span> msg <span class="kw">in</span> _messages)
-        <span class="type">Text</span>(msg),
-    ]);
+  <span class="type">State</span>&lt;TextFieldDemo&gt; createState() =&gt; _TextFieldDemoState();
+}
+
+<span class="kw">class</span> _TextFieldDemoState <span class="kw">extends</span> <span class="type">State</span>&lt;TextFieldDemo&gt; {
+  <span class="kw">final</span> controller = <span class="type">TextEditingController</span>();
+
+  <span class="type">Widget</span> build(<span class="type">BuildContext</span> context) {
+    <span class="kw">return</span> <span class="type">TextField</span>(
+      controller: controller,
+      placeholder: <span class="str">'Type here...'</span>,
+    );
   }
 }`,
         },
         1: {
           filename: "list_view_demo.dart",
-          code: `<span class="kw">class</span> <span class="type">ListViewDemo</span> <span class="kw">extends</span> <span class="type">StatefulComponent</span> {
-  <span class="kw">int</span> _selectedIndex = <span class="num">0</span>;
-  <span class="kw">final</span> _items = [<span class="str">'Row'</span>, <span class="str">'Column'</span>, <span class="str">'Stack'</span>, ...];
+          code: `<span class="kw">class</span> <span class="type">ListViewDemo</span> <span class="kw">extends</span> <span class="type">StatelessWidget</span> {
+  <span class="kw">const</span> ListViewDemo({<span class="kw">super</span>.key});
 
-  <span class="type">Component</span> <span class="fn">build</span>(<span class="type">BuildContext</span> context) {
-    <span class="kw">return</span> <span class="type">ListView</span>.<span class="fn">builder</span>(
-      itemCount: _items.length,
-      itemBuilder: (context, index) {
-        <span class="kw">final</span> isSelected = index == _selectedIndex;
-        <span class="kw">return</span> <span class="type">Container</span>(
-          decoration: <span class="type">BoxDecoration</span>(
-            color: isSelected ? <span class="type">Colors</span>.blue : <span class="kw">null</span>,
-          ),
-          child: <span class="type">Text</span>(_items[index]),
-        );
-      },
+  <span class="type">Widget</span> build(<span class="type">BuildContext</span> context) {
+    <span class="kw">return</span> <span class="type">ListView</span>.builder(
+      itemCount: items.length,
+      itemBuilder: (context, index) =&gt; <span class="type">Text</span>(items[index]),
     );
   }
 }`,
         },
         2: {
           filename: "counter_demo.dart",
-          code: `<span class="kw">class</span> <span class="type">CounterDemo</span> <span class="kw">extends</span> <span class="type">StatefulComponent</span> {
-  <span class="kw">int</span> _count = <span class="num">0</span>;
+          code: `<span class="kw">class</span> <span class="type">CounterDemo</span> <span class="kw">extends</span> <span class="type">StatefulWidget</span> {
+  <span class="kw">const</span> CounterDemo({<span class="kw">super</span>.key});
 
-  <span class="type">Component</span> <span class="fn">build</span>(<span class="type">BuildContext</span> context) {
-    <span class="kw">return</span> <span class="type">Focusable</span>(
-      onKeyEvent: (event) {
-        <span class="kw">if</span> (event.logicalKey == <span class="type">LogicalKey</span>.space) {
-          <span class="fn">setState</span>(() => _count++);
-          <span class="kw">return true</span>;
-        }
-        <span class="kw">return false</span>;
+  <span class="type">State</span>&lt;CounterDemo&gt; createState() =&gt; _CounterDemoState();
+}
+
+<span class="kw">class</span> _CounterDemoState <span class="kw">extends</span> <span class="type">State</span>&lt;CounterDemo&gt; {
+  <span class="kw">int</span> count = <span class="num">0</span>;
+
+  <span class="type">Widget</span> build(<span class="type">BuildContext</span> context) {
+    <span class="kw">return</span> <span class="type">KeyboardListener</span>(
+      onKeyEvent: (key) {
+        <span class="kw">if</span> (key != <span class="type">LogicalKey</span>.enter) <span class="kw">return</span> <span class="kw">false</span>;
+        <span class="fn">setState</span>(() =&gt; count++);
+        <span class="kw">return</span> <span class="kw">true</span>;
       },
-      child: <span class="type">Column</span>(children: [
-        <span class="type">Text</span>(<span class="str">'Count: \$_count'</span>),
-        <span class="type">ProgressBar</span>(value: _count % <span class="num">20</span>),
-      ]),
+      child: <span class="type">Text</span>(<span class="str">'Count: $count — press Enter'</span>),
     );
   }
 }`,
         },
         3: {
           filename: "layout_demo.dart",
-          code: `<span class="kw">class</span> <span class="type">LayoutDemo</span> <span class="kw">extends</span> <span class="type">StatelessComponent</span> {
-  <span class="type">Component</span> <span class="fn">build</span>(<span class="type">BuildContext</span> context) {
+          code: `<span class="kw">class</span> <span class="type">LayoutDemo</span> <span class="kw">extends</span> <span class="type">StatelessWidget</span> {
+  <span class="kw">const</span> LayoutDemo({<span class="kw">super</span>.key});
+
+  <span class="type">Widget</span> build(<span class="type">BuildContext</span> context) {
     <span class="kw">return</span> <span class="type">Row</span>(children: [
-      <span class="type">Expanded</span>(
-        child: <span class="type">Container</span>(
-          decoration: <span class="type">BoxDecoration</span>(
-            border: <span class="type">BoxBorder</span>.<span class="fn">all</span>(color: <span class="type">Colors</span>.red),
-          ),
-          child: <span class="type">Center</span>(child: <span class="type">Text</span>(<span class="str">'Left'</span>)),
-        ),
-      ),
-      <span class="type">Expanded</span>(
-        child: <span class="type">Column</span>(children: [
-          <span class="type">Expanded</span>(child: <span class="type">Text</span>(<span class="str">'Top'</span>)),
-          <span class="type">Expanded</span>(child: <span class="type">Text</span>(<span class="str">'Bottom'</span>)),
-        ]),
-      ),
+      <span class="type">Expanded</span>(child: <span class="type">Center</span>(child: <span class="type">Text</span>(<span class="str">'Left'</span>))),
+      <span class="type">Expanded</span>(child: <span class="type">Center</span>(child: <span class="type">Text</span>(<span class="str">'Right'</span>))),
     ]);
   }
 }`,
