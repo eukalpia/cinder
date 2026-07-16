@@ -22,7 +22,7 @@ jobs:
       - name: Install dependencies
         run: dart pub get
 
-      - name: Publish nocterm
+      - name: Publish cinder
         run: dart pub publish --force
 
   release:

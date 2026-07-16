@@ -10,8 +10,8 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    template: '%s | Nocterm',
-    default: 'Nocterm',
+    template: '%s | Cinder',
+    default: 'Cinder',
   },
   description: 'A Flutter-like framework for building beautiful Terminal UIs in Dart',
 };

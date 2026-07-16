@@ -8,23 +8,15 @@ pubspec.lock
 
 /third_party/
 
-CLAUDE.md
-.claude/
-
 .DS_Store
 
 reference/
 coverage/
 
-nocterm
-
 build/
 
 # Melos generated files
 pubspec_overrides.yaml
-
-# Local MCP config
-.mcp.json
 
 # Debug logs
 *_debug.log

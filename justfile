@@ -17,10 +17,6 @@ benchmark *ARGS:
 benchmark-save *ARGS:
     dart run benchmark/benchmark.dart --save {{ARGS}}
 
-# Build the blog with Hugo
-blog:
-    cd blog-hugo && hugo --minify
-
 # Interactive release workflow - updates README, commits, and creates tag
 release:
     #!/usr/bin/env bash
@@ -87,7 +83,6 @@ release:
 
             # Update version in README.md
             echo "Updating README.md..."
-            sed -i '' -E "s/nocterm: \^[0-9]+\.[0-9]+\.[0-9]+/nocterm: ^$version_number/" README.md
             sed -i '' -E "s/in early development \([0-9]+\.[0-9]+\.[0-9]+\)/in early development ($version_number)/" README.md
 
             # Update version on the landing page

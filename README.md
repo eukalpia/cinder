@@ -19,13 +19,9 @@ integrations — without bringing Flutter or Node.js into your CLI runtime.
 
 </div>
 
-
-Cell-based Interactive Native Dart Engine Renderer
-
 > [!IMPORTANT]
-> Cinder `1.0.0-dev.2` is a breaking development line. The legacy Nocterm
-> `Component`, `App`, `Frame`, and manual `TextField(focused: ...)` APIs are not
-> retained.
+> Cinder `1.0.0-dev.2` uses the Widget, Element, and RenderObject architecture
+> throughout. Earlier experimental APIs are not supported.
 
 ## Why Cinder?
 
@@ -515,23 +511,6 @@ feature/* → dev → test → main
 
 Direct feature work should not target `main`.
 
-## Migration from Nocterm
-
-Cinder is an independent continuation of the Nocterm codebase and intentionally
-does not include a legacy compatibility layer.
-
-```text
-package:nocterm/nocterm.dart  → package:cinder/cinder.dart
-Component                     → Widget
-StatelessComponent            → StatelessWidget
-StatefulComponent             → StatefulWidget
-InheritedComponent            → InheritedWidget
-TextField(focused: ...)       → TextField(focusNode: ..., autofocus: ...)
-```
-
-Applications should migrate directly to the new API instead of mixing runtimes
-or maintaining aliases.
-
 ## Performance
 
 Benchmarks live in [`benchmark/`](benchmark/) and run in GitHub Actions. Cinder
@@ -593,6 +572,6 @@ document deliberate differences.
 
 Cinder is distributed under the [MIT License](LICENSE).
 
-The project is derived from Nocterm. Original copyright and fork attribution are
-preserved in [`NOTICE.md`](NOTICE.md), the license files, and repository history.
+Required upstream attribution is preserved in [`NOTICE.md`](NOTICE.md), the
+license files, and repository history.
 
