@@ -20,9 +20,9 @@ jobs:
           fetch-depth: 1
       - name: Pack source tree
         run: |
-          tar --exclude=.git --exclude=.dart_tool --exclude=build -czf cinder-source.tar.gz .
+          tar --exclude=.git --exclude=.dart_tool --exclude=build -czf /tmp/cinder-source.tar.gz .
       - uses: actions/upload-artifact@v7
         with:
           name: cinder-source
-          path: cinder-source.tar.gz
+          path: /tmp/cinder-source.tar.gz
           retention-days: 1
