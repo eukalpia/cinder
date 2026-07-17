@@ -16,8 +16,17 @@ jobs:
       - uses: dart-lang/setup-dart@v1
         with:
           sdk: stable
-      - name: Resolve core dependencies
-        run: dart pub get
+      - name: Resolve maintained package dependencies
+        run: |
+          dart pub get
+          for package in cinder_nested cinder_provider cinder_riverpod cinder_bloc cinder_material_icons cinder_lucide; do
+            cat > "packages/$package/pubspec_overrides.yaml" <<EOF
+          dependency_overrides:
+            cinder:
+              path: ../..
+          EOF
+            (cd "packages/$package" && dart pub get)
+          done
       - name: Pack Dart SDK and pub cache
         run: |
           DART_BIN="$(readlink -f "$(command -v dart)")"
