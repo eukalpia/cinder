@@ -16,17 +16,24 @@ jobs:
       - uses: dart-lang/setup-dart@v1
         with:
           sdk: stable
-      - name: Resolve maintained package dependencies
+      - name: Resolve external dependencies
         run: |
-          dart pub get
-          for package in cinder_nested cinder_provider cinder_riverpod cinder_bloc cinder_material_icons cinder_lucide; do
-            cat > "packages/$package/pubspec_overrides.yaml" <<EOF
-          dependency_overrides:
-            cinder:
-              path: ../..
+          mkdir -p /tmp/cinder-toolchain
+          cat > /tmp/cinder-toolchain/pubspec.yaml <<'EOF'
+          name: cinder_toolchain
+          publish_to: none
+          environment:
+            sdk: '>=3.7.0 <4.0.0'
+          dependencies:
+            bloc: ^9.2.1
+            riverpod: ^3.3.2
+            meta: ^1.17.0
+          dev_dependencies:
+            lints: ^5.0.0
+            test: ^1.25.6
           EOF
-            (cd "packages/$package" && dart pub get)
-          done
+          cd /tmp/cinder-toolchain
+          dart pub get
       - name: Pack Dart SDK and pub cache
         run: |
           DART_BIN="$(readlink -f "$(command -v dart)")"
