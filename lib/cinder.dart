@@ -107,3 +107,10 @@ export 'src/image/terminal_capabilities.dart';
 export 'src/components/selection_area.dart';
 export 'src/components/selection_scope.dart';
 export 'src/components/selectable.dart';
+
+// Audio and video
+export 'src/media/media.dart';
+
+// Data grids and charts
+export 'src/data/data_grid.dart';
+export 'src/data/charts.dart';
