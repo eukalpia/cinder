@@ -16,13 +16,21 @@ jobs:
       - uses: dart-lang/setup-dart@v1
         with:
           sdk: stable
-      - name: Pack Dart SDK
+      - name: Resolve core dependencies
+        run: dart pub get
+      - name: Pack Dart SDK and pub cache
         run: |
           DART_BIN="$(readlink -f "$(command -v dart)")"
           DART_ROOT="$(dirname "$(dirname "$DART_BIN")")"
           tar -C "$(dirname "$DART_ROOT")" -czf /tmp/dart-sdk.tar.gz "$(basename "$DART_ROOT")"
+          tar -C "$HOME" -czf /tmp/pub-cache.tar.gz .pub-cache
       - uses: actions/upload-artifact@v7
         with:
           name: dart-sdk
           path: /tmp/dart-sdk.tar.gz
+          retention-days: 1
+      - uses: actions/upload-artifact@v7
+        with:
+          name: pub-cache
+          path: /tmp/pub-cache.tar.gz
           retention-days: 1
