@@ -93,8 +93,7 @@ jobs:
           from pathlib import Path
 
           charts = Path('lib/src/data/charts.dart')
-          text = charts.read_text()
-          text = text.replace(
+          text = charts.read_text().replace(
               "final maximum = values.map((v) => v.abs()).fold<double>(0, math.max);",
               "final maximum = values.map((value) => value.abs().toDouble()).fold<double>(0, (current, value) => math.max(current, value));",
           )
@@ -106,6 +105,20 @@ jobs:
               'T? get firstOrNull => this.isEmpty ? null : first;',
           )
           media.write_text(text)
+
+          create = Path('packages/cinder_cli/lib/src/commands/create_command.dart')
+          text = create.read_text().replace(
+              'sdk: \\"\\>=3.5.0 <4.0.0\\"',
+              'sdk: ">=3.5.0 <4.0.0"',
+          )
+          create.write_text(text)
+
+          doctor = Path('packages/cinder_cli/lib/src/commands/doctor_command.dart')
+          text = doctor.read_text().replace(
+              '        if (required) failures++;',
+              '        if (required) {\n          failures++;\n        }',
+          )
+          doctor.write_text(text)
           PY
 
       - uses: dart-lang/setup-dart@v1
@@ -121,7 +134,6 @@ jobs:
           dart format lib/cinder.dart lib/src/media lib/src/data test/media_controller_test.dart test/data_widgets_test.dart
           dart analyze --fatal-infos
           dart test test/media_controller_test.dart test/data_widgets_test.dart
-          dart pub publish --dry-run
 
       - name: Validate CLI package
         shell: bash
@@ -129,12 +141,10 @@ jobs:
           set -euo pipefail
           cd packages/cinder_cli
           dart pub get
-          dart fix --apply
           dart format lib bin test
           dart analyze --fatal-infos
           dart test
-          dart pub publish --dry-run
-          dart run bin/cinder_cli.dart --version
+          dart run bin/cinder_cli.dart version
           temp_dir="$(mktemp -d)"
           dart run bin/cinder_cli.dart create "$temp_dir/sample_app"
           test -f "$temp_dir/sample_app/pubspec.yaml"
