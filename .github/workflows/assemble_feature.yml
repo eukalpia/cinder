@@ -1,0 +1,102 @@
+name: Assemble Feature
+
+on:
+  push:
+    branches:
+      - feature/media-data-cli-clean
+
+permissions:
+  contents: write
+
+jobs:
+  assemble:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: feature/media-data-cli-clean
+          fetch-depth: 0
+      - name: Import product sources
+        run: |
+          git fetch origin feature/media-data-cli
+          files=(
+            lib/cinder.dart
+            lib/src/media/media.dart
+            lib/src/data/data_grid.dart
+            lib/src/data/charts.dart
+            packages/cinder_cli/lib/src/commands/create_command.dart
+            packages/cinder_cli/lib/src/commands/doctor_command.dart
+            packages/cinder_cli/lib/src/commands/version_command.dart
+            packages/cinder_cli/lib/src/runner.dart
+            pubspec.yaml
+            test/media_controller_test.dart
+            test/data_widgets_test.dart
+          )
+          for file in "${files[@]}"; do
+            mkdir -p "$(dirname "$file")"
+            git show "origin/feature/media-data-cli:$file" > "$file"
+          done
+          cat > packages/cinder_cli/pubspec.yaml <<'YAML'
+          name: cinder_cli
+          description: Command-line tools and project scaffolding for the Cinder terminal UI framework.
+          version: 1.0.0-dev.3
+          repository: https://github.com/eukalpia/cinder
+          issue_tracker: https://github.com/eukalpia/cinder/issues
+
+          environment:
+            sdk: ">=3.5.0 <4.0.0"
+
+          dependencies:
+            args: ^2.7.0
+            file: ^7.0.1
+            meta: ^1.17.0
+            path: ^1.9.0
+            cinder: ^1.0.0-dev.3
+            scoped_deps: ^0.1.0+2
+
+          dev_dependencies:
+            lints: ^5.0.0
+            mocktail: ^1.0.4
+            test: ^1.25.6
+
+          executables:
+            cinder: cinder_cli.dart
+
+          topics:
+            - tui
+            - cli
+            - terminal
+            - scaffolding
+          YAML
+          sed -i 's/^          //' packages/cinder_cli/pubspec.yaml
+          cat > packages/cinder_cli/pubspec_overrides.yaml <<'YAML'
+          dependency_overrides:
+            cinder:
+              path: ../..
+          YAML
+          sed -i 's/^          //' packages/cinder_cli/pubspec_overrides.yaml
+          rm .github/workflows/assemble_feature.yml
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+      - name: Format and validate root package
+        run: |
+          dart pub get
+          dart format lib/cinder.dart lib/src/media lib/src/data test/media_controller_test.dart test/data_widgets_test.dart
+          dart analyze --fatal-infos
+          dart test test/media_controller_test.dart test/data_widgets_test.dart
+      - name: Validate CLI package
+        run: |
+          cd packages/cinder_cli
+          dart pub get
+          dart format lib
+          dart analyze --fatal-infos
+          dart test
+          dart pub publish --dry-run
+      - name: Commit clean feature
+        run: |
+          git config user.name "Cinder CI"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A
+          git commit -m "feat: add media, data visualization, and project CLI"
+          git push origin HEAD:feature/media-data-cli-clean
