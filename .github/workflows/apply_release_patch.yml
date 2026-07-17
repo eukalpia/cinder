@@ -1,9 +1,9 @@
 name: Apply Release Source Patch
 
 on:
-  push:
+  pull_request:
     branches:
-      - feature/media-data-cli
+      - main
 
 permissions:
   contents: write
