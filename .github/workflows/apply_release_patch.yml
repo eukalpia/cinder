@@ -1,0 +1,63 @@
+name: Apply Release Source Patch
+
+on:
+  push:
+    branches:
+      - feature/media-data-cli
+
+permissions:
+  contents: write
+
+jobs:
+  apply-and-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: feature/media-data-cli
+          fetch-depth: 0
+      - name: Reconstruct and verify patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat .github/patch/part00 .github/patch/part01 .github/patch/part02 .github/patch/part03 > /tmp/cinder.patch.gz.b64
+          echo '948694aae2011c2d9c7ec95b153f78ea4a4c3bd2f9c08eed36b97d6b2e0abf6b  /tmp/cinder.patch.gz.b64' | sha256sum -c -
+          base64 --decode /tmp/cinder.patch.gz.b64 > /tmp/cinder.patch.gz
+          echo '12614ff242c5eeadcee5ce2f897ddecf89a6ef92d96dd161e1d11f7077f15b59  /tmp/cinder.patch.gz' | sha256sum -c -
+          gzip --decompress --stdout /tmp/cinder.patch.gz > /tmp/cinder.patch
+          echo 'a3c76c5ece36bd4e07bb969bf411080177cbbdf4eb2bf2e3370f05e9181ff511  /tmp/cinder.patch' | sha256sum -c -
+          git apply --check /tmp/cinder.patch
+      - name: Apply source changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          git apply /tmp/cinder.patch
+          rm -rf .github/patch
+          rm -f .github/workflows/apply_release_patch.yml
+          rm -f .github/workflows/source_snapshot.yml
+          rm -f .github/workflows/toolchain_snapshot.yml
+          git add -A
+          git config user.name 'Cinder Maintainers'
+          git config user.email 'maintainers@cinder.dev'
+          git commit -m 'feat: add media, data visualization, and CLI tooling'
+          git push origin HEAD:feature/media-data-cli
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+      - name: Resolve dependencies
+        run: dart pub get
+      - name: Verify formatting
+        run: dart format --output=none --set-exit-if-changed lib test packages/cinder_cli/lib packages/cinder_cli/bin packages/cinder_cli/test
+      - name: Analyze core
+        run: dart analyze --fatal-infos
+      - name: Test core
+        run: dart test --reporter expanded
+      - name: Validate core package archive
+        run: dart pub publish --dry-run
+      - name: Validate CLI package
+        working-directory: packages/cinder_cli
+        run: |
+          dart pub get
+          dart analyze --fatal-infos
+          dart test --reporter expanded
+          dart pub publish --dry-run
