@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - feature/media-data-cli
+  pull_request:
+    branches:
+      - main
 
 permissions:
   contents: read
