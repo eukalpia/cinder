@@ -16,10 +16,10 @@ jobs:
       - uses: dart-lang/setup-dart@v1
         with:
           sdk: stable
-      - name: Resolve workspace dependencies
+      - name: Resolve maintained package dependencies
         run: |
           dart pub get
-          for package in packages/cinder_nested packages/cinder_provider packages/cinder_riverpod packages/cinder_bloc packages/cinder_material_icons packages/cinder_lucide packages/cinder_cli; do
+          for package in packages/cinder_nested packages/cinder_provider packages/cinder_riverpod packages/cinder_bloc packages/cinder_material_icons packages/cinder_lucide; do
             (cd "$package" && dart pub get)
           done
       - name: Pack Dart SDK and pub cache
