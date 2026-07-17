@@ -1,0 +1,23 @@
+name: Verify Patch Chunks
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Verify uploaded chunks
+        run: |
+          set -euo pipefail
+          echo 'cbb133c8b489ee850725b4ef6c7bfabb156753d96048968c0dfa72e0a70e2e68  .github/patch2/chunk00' | sha256sum -c -
+          echo 'b60b7f02191ad4327d9fa42090a150a85a9a6381ccd48aff83128c256ed516ed  .github/patch2/chunk01' | sha256sum -c -
+          echo 'cb3b7ce6486373cc77cb6726354f94b4a8d34ec7f5c1f77a2e19d6a30294d46e  .github/patch2/chunk02' | sha256sum -c -
+          echo 'e2ef563e321dad708e3dbf180dff965b94459e6258700256dd97999deaba6101  .github/patch2/chunk03a' | sha256sum -c -
+          echo '7cb9d1b416b891524d1b488ebc5ebb18cbbdeac696e58a29b95962d6402b9992  .github/patch2/chunk03b' | sha256sum -c -
