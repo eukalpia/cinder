@@ -1,0 +1,40 @@
+name: Toolchain Snapshot
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+      - name: Resolve workspace dependencies
+        run: |
+          dart pub get
+          for package in packages/cinder_nested packages/cinder_provider packages/cinder_riverpod packages/cinder_bloc packages/cinder_material_icons packages/cinder_lucide packages/cinder_cli; do
+            (cd "$package" && dart pub get)
+          done
+      - name: Pack Dart SDK and pub cache
+        run: |
+          DART_BIN="$(readlink -f "$(command -v dart)")"
+          DART_ROOT="$(dirname "$(dirname "$DART_BIN")")"
+          tar -C "$(dirname "$DART_ROOT")" -czf /tmp/dart-sdk.tar.gz "$(basename "$DART_ROOT")"
+          tar -C "$HOME" -czf /tmp/pub-cache.tar.gz .pub-cache
+      - uses: actions/upload-artifact@v7
+        with:
+          name: dart-sdk
+          path: /tmp/dart-sdk.tar.gz
+          retention-days: 1
+      - uses: actions/upload-artifact@v7
+        with:
+          name: pub-cache
+          path: /tmp/pub-cache.tar.gz
+          retention-days: 1
