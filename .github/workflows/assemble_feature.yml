@@ -10,14 +10,18 @@ permissions:
 
 jobs:
   assemble:
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
         with:
           ref: feature/media-data-cli-clean
           fetch-depth: 0
+
       - name: Import product sources
+        shell: bash
         run: |
+          set -euo pipefail
           git fetch origin feature/media-data-cli
           files=(
             lib/cinder.dart
@@ -36,6 +40,7 @@ jobs:
             mkdir -p "$(dirname "$file")"
             git show "origin/feature/media-data-cli:$file" > "$file"
           done
+
           cat > packages/cinder_cli/pubspec.yaml <<'YAML'
           name: cinder_cli
           description: Command-line tools and project scaffolding for the Cinder terminal UI framework.
@@ -69,34 +74,75 @@ jobs:
             - scaffolding
           YAML
           sed -i 's/^          //' packages/cinder_cli/pubspec.yaml
+
           cat > packages/cinder_cli/pubspec_overrides.yaml <<'YAML'
           dependency_overrides:
             cinder:
               path: ../..
           YAML
           sed -i 's/^          //' packages/cinder_cli/pubspec_overrides.yaml
-          rm .github/workflows/assemble_feature.yml
+
+      - name: Correct imported source contracts
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          charts = Path('lib/src/data/charts.dart')
+          text = charts.read_text()
+          text = text.replace(
+              "final maximum = values.map((v) => v.abs()).fold<double>(0, math.max);",
+              "final maximum = values.map((value) => value.abs().toDouble()).fold<double>(0, (current, value) => math.max(current, value));",
+          )
+          charts.write_text(text)
+
+          media = Path('lib/src/media/media.dart')
+          text = media.read_text().replace(
+              'T? get firstOrNull => isEmpty ? null : first;',
+              'T? get firstOrNull => this.isEmpty ? null : first;',
+          )
+          media.write_text(text)
+          PY
+
       - uses: dart-lang/setup-dart@v1
         with:
           sdk: stable
-      - name: Format and validate root package
+
+      - name: Validate root package
+        shell: bash
         run: |
+          set -euo pipefail
           dart pub get
+          dart fix --apply
           dart format lib/cinder.dart lib/src/media lib/src/data test/media_controller_test.dart test/data_widgets_test.dart
           dart analyze --fatal-infos
           dart test test/media_controller_test.dart test/data_widgets_test.dart
+          dart pub publish --dry-run
+
       - name: Validate CLI package
+        shell: bash
         run: |
+          set -euo pipefail
           cd packages/cinder_cli
           dart pub get
-          dart format lib
+          dart fix --apply
+          dart format lib bin test
           dart analyze --fatal-infos
           dart test
           dart pub publish --dry-run
+          dart run bin/cinder_cli.dart --version
+          temp_dir="$(mktemp -d)"
+          dart run bin/cinder_cli.dart create "$temp_dir/sample_app"
+          test -f "$temp_dir/sample_app/pubspec.yaml"
+          test -f "$temp_dir/sample_app/bin/sample_app.dart"
+
       - name: Commit clean feature
+        shell: bash
         run: |
-          git config user.name "Cinder CI"
-          git config user.email "actions@users.noreply.github.com"
+          set -euo pipefail
+          rm .github/workflows/assemble_feature.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
           git commit -m "feat: add media, data visualization, and project CLI"
           git push origin HEAD:feature/media-data-cli-clean
