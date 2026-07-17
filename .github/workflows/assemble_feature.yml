@@ -1,16 +1,20 @@
 name: Assemble Feature
 
 on:
-  push:
+  pull_request:
     branches:
-      - feature/media-data-cli-clean
+      - main
 
 permissions:
   contents: write
 
+concurrency:
+  group: assemble-media-data-cli
+  cancel-in-progress: true
+
 jobs:
   assemble:
-    if: github.actor != 'github-actions[bot]'
+    if: github.event.pull_request.head.ref == 'feature/media-data-cli-clean' && github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
