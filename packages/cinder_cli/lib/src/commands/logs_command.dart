@@ -17,8 +17,7 @@ class LogsCommand extends CliCommand {
     argParser.addOption(
       'mode',
       abbr: 'm',
-      help:
-          'Output mode: "get" fetches buffered logs and exits, '
+      help: 'Output mode: "get" fetches buffered logs and exits, '
           '"listen" streams continuously (default)',
       allowed: ['get', 'listen'],
       defaultsTo: 'listen',
