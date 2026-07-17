@@ -7,8 +7,7 @@ class DoctorCommand extends Command<int> {
   String get name => 'doctor';
 
   @override
-  String get description =>
-      'Check Dart, terminal, and optional media tools.';
+  String get description => 'Check Dart, terminal, and optional media tools.';
 
   @override
   Future<int> run() async {
@@ -26,7 +25,9 @@ class DoctorCommand extends Command<int> {
           throw ProcessException(executable, arguments);
         }
         final output = '${result.stdout}${result.stderr}'.trim();
-        final firstLine = output.isEmpty ? 'available' : output.split('\n').first;
+        final firstLine = output.isEmpty
+            ? 'available'
+            : output.split('\n').first;
         stdout.writeln('✓ $name: $firstLine');
       } catch (_) {
         stdout.writeln(
@@ -36,12 +37,9 @@ class DoctorCommand extends Command<int> {
       }
     }
 
-    await check(
-      'Dart',
-      Platform.resolvedExecutable,
-      const <String>['--version'],
-      required: true,
-    );
+    await check('Dart', Platform.resolvedExecutable, const <String>[
+      '--version',
+    ], required: true);
     await check('FFmpeg', 'ffmpeg', const <String>['-version']);
     await check('FFprobe', 'ffprobe', const <String>['-version']);
     await check('FFplay', 'ffplay', const <String>['-version']);

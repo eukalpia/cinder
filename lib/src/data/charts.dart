@@ -51,12 +51,13 @@ class BarChart extends StatelessWidget {
         .fold<double>(0, math.max);
     final labelWidth = labels.isEmpty
         ? 0
-        : labels.fold<int>(0, (current, label) => math.max(current, label.length));
+        : labels.fold<int>(
+            0,
+            (current, label) => math.max(current, label.length),
+          );
     return List<String>.generate(values.length, (index) {
       final value = values[index].toDouble();
-      final count = maximum == 0
-          ? 0
-          : (value.abs() / maximum * width).round();
+      final count = maximum == 0 ? 0 : (value.abs() / maximum * width).round();
       final label = index < labels.length
           ? labels[index].padRight(labelWidth)
           : '';
@@ -68,12 +69,7 @@ class BarChart extends StatelessWidget {
 }
 
 class LineChart extends StatelessWidget {
-  const LineChart(
-    this.values, {
-    super.key,
-    this.width = 60,
-    this.height = 12,
-  });
+  const LineChart(this.values, {super.key, this.width = 60, this.height = 12});
 
   final List<num> values;
   final int width;
@@ -94,9 +90,10 @@ class LineChart extends StatelessWidget {
     );
     for (var x = 0; x < sampled.length; x++) {
       final normalized = range == 0 ? 0.5 : (sampled[x] - minimum) / range;
-      final y = (height - 1 - normalized * (height - 1))
-          .round()
-          .clamp(0, height - 1);
+      final y = (height - 1 - normalized * (height - 1)).round().clamp(
+        0,
+        height - 1,
+      );
       grid[y][x] = '●';
       if (x > 0) {
         final previous = grid.indexWhere((row) => row[x - 1] == '●');
@@ -119,8 +116,8 @@ List<double> _sample(List<num> values, int count) {
   }
   return List<double>.generate(
     count,
-    (index) => values[
-      (index * (values.length - 1) / math.max(1, count - 1)).round()
-    ].toDouble(),
+    (index) =>
+        values[(index * (values.length - 1) / math.max(1, count - 1)).round()]
+            .toDouble(),
   );
 }

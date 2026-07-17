@@ -33,17 +33,14 @@ void main() {
 }
 
 class _Backend implements MediaBackend {
-  final StreamController<VideoFrame> frames =
-      StreamController<VideoFrame>();
+  final StreamController<VideoFrame> frames = StreamController<VideoFrame>();
 
   @override
   Stream<VideoFrame> get videoFrames => frames.stream;
 
   @override
-  Future<MediaInfo> open(Uri source) async => const MediaInfo(
-        duration: Duration(seconds: 10),
-        hasVideo: true,
-      );
+  Future<MediaInfo> open(Uri source) async =>
+      const MediaInfo(duration: Duration(seconds: 10), hasVideo: true);
 
   @override
   Future<void> play({

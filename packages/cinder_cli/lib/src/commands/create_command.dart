@@ -29,9 +29,7 @@ class CreateCommand extends Command<int> {
 
     final directory = Directory(rest.single).absolute;
     final force = argResults?['force'] as bool;
-    if (directory.existsSync() &&
-        directory.listSync().isNotEmpty &&
-        !force) {
+    if (directory.existsSync() && directory.listSync().isNotEmpty && !force) {
       throw UsageException(
         'Directory ${directory.path} is not empty. Use --force to overwrite generated files.',
         usage,
@@ -51,9 +49,7 @@ class CreateCommand extends Command<int> {
       file.writeAsStringSync(content);
     }
 
-    write(
-      'pubspec.yaml',
-      '''name: $packageName
+    write('pubspec.yaml', '''name: $packageName
 description: $projectDescription
 version: 0.1.0
 publish_to: none
@@ -67,16 +63,10 @@ dependencies:
 dev_dependencies:
   lints: ^5.0.0
   test: ^1.25.0
-''',
-    );
-    write(
-      'analysis_options.yaml',
-      'include: package:lints/recommended.yaml\n',
-    );
+''');
+    write('analysis_options.yaml', 'include: package:lints/recommended.yaml\n');
     write('.gitignore', '.dart_tool/\nbuild/\ncoverage/\n');
-    write(
-      'bin/$packageName.dart',
-      '''import 'package:cinder/cinder.dart';
+    write('bin/$packageName.dart', '''import 'package:cinder/cinder.dart';
 
 void main() {
   runApp(const App());
@@ -94,24 +84,18 @@ class App extends StatelessWidget {
     );
   }
 }
-''',
-    );
-    write(
-      'test/app_test.dart',
-      '''import 'package:test/test.dart';
+''');
+    write('test/app_test.dart', '''import 'package:test/test.dart';
 
 void main() {
   test('project scaffold is ready', () {
     expect(true, isTrue);
   });
 }
-''',
-    );
+''');
 
     stdout.writeln('Created $packageName in ${directory.path}');
-    stdout.writeln(
-      'Next: cd ${directory.path} && dart pub get && dart run',
-    );
+    stdout.writeln('Next: cd ${directory.path} && dart pub get && dart run');
     return 0;
   }
 }

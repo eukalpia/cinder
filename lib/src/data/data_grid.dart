@@ -1,11 +1,7 @@
 import 'package:cinder/cinder.dart';
 
 class DataColumn {
-  const DataColumn(
-    this.label, {
-    this.width,
-    this.align = TextAlign.left,
-  });
+  const DataColumn(this.label, {this.width, this.align = TextAlign.left});
 
   final String label;
   final int? width;
@@ -61,9 +57,7 @@ class DataGrid extends StatelessWidget {
     String line(List<String> row) =>
         '│${List<String>.generate(widths.length, (index) {
           final text = index < row.length ? row[index] : '';
-          final clipped = text.length > widths[index]
-              ? '${text.substring(0, widths[index] - 1)}…'
-              : text;
+          final clipped = text.length > widths[index] ? '${text.substring(0, widths[index] - 1)}…' : text;
           return ' ${clipped.padRight(widths[index])} ';
         }).join('│')}│';
 

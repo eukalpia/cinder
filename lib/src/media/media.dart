@@ -68,10 +68,9 @@ class MediaClock {
   Duration _anchor = Duration.zero;
   double _speed = 1;
 
-  Duration get position => _anchor +
-      Duration(
-        microseconds: (_watch.elapsedMicroseconds * _speed).round(),
-      );
+  Duration get position =>
+      _anchor +
+      Duration(microseconds: (_watch.elapsedMicroseconds * _speed).round());
   bool get isRunning => _watch.isRunning;
 
   void start(Duration position, {double speed = 1}) {
@@ -105,7 +104,7 @@ class MediaClock {
 
 class MediaController extends ChangeNotifier {
   MediaController({MediaBackend? backend})
-      : backend = backend ?? FfmpegMediaBackend();
+    : backend = backend ?? FfmpegMediaBackend();
 
   final MediaBackend backend;
   final MediaClock clock = MediaClock();
@@ -132,10 +131,7 @@ class MediaController extends ChangeNotifier {
     try {
       _info = await backend.open(_toUri(source));
       await _subscription?.cancel();
-      _subscription = backend.videoFrames.listen(
-        _acceptFrame,
-        onError: _fail,
-      );
+      _subscription = backend.videoFrames.listen(_acceptFrame, onError: _fail);
       clock.seek(Duration.zero);
       _setState(MediaPlaybackState.ready);
       if (autoPlay) await play();
@@ -147,11 +143,7 @@ class MediaController extends ChangeNotifier {
 
   Future<void> play() async {
     if (_info == null) throw StateError('Open media before playback.');
-    await backend.play(
-      position: position,
-      volume: _volume,
-      speed: _speed,
-    );
+    await backend.play(position: position, volume: _volume, speed: _speed);
     clock.start(position, speed: _speed);
     _setState(MediaPlaybackState.playing);
   }
@@ -275,22 +267,19 @@ class FfmpegMediaBackend implements MediaBackend {
       );
     }
     final json = jsonDecode(result.stdout.toString()) as Map<String, dynamic>;
-    final streams =
-        (json['streams'] as List<dynamic>? ?? const <dynamic>[])
-            .cast<Map<String, dynamic>>();
+    final streams = (json['streams'] as List<dynamic>? ?? const <dynamic>[])
+        .cast<Map<String, dynamic>>();
     final video = streams.where((s) => s['codec_type'] == 'video').firstOrNull;
     final audio = streams.any((s) => s['codec_type'] == 'audio');
     final format = json['format'] as Map<String, dynamic>?;
     final durationSeconds =
         double.tryParse('${format?['duration'] ?? video?['duration'] ?? 0}') ??
-            0;
+        0;
     final rate = _parseRate(
       '${video?['avg_frame_rate'] ?? video?['r_frame_rate'] ?? ''}',
     );
     _info = MediaInfo(
-      duration: Duration(
-        microseconds: (durationSeconds * 1000000).round(),
-      ),
+      duration: Duration(microseconds: (durationSeconds * 1000000).round()),
       width: video?['width'] as int?,
       height: video?['height'] as int?,
       frameRate: rate,
@@ -360,13 +349,7 @@ class FfmpegMediaBackend implements MediaBackend {
         'rawvideo',
         'pipe:1',
       ]);
-      _readFrames(
-        _video!,
-        generation,
-        info.width!,
-        info.height!,
-        frameRate,
-      );
+      _readFrames(_video!, generation, info.width!, info.height!, frameRate);
     }
     if (info.hasAudio) {
       final filters = <String>[];
@@ -415,10 +398,10 @@ class FfmpegMediaBackend implements MediaBackend {
         final pixels = Uint8List.fromList(
           bytes.sublist(offset, offset + frameBytes),
         );
-        final timestamp = _position +
+        final timestamp =
+            _position +
             Duration(
-              microseconds:
-                  (index * 1000000 / frameRate / _speed).round(),
+              microseconds: (index * 1000000 / frameRate / _speed).round(),
             );
         _frames.add(
           VideoFrame(

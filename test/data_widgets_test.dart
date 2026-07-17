@@ -4,10 +4,7 @@ import 'package:test/test.dart';
 void main() {
   test('data grid renders headers and rows', () {
     final grid = DataGrid(
-      columns: const <DataColumn>[
-        DataColumn('Name'),
-        DataColumn('Score'),
-      ],
+      columns: const <DataColumn>[DataColumn('Name'), DataColumn('Score')],
       rows: const <List<Object?>>[
         <Object?>['Ada', 10],
       ],
