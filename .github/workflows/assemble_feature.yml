@@ -91,27 +91,28 @@ jobs:
         run: |
           python3 - <<'PY'
           from pathlib import Path
+          import re
 
           charts = Path('lib/src/data/charts.dart')
-          text = charts.read_text().replace(
-              "final maximum = values.map((v) => v.abs()).fold<double>(0, math.max);",
-              "final maximum = values.map((value) => value.abs().toDouble()).fold<double>(0, (current, value) => math.max(current, value));",
+          text = charts.read_text()
+          text, replacements = re.subn(
+              r"final maximum = values\s*\.map\(\(value\) => value\.abs\(\)\)\s*\.fold<double>\(0, math\.max\);",
+              "final maximum = values\n        .map((value) => value.abs().toDouble())\n        .fold<double>(0, (current, value) => math.max(current, value));",
+              text,
           )
+          if replacements != 1:
+              raise SystemExit(f'Expected one BarChart maximum replacement, got {replacements}.')
           charts.write_text(text)
 
           media = Path('lib/src/media/media.dart')
-          text = media.read_text().replace(
-              'T? get firstOrNull => isEmpty ? null : first;',
-              'T? get firstOrNull => this.isEmpty ? null : first;',
-          )
-          media.write_text(text)
+          text = media.read_text()
+          old = 'T? get firstOrNull => isEmpty ? null : first;'
+          if text.count(old) != 1:
+              raise SystemExit('Expected one firstOrNull contract to replace.')
+          media.write_text(text.replace(old, 'T? get firstOrNull => this.isEmpty ? null : first;'))
 
           create = Path('packages/cinder_cli/lib/src/commands/create_command.dart')
-          text = create.read_text().replace(
-              'sdk: \\"\\>=3.5.0 <4.0.0\\"',
-              'sdk: ">=3.5.0 <4.0.0"',
-          )
-          create.write_text(text)
+          create.write_text(create.read_text().replace(r'\"', '"'))
 
           doctor = Path('packages/cinder_cli/lib/src/commands/doctor_command.dart')
           text = doctor.read_text().replace(
@@ -125,25 +126,42 @@ jobs:
         with:
           sdk: stable
 
-      - name: Validate root package
+      - name: Resolve root dependencies
+        run: dart pub get
+
+      - name: Fix and format root sources
         shell: bash
         run: |
-          set -euo pipefail
-          dart pub get
           dart fix --apply
           dart format lib/cinder.dart lib/src/media lib/src/data test/media_controller_test.dart test/data_widgets_test.dart
-          dart analyze --fatal-infos
-          dart test test/media_controller_test.dart test/data_widgets_test.dart
 
-      - name: Validate CLI package
+      - name: Analyze root package
+        run: dart analyze --fatal-infos
+
+      - name: Test root package
+        run: dart test test/media_controller_test.dart test/data_widgets_test.dart
+
+      - name: Resolve CLI dependencies
+        working-directory: packages/cinder_cli
+        run: dart pub get
+
+      - name: Format CLI package
+        working-directory: packages/cinder_cli
+        run: dart format lib bin test
+
+      - name: Analyze CLI package
+        working-directory: packages/cinder_cli
+        run: dart analyze --fatal-infos
+
+      - name: Test CLI package
+        working-directory: packages/cinder_cli
+        run: dart test
+
+      - name: Smoke-test project creation
+        working-directory: packages/cinder_cli
         shell: bash
         run: |
           set -euo pipefail
-          cd packages/cinder_cli
-          dart pub get
-          dart format lib bin test
-          dart analyze --fatal-infos
-          dart test
           dart run bin/cinder_cli.dart version
           temp_dir="$(mktemp -d)"
           dart run bin/cinder_cli.dart create "$temp_dir/sample_app"
