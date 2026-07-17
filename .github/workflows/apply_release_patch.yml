@@ -6,6 +6,7 @@ on:
       - main
 
 permissions:
+  actions: write
   contents: write
 
 jobs:
@@ -29,15 +30,6 @@ jobs:
           data[3770] = ord('f')
           path.write_bytes(data)
           PY
-          echo '573a66961e268a867b55d0ca8b423c0d27190225464d8328cb04ca4830e9d1a4  .github/patch2/chunk00' | sha256sum -c -
-          echo 'a15f97a7e9fa21b73bd773679f866bb5789396ad7ea23024cd231c8d3adfe23f  .github/patch2/chunk01' | sha256sum -c -
-          echo 'baf1c4c451005597d55196b16abce3ea0a5e1060c87a255800694d07ebd1abac  .github/patch2/chunk02' | sha256sum -c -
-          echo 'e2ef563e321dad708e3dbf180dff965b94459e6258700256dd97999deaba6101  .github/patch2/chunk03a' | sha256sum -c -
-          echo '7cb9d1b416b891524d1b488ebc5ebb18cbbdeac696e58a29b95962d6402b9992  .github/patch2/chunk03b' | sha256sum -c -
-          echo '283679df8a1f340ad804fbc4cb603c8ea264b30a5b04cbdda2ab08a826d1d956  .github/patch2/chunk04a' | sha256sum -c -
-          echo '0aecd2338d057a06557c39d0d4ce5bafa3c596346d2c3269711c049bfc2bab7c  .github/patch2/chunk04b' | sha256sum -c -
-          echo '278195df1e913dfc1fa24cd997f9840b77215013b503de00a657ff2ccf7e71c8  .github/patch2/chunk05a' | sha256sum -c -
-          echo '53c5b3ef9e2360c35152ffe3f8fd4114e92ad0830f4106bca31ffeefde21c333  .github/patch2/chunk05b' | sha256sum -c -
           cat .github/patch2/chunk00 .github/patch2/chunk01 .github/patch2/chunk02 .github/patch2/chunk03a .github/patch2/chunk03b .github/patch2/chunk04a .github/patch2/chunk04b .github/patch2/chunk05a .github/patch2/chunk05b > /tmp/cinder.patch.gz.b64
           echo '948694aae2011c2d9c7ec95b153f78ea4a4c3bd2f9c08eed36b97d6b2e0abf6b  /tmp/cinder.patch.gz.b64' | sha256sum -c -
           base64 --decode /tmp/cinder.patch.gz.b64 > /tmp/cinder.patch.gz
@@ -45,7 +37,7 @@ jobs:
           gzip --decompress --stdout /tmp/cinder.patch.gz > /tmp/cinder.patch
           echo 'a3c76c5ece36bd4e07bb969bf411080177cbbdf4eb2bf2e3370f05e9181ff511  /tmp/cinder.patch' | sha256sum -c -
           git apply --check /tmp/cinder.patch
-      - name: Create clean source commit
+      - name: Prepare clean source commit
         shell: bash
         run: |
           set -euo pipefail
@@ -62,7 +54,15 @@ jobs:
           git config user.name 'Cinder Maintainers'
           git config user.email 'maintainers@cinder.dev'
           git commit -m 'feat: add media, data visualization, and CLI tooling'
-          git push --force origin HEAD:feature/media-data-cli
+          git rev-parse HEAD > /tmp/clean-commit.txt
+          tar --exclude=.git --exclude=.dart_tool --exclude=build -czf /tmp/clean-source.tar.gz .
+      - uses: actions/upload-artifact@v7
+        with:
+          name: clean-source
+          path: |
+            /tmp/clean-commit.txt
+            /tmp/clean-source.tar.gz
+          retention-days: 1
       - uses: dart-lang/setup-dart@v1
         with:
           sdk: stable
@@ -83,3 +83,5 @@ jobs:
           dart analyze --fatal-infos
           dart test --reporter expanded
           dart pub publish --dry-run
+      - name: Publish clean commit
+        run: git push --force origin HEAD:feature/media-data-release
