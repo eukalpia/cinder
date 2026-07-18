@@ -13,14 +13,14 @@ concurrency:
 jobs:
   finalize_media_player:
     name: Finalize media player
-    if: github.event_name == 'pull_request' && github.event.pull_request.head.ref == 'feature/media-data-cli-clean' && github.actor != 'github-actions[bot]'
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.ref == 'feature/media-player-controls' && github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: feature/media-data-cli-clean
+          ref: feature/media-player-controls
           fetch-depth: 0
       - uses: dart-lang/setup-dart@v1
         with:
@@ -80,14 +80,6 @@ jobs:
           if old not in text:
               raise SystemExit('RenderImage.imageData setter was not found')
           image.write_text(text.replace(old, new, 1))
-
-          player = Path('lib/src/media/media_player.dart')
-          text = player.read_text().replace(
-              "final bar = '[${'='.padRight(filled, '=')}${''.padRight(empty, '-')}]';",
-              "final bar = '[${''.padRight(filled, '=')}${''.padRight(empty, '-')}]';",
-              1,
-          )
-          player.write_text(text)
           PY
       - name: Resolve dependencies
         run: dart pub get
@@ -111,7 +103,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
           git commit -m "feat(media): add responsive player controls and direct frame rendering"
-          git push origin HEAD:feature/media-data-cli-clean
+          git push origin HEAD:feature/media-player-controls
 
   root:
     name: Root package
