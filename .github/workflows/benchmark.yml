@@ -28,40 +28,7 @@ jobs:
           sdk: stable
 
       - name: Apply lifecycle and adaptive patches
-        shell: bash
-        run: |
-          python3 - <<'PY'
-          import re
-          from pathlib import Path
-
-          def blocks(path):
-              workflow = Path(path).read_text()
-              matches = re.findall(
-                  r"^          python3 - <<'PY'\n(.*?)^          PY$",
-                  workflow,
-                  flags=re.MULTILINE | re.DOTALL,
-              )
-              result = []
-              for block in matches:
-                  lines = [
-                      line[10:] if line.startswith('          ') else line
-                      for line in block.splitlines()
-                  ]
-                  result.append('\n'.join(lines) + '\n')
-              return result
-
-          lifecycle = blocks('.github/workflows/fix_media_open_race.yml')
-          if len(lifecycle) != 2:
-              raise SystemExit(f'Expected 2 lifecycle blocks, found {len(lifecycle)}')
-          for block in lifecycle:
-              exec(compile(block, '<lifecycle-patch>', 'exec'), {'__name__': '__main__'})
-
-          adaptive = blocks('.github/workflows/apply_media_lifecycle_and_adaptive.yml')
-          if len(adaptive) != 3:
-              raise SystemExit(f'Expected 3 adaptive blocks, found {len(adaptive)}')
-          for block in adaptive[1:]:
-              exec(compile(block, '<adaptive-patch>', 'exec'), {'__name__': '__main__'})
-          PY
+        run: python3 .github/apply_media_fixes.py
 
       - name: Validate media changes
         run: |
@@ -75,6 +42,7 @@ jobs:
           git checkout origin/main -- .github/workflows/benchmark.yml
           rm .github/workflows/fix_media_open_race.yml
           rm .github/workflows/apply_media_lifecycle_and_adaptive.yml
+          rm .github/apply_media_fixes.py
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
