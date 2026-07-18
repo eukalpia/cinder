@@ -31,17 +31,22 @@ jobs:
         shell: bash
         run: |
           python3 - <<'PY'
+          import re
           from pathlib import Path
 
           def blocks(path):
               workflow = Path(path).read_text()
-              marker = "python3 - <<'PY'\n"
+              matches = re.findall(
+                  r"^          python3 - <<'PY'\n(.*?)^          PY$",
+                  workflow,
+                  flags=re.MULTILINE | re.DOTALL,
+              )
               result = []
-              remainder = workflow
-              while marker in remainder:
-                  remainder = remainder.split(marker, 1)[1]
-                  block, remainder = remainder.split('\n          PY', 1)
-                  lines = [line[10:] if line.startswith('          ') else line for line in block.splitlines()]
+              for block in matches:
+                  lines = [
+                      line[10:] if line.startswith('          ') else line
+                      for line in block.splitlines()
+                  ]
                   result.append('\n'.join(lines) + '\n')
               return result
 
