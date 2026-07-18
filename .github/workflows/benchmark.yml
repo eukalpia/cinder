@@ -49,28 +49,28 @@ jobs:
           PY
           python3 .github/apply_media_fixes.py
           python3 - <<'PY'
+          import re
           from pathlib import Path
 
           path = Path('test/media_controller_test.dart')
           text = path.read_text()
-          old = '''  @override
-          Future<void> close() async {
-            await frames.close();
-          }
-          }
-          '''
-          new = '''  @override
-          Future<void> close() async {
-            await frames.close();
-          }
-
-          @override
-          Future<void> dispose() => close();
-          }
-          '''
-          if old not in text:
+          pattern = re.compile(
+              r'(class _Backend implements MediaBackend \{.*?'
+              r'  @override\n  Future<void> close\(\) async \{\n'
+              r'    await frames\.close\(\);\n  \})'
+              r'(\n\})',
+              flags=re.DOTALL,
+          )
+          replacement = (
+              r'\1\n\n'
+              r'  @override\n'
+              r'  Future<void> dispose() => close();'
+              r'\2'
+          )
+          text, count = pattern.subn(replacement, text, count=1)
+          if count != 1:
               raise SystemExit('Test backend close block not found')
-          path.write_text(text.replace(old, new, 1))
+          path.write_text(text)
           PY
 
       - name: Resolve dependencies
