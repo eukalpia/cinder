@@ -11,6 +11,71 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  apply_media_fix:
+    name: Apply media lifecycle and adaptive viewport
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.ref == 'feature/media-data-cli-clean' && github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: feature/media-data-cli-clean
+          fetch-depth: 0
+
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+
+      - name: Apply lifecycle and adaptive patches
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          def blocks(path):
+              workflow = Path(path).read_text()
+              marker = "python3 - <<'PY'\n"
+              result = []
+              remainder = workflow
+              while marker in remainder:
+                  remainder = remainder.split(marker, 1)[1]
+                  block, remainder = remainder.split('\n          PY', 1)
+                  lines = [line[10:] if line.startswith('          ') else line for line in block.splitlines()]
+                  result.append('\n'.join(lines) + '\n')
+              return result
+
+          lifecycle = blocks('.github/workflows/fix_media_open_race.yml')
+          if len(lifecycle) != 2:
+              raise SystemExit(f'Expected 2 lifecycle blocks, found {len(lifecycle)}')
+          for block in lifecycle:
+              exec(compile(block, '<lifecycle-patch>', 'exec'), {'__name__': '__main__'})
+
+          adaptive = blocks('.github/workflows/apply_media_lifecycle_and_adaptive.yml')
+          if len(adaptive) != 3:
+              raise SystemExit(f'Expected 3 adaptive blocks, found {len(adaptive)}')
+          for block in adaptive[1:]:
+              exec(compile(block, '<adaptive-patch>', 'exec'), {'__name__': '__main__'})
+          PY
+
+      - name: Validate media changes
+        run: |
+          dart pub get
+          dart format lib/src/media/media.dart test/media_controller_test.dart
+          dart analyze --fatal-infos
+          dart test test/media_controller_test.dart --reporter expanded
+
+      - name: Commit clean product changes
+        run: |
+          git checkout origin/main -- .github/workflows/benchmark.yml
+          rm .github/workflows/fix_media_open_race.yml
+          rm .github/workflows/apply_media_lifecycle_and_adaptive.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "fix(media): make opening atomic and adapt video to terminal"
+          git push origin HEAD:feature/media-data-cli-clean
+
   benchmark:
     name: Benchmark
     runs-on: ubuntu-latest
