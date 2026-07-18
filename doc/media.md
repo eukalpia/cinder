@@ -8,7 +8,42 @@ Install `ffmpeg`, `ffprobe`, and `ffplay`, then ensure all three commands are av
 
 Cinder passes `-nostdin` only to FFmpeg. FFplay does not support that option, including current Windows builds from gyan.dev.
 
-## Basic usage
+## Complete player
+
+`MediaPlayer` combines the direct video surface, seek bar, playback buttons, volume, mute, speed selection, viewport modes, keyboard shortcuts, and runtime status:
+
+```dart
+Expanded(
+  child: MediaPlayer(
+    controller: controller,
+    title: 'movie.mp4',
+    fit: MediaPlayerFit.contain,
+  ),
+)
+```
+
+The direct video surface updates an existing render object instead of sending every frame through the asynchronous static-image loader.
+
+### Keyboard shortcuts
+
+| Key | Action |
+|---|---|
+| Space or K | Play or pause |
+| Left / Right | Seek 5 seconds |
+| Shift + Left / Right | Seek 30 seconds |
+| J / L | Seek backward or forward |
+| Up / Down | Change volume |
+| M | Mute or restore volume |
+| [ / ] | Decrease or increase playback speed |
+| 0–9 | Jump to 0–90 percent |
+| Home / End | Beginning or end |
+| F | Toggle contain/fullscreen cover |
+| C | Show or hide controls |
+| Q | Quit cleanly |
+
+The seek bar and control buttons also support mouse input.
+
+## Basic controller usage
 
 ```dart
 final controller = MediaController(
@@ -24,38 +59,9 @@ await controller.open('movie.mp4', autoPlay: true);
 
 ## Responsive terminal layout
 
-`VideoPlayer` is adaptive by default. Leave `width` and `height` unset and give it the remaining layout space with `Expanded`:
+`MediaPlayer` and `VideoPlayer` rebuild against the actual parent constraints after terminal resize. `MediaPlayerFit.contain` preserves the complete source with letterboxing. `MediaPlayerFit.cover` fills the complete viewport and crops around the center. `MediaPlayerFit.fill` stretches to the complete viewport.
 
-```dart
-Column(
-  children: [
-    Text('movie.mp4'),
-    const SizedBox(height: 1),
-    Expanded(
-      child: VideoPlayer(
-        controller: controller,
-        fit: BoxFit.contain,
-      ),
-    ),
-    const SizedBox(height: 1),
-    Text('00:10 / 01:42'),
-  ],
-)
-```
-
-The player rebuilds against the actual parent constraints after terminal resize and preserves the source aspect ratio while accounting for tall terminal cells.
-
-When `adaptive` is enabled, `width` and `height` are optional maximums rather than rigid dimensions:
-
-```dart
-VideoPlayer(
-  controller: controller,
-  width: 160,
-  height: 45,
-)
-```
-
-Use `adaptive: false` only when an exact fixed cell size is required.
+Leave explicit width and height unset and give the player the remaining space with `Expanded`.
 
 Use `maxFrameRate: 60` only when the selected terminal protocol and machine can sustain it. The default 30 FPS limit keeps Unicode fallback rendering responsive on ordinary terminals.
 
@@ -68,6 +74,7 @@ Run `dart pub get` before formatting examples so the formatter uses the package 
 - Video is decoded to a bounded resolution before entering the Dart process.
 - Frames are paced by presentation time instead of being emitted as quickly as FFmpeg can decode them.
 - Late frames are discarded before they overload the widget tree.
+- Equal-sized RGBA frame updates request repaint without relaying out the render tree.
 - FFmpeg stderr is consumed and decoder failures are forwarded through the media stream.
 - Media opening is atomic: a stale FFprobe completion cannot start playback after the controller was closed or disposed.
 - `pause`, `seek`, and controller disposal terminate owned media processes.
