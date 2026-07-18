@@ -86,6 +86,7 @@ class _MediaPlayerState extends State<MediaPlayer> {
   late MediaPlayerFit _fit;
   late bool _controlsVisible;
   double _lastAudibleVolume = 1;
+  Object? _lastReportedError;
   Future<void> _commandQueue = Future<void>.value();
 
   @override
@@ -100,7 +101,8 @@ class _MediaPlayerState extends State<MediaPlayer> {
     _ticker = Timer.periodic(
       const Duration(milliseconds: 200),
       (_) {
-        if (mounted && widget.controller.state == MediaPlaybackState.playing) {
+        if (mounted &&
+            widget.controller.state == MediaPlaybackState.playing) {
           setState(() {});
         }
       },
@@ -113,6 +115,7 @@ class _MediaPlayerState extends State<MediaPlayer> {
     if (oldWidget.controller != widget.controller) {
       oldWidget.controller.removeListener(_changed);
       widget.controller.addListener(_changed);
+      _lastReportedError = null;
     }
     if (oldWidget.fit != widget.fit) {
       _fit = widget.fit;
@@ -127,7 +130,8 @@ class _MediaPlayerState extends State<MediaPlayer> {
       return;
     }
     final error = widget.controller.error;
-    if (error != null) {
+    if (error != null && !identical(error, _lastReportedError)) {
+      _lastReportedError = error;
       widget.onError?.call(error);
     }
     setState(() {});
@@ -141,8 +145,12 @@ class _MediaPlayerState extends State<MediaPlayer> {
   }
 
   void _enqueue(Future<void> Function() command) {
-    _commandQueue = _commandQueue.then((_) => command()).catchError((Object error) {
-      widget.onError?.call(error);
+    _commandQueue = _commandQueue.then<void>((_) async {
+      try {
+        await command();
+      } catch (error) {
+        widget.onError?.call(error);
+      }
     });
   }
 
@@ -154,19 +162,15 @@ class _MediaPlayerState extends State<MediaPlayer> {
       return true;
     }
     if (key == LogicalKey.arrowLeft || key == LogicalKey.keyJ) {
-      _enqueue(
-        () => _seekRelative(
-          event.isShiftPressed ? -widget.largeSeekStep : -widget.seekStep,
-        ),
-      );
+      final amount =
+          event.isShiftPressed ? widget.largeSeekStep : widget.seekStep;
+      _enqueue(() => _seekRelative(_negate(amount)));
       return true;
     }
     if (key == LogicalKey.arrowRight || key == LogicalKey.keyL) {
-      _enqueue(
-        () => _seekRelative(
-          event.isShiftPressed ? widget.largeSeekStep : widget.seekStep,
-        ),
-      );
+      final amount =
+          event.isShiftPressed ? widget.largeSeekStep : widget.seekStep;
+      _enqueue(() => _seekRelative(amount));
       return true;
     }
     if (key == LogicalKey.arrowUp) {
@@ -190,11 +194,7 @@ class _MediaPlayerState extends State<MediaPlayer> {
       return true;
     }
     if (key == LogicalKey.keyF) {
-      setState(() {
-        _fit = _fit == MediaPlayerFit.cover
-            ? MediaPlayerFit.contain
-            : MediaPlayerFit.cover;
-      });
+      _toggleFit();
       return true;
     }
     if (key == LogicalKey.keyC) {
@@ -226,6 +226,14 @@ class _MediaPlayerState extends State<MediaPlayer> {
     }
 
     return false;
+  }
+
+  void _toggleFit() {
+    setState(() {
+      _fit = _fit == MediaPlayerFit.cover
+          ? MediaPlayerFit.contain
+          : MediaPlayerFit.cover;
+    });
   }
 
   Future<void> _togglePlayback() async {
@@ -287,10 +295,9 @@ class _MediaPlayerState extends State<MediaPlayer> {
         index = _playbackSpeeds.length - 1;
       }
     }
-    final nextIndex = (index + direction).clamp(
-      0,
-      _playbackSpeeds.length - 1,
-    );
+    final nextIndex = (index + direction)
+        .clamp(0, _playbackSpeeds.length - 1)
+        .toInt();
     await widget.controller.setSpeed(_playbackSpeeds[nextIndex]);
   }
 
@@ -324,31 +331,25 @@ class _MediaPlayerState extends State<MediaPlayer> {
               controller: controller,
               fit: _fit,
               onTogglePlayback: () => _enqueue(_togglePlayback),
-              onSeekFraction: (fraction) => _enqueue(
-                () => _seekFraction(fraction),
-              ),
-              onSeekBackward: () => _enqueue(
-                () => _seekRelative(-widget.seekStep),
-              ),
-              onSeekForward: () => _enqueue(
-                () => _seekRelative(widget.seekStep),
-              ),
-              onVolumeDown: () => _enqueue(
-                () => _changeVolume(-widget.volumeStep),
-              ),
-              onVolumeUp: () => _enqueue(
-                () => _changeVolume(widget.volumeStep),
-              ),
+              onSeekFraction: (fraction) {
+                _enqueue(() => _seekFraction(fraction));
+              },
+              onSeekBackward: () {
+                _enqueue(() => _seekRelative(_negate(widget.seekStep)));
+              },
+              onSeekForward: () {
+                _enqueue(() => _seekRelative(widget.seekStep));
+              },
+              onVolumeDown: () {
+                _enqueue(() => _changeVolume(-widget.volumeStep));
+              },
+              onVolumeUp: () {
+                _enqueue(() => _changeVolume(widget.volumeStep));
+              },
               onToggleMute: () => _enqueue(_toggleMute),
               onSlower: () => _enqueue(() => _changeSpeed(-1)),
               onFaster: () => _enqueue(() => _changeSpeed(1)),
-              onToggleFit: () {
-                setState(() {
-                  _fit = _fit == MediaPlayerFit.cover
-                      ? MediaPlayerFit.contain
-                      : MediaPlayerFit.cover;
-                });
-              },
+              onToggleFit: _toggleFit,
             ),
         ],
       ),
@@ -370,6 +371,10 @@ class _MediaPlayerState extends State<MediaPlayer> {
     ];
     final index = keys.indexOf(key);
     return index < 0 ? null : index;
+  }
+
+  static Duration _negate(Duration value) {
+    return Duration(microseconds: -value.inMicroseconds);
   }
 }
 
@@ -417,20 +422,26 @@ class VideoFrameSurface extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final maxWidth = constraints.maxWidth.isFinite
-            ? math.max(1, constraints.maxWidth.floor())
+        final candidateWidth = constraints.maxWidth.isFinite
+            ? constraints.maxWidth.floor()
             : 80;
-        final maxHeight = constraints.maxHeight.isFinite
-            ? math.max(1, constraints.maxHeight.floor())
+        final candidateHeight = constraints.maxHeight.isFinite
+            ? constraints.maxHeight.floor()
             : 24;
+        final maxWidth = candidateWidth < 1 ? 1 : candidateWidth;
+        final maxHeight = candidateHeight < 1 ? 1 : candidateHeight;
         final currentFrame = frame;
 
         if (currentFrame == null) {
+          final metadata = info;
+          final suffix = metadata?.width != null && metadata?.height != null
+              ? ' ${metadata!.width}x${metadata.height}'
+              : '';
           return SizedBox(
             width: maxWidth.toDouble(),
             height: maxHeight.toDouble(),
             child: Center(
-              child: placeholder ?? const Text('Opening video...'),
+              child: placeholder ?? Text('Opening video$suffix...'),
             ),
           );
         }
@@ -544,11 +555,13 @@ ImageData _cropFrameForCover(
   var cropHeight = frame.height;
 
   if (sourceAspect > targetAspect) {
-    cropWidth = math.max(1, (frame.height * targetAspect).round());
-    cropX = math.max(0, (frame.width - cropWidth) ~/ 2);
+    final calculated = (frame.height * targetAspect).round();
+    cropWidth = calculated < 1 ? 1 : calculated;
+    cropX = (frame.width - cropWidth) ~/ 2;
   } else if (sourceAspect < targetAspect) {
-    cropHeight = math.max(1, (frame.width / targetAspect).round());
-    cropY = math.max(0, (frame.height - cropHeight) ~/ 2);
+    final calculated = (frame.width / targetAspect).round();
+    cropHeight = calculated < 1 ? 1 : calculated;
+    cropY = (frame.height - cropHeight) ~/ 2;
   }
 
   if (cropX == 0 &&
@@ -645,8 +658,8 @@ class MediaControls extends StatelessWidget {
         ),
         LayoutBuilder(
           builder: (context, constraints) {
-            final compact = constraints.maxWidth.isFinite &&
-                constraints.maxWidth < 100;
+            final compact =
+                constraints.maxWidth.isFinite && constraints.maxWidth < 100;
             return Center(
               child: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -713,13 +726,16 @@ class _SeekBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final width = constraints.maxWidth.isFinite
-            ? math.max(10, constraints.maxWidth.floor())
+        final candidateWidth = constraints.maxWidth.isFinite
+            ? constraints.maxWidth.floor()
             : 80;
-        final innerWidth = math.max(1, width - 2);
+        final width = candidateWidth < 10 ? 10 : candidateWidth;
+        final innerWidth = width - 2 < 1 ? 1 : width - 2;
         final filled = (innerWidth * progress.clamp(0, 1)).round();
-        final empty = math.max(0, innerWidth - filled);
-        final bar = '[${'='.padRight(filled, '=')}${''.padRight(empty, '-')}]';
+        final remaining = innerWidth - filled;
+        final empty = remaining < 0 ? 0 : remaining;
+        final bar =
+            '[${''.padRight(filled, '=')}${''.padRight(empty, '-')}]';
 
         return GestureDetector(
           behavior: HitTestBehavior.opaque,
@@ -757,7 +773,8 @@ class _ControlButton extends StatelessWidget {
 }
 
 String _formatMediaDuration(Duration value) {
-  final seconds = math.max(0, value.inSeconds);
+  final rawSeconds = value.inSeconds;
+  final seconds = rawSeconds < 0 ? 0 : rawSeconds;
   final hours = seconds ~/ 3600;
   final minutes = seconds.remainder(3600) ~/ 60;
   final remainder = seconds.remainder(60);
