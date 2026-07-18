@@ -10,7 +10,7 @@ Cinder passes `-nostdin` only to FFmpeg. FFplay does not support that option, in
 
 ## Complete player
 
-`MediaPlayer` combines the direct video surface, seek bar, playback buttons, volume, mute, speed selection, viewport modes, keyboard shortcuts, and runtime status:
+`MediaPlayer` is the first-party media surface. It combines the direct video renderer, seek bar, playback buttons, volume, mute, speed selection, viewport modes, keyboard shortcuts, and runtime status:
 
 ```dart
 Expanded(
