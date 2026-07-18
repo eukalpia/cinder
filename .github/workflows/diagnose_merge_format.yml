@@ -1,0 +1,45 @@
+name: Diagnose Merge Formatting
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    if: github.event.pull_request.head.ref == 'feature/media-data-cli-clean'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+
+      - run: dart pub get
+
+      - name: Reproduce format check
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          mapfile -t files < <(git diff --name-only --diff-filter=ACMR "$BASE_SHA" HEAD | grep -E '^(lib|test|example|benchmark)/.*\.dart$' || true)
+          printf '%s\n' "${files[@]}" > changed-dart-files.txt
+          if [ "${#files[@]}" -gt 0 ]; then
+            dart format "${files[@]}"
+          fi
+          git diff --name-only > format-changed-files.txt
+          git diff > format.diff
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: merge-format-diagnostics
+          path: |
+            changed-dart-files.txt
+            format-changed-files.txt
+            format.diff
+          retention-days: 1
