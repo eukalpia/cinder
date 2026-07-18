@@ -56,7 +56,23 @@ jobs:
         run: dart format lib/src/media/media.dart test/media_controller_test.dart
 
       - name: Analyze repository
-        run: dart analyze --fatal-infos
+        id: analyze
+        continue-on-error: true
+        run: dart analyze --fatal-infos > media-analyzer.log 2>&1
+
+      - name: Upload analyzer diagnostics
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: media-analyzer-diagnostics
+          path: media-analyzer.log
+          retention-days: 1
+
+      - name: Require clean analyzer
+        if: steps.analyze.outcome == 'failure'
+        run: |
+          cat media-analyzer.log
+          exit 1
 
       - name: Test media lifecycle and viewport
         run: dart test test/media_controller_test.dart --reporter expanded
