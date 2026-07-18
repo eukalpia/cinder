@@ -28,7 +28,26 @@ jobs:
           sdk: stable
 
       - name: Apply lifecycle and adaptive patches
-        run: python3 .github/apply_media_fixes.py
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('.github/apply_media_fixes.py')
+          text = path.read_text()
+          text = text.replace(
+              "lifecycle_tests = '''\n",
+              'lifecycle_tests = """\n',
+              1,
+          )
+          text = text.replace(
+              "  });\n'''\ntests = tests.replace(\n",
+              '  });\n"""\ntests = tests.replace(\n',
+              1,
+          )
+          path.write_text(text)
+          PY
+          python3 .github/apply_media_fixes.py
 
       - name: Validate media changes
         run: |
