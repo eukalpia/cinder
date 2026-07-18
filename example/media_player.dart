@@ -34,37 +34,60 @@ Future<void> main(List<String> arguments) async {
     return;
   }
 
+  final capabilities = TerminalCapabilities.fromEnvironment(
+    Platform.environment,
+  );
+  final nativeImages = capabilities.supportsNativeImages;
+
   runApp(
     CinderApp(
-      home: PlayerScreen(source: source),
+      home: PlayerScreen(
+        source: source,
+        nativeImages: nativeImages,
+      ),
     ),
   );
 }
 
 class PlayerScreen extends StatefulWidget {
-  const PlayerScreen({super.key, required this.source});
+  const PlayerScreen({
+    super.key,
+    required this.source,
+    required this.nativeImages,
+  });
 
   final String source;
+  final bool nativeImages;
 
   @override
   State<PlayerScreen> createState() => _PlayerScreenState();
 }
 
 class _PlayerScreenState extends State<PlayerScreen> {
-  late final MediaController _controller;
+  late final ResilientMediaController _controller;
   Object? _error;
 
   @override
   void initState() {
     super.initState();
-    _controller = MediaController(
-      backend: FfmpegProcessBackend(
-        maxVideoWidth: 320,
-        maxVideoHeight: 180,
-        maxFrameRate: 30,
-        lateFrameThreshold: const Duration(milliseconds: 140),
+
+    final decodeWidth = widget.nativeImages ? 640 : 96;
+    final decodeHeight = widget.nativeImages ? 360 : 54;
+    final decodeFrameRate = widget.nativeImages ? 60.0 : 20.0;
+    final displayFrameRate = widget.nativeImages ? 60.0 : 15.0;
+
+    _controller = ResilientMediaController(
+      backend: LatestFrameMediaBackend(
+        displayFrameRate: displayFrameRate,
+        backend: FfmpegProcessBackend(
+          maxVideoWidth: decodeWidth,
+          maxVideoHeight: decodeHeight,
+          maxFrameRate: decodeFrameRate,
+          lateFrameThreshold: const Duration(milliseconds: 180),
+        ),
       ),
     );
+
     unawaited(_open());
   }
 
