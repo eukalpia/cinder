@@ -58,9 +58,8 @@ class BarChart extends StatelessWidget {
     return List<String>.generate(values.length, (index) {
       final value = values[index].toDouble();
       final count = maximum == 0 ? 0 : (value.abs() / maximum * width).round();
-      final label = index < labels.length
-          ? labels[index].padRight(labelWidth)
-          : '';
+      final label =
+          index < labels.length ? labels[index].padRight(labelWidth) : '';
       return '${label.isEmpty ? '' : '$label │'}'
           '${value < 0 ? '◀' : '▶'}${'█' * count}'
           '${showValues ? ' $value' : ''}';
@@ -91,9 +90,9 @@ class LineChart extends StatelessWidget {
     for (var x = 0; x < sampled.length; x++) {
       final normalized = range == 0 ? 0.5 : (sampled[x] - minimum) / range;
       final y = (height - 1 - normalized * (height - 1)).round().clamp(
-        0,
-        height - 1,
-      );
+            0,
+            height - 1,
+          );
       grid[y][x] = '●';
       if (x > 0) {
         final previous = grid.indexWhere((row) => row[x - 1] == '●');

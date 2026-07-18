@@ -28,9 +28,8 @@ class DataGrid extends StatelessWidget {
   Widget build(BuildContext context) => Text(render());
 
   String render() {
-    final effectiveColumns = rowNumbers
-        ? <DataColumn>[const DataColumn('#'), ...columns]
-        : columns;
+    final effectiveColumns =
+        rowNumbers ? <DataColumn>[const DataColumn('#'), ...columns] : columns;
     final effectiveRows = <List<String>>[
       if (showHeader) effectiveColumns.map((column) => column.label).toList(),
       for (var index = 0; index < rows.length; index++)
@@ -57,7 +56,9 @@ class DataGrid extends StatelessWidget {
     String line(List<String> row) =>
         '│${List<String>.generate(widths.length, (index) {
           final text = index < row.length ? row[index] : '';
-          final clipped = text.length > widths[index] ? '${text.substring(0, widths[index] - 1)}…' : text;
+          final clipped = text.length > widths[index]
+              ? '${text.substring(0, widths[index] - 1)}…'
+              : text;
           return ' ${clipped.padRight(widths[index])} ';
         }).join('│')}│';
 
