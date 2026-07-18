@@ -10,7 +10,7 @@ Install `ffmpeg`, `ffprobe`, and `ffplay`, then ensure all three commands are av
 
 ## Complete player
 
-`MediaPlayer` is the first-party media surface. It combines the direct video renderer, seek bar, playback buttons, volume, mute, speed selection, viewport modes, keyboard shortcuts, and runtime status:
+`MediaPlayer` is the first-party media surface. It combines the direct video renderer, seek bar, playback buttons, volume, mute, speed selection, viewport modes, keyboard shortcuts, mouse controls, and runtime status:
 
 ```dart
 final controller = MediaController(
