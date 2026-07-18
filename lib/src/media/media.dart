@@ -105,7 +105,7 @@ class MediaClock {
 
 class MediaController extends ChangeNotifier {
   MediaController({MediaBackend? backend})
-      : backend = backend ?? FfmpegMediaBackend();
+    : backend = backend ?? FfmpegMediaBackend();
 
   final MediaBackend backend;
   final MediaClock clock = MediaClock();
@@ -231,9 +231,9 @@ class FfmpegMediaBackend implements MediaBackend {
     this.maxVideoHeight = 135,
     this.maxFrameRate = 30,
     this.lateFrameThreshold = const Duration(milliseconds: 120),
-  })  : assert(maxVideoWidth > 0),
-        assert(maxVideoHeight > 0),
-        assert(maxFrameRate > 0) {
+  }) : assert(maxVideoWidth > 0),
+       assert(maxVideoHeight > 0),
+       assert(maxFrameRate > 0) {
     _installShutdownHooks();
   }
 
@@ -268,19 +268,15 @@ class FfmpegMediaBackend implements MediaBackend {
     _ensureActive();
     await close();
     _source = source;
-    final result = await Process.run(
-      ffprobe,
-      <String>[
-        '-v',
-        'error',
-        '-print_format',
-        'json',
-        '-show_streams',
-        '-show_format',
-        _input(source),
-      ],
-      runInShell: Platform.isWindows,
-    );
+    final result = await Process.run(ffprobe, <String>[
+      '-v',
+      'error',
+      '-print_format',
+      'json',
+      '-show_streams',
+      '-show_format',
+      _input(source),
+    ], runInShell: Platform.isWindows);
     if (result.exitCode != 0) {
       throw ProcessException(
         ffprobe,
@@ -293,21 +289,19 @@ class FfmpegMediaBackend implements MediaBackend {
     final streams = (json['streams'] as List<dynamic>? ?? const <dynamic>[])
         .whereType<Map<String, dynamic>>()
         .toList();
-    final video =
-        streams.where((stream) => stream['codec_type'] == 'video').firstOrNull;
+    final video = streams
+        .where((stream) => stream['codec_type'] == 'video')
+        .firstOrNull;
     final audio = streams.any((stream) => stream['codec_type'] == 'audio');
     final format = json['format'] as Map<String, dynamic>?;
-    final durationSeconds = double.tryParse(
-          '${format?['duration'] ?? video?['duration'] ?? 0}',
-        ) ??
+    final durationSeconds =
+        double.tryParse('${format?['duration'] ?? video?['duration'] ?? 0}') ??
         0;
     final rate = _parseRate(
       '${video?['avg_frame_rate'] ?? video?['r_frame_rate'] ?? ''}',
     );
     _info = MediaInfo(
-      duration: Duration(
-        microseconds: (durationSeconds * 1000000).round(),
-      ),
+      duration: Duration(microseconds: (durationSeconds * 1000000).round()),
       width: video?['width'] as int?,
       height: video?['height'] as int?,
       frameRate: rate,
@@ -372,39 +366,37 @@ class FfmpegMediaBackend implements MediaBackend {
     if (info.hasVideo && info.width != null && info.height != null) {
       final outputSize = _fitSize(info.width!, info.height!);
       final sourceRate = info.frameRate ?? maxFrameRate;
-      final outputRate =
-          math.min(sourceRate, maxFrameRate).clamp(1, 240).toDouble();
+      final outputRate = math
+          .min(sourceRate, maxFrameRate)
+          .clamp(1, 240)
+          .toDouble();
       final stderrBuffer = StringBuffer();
       final playbackWatch = Stopwatch()..start();
-      final process = await Process.start(
-        ffmpeg,
-        <String>[
-          '-hide_banner',
-          '-nostdin',
-          '-loglevel',
-          'error',
-          '-ss',
-          _seconds(_position),
-          '-i',
-          _input(source),
-          '-map',
-          '0:v:0',
-          '-an',
-          '-sn',
-          '-dn',
-          '-vf',
-          'scale=${outputSize.width}:${outputSize.height}:'
-              'flags=fast_bilinear,'
-              'fps=${outputRate.toStringAsFixed(3)},'
-              'setpts=PTS/${_speed.toStringAsFixed(4)}',
-          '-pix_fmt',
-          'rgba',
-          '-f',
-          'rawvideo',
-          'pipe:1',
-        ],
-        runInShell: Platform.isWindows,
-      );
+      final process = await Process.start(ffmpeg, <String>[
+        '-hide_banner',
+        '-nostdin',
+        '-loglevel',
+        'error',
+        '-ss',
+        _seconds(_position),
+        '-i',
+        _input(source),
+        '-map',
+        '0:v:0',
+        '-an',
+        '-sn',
+        '-dn',
+        '-vf',
+        'scale=${outputSize.width}:${outputSize.height}:'
+            'flags=fast_bilinear,'
+            'fps=${outputRate.toStringAsFixed(3)},'
+            'setpts=PTS/${_speed.toStringAsFixed(4)}',
+        '-pix_fmt',
+        'rgba',
+        '-f',
+        'rawvideo',
+        'pipe:1',
+      ], runInShell: Platform.isWindows);
       _video = process;
       unawaited(_captureStderr(process, stderrBuffer));
       unawaited(
@@ -418,12 +410,7 @@ class FfmpegMediaBackend implements MediaBackend {
         ),
       );
       unawaited(
-        _watchProcess(
-          process,
-          generation,
-          'video decoder',
-          stderrBuffer,
-        ),
+        _watchProcess(process, generation, 'video decoder', stderrBuffer),
       );
     }
 
@@ -440,34 +427,25 @@ class FfmpegMediaBackend implements MediaBackend {
       }
       filters.add('atempo=${remaining.toStringAsFixed(4)}');
       final stderrBuffer = StringBuffer();
-      final process = await Process.start(
-        ffplay,
-        <String>[
-          '-nodisp',
-          '-autoexit',
-          '-nostdin',
-          '-loglevel',
-          'error',
-          '-ss',
-          _seconds(_position),
-          '-vn',
-          '-volume',
-          (_volume * 100).round().toString(),
-          '-af',
-          filters.join(','),
-          _input(source),
-        ],
-        runInShell: Platform.isWindows,
-      );
+      final process = await Process.start(ffplay, <String>[
+        '-nodisp',
+        '-autoexit',
+        '-nostdin',
+        '-loglevel',
+        'error',
+        '-ss',
+        _seconds(_position),
+        '-vn',
+        '-volume',
+        (_volume * 100).round().toString(),
+        '-af',
+        filters.join(','),
+        _input(source),
+      ], runInShell: Platform.isWindows);
       _audio = process;
       unawaited(_captureStderr(process, stderrBuffer));
       unawaited(
-        _watchProcess(
-          process,
-          generation,
-          'audio player',
-          stderrBuffer,
-        ),
+        _watchProcess(process, generation, 'audio player', stderrBuffer),
       );
     }
   }
@@ -526,13 +504,11 @@ class FfmpegMediaBackend implements MediaBackend {
     }
   }
 
-  Future<void> _captureStderr(
-    Process process,
-    StringBuffer target,
-  ) async {
-    await for (final line in process.stderr
-        .transform(const Utf8Decoder(allowMalformed: true))
-        .transform(const LineSplitter())) {
+  Future<void> _captureStderr(Process process, StringBuffer target) async {
+    await for (final line
+        in process.stderr
+            .transform(const Utf8Decoder(allowMalformed: true))
+            .transform(const LineSplitter())) {
       if (target.length < 8192) {
         target.writeln(line);
       }
@@ -568,20 +544,18 @@ class FfmpegMediaBackend implements MediaBackend {
     };
     _video = null;
     _audio = null;
-    await Future.wait(
-      processes.map(_terminateProcess),
-      eagerError: false,
-    );
+    await Future.wait(processes.map(_terminateProcess), eagerError: false);
   }
 
   Future<void> _terminateProcess(Process process) async {
     try {
       if (Platform.isWindows) {
-        await Process.run(
-          'taskkill',
-          <String>['/PID', '${process.pid}', '/T', '/F'],
-          runInShell: true,
-        ).timeout(const Duration(seconds: 2));
+        await Process.run('taskkill', <String>[
+          '/PID',
+          '${process.pid}',
+          '/T',
+          '/F',
+        ], runInShell: true).timeout(const Duration(seconds: 2));
       } else {
         process.kill(ProcessSignal.sigterm);
       }
@@ -626,10 +600,7 @@ class FfmpegMediaBackend implements MediaBackend {
   _FrameSize _fitSize(int sourceWidth, int sourceHeight) {
     final scale = math.min(
       1.0,
-      math.min(
-        maxVideoWidth / sourceWidth,
-        maxVideoHeight / sourceHeight,
-      ),
+      math.min(maxVideoWidth / sourceWidth, maxVideoHeight / sourceHeight),
     );
     var width = math.max(2, (sourceWidth * scale).round());
     var height = math.max(2, (sourceHeight * scale).round());
@@ -644,9 +615,7 @@ class FfmpegMediaBackend implements MediaBackend {
 
   void _ensureActive() {
     if (_disposed) {
-      throw StateError(
-        'The FFmpeg media backend has been disposed.',
-      );
+      throw StateError('The FFmpeg media backend has been disposed.');
     }
   }
 
@@ -657,7 +626,6 @@ class FfmpegMediaBackend implements MediaBackend {
     _info = null;
   }
 
-  @override
   Future<void> dispose() async {
     if (_disposed) {
       return;
