@@ -10,7 +10,7 @@ Install `ffmpeg`, `ffprobe`, and `ffplay`, then ensure all three commands are av
 
 ## Complete player
 
-`MediaPlayer` is the first-party media surface. It combines the direct video renderer, seek bar, playback buttons, volume, mute, speed selection, viewport modes, keyboard shortcuts, mouse controls, and runtime status. Press `F` to switch between complete-video and fullscreen-cover modes:
+`MediaPlayer` is the first-party media surface. It combines the direct video renderer, seek bar, playback buttons, volume, mute, speed selection, viewport modes, keyboard shortcuts, mouse controls, and runtime status. Press `F` to switch between complete-video and fullscreen-cover modes, or `C` to hide the controls:
 
 ```dart
 final controller = MediaController(
