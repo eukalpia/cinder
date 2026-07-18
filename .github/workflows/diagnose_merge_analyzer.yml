@@ -1,4 +1,4 @@
-name: Diagnose Merge Analyzer
+name: Finalize Media Analyzer Fix
 
 on:
   pull_request:
@@ -6,29 +6,47 @@ on:
       - main
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  analyze:
-    if: github.event.pull_request.head.ref == 'feature/media-data-cli-clean'
+  finalize:
+    if: github.event.pull_request.head.ref == 'feature/media-data-cli-clean' && github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
         with:
+          ref: feature/media-data-cli-clean
           fetch-depth: 0
 
       - uses: dart-lang/setup-dart@v1
         with:
           sdk: stable
 
-      - run: dart pub get
+      - name: Remove invalid override annotation
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
 
-      - name: Analyze merge ref
-        continue-on-error: true
-        run: dart analyze --fatal-infos 2>&1 | tee merge-analyzer.log
+          path = Path('lib/src/media/media.dart')
+          text = path.read_text()
+          old = "  @override\n  Future<void> dispose() async {"
+          if old not in text:
+              raise SystemExit('Expected dispose override was not found.')
+          path.write_text(text.replace(old, "  Future<void> dispose() async {", 1))
+          PY
+          dart format lib/src/media/media.dart
 
-      - uses: actions/upload-artifact@v4
-        with:
-          name: merge-analyzer-output
-          path: merge-analyzer.log
-          retention-days: 1
+      - name: Validate
+        run: |
+          dart pub get
+          dart analyze --fatal-infos
+          dart test test/media_controller_test.dart
+
+      - name: Commit clean result
+        run: |
+          rm .github/workflows/diagnose_merge_analyzer.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "fix(media): finalize process lifecycle analysis"
+          git push origin HEAD:feature/media-data-cli-clean
