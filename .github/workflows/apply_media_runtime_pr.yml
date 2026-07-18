@@ -58,12 +58,17 @@ jobs:
           path.write_text(text)
           PY
 
-      - name: Validate media runtime
-        run: |
-          dart pub get
-          dart format lib/src/media/media.dart
-          dart analyze --fatal-infos
-          dart test test/media_controller_test.dart
+      - name: Resolve dependencies
+        run: dart pub get
+
+      - name: Format media source
+        run: dart format lib/src/media/media.dart
+
+      - name: Analyze repository
+        run: dart analyze --fatal-infos
+
+      - name: Test media controller
+        run: dart test test/media_controller_test.dart
 
       - name: Commit clean fix
         run: |
