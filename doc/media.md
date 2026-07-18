@@ -20,15 +20,40 @@ final controller = MediaController(
 await controller.open('movie.mp4', autoPlay: true);
 ```
 
-Render the current frame with:
+## Responsive terminal layout
+
+`VideoPlayer` is adaptive by default. Leave `width` and `height` unset and give it the remaining layout space with `Expanded`:
+
+```dart
+Column(
+  children: [
+    Text('movie.mp4'),
+    const SizedBox(height: 1),
+    Expanded(
+      child: VideoPlayer(
+        controller: controller,
+        fit: BoxFit.contain,
+      ),
+    ),
+    const SizedBox(height: 1),
+    Text('00:10 / 01:42'),
+  ],
+)
+```
+
+The player rebuilds against the actual parent constraints after terminal resize and preserves the source aspect ratio while accounting for tall terminal cells.
+
+When `adaptive` is enabled, `width` and `height` are optional maximums rather than rigid dimensions:
 
 ```dart
 VideoPlayer(
   controller: controller,
-  width: 100,
-  height: 30,
+  width: 160,
+  height: 45,
 )
 ```
+
+Use `adaptive: false` only when an exact fixed cell size is required.
 
 Use `maxFrameRate: 60` only when the selected terminal protocol and machine can sustain it. The default 30 FPS limit keeps Unicode fallback rendering responsive on ordinary terminals.
 
@@ -42,6 +67,7 @@ Run `dart pub get` before formatting examples so the formatter uses the package 
 - Frames are paced by presentation time instead of being emitted as quickly as FFmpeg can decode them.
 - Late frames are discarded before they overload the widget tree.
 - FFmpeg stderr is consumed and decoder failures are forwarded through the media stream.
+- Media opening is atomic: a stale FFprobe completion cannot start playback after the controller was closed or disposed.
 - `pause`, `seek`, and controller disposal terminate owned media processes.
 - On Windows, Cinder terminates the complete FFmpeg or FFplay process tree with `taskkill /T /F`.
 - SIGINT, SIGTERM, and SIGHUP cleanup hooks stop child processes when the host terminal exits.
