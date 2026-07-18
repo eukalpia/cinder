@@ -6,6 +6,8 @@ Cinder media playback uses FFprobe for metadata, FFmpeg for bounded RGBA video f
 
 Install `ffmpeg`, `ffprobe`, and `ffplay`, then ensure all three commands are available on `PATH`.
 
+Cinder passes `-nostdin` only to FFmpeg. FFplay does not support that option, including current Windows builds from gyan.dev.
+
 ## Basic usage
 
 ```dart
