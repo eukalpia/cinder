@@ -111,6 +111,7 @@ export 'src/components/selectable.dart';
 // Audio and video
 export 'src/media/media.dart';
 export 'src/media/ffmpeg_process_backend.dart';
+export 'src/media/latest_frame_backend.dart';
 export 'src/media/media_player.dart';
 export 'src/media/resilient_media_controller.dart';
 
