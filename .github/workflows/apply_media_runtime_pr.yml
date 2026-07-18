@@ -35,6 +35,28 @@ jobs:
           Path('/tmp/media_patch.py').write_text('\n'.join(lines) + '\n')
           PY
           python3 /tmp/media_patch.py
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('lib/src/media/media.dart')
+          text = path.read_text()
+          text = text.replace(
+              '  Future<void> close();\n\n  Future<void> dispose() => close();\n}',
+              '  Future<void> close();\n}',
+              1,
+          )
+          text = text.replace(
+              '    unawaited(backend.dispose());',
+              '    unawaited(backend.close());',
+              1,
+          )
+          text = text.replace(
+              '            @override\n            Future<void> dispose() async {',
+              '            Future<void> dispose() async {',
+              1,
+          )
+          path.write_text(text)
+          PY
 
       - name: Validate media runtime
         run: |
