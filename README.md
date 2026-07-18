@@ -13,7 +13,7 @@ integrations — without bringing Flutter or Node.js into your CLI runtime.
 [![CI](https://github.com/eukalpia/cinder/actions/workflows/ci.yml/badge.svg)](https://github.com/eukalpia/cinder/actions/workflows/ci.yml)
 [![Benchmark](https://github.com/eukalpia/cinder/actions/workflows/benchmark.yml/badge.svg)](https://github.com/eukalpia/cinder/actions/workflows/benchmark.yml)
 [![Dart](https://img.shields.io/badge/Dart-%3E%3D3.5-0175C2?logo=dart)](https://dart.dev)
-[![License]([(https://img.shields.io/badge/license-APACHE2-blue.svg))](LICENSE)
+[![License]((https://img.shields.io/badge/license-APACHE2-blue.svg))](LICENSE)
 
 [Quick start](#quick-start) · [Icons](#material-and-lucide-icons) · [Images](#terminal-images) · [Focus](#focus-and-keyboard-input) · [State management](#state-management) · [Testing](#testing) · [Architecture](#architecture)
 
