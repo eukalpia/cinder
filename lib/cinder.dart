@@ -112,6 +112,7 @@ export 'src/components/selectable.dart';
 export 'src/media/media.dart';
 export 'src/media/ffmpeg_process_backend.dart';
 export 'src/media/media_player.dart';
+export 'src/media/resilient_media_controller.dart';
 
 // Data grids and charts
 export 'src/data/data_grid.dart';
