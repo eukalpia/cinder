@@ -32,6 +32,8 @@ VideoPlayer(
 
 Use `maxFrameRate: 60` only when the selected terminal protocol and machine can sustain it. The default 30 FPS limit keeps Unicode fallback rendering responsive on ordinary terminals.
 
+Use `shutdownApp()` or `Ctrl+C` for a clean application exit. The media backend receives the shutdown signal and terminates its FFmpeg and FFplay children before the process ends.
+
 ## Runtime behavior
 
 - Video is decoded to a bounded resolution before entering the Dart process.
