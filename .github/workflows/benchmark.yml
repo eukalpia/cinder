@@ -49,12 +49,17 @@ jobs:
           PY
           python3 .github/apply_media_fixes.py
 
-      - name: Validate media changes
-        run: |
-          dart pub get
-          dart format lib/src/media/media.dart test/media_controller_test.dart
-          dart analyze --fatal-infos
-          dart test test/media_controller_test.dart --reporter expanded
+      - name: Resolve dependencies
+        run: dart pub get
+
+      - name: Format media changes
+        run: dart format lib/src/media/media.dart test/media_controller_test.dart
+
+      - name: Analyze repository
+        run: dart analyze --fatal-infos
+
+      - name: Test media lifecycle and viewport
+        run: dart test test/media_controller_test.dart --reporter expanded
 
       - name: Commit clean product changes
         run: |
