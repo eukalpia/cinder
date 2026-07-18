@@ -1,0 +1,64 @@
+name: Fix FFplay Arguments
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    if: github.event.pull_request.head.ref == 'feature/media-data-cli-clean' && github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: feature/media-data-cli-clean
+          fetch-depth: 0
+
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+
+      - name: Remove unsupported FFplay option
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('lib/src/media/media.dart')
+          text = path.read_text()
+          old = """            '-nodisp',
+            '-autoexit',
+            '-nostdin',
+            '-loglevel',
+"""
+          new = """            '-nodisp',
+            '-autoexit',
+            '-loglevel',
+"""
+          if old not in text:
+              raise SystemExit('Expected FFplay argument block was not found')
+          path.write_text(text.replace(old, new, 1))
+          PY
+
+      - name: Validate
+        run: |
+          dart pub get
+          dart format lib/src/media/media.dart
+          dart analyze --fatal-infos
+          dart test test/media_controller_test.dart --reporter expanded
+          if sed -n '/Process.start(/,/runInShell/p' lib/src/media/media.dart | grep -A30 'ffplay' | grep -q "'-nostdin'"; then
+            echo 'ffplay argument list still contains -nostdin'
+            exit 1
+          fi
+
+      - name: Commit clean fix
+        run: |
+          rm .github/workflows/fix_ffplay_arguments.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "fix(media): remove unsupported ffplay option"
+          git push origin HEAD:feature/media-data-cli-clean
