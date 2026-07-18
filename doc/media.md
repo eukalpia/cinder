@@ -34,6 +34,8 @@ Use `maxFrameRate: 60` only when the selected terminal protocol and machine can 
 
 Use `shutdownApp()` or `Ctrl+C` for a clean application exit. The media backend receives the shutdown signal and terminates its FFmpeg and FFplay children before the process ends.
 
+Run `dart pub get` before formatting examples so the formatter uses the package language version.
+
 ## Runtime behavior
 
 - Video is decoded to a bounded resolution before entering the Dart process.
