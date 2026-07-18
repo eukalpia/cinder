@@ -1,0 +1,314 @@
+name: Apply Media Lifecycle and Adaptive Viewport
+
+on:
+  push:
+    branches:
+      - feature/media-data-cli-clean
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: feature/media-data-cli-clean
+          fetch-depth: 0
+
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+
+      - name: Apply pending lifecycle patch
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          workflow = Path('.github/workflows/fix_media_open_race.yml').read_text()
+          marker = "python3 - <<'PY'\n"
+          blocks = []
+          remainder = workflow
+          while marker in remainder:
+              remainder = remainder.split(marker, 1)[1]
+              block, remainder = remainder.split('\n          PY', 1)
+              lines = [line[10:] if line.startswith('          ') else line for line in block.splitlines()]
+              blocks.append('\n'.join(lines) + '\n')
+
+          if len(blocks) != 2:
+              raise SystemExit(f'Expected two lifecycle patch blocks, found {len(blocks)}')
+
+          for index, block in enumerate(blocks):
+              script = Path(f'/tmp/media_lifecycle_{index}.py')
+              script.write_text(block)
+              namespace = {'__name__': '__main__'}
+              exec(compile(block, str(script), 'exec'), namespace)
+          PY
+
+      - name: Add adaptive terminal viewport
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('lib/src/media/media.dart')
+          text = path.read_text()
+          start = text.index('class VideoPlayer extends StatefulWidget {')
+          replacement = r'''class VideoViewport {
+            const VideoViewport({required this.width, required this.height});
+
+            final int width;
+            final int height;
+
+            @override
+            bool operator ==(Object other) =>
+                identical(this, other) ||
+                other is VideoViewport &&
+                    other.width == width &&
+                    other.height == height;
+
+            @override
+            int get hashCode => Object.hash(width, height);
+          }
+
+          VideoViewport fitVideoViewport({
+            required int maxWidth,
+            required int maxHeight,
+            required int sourceWidth,
+            required int sourceHeight,
+            double cellHeightToWidthRatio = 2,
+          }) {
+            final safeMaxWidth = math.max(1, maxWidth);
+            final safeMaxHeight = math.max(1, maxHeight);
+            if (sourceWidth <= 0 || sourceHeight <= 0) {
+              return VideoViewport(
+                width: safeMaxWidth,
+                height: safeMaxHeight,
+              );
+            }
+
+            final targetCellAspect =
+                sourceWidth / sourceHeight * cellHeightToWidthRatio;
+            final availableAspect = safeMaxWidth / safeMaxHeight;
+            if (availableAspect > targetCellAspect) {
+              return VideoViewport(
+                width: math.max(
+                  1,
+                  (safeMaxHeight * targetCellAspect).round(),
+                ),
+                height: safeMaxHeight,
+              );
+            }
+            return VideoViewport(
+              width: safeMaxWidth,
+              height: math.max(
+                1,
+                (safeMaxWidth / targetCellAspect).round(),
+              ),
+            );
+          }
+
+          class VideoPlayer extends StatefulWidget {
+            const VideoPlayer({
+              super.key,
+              required this.controller,
+              this.width,
+              this.height,
+              this.fit = BoxFit.contain,
+              this.placeholder,
+              this.adaptive = true,
+              this.reservedRows = 0,
+              this.cellHeightToWidthRatio = 2,
+            })  : assert(width == null || width > 0),
+                  assert(height == null || height > 0),
+                  assert(reservedRows >= 0),
+                  assert(cellHeightToWidthRatio > 0);
+
+            final MediaController controller;
+
+            /// Maximum width in terminal cells when [adaptive] is true.
+            /// When [adaptive] is false this is the exact requested width.
+            final int? width;
+
+            /// Maximum height in terminal rows when [adaptive] is true.
+            /// When [adaptive] is false this is the exact requested height.
+            final int? height;
+
+            final BoxFit fit;
+            final Widget? placeholder;
+
+            /// Fits the player to the actual parent constraints and terminal resize.
+            final bool adaptive;
+
+            /// Rows kept free inside the received constraints for overlays or controls.
+            final int reservedRows;
+
+            /// Approximate physical cell height divided by cell width.
+            /// Most terminal fonts are close to 2.0.
+            final double cellHeightToWidthRatio;
+
+            @override
+            State<VideoPlayer> createState() => _VideoPlayerState();
+          }
+
+          class _VideoPlayerState extends State<VideoPlayer> {
+            @override
+            void initState() {
+              super.initState();
+              widget.controller.addListener(_changed);
+            }
+
+            @override
+            void didUpdateWidget(VideoPlayer oldWidget) {
+              super.didUpdateWidget(oldWidget);
+              if (oldWidget.controller != widget.controller) {
+                oldWidget.controller.removeListener(_changed);
+                widget.controller.addListener(_changed);
+              }
+            }
+
+            void _changed() {
+              if (mounted) {
+                setState(() {});
+              }
+            }
+
+            @override
+            void dispose() {
+              widget.controller.removeListener(_changed);
+              super.dispose();
+            }
+
+            @override
+            Widget build(BuildContext context) {
+              if (!widget.adaptive) {
+                return _buildSized(widget.width, widget.height);
+              }
+
+              return LayoutBuilder(
+                builder: (context, constraints) {
+                  final frame = widget.controller.frame;
+                  final info = widget.controller.info;
+                  final sourceWidth = frame?.width ?? info?.width ?? 16;
+                  final sourceHeight = frame?.height ?? info?.height ?? 9;
+
+                  final constraintWidth = constraints.maxWidth.isFinite
+                      ? constraints.maxWidth.floor()
+                      : (widget.width ?? sourceWidth);
+                  final rawConstraintHeight = constraints.maxHeight.isFinite
+                      ? constraints.maxHeight.floor()
+                      : (widget.height ?? sourceHeight);
+                  final constraintHeight = math.max(
+                    1,
+                    rawConstraintHeight - widget.reservedRows,
+                  );
+                  final availableWidth = math.max(
+                    1,
+                    widget.width == null
+                        ? constraintWidth
+                        : math.min(widget.width!, constraintWidth),
+                  );
+                  final availableHeight = math.max(
+                    1,
+                    widget.height == null
+                        ? constraintHeight
+                        : math.min(widget.height!, constraintHeight),
+                  );
+                  final viewport = fitVideoViewport(
+                    maxWidth: availableWidth,
+                    maxHeight: availableHeight,
+                    sourceWidth: sourceWidth,
+                    sourceHeight: sourceHeight,
+                    cellHeightToWidthRatio: widget.cellHeightToWidthRatio,
+                  );
+
+                  return Center(
+                    child: _buildSized(viewport.width, viewport.height),
+                  );
+                },
+              );
+            }
+
+            Widget _buildSized(int? width, int? height) {
+              final frame = widget.controller.frame;
+              if (frame == null) {
+                final placeholder =
+                    widget.placeholder ?? const Text('Loading media...');
+                return SizedBox(
+                  width: width?.toDouble(),
+                  height: height?.toDouble(),
+                  child: Center(child: placeholder),
+                );
+              }
+
+              return Image.rgba(
+                frame.pixels,
+                pixelWidth: frame.width,
+                pixelHeight: frame.height,
+                width: width,
+                height: height,
+                fit: widget.fit,
+              );
+            }
+          }
+          '''
+          path.write_text(text[:start] + replacement)
+          PY
+
+      - name: Add adaptive viewport tests
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('test/media_controller_test.dart')
+          text = path.read_text()
+          marker = "void main() {\n"
+          tests = r'''
+            test('video viewport expands while preserving terminal aspect', () {
+              final viewport = fitVideoViewport(
+                maxWidth: 200,
+                maxHeight: 55,
+                sourceWidth: 1920,
+                sourceHeight: 1080,
+              );
+
+              expect(viewport, const VideoViewport(width: 196, height: 55));
+            });
+
+            test('video viewport is constrained by terminal width', () {
+              final viewport = fitVideoViewport(
+                maxWidth: 80,
+                maxHeight: 40,
+                sourceWidth: 1920,
+                sourceHeight: 1080,
+              );
+
+              expect(viewport, const VideoViewport(width: 80, height: 23));
+            });
+
+          '''
+          if tests.strip() not in text:
+              text = text.replace(marker, marker + tests, 1)
+          path.write_text(text)
+          PY
+
+      - name: Validate
+        run: |
+          dart pub get
+          dart format lib/src/media/media.dart test/media_controller_test.dart
+          dart analyze --fatal-infos
+          dart test test/media_controller_test.dart --reporter expanded
+
+      - name: Commit clean product changes
+        run: |
+          rm .github/workflows/fix_media_open_race.yml
+          rm .github/workflows/apply_media_lifecycle_and_adaptive.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "fix(media): make opening atomic and adapt video to terminal"
+          git push origin HEAD:feature/media-data-cli-clean
