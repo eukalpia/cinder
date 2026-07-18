@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:cinder/cinder.dart';
@@ -226,11 +227,24 @@ class FfmpegMediaBackend implements MediaBackend {
     this.ffmpeg = 'ffmpeg',
     this.ffprobe = 'ffprobe',
     this.ffplay = 'ffplay',
-  });
+    this.maxVideoWidth = 240,
+    this.maxVideoHeight = 135,
+    this.maxFrameRate = 30,
+    this.lateFrameThreshold = const Duration(milliseconds: 120),
+  })  : assert(maxVideoWidth > 0),
+        assert(maxVideoHeight > 0),
+        assert(maxFrameRate > 0) {
+    _installShutdownHooks();
+  }
 
   final String ffmpeg;
   final String ffprobe;
   final String ffplay;
+  final int maxVideoWidth;
+  final int maxVideoHeight;
+  final double maxFrameRate;
+  final Duration lateFrameThreshold;
+
   final StreamController<VideoFrame> _frames =
       StreamController<VideoFrame>.broadcast(sync: true);
   Process? _video;
@@ -241,45 +255,59 @@ class FfmpegMediaBackend implements MediaBackend {
   double _volume = 1;
   double _speed = 1;
   int _generation = 0;
+  bool _disposed = false;
+  StreamSubscription<ProcessSignal>? _sigintSubscription;
+  StreamSubscription<ProcessSignal>? _sigtermSubscription;
+  StreamSubscription<ProcessSignal>? _sighupSubscription;
 
   @override
   Stream<VideoFrame> get videoFrames => _frames.stream;
 
   @override
   Future<MediaInfo> open(Uri source) async {
+    _ensureActive();
     await close();
     _source = source;
-    final result = await Process.run(ffprobe, [
-      '-v',
-      'error',
-      '-print_format',
-      'json',
-      '-show_streams',
-      '-show_format',
-      _input(source),
-    ]);
+    final result = await Process.run(
+      ffprobe,
+      <String>[
+        '-v',
+        'error',
+        '-print_format',
+        'json',
+        '-show_streams',
+        '-show_format',
+        _input(source),
+      ],
+      runInShell: Platform.isWindows,
+    );
     if (result.exitCode != 0) {
       throw ProcessException(
         ffprobe,
-        const [],
+        const <String>[],
         result.stderr.toString(),
         result.exitCode,
       );
     }
     final json = jsonDecode(result.stdout.toString()) as Map<String, dynamic>;
     final streams = (json['streams'] as List<dynamic>? ?? const <dynamic>[])
-        .cast<Map<String, dynamic>>();
-    final video = streams.where((s) => s['codec_type'] == 'video').firstOrNull;
-    final audio = streams.any((s) => s['codec_type'] == 'audio');
+        .whereType<Map<String, dynamic>>()
+        .toList();
+    final video =
+        streams.where((stream) => stream['codec_type'] == 'video').firstOrNull;
+    final audio = streams.any((stream) => stream['codec_type'] == 'audio');
     final format = json['format'] as Map<String, dynamic>?;
-    final durationSeconds =
-        double.tryParse('${format?['duration'] ?? video?['duration'] ?? 0}') ??
-            0;
+    final durationSeconds = double.tryParse(
+          '${format?['duration'] ?? video?['duration'] ?? 0}',
+        ) ??
+        0;
     final rate = _parseRate(
       '${video?['avg_frame_rate'] ?? video?['r_frame_rate'] ?? ''}',
     );
     _info = MediaInfo(
-      duration: Duration(microseconds: (durationSeconds * 1000000).round()),
+      duration: Duration(
+        microseconds: (durationSeconds * 1000000).round(),
+      ),
       width: video?['width'] as int?,
       height: video?['height'] as int?,
       frameRate: rate,
@@ -295,6 +323,7 @@ class FfmpegMediaBackend implements MediaBackend {
     required double volume,
     required double speed,
   }) async {
+    _ensureActive();
     _position = position;
     _volume = volume;
     _speed = speed;
@@ -302,24 +331,33 @@ class FfmpegMediaBackend implements MediaBackend {
   }
 
   @override
-  Future<void> pause() async => _stopProcesses();
+  Future<void> pause() => _stopProcesses();
 
   @override
   Future<void> seek(Duration position) async {
+    _ensureActive();
     _position = position;
-    if (_video != null || _audio != null) await _restart();
+    if (_video != null || _audio != null) {
+      await _restart();
+    }
   }
 
   @override
   Future<void> setVolume(double volume) async {
+    _ensureActive();
     _volume = volume;
-    if (_audio != null) await _restart();
+    if (_audio != null) {
+      await _restart();
+    }
   }
 
   @override
   Future<void> setSpeed(double speed) async {
+    _ensureActive();
     _speed = speed;
-    if (_video != null || _audio != null) await _restart();
+    if (_video != null || _audio != null) {
+      await _restart();
+    }
   }
 
   Future<void> _restart() async {
@@ -330,27 +368,65 @@ class FfmpegMediaBackend implements MediaBackend {
     }
     await _stopProcesses();
     final generation = ++_generation;
+
     if (info.hasVideo && info.width != null && info.height != null) {
-      final frameRate = info.frameRate ?? 30;
-      _video = await Process.start(ffmpeg, [
-        '-hide_banner',
-        '-loglevel',
-        'error',
-        '-ss',
-        _seconds(_position),
-        '-i',
-        _input(source),
-        '-an',
-        '-vf',
-        'setpts=PTS/${_speed.toStringAsFixed(4)}',
-        '-pix_fmt',
-        'rgba',
-        '-f',
-        'rawvideo',
-        'pipe:1',
-      ]);
-      _readFrames(_video!, generation, info.width!, info.height!, frameRate);
+      final outputSize = _fitSize(info.width!, info.height!);
+      final sourceRate = info.frameRate ?? maxFrameRate;
+      final outputRate =
+          math.min(sourceRate, maxFrameRate).clamp(1, 240).toDouble();
+      final stderrBuffer = StringBuffer();
+      final playbackWatch = Stopwatch()..start();
+      final process = await Process.start(
+        ffmpeg,
+        <String>[
+          '-hide_banner',
+          '-nostdin',
+          '-loglevel',
+          'error',
+          '-ss',
+          _seconds(_position),
+          '-i',
+          _input(source),
+          '-map',
+          '0:v:0',
+          '-an',
+          '-sn',
+          '-dn',
+          '-vf',
+          'scale=${outputSize.width}:${outputSize.height}:'
+              'flags=fast_bilinear,'
+              'fps=${outputRate.toStringAsFixed(3)},'
+              'setpts=PTS/${_speed.toStringAsFixed(4)}',
+          '-pix_fmt',
+          'rgba',
+          '-f',
+          'rawvideo',
+          'pipe:1',
+        ],
+        runInShell: Platform.isWindows,
+      );
+      _video = process;
+      unawaited(_captureStderr(process, stderrBuffer));
+      unawaited(
+        _readFrames(
+          process,
+          generation,
+          outputSize.width,
+          outputSize.height,
+          outputRate,
+          playbackWatch,
+        ),
+      );
+      unawaited(
+        _watchProcess(
+          process,
+          generation,
+          'video decoder',
+          stderrBuffer,
+        ),
+      );
     }
+
     if (info.hasAudio) {
       final filters = <String>[];
       var remaining = _speed;
@@ -363,19 +439,36 @@ class FfmpegMediaBackend implements MediaBackend {
         remaining /= 0.5;
       }
       filters.add('atempo=${remaining.toStringAsFixed(4)}');
-      _audio = await Process.start(ffplay, [
-        '-nodisp',
-        '-autoexit',
-        '-loglevel',
-        'error',
-        '-ss',
-        _seconds(_position),
-        '-volume',
-        (_volume * 100).round().toString(),
-        '-af',
-        filters.join(','),
-        _input(source),
-      ]);
+      final stderrBuffer = StringBuffer();
+      final process = await Process.start(
+        ffplay,
+        <String>[
+          '-nodisp',
+          '-autoexit',
+          '-nostdin',
+          '-loglevel',
+          'error',
+          '-ss',
+          _seconds(_position),
+          '-vn',
+          '-volume',
+          (_volume * 100).round().toString(),
+          '-af',
+          filters.join(','),
+          _input(source),
+        ],
+        runInShell: Platform.isWindows,
+      );
+      _audio = process;
+      unawaited(_captureStderr(process, stderrBuffer));
+      unawaited(
+        _watchProcess(
+          process,
+          generation,
+          'audio player',
+          stderrBuffer,
+        ),
+      );
     }
   }
 
@@ -385,45 +478,176 @@ class FfmpegMediaBackend implements MediaBackend {
     int width,
     int height,
     double frameRate,
+    Stopwatch playbackWatch,
   ) async {
     final frameBytes = width * height * 4;
     var buffer = BytesBuilder(copy: false);
     var index = 0;
     await for (final chunk in process.stdout) {
-      if (generation != _generation) return;
+      if (_disposed || generation != _generation) {
+        return;
+      }
       buffer.add(chunk);
       final bytes = buffer.takeBytes();
       var offset = 0;
       while (bytes.length - offset >= frameBytes) {
-        final pixels = Uint8List.fromList(
-          bytes.sublist(offset, offset + frameBytes),
+        if (_disposed || generation != _generation) {
+          return;
+        }
+        final relativePresentationTime = Duration(
+          microseconds: (index * 1000000 / frameRate / _speed).round(),
         );
-        final timestamp = _position +
-            Duration(
-              microseconds: (index * 1000000 / frameRate / _speed).round(),
-            );
-        _frames.add(
-          VideoFrame(
-            pixels: pixels,
-            width: width,
-            height: height,
-            presentationTime: timestamp,
-          ),
-        );
+        final lead = relativePresentationTime - playbackWatch.elapsed;
+        if (lead > Duration.zero) {
+          await Future<void>.delayed(lead);
+        }
+        if (_disposed || generation != _generation) {
+          return;
+        }
+        final lateness = playbackWatch.elapsed - relativePresentationTime;
+        if (lateness <= lateFrameThreshold) {
+          _frames.add(
+            VideoFrame(
+              pixels: Uint8List.fromList(
+                bytes.sublist(offset, offset + frameBytes),
+              ),
+              width: width,
+              height: height,
+              presentationTime: _position + relativePresentationTime,
+            ),
+          );
+        }
         offset += frameBytes;
         index++;
       }
-      if (offset < bytes.length) buffer.add(bytes.sublist(offset));
+      if (offset < bytes.length) {
+        buffer.add(bytes.sublist(offset));
+      }
     }
+  }
+
+  Future<void> _captureStderr(
+    Process process,
+    StringBuffer target,
+  ) async {
+    await for (final line in process.stderr
+        .transform(const Utf8Decoder(allowMalformed: true))
+        .transform(const LineSplitter())) {
+      if (target.length < 8192) {
+        target.writeln(line);
+      }
+    }
+  }
+
+  Future<void> _watchProcess(
+    Process process,
+    int generation,
+    String label,
+    StringBuffer stderrBuffer,
+  ) async {
+    final exitCode = await process.exitCode;
+    if (_disposed || generation != _generation || exitCode == 0) {
+      return;
+    }
+    final details = stderrBuffer.toString().trim();
+    _frames.addError(
+      ProcessException(
+        label,
+        const <String>[],
+        details.isEmpty ? '$label exited with code $exitCode.' : details,
+        exitCode,
+      ),
+    );
   }
 
   Future<void> _stopProcesses() async {
     _generation++;
-    for (final process in <Process?>[_video, _audio]) {
-      process?.kill(ProcessSignal.sigterm);
-    }
+    final processes = <Process>{
+      if (_video != null) _video!,
+      if (_audio != null) _audio!,
+    };
     _video = null;
     _audio = null;
+    await Future.wait(
+      processes.map(_terminateProcess),
+      eagerError: false,
+    );
+  }
+
+  Future<void> _terminateProcess(Process process) async {
+    try {
+      if (Platform.isWindows) {
+        await Process.run(
+          'taskkill',
+          <String>['/PID', '${process.pid}', '/T', '/F'],
+          runInShell: true,
+        ).timeout(const Duration(seconds: 2));
+      } else {
+        process.kill(ProcessSignal.sigterm);
+      }
+    } catch (_) {
+      process.kill();
+    }
+    try {
+      await process.exitCode.timeout(const Duration(milliseconds: 700));
+      return;
+    } on TimeoutException {
+      if (Platform.isWindows) {
+        process.kill();
+      } else {
+        process.kill(ProcessSignal.sigkill);
+      }
+    }
+    try {
+      await process.exitCode.timeout(const Duration(milliseconds: 700));
+    } catch (_) {}
+  }
+
+  void _installShutdownHooks() {
+    try {
+      _sigintSubscription = ProcessSignal.sigint.watch().listen((_) {
+        unawaited(_stopProcesses());
+      });
+    } catch (_) {}
+    if (!Platform.isWindows) {
+      try {
+        _sigtermSubscription = ProcessSignal.sigterm.watch().listen((_) {
+          unawaited(_stopProcesses());
+        });
+      } catch (_) {}
+      try {
+        _sighupSubscription = ProcessSignal.sighup.watch().listen((_) {
+          unawaited(_stopProcesses());
+        });
+      } catch (_) {}
+    }
+  }
+
+  _FrameSize _fitSize(int sourceWidth, int sourceHeight) {
+    final scale = math.min(
+      1.0,
+      math.min(
+        maxVideoWidth / sourceWidth,
+        maxVideoHeight / sourceHeight,
+      ),
+    );
+    var width = math.max(2, (sourceWidth * scale).round());
+    var height = math.max(2, (sourceHeight * scale).round());
+    if (width.isOdd) {
+      width--;
+    }
+    if (height.isOdd) {
+      height--;
+    }
+    return _FrameSize(width, height);
+  }
+
+  void _ensureActive() {
+    if (_disposed) {
+      throw StateError(
+        'The FFmpeg media backend has been disposed.',
+      );
+    }
   }
 
   @override
@@ -433,10 +657,29 @@ class FfmpegMediaBackend implements MediaBackend {
     _info = null;
   }
 
+  @override
+  Future<void> dispose() async {
+    if (_disposed) {
+      return;
+    }
+    _disposed = true;
+    await _stopProcesses();
+    await _sigintSubscription?.cancel();
+    await _sigtermSubscription?.cancel();
+    await _sighupSubscription?.cancel();
+    if (!_frames.isClosed) {
+      await _frames.close();
+    }
+    _source = null;
+    _info = null;
+  }
+
   static String _input(Uri source) =>
       source.scheme == 'file' ? source.toFilePath() : source.toString();
+
   static String _seconds(Duration value) =>
       (value.inMicroseconds / 1000000).toStringAsFixed(6);
+
   static double? _parseRate(String value) {
     final parts = value.split('/');
     if (parts.length == 2) {
@@ -448,6 +691,13 @@ class FfmpegMediaBackend implements MediaBackend {
     }
     return double.tryParse(value);
   }
+}
+
+class _FrameSize {
+  const _FrameSize(this.width, this.height);
+
+  final int width;
+  final int height;
 }
 
 extension _FirstOrNull<T> on Iterable<T> {
