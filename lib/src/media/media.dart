@@ -62,6 +62,8 @@ abstract class MediaBackend {
   Future<void> setVolume(double volume);
   Future<void> setSpeed(double speed);
   Future<void> close();
+
+  Future<void> dispose() => close();
 }
 
 class MediaClock {
@@ -117,6 +119,8 @@ class MediaController extends ChangeNotifier {
   double _volume = 1;
   double _speed = 1;
   int _droppedFrames = 0;
+  int _openGeneration = 0;
+  bool _disposed = false;
 
   MediaInfo? get info => _info;
   VideoFrame? get frame => _frame;
@@ -128,15 +132,29 @@ class MediaController extends ChangeNotifier {
   int get droppedFrames => _droppedFrames;
 
   Future<void> open(String source, {bool autoPlay = false}) async {
+    if (_disposed) {
+      throw StateError('The media controller has been disposed.');
+    }
+    final generation = ++_openGeneration;
     _setState(MediaPlaybackState.loading);
     try {
-      _info = await backend.open(_toUri(source));
+      final info = await backend.open(_toUri(source));
+      if (_disposed || generation != _openGeneration) {
+        await backend.close();
+        return;
+      }
+      _info = info;
       await _subscription?.cancel();
       _subscription = backend.videoFrames.listen(_acceptFrame, onError: _fail);
       clock.seek(Duration.zero);
       _setState(MediaPlaybackState.ready);
-      if (autoPlay) await play();
+      if (autoPlay && !_disposed && generation == _openGeneration) {
+        await play();
+      }
     } catch (error) {
+      if (_disposed || generation != _openGeneration) {
+        return;
+      }
       _fail(error);
       rethrow;
     }
@@ -215,9 +233,14 @@ class MediaController extends ChangeNotifier {
 
   @override
   void dispose() {
+    if (_disposed) {
+      return;
+    }
+    _disposed = true;
+    _openGeneration++;
     _state = MediaPlaybackState.disposed;
     _subscription?.cancel();
-    unawaited(backend.close());
+    unawaited(backend.dispose());
     super.dispose();
   }
 }
@@ -266,20 +289,25 @@ class FfmpegMediaBackend implements MediaBackend {
   @override
   Future<MediaInfo> open(Uri source) async {
     _ensureActive();
-    await close();
-    _source = source;
+    await _stopProcesses();
+    _source = null;
+    _info = null;
+    _position = Duration.zero;
+    final generation = ++_generation;
+
     final result = await Process.run(
-        ffprobe,
-        <String>[
-          '-v',
-          'error',
-          '-print_format',
-          'json',
-          '-show_streams',
-          '-show_format',
-          _input(source),
-        ],
-        runInShell: Platform.isWindows);
+      ffprobe,
+      <String>[
+        '-v',
+        'error',
+        '-print_format',
+        'json',
+        '-show_streams',
+        '-show_format',
+        _input(source),
+      ],
+      runInShell: Platform.isWindows,
+    );
     if (result.exitCode != 0) {
       throw ProcessException(
         ffprobe,
@@ -288,6 +316,7 @@ class FfmpegMediaBackend implements MediaBackend {
         result.exitCode,
       );
     }
+
     final json = jsonDecode(result.stdout.toString()) as Map<String, dynamic>;
     final streams = (json['streams'] as List<dynamic>? ?? const <dynamic>[])
         .whereType<Map<String, dynamic>>()
@@ -296,21 +325,31 @@ class FfmpegMediaBackend implements MediaBackend {
         streams.where((stream) => stream['codec_type'] == 'video').firstOrNull;
     final audio = streams.any((stream) => stream['codec_type'] == 'audio');
     final format = json['format'] as Map<String, dynamic>?;
-    final durationSeconds =
-        double.tryParse('${format?['duration'] ?? video?['duration'] ?? 0}') ??
-            0;
+    final durationSeconds = double.tryParse(
+          '${format?['duration'] ?? video?['duration'] ?? 0}',
+        ) ??
+        0;
     final rate = _parseRate(
       '${video?['avg_frame_rate'] ?? video?['r_frame_rate'] ?? ''}',
     );
-    _info = MediaInfo(
-      duration: Duration(microseconds: (durationSeconds * 1000000).round()),
+    final info = MediaInfo(
+      duration: Duration(
+        microseconds: (durationSeconds * 1000000).round(),
+      ),
       width: video?['width'] as int?,
       height: video?['height'] as int?,
       frameRate: rate,
       hasAudio: audio,
       hasVideo: video != null,
     );
-    return _info!;
+
+    if (_disposed || generation != _generation) {
+      throw StateError('Media open was cancelled.');
+    }
+
+    _source = source;
+    _info = info;
+    return info;
   }
 
   @override
@@ -635,6 +674,7 @@ class FfmpegMediaBackend implements MediaBackend {
     _info = null;
   }
 
+  @override
   Future<void> dispose() async {
     if (_disposed) {
       return;
@@ -681,6 +721,48 @@ extension _FirstOrNull<T> on Iterable<T> {
   T? get firstOrNull => this.isEmpty ? null : first;
 }
 
+class VideoViewport {
+  const VideoViewport({required this.width, required this.height});
+
+  final int width;
+  final int height;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is VideoViewport && other.width == width && other.height == height;
+
+  @override
+  int get hashCode => Object.hash(width, height);
+}
+
+VideoViewport fitVideoViewport({
+  required int maxWidth,
+  required int maxHeight,
+  required int sourceWidth,
+  required int sourceHeight,
+  double cellHeightToWidthRatio = 2,
+}) {
+  final safeMaxWidth = math.max(1, maxWidth);
+  final safeMaxHeight = math.max(1, maxHeight);
+  if (sourceWidth <= 0 || sourceHeight <= 0) {
+    return VideoViewport(width: safeMaxWidth, height: safeMaxHeight);
+  }
+
+  final targetCellAspect = sourceWidth / sourceHeight * cellHeightToWidthRatio;
+  final availableAspect = safeMaxWidth / safeMaxHeight;
+  if (availableAspect > targetCellAspect) {
+    return VideoViewport(
+      width: math.max(1, (safeMaxHeight * targetCellAspect).round()),
+      height: safeMaxHeight,
+    );
+  }
+  return VideoViewport(
+    width: safeMaxWidth,
+    height: math.max(1, (safeMaxWidth / targetCellAspect).round()),
+  );
+}
+
 class VideoPlayer extends StatefulWidget {
   const VideoPlayer({
     super.key,
@@ -689,13 +771,35 @@ class VideoPlayer extends StatefulWidget {
     this.height,
     this.fit = BoxFit.contain,
     this.placeholder,
-  });
+    this.adaptive = true,
+    this.reservedRows = 0,
+    this.cellHeightToWidthRatio = 2,
+  })  : assert(width == null || width > 0),
+        assert(height == null || height > 0),
+        assert(reservedRows >= 0),
+        assert(cellHeightToWidthRatio > 0);
 
   final MediaController controller;
+
+  /// Maximum width in cells when [adaptive] is true.
+  /// Otherwise this is the exact requested width.
   final int? width;
+
+  /// Maximum height in rows when [adaptive] is true.
+  /// Otherwise this is the exact requested height.
   final int? height;
+
   final BoxFit fit;
   final Widget? placeholder;
+
+  /// Rebuilds against the real parent constraints after terminal resize.
+  final bool adaptive;
+
+  /// Rows kept free for controls rendered inside the same constrained area.
+  final int reservedRows;
+
+  /// Approximate physical terminal-cell height divided by its width.
+  final double cellHeightToWidthRatio;
 
   @override
   State<VideoPlayer> createState() => _VideoPlayerState();
@@ -718,7 +822,9 @@ class _VideoPlayerState extends State<VideoPlayer> {
   }
 
   void _changed() {
-    if (mounted) setState(() {});
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override
@@ -729,21 +835,71 @@ class _VideoPlayerState extends State<VideoPlayer> {
 
   @override
   Widget build(BuildContext context) {
+    if (!widget.adaptive) {
+      return _buildSized(widget.width, widget.height);
+    }
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final frame = widget.controller.frame;
+        final info = widget.controller.info;
+        final sourceWidth = frame?.width ?? info?.width ?? 16;
+        final sourceHeight = frame?.height ?? info?.height ?? 9;
+
+        final constraintWidth = constraints.maxWidth.isFinite
+            ? constraints.maxWidth.floor()
+            : (widget.width ?? 80);
+        final rawConstraintHeight = constraints.maxHeight.isFinite
+            ? constraints.maxHeight.floor()
+            : (widget.height ?? 24);
+        final constraintHeight = math.max(
+          1,
+          rawConstraintHeight - widget.reservedRows,
+        );
+        final availableWidth = math.max(
+          1,
+          widget.width == null
+              ? constraintWidth
+              : math.min(widget.width!, constraintWidth),
+        );
+        final availableHeight = math.max(
+          1,
+          widget.height == null
+              ? constraintHeight
+              : math.min(widget.height!, constraintHeight),
+        );
+        final viewport = fitVideoViewport(
+          maxWidth: availableWidth,
+          maxHeight: availableHeight,
+          sourceWidth: sourceWidth,
+          sourceHeight: sourceHeight,
+          cellHeightToWidthRatio: widget.cellHeightToWidthRatio,
+        );
+
+        return Center(
+          child: _buildSized(viewport.width, viewport.height),
+        );
+      },
+    );
+  }
+
+  Widget _buildSized(int? width, int? height) {
     final frame = widget.controller.frame;
     if (frame == null) {
-      return widget.placeholder ??
-          SizedBox(
-            width: widget.width?.toDouble(),
-            height: widget.height?.toDouble(),
-            child: const Text('Loading media...'),
-          );
+      final placeholder = widget.placeholder ?? const Text('Loading media...');
+      return SizedBox(
+        width: width?.toDouble(),
+        height: height?.toDouble(),
+        child: Center(child: placeholder),
+      );
     }
+
     return Image.rgba(
       frame.pixels,
       pixelWidth: frame.width,
       pixelHeight: frame.height,
-      width: widget.width,
-      height: widget.height,
+      width: width,
+      height: height,
       fit: widget.fit,
     );
   }
