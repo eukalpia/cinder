@@ -48,6 +48,30 @@ jobs:
           path.write_text(text)
           PY
           python3 .github/apply_media_fixes.py
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('test/media_controller_test.dart')
+          text = path.read_text()
+          old = '''  @override
+          Future<void> close() async {
+            await frames.close();
+          }
+          }
+          '''
+          new = '''  @override
+          Future<void> close() async {
+            await frames.close();
+          }
+
+          @override
+          Future<void> dispose() => close();
+          }
+          '''
+          if old not in text:
+              raise SystemExit('Test backend close block not found')
+          path.write_text(text.replace(old, new, 1))
+          PY
 
       - name: Resolve dependencies
         run: dart pub get
