@@ -75,9 +75,7 @@ class _ClipboardSandboxAppState extends State<ClipboardSandboxApp> {
       },
       child: Container(
         padding: const EdgeInsets.all(1),
-        decoration: BoxDecoration(
-          border: BoxBorder.all(color: Colors.magenta),
-        ),
+        decoration: BoxDecoration(border: BoxBorder.all(color: Colors.magenta)),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

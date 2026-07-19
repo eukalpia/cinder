@@ -77,19 +77,25 @@ class _BrowserImageDemoState extends State<BrowserImageDemo> {
             ),
             const SizedBox(height: 1),
             Row(
-              children: _protocols.asMap().entries.map((entry) {
-                final selected = entry.key == _selected;
-                return Padding(
-                  padding: const EdgeInsets.only(right: 2),
-                  child: Text(
-                    '[${entry.key + 1}] ${_name(entry.value)}',
-                    style: TextStyle(
-                      color: selected ? Colors.yellow : Colors.gray,
-                      fontWeight: selected ? FontWeight.bold : FontWeight.normal,
-                    ),
-                  ),
-                );
-              }).toList(growable: false),
+              children: _protocols
+                  .asMap()
+                  .entries
+                  .map((entry) {
+                    final selected = entry.key == _selected;
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 2),
+                      child: Text(
+                        '[${entry.key + 1}] ${_name(entry.value)}',
+                        style: TextStyle(
+                          color: selected ? Colors.yellow : Colors.gray,
+                          fontWeight: selected
+                              ? FontWeight.bold
+                              : FontWeight.normal,
+                        ),
+                      ),
+                    );
+                  })
+                  .toList(growable: false),
             ),
             const SizedBox(height: 1),
             Expanded(

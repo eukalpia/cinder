@@ -98,9 +98,7 @@ class _BrowserLabState extends State<BrowserLab> {
   }) {
     return Container(
       padding: const EdgeInsets.all(1),
-      decoration: BoxDecoration(
-        border: BoxBorder.all(color: Colors.magenta),
-      ),
+      decoration: BoxDecoration(border: BoxBorder.all(color: Colors.magenta)),
       child: Column(
         children: [
           Row(
@@ -147,9 +145,7 @@ class _BrowserLabState extends State<BrowserLab> {
                 ),
                 child: Center(
                   child: Text(
-                    _tapCount == 0
-                        ? 'INTERACT HERE'
-                        : 'TAPS: $_tapCount',
+                    _tapCount == 0 ? 'INTERACT HERE' : 'TAPS: $_tapCount',
                     style: const TextStyle(
                       color: Colors.cyan,
                       fontWeight: FontWeight.bold,
@@ -160,10 +156,7 @@ class _BrowserLabState extends State<BrowserLab> {
             ),
           ),
           const SizedBox(height: 1),
-          SizedBox(
-            height: 9,
-            child: _eventLedger('GESTURE EVENT LEDGER'),
-          ),
+          SizedBox(height: 9, child: _eventLedger('GESTURE EVENT LEDGER')),
         ],
       ),
     );
@@ -197,7 +190,10 @@ class _BrowserLabState extends State<BrowserLab> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text('ROW ${(index + 1).toString().padLeft(2, '0')}'),
-                    const Text('hover / click', style: TextStyle(color: Colors.cyan)),
+                    const Text(
+                      'hover / click',
+                      style: TextStyle(color: Colors.cyan),
+                    ),
                   ],
                 ),
               ),
@@ -318,7 +314,8 @@ class _BrowserLabState extends State<BrowserLab> {
               ? 'RESIZE EVENT LEDGER / WEB ADAPTER'
               : 'TERMINAL RESIZE / WEB ADAPTER',
           status: '${size.width.toInt()}×${size.height.toInt()}',
-          footer: 'Resize the browser frame; Cinder receives new cell constraints.',
+          footer:
+              'Resize the browser frame; Cinder receives new cell constraints.',
           child: history
               ? _eventLedger('RECENT CELL GEOMETRY')
               : Center(
@@ -347,7 +344,8 @@ class _BrowserLabState extends State<BrowserLab> {
     return _shell(
       title: 'TEXT FIELD / WEB ADAPTER',
       status: 'UNICODE READY',
-      footer: 'Try Cyrillic, Arabic, CJK, emoji, combining marks, and navigation keys.',
+      footer:
+          'Try Cyrillic, Arabic, CJK, emoji, combining marks, and navigation keys.',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -383,9 +381,7 @@ class _BrowserLabState extends State<BrowserLab> {
   Widget _eventLedger(String title) {
     return Container(
       padding: const EdgeInsets.all(1),
-      decoration: BoxDecoration(
-        border: BoxBorder.all(color: Colors.gray),
-      ),
+      decoration: BoxDecoration(border: BoxBorder.all(color: Colors.gray)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -393,11 +389,10 @@ class _BrowserLabState extends State<BrowserLab> {
           const SizedBox(height: 1),
           Expanded(
             child: ListView(
-              children: (_events.isEmpty
-                      ? const <String>['No events yet.']
-                      : _events)
-                  .map((event) => Text('› $event'))
-                  .toList(growable: false),
+              children:
+                  (_events.isEmpty ? const <String>['No events yet.'] : _events)
+                      .map((event) => Text('› $event'))
+                      .toList(growable: false),
             ),
           ),
         ],

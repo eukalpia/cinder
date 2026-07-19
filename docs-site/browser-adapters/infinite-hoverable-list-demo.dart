@@ -11,9 +11,7 @@ class InfiniteListBrowserAdapter extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(1),
-      decoration: BoxDecoration(
-        border: BoxBorder.all(color: Colors.magenta),
-      ),
+      decoration: BoxDecoration(border: BoxBorder.all(color: Colors.magenta)),
       child: Column(
         children: [
           Row(

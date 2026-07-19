@@ -86,9 +86,7 @@ class _PtySandboxAppState extends State<PtySandboxApp> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        border: BoxBorder.all(color: Colors.magenta),
-      ),
+      decoration: BoxDecoration(border: BoxBorder.all(color: Colors.magenta)),
       child: Column(
         children: [
           Container(
@@ -104,10 +102,7 @@ class _PtySandboxAppState extends State<PtySandboxApp> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                Text(
-                  'NO OS PROCESS',
-                  style: TextStyle(color: Colors.yellow),
-                ),
+                Text('NO OS PROCESS', style: TextStyle(color: Colors.yellow)),
               ],
             ),
           ),

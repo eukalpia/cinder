@@ -138,8 +138,7 @@ Uint8List _makePixels(int width, int height, int seed) {
       final stripe = ((x + y + seed * 5) % 11) < 2;
       pixels[index] = (30 + wave * 210).round();
       pixels[index + 1] = (18 + (1 - wave) * 90).round();
-      pixels[index + 2] =
-          (70 + seed * 13 + y * 2).clamp(0, 255).toInt();
+      pixels[index + 2] = (70 + seed * 13 + y * 2).clamp(0, 255).toInt();
       pixels[index + 3] = stripe ? 220 : 255;
     }
   }
