@@ -3,14 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "node scripts/prepare-site.mjs --skip-compile && node scripts/sync-version.mjs && next dev",
-    "prepare:site": "node scripts/prepare-site.mjs && node scripts/sync-version.mjs",
-    "build": "node scripts/prepare-site.mjs && node scripts/sync-version.mjs && next build && node scripts/finalize-export.mjs",
+    "dev": "node scripts/prepare-site.mjs --skip-compile && node scripts/polish-site.mjs --skip-compile && node scripts/sync-version.mjs && next dev",
+    "prepare:site": "node scripts/prepare-site.mjs && node scripts/polish-site.mjs && node scripts/sync-version.mjs",
+    "build": "node scripts/prepare-site.mjs && node scripts/polish-site.mjs && node scripts/sync-version.mjs && next build && node scripts/finalize-export.mjs",
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "test:routes": "node scripts/verify-export.mjs",
-    "test:examples": "node scripts/prepare-site.mjs && node scripts/sync-version.mjs",
+    "test:examples": "node scripts/prepare-site.mjs && node scripts/polish-site.mjs && node scripts/sync-version.mjs",
     "test:browser": "playwright test",
     "test:visual": "playwright test --grep \"homepage|showcase\""
   },
