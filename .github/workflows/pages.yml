@@ -40,7 +40,7 @@ jobs:
   build:
     name: Build and verify static site
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 55
     env:
       NEXT_PUBLIC_BASE_PATH: /cinder
       NEXT_PUBLIC_SITE_ORIGIN: https://eukalpia.github.io
@@ -116,6 +116,25 @@ jobs:
       - name: Verify routes, bundles, and generated metadata
         working-directory: docs-site
         run: npm run test:routes
+
+      - name: Install Chromium for browser validation
+        working-directory: docs-site
+        run: npx playwright install --with-deps chromium
+
+      - name: Run browser runtime, keyboard, resize, restart, and mobile checks
+        working-directory: docs-site
+        run: npm run test:browser
+
+      - name: Upload browser test report and screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cinder-web-browser-report
+          path: |
+            docs-site/playwright-report/
+            docs-site/test-results/
+          if-no-files-found: ignore
+          retention-days: 14
 
       - name: Upload browser compiler diagnostics
         if: always()
