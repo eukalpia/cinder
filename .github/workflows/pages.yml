@@ -120,7 +120,10 @@ jobs:
 
       - name: Build static site and browser examples
         working-directory: docs-site
-        run: npm run build
+        shell: bash
+        run: |
+          set -o pipefail
+          npm run build 2>&1 | tee build-report.txt
 
       - name: Verify routes, bundles, and generated metadata
         working-directory: docs-site
@@ -134,6 +137,7 @@ jobs:
           path: |
             docs-site/lint-report.json
             docs-site/typecheck-report.txt
+            docs-site/build-report.txt
             docs-site/public/generated/examples/*.build-error.txt
             docs-site/.generated/
           if-no-files-found: ignore
@@ -158,6 +162,6 @@ jobs:
       id-token: write
 
     steps:
-      - name: Deploy Pages artifact
+      - name: Deploy GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
