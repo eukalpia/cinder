@@ -1,5 +1,6 @@
 'use client';
 
+import type { IDisposable, Terminal as XtermTerminal } from '@xterm/xterm';
 import { useEffect, useRef, useState } from 'react';
 
 type CinderBridge = {
@@ -11,41 +12,11 @@ type CinderBridge = {
   onShutdown: (() => void) | null;
 };
 
-type XtermDisposable = { dispose(): void };
-
-type XtermInstance = {
-  cols: number;
-  rows: number;
-  open(element: HTMLElement): void;
-  write(data: string): void;
-  focus(): void;
-  dispose(): void;
-  loadAddon(addon: unknown): void;
-  onData(callback: (data: string) => void): XtermDisposable;
-  onResize(
-    callback: (size: { cols: number; rows: number }) => void,
-  ): XtermDisposable;
-};
-
-type FitAddonInstance = {
-  fit(): void;
-};
-
 declare global {
   interface Window {
-    Terminal?: new (options: Record<string, unknown>) => XtermInstance;
-    FitAddon?: {
-      FitAddon: new () => FitAddonInstance;
-    };
     cinderBridge?: CinderBridge;
   }
 }
-
-const xtermScript = 'https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.js';
-const fitScript =
-  'https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.js';
-const xtermStyles =
-  'https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.css';
 
 export function WebTerminal({
   title,
@@ -59,7 +30,7 @@ export function WebTerminal({
   reason: string | null;
 }) {
   const hostRef = useRef<HTMLDivElement>(null);
-  const terminalRef = useRef<XtermInstance | null>(null);
+  const terminalRef = useRef<XtermTerminal | null>(null);
   const [status, setStatus] = useState<'loading' | 'running' | 'failed'>(
     runnable ? 'loading' : 'failed',
   );
@@ -72,24 +43,19 @@ export function WebTerminal({
     let disposed = false;
     let guestScript: HTMLScriptElement | null = null;
     let resizeObserver: ResizeObserver | null = null;
-    const subscriptions: XtermDisposable[] = [];
+    let animationFrame: number | null = null;
+    const subscriptions: IDisposable[] = [];
 
     async function start() {
       try {
-        installStylesheet(xtermStyles);
-        await loadScript(xtermScript, 'xterm-core');
-        await loadScript(fitScript, 'xterm-fit');
+        const [{ Terminal }, { FitAddon }] = await Promise.all([
+          import('@xterm/xterm'),
+          import('@xterm/addon-fit'),
+        ]);
 
-        if (
-          disposed ||
-          !hostRef.current ||
-          !window.Terminal ||
-          !window.FitAddon
-        ) {
-          return;
-        }
+        if (disposed || !hostRef.current) return;
 
-        const terminal = new window.Terminal({
+        const terminal = new Terminal({
           cursorBlink: true,
           cursorStyle: 'bar',
           cursorWidth: 1,
@@ -102,6 +68,7 @@ export function WebTerminal({
           allowTransparency: false,
           convertEol: false,
           drawBoldTextInBrightColors: false,
+          screenReaderMode: false,
           theme: {
             background: '#090b10',
             foreground: '#d8d5e2',
@@ -126,22 +93,24 @@ export function WebTerminal({
             brightWhite: '#ffffff',
           },
         });
-        const fitAddon = new window.FitAddon.FitAddon();
+        const fitAddon = new FitAddon();
         terminal.loadAddon(fitAddon);
         terminal.open(hostRef.current);
         terminalRef.current = terminal;
 
         const fit = () => {
-          if (disposed) return;
+          if (disposed || !hostRef.current) return;
+          const bounds = hostRef.current.getBoundingClientRect();
+          if (bounds.width < 1 || bounds.height < 1) return;
           try {
             fitAddon.fit();
           } catch {
-            // xterm can report zero geometry while a tab is hidden.
+            // A hidden tab can briefly report zero terminal geometry.
           }
         };
 
         fit();
-        requestAnimationFrame(fit);
+        animationFrame = requestAnimationFrame(fit);
 
         const bridge: CinderBridge = {
           width: terminal.cols,
@@ -163,7 +132,8 @@ export function WebTerminal({
         );
 
         resizeObserver = new ResizeObserver(() => {
-          requestAnimationFrame(fit);
+          if (animationFrame !== null) cancelAnimationFrame(animationFrame);
+          animationFrame = requestAnimationFrame(fit);
         });
         resizeObserver.observe(hostRef.current);
 
@@ -196,8 +166,10 @@ export function WebTerminal({
 
     return () => {
       disposed = true;
+      if (animationFrame !== null) cancelAnimationFrame(animationFrame);
       resizeObserver?.disconnect();
       for (const subscription of subscriptions) subscription.dispose();
+      window.cinderBridge?.onShutdown?.();
       guestScript?.remove();
       terminalRef.current?.dispose();
       terminalRef.current = null;
@@ -233,7 +205,11 @@ export function WebTerminal({
         <div
           ref={hostRef}
           className="web-terminal__viewport"
+          role="application"
+          aria-label={`${title} terminal viewport`}
+          tabIndex={0}
           onClick={() => terminalRef.current?.focus()}
+          onFocus={() => terminalRef.current?.focus()}
         />
       ) : (
         <div className="web-terminal__unavailable">
@@ -242,45 +218,9 @@ export function WebTerminal({
         </div>
       )}
       <footer className="web-terminal__footer">
-        <span>Click the terminal before typing.</span>
+        <span>Focus the terminal before typing.</span>
         <span>Rendered by Cinder, hosted by xterm.js.</span>
       </footer>
     </section>
   );
-}
-
-function installStylesheet(href: string) {
-  if (document.querySelector(`link[href="${href}"]`)) return;
-  const link = document.createElement('link');
-  link.rel = 'stylesheet';
-  link.href = href;
-  document.head.appendChild(link);
-}
-
-function loadScript(src: string, id: string) {
-  const existing = document.querySelector<HTMLScriptElement>(
-    `script[data-cinder-runtime="${id}"]`,
-  );
-  if (existing?.dataset.loaded === 'true') return Promise.resolve();
-
-  return new Promise<void>((resolve, reject) => {
-    const script = existing ?? document.createElement('script');
-    script.dataset.cinderRuntime = id;
-    script.src = src;
-    script.async = true;
-    script.addEventListener(
-      'load',
-      () => {
-        script.dataset.loaded = 'true';
-        resolve();
-      },
-      { once: true },
-    );
-    script.addEventListener(
-      'error',
-      () => reject(new Error(`Failed to load ${src}`)),
-      { once: true },
-    );
-    if (!existing) document.head.appendChild(script);
-  });
 }
