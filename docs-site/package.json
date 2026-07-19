@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "node scripts/prepare-site.mjs --skip-compile && node scripts/sync-version.mjs && next dev",
     "prepare:site": "node scripts/prepare-site.mjs && node scripts/sync-version.mjs",
-    "build": "node scripts/prepare-site.mjs && node scripts/sync-version.mjs && next build",
+    "build": "node scripts/prepare-site.mjs && node scripts/sync-version.mjs && next build && node scripts/finalize-export.mjs",
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
