@@ -1,0 +1,243 @@
+name: Modernize Web Examples
+
+on:
+  push:
+    branches:
+      - feature/web-docs-lab
+    paths:
+      - '.github/workflows/modernize-web-examples.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  modernize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: feature/web-docs-lab
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+      - name: Remove accidental native-only dependencies
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          root = Path('.')
+          portable_logs = [
+              'example/gesture_demo.dart',
+              'example/hoverable_widgets_demo.dart',
+              'example/infinite_hoverable_list_demo.dart',
+              'example/mouse_demo.dart',
+          ]
+
+          for name in portable_logs:
+              path = root / name
+              source = path.read_text()
+              source = source.replace(
+                  "import 'dart:io';\n",
+                  "import '../tool/example_support/portable_debug_log.dart';\n",
+              )
+              source = re.sub(
+                  r"final _debugLog = File\('([^']+)'\);",
+                  r"final _debugLog = PortableDebugLog('\1');",
+                  source,
+              )
+              source = source.replace(
+                  "_debugLog.writeAsStringSync('[$timestamp] $message\\n', mode: FileMode.append);",
+                  "_debugLog.write('[$timestamp] $message');",
+              )
+              source = re.sub(
+                  r"\s*if \(_debugLog\.existsSync\(\)\) \{\s*_debugLog\.deleteSync\(\);\s*\}",
+                  "\n  _debugLog.clear();",
+                  source,
+              )
+              path.write_text(source)
+
+          logger = root / 'example/logger_demo.dart'
+          source = logger.read_text().replace("import 'dart:io';\n", '')
+          source = source.replace('stdout.writeln(', 'print(')
+          logger.write_text(source)
+
+          textfield = root / 'example/textfield_demo.dart'
+          source = textfield.read_text().replace("import 'dart:io';\n\n", '')
+          source = source.replace('exit(0);', 'shutdownApp();')
+          textfield.write_text(source)
+
+          resize_demo = root / 'example/test_resize_demo.dart'
+          source = resize_demo.read_text().replace("import 'dart:io';\n", '')
+          source = re.sub(
+              r"void main\(\) async \{[\s\S]*?await runApp\(TerminalResizeDemo\(\)\);\n\}",
+              "void main() {\n  runApp(const TerminalResizeDemo());\n}",
+              source,
+              count=1,
+          )
+          source = source.replace(
+              'class TerminalResizeDemo extends StatelessWidget {',
+              'class TerminalResizeDemo extends StatelessWidget {\n  const TerminalResizeDemo({super.key});',
+          )
+          resize_demo.write_text(source)
+
+          (root / 'example/test_resize.dart').write_text(r'''import 'package:cinder/cinder.dart';
+
+void main() {
+  runApp(const ResizeTestApp());
+}
+
+class ResizeTestApp extends StatelessWidget {
+  const ResizeTestApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth.toInt();
+        final height = constraints.maxHeight.toInt();
+        final lineWidth = width > 2 ? width - 2 : 0;
+
+        return Container(
+          decoration: BoxDecoration(
+            border: BoxBorder.all(color: Colors.blue),
+          ),
+          padding: const EdgeInsets.all(1),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                ' TERMINAL RESIZE TEST ',
+                style: TextStyle(
+                  color: Colors.blue,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 1),
+              Text('Current layout: ${width}×$height'),
+              Text('Available inner width: $lineWidth cells'),
+              const SizedBox(height: 1),
+              const Text('Resize the terminal or browser frame.'),
+              const Text('LayoutBuilder receives the new cell constraints.'),
+              const Spacer(),
+              Text('─' * lineWidth, style: const TextStyle(color: Colors.blue)),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+''')
+
+          (root / 'example/test_resize_improved.dart').write_text(r'''import 'package:cinder/cinder.dart';
+
+void main() {
+  runApp(const ResizeHistoryApp());
+}
+
+class ResizeHistoryApp extends StatefulWidget {
+  const ResizeHistoryApp({super.key});
+
+  @override
+  State<ResizeHistoryApp> createState() => _ResizeHistoryAppState();
+}
+
+class _ResizeHistoryAppState extends State<ResizeHistoryApp> {
+  Size? _lastSize;
+  final List<String> _history = <String>[];
+
+  void _record(Size size) {
+    if (_lastSize == size) return;
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _lastSize == size) return;
+      setState(() {
+        _lastSize = size;
+        _history.insert(
+          0,
+          '${size.width.toInt()}×${size.height.toInt()} at ${DateTime.now().toIso8601String().substring(11, 19)}',
+        );
+        if (_history.length > 8) _history.removeLast();
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final size = Size(constraints.maxWidth, constraints.maxHeight);
+        _record(size);
+
+        return Container(
+          padding: const EdgeInsets.all(1),
+          decoration: BoxDecoration(
+            border: BoxBorder.all(color: Colors.cyan),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    ' RESIZE EVENT LEDGER ',
+                    style: TextStyle(
+                      color: Colors.cyan,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    '${size.width.toInt()}×${size.height.toInt()}',
+                    style: const TextStyle(color: Colors.green),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 1),
+              const Text('Recent cell-constraint changes:'),
+              const SizedBox(height: 1),
+              Expanded(
+                child: ListView(
+                  children: _history
+                      .map((entry) => Text('› $entry'))
+                      .toList(growable: false),
+                ),
+              ),
+              const Text(
+                'Resize the native terminal or browser iframe to append an entry.',
+                style: TextStyle(color: Colors.gray),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+''')
+          PY
+
+      - name: Format changed Dart sources
+        run: >-
+          dart format
+          example/gesture_demo.dart
+          example/hoverable_widgets_demo.dart
+          example/infinite_hoverable_list_demo.dart
+          example/mouse_demo.dart
+          example/logger_demo.dart
+          example/textfield_demo.dart
+          example/test_resize_demo.dart
+          example/test_resize.dart
+          example/test_resize_improved.dart
+          tool/example_support
+
+      - name: Commit portable examples and remove one-shot workflow
+        shell: bash
+        run: |
+          git rm .github/workflows/modernize-web-examples.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add example tool/example_support
+          git commit -m 'refactor(examples): make portable demos browser-runnable'
+          git push origin HEAD:feature/web-docs-lab
