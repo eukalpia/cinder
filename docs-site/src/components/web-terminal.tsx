@@ -39,12 +39,18 @@ export function WebTerminal({
   useEffect(() => {
     if (!runnable || !bundle || !hostRef.current) return;
 
+    const host = hostRef.current;
     const guestBundle = bundle;
     let disposed = false;
     let guestScript: HTMLScriptElement | null = null;
     let resizeObserver: ResizeObserver | null = null;
     let animationFrame: number | null = null;
     const subscriptions: IDisposable[] = [];
+
+    host.dataset.outputWrites = '0';
+    host.dataset.inputEvents = '0';
+    host.dataset.resizeEvents = '0';
+    host.dataset.guestLoaded = 'false';
 
     async function start() {
       try {
@@ -53,7 +59,7 @@ export function WebTerminal({
           import('@xterm/addon-fit'),
         ]);
 
-        if (disposed || !hostRef.current) return;
+        if (disposed) return;
 
         const terminal = new Terminal({
           cursorBlink: true,
@@ -68,7 +74,7 @@ export function WebTerminal({
           allowTransparency: false,
           convertEol: false,
           drawBoldTextInBrightColors: false,
-          screenReaderMode: false,
+          screenReaderMode: true,
           theme: {
             background: '#090b10',
             foreground: '#d8d5e2',
@@ -95,17 +101,17 @@ export function WebTerminal({
         });
         const fitAddon = new FitAddon();
         terminal.loadAddon(fitAddon);
-        terminal.open(hostRef.current);
+        terminal.open(host);
         terminalRef.current = terminal;
 
         const fit = () => {
-          if (disposed || !hostRef.current) return;
-          const bounds = hostRef.current.getBoundingClientRect();
+          if (disposed) return;
+          const bounds = host.getBoundingClientRect();
           if (bounds.width < 1 || bounds.height < 1) return;
           try {
             fitAddon.fit();
           } catch {
-            // A hidden tab can briefly report zero terminal geometry.
+            // Hidden tabs and freshly mounted iframes can briefly report zero geometry.
           }
         };
 
@@ -115,18 +121,30 @@ export function WebTerminal({
         const bridge: CinderBridge = {
           width: terminal.cols,
           height: terminal.rows,
-          onOutput: (data) => terminal.write(data),
+          onOutput: (data) => {
+            incrementMetric(host, 'outputWrites');
+            terminal.write(data);
+          },
           onInput: null,
           onResize: null,
           onShutdown: null,
         };
         window.cinderBridge = bridge;
+        updateGeometry(host, terminal.cols, terminal.rows);
+
+        const forwardInput = (data: string) => {
+          incrementMetric(host, 'inputEvents');
+          bridge.onInput?.(data);
+        };
 
         subscriptions.push(
-          terminal.onData((data) => bridge.onInput?.(data)),
+          terminal.onData(forwardInput),
+          terminal.onBinary(forwardInput),
           terminal.onResize(({ cols, rows }) => {
             bridge.width = cols;
             bridge.height = rows;
+            updateGeometry(host, cols, rows);
+            incrementMetric(host, 'resizeEvents');
             bridge.onResize?.(cols, rows);
           }),
         );
@@ -135,7 +153,7 @@ export function WebTerminal({
           if (animationFrame !== null) cancelAnimationFrame(animationFrame);
           animationFrame = requestAnimationFrame(fit);
         });
-        resizeObserver.observe(hostRef.current);
+        resizeObserver.observe(host);
 
         guestScript = document.createElement('script');
         guestScript.src = guestBundle;
@@ -143,12 +161,14 @@ export function WebTerminal({
         guestScript.dataset.cinderGuest = title;
         guestScript.onload = () => {
           if (!disposed) {
+            host.dataset.guestLoaded = 'true';
             setStatus('running');
             terminal.focus();
           }
         };
         guestScript.onerror = () => {
           if (!disposed) {
+            host.dataset.guestLoaded = 'failed';
             setStatus('failed');
             setFailure('The generated Dart bundle could not be loaded.');
           }
@@ -156,6 +176,7 @@ export function WebTerminal({
         document.body.appendChild(guestScript);
       } catch (error) {
         if (!disposed) {
+          host.dataset.guestLoaded = 'failed';
           setStatus('failed');
           setFailure(error instanceof Error ? error.message : String(error));
         }
@@ -166,6 +187,7 @@ export function WebTerminal({
 
     return () => {
       disposed = true;
+      host.dataset.guestLoaded = 'disposed';
       if (animationFrame !== null) cancelAnimationFrame(animationFrame);
       resizeObserver?.disconnect();
       for (const subscription of subscriptions) subscription.dispose();
@@ -207,6 +229,8 @@ export function WebTerminal({
           className="web-terminal__viewport"
           role="application"
           aria-label={`${title} terminal viewport`}
+          aria-describedby="web-terminal-help"
+          data-runtime-status={status}
           tabIndex={0}
           onClick={() => terminalRef.current?.focus()}
           onFocus={() => terminalRef.current?.focus()}
@@ -217,10 +241,20 @@ export function WebTerminal({
           <p>{failure ?? 'It requires a native terminal capability.'}</p>
         </div>
       )}
-      <footer className="web-terminal__footer">
+      <footer className="web-terminal__footer" id="web-terminal-help">
         <span>Focus the terminal before typing.</span>
         <span>Rendered by Cinder, hosted by xterm.js.</span>
       </footer>
     </section>
   );
+}
+
+function incrementMetric(host: HTMLElement, key: 'outputWrites' | 'inputEvents' | 'resizeEvents') {
+  const current = Number(host.dataset[key] ?? '0');
+  host.dataset[key] = String(current + 1);
+}
+
+function updateGeometry(host: HTMLElement, cols: number, rows: number) {
+  host.dataset.cols = String(cols);
+  host.dataset.rows = String(rows);
 }
