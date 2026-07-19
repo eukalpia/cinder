@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { CopyCommand } from '@/components/copy-command';
 import { SiteHeader } from '@/components/site-header';
 import {
   cinderVersion,
@@ -98,13 +99,7 @@ export default function HomePage() {
             <div className="tui-install" aria-label="Install Cinder">
               <span className="tui-panel-label">INSTALL</span>
               <code>$ dart pub add cinder</code>
-              <button
-                type="button"
-                aria-label="Copy dart pub add cinder"
-                title="Copy command"
-              >
-                [copy]
-              </button>
+              <CopyCommand value="dart pub add cinder" />
             </div>
 
             <div className="tui-platforms">
