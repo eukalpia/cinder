@@ -127,7 +127,10 @@ jobs:
 
       - name: Verify routes, bundles, and generated metadata
         working-directory: docs-site
-        run: npm run test:routes
+        shell: bash
+        run: |
+          set -o pipefail
+          npm run test:routes 2>&1 | tee verify-report.txt
 
       - name: Upload build diagnostics
         if: always()
@@ -138,6 +141,7 @@ jobs:
             docs-site/lint-report.json
             docs-site/typecheck-report.txt
             docs-site/build-report.txt
+            docs-site/verify-report.txt
             docs-site/public/generated/examples/*.build-error.txt
             docs-site/.generated/
           if-no-files-found: ignore
