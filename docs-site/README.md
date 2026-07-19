@@ -81,7 +81,7 @@ The suite checks real Cinder output, keyboard input, resize propagation, restart
 - `native-only`: source is indexed but requires native access;
 - `build-failed`: isolated web compilation failed and diagnostics are preserved.
 
-Adapters live in `browser-adapters/` and are selected by generated example slug. They must not imitate Cinder with HTML.
+Adapters live in `browser-adapters/` and are selected by generated example slug. They must not imitate Cinder with HTML. The Pages workflow checks their Dart formatting and analyzer diagnostics before compiling any browser bundle.
 
 ## Generated files
 
