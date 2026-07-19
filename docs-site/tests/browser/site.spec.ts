@@ -39,7 +39,7 @@ test('documentation and generated example catalogue are reachable', async ({ pag
   const assertNoPageErrors = failOnPageErrors(page);
 
   await page.goto('docs/');
-  await expect(page.locator('main')).toContainText('Cinder');
+  await expect(page.getByRole('heading', { name: 'What is Cinder?' })).toBeVisible();
   await expect(page.getByRole('link', { name: /Installation/i }).first()).toBeVisible();
 
   await page.goto('../examples/');
@@ -88,8 +88,11 @@ test('native-only examples explain the missing browser capability', async ({ pag
 
   test.skip(!nativeExample, 'The generated manifest contains no native-only example.');
   await page.goto(`examples/${nativeExample!.slug}/`);
-  await expect(page.getByText('Native only').first()).toBeVisible();
-  await expect(page.getByText(/not faked in the browser/i)).toBeVisible();
+  await expect(page.getByText('Native capability required')).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: /browser runner stops at the real boundary/i }),
+  ).toBeVisible();
+  await expect(page.getByText(/requires a native operating-system runtime/i)).toBeVisible();
 });
 
 test('homepage remains usable at a mobile viewport', async ({ page }, testInfo) => {
