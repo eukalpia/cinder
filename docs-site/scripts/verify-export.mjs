@@ -25,6 +25,7 @@ const failures = [];
 const required = [
   'index.html',
   'docs/index.html',
+  'docs/web-runtime/index.html',
   'examples/index.html',
   'api/index.html',
   'robots.txt',
