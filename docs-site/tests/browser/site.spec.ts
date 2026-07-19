@@ -179,14 +179,18 @@ test('text input adapter accepts mixed Unicode through the Cinder bridge', async
     /Textfield Demo terminal viewport/i,
   );
   const before = Number((await terminal.getAttribute('data-input-events')) ?? '0');
+  const sample = 'Привет 👋 مرحبا e\u0301';
 
   await terminal.focus();
-  await page.keyboard.type('Привет 👋 مرحبا e\u0301');
+  await page.keyboard.insertText(sample);
   await page.keyboard.press('Enter');
 
   await expect
     .poll(async () => Number((await terminal.getAttribute('data-input-events')) ?? '0'))
-    .toBeGreaterThan(before + 5);
+    .toBeGreaterThan(before);
+  const accessibleTerminal = page.locator('.xterm-accessibility-tree');
+  await expect(accessibleTerminal).toContainText('Привет', { timeout: 10_000 });
+  await expect(accessibleTerminal).toContainText('مرحبا');
 });
 
 test('remaining native or failed examples explain the capability boundary', async ({
@@ -198,9 +202,7 @@ test('remaining native or failed examples explain the capability boundary', asyn
 
   await page.goto(`examples/${sourceOnly!.slug}/`);
   await expect(
-    page.locator(
-      `.compatibility--${sourceOnly!.runtimeMode}`,
-    ),
+    page.locator(`.compatibility--${sourceOnly!.runtimeMode}`),
   ).toBeVisible();
   await expect(
     page.getByRole('heading', {
@@ -240,8 +242,8 @@ test('responsive widths avoid document overflow and preserve navigation', async 
 
 test('keyboard navigation exposes the skip link and named frames', async ({ page }) => {
   await page.goto('./');
-  await page.keyboard.press('Tab');
   const skipLink = page.getByRole('link', { name: 'Skip to content' });
+  await page.keyboard.press('Tab');
   await expect(skipLink).toBeFocused();
   await skipLink.press('Enter');
   await expect(page.locator('#main-content')).toBeFocused();
