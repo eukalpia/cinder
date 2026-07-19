@@ -1,0 +1,139 @@
+name: Cinder Pages
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/pages.yml'
+      - 'docs-site/**'
+      - 'doc/**'
+      - 'example/**'
+      - 'packages/*/example/**'
+      - 'landing/demos/**'
+      - 'lib/**'
+      - 'pubspec.yaml'
+      - 'pubspec.lock'
+  pull_request:
+    paths:
+      - '.github/workflows/pages.yml'
+      - 'docs-site/**'
+      - 'doc/**'
+      - 'example/**'
+      - 'packages/*/example/**'
+      - 'landing/demos/**'
+      - 'lib/**'
+      - 'pubspec.yaml'
+      - 'pubspec.lock'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: cinder-pages-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build and verify static site
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      NEXT_PUBLIC_BASE_PATH: /cinder
+      NEXT_PUBLIC_SITE_ORIGIN: https://eukalpia.github.io
+      CINDER_WEB_COMPILE_TIMEOUT_MS: 900000
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Install Dart
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+
+      - name: Install Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: docs-site/package-lock.json
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Resolve Dart dependencies
+        run: dart pub get
+
+      - name: Check Dart formatting
+        run: >-
+          dart format
+          --output=none
+          --set-exit-if-changed
+          lib test example packages benchmark
+
+      - name: Analyze Dart
+        run: dart analyze --fatal-infos
+
+      - name: Test Cinder
+        run: dart test --reporter expanded
+
+      - name: Resolve site dependencies
+        working-directory: docs-site
+        run: npm ci
+
+      - name: Lint site
+        working-directory: docs-site
+        run: npm run lint
+
+      - name: Type-check site
+        working-directory: docs-site
+        run: npm run typecheck
+
+      - name: Generate Dart API reference
+        run: dart doc --output docs-site/public/api
+
+      - name: Build static site and browser examples
+        working-directory: docs-site
+        run: npm run build
+
+      - name: Verify routes, bundles, and generated metadata
+        working-directory: docs-site
+        run: npm run test:routes
+
+      - name: Upload compiler diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cinder-web-build-diagnostics
+          path: |
+            docs-site/public/generated/examples/*.build-error.txt
+            docs-site/.generated/
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Upload GitHub Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: docs-site/out
+
+  deploy:
+    name: Deploy GitHub Pages
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      pages: write
+      id-token: write
+
+    steps:
+      - name: Deploy Pages artifact
+        id: deployment
+        uses: actions/deploy-pages@v4
