@@ -89,7 +89,10 @@ jobs:
           fi
 
       - name: Analyze Dart
-        run: dart analyze --fatal-infos
+        shell: bash
+        run: |
+          set -o pipefail
+          dart analyze --fatal-infos 2>&1 | tee docs-site/dart-analyze-report.txt
 
       - name: Test Cinder
         run: dart test --reporter expanded
@@ -142,6 +145,7 @@ jobs:
         with:
           name: cinder-web-compiler-diagnostics
           path: |
+            docs-site/dart-analyze-report.txt
             docs-site/public/generated/examples/*.build-error.txt
             docs-site/.generated/
           if-no-files-found: ignore
