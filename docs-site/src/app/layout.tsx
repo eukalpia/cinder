@@ -2,6 +2,7 @@ import '@xterm/xterm/css/xterm.css';
 import './globals.css';
 import './tui.css';
 import './a11y.css';
+import './runtime-modes.css';
 import { RootProvider } from 'fumadocs-ui/provider/next';
 import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
