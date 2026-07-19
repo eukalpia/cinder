@@ -1,25 +1,40 @@
 import './globals.css';
 import { RootProvider } from 'fumadocs-ui/provider/next';
-import { Inter } from 'next/font/google';
+import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
-import type { Metadata } from 'next';
-
-const inter = Inter({
-  subsets: ['latin'],
-});
 
 export const metadata: Metadata = {
   title: {
-    template: '%s | Cinder',
-    default: 'Cinder',
+    template: '%s · Cinder',
+    default: 'Cinder · Terminal UI framework for Dart',
   },
-  description: 'A Flutter-like framework for building beautiful Terminal UIs in Dart',
+  description:
+    'A Flutter-style Widget, Element, and RenderObject framework for building terminal applications in Dart.',
+  applicationName: 'Cinder',
+  keywords: [
+    'Dart',
+    'terminal UI',
+    'TUI',
+    'Widget framework',
+    'Flutter-style',
+  ],
+  openGraph: {
+    title: 'Cinder · Terminal UI framework for Dart',
+    description:
+      'Build native and browser-hosted terminal applications with a Flutter-style runtime.',
+    type: 'website',
+  },
+};
+
+export const viewport: Viewport = {
+  colorScheme: 'dark',
+  themeColor: '#090b10',
 };
 
 export default function Layout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className={inter.className} suppressHydrationWarning>
-      <body className="flex flex-col min-h-screen">
+    <html lang="en" className="dark" suppressHydrationWarning>
+      <body>
         <RootProvider>{children}</RootProvider>
       </body>
     </html>
