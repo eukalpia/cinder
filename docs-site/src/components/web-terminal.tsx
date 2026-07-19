@@ -68,6 +68,7 @@ export function WebTerminal({
   useEffect(() => {
     if (!runnable || !bundle || !hostRef.current) return;
 
+    const guestBundle = bundle;
     let disposed = false;
     let guestScript: HTMLScriptElement | null = null;
     let resizeObserver: ResizeObserver | null = null;
@@ -167,7 +168,7 @@ export function WebTerminal({
         resizeObserver.observe(hostRef.current);
 
         guestScript = document.createElement('script');
-        guestScript.src = bundle;
+        guestScript.src = guestBundle;
         guestScript.async = true;
         guestScript.dataset.cinderGuest = title;
         guestScript.onload = () => {
