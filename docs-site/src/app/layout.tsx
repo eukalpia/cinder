@@ -1,3 +1,4 @@
+import '@xterm/xterm/css/xterm.css';
 import './globals.css';
 import './tui.css';
 import './a11y.css';
