@@ -1,0 +1,36 @@
+name: Install Modern Xterm Packages
+
+on:
+  push:
+    branches:
+      - feature/web-docs-lab
+    paths:
+      - '.github/workflows/install-modern-xterm.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  install:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: feature/web-docs-lab
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: docs-site/package-lock.json
+      - name: Install pinned xterm packages
+        working-directory: docs-site
+        run: npm install --save-exact @xterm/xterm@6.0.0 @xterm/addon-fit@0.11.0
+      - name: Commit dependencies and remove this one-shot workflow
+        shell: bash
+        run: |
+          rm -f .github/workflows/install-modern-xterm.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs-site/package.json docs-site/package-lock.json .github/workflows/install-modern-xterm.yml
+          git commit -m 'build(web): use modern pinned xterm packages'
+          git push origin HEAD:feature/web-docs-lab
