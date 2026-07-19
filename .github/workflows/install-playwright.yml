@@ -12,6 +12,7 @@ permissions:
 
 jobs:
   install:
+    name: Install pinned browser test dependency
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
