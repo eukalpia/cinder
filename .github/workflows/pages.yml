@@ -100,48 +100,29 @@ jobs:
 
       - name: Lint site
         working-directory: docs-site
-        shell: bash
-        run: |
-          set +e
-          npx eslint . --format json > lint-report.json
-          status=$?
-          cat lint-report.json
-          exit "$status"
+        run: npm run lint
 
       - name: Type-check site
         working-directory: docs-site
-        shell: bash
-        run: |
-          set -o pipefail
-          npm run typecheck 2>&1 | tee typecheck-report.txt
+        run: npm run typecheck
 
       - name: Generate Dart API reference
         run: dart doc --output docs-site/public/api
 
       - name: Build static site and browser examples
         working-directory: docs-site
-        shell: bash
-        run: |
-          set -o pipefail
-          npm run build 2>&1 | tee build-report.txt
+        run: npm run build
 
       - name: Verify routes, bundles, and generated metadata
         working-directory: docs-site
-        shell: bash
-        run: |
-          set -o pipefail
-          npm run test:routes 2>&1 | tee verify-report.txt
+        run: npm run test:routes
 
-      - name: Upload build diagnostics
+      - name: Upload browser compiler diagnostics
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: cinder-web-build-diagnostics
+          name: cinder-web-compiler-diagnostics
           path: |
-            docs-site/lint-report.json
-            docs-site/typecheck-report.txt
-            docs-site/build-report.txt
-            docs-site/verify-report.txt
             docs-site/public/generated/examples/*.build-error.txt
             docs-site/.generated/
           if-no-files-found: ignore
