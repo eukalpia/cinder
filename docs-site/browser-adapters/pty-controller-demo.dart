@@ -114,9 +114,8 @@ class _PtySandboxAppState extends State<PtySandboxApp> {
                     (line) => Text(
                       line,
                       style: TextStyle(
-                        color: line.startsWith('sandbox@')
-                            ? Colors.green
-                            : null,
+                        color:
+                            line.startsWith('sandbox@') ? Colors.green : null,
                       ),
                     ),
                   )
