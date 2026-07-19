@@ -30,6 +30,8 @@ class _WebShowcaseState extends State<WebShowcase> {
 
   @override
   Widget build(BuildContext context) {
+    final scene = '$_cityTop${_flames[_frame]}$_cityBottom';
+
     return Focus(
       autofocus: true,
       onKeyEvent: (event) {
@@ -64,19 +66,12 @@ class _WebShowcaseState extends State<WebShowcase> {
             const SizedBox(height: 1),
             Expanded(
               child: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(_cityTop, style: TextStyle(color: Colors.magenta)),
-                    Text(
-                      _flames[_frame],
-                      style: TextStyle(
-                        color: _frame.isEven ? Colors.yellow : Colors.magenta,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Text(_cityBottom, style: TextStyle(color: Colors.cyan)),
-                  ],
+                child: Text(
+                  scene,
+                  style: TextStyle(
+                    color: Colors.magenta,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),
