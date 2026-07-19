@@ -111,7 +111,11 @@ export default function Layout({ children }: { children: ReactNode }) {
         <a className="skip-link" href="#main-content">
           Skip to content
         </a>
-        <RootProvider>{children}</RootProvider>
+        <RootProvider>
+          <div id="main-content" tabIndex={-1}>
+            {children}
+          </div>
+        </RootProvider>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
