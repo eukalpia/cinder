@@ -6,6 +6,11 @@ on:
       - feature/web-runtime-polish
     paths:
       - '.github/workflows/bootstrap-runtime-polish.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/bootstrap-runtime-polish.yml'
 
 permissions:
   contents: write
