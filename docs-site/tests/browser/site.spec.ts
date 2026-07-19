@@ -17,7 +17,7 @@ function failOnPageErrors(page: Page) {
 test('homepage presents Cinder as a terminal control surface', async ({ page }, testInfo) => {
   const assertNoPageErrors = failOnPageErrors(page);
   await page.setViewportSize({ width: 1440, height: 1000 });
-  await page.goto('/');
+  await page.goto('./');
 
   await expect(page).toHaveTitle(/Cinder/);
   await expect(
@@ -38,11 +38,11 @@ test('homepage presents Cinder as a terminal control surface', async ({ page }, 
 test('documentation and generated example catalogue are reachable', async ({ page }) => {
   const assertNoPageErrors = failOnPageErrors(page);
 
-  await page.goto('/docs/');
+  await page.goto('docs/');
   await expect(page.locator('main')).toContainText('Cinder');
   await expect(page.getByRole('link', { name: /Installation/i }).first()).toBeVisible();
 
-  await page.goto('/examples/');
+  await page.goto('../examples/');
   await expect(page.getByRole('heading', { name: /Every example has an address/i })).toBeVisible();
   const search = page.getByPlaceholder('TextField, renderer, image…');
   await search.fill('web showcase');
@@ -54,7 +54,7 @@ test('real Cinder web showcase boots, receives input, resizes, and restarts', as
   page,
 }, testInfo) => {
   const assertNoPageErrors = failOnPageErrors(page);
-  await page.goto('/play/web-showcase/');
+  await page.goto('play/web-showcase/');
 
   const runtimeState = page.locator('.runtime-state');
   await expect(runtimeState).toHaveText('browser runtime', { timeout: 45_000 });
@@ -81,20 +81,20 @@ test('real Cinder web showcase boots, receives input, resizes, and restarts', as
 });
 
 test('native-only examples explain the missing browser capability', async ({ page }) => {
-  const response = await page.request.get('/generated/examples/manifest.json');
+  const response = await page.request.get('generated/examples/manifest.json');
   expect(response.ok()).toBeTruthy();
   const manifest = (await response.json()) as ExampleManifest;
   const nativeExample = manifest.examples.find((example) => !example.runnable);
 
   test.skip(!nativeExample, 'The generated manifest contains no native-only example.');
-  await page.goto(`/examples/${nativeExample!.slug}/`);
+  await page.goto(`examples/${nativeExample!.slug}/`);
   await expect(page.getByText('Native only').first()).toBeVisible();
   await expect(page.getByText(/not faked in the browser/i)).toBeVisible();
 });
 
 test('homepage remains usable at a mobile viewport', async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto('/');
+  await page.goto('./');
 
   await expect(
     page.getByRole('heading', { name: /Build terminal UIs the Flutter way/i }),
