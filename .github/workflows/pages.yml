@@ -80,7 +80,7 @@ jobs:
           if [ -z "$base" ] || [ "$base" = "0000000000000000000000000000000000000000" ]; then
             base="$(git rev-parse HEAD^ 2>/dev/null || git rev-list --max-parents=0 HEAD)"
           fi
-          mapfile -t files < <(git diff --name-only --diff-filter=ACMR "$base" HEAD | grep -E '^(lib|test|example|benchmark|packages)/.*\.dart$' || true)
+          mapfile -t files < <(git diff --name-only --diff-filter=ACMR "$base" HEAD | grep -E '^((lib|test|example|benchmark|packages)/.*|docs-site/browser-adapters/.*)\.dart$' || true)
           if [ "${#files[@]}" -gt 0 ]; then
             dart format "${files[@]}"
             git diff --exit-code -- "${files[@]}"
