@@ -38,10 +38,13 @@ The build performs these stages:
 3. discover official Dart examples;
 4. compile direct-web example groups;
 5. compile browser adapters and recover isolated portable examples;
-6. classify every example runtime mode;
-7. synchronize the package version from `../pubspec.yaml`;
-8. build the static Next.js export;
-9. write `.nojekyll` for GitHub Pages.
+6. resolve nested package examples with their own package configuration;
+7. classify every example runtime mode;
+8. synchronize the package version from `../pubspec.yaml`;
+9. build the static Next.js export;
+10. write `.nojekyll` for GitHub Pages.
+
+A nested example under `packages/<name>/example/` is compiled from that package root. The recovery pass runs `dart pub get` only for a nested package that needs an isolated browser build, so its package imports and dependency overrides remain authoritative.
 
 Verify the export:
 
