@@ -3,6 +3,7 @@ import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 export const baseOptions: BaseLayoutProps = {
   nav: {
     title: 'Cinder',
+    transparentMode: 'top',
   },
   links: [
     {
@@ -11,8 +12,14 @@ export const baseOptions: BaseLayoutProps = {
       active: 'nested-url',
     },
     {
+      text: 'Examples',
+      url: '/examples',
+      active: 'nested-url',
+    },
+    {
       text: 'GitHub',
       url: 'https://github.com/eukalpia/cinder',
+      external: true,
     },
   ],
 };
