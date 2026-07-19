@@ -10,7 +10,7 @@ import {
   writeFile,
 } from 'node:fs/promises';
 import path from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
 
 const execFileAsync = promisify(execFile);
@@ -23,6 +23,7 @@ const generatedPublicRoot = path.join(publicRoot, 'generated', 'examples');
 const generatedSourceRoot = path.join(siteRoot, 'src', 'generated');
 const launcherRoot = path.join(siteRoot, '.generated');
 const referenceRoot = path.join(siteRoot, 'content', 'docs', 'reference');
+const adapterRoot = path.join(siteRoot, 'browser-adapters');
 const basePath = normalizeBasePath(process.env.NEXT_PUBLIC_BASE_PATH ?? '');
 
 const blockedPatterns = [
@@ -39,7 +40,8 @@ const blockedPatterns = [
     reason: 'Uses native isolate APIs that are not available in this browser runner.',
   },
   {
-    pattern: /\b(?:Process|ProcessSignal|File|Directory|RandomAccessFile|InternetAddress|RawSocket|ServerSocket|SecureSocket|HttpClient)\b/,
+    pattern:
+      /\b(?:Process|ProcessSignal|File|Directory|RandomAccessFile|InternetAddress|RawSocket|ServerSocket|SecureSocket|HttpClient)\s*[.(]/,
     reason: 'Uses operating-system files, processes, or sockets.',
   },
   {
@@ -47,6 +49,13 @@ const blockedPatterns = [
     reason: 'Requires a PTY, FFmpeg, or another native process.',
   },
 ];
+
+const adapterModes = new Map([
+  ['clipboard-debug', 'browser-sandbox'],
+  ['image-demo', 'browser-adapter'],
+  ['image-listview-demo', 'browser-adapter'],
+  ['pty-controller-demo', 'browser-sandbox'],
+]);
 
 await main();
 
@@ -69,8 +78,14 @@ async function main() {
   await writeExampleManifest(examples, documentationCount);
 
   const runnable = examples.filter((example) => example.runnable).length;
+  const modes = countBy(examples, (example) => example.runtimeMode);
   console.log(
     `Prepared ${examples.length} examples (${runnable} browser-runnable) and ${documentationCount} reference documents.`,
+  );
+  console.log(
+    `Runtime modes: ${Array.from(modes.entries())
+      .map(([mode, count]) => `${mode}=${count}`)
+      .join(', ')}`,
   );
 }
 
@@ -195,10 +210,21 @@ async function discoverExamples() {
     const slug = uniqueSlug(baseSlug, usedSlugs);
     const title = titleFromFilename(path.basename(file, '.dart'));
     const category = inferCategory(repositoryPath, source);
-    const blocker = findWebBlocker(source);
+    const adapterFile = path.join(adapterRoot, `${slug}.dart`);
+    const hasAdapter = await exists(adapterFile);
+    const adapterMode = adapterModes.get(slug);
+    const blocker = hasAdapter ? null : findWebBlocker(source);
     const hasMain = /\bmain\s*\(/.test(source);
     const acceptsArguments = /\bmain\s*\(\s*(?:final\s+)?List\s*<\s*String\s*>/.test(source);
     const sourceOutput = path.join(generatedPublicRoot, slug, 'source.dart');
+    const compilePath = hasAdapter
+      ? normalizePath(path.relative(repositoryRoot, adapterFile))
+      : repositoryPath;
+    const runtimeMode = hasAdapter
+      ? (adapterMode ?? 'browser-adapter')
+      : blocker
+        ? 'native-only'
+        : 'direct-web';
 
     await mkdir(path.dirname(sourceOutput), { recursive: true });
     await writeFile(sourceOutput, source, 'utf8');
@@ -210,11 +236,23 @@ async function discoverExamples() {
       repositoryPath,
       sourcePath: `${basePath}/generated/examples/${slug}/source.dart`,
       sourceUrl: `https://github.com/eukalpia/cinder/blob/main/${repositoryPath}`,
+      adapterSourceUrl: hasAdapter
+        ? `https://github.com/eukalpia/cinder/blob/main/${compilePath}`
+        : null,
       runnable: false,
       bundle: null,
-      reason: blocker?.reason ?? (hasMain ? 'Pending browser compilation.' : 'This source file has no executable main() entrypoint.'),
-      webCandidate: !blocker && hasMain,
-      acceptsArguments,
+      reason:
+        blocker?.reason ??
+        (hasMain || hasAdapter
+          ? 'Pending browser compilation.'
+          : 'This source file has no executable main() entrypoint.'),
+      runtimeMode,
+      runtimeNote: runtimeNoteFor(runtimeMode),
+      controls: inferControls(source),
+      tags: inferTags(repositoryPath, source, category),
+      webCandidate: hasAdapter || (!blocker && hasMain),
+      acceptsArguments: hasAdapter ? false : acceptsArguments,
+      compilePath,
       description: inferDescription(source, title, category),
     });
   }
@@ -242,77 +280,95 @@ async function compileExampleBundles(examples) {
   );
 
   for (const [groupName, groupExamples] of groups) {
-    await compileGroup(groupName, groupExamples);
+    await compileBatch(groupName, groupExamples);
   }
 }
 
-async function compileGroup(groupName, groupExamples) {
-  let active = [...groupExamples];
-  const excluded = new Set();
-  const bundleName = `${groupName}.js`;
+async function compileBatch(bundleStem, examples) {
+  if (examples.length === 0) return;
+
+  const launcher = path.join(launcherRoot, `${bundleStem}.dart`);
+  const bundleName = `${bundleStem}.js`;
   const bundleOutput = path.join(generatedPublicRoot, bundleName);
+  await writeLauncher(launcher, examples);
+  await rm(bundleOutput, { force: true });
 
-  while (active.length > 0) {
-    const launcher = path.join(launcherRoot, `${groupName}.dart`);
-    await writeLauncher(launcher, active);
-    await rm(bundleOutput, { force: true });
+  try {
+    await execFileAsync(
+      'dart',
+      [
+        'compile',
+        'js',
+        '-O2',
+        '--no-source-maps',
+        '-o',
+        bundleOutput,
+        launcher,
+      ],
+      {
+        cwd: repositoryRoot,
+        maxBuffer: 16 * 1024 * 1024,
+        timeout: Number(process.env.CINDER_WEB_COMPILE_TIMEOUT_MS ?? 900_000),
+      },
+    );
 
-    try {
-      await execFileAsync(
-        'dart',
-        [
-          'compile',
-          'js',
-          '-O2',
-          '--no-source-maps',
-          '-o',
-          bundleOutput,
-          launcher,
-        ],
-        {
-          cwd: repositoryRoot,
-          maxBuffer: 16 * 1024 * 1024,
-          timeout: Number(process.env.CINDER_WEB_COMPILE_TIMEOUT_MS ?? 900_000),
-        },
-      );
-
-      for (const example of active) {
-        example.runnable = true;
-        example.bundle = `${basePath}/generated/examples/${bundleName}`;
-        example.reason = null;
-      }
-      return;
-    } catch (error) {
-      const stderr = String(error.stderr ?? error.message ?? 'Unknown compiler error');
-      const offender = active.find((example) =>
-        stderr.includes(example.repositoryPath),
-      );
-
-      if (!offender || excluded.has(offender.slug)) {
-        const summary = firstCompilerMessage(stderr);
-        for (const example of active) {
-          example.reason = `Browser compilation stopped in shared code: ${summary}`;
-        }
-        await writeFile(
-          path.join(generatedPublicRoot, `${groupName}.build-error.txt`),
-          stderr,
-          'utf8',
-        );
-        return;
-      }
-
-      offender.webCandidate = false;
-      offender.reason = `The Dart web compiler rejected this example: ${firstCompilerMessage(stderr, offender.repositoryPath)}`;
-      excluded.add(offender.slug);
-      active = active.filter((example) => example !== offender);
+    for (const example of examples) {
+      example.runnable = true;
+      example.bundle = `${basePath}/generated/examples/${bundleName}`;
+      example.reason = null;
     }
+    return;
+  } catch (error) {
+    const stderr = compilerDiagnostics(error);
+
+    if (examples.length === 1) {
+      const [example] = examples;
+      example.runnable = false;
+      example.runtimeMode = 'build-failed';
+      example.runtimeNote = runtimeNoteFor('build-failed');
+      example.reason = `The Dart web compiler rejected this example: ${firstCompilerMessage(
+        stderr,
+        example.compilePath,
+      )}`;
+      await writeCompilerFailure(example.slug, stderr || String(error));
+      return;
+    }
+
+    const offender = examples.find((example) => stderr.includes(example.compilePath));
+    if (offender) {
+      await compileBatch(`${bundleStem}-${offender.slug}`, [offender]);
+      await compileBatch(
+        bundleStem,
+        examples.filter((example) => example !== offender),
+      );
+      return;
+    }
+
+    const midpoint = Math.ceil(examples.length / 2);
+    await compileBatch(`${bundleStem}-a`, examples.slice(0, midpoint));
+    await compileBatch(`${bundleStem}-b`, examples.slice(midpoint));
   }
+}
+
+async function writeCompilerFailure(slug, diagnostics) {
+  await writeFile(
+    path.join(generatedPublicRoot, `${slug}.build-error.txt`),
+    diagnostics,
+    'utf8',
+  );
+}
+
+function compilerDiagnostics(error) {
+  const stderr = String(error?.stderr ?? '').trim();
+  const stdout = String(error?.stdout ?? '').trim();
+  const message = String(error?.message ?? '').trim();
+  return [stderr, stdout, message].filter(Boolean).join('\n');
 }
 
 async function writeLauncher(output, examples) {
   const imports = examples
     .map((example, index) => {
-      const sourceFile = path.join(repositoryRoot, example.repositoryPath);
+      const sourceFile = path.join(repositoryRoot, example.compilePath);
       const relative = normalizePath(path.relative(path.dirname(output), sourceFile));
       const uri = relative.startsWith('.') ? relative : `./${relative}`;
       return `import ${JSON.stringify(uri)} as example_${index};`;
@@ -334,10 +390,13 @@ async function writeLauncher(output, examples) {
 }
 
 async function writeExampleManifest(examples, documentationCount) {
-  const cleaned = examples.map(({ webCandidate, acceptsArguments, ...example }) => example);
+  const cleaned = examples.map(
+    ({ webCandidate, acceptsArguments, compilePath, ...example }) => example,
+  );
+  const version = await readPackageVersion();
   const manifest = {
     generatedAt: new Date().toISOString(),
-    version: '1.0.0-dev.2',
+    version,
     documentationCount,
     examples: cleaned,
   };
@@ -347,8 +406,30 @@ async function writeExampleManifest(examples, documentationCount) {
   await writeFile(path.join(generatedPublicRoot, 'manifest.json'), json, 'utf8');
 }
 
+async function readPackageVersion() {
+  const pubspec = await readFile(path.join(repositoryRoot, 'pubspec.yaml'), 'utf8');
+  const version = pubspec.match(/^version:\s*([^\s#]+)\s*$/m)?.[1];
+  if (!version) throw new Error('Unable to read version from pubspec.yaml.');
+  return version;
+}
+
 function findWebBlocker(source) {
   return blockedPatterns.find(({ pattern }) => pattern.test(source)) ?? null;
+}
+
+function runtimeNoteFor(mode) {
+  switch (mode) {
+    case 'browser-adapter':
+      return 'Runs through an official Cinder browser adapter while preserving the example intent and widget model.';
+    case 'browser-sandbox':
+      return 'Runs in a deterministic browser sandbox. Native operating-system access is not simulated as real access.';
+    case 'native-only':
+      return 'Source is indexed, but the example requires a native terminal capability.';
+    case 'build-failed':
+      return 'The source was discovered, but the current Dart web compiler did not produce a runnable bundle.';
+    default:
+      return 'Runs directly from the repository Dart source through Cinder WebBackend.';
+  }
 }
 
 function inferDescription(source, title, category) {
@@ -364,11 +445,49 @@ function inferCategory(repositoryPath, source) {
     ['Input', /\b(text_field|textfield|input|form|focus|keyboard|mouse|gesture)\b/],
     ['Data', /\b(list|scroll|table|grid|tree|chart|log|data)\b/],
     ['Navigation', /\b(navigation|navigator|route|dialog|overlay|menu|tabs|drawer)\b/],
-    ['Motion', /\b(animation|animated|progress|spinner|transition)\b/],
+    ['Motion', /\b(animation|animated|progress|spinner|transition|counter)\b/],
     ['Layout', /\b(layout|row|column|stack|flex|expanded|container|split)\b/],
-    ['Terminal', /\b(terminal|pty|shell|process|ssh|xterm)\b/],
+    ['Terminal', /\b(terminal|pty|shell|process|ssh|xterm|clipboard)\b/],
   ];
   return rules.find(([, pattern]) => pattern.test(text))?.[0] ?? 'Framework';
+}
+
+function inferControls(source) {
+  const controls = [];
+  const candidates = [
+    ['Tab / Shift+Tab', /LogicalKey\.tab|Shift\+Tab/i],
+    ['Arrow keys', /LogicalKey\.arrow(?:Up|Down|Left|Right)/],
+    ['Enter', /LogicalKey\.enter/],
+    ['Space', /LogicalKey\.space/],
+    ['Escape', /LogicalKey\.escape/],
+    ['Mouse', /GestureDetector|MouseRegion|onMouse|onHover|onTap/],
+    ['Scroll', /ListView|SingleChildScrollView|Scrollbar|onWheel/],
+    ['Text input', /TextField|TextEditingController/],
+  ];
+  for (const [label, pattern] of candidates) {
+    if (pattern.test(source)) controls.push(label);
+  }
+  return controls;
+}
+
+function inferTags(repositoryPath, source, category) {
+  const text = `${repositoryPath} ${source}`.toLowerCase();
+  const tags = new Set([category.toLowerCase()]);
+  const rules = [
+    ['keyboard', /keyboard|logicalkey|onkey/],
+    ['mouse', /mouse|gesture|hover|tap/],
+    ['unicode', /unicode|emoji|cjk|chinese|arabic|grapheme/],
+    ['scrolling', /listview|scrollbar|scrollcontroller/],
+    ['state', /statefulwidget|setstate/],
+    ['animation', /animation|timer|ticker|progress/],
+    ['images', /image|sixel|kitty|iterm/],
+    ['terminal', /terminal|pty|xterm|shell/],
+    ['forms', /textfield|form|controller/],
+  ];
+  for (const [tag, pattern] of rules) {
+    if (pattern.test(text)) tags.add(tag);
+  }
+  return Array.from(tags).sort();
 }
 
 function createBaseSlug(repositoryPath) {
@@ -396,7 +515,9 @@ function titleFromFilename(filename) {
 }
 
 function extractTitle(raw, slug) {
-  const frontmatterTitle = raw.match(/^---\r?\n[\s\S]*?^title:\s*["']?(.+?)["']?\s*$[\s\S]*?^---/m)?.[1];
+  const frontmatterTitle = raw.match(
+    /^---\r?\n[\s\S]*?^title:\s*["']?(.+?)["']?\s*$[\s\S]*?^---/m,
+  )?.[1];
   const heading = raw.match(/^#\s+(.+)$/m)?.[1];
   return (frontmatterTitle ?? heading ?? titleFromFilename(path.basename(slug))).trim();
 }
@@ -407,7 +528,7 @@ function firstCompilerMessage(stderr, repositoryPath = '') {
     .map((line) => line.trim())
     .filter(Boolean);
   const preferred = lines.find((line) =>
-    repositoryPath ? line.includes(repositoryPath) : /Error:|error:/i.test(line),
+    repositoryPath ? line.includes(repositoryPath) : /Error:|error:|timed out/i.test(line),
   );
   return sanitizeCompilerMessage(preferred ?? lines[0] ?? 'unknown web compiler error');
 }
@@ -416,7 +537,7 @@ function sanitizeCompilerMessage(message) {
   return message
     .replaceAll(repositoryRoot, '<repo>')
     .replace(/\s+/g, ' ')
-    .slice(0, 240);
+    .slice(0, 320);
 }
 
 function slugify(value) {
@@ -438,7 +559,11 @@ function normalizePath(value) {
 async function walk(root) {
   const output = [];
   for (const entry of await readdir(root, { withFileTypes: true })) {
-    if (entry.name.startsWith('.') || entry.name === 'build' || entry.name === 'node_modules') {
+    if (
+      entry.name.startsWith('.') ||
+      entry.name === 'build' ||
+      entry.name === 'node_modules'
+    ) {
       continue;
     }
     const absolute = path.join(root, entry.name);
@@ -455,4 +580,13 @@ async function exists(file) {
   } catch {
     return false;
   }
+}
+
+function countBy(values, selector) {
+  const counts = new Map();
+  for (const value of values) {
+    const key = selector(value);
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+  }
+  return counts;
 }
