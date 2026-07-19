@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { ArrowUpRight, Check, GitBranch, TerminalSquare } from 'lucide-react';
 import { SiteHeader } from '@/components/site-header';
 import {
   cinderVersion,
@@ -9,233 +8,318 @@ import {
 } from '@/lib/examples';
 import { withBasePath } from '@/lib/site';
 
-const counterSource = `class Counter extends StatefulWidget {
-  const Counter({super.key});
+const showcaseSource = `import 'package:cinder/cinder.dart';
 
-  @override
-  State<Counter> createState() => _CounterState();
+void main() {
+  runApp(const CinderApp(
+    child: WebShowcase(),
+  ));
 }
 
-class _CounterState extends State<Counter> {
-  int count = 0;
+class WebShowcase extends StatefulWidget {
+  const WebShowcase({super.key});
+
+  @override
+  State<WebShowcase> createState() => _WebShowcaseState();
+}
+
+class _WebShowcaseState extends State<WebShowcase> {
+  int frame = 0;
 
   @override
   Widget build(BuildContext context) {
-    return Focus(
-      autofocus: true,
-      onKeyEvent: (event) {
-        if (event.logicalKey == LogicalKey.space) {
-          setState(() => count++);
-          return true;
-        }
-        return false;
-      },
-      child: Center(child: Text('Count: $count')),
+    return Column(
+      children: [
+        Text('CINDER RENDER PIPELINE'),
+        Expanded(child: Text(cityFrames[frame])),
+        Text('Widget → Element → RenderObject → Diff'),
+      ],
     );
   }
 }`;
 
+const pipelineStages = [
+  ['01', 'WIDGET', 'Describe UI immutably'],
+  ['02', 'ELEMENT', 'Preserve identity and state'],
+  ['03', 'RENDER OBJECT', 'Layout and paint cells'],
+  ['04', 'BUFFER', 'Own graphemes and styles'],
+  ['05', 'DIFF', 'Emit minimal terminal updates'],
+  ['06', 'WEB BACKEND', 'Bridge output to xterm.js'],
+] as const;
+
+const guarantees = [
+  'Deterministic Widget → Element → RenderObject pipeline',
+  'Reusable cell buffers and differential terminal output',
+  'Keyboard, mouse, focus, resize, and Unicode support',
+  'Native terminal and isolated browser runtime',
+  'No React reimplementation of the terminal renderer',
+] as const;
+
+const runtimeNotes = [
+  'Dart source is compiled during the site build.',
+  'Every application runs in a fresh iframe context.',
+  'xterm.js is only a terminal host; Cinder paints the UI.',
+  'Native-only capabilities are labelled instead of faked.',
+] as const;
+
 export default function HomePage() {
   const featured =
-    runnableExamples.find((example) => example.category === 'Input') ??
+    runnableExamples.find((example) => example.slug === 'web-showcase') ??
+    runnableExamples.find((example) => example.category === 'Motion') ??
     runnableExamples[0];
   const visibleExamples = examples.slice(0, 6);
 
   return (
-    <main className="marketing-page">
-      <div className="marketing-shell">
+    <main className="tui-page">
+      <div className="tui-frame">
         <SiteHeader />
 
-        <section className="hero" aria-labelledby="hero-title">
-          <div className="hero__copy">
-            <p className="kicker">Dart · terminal cells · real browser runtime</p>
+        <section className="tui-hero" aria-labelledby="hero-title">
+          <article className="tui-panel tui-intro">
+            <p className="tui-eyebrow">CINDER / DART TERMINAL UI FRAMEWORK</p>
             <h1 id="hero-title">
-              Flutter&apos;s UI model,
+              Build terminal UIs
               <br />
-              rebuilt for terminals.
+              the Flutter way.<span className="tui-cursor">_</span>
             </h1>
-            <p className="hero__lede">
-              Cinder is a Widget, Element, and RenderObject framework for terminal
-              applications. The same application code now targets native terminals
-              and an isolated browser terminal—without replacing the renderer with
-              a decorative mockup.
+            <p className="tui-copy">
+              Cinder brings Widget, Element, State, BuildContext, and RenderObject
+              architecture to terminal applications without shipping Flutter or a
+              browser UI clone.
             </p>
-            <div className="hero__actions">
-              <Link href="/docs/installation" className="button button--primary">
-                Install Cinder <ArrowUpRight size={15} />
-              </Link>
-              <Link href="/examples" className="button button--quiet">
-                Open example index
-              </Link>
+
+            <ul className="tui-list" aria-label="Cinder capabilities">
+              <li>Same declarative model on native terminals and the browser</li>
+              <li>Real frame scheduling, layout, paint, damage, and diff</li>
+              <li>Interactive examples compiled from repository Dart source</li>
+              <li>Static documentation and GitHub Pages deployment</li>
+            </ul>
+
+            <div className="tui-install" aria-label="Install Cinder">
+              <span className="tui-panel-label">INSTALL</span>
+              <code>$ dart pub add cinder</code>
+              <button
+                type="button"
+                aria-label="Copy dart pub add cinder"
+                title="Copy command"
+              >
+                [copy]
+              </button>
             </div>
-            <dl className="hero__facts">
+
+            <div className="tui-platforms">
+              Dart 3.5+ · Web · macOS · Linux · Windows
+            </div>
+          </article>
+
+          <section className="tui-panel tui-scene" aria-label="Live Cinder scene">
+            <header className="tui-panel-bar">
+              <span>CINDER RENDER PIPELINE</span>
+              <span className="tui-live">● LIVE DART</span>
+            </header>
+            {featured ? (
+              <iframe
+                title={`${featured.title} rendered by Cinder`}
+                src={withBasePath(`/play/${featured.slug}/`)}
+                className="tui-scene-frame"
+                loading="eager"
+              />
+            ) : (
+              <pre className="tui-scene-fallback">
+                <code>{`                 STATE           DIFF
+                   │               │
+          ┌────────┴───────────────┴────────┐
+          │     CINDER WEB RUNTIME          │
+          │  waiting for generated bundle  │
+          └─────────────────────────────────┘
+
+ Widget → Element → RenderObject → Buffer → Diff`}</code>
+              </pre>
+            )}
+            <footer className="tui-panel-foot">
+              <span>EVENTS: keyboard / mouse / resize</span>
+              <span>FRAME: renderer-owned</span>
+            </footer>
+          </section>
+
+          <aside className="tui-hero-side">
+            <section className="tui-panel tui-source-panel">
+              <header className="tui-panel-bar">
+                <span>● main.dart</span>
+                <span>DART</span>
+              </header>
+              <pre className="tui-code">
+                <code>{showcaseSource}</code>
+              </pre>
+            </section>
+
+            <section className="tui-panel tui-runtime-panel">
+              <header className="tui-panel-bar">
+                <span>LIVE RUN / WEB</span>
+                <span className="tui-fps">60 FPS TARGET</span>
+              </header>
+              <div className="tui-runtime-grid">
+                <nav aria-label="Runtime sections">
+                  <strong>Cinder Runtime</strong>
+                  <span className="is-active">› Overview</span>
+                  <span>  Widgets</span>
+                  <span>  Events</span>
+                  <span>  Performance</span>
+                  <span>  Logs</span>
+                </nav>
+                <div className="tui-signal" aria-hidden="true">
+                  <span>FRAME ACTIVITY</span>
+                  <pre>{`▁▂▃▂▄▆▅▃▅▇▆▄▃▅▆▇▅▄▆▇▆▅▄▃`}</pre>
+                </div>
+                <dl>
+                  <div>
+                    <dt>EXAMPLES</dt>
+                    <dd>{examples.length || 'build'}</dd>
+                  </div>
+                  <div>
+                    <dt>WEB</dt>
+                    <dd>{runnableExamples.length || 'scan'}</dd>
+                  </div>
+                  <div>
+                    <dt>DOCS</dt>
+                    <dd>{documentationCount || 'sync'}</dd>
+                  </div>
+                  <div>
+                    <dt>VERSION</dt>
+                    <dd>{cinderVersion}</dd>
+                  </div>
+                </dl>
+              </div>
+              <footer className="tui-panel-foot tui-connected">
+                <span>● Connected to web runtime</span>
+                <span>isolated iframe</span>
+              </footer>
+            </section>
+          </aside>
+        </section>
+
+        <section className="tui-pipeline" aria-labelledby="pipeline-title">
+          <h2 id="pipeline-title" className="sr-only">
+            Cinder rendering pipeline
+          </h2>
+          {pipelineStages.map(([number, title, description], index) => (
+            <div className="tui-pipeline-stage" key={title}>
+              <span>{number}</span>
+              <strong>{title}</strong>
+              <small>{description}</small>
+              {index < pipelineStages.length - 1 ? (
+                <b aria-hidden="true">→</b>
+              ) : null}
+            </div>
+          ))}
+        </section>
+
+        <section className="tui-ledger-grid">
+          <article className="tui-panel tui-ledger">
+            <h2>RUNTIME GUARANTEES</h2>
+            <ul>
+              {guarantees.map((guarantee) => (
+                <li key={guarantee}>✓ {guarantee}</li>
+              ))}
+            </ul>
+          </article>
+
+          <article className="tui-panel tui-ledger">
+            <h2>THE WEB RUNTIME IS REAL</h2>
+            <ul>
+              {runtimeNotes.map((note) => (
+                <li key={note}>› {note}</li>
+              ))}
+            </ul>
+            <Link href="/docs/web-runtime">Open runtime contract →</Link>
+          </article>
+
+          <article className="tui-panel tui-ledger tui-install-ledger">
+            <h2>INSTALL</h2>
+            <p>Dart package</p>
+            <code>$ dart pub add cinder</code>
+            <p>Repository development</p>
+            <code>$ git clone github.com/eukalpia/cinder</code>
+          </article>
+
+          <article className="tui-panel tui-ledger tui-numbers">
+            <h2>BUILD INDEX</h2>
+            <dl>
               <div>
-                <dt>Release line</dt>
-                <dd>{cinderVersion}</dd>
+                <dt>{examples.length || '—'}</dt>
+                <dd>repository examples</dd>
               </div>
               <div>
-                <dt>Repository examples</dt>
-                <dd>{examples.length || 'generated at build'}</dd>
+                <dt>{runnableExamples.length || '—'}</dt>
+                <dd>browser-runnable</dd>
               </div>
               <div>
-                <dt>Reference documents</dt>
-                <dd>{documentationCount || 'synced at build'}</dd>
+                <dt>{documentationCount || '—'}</dt>
+                <dd>reference documents</dd>
               </div>
             </dl>
-          </div>
+          </article>
+        </section>
 
-          <div className="hero__runtime" aria-label="Live Cinder browser example">
-            <div className="runtime-window">
-              <div className="runtime-window__bar">
-                <span className="runtime-window__title">
-                  <TerminalSquare size={14} /> cinder web runner
-                </span>
-                <span className="runtime-window__status">
-                  <i /> generated from Dart
-                </span>
+        <section className="tui-bottom-grid">
+          <article className="tui-panel tui-examples-panel">
+            <header className="tui-section-bar">
+              <div>
+                <span>EXAMPLES</span>
+                <small>generated from repository source</small>
               </div>
-              {featured ? (
-                <iframe
-                  title={`${featured.title} live Cinder example`}
-                  src={withBasePath(`/play/${featured.slug}/`)}
-                  className="runtime-window__frame"
-                  loading="eager"
-                />
-              ) : (
-                <pre className="runtime-window__fallback">
-                  <code>
-                    $ npm run build{`\n`}
-                    → scan repository examples{`\n`}
-                    → compile browser-safe Dart{`\n`}
-                    → publish isolated runners
-                  </code>
-                </pre>
-              )}
-              <div className="runtime-window__foot">
-                <span>{featured?.repositoryPath ?? 'example/**/*.dart'}</span>
-                <span>keyboard · mouse · resize</span>
-              </div>
+              <Link href="/examples">+ open catalogue</Link>
+            </header>
+            <div className="tui-example-strip">
+              {visibleExamples.map((example, index) => (
+                <Link href={`/examples/${example.slug}`} key={example.slug}>
+                  <span>{String(index + 1).padStart(2, '0')}</span>
+                  <strong>{example.title}</strong>
+                  <small>{example.category}</small>
+                  <em>{example.runnable ? 'WEB' : 'NATIVE'}</em>
+                </Link>
+              ))}
+              {visibleExamples.length === 0 ? (
+                <p>Run `npm run prepare:site` to generate the example index.</p>
+              ) : null}
             </div>
-          </div>
-        </section>
+          </article>
 
-        <section className="proof-strip" aria-label="Runtime guarantees">
-          <span>
-            <Check size={14} /> real Cinder frame pipeline
-          </span>
-          <span>
-            <Check size={14} /> one isolated iframe per app
-          </span>
-          <span>
-            <Check size={14} /> static GitHub Pages export
-          </span>
-          <span>
-            <Check size={14} /> native limitations disclosed, never simulated
-          </span>
-        </section>
-
-        <section className="split-section" aria-labelledby="model-title">
-          <div className="section-heading">
-            <p className="kicker">Programming model</p>
-            <h2 id="model-title">One widget tree. Two terminal backends.</h2>
-            <p>
-              Cinder does not turn a screenshot into a website. The browser runner
-              hosts the actual Dart application and forwards terminal I/O through a
-              narrow bridge.
-            </p>
-          </div>
-          <div className="pipeline" role="list">
-            {[
-              ['01', 'Widget tree', 'Immutable configuration and stateful lifecycles.'],
-              ['02', 'Element reconciliation', 'Persistent identity and scoped rebuilds.'],
-              ['03', 'RenderObjects', 'Cell-aware layout, paint, damage, and diff.'],
-              ['04', 'Backend', 'stdio on native; xterm bridge in the browser.'],
-            ].map(([number, title, description]) => (
-              <div className="pipeline__row" role="listitem" key={number}>
-                <span>{number}</span>
-                <strong>{title}</strong>
-                <p>{description}</p>
+          <article className="tui-panel tui-docs-panel">
+            <header className="tui-section-bar">
+              <div>
+                <span>DOCS / REFERENCE</span>
+                <small>source-backed documentation</small>
               </div>
-            ))}
-          </div>
-        </section>
-
-        <section className="code-section" aria-labelledby="code-title">
-          <div className="code-section__source">
-            <div className="code-caption">
-              <span>counter.dart</span>
-              <span>same source on native and web</span>
+            </header>
+            <div className="tui-doc-columns">
+              <nav aria-label="Documentation links">
+                <Link href="/docs">Getting started <span>[..]</span></Link>
+                <Link href="/docs/fundamentals/components">
+                  Widget model <span>[..]</span>
+                </Link>
+                <Link href="/docs/interactivity/focus">
+                  Input and focus <span>[..]</span>
+                </Link>
+                <Link href="/docs/testing/basics">Testing <span>[..]</span></Link>
+              </nav>
+              <nav aria-label="Reference links">
+                <Link href="/docs/reference">Engineering reference <span>[..]</span></Link>
+                <Link href="/docs/reference/renderer-v2">Renderer V2 <span>[..]</span></Link>
+                <Link href="/docs/reference/images">Images <span>[..]</span></Link>
+                <Link href="/docs/web-runtime">Web backend <span>[..]</span></Link>
+              </nav>
             </div>
-            <pre>
-              <code>{counterSource}</code>
-            </pre>
-          </div>
-          <div className="code-section__notes">
-            <p className="kicker">No compatibility theatre</p>
-            <h2 id="code-title">The browser is another terminal host.</h2>
-            <ul className="plain-checklist">
-              <li>Input is forwarded as terminal byte sequences.</li>
-              <li>Resize events update the Cinder terminal binding.</li>
-              <li>ANSI output is rendered by xterm.js, not reimplemented in React.</li>
-              <li>Each route owns a fresh JavaScript context, so apps actually stop.</li>
-            </ul>
-            <Link href="/docs/web-runtime" className="text-link">
-              Read the web runtime contract <ArrowUpRight size={14} />
-            </Link>
-          </div>
+          </article>
         </section>
 
-        <section className="example-preview" aria-labelledby="examples-title">
-          <div className="section-heading section-heading--row">
-            <div>
-              <p className="kicker">Repository-indexed</p>
-              <h2 id="examples-title">Examples are products, not thumbnails.</h2>
-            </div>
-            <Link href="/examples" className="text-link">
-              Browse all examples <ArrowUpRight size={14} />
-            </Link>
-          </div>
-          <div className="example-preview__ledger">
-            {visibleExamples.map((example, index) => (
-              <Link href={`/examples/${example.slug}`} key={example.slug}>
-                <span>{String(index + 1).padStart(2, '0')}</span>
-                <strong>{example.title}</strong>
-                <small>{example.category}</small>
-                <em className={example.runnable ? 'is-web' : 'is-native'}>
-                  {example.runnable ? 'live web' : 'native source'}
-                </em>
-                <ArrowUpRight size={14} />
-              </Link>
-            ))}
-            {visibleExamples.length === 0 ? (
-              <div className="example-preview__empty">
-                The catalogue is generated during the production build from
-                <code> example/</code> and package example directories.
-              </div>
-            ) : null}
-          </div>
-        </section>
-
-        <section className="docs-callout" aria-labelledby="docs-title">
-          <div>
-            <p className="kicker">Documentation without drift</p>
-            <h2 id="docs-title">The engineering reference comes from the repo.</h2>
-          </div>
-          <p>
-            Architecture, renderer, images, icons, security, and performance notes
-            are copied from <code>doc/</code> during every build. The public docs
-            cannot quietly become a different project from the source tree.
-          </p>
-          <Link href="/docs/reference" className="button button--primary">
-            Open engineering reference
-          </Link>
-        </section>
-
-        <footer className="site-footer">
-          <span>
-            <GitBranch size={14} /> eukalpia/cinder
-          </span>
-          <span>Apache-2.0 · built in Dart</span>
+        <footer className="tui-statusbar">
+          <span>[?] HELP</span>
+          <span>[1–5] NAVIGATE</span>
+          <span>[J/K] SCROLL</span>
+          <span>[/] SEARCH</span>
+          <a href="https://github.com/eukalpia/cinder">GITHUB.COM/EUKALPIA/CINDER</a>
+          <strong>● WEB RUNTIME: ONLINE</strong>
         </footer>
       </div>
     </main>
