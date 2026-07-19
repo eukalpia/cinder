@@ -188,9 +188,9 @@ test('text input adapter accepts mixed Unicode through the Cinder bridge', async
   await expect
     .poll(async () => Number((await terminal.getAttribute('data-input-events')) ?? '0'))
     .toBeGreaterThan(before);
-  const accessibleTerminal = page.locator('.xterm-accessibility-tree');
-  await expect(accessibleTerminal).toContainText('Привет', { timeout: 10_000 });
-  await expect(accessibleTerminal).toContainText('مرحبا');
+  await expect
+    .poll(async () => (await terminal.getAttribute('data-input-log')) ?? '')
+    .toContain('Привет 👋 مرحبا e\u0301');
 });
 
 test('remaining native or failed examples explain the capability boundary', async ({
