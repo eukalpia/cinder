@@ -4,11 +4,7 @@ import 'package:cinder/cinder.dart';
 
 /// Animated isometric terminal scene used by the Cinder documentation homepage.
 void main() {
-  runApp(
-    const CinderApp(
-      child: WebShowcase(),
-    ),
-  );
+  runApp(const CinderApp(child: WebShowcase()));
 }
 
 class WebShowcase extends StatefulWidget {
@@ -45,9 +41,7 @@ class _WebShowcaseState extends State<WebShowcase> {
       },
       child: Container(
         padding: const EdgeInsets.all(1),
-        decoration: BoxDecoration(
-          border: BoxBorder.all(color: Colors.magenta),
-        ),
+        decoration: BoxDecoration(border: BoxBorder.all(color: Colors.magenta)),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -73,10 +67,7 @@ class _WebShowcaseState extends State<WebShowcase> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
-                      _cityTop,
-                      style: TextStyle(color: Colors.magenta),
-                    ),
+                    Text(_cityTop, style: TextStyle(color: Colors.magenta)),
                     Text(
                       _flames[_frame],
                       style: TextStyle(
@@ -84,10 +75,7 @@ class _WebShowcaseState extends State<WebShowcase> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    Text(
-                      _cityBottom,
-                      style: TextStyle(color: Colors.cyan),
-                    ),
+                    Text(_cityBottom, style: TextStyle(color: Colors.cyan)),
                   ],
                 ),
               ),
