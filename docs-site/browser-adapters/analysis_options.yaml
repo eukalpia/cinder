@@ -1,3 +1,5 @@
+include: ../../analysis_options.yaml
+
 # Adapter entrypoints intentionally match generated URL slugs.
 linter:
   rules:
