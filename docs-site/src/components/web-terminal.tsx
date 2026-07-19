@@ -49,6 +49,7 @@ export function WebTerminal({
 
     host.dataset.outputWrites = '0';
     host.dataset.inputEvents = '0';
+    host.dataset.inputLog = '';
     host.dataset.resizeEvents = '0';
     host.dataset.guestLoaded = 'false';
 
@@ -134,6 +135,9 @@ export function WebTerminal({
 
         const forwardInput = (data: string) => {
           incrementMetric(host, 'inputEvents');
+          host.dataset.inputLog = `${host.dataset.inputLog ?? ''}${data}`.slice(
+            -512,
+          );
           bridge.onInput?.(data);
         };
 
