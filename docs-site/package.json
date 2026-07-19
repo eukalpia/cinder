@@ -3,12 +3,20 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "node scripts/prepare-site.mjs --skip-compile && node scripts/sync-version.mjs && next dev",
+    "prepare:site": "node scripts/prepare-site.mjs && node scripts/sync-version.mjs",
+    "build": "node scripts/prepare-site.mjs && node scripts/sync-version.mjs && next build && node scripts/finalize-export.mjs",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "test:routes": "node scripts/verify-export.mjs",
+    "test:examples": "node scripts/prepare-site.mjs && node scripts/sync-version.mjs",
+    "test:browser": "playwright test",
+    "test:visual": "playwright test --grep \"homepage|showcase\""
   },
   "dependencies": {
+    "@xterm/addon-fit": "0.11.0",
+    "@xterm/xterm": "6.0.0",
     "fumadocs-core": "^16.3.2",
     "fumadocs-mdx": "^14.2.2",
     "fumadocs-ui": "^16.3.2",
@@ -18,6 +26,7 @@
     "react-dom": "19.2.3"
   },
   "devDependencies": {
+    "@playwright/test": "1.61.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",

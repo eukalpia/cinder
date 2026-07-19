@@ -1,0 +1,171 @@
+name: Cinder Pages
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/pages.yml'
+      - 'docs-site/**'
+      - 'doc/**'
+      - 'example/**'
+      - 'packages/*/example/**'
+      - 'landing/demos/**'
+      - 'lib/**'
+      - 'pubspec.yaml'
+      - 'pubspec.lock'
+  pull_request:
+    paths:
+      - '.github/workflows/pages.yml'
+      - 'docs-site/**'
+      - 'doc/**'
+      - 'example/**'
+      - 'packages/*/example/**'
+      - 'landing/demos/**'
+      - 'lib/**'
+      - 'pubspec.yaml'
+      - 'pubspec.lock'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: cinder-pages-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build and verify static site
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    env:
+      NEXT_PUBLIC_BASE_PATH: /cinder
+      NEXT_PUBLIC_SITE_ORIGIN: https://eukalpia.github.io
+      CINDER_WEB_COMPILE_TIMEOUT_MS: 900000
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Install Dart
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+
+      - name: Install Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: docs-site/package-lock.json
+
+      - name: Configure GitHub Pages
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/configure-pages@v5
+
+      - name: Resolve Dart dependencies
+        run: dart pub get
+
+      - name: Check formatting of changed Dart files
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        shell: bash
+        run: |
+          base="$BASE_SHA"
+          if [ -z "$base" ] || [ "$base" = "0000000000000000000000000000000000000000" ]; then
+            base="$(git rev-parse HEAD^ 2>/dev/null || git rev-list --max-parents=0 HEAD)"
+          fi
+          mapfile -t files < <(git diff --name-only --diff-filter=ACMR "$base" HEAD | grep -E '^(lib|test|example|benchmark|packages)/.*\.dart$' || true)
+          if [ "${#files[@]}" -gt 0 ]; then
+            dart format "${files[@]}"
+            git diff --exit-code -- "${files[@]}"
+          else
+            echo 'No changed Dart files.'
+          fi
+
+      - name: Analyze Dart
+        run: dart analyze --fatal-infos
+
+      - name: Test Cinder
+        run: dart test --reporter expanded
+
+      - name: Resolve site dependencies
+        working-directory: docs-site
+        run: npm ci
+
+      - name: Lint site
+        working-directory: docs-site
+        run: npm run lint
+
+      - name: Type-check site
+        working-directory: docs-site
+        run: npm run typecheck
+
+      - name: Generate Dart API reference
+        run: dart doc --output docs-site/public/api
+
+      - name: Build static site and browser examples
+        working-directory: docs-site
+        run: npm run build
+
+      - name: Verify routes, bundles, and generated metadata
+        working-directory: docs-site
+        run: npm run test:routes
+
+      - name: Install Chromium for browser validation
+        working-directory: docs-site
+        run: npx playwright install --with-deps chromium
+
+      - name: Run browser runtime, keyboard, resize, restart, and mobile checks
+        working-directory: docs-site
+        run: npm run test:browser
+
+      - name: Upload browser test report and screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cinder-web-browser-report
+          path: |
+            docs-site/playwright-report/
+            docs-site/test-results/
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Upload browser compiler diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cinder-web-compiler-diagnostics
+          path: |
+            docs-site/public/generated/examples/*.build-error.txt
+            docs-site/.generated/
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Upload GitHub Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: docs-site/out
+
+  deploy:
+    name: Deploy GitHub Pages
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      pages: write
+      id-token: write
+
+    steps:
+      - name: Deploy GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
