@@ -95,6 +95,20 @@ The route is not silently omitted, and the site does not display a fake success 
 
 This is different from `native-only`: a build failure may be a portable bug worth fixing, while a native boundary can be intentional.
 
+## Package-scoped examples
+
+Examples under `packages/<package>/example/` are compiled with that package's own dependency graph instead of the root package configuration.
+
+The recovery pass:
+
+1. identifies the containing package from the repository path;
+2. resolves that package with `dart pub get` only when an isolated build is needed;
+3. creates a temporary launcher inside the package root;
+4. compiles from that package root so package imports and dependency overrides remain authoritative;
+5. writes the resulting static bundle into the shared generated example directory.
+
+This prevents a valid integration example from being marked as failed merely because its package import is unavailable from the root package configuration.
+
 ## Input and resize
 
 The browser host forwards:
