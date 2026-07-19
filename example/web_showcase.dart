@@ -46,7 +46,7 @@ class _WebShowcaseState extends State<WebShowcase> {
       child: Container(
         padding: const EdgeInsets.all(1),
         decoration: BoxDecoration(
-          border: BoxBorder.all(color: Colors.deepPurple),
+          border: BoxBorder.all(color: Colors.magenta),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -75,7 +75,7 @@ class _WebShowcaseState extends State<WebShowcase> {
                   children: [
                     Text(
                       _cityTop,
-                      style: TextStyle(color: Colors.deepPurple),
+                      style: TextStyle(color: Colors.magenta),
                     ),
                     Text(
                       _flames[_frame],
@@ -86,7 +86,7 @@ class _WebShowcaseState extends State<WebShowcase> {
                     ),
                     Text(
                       _cityBottom,
-                      style: TextStyle(color: Colors.magenta),
+                      style: TextStyle(color: Colors.cyan),
                     ),
                   ],
                 ),
