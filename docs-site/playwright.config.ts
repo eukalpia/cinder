@@ -1,7 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? '/cinder';
-const baseURL = `http://127.0.0.1:4173${basePath}`;
+const baseURL = `http://127.0.0.1:4173${basePath}/`;
 
 export default defineConfig({
   testDir: './tests/browser',
@@ -22,7 +22,7 @@ export default defineConfig({
   },
   webServer: {
     command: 'node scripts/serve-export.mjs',
-    url: `${baseURL}/`,
+    url: baseURL,
     reuseExistingServer: !process.env.CI,
     timeout: 30_000,
     env: {
