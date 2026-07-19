@@ -7,6 +7,18 @@ const siteRoot = path.resolve(path.dirname(scriptFile), '..');
 const outRoot = path.join(siteRoot, 'out');
 const manifestPath = path.join(siteRoot, 'src', 'generated', 'examples.json');
 const basePath = normalizeBasePath(process.env.NEXT_PUBLIC_BASE_PATH ?? '');
+const validRuntimeModes = new Set([
+  'direct-web',
+  'browser-adapter',
+  'browser-sandbox',
+  'native-only',
+  'build-failed',
+]);
+const runnableModes = new Set([
+  'direct-web',
+  'browser-adapter',
+  'browser-sandbox',
+]);
 
 const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
 const failures = [];
@@ -35,13 +47,45 @@ for (const example of manifest.examples) {
   await requireFile(`play/${example.slug}/index.html`);
   await requireFile(stripBasePath(example.sourcePath));
 
-  if (example.runnable) {
-    if (!example.bundle) failures.push(`Runnable example has no bundle: ${example.slug}`);
-    else await requireFile(stripBasePath(example.bundle));
+  if (!validRuntimeModes.has(example.runtimeMode)) {
+    failures.push(
+      `Example ${example.slug} has invalid runtime mode: ${example.runtimeMode ?? '(missing)'}`,
+    );
   }
 
-  if (!example.runnable && !example.reason) {
-    failures.push(`Non-runnable example has no compatibility reason: ${example.slug}`);
+  if (!example.runtimeNote) {
+    failures.push(`Example ${example.slug} has no runtime disclosure note.`);
+  }
+
+  if (!Array.isArray(example.controls) || !Array.isArray(example.tags)) {
+    failures.push(`Example ${example.slug} is missing controls or tags metadata.`);
+  }
+
+  if (example.runnable) {
+    if (!runnableModes.has(example.runtimeMode)) {
+      failures.push(
+        `Runnable example ${example.slug} uses non-runnable mode ${example.runtimeMode}.`,
+      );
+    }
+    if (!example.bundle) failures.push(`Runnable example has no bundle: ${example.slug}`);
+    else await requireFile(stripBasePath(example.bundle));
+  } else {
+    if (runnableModes.has(example.runtimeMode)) {
+      failures.push(
+        `Non-runnable example ${example.slug} uses runnable mode ${example.runtimeMode}.`,
+      );
+    }
+    if (!example.reason) {
+      failures.push(`Non-runnable example has no compatibility reason: ${example.slug}`);
+    }
+  }
+
+  if (
+    (example.runtimeMode === 'browser-adapter' ||
+      example.runtimeMode === 'browser-sandbox') &&
+    !example.adapterSourceUrl
+  ) {
+    failures.push(`Adapted example ${example.slug} has no adapter source URL.`);
   }
 }
 
@@ -73,8 +117,14 @@ if (failures.length > 0) {
   for (const failure of failures) console.error(`- ${failure}`);
   process.exitCode = 1;
 } else {
+  const modes = countBy(manifest.examples, (example) => example.runtimeMode);
   console.log(
     `Verified ${htmlFiles.length} HTML files and ${manifest.examples.length} example routes.`,
+  );
+  console.log(
+    `Runtime modes: ${Array.from(modes.entries())
+      .map(([mode, count]) => `${mode}=${count}`)
+      .join(', ')}`,
   );
 }
 
@@ -100,6 +150,15 @@ function stripBasePath(value) {
 function normalizeBasePath(value) {
   if (!value || value === '/') return '';
   return `/${value.replace(/^\/+|\/+$/g, '')}`;
+}
+
+function countBy(values, selector) {
+  const counts = new Map();
+  for (const value of values) {
+    const key = selector(value);
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+  }
+  return counts;
 }
 
 async function walk(root) {
