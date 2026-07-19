@@ -15,6 +15,7 @@ const launcherRoot = path.join(siteRoot, '.generated');
 const adapterRoot = path.join(siteRoot, 'browser-adapters');
 const basePath = normalizeBasePath(process.env.NEXT_PUBLIC_BASE_PATH ?? '');
 const skipCompile = process.argv.includes('--skip-compile');
+const preparedPackageRoots = new Set();
 
 const adapterModes = new Map([
   ['clipboard-debug', 'browser-sandbox'],
@@ -45,9 +46,11 @@ async function main() {
     const source = await readFile(sourceFile, 'utf8');
     const adapterFile = path.join(adapterRoot, `${example.slug}.dart`);
     const hasAdapter = await exists(adapterFile);
+    const adapterSource = hasAdapter ? await readFile(adapterFile, 'utf8') : '';
+    const runtimeSource = `${source}\n${adapterSource}`;
 
-    example.controls = inferControls(source);
-    example.tags = inferTags(example.repositoryPath, source, example.category);
+    example.controls = inferControls(runtimeSource);
+    example.tags = inferTags(example.repositoryPath, runtimeSource, example.category);
     example.adapterSourceUrl = hasAdapter
       ? `https://github.com/eukalpia/cinder/blob/main/docs-site/browser-adapters/${example.slug}.dart`
       : null;
@@ -56,7 +59,7 @@ async function main() {
       example.runtimeMode = adapterModes.get(example.slug) ?? 'browser-adapter';
       example.runtimeNote = runtimeNoteFor(example.runtimeMode);
       if (!skipCompile) {
-        await compileOne(example, adapterFile, false);
+        await compileOne(example, adapterFile, false, false);
       }
       continue;
     }
@@ -68,7 +71,12 @@ async function main() {
     }
 
     if (!skipCompile && isPortableCandidate(source)) {
-      await compileOne(example, sourceFile, acceptsArguments(source));
+      await compileOne(
+        example,
+        sourceFile,
+        acceptsArguments(source),
+        true,
+      );
       continue;
     }
 
@@ -93,10 +101,31 @@ async function main() {
   );
 }
 
-async function compileOne(example, sourceFile, withArguments) {
-  const launcher = path.join(launcherRoot, `polish-${example.slug}.dart`);
+async function compileOne(
+  example,
+  sourceFile,
+  withArguments,
+  useSourcePackage,
+) {
+  const packageRoot = useSourcePackage
+    ? packageRootFor(example.repositoryPath)
+    : repositoryRoot;
+  const packageScoped = packageRoot !== repositoryRoot;
+  const currentLauncherRoot = packageScoped
+    ? path.join(packageRoot, '.cinder-web')
+    : launcherRoot;
+  const launcher = path.join(
+    currentLauncherRoot,
+    `polish-${example.slug}.dart`,
+  );
   const bundleName = `example-${example.slug}.js`;
   const bundleOutput = path.join(generatedRoot, bundleName);
+
+  if (packageScoped) {
+    await preparePackageRoot(packageRoot);
+  }
+  await mkdir(currentLauncherRoot, { recursive: true });
+
   const relative = normalizePath(path.relative(path.dirname(launcher), sourceFile));
   const uri = relative.startsWith('.') ? relative : `./${relative}`;
   const invocation = withArguments ? 'example.main(const <String>[]);' : 'example.main();';
@@ -120,7 +149,7 @@ async function compileOne(example, sourceFile, withArguments) {
         launcher,
       ],
       {
-        cwd: repositoryRoot,
+        cwd: packageRoot,
         maxBuffer: 16 * 1024 * 1024,
         timeout: Number(process.env.CINDER_WEB_COMPILE_TIMEOUT_MS ?? 900_000),
       },
@@ -146,6 +175,24 @@ async function compileOne(example, sourceFile, withArguments) {
       'utf8',
     );
   }
+}
+
+async function preparePackageRoot(packageRoot) {
+  if (preparedPackageRoots.has(packageRoot)) return;
+  preparedPackageRoots.add(packageRoot);
+
+  await execFileAsync('dart', ['pub', 'get'], {
+    cwd: packageRoot,
+    maxBuffer: 16 * 1024 * 1024,
+    timeout: Number(process.env.CINDER_WEB_COMPILE_TIMEOUT_MS ?? 900_000),
+  });
+}
+
+function packageRootFor(repositoryPath) {
+  const match = /^packages\/([^/]+)\//.exec(repositoryPath);
+  return match
+    ? path.join(repositoryRoot, 'packages', match[1])
+    : repositoryRoot;
 }
 
 function isPortableCandidate(source) {
@@ -179,8 +226,8 @@ function inferControls(source) {
   const controls = [];
   const candidates = [
     ['Tab / Shift+Tab', /LogicalKey\.tab|Shift\+Tab/i],
-    ['Arrow keys', /LogicalKey\.arrow(?:Up|Down|Left|Right)/],
-    ['Enter', /LogicalKey\.enter/],
+    ['Arrow keys', /LogicalKey\.arrow(?:Up|Down|Left|Right)|keyboardScrollable/],
+    ['Enter', /LogicalKey\.enter|onSubmitted/],
     ['Space', /LogicalKey\.space/],
     ['Escape', /LogicalKey\.escape/],
     ['Mouse', /GestureDetector|MouseRegion|onHover|onTap/],
