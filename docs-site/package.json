@@ -3,8 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "node scripts/prepare-site.mjs --skip-compile && next dev",
+    "prepare:site": "node scripts/prepare-site.mjs",
+    "build": "node scripts/prepare-site.mjs && next build",
     "start": "next start",
     "lint": "eslint"
   },
