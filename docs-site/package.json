@@ -11,7 +11,8 @@
     "typecheck": "tsc --noEmit",
     "test:routes": "node scripts/verify-export.mjs",
     "test:examples": "node scripts/prepare-site.mjs && node scripts/sync-version.mjs",
-    "test:visual": "echo \"Visual regression runs in the Pages browser workflow.\""
+    "test:browser": "playwright test",
+    "test:visual": "playwright test --grep \"homepage|showcase\""
   },
   "dependencies": {
     "@xterm/addon-fit": "0.11.0",
