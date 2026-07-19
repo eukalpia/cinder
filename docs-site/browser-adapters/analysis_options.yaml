@@ -1,0 +1,4 @@
+# Adapter entrypoints intentionally match generated URL slugs.
+linter:
+  rules:
+    file_names: false
