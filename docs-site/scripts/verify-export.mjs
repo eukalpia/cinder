@@ -14,6 +14,7 @@ const required = [
   'index.html',
   'docs/index.html',
   'examples/index.html',
+  'api/index.html',
   'robots.txt',
   'sitemap.xml',
   'site.webmanifest',
@@ -48,7 +49,12 @@ const htmlFiles = (await walk(outRoot)).filter((file) => file.endsWith('.html'))
 for (const file of htmlFiles) {
   const source = await readFile(file, 'utf8');
   const relative = path.relative(outRoot, file);
-  if (/\b(?:href|src)=["']\s*["']/.test(source)) {
+  const isGeneratedDartdoc =
+    relative === 'api/index.html' || relative.startsWith(`api${path.sep}`);
+
+  // Dartdoc intentionally emits empty anchor targets for its client-side router.
+  // The Cinder/Next pages must still reject empty navigational attributes.
+  if (!isGeneratedDartdoc && /\b(?:href|src)=["']\s*["']/.test(source)) {
     failures.push(`Empty href/src in ${relative}`);
   }
   if (/cdn\.jsdelivr\.net\/npm\/.+@latest/i.test(source)) {
