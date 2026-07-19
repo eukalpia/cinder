@@ -42,9 +42,7 @@ class _PtySandboxAppState extends State<PtySandboxApp> {
     });
 
     SchedulerBinding.instance.addPostFrameCallback((_) {
-      if (_scrollController.hasClients) {
-        _scrollController.jumpTo(_scrollController.maxScrollExtent);
-      }
+      _scrollController.scrollToEnd();
     });
   }
 
