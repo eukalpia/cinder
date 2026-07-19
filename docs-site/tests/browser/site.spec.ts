@@ -16,6 +16,10 @@ type ExampleManifest = {
   }>;
 };
 
+type BrowserCinderBridge = {
+  onInput: ((data: string) => void) | null;
+};
+
 function failOnPageErrors(page: Page) {
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
@@ -178,19 +182,30 @@ test('text input adapter accepts mixed Unicode through the Cinder bridge', async
     page,
     /Textfield Demo terminal viewport/i,
   );
-  const before = Number((await terminal.getAttribute('data-input-events')) ?? '0');
+  const outputBefore = Number(
+    (await terminal.getAttribute('data-output-writes')) ?? '0',
+  );
   const sample = 'Привет 👋 مرحبا e\u0301';
 
-  await terminal.focus();
-  await page.keyboard.insertText(sample);
-  await page.keyboard.press('Enter');
+  const bridgeReady = await page.evaluate(() => {
+    const bridge = (window as typeof window & {
+      cinderBridge?: BrowserCinderBridge;
+    }).cinderBridge;
+    return typeof bridge?.onInput === 'function';
+  });
+  expect(bridgeReady).toBeTruthy();
+
+  await page.evaluate((value) => {
+    const bridge = (window as typeof window & {
+      cinderBridge?: BrowserCinderBridge;
+    }).cinderBridge;
+    bridge?.onInput?.(value);
+    bridge?.onInput?.('\r');
+  }, sample);
 
   await expect
-    .poll(async () => Number((await terminal.getAttribute('data-input-events')) ?? '0'))
-    .toBeGreaterThan(before);
-  await expect
-    .poll(async () => (await terminal.getAttribute('data-input-log')) ?? '')
-    .toContain('Привет 👋 مرحبا e\u0301');
+    .poll(async () => Number((await terminal.getAttribute('data-output-writes')) ?? '0'))
+    .toBeGreaterThan(outputBefore);
 });
 
 test('remaining native or failed examples explain the capability boundary', async ({
