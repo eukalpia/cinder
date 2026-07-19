@@ -163,7 +163,9 @@ export function WebTerminal({
           if (!disposed) {
             host.dataset.guestLoaded = 'true';
             setStatus('running');
-            terminal.focus();
+            if (window.top === window.self) {
+              terminal.focus();
+            }
           }
         };
         guestScript.onerror = () => {
