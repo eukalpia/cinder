@@ -1,0 +1,17 @@
+{
+  "name": "Cinder Documentation",
+  "short_name": "Cinder",
+  "description": "Documentation, examples, and browser runners for the Cinder terminal UI framework for Dart.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#05070b",
+  "theme_color": "#05070b",
+  "icons": [
+    {
+      "src": "cinder-logo.png",
+      "sizes": "720x180",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
