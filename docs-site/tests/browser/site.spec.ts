@@ -42,7 +42,7 @@ test('documentation and generated example catalogue are reachable', async ({ pag
   await expect(page.getByRole('heading', { name: 'What is Cinder?' })).toBeVisible();
   await expect(page.getByRole('link', { name: /Installation/i }).first()).toBeVisible();
 
-  await page.goto('../examples/');
+  await page.goto('examples/');
   await expect(page.getByRole('heading', { name: /Every example has an address/i })).toBeVisible();
   const search = page.getByPlaceholder('TextField, renderer, image…');
   await search.fill('web showcase');
