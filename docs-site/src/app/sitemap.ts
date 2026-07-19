@@ -2,6 +2,8 @@ import type { MetadataRoute } from 'next';
 import { examples } from '@/lib/examples';
 import { withBasePath } from '@/lib/site';
 
+export const dynamic = 'force-static';
+
 const siteOrigin = process.env.NEXT_PUBLIC_SITE_ORIGIN ?? 'https://eukalpia.github.io';
 
 function absolute(path: string) {
