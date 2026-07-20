@@ -80,14 +80,18 @@ class _MyAppWithNavigationState extends State<MyAppWithNavigation> {
               constraints.maxWidth.isFinite ? constraints.maxWidth : 80.0;
           final availableHeight =
               constraints.maxHeight.isFinite ? constraints.maxHeight : 28.0;
-          final panelWidth = math.max(
-            20.0,
-            math.min(72.0, availableWidth - 4),
-          );
-          final panelHeight = math.max(
-            8.0,
-            math.min(18.0, availableHeight - 4),
-          );
+          final panelWidth = math
+              .max(
+                20.0,
+                math.min(72.0, availableWidth - 4),
+              )
+              .toDouble();
+          final panelHeight = math
+              .max(
+                8.0,
+                math.min(18.0, availableHeight - 4),
+              )
+              .toDouble();
 
           if (widget.depth != 5 && widget.depth != 0) {
             return Center(
