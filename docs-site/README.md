@@ -62,6 +62,8 @@ NEXT_PUBLIC_SITE_ORIGIN=https://eukalpia.github.io \
 npm run build
 ```
 
+The repository Pages source must be set to **GitHub Actions**. A push affecting `docs-site/**` then builds, verifies, and deploys the static export automatically.
+
 All public assets, example bundles, iframe routes, sitemap entries, and generated source links must use the normalized base path.
 
 ## Browser tests
