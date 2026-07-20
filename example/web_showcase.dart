@@ -77,7 +77,7 @@ class _InteractiveCinderCityState extends State<InteractiveCinderCity> {
     _select(next, 'KEYBOARD');
   }
 
-  bool _handleKey(KeyEvent event, int buildingCount) {
+  bool _handleKey(KeyboardEvent event, int buildingCount) {
     final key = event.logicalKey;
     if (key == LogicalKey.arrowLeft || key == LogicalKey.keyH) {
       _cycle(-1, buildingCount);
@@ -501,18 +501,18 @@ enum _Tone { dim, purple, orange, pink, white, green, red, cyan }
 
 class _SceneBuffer {
   _SceneBuffer(this.width, this.height)
-      : _glyphs = List<List<String>>.generate(
-          height,
-          (_) => List<String>.filled(width, ' '),
-        ),
-        _tones = List<List<_Tone>>.generate(
-          height,
-          (_) => List<_Tone>.filled(width, _Tone.dim),
-        ),
-        _priority = List<List<int>>.generate(
-          height,
-          (_) => List<int>.filled(width, 0),
-        );
+    : _glyphs = List<List<String>>.generate(
+        height,
+        (_) => List<String>.filled(width, ' '),
+      ),
+      _tones = List<List<_Tone>>.generate(
+        height,
+        (_) => List<_Tone>.filled(width, _Tone.dim),
+      ),
+      _priority = List<List<int>>.generate(
+        height,
+        (_) => List<int>.filled(width, 0),
+      );
 
   final int width;
   final int height;
@@ -545,8 +545,13 @@ class _SceneBuffer {
     var step = 0;
     while (true) {
       final pulse = (step + tick) % 13 == 0;
-      put(x, y, pulse ? '◆' : (dx >= dy ? '─' : '│'),
-          pulse ? _Tone.orange : tone, 2);
+      put(
+        x,
+        y,
+        pulse ? '◆' : (dx >= dy ? '─' : '│'),
+        pulse ? _Tone.orange : tone,
+        2,
+      );
       if (x == x2 && y == y2) break;
       final e2 = error * 2;
       if (e2 > -dy) {
@@ -570,15 +575,17 @@ class _SceneBuffer {
         final tone = _tones[y][x];
         if (tone != currentTone && run.isNotEmpty) {
           spans.add(
-              TextSpan(text: run.toString(), style: _styleFor(currentTone)));
+            TextSpan(text: run.toString(), style: _styleFor(currentTone)),
+          );
           run.clear();
           currentTone = tone;
         }
         run.write(_glyphs[y][x]);
       }
       if (run.isNotEmpty) {
-        spans
-            .add(TextSpan(text: run.toString(), style: _styleFor(currentTone)));
+        spans.add(
+          TextSpan(text: run.toString(), style: _styleFor(currentTone)),
+        );
       }
       if (y != height - 1) spans.add(const TextSpan(text: '\n'));
     }
@@ -596,113 +603,125 @@ List<_Building> _layoutBuildings(
   int sy(double value) => (value * (compact ? 0.68 : scale)).round();
   final specs = <_Building>[
     _Building(
-        name: 'Cinder Core',
-        x: centerX - sx(12),
-        y: centerY - sy(4),
-        width: sx(20),
-        height: sy(5),
-        depth: sx(4),
-        tone: _Tone.purple,
-        seed: 1),
+      name: 'Cinder Core',
+      x: centerX - sx(12),
+      y: centerY - sy(4),
+      width: sx(20),
+      height: sy(5),
+      depth: sx(4),
+      tone: _Tone.purple,
+      seed: 1,
+    ),
     _Building(
-        name: 'Widget Tower',
-        x: centerX - sx(47),
-        y: centerY - sy(15),
-        width: sx(12),
-        height: sy(12),
-        depth: sx(3),
-        tone: _Tone.purple,
-        seed: 2),
+      name: 'Widget Tower',
+      x: centerX - sx(47),
+      y: centerY - sy(15),
+      width: sx(12),
+      height: sy(12),
+      depth: sx(3),
+      tone: _Tone.purple,
+      seed: 2,
+    ),
     _Building(
-        name: 'Element Stack',
-        x: centerX - sx(28),
-        y: centerY - sy(18),
-        width: sx(10),
-        height: sy(15),
-        depth: sx(3),
-        tone: _Tone.cyan,
-        seed: 3),
+      name: 'Element Stack',
+      x: centerX - sx(28),
+      y: centerY - sy(18),
+      width: sx(10),
+      height: sy(15),
+      depth: sx(3),
+      tone: _Tone.cyan,
+      seed: 3,
+    ),
     _Building(
-        name: 'Render Spire',
-        x: centerX - sx(8),
-        y: centerY - sy(20),
-        width: sx(11),
-        height: sy(17),
-        depth: sx(3),
-        tone: _Tone.purple,
-        seed: 4),
+      name: 'Render Spire',
+      x: centerX - sx(8),
+      y: centerY - sy(20),
+      width: sx(11),
+      height: sy(17),
+      depth: sx(3),
+      tone: _Tone.purple,
+      seed: 4,
+    ),
     _Building(
-        name: 'Buffer Array',
-        x: centerX + sx(17),
-        y: centerY - sy(18),
-        width: sx(12),
-        height: sy(15),
-        depth: sx(3),
-        tone: _Tone.orange,
-        seed: 5),
+      name: 'Buffer Array',
+      x: centerX + sx(17),
+      y: centerY - sy(18),
+      width: sx(12),
+      height: sy(15),
+      depth: sx(3),
+      tone: _Tone.orange,
+      seed: 5,
+    ),
     _Building(
-        name: 'Diff Tower',
-        x: centerX + sx(39),
-        y: centerY - sy(15),
-        width: sx(11),
-        height: sy(12),
-        depth: sx(3),
-        tone: _Tone.purple,
-        seed: 6),
+      name: 'Diff Tower',
+      x: centerX + sx(39),
+      y: centerY - sy(15),
+      width: sx(11),
+      height: sy(12),
+      depth: sx(3),
+      tone: _Tone.purple,
+      seed: 6,
+    ),
     _Building(
-        name: 'Input Hub',
-        x: centerX - sx(56),
-        y: centerY + sy(4),
-        width: sx(12),
-        height: sy(8),
-        depth: sx(3),
-        tone: _Tone.orange,
-        seed: 7),
+      name: 'Input Hub',
+      x: centerX - sx(56),
+      y: centerY + sy(4),
+      width: sx(12),
+      height: sy(8),
+      depth: sx(3),
+      tone: _Tone.orange,
+      seed: 7,
+    ),
     _Building(
-        name: 'Focus Grid',
-        x: centerX - sx(35),
-        y: centerY + sy(8),
-        width: sx(12),
-        height: sy(9),
-        depth: sx(3),
-        tone: _Tone.purple,
-        seed: 8),
+      name: 'Focus Grid',
+      x: centerX - sx(35),
+      y: centerY + sy(8),
+      width: sx(12),
+      height: sy(9),
+      depth: sx(3),
+      tone: _Tone.purple,
+      seed: 8,
+    ),
     _Building(
-        name: 'Scheduler',
-        x: centerX + sx(22),
-        y: centerY + sy(8),
-        width: sx(12),
-        height: sy(9),
-        depth: sx(3),
-        tone: _Tone.orange,
-        seed: 9),
+      name: 'Scheduler',
+      x: centerX + sx(22),
+      y: centerY + sy(8),
+      width: sx(12),
+      height: sy(9),
+      depth: sx(3),
+      tone: _Tone.orange,
+      seed: 9,
+    ),
     _Building(
-        name: 'Web Backend',
-        x: centerX + sx(45),
-        y: centerY + sy(4),
-        width: sx(12),
-        height: sy(8),
-        depth: sx(3),
-        tone: _Tone.purple,
-        seed: 10),
+      name: 'Web Backend',
+      x: centerX + sx(45),
+      y: centerY + sy(4),
+      width: sx(12),
+      height: sy(8),
+      depth: sx(3),
+      tone: _Tone.purple,
+      seed: 10,
+    ),
     _Building(
-        name: 'Image Node',
-        x: centerX - sx(18),
-        y: centerY + sy(14),
-        width: sx(10),
-        height: sy(7),
-        depth: sx(3),
-        tone: _Tone.pink,
-        seed: 11),
+      name: 'Image Node',
+      x: centerX - sx(18),
+      y: centerY + sy(14),
+      width: sx(10),
+      height: sy(7),
+      depth: sx(3),
+      tone: _Tone.pink,
+      seed: 11,
+    ),
     _Building(
-        name: 'Terminal Link',
-        x: centerX + sx(4),
-        y: centerY + sy(15),
-        width: sx(10),
-        height: sy(7),
-        depth: sx(3),
-        tone: _Tone.cyan,
-        seed: 12),
+      name: 'Terminal Link',
+      x: centerX + sx(4),
+      y: centerY + sy(15),
+      width: sx(10),
+      height: sy(7),
+      depth: sx(3),
+      tone: _Tone.cyan,
+      seed: 12,
+    ),
   ];
   return compact ? specs.take(7).toList(growable: false) : specs;
 }
@@ -714,7 +733,12 @@ void _drawSky(_SceneBuffer buffer, int tick, int seed) {
       if (hash % 47 == 0) {
         final bright = (hash + tick) % 17 == 0;
         buffer.put(
-            x, y, bright ? '✦' : '·', bright ? _Tone.pink : _Tone.dim, 1);
+          x,
+          y,
+          bright ? '✦' : '·',
+          bright ? _Tone.pink : _Tone.dim,
+          1,
+        );
       } else if (hash % 79 == 0) {
         buffer.put(x, y, '·', _Tone.purple, 1);
       }
@@ -744,11 +768,23 @@ void _drawNetwork(
   for (var index = 0; index < hubs.length; index++) {
     final hub = hubs[index];
     buffer.line(
-        centerX, centerY + 2, hub.$1, hub.$2, _Tone.purple, tick + index * 3);
+      centerX,
+      centerY + 2,
+      hub.$1,
+      hub.$2,
+      _Tone.purple,
+      tick + index * 3,
+    );
     if (index > 0) {
       final previous = hubs[index - 1];
-      buffer.line(previous.$1, previous.$2, hub.$1, hub.$2, _Tone.orange,
-          tick + index * 5);
+      buffer.line(
+        previous.$1,
+        previous.$2,
+        hub.$1,
+        hub.$2,
+        _Tone.orange,
+        tick + index * 5,
+      );
     }
   }
   final last = hubs.last;
@@ -792,14 +828,24 @@ void _drawBuilding(
       buffer.put(x - depth + 1 + column, bodyTop + row, glyph, tone, 4);
     }
   }
-  buffer.text(x - depth, bodyTop + height, '╰${'─' * (width + depth + 1)}╯',
-      wallTone, 5);
+  buffer.text(
+    x - depth,
+    bodyTop + height,
+    '╰${'─' * (width + depth + 1)}╯',
+    wallTone,
+    5,
+  );
 
   if (highlighted && width >= 8) {
     final label = building.name.toUpperCase();
     final clipped = label.length > width ? label.substring(0, width) : label;
     buffer.text(
-        x + (width - clipped.length) ~/ 2, y + depth, clipped, _Tone.white, 7);
+      x + (width - clipped.length) ~/ 2,
+      y + depth,
+      clipped,
+      _Tone.white,
+      7,
+    );
   }
 }
 
@@ -818,15 +864,22 @@ void _drawCore(
   buffer.text(x - 2, y + 2, '╱${'─' * width}╲', _Tone.purple, 9);
   buffer.text(x - 2, y + 3, '│${' ' * width}│', _Tone.purple, 9);
   buffer.text(
-      x - 2, y + 4, '│${_center('>_  CINDER', width)}│', _Tone.white, 10);
+    x - 2,
+    y + 4,
+    '│${_center('>_  CINDER', width)}│',
+    _Tone.white,
+    10,
+  );
   buffer.text(x - 2, y + 5, '╰${'═' * width}╯', _Tone.pink, 9);
 
   final flameHeight = compact ? 8 : 13;
   for (var row = 0; row < flameHeight; row++) {
     final phase = (tick + row * 2) % 5;
     final ratio = 1 - row / flameHeight;
-    final half =
-        math.max(0, (ratio * (compact ? 5 : 8)).round() + (phase == 0 ? 1 : 0));
+    final half = math.max(
+      0,
+      (ratio * (compact ? 5 : 8)).round() + (phase == 0 ? 1 : 0),
+    );
     final flameY = y - 1 - row;
     for (var dx = -half; dx <= half; dx++) {
       final edge = dx.abs() == half;
@@ -835,10 +888,15 @@ void _drawCore(
       final tone = inner
           ? _Tone.orange
           : row < flameHeight ~/ 3
-              ? _Tone.pink
-              : _Tone.purple;
+          ? _Tone.pink
+          : _Tone.purple;
       buffer.put(
-          centerX + dx + ((row + tick) % 3) - 1, flameY, glyph, tone, 12);
+        centerX + dx + ((row + tick) % 3) - 1,
+        flameY,
+        glyph,
+        tone,
+        12,
+      );
     }
   }
 }
@@ -855,7 +913,8 @@ void _drawParticles(
     final orbit = 8 + (index % (compact ? 13 : 25));
     final phase = (tick + index * 11) % 97;
     final x = centerX + (((phase * 17 + index * 23) % (orbit * 2 + 1)) - orbit);
-    final y = centerY - 5 - ((tick * 2 + index * 7) % math.max(8, centerY - 3));
+    final particleRange = math.max(8, centerY - 3).toInt();
+    final y = centerY - 5 - ((tick * 2 + index * 7) % particleRange);
     final glyph = index % 5 == 0 ? '✦' : (index % 3 == 0 ? '◆' : '·');
     buffer.put(x, y, glyph, index.isEven ? _Tone.pink : _Tone.orange, 11);
   }
