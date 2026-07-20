@@ -16,7 +16,7 @@ export default function CityRuntimePage() {
       <section
         className="tui-panel control-scene"
         aria-label="Cinder city runtime launcher"
-        style={{ minHeight: '100vh', height: '100vh' }}
+        style={{ minHeight: '100dvh', height: '100dvh' }}
       >
         <div className="control-scene-title">CINDER CITY // WEB RUNTIME</div>
         <HeroCity />
@@ -24,13 +24,13 @@ export default function CityRuntimePage() {
           href="/play/web-showcase"
           style={{
             position: 'absolute',
-            right: '24px',
-            bottom: '24px',
-            left: '24px',
+            right: 'clamp(12px, 2vw, 24px)',
+            bottom: 'clamp(12px, 2vw, 24px)',
+            left: 'clamp(12px, 2vw, 24px)',
             zIndex: 10,
             display: 'grid',
             gap: '8px',
-            padding: '16px 18px',
+            padding: 'clamp(14px, 2vw, 20px)',
             border: '1px solid rgba(255, 132, 35, 0.6)',
             background: 'rgba(3, 4, 9, 0.94)',
             color: '#ff8423',
