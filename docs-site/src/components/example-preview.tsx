@@ -101,7 +101,7 @@ function EditorPreview({ seed }: { seed: number }) {
         <span className="ln">2</span>   <b>const</b> Dashboard();{`\n`}
         <span className="ln">3</span>   Widget build(ctx) {'{'}{`\n`}
         <span className="ln">4</span>     <b>return</b> Column(...);{`\n`}
-        <span className="ln">5</span>   {'}'} <small>// {seed % 99} cells</small>{`\n`}
+        <span className="ln">5</span>   {'}'} <small>{'// '}{seed % 99} cells</small>{`\n`}
         <span className="ln">6</span> {'}'}
       </pre>
     </div>
