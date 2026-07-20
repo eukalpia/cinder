@@ -1005,10 +1005,12 @@ class _WebShowcaseState extends State<WebShowcase> {
         final x1 = cx + x;
         final y1 = cy + y;
         final y2 = cy - y;
-        if (x1 >= 0 && x1 < width && y1 >= 0 && y1 < height)
+        if (x1 >= 0 && x1 < width && y1 >= 0 && y1 < height) {
           grid[y1][x1] = char;
-        if (x1 >= 0 && x1 < width && y2 >= 0 && y2 < height)
+        }
+        if (x1 >= 0 && x1 < width && y2 >= 0 && y2 < height) {
           grid[y2][x1] = char;
+        }
       }
     }
     return _gridToString(grid);
