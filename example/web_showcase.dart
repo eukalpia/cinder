@@ -145,8 +145,9 @@ class _WebShowcaseState extends State<WebShowcase> {
                           ? 'CINDER CITY // PAUSED'
                           : 'CINDER CITY // LIVE CELL NETWORK',
                       style: TextStyle(
-                        color:
-                            _paused ? _Palette.orange : _Palette.violetBright,
+                        color: _paused
+                            ? _Palette.orange
+                            : _Palette.violetBright,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -297,15 +298,19 @@ class _WebShowcaseState extends State<WebShowcase> {
       final spec = _towers[i];
       final art = _towerArt(spec.variant, i);
       final lines = art.split('\n');
-      final artWidth =
-          lines.fold<int>(0, (current, line) => math.max(current, line.length));
+      final artWidth = lines.fold<int>(
+        0,
+        (current, line) => math.max(current, line.length),
+      );
       final artHeight = lines.length;
-      final left = (spec.x * (width - artWidth - 4))
-          .round()
-          .clamp(0, math.max(0, width - artWidth - 2));
-      final top = (spec.y * (height - artHeight - 4))
-          .round()
-          .clamp(3, math.max(3, height - artHeight - 3));
+      final left = (spec.x * (width - artWidth - 4)).round().clamp(
+        0,
+        math.max(0, width - artWidth - 2),
+      );
+      final top = (spec.y * (height - artHeight - 4)).round().clamp(
+        3,
+        math.max(3, height - artHeight - 3),
+      );
       final selected = i == _selectedTower;
       final hovered = i == _hoveredTower;
       final active = _activeTowers.contains(i);
@@ -313,10 +318,10 @@ class _WebShowcaseState extends State<WebShowcase> {
       final color = hovered
           ? _Palette.orangeBright
           : selected
-              ? _Palette.white
-              : active
-                  ? _Palette.violetBright
-                  : _Palette.violetDim;
+          ? _Palette.white
+          : active
+          ? _Palette.violetBright
+          : _Palette.violetDim;
 
       widgets.add(
         Positioned(
@@ -359,8 +364,9 @@ class _WebShowcaseState extends State<WebShowcase> {
                   softWrap: false,
                   style: TextStyle(
                     color: color,
-                    fontWeight:
-                        active || selected ? FontWeight.bold : FontWeight.dim,
+                    fontWeight: active || selected
+                        ? FontWeight.bold
+                        : FontWeight.dim,
                   ),
                 ),
               ),
@@ -375,8 +381,10 @@ class _WebShowcaseState extends State<WebShowcase> {
   List<Widget> _buildCore(int width, int height) {
     final core = _coreArt();
     final lines = core.split('\n');
-    final coreWidth =
-        lines.fold<int>(0, (current, line) => math.max(current, line.length));
+    final coreWidth = lines.fold<int>(
+      0,
+      (current, line) => math.max(current, line.length),
+    );
     final coreHeight = lines.length;
     final left = width / 2 - coreWidth / 2;
     final top = height / 2 - coreHeight / 2 + 1;
@@ -384,8 +392,8 @@ class _WebShowcaseState extends State<WebShowcase> {
     final coreColor = _coreBurst || _coreHovered
         ? _Palette.orangeBright
         : pulse == 0
-            ? _Palette.pink
-            : _Palette.orange;
+        ? _Palette.pink
+        : _Palette.orange;
 
     return [
       Positioned(
@@ -420,10 +428,7 @@ class _WebShowcaseState extends State<WebShowcase> {
             child: Text(
               core,
               softWrap: false,
-              style: TextStyle(
-                color: coreColor,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(color: coreColor, fontWeight: FontWeight.bold),
             ),
           ),
         ),
@@ -482,7 +487,9 @@ class _WebShowcaseState extends State<WebShowcase> {
         if (i != phase)
           Positioned(
             left: regions[i].left.clamp(0, width - regions[i].width).toDouble(),
-            top: regions[i].top.clamp(3, height - regions[i].height - 2).toDouble(),
+            top: regions[i].top
+                .clamp(3, height - regions[i].height - 2)
+                .toDouble(),
             width: regions[i].width.toDouble(),
             height: regions[i].height.toDouble(),
             child: Container(
@@ -520,7 +527,10 @@ class _WebShowcaseState extends State<WebShowcase> {
             children: [
               _counterBox(active.toString().padLeft(2, '0'), 'SYS'),
               const SizedBox(width: 1),
-              _counterBox((_events.length % 100).toString().padLeft(2, '0'), 'NET'),
+              _counterBox(
+                (_events.length % 100).toString().padLeft(2, '0'),
+                'NET',
+              ),
             ],
           ),
           const Spacer(),
@@ -587,8 +597,8 @@ class _WebShowcaseState extends State<WebShowcase> {
                 color: event.startsWith('HOVER')
                     ? _Palette.violetBright
                     : event.startsWith('NODE') || event.startsWith('CORE')
-                        ? _Palette.orange
-                        : _Palette.labelBright,
+                    ? _Palette.orange
+                    : _Palette.labelBright,
               ),
             ),
           const Spacer(),
@@ -606,7 +616,8 @@ class _WebShowcaseState extends State<WebShowcase> {
 
   Widget _buildFramePanel() {
     final average =
-        _frameHistory.reduce((left, right) => left + right) / _frameHistory.length;
+        _frameHistory.reduce((left, right) => left + right) /
+        _frameHistory.length;
     return _panel(
       width: 23,
       height: 10,
@@ -957,7 +968,11 @@ class _WebShowcaseState extends State<WebShowcase> {
   String _coreArt() {
     final phase = (_frame ~/ 3) % 4;
     final crown = const <String>['  ·  ', '  ✦  ', '  +  ', '  *  '][phase];
-    final fill = _coreBurst ? '█' : phase.isEven ? '▓' : '▒';
+    final fill = _coreBurst
+        ? '█'
+        : phase.isEven
+        ? '▓'
+        : '▒';
     return '''
             $crown
             ╱│╲
@@ -992,15 +1007,21 @@ class _WebShowcaseState extends State<WebShowcase> {
         final x1 = cx + x;
         final y1 = cy + y;
         final y2 = cy - y;
-        if (x1 >= 0 && x1 < width && y1 >= 0 && y1 < height) grid[y1][x1] = char;
-        if (x1 >= 0 && x1 < width && y2 >= 0 && y2 < height) grid[y2][x1] = char;
+        if (x1 >= 0 && x1 < width && y1 >= 0 && y1 < height)
+          grid[y1][x1] = char;
+        if (x1 >= 0 && x1 < width && y2 >= 0 && y2 < height)
+          grid[y2][x1] = char;
       }
     }
     return _gridToString(grid);
   }
 
   String _compactCore() {
-    final fill = _coreBurst ? '█' : (_frame ~/ 4).isEven ? '▓' : '▒';
+    final fill = _coreBurst
+        ? '█'
+        : (_frame ~/ 4).isEven
+        ? '▓'
+        : '▒';
     return '''
           ✦
          ╱│╲
@@ -1016,14 +1037,17 @@ class _WebShowcaseState extends State<WebShowcase> {
   String _miniBar(int width) {
     const chars = '▁▂▃▄▅▆▇█';
     return List.generate(width, (index) {
-      final value = (index * 5 + _frame ~/ 2 + _activeTowers.length) % chars.length;
+      final value =
+          (index * 5 + _frame ~/ 2 + _activeTowers.length) % chars.length;
       return chars[value];
     }).join();
   }
 
   String _graph(List<double> values, {required int width}) {
     const chars = '▁▂▃▄▅▆▇█';
-    final source = values.length > width ? values.sublist(values.length - width) : values;
+    final source = values.length > width
+        ? values.sublist(values.length - width)
+        : values;
     if (source.isEmpty) return '';
     final low = source.reduce((a, b) => math.min(a, b).toDouble());
     final high = source.reduce((a, b) => math.max(a, b).toDouble());
@@ -1039,7 +1063,9 @@ class _WebShowcaseState extends State<WebShowcase> {
   }
 
   String _gridToString(List<List<String>> grid) {
-    return grid.map((row) => row.join().replaceFirst(RegExp(r'\s+$'), '')).join('\n');
+    return grid
+        .map((row) => row.join().replaceFirst(RegExp(r'\s+$'), ''))
+        .join('\n');
   }
 
   int _safeExtent(double value, {required int fallback}) {
