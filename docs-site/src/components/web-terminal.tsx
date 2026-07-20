@@ -23,11 +23,13 @@ export function WebTerminal({
   bundle,
   runnable,
   reason,
+  embedded = false,
 }: {
   title: string;
   bundle: string | null;
   runnable: boolean;
   reason: string | null;
+  embedded?: boolean;
 }) {
   const hostRef = useRef<HTMLDivElement>(null);
   const terminalRef = useRef<XtermTerminal | null>(null);
@@ -73,34 +75,34 @@ export function WebTerminal({
           cursorWidth: 1,
           fontFamily:
             '"IBM Plex Mono", "JetBrains Mono", "Cascadia Code", ui-monospace, monospace',
-          fontSize: 13,
+          fontSize: embedded ? 12 : 13,
           lineHeight: 1,
           letterSpacing: 0,
-          scrollback: 1000,
+          scrollback: embedded ? 0 : 1000,
           allowTransparency: false,
           convertEol: false,
           drawBoldTextInBrightColors: false,
           screenReaderMode: true,
           theme: {
-            background: '#06080d',
+            background: '#030409',
             foreground: '#d8d5e2',
             cursor: '#ff8b3d',
-            cursorAccent: '#06080d',
+            cursorAccent: '#030409',
             selectionBackground: '#55311f',
-            black: '#06080d',
+            black: '#030409',
             red: '#ff6b73',
             green: '#8dc891',
             yellow: '#e6bf69',
             blue: '#8ea7d8',
-            magenta: '#aa8ee8',
+            magenta: '#cb5fff',
             cyan: '#77bec2',
             white: '#d8d5e2',
             brightBlack: '#626775',
             brightRed: '#ff858b',
             brightGreen: '#a4d9a7',
-            brightYellow: '#f0ce82',
+            brightYellow: '#ffbc42',
             brightBlue: '#a7bce6',
-            brightMagenta: '#c0a8f2',
+            brightMagenta: '#e0a0ff',
             brightCyan: '#91d0d3',
             brightWhite: '#ffffff',
           },
@@ -235,10 +237,13 @@ export function WebTerminal({
       terminalRef.current = null;
       delete window.cinderBridge;
     };
-  }, [bundle, runnable, title]);
+  }, [bundle, embedded, runnable, title]);
 
   return (
-    <section className="web-terminal" aria-label={`${title} live terminal`}>
+    <section
+      className={`web-terminal${embedded ? ' web-terminal--embedded' : ''}`}
+      aria-label={`${title} live terminal`}
+    >
       <header className="web-terminal__bar">
         <div className="web-terminal__identity">
           <span className="web-terminal__prompt" aria-hidden="true">&gt;_</span>
@@ -265,7 +270,7 @@ export function WebTerminal({
           className="web-terminal__viewport"
           role="application"
           aria-label={`${title} terminal viewport`}
-          aria-describedby="web-terminal-help"
+          aria-describedby={embedded ? undefined : 'web-terminal-help'}
           data-runtime-status={status}
           tabIndex={0}
           onClick={() => terminalRef.current?.focus()}
