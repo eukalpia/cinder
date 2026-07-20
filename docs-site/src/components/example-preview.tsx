@@ -70,7 +70,7 @@ function DashboardPreview({ seed, title }: { seed: number; title: string }) {
         <span>Events</span>
         <span>Logs</span>
       </aside>
-      <main>
+      <div className="preview-dashboard__main">
         <label>FRAME ACTIVITY</label>
         <div className="preview-bars">
           {bars.map((height, index) => (
@@ -82,7 +82,7 @@ function DashboardPreview({ seed, title }: { seed: number; title: string }) {
           <span><b>DIFF</b><em>{seed % 240}</em></span>
           <span><b>MS</b><em>{((seed % 23) / 10 + 1).toFixed(1)}</em></span>
         </div>
-      </main>
+      </div>
     </div>
   );
 }
@@ -90,7 +90,7 @@ function DashboardPreview({ seed, title }: { seed: number; title: string }) {
 function EditorPreview({ seed }: { seed: number }) {
   return (
     <div className="preview-editor">
-      <nav>
+      <nav aria-label="Preview files">
         <span>▾ lib</span>
         <span>  app.dart</span>
         <span>  screen.dart</span>
@@ -120,14 +120,14 @@ function FilesPreview({ seed }: { seed: number }) {
           </span>
         ))}
       </aside>
-      <main>
+      <div className="preview-files__main">
         <b>PROJECT INFO</b>
         <dl>
           <dt>FILES</dt><dd>{(seed % 180) + 22}</dd>
           <dt>LINES</dt><dd>{(seed % 8000) + 1200}</dd>
           <dt>STATUS</dt><dd>clean</dd>
         </dl>
-      </main>
+      </div>
     </div>
   );
 }
@@ -157,7 +157,7 @@ function InputPreview({ seed }: { seed: number }) {
       <div><span>cinder-user-{seed % 99}</span><i>│</i></div>
       <label>RUNTIME</label>
       <div className="preview-choice"><b>● Web</b><span>○ Native</span><span>○ SSH</span></div>
-      <button type="button">[ Enter ] APPLY</button>
+      <span className="preview-input__action">[ Enter ] APPLY</span>
     </div>
   );
 }
@@ -185,10 +185,10 @@ function NavigationPreview({ seed }: { seed: number }) {
           <span className={index === active ? 'is-active' : ''} key={item}>› {item}</span>
         ))}
       </aside>
-      <main>
+      <div className="preview-navigation__main">
         <div className="preview-route">/app/{active}/details</div>
         <div className="preview-route-map">HOME → STACK → PAGE → DIALOG</div>
-      </main>
+      </div>
     </div>
   );
 }
@@ -248,7 +248,10 @@ type PreviewVariant =
 
 function series(seed: number, count: number, min: number, max: number) {
   const range = max - min + 1;
-  return Array.from({ length: count }, (_, index) => min + ((seed + index * 13 + index * index * 3) % range));
+  return Array.from(
+    { length: count },
+    (_, index) => min + ((seed + index * 13 + index * index * 3) % range),
+  );
 }
 
 function hash(value: string) {
