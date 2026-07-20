@@ -22,7 +22,6 @@ export default function CityRuntimePage() {
         bundle={example.bundle}
         runnable={example.runnable}
         reason={example.reason}
-        embedded
       />
     </main>
   );
