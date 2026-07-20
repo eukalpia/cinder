@@ -7,6 +7,7 @@ import './site-polish.css';
 import './site-polish-fixes.css';
 import './a11y.css';
 import './runtime-modes.css';
+import './responsive-overhaul.css';
 import { RootProvider } from 'fumadocs-ui/provider/next';
 import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
