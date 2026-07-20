@@ -1,6 +1,7 @@
 import '@xterm/xterm/css/xterm.css';
 import './globals.css';
 import './tui.css';
+import './control-room.css';
 import './a11y.css';
 import './runtime-modes.css';
 import { RootProvider } from 'fumadocs-ui/provider/next';
@@ -35,9 +36,7 @@ export const metadata: Metadata = {
     'command line interface framework',
     'cross-platform TUI',
   ],
-  alternates: {
-    canonical: canonicalRoot,
-  },
+  alternates: { canonical: canonicalRoot },
   manifest: withBasePath('/site.webmanifest'),
   robots: {
     index: true,

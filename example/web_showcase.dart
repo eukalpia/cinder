@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:cinder/cinder.dart';
 
-/// Animated isometric terminal scene used by the Cinder documentation homepage.
+/// Animated isometric terminal city used by the Cinder documentation homepage.
 void main() {
   runApp(const CinderApp(child: WebShowcase()));
 }
@@ -22,16 +22,14 @@ class _WebShowcaseState extends State<WebShowcase> {
   @override
   void initState() {
     super.initState();
-    _timer = Timer.periodic(const Duration(milliseconds: 220), (_) {
+    _timer = Timer.periodic(const Duration(milliseconds: 420), (_) {
       if (!mounted) return;
-      setState(() => _frame = (_frame + 1) % _flames.length);
+      setState(() => _frame = (_frame + 1) % _cityFrames.length);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final scene = '$_cityTop${_flames[_frame]}$_cityBottom';
-
     return Focus(
       autofocus: true,
       onKeyEvent: (event) {
@@ -42,52 +40,34 @@ class _WebShowcaseState extends State<WebShowcase> {
         return false;
       },
       child: Container(
-        padding: const EdgeInsets.all(1),
-        decoration: BoxDecoration(border: BoxBorder.all(color: Colors.magenta)),
+        color: const Color.fromRGB(5, 7, 11),
+        padding: const EdgeInsets.symmetric(horizontal: 1),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  ' CINDER RENDER PIPELINE ',
-                  style: TextStyle(
-                    color: Colors.magenta,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Text(
-                  _showPipeline ? 'STATE → FRAME → DIFF ' : 'SCENE MODE ',
-                  style: TextStyle(color: Colors.yellow),
-                ),
-              ],
-            ),
-            const SizedBox(height: 1),
             Expanded(
               child: Center(
                 child: Text(
-                  scene,
-                  style: TextStyle(
+                  _cityFrames[_frame],
+                  style: const TextStyle(
                     color: Colors.magenta,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
             ),
-            const SizedBox(height: 1),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
                   _showPipeline
-                      ? ' WIDGET  →  ELEMENT  →  RENDER OBJECT  →  BUFFER  →  DIFF '
-                      : ' SPACE: show pipeline ',
-                  style: TextStyle(color: Colors.gray),
+                      ? ' WIDGET → ELEMENT → RENDER OBJECT → BUFFER → DIFF '
+                      : ' SPACE: toggle pipeline ',
+                  style: const TextStyle(color: Colors.gray),
                 ),
                 Text(
                   'FRAME ${(_frame + 1).toString().padLeft(2, '0')}  ',
-                  style: TextStyle(color: Colors.green),
+                  style: const TextStyle(color: Colors.green),
                 ),
               ],
             ),
@@ -104,63 +84,67 @@ class _WebShowcaseState extends State<WebShowcase> {
   }
 }
 
-const _cityTop = r'''
-        ┌────┐           ┌──────┐              ┌────┐
-     ┌──┤░░░░├──┐     ┌──┤░░░░░░├──┐        ┌──┤░░░░├─┐
-   ┌─┤░░│░░░░│░░├─┐ ┌─┤░░│░░░░░░│░░├─┐   ┌──┤░░│░░░░│░├─┐
-   │░│░░│░░░░│░░│░│ │░│░░│░░░░░░│░░│░│   │░░│░░│░░░░│░│░│
-   └─┴──┴─┬──┴──┴─┘ └─┴──┴──┬───┴──┴─┘   └──┴──┴─┬──┴─┴─┘
-          │    ┌──────────────┐                    │
-     ─────┴────┤  CELL GRID   ├───────────────┬────┴─────
-               └──────┬───────┘               │
-''';
-
-const _flames = [
+const _cityFrames = <String>[
   r'''
-                      ░
-                     ▒▓▒
-                    ▓███▓
-                   ▒█████▒
-                  ░▓█████▓░
-                    ▓███▓
-                     ▒▓▒
+              ╭────╮                  ╭──────╮                 ╭────╮
+          ╭───┤░░░░├──╮          ╭────┤░░░░░░├───╮         ╭──┤░░░░├──╮
+       ╭──┤░░░│░░░░│░░├──╮    ╭──┤░░░│░░░░░░│░░░├──╮   ╭──┤░░│░░░░│░░├─╮
+       │░░│░░░│░░░░│░░│░░│    │░░│░░░│░░░░░░│░░░│░░│   │░░│░░│░░░░│░░│░│
+       ╰──┴─┬─┴──┬─┴──┴──╯    ╰──┴──┬┴──┬───┴┬──┴──╯   ╰──┴─┬┴──┬─┴──┴─╯
+            │ ╭──┴────╮              │   │    │              │   │
+     ╭──────┴─┤▒▒▒▒▒▒├────╮    ╭────┴───┴────┴────╮    ╭────┴───┴────╮
+  ╭──┤░░░░░░░░│▒▒▒▒▒▒│░░░░├──╮ │░░░░░░░░░░░░░░░░░│ ╭──┤░░░░░░░░░░░░├──╮
+  │░░│░░░░░░░░│▒▒▒▒▒▒│░░░░│░░│ │░░░░░░░░░░░░░░░░░│ │░░│░░░░░░░░░░░░│░░│
+  ╰──┴──────┬─┴──┬───┴─┬──┴──╯ ╰──────┬──────┬─────╯ ╰──┴──────┬─────┴──╯
+            │    │     │              │      │                │
+       ╭────┴────┴─────┴────────────────┴──────┴────────────────┴────╮
+       │▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒│
+       │▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒│
+       ╰───────────╮            ╭────────────╮            ╭───────────╯
+                   ╲            │    ░       │           ╱
+                    ╲           │   ▒▓▒      │          ╱
+        ╭────────────╲───────────│  ▓███▓     │─────────╱────────────╮
+        │░░░░░░░░░░░░╲░░░░░░░░│ ▒█████▒    │░░░░░░░╱░░░░░░░░░░░│
+        │░░░░░░░░░░░░░╲░░░░░░░│▓███████▓   │░░░░░░╱░░░░░░░░░░░░│
+        ╰─────╮         ╲────────┤  ▓███▓     ├────────╱        ╭──────╯
+              ╲          ╲       │   ▒▓▒      │       ╱        ╱
+               ╲          ╰──────┤    ░       ├──────╯        ╱
+                ╲                │   >_       │              ╱
+                 ╰───────────────┴────────────┴─────────────╯
+          ╭──────────╮        ╭──────────╮        ╭──────────╮
+       ╭──┤░░░░░░░░░├──╮  ╭──┤░░░░░░░░░├──╮  ╭──┤░░░░░░░░░├──╮
+       │░░│░░░░░░░░░│░░│  │░░│░░░░░░░░░│░░│  │░░│░░░░░░░░░│░░│
+       ╰──┴──────────┴──╯  ╰──┴──────────┴──╯  ╰──┴──────────┴──╯
 ''',
   r'''
-                     ▒░▒
-                    ▓███▓
-                   ▒█████▒
-                  ▓███████▓
-                   ▓█████▓
-                    ▒███▒
-                     ░▓░
-''',
-  r'''
-                      ▓
-                    ▒███▒
-                   ▓█████▓
-                  ▒███████▒
-                   ▒█████▒
-                    ▓███▓
-                     ▒▓▒
-''',
-  r'''
-                     ░▓░
-                    ▓███▓
-                  ░▓█████▓░
-                  ▓███████▓
-                   ▓█████▓
-                    ▒███▒
-                      ▓
+              ╭────╮                  ╭──────╮                 ╭────╮
+          ╭───┤░░░░├──╮          ╭────┤░░░░░░├───╮         ╭──┤░░░░├──╮
+       ╭──┤░░░│░░░░│░░├──╮    ╭──┤░░░│░░░░░░│░░░├──╮   ╭──┤░░│░░░░│░░├─╮
+       │░░│░░░│░░░░│░░│░░│    │░░│░░░│░░░░░░│░░░│░░│   │░░│░░│░░░░│░░│░│
+       ╰──┴─┬─┴──┬─┴──┴──╯    ╰──┴──┬┴──┬───┴┬──┴──╯   ╰──┴─┬┴──┬─┴──┴─╯
+            │ ╭──┴────╮              │   │    │              │   │
+     ╭──────┴─┤▒▒▒▒▒▒├────╮    ╭────┴───┴────┴────╮    ╭────┴───┴────╮
+  ╭──┤░░░░░░░░│▒▒▒▒▒▒│░░░░├──╮ │░░░░░░░░░░░░░░░░░│ ╭──┤░░░░░░░░░░░░├──╮
+  │░░│░░░░░░░░│▒▒▒▒▒▒│░░░░│░░│ │░░░░░░░░░░░░░░░░░│ │░░│░░░░░░░░░░░░│░░│
+  ╰──┴──────┬─┴──┬───┴─┬──┴──╯ ╰──────┬──────┬─────╯ ╰──┴──────┬─────┴──╯
+            │    │     │              │      │                │
+       ╭────┴────┴─────┴────────────────┴──────┴────────────────┴────╮
+       │▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒│
+       │▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒│
+       ╰───────────╮            ╭────────────╮            ╭───────────╯
+                   ╲            │   ▒░▒      │           ╱
+                    ╲           │  ▓███▓     │          ╱
+        ╭────────────╲───────────│ ▒█████▒    │─────────╱────────────╮
+        │░░░░░░░░░░░░╲░░░░░░░░│▓███████▓   │░░░░░░░╱░░░░░░░░░░░│
+        │░░░░░░░░░░░░░╲░░░░░░░│ ▓█████▓    │░░░░░░╱░░░░░░░░░░░░│
+        ╰─────╮         ╲────────┤  ▒███▒     ├────────╱        ╭──────╯
+              ╲          ╲       │   ░▓░      │       ╱        ╱
+               ╲          ╰──────┤            ├──────╯        ╱
+                ╲                │   >_       │              ╱
+                 ╰───────────────┴────────────┴─────────────╯
+          ╭──────────╮        ╭──────────╮        ╭──────────╮
+       ╭──┤░░░░░░░░░├──╮  ╭──┤░░░░░░░░░├──╮  ╭──┤░░░░░░░░░├──╮
+       │░░│░░░░░░░░░│░░│  │░░│░░░░░░░░░│░░│  │░░│░░░░░░░░░│░░│
+       ╰──┴──────────┴──╯  ╰──┴──────────┴──╯  ╰──┴──────────┴──╯
 ''',
 ];
-
-const _cityBottom = r'''
-               ┌──────┴───────┐               │
-       ┌───────┤  FRAME DIFF  ├───────┐       │
-    ┌──┴──┐    └──────┬───────┘    ┌──┴──┐ ┌──┴──┐
-   /░░░░░/│       ┌───┴───┐        /░░░░/│ /░░░░/│
-  /_____/░│       │ WEB   │       /_____/░│/_____/░│
-  │░░░░░│░│───────│BACKEND│───────│░░░░░│░│░░░░░│░│
-  │░░░░░│/        └───┬───┘       │░░░░░│/│░░░░░│/
-  └─────┘             └───────────└─────┘ └─────┘
-''';
