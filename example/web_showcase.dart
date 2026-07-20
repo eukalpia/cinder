@@ -503,18 +503,18 @@ enum _Tone { dim, purple, orange, pink, white, green, red, cyan }
 
 class _SceneBuffer {
   _SceneBuffer(this.width, this.height)
-    : _glyphs = List<List<String>>.generate(
-        height,
-        (_) => List<String>.filled(width, ' '),
-      ),
-      _tones = List<List<_Tone>>.generate(
-        height,
-        (_) => List<_Tone>.filled(width, _Tone.dim),
-      ),
-      _priority = List<List<int>>.generate(
-        height,
-        (_) => List<int>.filled(width, 0),
-      );
+      : _glyphs = List<List<String>>.generate(
+          height,
+          (_) => List<String>.filled(width, ' '),
+        ),
+        _tones = List<List<_Tone>>.generate(
+          height,
+          (_) => List<_Tone>.filled(width, _Tone.dim),
+        ),
+        _priority = List<List<int>>.generate(
+          height,
+          (_) => List<int>.filled(width, 0),
+        );
 
   final int width;
   final int height;
@@ -897,8 +897,8 @@ void _drawCore(
       final tone = inner
           ? _Tone.orange
           : row < flameHeight ~/ 3
-          ? _Tone.pink
-          : _Tone.purple;
+              ? _Tone.pink
+              : _Tone.purple;
       buffer.put(
         centerX + dx + ((row + tick) % 3) - 1,
         flameY,
