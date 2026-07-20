@@ -1,0 +1,46 @@
+.preview-dashboard__main {
+  display: grid;
+  min-width: 0;
+  align-content: start;
+}
+
+.preview-files__main {
+  padding: 7px;
+  border: 1px solid #272a36;
+}
+
+.preview-files__main > b {
+  color: #a875dc;
+  font-size: 7px;
+}
+
+.preview-files__main dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 7px 10px;
+  margin-top: 12px;
+  font-size: 6px;
+}
+
+.preview-files__main dt {
+  color: #615b68;
+}
+
+.preview-files__main dd {
+  margin: 0;
+  color: #bd7ee8;
+}
+
+.preview-navigation__main {
+  display: grid;
+  align-content: center;
+  gap: 10px;
+  padding: 8px;
+  border: 1px solid #282b37;
+}
+
+.preview-input__action {
+  justify-self: start;
+  color: #d67c2f;
+  font-size: 7px;
+}
