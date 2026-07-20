@@ -148,7 +148,7 @@ class _InteractiveCinderCityState extends State<InteractiveCinderCity> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final width = math.max(48, constraints.maxWidth.floor());
+        final width = math.max(32, constraints.maxWidth.floor());
         final height = math.max(22, constraints.maxHeight.floor());
         final compact = width < 92 || height < 31;
         final scene = _CityScene.compose(
@@ -432,7 +432,9 @@ class _CityScene {
 
     final centerX = width ~/ 2;
     final centerY = compact ? height ~/ 2 + 1 : height ~/ 2;
-    final scale = compact ? 0.72 : math.min(1.0, width / 132.0);
+    final scale = compact
+        ? math.min(0.72, math.max(0.34, width / 92.0))
+        : math.min(1.0, width / 132.0);
     final buildings = _layoutBuildings(centerX, centerY, scale, compact);
 
     _drawNetwork(buffer, centerX, centerY, tick, compact);
@@ -600,7 +602,8 @@ List<_Building> _layoutBuildings(
   bool compact,
 ) {
   int sx(double value) => (value * scale).round();
-  int sy(double value) => (value * (compact ? 0.68 : scale)).round();
+  int sy(double value) =>
+      (value * (compact ? math.min(0.68, scale * 1.22) : scale)).round();
   final specs = <_Building>[
     _Building(
       name: 'Cinder Core',
@@ -723,7 +726,9 @@ List<_Building> _layoutBuildings(
       seed: 12,
     ),
   ];
-  return compact ? specs.take(7).toList(growable: false) : specs;
+  if (!compact) return specs;
+  final visibleCount = scale < 0.48 ? 5 : 7;
+  return specs.take(visibleCount).toList(growable: false);
 }
 
 void _drawSky(_SceneBuffer buffer, int tick, int seed) {
@@ -753,8 +758,12 @@ void _drawNetwork(
   int tick,
   bool compact,
 ) {
-  final radiusX = compact ? 35 : math.min(58, buffer.width ~/ 2 - 4);
-  final radiusY = compact ? 10 : math.min(17, buffer.height ~/ 2 - 3);
+  final radiusX = compact
+      ? math.max(10, math.min(35, buffer.width ~/ 2 - 3))
+      : math.min(58, buffer.width ~/ 2 - 4);
+  final radiusY = compact
+      ? math.max(5, math.min(10, buffer.height ~/ 2 - 3))
+      : math.min(17, buffer.height ~/ 2 - 3);
   final hubs = <(int, int)>[
     (centerX - radiusX, centerY - radiusY ~/ 2),
     (centerX - radiusX ~/ 2, centerY - radiusY),
