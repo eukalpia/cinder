@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { CopyCommand } from '@/components/copy-command';
 import { DartCode } from '@/components/dart-code';
 import { ExamplePreview } from '@/components/example-preview';
-import { HeroCity } from '@/components/hero-city';
+import { InteractiveHeroCity } from '@/components/interactive-hero-city';
 import { SiteHeader } from '@/components/site-header';
 import {
   cinderVersion,
@@ -12,29 +12,40 @@ import {
 } from '@/lib/examples';
 import { withBasePath } from '@/lib/site';
 
-const showcaseSource = `import 'package:cinder/cinder.dart';
+const showcaseSource = `import 'dart:async';
+import 'package:cinder/cinder.dart';
 
 void main() {
-  runApp(const CinderApp(child: Dashboard()));
+  runApp(const CinderApp(child: InteractiveCinderCity()));
 }
 
-class Dashboard extends StatefulWidget {
-  const Dashboard({super.key});
+class InteractiveCinderCity extends StatefulWidget {
+  const InteractiveCinderCity({super.key});
 
   @override
-  State<Dashboard> createState() => _DashboardState();
+  State<InteractiveCinderCity> createState() =>
+      _InteractiveCinderCityState();
 }
 
-class _DashboardState extends State<Dashboard> {
+class _InteractiveCinderCityState
+    extends State<InteractiveCinderCity> {
   int selected = 0;
+  bool paused = false;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        NavigationRail(selectedIndex: selected),
-        const Expanded(child: RuntimeOverview()),
-      ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Stack(
+          children: [
+            ProceduralCityScene(
+              selected: selected,
+              paused: paused,
+            ),
+            const CityRuntimeHud(),
+          ],
+        );
+      },
     );
   }
 }`;
@@ -102,18 +113,13 @@ export default function HomePage() {
             <small>Supports Dart 3.5+ · Web · macOS · Linux · Windows</small>
           </article>
 
-          <section className="tui-panel control-scene" aria-label="Cinder city render pipeline">
-            <div className="control-scene-title">CINDER RENDER PIPELINE</div>
-            <HeroCity />
-            <span className="scene-tag scene-tag--state">STATE<br />▣▣▣</span>
-            <span className="scene-tag scene-tag--diff">DIFF<br />▣▣▣</span>
-            <span className="scene-tag scene-tag--events">EVENTS</span>
-            <span className="scene-tag scene-tag--frame">FRAME&nbsp; 16.7ms</span>
+          <section className="tui-panel control-scene" aria-label="Interactive Cinder city render pipeline">
+            <InteractiveHeroCity />
           </section>
 
           <aside className="control-side">
             <section className="tui-panel control-code-panel">
-              <header><span>● main.dart</span><span>DART</span></header>
+              <header><span>● web_showcase.dart</span><span>DART</span></header>
               <DartCode code={showcaseSource} className="control-code" lineNumbers />
             </section>
 
@@ -162,16 +168,16 @@ export default function HomePage() {
           <section className="control-live-runtime" aria-label="Interactive Cinder web runtime">
             <article className="tui-panel control-live-runtime__meta">
               <p className="kicker">REAL CINDER APPLICATION</p>
-              <h2>Interact with the runtime after the poster.</h2>
+              <h2>Explore the city as a complete terminal application.</h2>
               <p>
-                The city above stays on a fixed terminal grid so its composition never
-                collapses on phones. The actual Cinder application runs here in an
-                isolated document with keyboard, mouse, resize, and restart support.
+                Hover and click buildings, navigate with arrows or HJKL, press Enter to
+                boost a sector, Space to pause, M to freeze motion, I to hide the HUD,
+                and R to reset the simulation.
               </p>
               <div className="control-live-runtime__facts">
                 <span>Source <b>{featured.repositoryPath}</b></span>
                 <span>Mode <b>{featured.runtimeMode}</b></span>
-                <span>Teardown <b>isolated</b></span>
+                <span>Rendering <b>procedural cells</b></span>
                 <span>Backend <b>WebBackend</b></span>
               </div>
             </article>
@@ -190,11 +196,16 @@ export default function HomePage() {
           <article className="tui-panel control-install-panel">
             <h2>INSTALL</h2>
             <label>Dart</label><code>$ dart pub add cinder</code>
-            <label>Run an example</label><code>$ dart run example/web_showcase.dart</code>
+            <label>Run the city</label><code>$ dart run example/web_showcase.dart</code>
           </article>
           <article className="tui-panel control-numbers">
             <h2>BY THE NUMBERS</h2>
-            <div><dl><dt>{examples.length}</dt><dd>Examples indexed</dd><dt>{runnableExamples.length}</dt><dd>Browser runners</dd><dt>{documentationCount}</dt><dd>Reference docs</dd></dl><pre aria-hidden="true">   ░\n  ▒▓▒\n ▓███▓\n▒█████▒\n ▓███▓\n  ▒▓▒</pre></div>
+            <div><dl><dt>{examples.length}</dt><dd>Examples indexed</dd><dt>{runnableExamples.length}</dt><dd>Browser runners</dd><dt>{documentationCount}</dt><dd>Reference docs</dd></dl><pre aria-hidden="true">   ░
+  ▒▓▒
+ ▓███▓
+▒█████▒
+ ▓███▓
+  ▒▓▒</pre></div>
           </article>
         </section>
 

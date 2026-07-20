@@ -27,6 +27,7 @@ const required = [
   'docs/index.html',
   'docs/web-runtime/index.html',
   'examples/index.html',
+  'showcase/city/index.html',
   'api/index.html',
   'robots.txt',
   'sitemap.xml',

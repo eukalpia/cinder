@@ -1,0 +1,138 @@
+.interactive-hero-city {
+  position: relative;
+  width: 100%;
+  height: 446px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 45%, rgba(175, 65, 255, 0.1), transparent 54%),
+    #030408;
+}
+
+.interactive-hero-city__runtime,
+.interactive-hero-city__fallback {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.interactive-hero-city__runtime {
+  display: block;
+  border: 0;
+  background: #030408;
+  touch-action: manipulation;
+}
+
+.interactive-hero-city__runtime:focus-visible {
+  outline: 1px solid var(--tui-orange);
+  outline-offset: -1px;
+}
+
+.interactive-hero-city__fallback {
+  display: none;
+}
+
+.interactive-hero-city__hint {
+  position: absolute;
+  z-index: 5;
+  right: 10px;
+  bottom: 7px;
+  left: 10px;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  pointer-events: none;
+  color: rgba(184, 166, 203, 0.62);
+  font-family: var(--tui-mono);
+  font-size: 7px;
+  letter-spacing: 0.05em;
+}
+
+.interactive-hero-city__hint span {
+  padding: 2px 5px;
+  border: 1px solid rgba(102, 70, 126, 0.42);
+  background: rgba(3, 4, 8, 0.72);
+}
+
+.city-showcase-page {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: #030408;
+}
+
+.city-showcase-page .web-terminal--chromeless,
+.city-showcase-page .web-terminal--chromeless .web-terminal__viewport {
+  width: 100%;
+  min-height: 100vh;
+  height: 100vh;
+  border: 0;
+  border-radius: 0;
+  background: #030408;
+}
+
+.city-showcase-page .web-terminal--chromeless .xterm,
+.city-showcase-page .web-terminal--chromeless .xterm-screen,
+.city-showcase-page .web-terminal--chromeless .xterm-viewport {
+  width: 100% !important;
+  height: 100% !important;
+  background: #030408 !important;
+}
+
+.city-showcase-page .web-terminal--chromeless .xterm-viewport {
+  overflow: hidden !important;
+}
+
+.control-scene:has(.interactive-hero-city) {
+  min-height: 446px;
+  padding: 0;
+  background: #030408;
+}
+
+@media (max-width: 900px) {
+  .interactive-hero-city {
+    height: 390px;
+  }
+
+  .interactive-hero-city__hint {
+    right: 6px;
+    bottom: 5px;
+    left: 6px;
+    justify-content: space-between;
+    gap: 4px;
+  }
+
+  .interactive-hero-city__hint span {
+    padding: 2px 3px;
+    font-size: 6px;
+  }
+
+  .interactive-hero-city__hint span:nth-child(3),
+  .interactive-hero-city__hint span:nth-child(4) {
+    display: none;
+  }
+}
+
+@media (max-width: 520px) {
+  .interactive-hero-city {
+    height: 320px;
+  }
+
+  .interactive-hero-city__hint {
+    justify-content: center;
+  }
+
+  .interactive-hero-city__hint span:nth-child(2) {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .interactive-hero-city__runtime {
+    display: none;
+  }
+
+  .interactive-hero-city__fallback {
+    display: block;
+  }
+}

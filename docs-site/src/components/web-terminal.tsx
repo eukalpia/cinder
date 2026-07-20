@@ -18,17 +18,25 @@ declare global {
   }
 }
 
+type WebTerminalProps = {
+  title: string;
+  bundle: string | null;
+  runnable: boolean;
+  reason: string | null;
+  chrome?: boolean;
+  fontSize?: number;
+  scrollback?: number;
+};
+
 export function WebTerminal({
   title,
   bundle,
   runnable,
   reason,
-}: {
-  title: string;
-  bundle: string | null;
-  runnable: boolean;
-  reason: string | null;
-}) {
+  chrome = true,
+  fontSize = 13,
+  scrollback = 1000,
+}: WebTerminalProps) {
   const hostRef = useRef<HTMLDivElement>(null);
   const terminalRef = useRef<XtermTerminal | null>(null);
   const [status, setStatus] = useState<'loading' | 'running' | 'failed'>(
@@ -73,10 +81,10 @@ export function WebTerminal({
           cursorWidth: 1,
           fontFamily:
             '"IBM Plex Mono", "JetBrains Mono", "Cascadia Code", ui-monospace, monospace',
-          fontSize: 13,
+          fontSize,
           lineHeight: 1,
           letterSpacing: 0,
-          scrollback: 1000,
+          scrollback,
           allowTransparency: false,
           convertEol: false,
           drawBoldTextInBrightColors: false,
@@ -235,37 +243,42 @@ export function WebTerminal({
       terminalRef.current = null;
       delete window.cinderBridge;
     };
-  }, [bundle, runnable, title]);
+  }, [bundle, fontSize, runnable, scrollback, title]);
 
   return (
-    <section className="web-terminal" aria-label={`${title} live terminal`}>
-      <header className="web-terminal__bar">
-        <div className="web-terminal__identity">
-          <span className="web-terminal__prompt" aria-hidden="true">&gt;_</span>
-          <span>{title}</span>
-        </div>
-        <div className="web-terminal__actions">
-          <span className={`runtime-state runtime-state--${status}`}>
-            {status === 'loading'
-              ? 'booting'
-              : status === 'running'
-                ? 'browser runtime'
-                : 'source only'}
-          </span>
-          {runnable ? (
-            <button type="button" onClick={() => window.location.reload()}>
-              Restart
-            </button>
-          ) : null}
-        </div>
-      </header>
+    <section
+      className={`web-terminal${chrome ? '' : ' web-terminal--chromeless'}`}
+      aria-label={`${title} live terminal`}
+    >
+      {chrome ? (
+        <header className="web-terminal__bar">
+          <div className="web-terminal__identity">
+            <span className="web-terminal__prompt" aria-hidden="true">&gt;_</span>
+            <span>{title}</span>
+          </div>
+          <div className="web-terminal__actions">
+            <span className={`runtime-state runtime-state--${status}`}>
+              {status === 'loading'
+                ? 'booting'
+                : status === 'running'
+                  ? 'browser runtime'
+                  : 'source only'}
+            </span>
+            {runnable ? (
+              <button type="button" onClick={() => window.location.reload()}>
+                Restart
+              </button>
+            ) : null}
+          </div>
+        </header>
+      ) : null}
       {runnable ? (
         <div
           ref={hostRef}
           className="web-terminal__viewport"
           role="application"
           aria-label={`${title} terminal viewport`}
-          aria-describedby="web-terminal-help"
+          aria-describedby={chrome ? 'web-terminal-help' : undefined}
           data-runtime-status={status}
           tabIndex={0}
           onClick={() => terminalRef.current?.focus()}
@@ -277,10 +290,12 @@ export function WebTerminal({
           <p>{failure ?? 'It requires a native terminal capability.'}</p>
         </div>
       )}
-      <footer className="web-terminal__footer" id="web-terminal-help">
-        <span>Focus the terminal before typing.</span>
-        <span>Rendered by Cinder, hosted by xterm.js.</span>
-      </footer>
+      {chrome ? (
+        <footer className="web-terminal__footer" id="web-terminal-help">
+          <span>Focus the terminal before typing.</span>
+          <span>Rendered by Cinder, hosted by xterm.js.</span>
+        </footer>
+      ) : null}
     </section>
   );
 }
