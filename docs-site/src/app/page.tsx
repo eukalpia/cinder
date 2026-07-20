@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { CopyCommand } from '@/components/copy-command';
 import { DartCode } from '@/components/dart-code';
+import { ExamplePreview } from '@/components/example-preview';
+import { HeroCity } from '@/components/hero-city';
 import { SiteHeader } from '@/components/site-header';
 import {
   cinderVersion,
@@ -12,20 +14,27 @@ import { withBasePath } from '@/lib/site';
 
 const showcaseSource = `import 'package:cinder/cinder.dart';
 
-void main() => runApp(const DashboardApp());
+void main() {
+  runApp(const CinderApp(child: Dashboard()));
+}
 
-class DashboardApp extends CinderApp {
-  const DashboardApp({super.key});
+class Dashboard extends StatefulWidget {
+  const Dashboard({super.key});
+
+  @override
+  State<Dashboard> createState() => _DashboardState();
+}
+
+class _DashboardState extends State<Dashboard> {
+  int selected = 0;
 
   @override
   Widget build(BuildContext context) {
-    return Cinder(
-      title: 'Cinder Dashboard',
-      theme: const CinderTheme(
-        primary: Color(0xFFFFA235),
-        accent: Color(0xFFFF8A3D),
-      ),
-      home: const Dashboard(),
+    return Row(
+      children: [
+        NavigationRail(selectedIndex: selected),
+        const Expanded(child: RuntimeOverview()),
+      ],
     );
   }
 }`;
@@ -49,19 +58,17 @@ const guarantees = [
 ] as const;
 
 const realWorld = [
-  'Runs in any terminal (xterm, iTerm2, Windows Terminal, ...)',
-  'Web runtime with WebSockets + Canvas fallback',
-  'Handles resize, scrollback, and lost connections',
-  'Battle-tested in production',
+  'Runs in xterm, iTerm2, Windows Terminal, Kitty, and WezTerm',
+  'Browser terminal backend hosted through xterm.js',
+  'Handles resize, scrollback, focus, mouse, and teardown',
+  'Generated examples are compiled from repository Dart source',
 ] as const;
-
-const previewKinds = ['dashboard', 'editor', 'files', 'monitor', 'chat', 'table'] as const;
 
 export default function HomePage() {
   const featured =
     runnableExamples.find((example) => example.slug === 'web-showcase') ??
     runnableExamples[0];
-  const visibleExamples = examples.slice(0, 6);
+  const visibleExamples = pickDiverseExamples(6);
 
   return (
     <main className="tui-page tui-page--control-room">
@@ -82,8 +89,8 @@ export default function HomePage() {
             <ul>
               <li>Same declarative model you know</li>
               <li>Runs in any terminal or the browser</li>
-              <li>Real-time updates at 60 FPS</li>
-              <li>Tiny runtime. Zero config.</li>
+              <li>Real frame scheduling, layout, paint, damage, and diff</li>
+              <li>Repository examples compiled into isolated web runners</li>
             </ul>
             <div className="control-install">
               <strong>› INSTALL</strong>
@@ -95,18 +102,9 @@ export default function HomePage() {
             <small>Supports Dart 3.5+ · Web · macOS · Linux · Windows</small>
           </article>
 
-          <section className="tui-panel control-scene" aria-label="Live Cinder city scene">
+          <section className="tui-panel control-scene" aria-label="Cinder city render pipeline">
             <div className="control-scene-title">CINDER RENDER PIPELINE</div>
-            {featured ? (
-              <iframe
-                title={`${featured.title} rendered by Cinder`}
-                src={withBasePath(`/play/${featured.slug}/`)}
-                className="control-scene-frame"
-                loading="eager"
-              />
-            ) : (
-              <pre className="control-scene-fallback">Cinder runtime is building…</pre>
-            )}
+            <HeroCity />
             <span className="scene-tag scene-tag--state">STATE<br />▣▣▣</span>
             <span className="scene-tag scene-tag--diff">DIFF<br />▣▣▣</span>
             <span className="scene-tag scene-tag--events">EVENTS</span>
@@ -116,7 +114,7 @@ export default function HomePage() {
           <aside className="control-side">
             <section className="tui-panel control-code-panel">
               <header><span>● main.dart</span><span>DART</span></header>
-              <DartCode code={showcaseSource} className="control-code" />
+              <DartCode code={showcaseSource} className="control-code" lineNumbers />
             </section>
 
             <section className="tui-panel control-dashboard">
@@ -132,12 +130,12 @@ export default function HomePage() {
                   <span>◎ Settings</span>
                 </nav>
                 <div className="dashboard-main">
-                  <label>ACTIVE USERS (24H)</label>
+                  <label>FRAME ACTIVITY</label>
                   <pre aria-hidden="true">▁▂▃▅▃▆▄▂▇▅▄▆▃▅▇▆▄▅▇▃▆▄▅▇</pre>
                   <div className="dashboard-stats">
                     <span><b>FPS</b><em>60</em></span>
-                    <span><b>EVENTS</b><em>842</em></span>
-                    <span><b>DIFFS</b><em>128</em></span>
+                    <span><b>EXAMPLES</b><em>{examples.length}</em></span>
+                    <span><b>DOCS</b><em>{documentationCount}</em></span>
                     <span><b>LATENCY</b><em>2.1ms</em></span>
                   </div>
                 </div>
@@ -160,27 +158,53 @@ export default function HomePage() {
           </div>
         </section>
 
+        {featured ? (
+          <section className="control-live-runtime" aria-label="Interactive Cinder web runtime">
+            <article className="tui-panel control-live-runtime__meta">
+              <p className="kicker">REAL CINDER APPLICATION</p>
+              <h2>Interact with the runtime after the poster.</h2>
+              <p>
+                The city above stays on a fixed terminal grid so its composition never
+                collapses on phones. The actual Cinder application runs here in an
+                isolated document with keyboard, mouse, resize, and restart support.
+              </p>
+              <div className="control-live-runtime__facts">
+                <span>Source <b>{featured.repositoryPath}</b></span>
+                <span>Mode <b>{featured.runtimeMode}</b></span>
+                <span>Teardown <b>isolated</b></span>
+                <span>Backend <b>WebBackend</b></span>
+              </div>
+            </article>
+            <iframe
+              title={`${featured.title} interactive Cinder runtime`}
+              src={withBasePath(`/play/${featured.slug}/`)}
+              className="control-live-runtime__frame"
+              loading="eager"
+            />
+          </section>
+        ) : null}
+
         <section className="control-ledgers">
           <article className="tui-panel"><h2>RUNTIME GUARANTEES</h2><ul>{guarantees.map((item) => <li key={item}>✓ {item}</li>)}</ul></article>
           <article className="tui-panel"><h2>BUILT FOR THE REAL WORLD</h2><ul>{realWorld.map((item) => <li key={item}>› {item}</li>)}</ul></article>
           <article className="tui-panel control-install-panel">
             <h2>INSTALL</h2>
-            <label>Dart / Flutter</label><code>$ dart pub add cinder</code>
-            <label>Flutter (coming soon)</label><code>$ flutter pub add cinder</code>
+            <label>Dart</label><code>$ dart pub add cinder</code>
+            <label>Run an example</label><code>$ dart run example/web_showcase.dart</code>
           </article>
           <article className="tui-panel control-numbers">
             <h2>BY THE NUMBERS</h2>
-            <div><dl><dt>~12KB</dt><dd>Runtime (minified)</dd><dt>0</dt><dd>Native deps</dd><dt>∞</dt><dd>Possibilities</dd></dl><pre aria-hidden="true">   ░\n  ▒▓▒\n ▓███▓\n▒█████▒\n ▓███▓\n  ▒▓▒</pre></div>
+            <div><dl><dt>{examples.length}</dt><dd>Examples indexed</dd><dt>{runnableExamples.length}</dt><dd>Browser runners</dd><dt>{documentationCount}</dt><dd>Reference docs</dd></dl><pre aria-hidden="true">   ░\n  ▒▓▒\n ▓███▓\n▒█████▒\n ▓███▓\n  ▒▓▒</pre></div>
           </article>
         </section>
 
         <section className="control-bottom">
           <article className="tui-panel control-examples">
-            <header><span>EXAMPLES</span><Link href="/examples">+ more</Link></header>
+            <header><span>EXAMPLES</span><Link href="/examples">+ all {examples.length}</Link></header>
             <div>
-              {visibleExamples.map((example, index) => (
+              {visibleExamples.map((example) => (
                 <Link href={`/examples/${example.slug}`} key={example.slug}>
-                  <MiniPreview kind={previewKinds[index] ?? 'dashboard'} />
+                  <ExamplePreview example={example} compact />
                   <strong>{example.title}</strong>
                 </Link>
               ))}
@@ -217,14 +241,21 @@ export default function HomePage() {
   );
 }
 
-function MiniPreview({ kind }: { kind: (typeof previewKinds)[number] }) {
-  const content = {
-    dashboard: '▁▃▆▂  ┌────┐\n▂▅▇▃  │ 60 │\n─────  └────┘',
-    editor: '1 import cinder\n2 class App {\n3   build() {}\n4 }',
-    files: '▾ lib/\n  ├ app.dart\n  ├ ui.dart\n  └ theme.dart',
-    monitor: 'CPU  ▂▄▆▃▇▅\nMEM  ▃▅▇▄▆▃\nNET  ▁▂▅▇▃▂',
-    chat: '┌ message ──┐\n│ hello!    │\n└───────────┘\n> reply_',
-    table: 'ID │ NAME │ FPS\n01 │ Web  │ 60\n02 │ TUI  │ 60',
-  }[kind];
-  return <pre aria-hidden="true">{content}</pre>;
+function pickDiverseExamples(limit: number) {
+  const selected = [] as typeof examples;
+  const categories = new Set<string>();
+
+  for (const example of examples) {
+    if (!categories.has(example.category)) {
+      selected.push(example);
+      categories.add(example.category);
+    }
+    if (selected.length === limit) return selected;
+  }
+
+  for (const example of examples) {
+    if (!selected.some((item) => item.slug === example.slug)) selected.push(example);
+    if (selected.length === limit) break;
+  }
+  return selected;
 }
