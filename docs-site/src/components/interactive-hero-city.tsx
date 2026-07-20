@@ -5,7 +5,7 @@ export function InteractiveHeroCity() {
   return (
     <div className="interactive-hero-city">
       <iframe
-        title="Interactive Cinder terminal city"
+        title="Interactive terminal city rendered by Cinder"
         src={withBasePath('/showcase/city/')}
         className="interactive-hero-city__runtime"
         loading="eager"
@@ -14,7 +14,7 @@ export function InteractiveHeroCity() {
         <HeroCity />
       </div>
       <div className="interactive-hero-city__hint" aria-hidden="true">
-        <span>HOVER BUILDINGS</span>
+        <span>HOVER / TAP BUILDINGS</span>
         <span>CLICK TO BOOST</span>
         <span>ARROWS TO NAVIGATE</span>
         <span>SPACE TO PAUSE</span>
