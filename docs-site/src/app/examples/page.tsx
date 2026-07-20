@@ -1,15 +1,26 @@
 import type { Metadata } from 'next';
 import { ExampleDeck } from '@/components/example-deck';
 import { SiteHeader } from '@/components/site-header';
-import { examples, runnableExamples } from '@/lib/examples';
+import { examples } from '@/lib/examples';
 
 export const metadata: Metadata = {
   title: 'Examples',
   description:
-    'Every Cinder example indexed from the repository, with live browser runners where the Dart source supports the web platform.',
+    'Every Cinder example indexed from the repository, with direct web builds, explicit browser adapters, deterministic sandboxes, and honest native boundaries.',
 };
 
 export default function ExamplesPage() {
+  const direct = examples.filter((example) => example.runtimeMode === 'direct-web').length;
+  const adapted = examples.filter(
+    (example) =>
+      example.runtimeMode === 'browser-adapter' ||
+      example.runtimeMode === 'browser-sandbox',
+  ).length;
+  const native = examples.filter(
+    (example) =>
+      example.runtimeMode === 'native-only' || example.runtimeMode === 'build-failed',
+  ).length;
+
   return (
     <main className="marketing-page examples-page">
       <div className="marketing-shell">
@@ -18,10 +29,10 @@ export default function ExamplesPage() {
           <p className="kicker">Generated from the repository</p>
           <h1>Every example has an address.</h1>
           <p>
-            Browser-compatible Dart sources are compiled into isolated live
-            terminals. Native-only examples still get a stable page, source, and a
-            precise reason they cannot run in a browser. No animated cardboard
-            cut-outs pretending to be software.
+            Original Dart sources run directly when the browser supports them.
+            Capability-dependent examples use clearly labelled adapters or deterministic
+            sandboxes. Native boundaries remain visible instead of being disguised as
+            fake software.
           </p>
           <dl className="page-intro__facts">
             <div>
@@ -29,12 +40,16 @@ export default function ExamplesPage() {
               <dd>{examples.length}</dd>
             </div>
             <div>
-              <dt>Live web</dt>
-              <dd>{runnableExamples.length}</dd>
+              <dt>Direct web</dt>
+              <dd>{direct}</dd>
             </div>
             <div>
-              <dt>Source-only</dt>
-              <dd>{examples.length - runnableExamples.length}</dd>
+              <dt>Adapter / sandbox</dt>
+              <dd>{adapted}</dd>
+            </div>
+            <div>
+              <dt>Native / failed</dt>
+              <dd>{native}</dd>
             </div>
           </dl>
         </header>

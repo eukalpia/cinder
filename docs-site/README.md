@@ -1,36 +1,96 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Cinder web platform
 
-## Getting Started
+`docs-site/` is the single public website for Cinder. It contains the terminal-native homepage, documentation, engineering reference, generated example catalogue, isolated browser runners, and Dart API reference.
 
-First, run the development server:
+## Requirements
+
+- Dart stable matching the repository SDK constraint;
+- Node.js 22;
+- npm;
+- Chromium for Playwright browser tests.
+
+From the repository root:
+
+```bash
+dart pub get
+cd docs-site
+npm ci
+```
+
+## Development
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Development mode scans documentation and examples but skips the expensive full browser compilation pass. Existing generated metadata remains available for route development.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Production build
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+```
 
-## Learn More
+The build performs these stages:
 
-To learn more about Next.js, take a look at the following resources:
+1. synchronize brand assets;
+2. generate engineering-reference MDX from `../doc/`;
+3. discover official Dart examples;
+4. compile direct-web example groups;
+5. compile browser adapters and recover isolated portable examples;
+6. resolve nested package examples with their own package configuration;
+7. classify every example runtime mode;
+8. synchronize the package version from `../pubspec.yaml`;
+9. build the static Next.js export;
+10. write `.nojekyll` for GitHub Pages.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+A nested example under `packages/<name>/example/` is compiled from that package root. The recovery pass runs `dart pub get` only for a nested package that needs an isolated browser build, so its package imports and dependency overrides remain authoritative.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Verify the export:
 
-## Deploy on Vercel
+```bash
+npm run test:routes
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## GitHub Pages base path
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Project Pages is deployed below `/cinder`:
+
+```bash
+NEXT_PUBLIC_BASE_PATH=/cinder \
+NEXT_PUBLIC_SITE_ORIGIN=https://eukalpia.github.io \
+npm run build
+```
+
+All public assets, example bundles, iframe routes, sitemap entries, and generated source links must use the normalized base path.
+
+## Browser tests
+
+```bash
+npx playwright install chromium
+npm run test:browser
+```
+
+The suite checks real Cinder output, keyboard input, resize propagation, restart isolation, compatibility disclosures, Unicode input, keyboard navigation, and responsive widths. Screenshots are written to Playwright test artifacts rather than committed to the repository.
+
+## Example runtime modes
+
+- `direct-web`: original Dart source;
+- `browser-adapter`: real Cinder UI with a browser capability implementation;
+- `browser-sandbox`: deterministic substitute with an explicit native boundary;
+- `native-only`: source is indexed but requires native access;
+- `build-failed`: isolated web compilation failed and diagnostics are preserved.
+
+Adapters live in `browser-adapters/` and are selected by generated example slug. They must not imitate Cinder with HTML. The Pages workflow checks their Dart formatting and analyzer diagnostics before compiling any browser bundle.
+
+## Generated files
+
+Do not edit these manually:
+
+- `src/generated/examples.json`;
+- `public/generated/examples/**`;
+- `.generated/**`;
+- `content/docs/reference/**`;
+- `public/api/**`.
+
+The Pages workflow rebuilds them from repository source.

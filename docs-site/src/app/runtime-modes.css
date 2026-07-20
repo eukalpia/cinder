@@ -1,0 +1,136 @@
+.runtime-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.runtime-filter button {
+  min-height: 32px;
+  padding: 6px 10px;
+  border: 1px solid var(--line, #2a2939);
+  border-radius: 0;
+  background: transparent;
+  color: var(--muted, #8a8497);
+  font: inherit;
+  font-size: 0.76rem;
+  cursor: pointer;
+}
+
+.runtime-filter button:hover,
+.runtime-filter button:focus-visible,
+.runtime-filter button.is-active {
+  border-color: #ff8a2b;
+  color: #ffb36f;
+  outline: none;
+}
+
+.compatibility--direct-web,
+.compatibility--web {
+  border-color: rgba(114, 213, 114, 0.58);
+  color: #8ee38e;
+}
+
+.compatibility--browser-adapter {
+  border-color: rgba(167, 108, 255, 0.62);
+  color: #bd91ff;
+}
+
+.compatibility--browser-sandbox {
+  border-color: rgba(255, 138, 43, 0.62);
+  color: #ffad66;
+}
+
+.compatibility--native-only,
+.compatibility--native {
+  border-color: rgba(136, 129, 152, 0.58);
+  color: #aaa3b6;
+}
+
+.compatibility--build-failed {
+  border-color: rgba(255, 109, 122, 0.68);
+  color: #ff8994;
+}
+
+.runtime-contract {
+  max-width: 72ch;
+  margin-top: 12px;
+  color: #8d879b;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.78rem;
+  line-height: 1.55;
+}
+
+.example-source-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.runtime-disclosure {
+  margin: 0 0 10px;
+  padding: 10px 12px;
+  border: 1px solid #4f385e;
+  background: #0d0a12;
+  color: #a9a2b4;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.78rem;
+  line-height: 1.55;
+}
+
+.runtime-disclosure strong {
+  color: #ffad66;
+}
+
+.example-controls {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.42fr) minmax(0, 1fr);
+  gap: 22px;
+  align-items: start;
+  padding: 18px;
+  border: 1px solid #29283a;
+  background: #080b11;
+}
+
+.example-controls h2,
+.example-controls p {
+  margin: 0;
+}
+
+.example-controls ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.example-controls li {
+  padding: 6px 9px;
+  border: 1px solid #3c3449;
+  color: #b4adbe;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.75rem;
+}
+
+@media (max-width: 720px) {
+  .runtime-filter {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 4px;
+  }
+
+  .runtime-filter button {
+    flex: 0 0 auto;
+  }
+
+  .example-source-actions {
+    justify-content: flex-start;
+  }
+
+  .example-controls {
+    grid-template-columns: 1fr;
+  }
+}

@@ -2,7 +2,22 @@
 
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
-import type { CinderExample } from '@/lib/examples';
+import {
+  runtimeModeLabel,
+  type CinderExample,
+  type CinderRuntimeMode,
+} from '@/lib/examples';
+
+type RuntimeFilter = 'all' | CinderRuntimeMode;
+
+const runtimeOrder: RuntimeFilter[] = [
+  'all',
+  'direct-web',
+  'browser-adapter',
+  'browser-sandbox',
+  'native-only',
+  'build-failed',
+];
 
 export function ExampleDeck({ examples }: { examples: CinderExample[] }) {
   const categories = useMemo(
@@ -14,19 +29,21 @@ export function ExampleDeck({ examples }: { examples: CinderExample[] }) {
   );
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('All');
+  const [runtime, setRuntime] = useState<RuntimeFilter>('all');
 
   const filtered = useMemo(() => {
     const needle = query.trim().toLowerCase();
     return examples.filter((example) => {
       const matchesCategory = category === 'All' || example.category === category;
+      const matchesRuntime = runtime === 'all' || example.runtimeMode === runtime;
       const matchesQuery =
         !needle ||
-        `${example.title} ${example.description} ${example.repositoryPath}`
+        `${example.title} ${example.description} ${example.repositoryPath} ${example.tags?.join(' ') ?? ''} ${example.runtimeMode ?? ''}`
           .toLowerCase()
           .includes(needle);
-      return matchesCategory && matchesQuery;
+      return matchesCategory && matchesRuntime && matchesQuery;
     });
-  }, [category, examples, query]);
+  }, [category, examples, query, runtime]);
 
   return (
     <section className="example-index" aria-labelledby="example-index-title">
@@ -40,6 +57,20 @@ export function ExampleDeck({ examples }: { examples: CinderExample[] }) {
             placeholder="TextField, renderer, image…"
           />
         </label>
+
+        <div className="runtime-filter" aria-label="Filter examples by runtime mode">
+          {runtimeOrder.map((value) => (
+            <button
+              type="button"
+              key={value}
+              className={value === runtime ? 'is-active' : undefined}
+              onClick={() => setRuntime(value)}
+            >
+              {value === 'all' ? 'All runtimes' : runtimeModeLabel(value)}
+            </button>
+          ))}
+        </div>
+
         <div className="category-filter" aria-label="Filter examples by category">
           {['All', ...categories].map((value) => (
             <button
@@ -62,33 +93,34 @@ export function ExampleDeck({ examples }: { examples: CinderExample[] }) {
       </div>
 
       <div className="example-ledger">
-        {filtered.map((example, index) => (
-          <Link
-            href={`/examples/${example.slug}`}
-            className="example-ledger__row"
-            key={example.slug}
-          >
-            <span className="example-ledger__number">
-              {String(index + 1).padStart(2, '0')}
-            </span>
-            <span className="example-ledger__main">
-              <strong>{example.title}</strong>
-              <small>{example.description}</small>
-            </span>
-            <span className="example-ledger__category">{example.category}</span>
-            <span
-              className={`compatibility compatibility--${example.runnable ? 'web' : 'native'}`}
+        {filtered.map((example, index) => {
+          const mode = example.runtimeMode ?? (example.runnable ? 'direct-web' : 'native-only');
+          return (
+            <Link
+              href={`/examples/${example.slug}`}
+              className="example-ledger__row"
+              key={example.slug}
             >
-              {example.runnable ? 'Live web' : 'Native only'}
-            </span>
-            <span className="example-ledger__arrow" aria-hidden="true">
-              ↗
-            </span>
-          </Link>
-        ))}
+              <span className="example-ledger__number">
+                {String(index + 1).padStart(2, '0')}
+              </span>
+              <span className="example-ledger__main">
+                <strong>{example.title}</strong>
+                <small>{example.description}</small>
+              </span>
+              <span className="example-ledger__category">{example.category}</span>
+              <span className={`compatibility compatibility--${mode}`}>
+                {runtimeModeLabel(mode)}
+              </span>
+              <span className="example-ledger__arrow" aria-hidden="true">
+                ↗
+              </span>
+            </Link>
+          );
+        })}
         {filtered.length === 0 ? (
           <div className="example-index__empty">
-            No invented result. Change the search or category.
+            No matching repository example. Change the search or filters.
           </div>
         ) : null}
       </div>

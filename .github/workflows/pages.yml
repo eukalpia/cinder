@@ -76,20 +76,24 @@ jobs:
           BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
         shell: bash
         run: |
+          set -o pipefail
           base="$BASE_SHA"
           if [ -z "$base" ] || [ "$base" = "0000000000000000000000000000000000000000" ]; then
             base="$(git rev-parse HEAD^ 2>/dev/null || git rev-list --max-parents=0 HEAD)"
           fi
-          mapfile -t files < <(git diff --name-only --diff-filter=ACMR "$base" HEAD | grep -E '^(lib|test|example|benchmark|packages)/.*\.dart$' || true)
+          mapfile -t files < <(git diff --name-only --diff-filter=ACMR "$base" HEAD | grep -E '^((lib|test|example|benchmark|packages)/.*|docs-site/browser-adapters/.*)\.dart$' || true)
           if [ "${#files[@]}" -gt 0 ]; then
-            dart format "${files[@]}"
-            git diff --exit-code -- "${files[@]}"
+            printf 'Checking %s\n' "${files[@]}" | tee docs-site/dart-format-report.txt
+            dart format --output=none --set-exit-if-changed "${files[@]}" 2>&1 | tee -a docs-site/dart-format-report.txt
           else
-            echo 'No changed Dart files.'
+            echo 'No changed Dart files.' | tee docs-site/dart-format-report.txt
           fi
 
       - name: Analyze Dart
-        run: dart analyze --fatal-infos
+        shell: bash
+        run: |
+          set -o pipefail
+          dart analyze --fatal-infos 2>&1 | tee docs-site/dart-analyze-report.txt
 
       - name: Test Cinder
         run: dart test --reporter expanded
@@ -142,6 +146,8 @@ jobs:
         with:
           name: cinder-web-compiler-diagnostics
           path: |
+            docs-site/dart-format-report.txt
+            docs-site/dart-analyze-report.txt
             docs-site/public/generated/examples/*.build-error.txt
             docs-site/.generated/
           if-no-files-found: ignore
