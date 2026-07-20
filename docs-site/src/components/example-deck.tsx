@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
+import { ExamplePreview } from '@/components/example-preview';
 import {
   runtimeModeLabel,
   type CinderExample,
@@ -86,44 +87,50 @@ export function ExampleDeck({ examples }: { examples: CinderExample[] }) {
       </div>
 
       <div className="example-index__summary" id="example-index-title">
-        <span>{filtered.length} entries</span>
-        <span>
-          {filtered.filter((example) => example.runnable).length} run in the browser
-        </span>
+        <span>{filtered.length} detailed previews</span>
+        <span>{filtered.filter((example) => example.runnable).length} run in the browser</span>
       </div>
 
-      <div className="example-ledger">
+      <div className="example-gallery">
         {filtered.map((example, index) => {
           const mode = example.runtimeMode ?? (example.runnable ? 'direct-web' : 'native-only');
           return (
             <Link
               href={`/examples/${example.slug}`}
-              className="example-ledger__row"
+              className="example-card"
               key={example.slug}
             >
-              <span className="example-ledger__number">
-                {String(index + 1).padStart(2, '0')}
-              </span>
-              <span className="example-ledger__main">
-                <strong>{example.title}</strong>
-                <small>{example.description}</small>
-              </span>
-              <span className="example-ledger__category">{example.category}</span>
-              <span className={`compatibility compatibility--${mode}`}>
-                {runtimeModeLabel(mode)}
-              </span>
-              <span className="example-ledger__arrow" aria-hidden="true">
-                ↗
-              </span>
+              <div className="example-card__preview">
+                <ExamplePreview example={example} />
+              </div>
+              <div className="example-card__content">
+                <div className="example-card__heading">
+                  <strong>{example.title}</strong>
+                  <span className="example-card__index">#{String(index + 1).padStart(2, '0')}</span>
+                </div>
+                <p className="example-card__description">{example.description}</p>
+                <div className="example-card__tags">
+                  {(example.tags ?? []).slice(0, 5).map((tag) => (
+                    <span key={tag}>{tag}</span>
+                  ))}
+                </div>
+                <div className="example-card__footer">
+                  <small>{example.repositoryPath}</small>
+                  <b className={`compatibility compatibility--${mode}`}>
+                    {runtimeModeLabel(mode)} ↗
+                  </b>
+                </div>
+              </div>
             </Link>
           );
         })}
-        {filtered.length === 0 ? (
-          <div className="example-index__empty">
-            No matching repository example. Change the search or filters.
-          </div>
-        ) : null}
       </div>
+
+      {filtered.length === 0 ? (
+        <div className="example-index__empty">
+          No matching repository example. Change the search or filters.
+        </div>
+      ) : null}
     </section>
   );
 }
