@@ -2,6 +2,8 @@ import '@xterm/xterm/css/xterm.css';
 import './globals.css';
 import './tui.css';
 import './control-room.css';
+import './site-polish.css';
+import './site-polish-fixes.css';
 import './a11y.css';
 import './runtime-modes.css';
 import { RootProvider } from 'fumadocs-ui/provider/next';

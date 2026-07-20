@@ -43,7 +43,7 @@ async function waitForRuntime(page: Page, title: RegExp) {
   return terminal;
 }
 
-test('homepage presents Cinder as a terminal control surface', async ({
+test('homepage presents a fixed terminal city and a separate live runtime', async ({
   page,
 }, testInfo) => {
   const assertNoPageErrors = failOnPageErrors(page);
@@ -56,7 +56,10 @@ test('homepage presents Cinder as a terminal control surface', async ({
   ).toBeVisible();
   await expect(page.getByText('CINDER RENDER PIPELINE').first()).toBeVisible();
   await expect(page.getByText('WEB RUNTIME AVAILABLE')).toBeVisible();
-  await expect(page.locator('iframe[title*="rendered by Cinder"]')).toBeVisible();
+  await expect(page.locator('.hero-city')).toBeVisible();
+  await expect(page.locator('.hero-city__tone--f').first()).toBeVisible();
+  await expect(page.locator('.control-live-runtime__frame')).toBeVisible();
+  await expect(page.locator('.control-scene iframe')).toHaveCount(0);
 
   await page.screenshot({
     path: testInfo.outputPath('homepage-1440x1000.png'),
@@ -66,9 +69,7 @@ test('homepage presents Cinder as a terminal control surface', async ({
   assertNoPageErrors();
 });
 
-test('documentation and compatibility-aware catalogue are reachable', async ({
-  page,
-}) => {
+test('documentation and detailed example gallery are reachable', async ({ page }) => {
   const assertNoPageErrors = failOnPageErrors(page);
 
   await page.goto('docs/');
@@ -81,13 +82,25 @@ test('documentation and compatibility-aware catalogue are reachable', async ({
   ).toBeVisible();
   const search = page.getByPlaceholder('TextField, renderer, image…');
   await search.fill('web showcase');
-  await expect(page.locator('.example-ledger')).toContainText('Web Showcase');
+  await expect(page.locator('.example-gallery')).toContainText('Web Showcase');
+  await expect(page.locator('.example-preview').first()).toBeVisible();
 
   await search.clear();
   await page.getByRole('button', { name: 'Web adapter' }).click();
-  await expect(page.locator('.example-ledger__row').first()).toBeVisible();
+  await expect(page.locator('.example-card').first()).toBeVisible();
   await expect(page.locator('.compatibility--browser-adapter').first()).toBeVisible();
   assertNoPageErrors();
+});
+
+test('example detail pages show preview, controls, and highlighted Dart source', async ({
+  page,
+}) => {
+  await page.goto('examples/web-showcase/');
+  await expect(page.locator('.example-detail-hero .example-preview')).toBeVisible();
+  await expect(page.locator('.example-fact-panel').first()).toBeVisible();
+  await expect(page.locator('.example-source-reader .tui-code__line').first()).toBeVisible();
+  await expect(page.locator('.example-source-reader .syntax-keyword').first()).toBeVisible();
+  await expect(page.locator('.example-related .example-card')).toHaveCount(3);
 });
 
 test('real Cinder runtime receives output, input, resize, and clean restart', async ({
@@ -226,7 +239,7 @@ test('remaining native or failed examples explain the capability boundary', asyn
   ).toBeVisible();
 });
 
-test('responsive widths avoid document overflow and preserve navigation', async ({
+test('responsive widths keep the city readable and avoid document overflow', async ({
   page,
 }, testInfo) => {
   for (const viewport of [
@@ -243,10 +256,31 @@ test('responsive widths avoid document overflow and preserve navigation', async 
     await expect(
       page.getByRole('navigation', { name: 'Primary navigation' }),
     ).toBeVisible();
+    const city = page.locator('.hero-city');
+    await expect(city).toBeVisible();
+
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth - window.innerWidth,
     );
     expect(overflow, `${viewport.name} horizontal overflow`).toBeLessThanOrEqual(1);
+
+    const cityLayout = await city.evaluate((element) => {
+      const bounds = element.getBoundingClientRect();
+      const style = getComputedStyle(element);
+      return {
+        left: bounds.left,
+        right: bounds.right,
+        width: bounds.width,
+        overflowX: style.overflowX,
+      };
+    });
+    expect(cityLayout.left, `${viewport.name} city left edge`).toBeGreaterThanOrEqual(-1);
+    expect(cityLayout.right, `${viewport.name} city right edge`).toBeLessThanOrEqual(
+      viewport.width + 1,
+    );
+    expect(cityLayout.width, `${viewport.name} city width`).toBeGreaterThan(180);
+    expect(['hidden', 'clip']).toContain(cityLayout.overflowX);
+
     await page.screenshot({
       path: testInfo.outputPath(`homepage-${viewport.name}.png`),
       fullPage: true,
