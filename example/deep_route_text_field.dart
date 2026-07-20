@@ -120,7 +120,7 @@ class _MyAppWithNavigationState extends State<MyAppWithNavigation> {
                       const Text(
                         'DEEP ROUTE TEXT FIELD',
                         style: TextStyle(
-                          color: Colors.orange,
+                          color: Color.fromRGB(255, 132, 35),
                           fontWeight: FontWeight.bold,
                         ),
                       ),
