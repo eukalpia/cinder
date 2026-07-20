@@ -110,6 +110,11 @@ export function WebTerminal({
         const fitAddon = new FitAddon();
         terminal.loadAddon(fitAddon);
         terminal.open(host);
+        try {
+          fitAddon.fit();
+        } catch {
+          // ResizeObserver retries after the embedded document has settled.
+        }
         terminalRef.current = terminal;
 
         const fitIfNeeded = () => {
