@@ -71,7 +71,8 @@ class _WebShowcaseState extends State<WebShowcase> {
                     _layer(frame.stars, _Palette.star, FontWeight.dim),
                     _layer(frame.depth, _Palette.depth, FontWeight.dim),
                     _layer(frame.structure, _Palette.violetDim, FontWeight.dim),
-                    _layer(frame.violet, _Palette.violetBright, FontWeight.bold),
+                    _layer(
+                        frame.violet, _Palette.violetBright, FontWeight.bold),
                     _layer(frame.orange, _Palette.orange, FontWeight.bold),
                     _layer(frame.pink, _Palette.pink, FontWeight.bold),
                     _layer(frame.glow, _Palette.orangeBright, FontWeight.bold),
@@ -365,8 +366,7 @@ class _ElectricCityPainter {
       final remainingLevels = levels - level;
       final levelHeight = math.max(
         3,
-        (availableHeight / levels).round() +
-            ((_noise(seed, level, 3) % 3) - 1),
+        (availableHeight / levels).round() + ((_noise(seed, level, 3) % 3) - 1),
       );
       final left = centerX - currentWidth ~/ 2;
       final right = left + currentWidth - 1;
@@ -406,7 +406,8 @@ class _ElectricCityPainter {
     for (var y = antennaBottom - antennaHeight; y < antennaBottom; y++) {
       canvas.set(centerX, y, '│');
     }
-    canvas.set(centerX, antennaBottom - antennaHeight - 1, seed.isEven ? '^' : '·');
+    canvas.set(
+        centerX, antennaBottom - antennaHeight - 1, seed.isEven ? '^' : '·');
 
     if (foreground) {
       final pulseY = antennaBottom - antennaHeight - 1;
@@ -483,9 +484,11 @@ class _ElectricCityPainter {
     for (var index = 0; index < roads.length; index++) {
       final path = _polyline(roads[index]);
       _stroke(_structure, path, sparse: true, phase: index);
-      final offset = _positiveMod(tick * 2 + index * 17, math.max(1, path.length));
+      final offset =
+          _positiveMod(tick * 2 + index * 17, math.max(1, path.length));
       _drawMovingPulse(path, offset, radius: 3, hot: index.isEven);
-      final second = _positiveMod(offset + path.length ~/ 2, math.max(1, path.length));
+      final second =
+          _positiveMod(offset + path.length ~/ 2, math.max(1, path.length));
       _drawMovingPulse(path, second, radius: 2, hot: !index.isEven);
     }
 
@@ -560,8 +563,11 @@ class _ElectricCityPainter {
     _glow.set(centerX + 2, socketY, '╱');
 
     final platformY = math.min(baseY - 3, shoulderY + 3);
-    _structure.hLine(math.max(1, roofLeft - 8), math.min(width - 2, roofRight + 8), platformY, '═');
-    for (var x = math.max(1, roofLeft - 8); x <= math.min(width - 2, roofRight + 8); x++) {
+    _structure.hLine(math.max(1, roofLeft - 8),
+        math.min(width - 2, roofRight + 8), platformY, '═');
+    for (var x = math.max(1, roofLeft - 8);
+        x <= math.min(width - 2, roofRight + 8);
+        x++) {
       if ((x + tick) % 9 == 0) _orange.set(x, platformY, '◆');
     }
 
@@ -636,7 +642,9 @@ class _ElectricCityPainter {
 
   void _drawElectricityBetweenCables() {
     if (_cables.length < 2) return;
-    final arcCount = surging ? math.min(8, _cables.length - 1) : math.min(3, _cables.length - 1);
+    final arcCount = surging
+        ? math.min(8, _cables.length - 1)
+        : math.min(3, _cables.length - 1);
 
     for (var i = 0; i < arcCount; i++) {
       final left = _cables[i];
@@ -684,14 +692,19 @@ class _ElectricCityPainter {
     final top = math.max(1, height ~/ 18);
     final bottom = math.max(top + 2, socket.y - 1);
     final centerX = socket.x;
-    final amplitude = surging ? 1.55 : hovered ? 1.2 : 1;
+    final amplitude = surging
+        ? 1.55
+        : hovered
+            ? 1.2
+            : 1;
 
     for (var y = bottom; y >= top; y--) {
       final progress = (bottom - y) / math.max(1, bottom - top);
       final plume = math.sin((y * 0.72) + tick * 0.28) * 2.2;
       final turbulence = (_noise(centerX, y, tick ~/ 2) % 7) - 3;
       final drift = ((plume + turbulence * 0.45) * amplitude).round();
-      final baseRadius = 2 + ((1 - progress) * math.max(2, width ~/ 36)).round();
+      final baseRadius =
+          2 + ((1 - progress) * math.max(2, width ~/ 36)).round();
       final breathe = ((_noise(y, tick, 83) % 3) - 1) + (surging ? 2 : 0);
       final radius = math.max(1, baseRadius + breathe);
       final rowCenter = centerX + drift;
