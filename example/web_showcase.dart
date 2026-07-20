@@ -145,9 +145,8 @@ class _WebShowcaseState extends State<WebShowcase> {
                           ? 'CINDER CITY // PAUSED'
                           : 'CINDER CITY // LIVE CELL NETWORK',
                       style: TextStyle(
-                        color: _paused
-                            ? _Palette.orange
-                            : _Palette.violetBright,
+                        color:
+                            _paused ? _Palette.orange : _Palette.violetBright,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -304,13 +303,13 @@ class _WebShowcaseState extends State<WebShowcase> {
       );
       final artHeight = lines.length;
       final left = (spec.x * (width - artWidth - 4)).round().clamp(
-        0,
-        math.max(0, width - artWidth - 2),
-      );
+            0,
+            math.max(0, width - artWidth - 2),
+          );
       final top = (spec.y * (height - artHeight - 4)).round().clamp(
-        3,
-        math.max(3, height - artHeight - 3),
-      );
+            3,
+            math.max(3, height - artHeight - 3),
+          );
       final selected = i == _selectedTower;
       final hovered = i == _hoveredTower;
       final active = _activeTowers.contains(i);
@@ -318,10 +317,10 @@ class _WebShowcaseState extends State<WebShowcase> {
       final color = hovered
           ? _Palette.orangeBright
           : selected
-          ? _Palette.white
-          : active
-          ? _Palette.violetBright
-          : _Palette.violetDim;
+              ? _Palette.white
+              : active
+                  ? _Palette.violetBright
+                  : _Palette.violetDim;
 
       widgets.add(
         Positioned(
@@ -364,9 +363,8 @@ class _WebShowcaseState extends State<WebShowcase> {
                   softWrap: false,
                   style: TextStyle(
                     color: color,
-                    fontWeight: active || selected
-                        ? FontWeight.bold
-                        : FontWeight.dim,
+                    fontWeight:
+                        active || selected ? FontWeight.bold : FontWeight.dim,
                   ),
                 ),
               ),
@@ -392,8 +390,8 @@ class _WebShowcaseState extends State<WebShowcase> {
     final coreColor = _coreBurst || _coreHovered
         ? _Palette.orangeBright
         : pulse == 0
-        ? _Palette.pink
-        : _Palette.orange;
+            ? _Palette.pink
+            : _Palette.orange;
 
     return [
       Positioned(
@@ -487,7 +485,8 @@ class _WebShowcaseState extends State<WebShowcase> {
         if (i != phase)
           Positioned(
             left: regions[i].left.clamp(0, width - regions[i].width).toDouble(),
-            top: regions[i].top
+            top: regions[i]
+                .top
                 .clamp(3, height - regions[i].height - 2)
                 .toDouble(),
             width: regions[i].width.toDouble(),
@@ -597,8 +596,8 @@ class _WebShowcaseState extends State<WebShowcase> {
                 color: event.startsWith('HOVER')
                     ? _Palette.violetBright
                     : event.startsWith('NODE') || event.startsWith('CORE')
-                    ? _Palette.orange
-                    : _Palette.labelBright,
+                        ? _Palette.orange
+                        : _Palette.labelBright,
               ),
             ),
           const Spacer(),
@@ -615,8 +614,7 @@ class _WebShowcaseState extends State<WebShowcase> {
   }
 
   Widget _buildFramePanel() {
-    final average =
-        _frameHistory.reduce((left, right) => left + right) /
+    final average = _frameHistory.reduce((left, right) => left + right) /
         _frameHistory.length;
     return _panel(
       width: 23,
@@ -971,8 +969,8 @@ class _WebShowcaseState extends State<WebShowcase> {
     final fill = _coreBurst
         ? '█'
         : phase.isEven
-        ? '▓'
-        : '▒';
+            ? '▓'
+            : '▒';
     return '''
             $crown
             ╱│╲
@@ -1020,8 +1018,8 @@ class _WebShowcaseState extends State<WebShowcase> {
     final fill = _coreBurst
         ? '█'
         : (_frame ~/ 4).isEven
-        ? '▓'
-        : '▒';
+            ? '▓'
+            : '▒';
     return '''
           ✦
          ╱│╲
@@ -1045,9 +1043,8 @@ class _WebShowcaseState extends State<WebShowcase> {
 
   String _graph(List<double> values, {required int width}) {
     const chars = '▁▂▃▄▅▆▇█';
-    final source = values.length > width
-        ? values.sublist(values.length - width)
-        : values;
+    final source =
+        values.length > width ? values.sublist(values.length - width) : values;
     if (source.isEmpty) return '';
     final low = source.reduce((a, b) => math.min(a, b).toDouble());
     final high = source.reduce((a, b) => math.max(a, b).toDouble());
