@@ -22,6 +22,7 @@ export default function CityRuntimePage() {
         bundle={example.bundle}
         runnable={example.runnable}
         reason={example.reason}
+        cinematic
       />
     </main>
   );
