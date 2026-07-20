@@ -104,11 +104,17 @@ jobs:
 
       - name: Lint site
         working-directory: docs-site
-        run: npm run lint
+        shell: bash
+        run: |
+          set -o pipefail
+          npm run lint 2>&1 | tee eslint-report.txt
 
       - name: Type-check site
         working-directory: docs-site
-        run: npm run typecheck
+        shell: bash
+        run: |
+          set -o pipefail
+          npm run typecheck 2>&1 | tee typecheck-report.txt
 
       - name: Generate Dart API reference
         run: dart doc --output docs-site/public/api
@@ -148,6 +154,8 @@ jobs:
           path: |
             docs-site/dart-format-report.txt
             docs-site/dart-analyze-report.txt
+            docs-site/eslint-report.txt
+            docs-site/typecheck-report.txt
             docs-site/public/generated/examples/*.build-error.txt
             docs-site/.generated/
           if-no-files-found: ignore
