@@ -2,7 +2,6 @@ import Link from 'next/link';
 import { CopyCommand } from '@/components/copy-command';
 import { DartCode } from '@/components/dart-code';
 import { ExamplePreview } from '@/components/example-preview';
-import { HeroCity } from '@/components/hero-city';
 import { InteractiveCityLauncher } from '@/components/interactive-city-launcher';
 import { SiteHeader } from '@/components/site-header';
 import {
@@ -13,37 +12,37 @@ import {
 } from '@/lib/examples';
 import { withBasePath } from '@/lib/site';
 
-const showcaseSource = `import 'package:cinder/cinder.dart';
+const showcaseSource = `import 'dart:async';
+import 'package:cinder/cinder.dart';
 
 void main() {
-  runApp(const CinderApp(child: CinderCity()));
+  runApp(const CinderApp(child: WebShowcase()));
 }
 
-class CinderCity extends StatefulWidget {
-  const CinderCity({super.key});
+class WebShowcase extends StatefulWidget {
+  const WebShowcase({super.key});
 
   @override
-  State<CinderCity> createState() => _CinderCityState();
+  State<WebShowcase> createState() => _WebShowcaseState();
 }
 
-class _CinderCityState extends State<CinderCity> {
-  int selectedNode = 4;
-  bool diffTrace = true;
+class _WebShowcaseState extends State<WebShowcase> {
+  Timer? ticker;
+  int tick = 0;
 
   @override
   Widget build(BuildContext context) {
     return Focus(
       autofocus: true,
-      onKeyEvent: handleCityInput,
       child: LayoutBuilder(
         builder: (context, constraints) {
-          return Stack(
-            children: buildInteractiveCity(
-              constraints,
-              selectedNode,
-              diffTrace,
-            ),
-          );
+          final world = ElectricCityPainter(
+            width: constraints.maxWidth.floor(),
+            height: constraints.maxHeight.floor(),
+            tick: tick,
+          ).paint();
+
+          return Stack(children: world.layers);
         },
       ),
     );
@@ -70,7 +69,7 @@ const guarantees = [
 
 const realWorld = [
   'Runs in xterm, iTerm2, Windows Terminal, Kitty, and WezTerm',
-  'The interactive city is a real Cinder application hosted through xterm.js',
+  'The electric city is a real Cinder application hosted through xterm.js',
   'Handles resize, focus, pointer events, keyboard input, and teardown',
   'Generated examples are compiled from repository Dart source',
 ] as const;
@@ -102,7 +101,7 @@ export default function HomePage() {
               <li>Same declarative model you know</li>
               <li>Runs in any terminal or the browser</li>
               <li>Real frame scheduling, layout, paint, damage, and diff</li>
-              <li>The interactive city below is compiled from Dart, not a screenshot</li>
+              <li>The world above is compiled Dart, not a screenshot</li>
             </ul>
             <div className="control-install">
               <strong>› INSTALL</strong>
@@ -115,15 +114,15 @@ export default function HomePage() {
           </article>
 
           <section
-            className="tui-panel control-scene"
-            aria-label="Cinder city render pipeline"
+            className="tui-panel control-scene control-scene--living"
+            aria-label="Living Cinder electric city"
           >
-            <div className="control-scene-title">CINDER RENDER PIPELINE</div>
-            <HeroCity />
-            <span className="scene-tag scene-tag--state">STATE<br />▣▣▣</span>
-            <span className="scene-tag scene-tag--diff">DIFF<br />▣▣▣</span>
-            <span className="scene-tag scene-tag--events">EVENTS</span>
-            <span className="scene-tag scene-tag--frame">FRAME&nbsp; 16.7ms</span>
+            <iframe
+              title="Living Cinder electric city"
+              src={withBasePath('/city/')}
+              className="control-scene-frame"
+              loading="eager"
+            />
           </section>
 
           <aside className="control-side">
@@ -136,17 +135,17 @@ export default function HomePage() {
               <header><span>› RUNTIME TELEMETRY</span><strong>CONNECTED</strong></header>
               <div className="dashboard-body">
                 <nav>
-                  <b>Cinder City</b>
-                  <span className="is-active">◉ Runtime</span>
-                  <span>◎ Nodes&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;14</span>
-                  <span>◎ Input&nbsp;&nbsp;&nbsp;&nbsp;mouse</span>
-                  <span>◎ Keyboard&nbsp;&nbsp;live</span>
-                  <span>◎ Resize&nbsp;&nbsp;&nbsp;&nbsp;fluid</span>
-                  <span>◎ Teardown&nbsp;&nbsp;safe</span>
+                  <b>Electric City</b>
+                  <span className="is-active">◉ World</span>
+                  <span>◎ Cable arcs</span>
+                  <span>◎ Plasma core</span>
+                  <span>◎ Traffic flow</span>
+                  <span>◎ Responsive</span>
+                  <span>◎ WebBackend</span>
                 </nav>
                 <div className="dashboard-main">
-                  <label>FRAME ACTIVITY</label>
-                  <pre aria-hidden="true">▁▂▃▅▃▆▄▂▇▅▄▆▃▅▇▆▄▅▇▃▆▄▅▇</pre>
+                  <label>ENERGY FLOW</label>
+                  <pre aria-hidden="true">▁▃▆█▅▂▇▄▁▆█▃▅▇▂▄█▆▃▇▅▁▆█</pre>
                   <div className="dashboard-stats">
                     <span><b>INPUT</b><em>2-WAY</em></span>
                     <span><b>EXAMPLES</b><em>{examples.length}</em></span>
@@ -156,7 +155,7 @@ export default function HomePage() {
                 </div>
               </div>
               <footer>
-                <span>● Isolated Cinder runtime</span>
+                <span>● Living Cinder runtime</span>
                 <span>{cinderVersion}</span>
                 <span>keyboard + mouse</span>
               </footer>
@@ -181,20 +180,21 @@ export default function HomePage() {
           <section className="control-live-runtime" aria-label="Interactive Cinder web runtime">
             <article className="tui-panel control-live-runtime__meta">
               <p className="kicker">REAL CINDER APPLICATION</p>
-              <h2>The artwork becomes the runtime.</h2>
+              <h2>The world is the runtime.</h2>
               <p>
-                The city opens as the actual compiled Cinder application. Launch it
-                inline, move the drone, wake nodes, toggle damage traces, pause the
-                frame clock, and then resize the browser without the layout collapsing.
+                Electricity moves through the cable network, arcs jump between
+                conductors, plasma climbs from the core, traffic crosses the districts,
+                windows flicker, and the whole world recomposes whenever the terminal
+                changes size.
               </p>
               <div className="control-live-runtime__facts">
                 <span>Source <b>{featured.repositoryPath}</b></span>
                 <span>Mode <b>{featured.runtimeMode}</b></span>
-                <span>Runtime <b>on demand</b></span>
+                <span>Runtime <b>continuous</b></span>
                 <span>Backend <b>WebBackend</b></span>
-                <span>Move <b>arrow keys</b></span>
-                <span>Nodes <b>Tab + Enter</b></span>
-                <span>Trace <b>D</b></span>
+                <span>Energy <b>↑ / ↓</b></span>
+                <span>Phase <b>← / →</b></span>
+                <span>Surge <b>E / Enter / click</b></span>
                 <span>Pause <b>Space</b></span>
               </div>
             </article>
