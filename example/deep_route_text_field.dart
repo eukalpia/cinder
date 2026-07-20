@@ -76,12 +76,10 @@ class _MyAppWithNavigationState extends State<MyAppWithNavigation> {
       },
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final availableWidth = constraints.maxWidth.isFinite
-              ? constraints.maxWidth
-              : 80.0;
-          final availableHeight = constraints.maxHeight.isFinite
-              ? constraints.maxHeight
-              : 28.0;
+          final availableWidth =
+              constraints.maxWidth.isFinite ? constraints.maxWidth : 80.0;
+          final availableHeight =
+              constraints.maxHeight.isFinite ? constraints.maxHeight : 28.0;
           final panelWidth = math.max(
             20.0,
             math.min(72.0, availableWidth - 4),
