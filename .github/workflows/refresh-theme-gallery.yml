@@ -1,0 +1,56 @@
+name: Refresh theme gallery
+
+on:
+  push:
+    branches:
+      - feature/cinder-web-city-runtime
+    paths:
+      - .github/workflows/refresh-theme-gallery.yml
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout feature branch
+        uses: actions/checkout@v6
+        with:
+          ref: feature/cinder-web-city-runtime
+          fetch-depth: 0
+      - name: Replace legacy screenshot gallery
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          path = Path('docs-site/content/docs/fundamentals/theming.mdx')
+          source = path.read_text(encoding='utf-8')
+
+          import_line = "import { ThemeGallery } from '@/components/theme-gallery';"
+          if import_line not in source:
+              marker = "icon: palette\n---\n"
+              if marker not in source:
+                  raise SystemExit('Frontmatter marker not found')
+              source = source.replace(marker, marker + "\n" + import_line + "\n", 1)
+
+          pattern = r"### Theme gallery\n\n<div style=.*?</div>\n\nSwitch themes by changing"
+          replacement = "### Theme gallery\n\n<ThemeGallery />\n\nSwitch themes by changing"
+          source, count = re.subn(pattern, replacement, source, count=1, flags=re.S)
+          if count != 1 and '<ThemeGallery />' not in source:
+              raise SystemExit('Legacy theme gallery block not found')
+
+          path.write_text(source, encoding='utf-8')
+          PY
+      - name: Commit documentation update
+        run: |
+          if git diff --quiet -- docs-site/content/docs/fundamentals/theming.mdx; then
+            echo "Theme gallery already current."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs-site/content/docs/fundamentals/theming.mdx
+          git commit -m "fix(docs): replace broken theme screenshots with native previews"
+          git push origin HEAD:feature/cinder-web-city-runtime
