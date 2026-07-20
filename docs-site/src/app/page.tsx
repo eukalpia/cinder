@@ -3,6 +3,7 @@ import { CopyCommand } from '@/components/copy-command';
 import { DartCode } from '@/components/dart-code';
 import { ExamplePreview } from '@/components/example-preview';
 import { HeroCity } from '@/components/hero-city';
+import { InteractiveCityLauncher } from '@/components/interactive-city-launcher';
 import { SiteHeader } from '@/components/site-header';
 import {
   cinderVersion,
@@ -10,6 +11,7 @@ import {
   examples,
   runnableExamples,
 } from '@/lib/examples';
+import { withBasePath } from '@/lib/site';
 
 const showcaseSource = `import 'package:cinder/cinder.dart';
 
@@ -181,15 +183,14 @@ export default function HomePage() {
               <p className="kicker">REAL CINDER APPLICATION</p>
               <h2>The artwork becomes the runtime.</h2>
               <p>
-                The fixed city above preserves the composition from the reference.
-                Open the live city beside it to control a Dart application built from
-                Cinder widgets, layout, focus, gestures, timers, terminal cells, and
-                WebBackend.
+                The city opens as the actual compiled Cinder application. Launch it
+                inline, move the drone, wake nodes, toggle damage traces, pause the
+                frame clock, and then resize the browser without the layout collapsing.
               </p>
               <div className="control-live-runtime__facts">
                 <span>Source <b>{featured.repositoryPath}</b></span>
                 <span>Mode <b>{featured.runtimeMode}</b></span>
-                <span>Runtime <b>isolated document</b></span>
+                <span>Runtime <b>on demand</b></span>
                 <span>Backend <b>WebBackend</b></span>
                 <span>Move <b>arrow keys</b></span>
                 <span>Nodes <b>Tab + Enter</b></span>
@@ -197,56 +198,12 @@ export default function HomePage() {
                 <span>Pause <b>Space</b></span>
               </div>
             </article>
-            <Link
-              href={`/play/${featured.slug}`}
-              className="control-live-runtime__frame"
-              aria-label="Open the interactive Cinder cyber city"
-              style={{
-                position: 'relative',
-                display: 'grid',
-                minWidth: 0,
-                minHeight: '560px',
-                overflow: 'hidden',
-                border: '1px solid var(--tui-line)',
-                background: '#030409',
-              }}
-            >
-              <HeroCity />
-              <span
-                aria-hidden="true"
-                style={{
-                  position: 'absolute',
-                  inset: 0,
-                  background:
-                    'linear-gradient(180deg, transparent 35%, rgba(3, 4, 9, 0.22) 60%, rgba(3, 4, 9, 0.94) 100%)',
-                }}
+            <div className="control-live-runtime__frame">
+              <InteractiveCityLauncher
+                src={withBasePath(`/play/${featured.slug}/`)}
+                fullScreenHref={`/play/${featured.slug}`}
               />
-              <span
-                style={{
-                  position: 'absolute',
-                  right: '18px',
-                  bottom: '18px',
-                  left: '18px',
-                  display: 'grid',
-                  gap: '8px',
-                  padding: '14px 16px',
-                  border: '1px solid rgba(255, 132, 35, 0.55)',
-                  background: 'rgba(3, 4, 9, 0.9)',
-                  fontFamily: 'var(--tui-mono)',
-                  boxShadow: '0 0 34px rgba(203, 95, 255, 0.16)',
-                }}
-              >
-                <small style={{ color: '#7ee28e', letterSpacing: '0.08em' }}>
-                  ● CINDER WEB READY
-                </small>
-                <strong style={{ color: '#ff8423', fontSize: '16px' }}>
-                  OPEN INTERACTIVE CITY ↗
-                </strong>
-                <small style={{ color: '#8f879a' }}>
-                  Mouse · arrows · Tab · Enter · D · E · Space · R
-                </small>
-              </span>
-            </Link>
+            </div>
           </section>
         ) : null}
 
