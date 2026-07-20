@@ -11,6 +11,7 @@ import './responsive-overhaul.css';
 import './responsive-corrections.css';
 import './example-ui-polish.css';
 import './theme-gallery.css';
+import './living-city.css';
 import { RootProvider } from 'fumadocs-ui/provider/next';
 import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
