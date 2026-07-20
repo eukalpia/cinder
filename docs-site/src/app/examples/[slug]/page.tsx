@@ -3,7 +3,7 @@ import path from 'node:path';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { ArrowLeft, ArrowUpRight, CircleAlert, Play } from 'lucide-react';
+import { ArrowLeft, ArrowUpRight, CircleAlert, Maximize2, Play } from 'lucide-react';
 import { DartCode } from '@/components/dart-code';
 import { ExamplePreview } from '@/components/example-preview';
 import { SiteHeader } from '@/components/site-header';
@@ -106,9 +106,12 @@ export default async function ExamplePage({ params }: ExamplePageProps) {
                     </p>
                     <h2 id="runtime-title">Interactive runtime</h2>
                   </div>
-                  <span>
-                    <Play size={14} /> isolated browser document
-                  </span>
+                  <Link
+                    href={`/play/${example.slug}`}
+                    className="example-runtime__fullscreen"
+                  >
+                    <Maximize2 size={13} /> Full screen
+                  </Link>
                 </div>
                 {isAdapted ? (
                   <div className="runtime-disclosure">
@@ -116,12 +119,27 @@ export default async function ExamplePage({ params }: ExamplePageProps) {
                     {runtimeModeDescription(mode)}
                   </div>
                 ) : null}
-                <iframe
-                  title={`${example.title} live Cinder terminal`}
-                  src={withBasePath(`/play/${example.slug}/`)}
-                  className="example-runtime__frame"
-                  loading="eager"
-                />
+                <div className="example-runtime__stage">
+                  <div className="example-runtime__stage-bar">
+                    <span>› {example.slug}.dart</span>
+                    <b>● CINDER WEB LIVE</b>
+                  </div>
+                  <iframe
+                    title={`${example.title} live Cinder terminal`}
+                    src={withBasePath(`/play/${example.slug}/`)}
+                    className="example-runtime__frame"
+                    loading="eager"
+                  />
+                  <div className="example-runtime__stage-foot">
+                    <span>{controls.length > 0 ? controls.join(' · ') : 'No special controls'}</span>
+                    <span>Click the terminal before typing</span>
+                  </div>
+                </div>
+                {controls.length > 0 ? (
+                  <div className="example-runtime__controls" aria-label="Runtime controls">
+                    {controls.map((control) => <span key={control}>{control}</span>)}
+                  </div>
+                ) : null}
               </section>
             ) : (
               <section className="native-notice" aria-labelledby="runtime-title">
