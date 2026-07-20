@@ -44,3 +44,37 @@
   color: #d67c2f;
   font-size: 7px;
 }
+
+.control-install > div {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.control-install code {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.control-install button {
+  min-width: 54px;
+  padding-inline: 8px;
+  white-space: nowrap;
+}
+
+@media (max-width: 760px) {
+  .hero-city__art {
+    font-size: 5.2px;
+  }
+}
+
+@media (max-width: 390px) {
+  .hero-city__art {
+    font-size: 4.45px;
+  }
+
+  .control-install button {
+    min-width: 50px;
+    padding-inline: 6px;
+  }
+}
