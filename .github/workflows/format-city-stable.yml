@@ -23,6 +23,8 @@ jobs:
         uses: dart-lang/setup-dart@v1
         with:
           sdk: stable
+      - name: Resolve package language version
+        run: dart pub get
       - name: Format exactly like CI
         run: |
           git pull --ff-only origin feature/cinder-web-city-runtime
