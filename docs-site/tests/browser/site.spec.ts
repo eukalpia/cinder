@@ -256,15 +256,31 @@ test('responsive widths keep the city readable and avoid document overflow', asy
     await expect(
       page.getByRole('navigation', { name: 'Primary navigation' }),
     ).toBeVisible();
-    await expect(page.locator('.hero-city')).toBeVisible();
+    const city = page.locator('.hero-city');
+    await expect(city).toBeVisible();
+
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth - window.innerWidth,
     );
     expect(overflow, `${viewport.name} horizontal overflow`).toBeLessThanOrEqual(1);
-    const cityOverflow = await page.locator('.hero-city').evaluate(
-      (element) => element.scrollWidth - element.clientWidth,
+
+    const cityLayout = await city.evaluate((element) => {
+      const bounds = element.getBoundingClientRect();
+      const style = getComputedStyle(element);
+      return {
+        left: bounds.left,
+        right: bounds.right,
+        width: bounds.width,
+        overflowX: style.overflowX,
+      };
+    });
+    expect(cityLayout.left, `${viewport.name} city left edge`).toBeGreaterThanOrEqual(-1);
+    expect(cityLayout.right, `${viewport.name} city right edge`).toBeLessThanOrEqual(
+      viewport.width + 1,
     );
-    expect(cityOverflow, `${viewport.name} city overflow`).toBeLessThanOrEqual(1);
+    expect(cityLayout.width, `${viewport.name} city width`).toBeGreaterThan(180);
+    expect(['hidden', 'clip']).toContain(cityLayout.overflowX);
+
     await page.screenshot({
       path: testInfo.outputPath(`homepage-${viewport.name}.png`),
       fullPage: true,
