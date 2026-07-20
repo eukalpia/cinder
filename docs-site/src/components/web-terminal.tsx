@@ -52,6 +52,7 @@ export function WebTerminal({
     let lastMeasuredHeight = -1;
     let lastColumns = -1;
     let lastRows = -1;
+    let bridge: CinderBridge | null = null;
     const subscriptions: IDisposable[] = [];
 
     host.dataset.outputWrites = '0';
@@ -110,53 +111,57 @@ export function WebTerminal({
         const fitAddon = new FitAddon();
         terminal.loadAddon(fitAddon);
         terminal.open(host);
-        try {
-          fitAddon.fit();
-        } catch {
-          // ResizeObserver retries after the embedded document has settled.
-        }
         terminalRef.current = terminal;
 
-        const fitIfNeeded = () => {
+        const fitIfNeeded = (force = false) => {
           if (disposed) return;
           const bounds = host.getBoundingClientRect();
           const width = Math.round(bounds.width);
           const height = Math.round(bounds.height);
           if (width < 2 || height < 2) return;
-          if (width === lastMeasuredWidth && height === lastMeasuredHeight) return;
+          if (!force && width === lastMeasuredWidth && height === lastMeasuredHeight) return;
 
           lastMeasuredWidth = width;
           lastMeasuredHeight = height;
 
           try {
             const proposed = fitAddon.proposeDimensions();
-            if (!proposed) return;
-            if (proposed.cols === lastColumns && proposed.rows === lastRows) return;
+            if (!proposed || proposed.cols < 2 || proposed.rows < 2) return;
+            if (!force && proposed.cols === lastColumns && proposed.rows === lastRows) return;
             lastColumns = proposed.cols;
             lastRows = proposed.rows;
             terminal.resize(proposed.cols, proposed.rows);
+            bridge && updateBridgeGeometry(bridge, host, proposed.cols, proposed.rows);
           } catch {
             // Hidden tabs and freshly mounted iframes can report zero geometry.
           }
         };
 
-        const scheduleFit = (immediate = false) => {
+        const scheduleFit = (immediate = false, force = false) => {
           if (fitTimer !== null) clearTimeout(fitTimer);
           if (animationFrame !== null) cancelAnimationFrame(animationFrame);
 
+          const run = () => {
+            animationFrame = requestAnimationFrame(() => fitIfNeeded(force));
+          };
+
           if (immediate) {
-            animationFrame = requestAnimationFrame(fitIfNeeded);
+            run();
             return;
           }
 
-          fitTimer = setTimeout(() => {
-            animationFrame = requestAnimationFrame(fitIfNeeded);
-          }, 90);
+          fitTimer = setTimeout(run, 72);
         };
 
-        scheduleFit(true);
+        try {
+          fitAddon.fit();
+          lastColumns = terminal.cols;
+          lastRows = terminal.rows;
+        } catch {
+          // The forced frame below retries after layout has settled.
+        }
 
-        const bridge: CinderBridge = {
+        bridge = {
           width: terminal.cols,
           height: terminal.rows,
           onOutput: (data) => {
@@ -173,20 +178,21 @@ export function WebTerminal({
         const forwardInput = (data: string) => {
           incrementMetric(host, 'inputEvents');
           host.dataset.inputLog = `${host.dataset.inputLog ?? ''}${data}`.slice(-512);
-          bridge.onInput?.(data);
+          bridge?.onInput?.(data);
         };
 
         subscriptions.push(
           terminal.onData(forwardInput),
           terminal.onBinary(forwardInput),
           terminal.onResize(({ cols, rows }) => {
-            bridge.width = cols;
-            bridge.height = rows;
-            updateGeometry(host, cols, rows);
+            if (bridge) updateBridgeGeometry(bridge, host, cols, rows);
             incrementMetric(host, 'resizeEvents');
-            bridge.onResize?.(cols, rows);
+            bridge?.onResize?.(cols, rows);
           }),
         );
+
+        const handleWindowResize = () => scheduleFit(false, true);
+        window.addEventListener('resize', handleWindowResize, { passive: true });
 
         resizeObserver = new ResizeObserver((entries) => {
           const entry = entries[0];
@@ -194,9 +200,18 @@ export function WebTerminal({
           const width = Math.round(entry.contentRect.width);
           const height = Math.round(entry.contentRect.height);
           if (width === lastMeasuredWidth && height === lastMeasuredHeight) return;
-          scheduleFit();
+          scheduleFit(false, true);
         });
         resizeObserver.observe(host);
+
+        void document.fonts.ready.then(() => {
+          if (!disposed) scheduleFit(true, true);
+        });
+
+        scheduleFit(true, true);
+        setTimeout(() => {
+          if (!disposed) scheduleFit(true, true);
+        }, 180);
 
         guestScript = document.createElement('script');
         guestScript.src = guestBundle;
@@ -206,7 +221,10 @@ export function WebTerminal({
           if (!disposed) {
             host.dataset.guestLoaded = 'true';
             setStatus('running');
-            scheduleFit(true);
+            scheduleFit(true, true);
+            setTimeout(() => {
+              if (!disposed) scheduleFit(true, true);
+            }, 120);
             if (window.top === window.self) terminal.focus();
           }
         };
@@ -218,6 +236,10 @@ export function WebTerminal({
           }
         };
         document.body.appendChild(guestScript);
+
+        subscriptions.push({
+          dispose: () => window.removeEventListener('resize', handleWindowResize),
+        });
       } catch (error) {
         if (!disposed) {
           host.dataset.guestLoaded = 'failed';
@@ -301,6 +323,17 @@ function incrementMetric(
 ) {
   const current = Number(host.dataset[key] ?? '0');
   host.dataset[key] = String(current + 1);
+}
+
+function updateBridgeGeometry(
+  bridge: CinderBridge,
+  host: HTMLElement,
+  cols: number,
+  rows: number,
+) {
+  bridge.width = cols;
+  bridge.height = rows;
+  updateGeometry(host, cols, rows);
 }
 
 function updateGeometry(host: HTMLElement, cols: number, rows: number) {
