@@ -9,7 +9,7 @@ export function ExamplePreview({
   compact?: boolean;
 }) {
   const seed = hash(example.slug);
-  const variant = variantFor(example);
+  const variant = example.slug === 'web-showcase' ? 'city' : variantFor(example);
 
   return (
     <div
@@ -38,6 +38,8 @@ function renderVariant(
   example: CinderExample,
 ): ReactNode {
   switch (variant) {
+    case 'city':
+      return <CityPreview seed={seed} />;
     case 'editor':
       return <EditorPreview seed={seed} />;
     case 'files':
@@ -47,7 +49,7 @@ function renderVariant(
     case 'input':
       return <InputPreview seed={seed} />;
     case 'media':
-      return <MediaPreview seed={seed} />;
+      return <MediaPreview seed={seed} example={example} />;
     case 'navigation':
       return <NavigationPreview seed={seed} />;
     case 'motion':
@@ -57,6 +59,30 @@ function renderVariant(
     default:
       return <DashboardPreview seed={seed} title={example.title} />;
   }
+}
+
+function CityPreview({ seed }: { seed: number }) {
+  const lights = series(seed, 18, 1, 5);
+  return (
+    <div className="preview-city" aria-hidden="true">
+      <div className="preview-city__sky">
+        {lights.map((value, index) => (
+          <i
+            key={index}
+            style={
+              {
+                '--x': `${(index * 37 + seed) % 100}%`,
+                '--y': `${(index * 23 + seed) % 58}%`,
+                '--glow': value,
+              } as CSSProperties
+            }
+          />
+        ))}
+      </div>
+      <pre>{`     ╱╲       ╱╲       ╱╲\n  ╭──┴─╮   ╭──┴──╮  ╭──┴─╮\n  │▓░▓░│═══│░▓░▓░│══│▓░▓░│\n╭─┴────┴───┴─────┴──┴────┴─╮\n│        ░▒▓ CINDER ▓▒░      │\n╰══╦════════╦════════╦═══════╯\n   ║  ╱╲    ║   ╱╲   ║\n   ╚═╱__╲═══╩══╱__╲══╝`}</pre>
+      <span>FRAME 16.7ms</span>
+    </div>
+  );
 }
 
 function DashboardPreview({ seed, title }: { seed: number; title: string }) {
@@ -162,15 +188,64 @@ function InputPreview({ seed }: { seed: number }) {
   );
 }
 
-function MediaPreview({ seed }: { seed: number }) {
-  const flame = ['    ░', '   ▒▓▒', '  ▓███▓', ' ▒█████▒', '▓███████▓', ' ▓█████▓', '  ▒███▒'];
+function MediaPreview({ seed, example }: { seed: number; example: CinderExample }) {
+  const text = `${example.title} ${example.slug}`.toLowerCase();
+  const isVideo = /video|movie|player/.test(text);
+  const isAudio = /audio|sound|wave/.test(text);
+
   return (
-    <div className="preview-media">
-      <pre>{flame.join('\n')}</pre>
-      <div>
+    <div className={`preview-media preview-media--${isVideo ? 'video' : isAudio ? 'audio' : 'image'}`}>
+      <div className="preview-media__canvas">
+        {isAudio ? (
+          <div className="preview-media__wave" aria-hidden="true">
+            {series(seed, 34, 1, 10).map((height, index) => (
+              <i key={index} style={{ '--bar': height } as CSSProperties} />
+            ))}
+          </div>
+        ) : (
+          <svg viewBox="0 0 320 180" role="img" aria-label={`${example.title} generated preview`}>
+            <defs>
+              <linearGradient id={`sky-${seed}`} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stopColor="#12071f" />
+                <stop offset="0.55" stopColor="#37104d" />
+                <stop offset="1" stopColor="#09050d" />
+              </linearGradient>
+              <linearGradient id={`sun-${seed}`} x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stopColor="#ffca55" />
+                <stop offset="1" stopColor="#ff5f38" />
+              </linearGradient>
+            </defs>
+            <rect width="320" height="180" fill={`url(#sky-${seed})`} />
+            <circle cx="238" cy="52" r="28" fill={`url(#sun-${seed})`} opacity="0.94" />
+            <path d="M0 132 L48 87 L82 116 L126 68 L171 124 L218 83 L320 139 V180 H0 Z" fill="#110b1d" />
+            <path d="M0 151 L61 112 L102 143 L157 104 L205 146 L263 111 L320 151 V180 H0 Z" fill="#261039" />
+            <g fill="#08070d" stroke="#b85af4" strokeWidth="2">
+              <path d="M32 150 V97 H76 V150" />
+              <path d="M91 150 V75 H139 V150" />
+              <path d="M153 150 V104 H197 V150" />
+              <path d="M211 150 V89 H269 V150" />
+            </g>
+            <g fill="#ff8a2b">
+              {Array.from({ length: 18 }, (_, index) => {
+                const x = 39 + (index % 3) * 11 + Math.floor(index / 6) * 59;
+                const y = 107 + Math.floor(index / 3) % 4 * 10;
+                return <rect key={index} x={x} y={y} width="5" height="3" opacity={(index + seed) % 4 === 0 ? 0.25 : 0.9} />;
+              })}
+            </g>
+            {isVideo ? (
+              <g transform="translate(145 70)">
+                <circle r="24" fill="#05070b" opacity="0.82" stroke="#ff8a2b" />
+                <path d="M-6 -11 L13 0 L-6 11 Z" fill="#f7e9ff" />
+              </g>
+            ) : null}
+          </svg>
+        )}
+        <span className="preview-media__badge">{isVideo ? '▶ VIDEO' : isAudio ? '♫ AUDIO' : '▣ IMAGE'}</span>
+      </div>
+      <div className="preview-media__details">
         <span>FRAME {(seed % 240) + 1}</span>
-        <span>RGBA 96×48</span>
-        <span>UNICODE BLOCKS</span>
+        <span>{isAudio ? '48 kHz stereo' : 'RGBA 320×180'}</span>
+        <span>{isVideo ? '60 FPS STREAM' : isAudio ? 'PCM BUFFER' : 'CINDER IMAGE CELL'}</span>
       </div>
     </div>
   );
@@ -236,6 +311,7 @@ function variantFor(example: CinderExample): PreviewVariant {
 }
 
 type PreviewVariant =
+  | 'city'
   | 'dashboard'
   | 'editor'
   | 'files'
