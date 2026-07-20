@@ -3,10 +3,11 @@ import 'dart:math' as math;
 
 import 'package:cinder/cinder.dart';
 
-/// Interactive cyber-city used as the live Cinder Web hero.
+/// A living terminal city rendered entirely by Cinder.
 ///
-/// Everything visible here is rendered by Cinder into terminal cells. The
-/// browser only hosts the isolated runtime through xterm.js.
+/// The browser only provides the terminal surface. Buildings, roads, cables,
+/// plasma, electricity, hover state, keyboard input, and animation are all
+/// produced by Cinder widgets and terminal cells.
 void main() {
   runApp(const CinderApp(child: WebShowcase()));
 }
@@ -20,62 +21,21 @@ class WebShowcase extends StatefulWidget {
 
 class _WebShowcaseState extends State<WebShowcase> {
   Timer? _ticker;
-  DateTime _lastTick = DateTime.now();
-  int _frame = 0;
-  double _frameMs = 16.7;
-  final List<double> _frameHistory = <double>[
-    16.7,
-    17.2,
-    15.9,
-    16.4,
-    18.1,
-    16.0,
-    16.8,
-    17.5,
-    16.2,
-    15.8,
-    16.6,
-    17.1,
-  ];
-
+  int _tick = 0;
+  int _surgeUntil = 0;
+  int _phaseShift = 0;
+  double _energy = 1;
   bool _paused = false;
-  bool _showDiff = true;
-  bool _eventsExpanded = false;
-  bool _coreBurst = false;
-  int _selectedTower = 4;
-  int? _hoveredTower;
-  bool _coreHovered = false;
-  double _droneX = 0;
-  double _droneY = -1;
+  bool _hovered = false;
 
-  final Set<int> _activeTowers = <int>{1, 4, 6, 9};
-  final List<String> _events = <String>[
-    'BOOT  WEB BACKEND READY',
-    'SYNC  CELL BUFFER STABLE',
-    'LINK  POINTER ROUTER ACTIVE',
-    'CORE  CINDER ONLINE',
-  ];
+  bool get _surging => _tick < _surgeUntil;
 
   @override
   void initState() {
     super.initState();
-    _ticker = Timer.periodic(const Duration(milliseconds: 33), (_) {
+    _ticker = Timer.periodic(const Duration(milliseconds: 50), (_) {
       if (!mounted || _paused) return;
-      final now = DateTime.now();
-      final elapsed = now.difference(_lastTick).inMicroseconds / 1000;
-      _lastTick = now;
-      setState(() {
-        _frame++;
-        _frameMs = elapsed.clamp(0.1, 999.0).toDouble();
-        if (_frame % 3 == 0) {
-          _frameHistory
-            ..add(_frameMs)
-            ..removeAt(0);
-        }
-        if (_coreBurst && _frame % 34 == 0) {
-          _coreBurst = false;
-        }
-      });
+      setState(() => _tick++);
     });
   }
 
@@ -84,167 +44,54 @@ class _WebShowcaseState extends State<WebShowcase> {
     return Focus(
       autofocus: true,
       onKeyEvent: _handleKey,
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final width = _safeExtent(constraints.maxWidth, fallback: 128);
-          final height = _safeExtent(constraints.maxHeight, fallback: 42);
+      child: MouseRegion(
+        onEnter: (_) => setState(() => _hovered = true),
+        onExit: (_) => setState(() => _hovered = false),
+        child: GestureDetector(
+          onTap: _triggerSurge,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final width = _safeExtent(constraints.maxWidth, fallback: 150);
+              final height = _safeExtent(constraints.maxHeight, fallback: 52);
+              final frame = _ElectricCityPainter(
+                width: width,
+                height: height,
+                tick: _tick + _phaseShift,
+                energy: _energy,
+                surging: _surging,
+                hovered: _hovered,
+              ).paint();
 
-          if (width < 78 || height < 27) {
-            return _buildCompact(width, height);
-          }
-
-          return Container(
-            color: _Palette.voidBlack,
-            child: Stack(
-              fit: StackFit.expand,
-              clipBehavior: Clip.hardEdge,
-              children: [
-                Positioned.fill(
-                  child: Text(
-                    _buildStarfield(width, height),
-                    softWrap: false,
-                    style: const TextStyle(
-                      color: _Palette.star,
-                      fontWeight: FontWeight.dim,
-                    ),
-                  ),
+              return Container(
+                color: _Palette.voidBlack,
+                child: Stack(
+                  fit: StackFit.expand,
+                  clipBehavior: Clip.hardEdge,
+                  children: [
+                    _layer(frame.stars, _Palette.star, FontWeight.dim),
+                    _layer(frame.depth, _Palette.depth, FontWeight.dim),
+                    _layer(frame.structure, _Palette.violetDim, FontWeight.dim),
+                    _layer(frame.violet, _Palette.violetBright, FontWeight.bold),
+                    _layer(frame.orange, _Palette.orange, FontWeight.bold),
+                    _layer(frame.pink, _Palette.pink, FontWeight.bold),
+                    _layer(frame.glow, _Palette.orangeBright, FontWeight.bold),
+                    _layer(frame.white, _Palette.white, FontWeight.bold),
+                  ],
                 ),
-                Positioned.fill(
-                  child: Text(
-                    _buildGrid(width, height),
-                    softWrap: false,
-                    style: const TextStyle(
-                      color: _Palette.grid,
-                      fontWeight: FontWeight.dim,
-                    ),
-                  ),
-                ),
-                Positioned.fill(
-                  child: Text(
-                    _buildRoads(width, height),
-                    softWrap: false,
-                    style: const TextStyle(color: _Palette.orangeDim),
-                  ),
-                ),
-                ..._buildTowers(width, height),
-                ..._buildCore(width, height),
-                ..._buildDrone(width, height),
-                if (_showDiff) ..._buildDamageRegions(width, height),
-                _positionTopLeft(_buildStatePanel()),
-                _positionTopRight(width, _buildDiffPanel()),
-                _positionBottomLeft(height, _buildEventsPanel()),
-                _positionBottomRight(width, height, _buildFramePanel()),
-                Positioned(
-                  left: math.max(0.0, width / 2 - 24).toDouble(),
-                  top: 1,
-                  width: 48,
-                  height: 3,
-                  child: Center(
-                    child: Text(
-                      _paused
-                          ? 'CINDER CITY // PAUSED'
-                          : 'CINDER CITY // LIVE CELL NETWORK',
-                      style: TextStyle(
-                        color:
-                            _paused ? _Palette.orange : _Palette.violetBright,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-                Positioned(
-                  left: math.max(1.0, width / 2 - 39).toDouble(),
-                  bottom: 0,
-                  width: math.min(78, width - 2).toDouble(),
-                  height: 2,
-                  child: Center(
-                    child: Text(
-                      'ARROWS move drone  TAB select  ENTER toggle  D diff  E events  SPACE pause  R reset',
-                      softWrap: false,
-                      style: const TextStyle(
-                        color: _Palette.label,
-                        fontWeight: FontWeight.dim,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
+              );
+            },
+          ),
+        ),
       ),
     );
   }
 
-  Widget _buildCompact(int width, int height) {
-    final graph = _graph(_frameHistory, width: math.max(12, width - 22));
-    return Container(
-      color: _Palette.voidBlack,
-      padding: const EdgeInsets.all(1),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: width.toDouble(),
-            decoration: BoxDecoration(
-              border: BoxBorder.all(
-                color: _Palette.violet,
-                style: BoxBorderStyle.dashed,
-              ),
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 1),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'CINDER CITY',
-                  style: TextStyle(
-                    color: _Palette.orange,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Text(
-                  _paused ? 'PAUSED' : 'LIVE',
-                  style: TextStyle(
-                    color: _paused ? _Palette.orange : _Palette.green,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: Center(
-              child: GestureDetector(
-                onTap: _pulseCore,
-                child: MouseRegion(
-                  onEnter: (_) => setState(() => _coreHovered = true),
-                  onExit: (_) => setState(() => _coreHovered = false),
-                  child: Text(
-                    _compactCore(),
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: _coreBurst || _coreHovered
-                          ? _Palette.orangeBright
-                          : _Palette.violetBright,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          Text(
-            'FRAME ${_frameMs.toStringAsFixed(1)}ms  $graph',
-            softWrap: false,
-            style: const TextStyle(color: _Palette.violetBright),
-          ),
-          const Text(
-            'TAB / ENTER nodes   D diff   SPACE pause   R reset',
-            softWrap: false,
-            style: TextStyle(color: _Palette.label),
-          ),
-        ],
+  Widget _layer(String value, Color color, FontWeight weight) {
+    return Positioned.fill(
+      child: Text(
+        value,
+        softWrap: false,
+        style: TextStyle(color: color, fontWeight: weight),
       ),
     );
   }
@@ -252,827 +99,44 @@ class _WebShowcaseState extends State<WebShowcase> {
   bool _handleKey(dynamic event) {
     final key = event.logicalKey;
 
-    if (key == LogicalKey.arrowLeft) {
-      _moveDrone(-2, 0);
-    } else if (key == LogicalKey.arrowRight) {
-      _moveDrone(2, 0);
+    if (key == LogicalKey.space || key == LogicalKey.keyP) {
+      setState(() => _paused = !_paused);
+    } else if (key == LogicalKey.enter || key == LogicalKey.keyE) {
+      _triggerSurge();
     } else if (key == LogicalKey.arrowUp) {
-      _moveDrone(0, -1);
+      setState(() => _energy = math.min(1.7, _energy + 0.12));
     } else if (key == LogicalKey.arrowDown) {
-      _moveDrone(0, 1);
-    } else if (key == LogicalKey.tab) {
-      setState(() {
-        _selectedTower = (_selectedTower + 1) % _towers.length;
-        _addEvent('SELECT  NODE ${_nodeId(_selectedTower)}');
-      });
-    } else if (key == LogicalKey.enter) {
-      _toggleTower(_selectedTower);
-    } else if (key == LogicalKey.keyD) {
-      setState(() {
-        _showDiff = !_showDiff;
-        _addEvent('DIFF  ${_showDiff ? 'TRACE ENABLED' : 'TRACE HIDDEN'}');
-      });
-    } else if (key == LogicalKey.keyE) {
-      setState(() {
-        _eventsExpanded = !_eventsExpanded;
-        _addEvent('EVENTS  ${_eventsExpanded ? 'EXPANDED' : 'COMPACT'}');
-      });
-    } else if (key == LogicalKey.space || key == LogicalKey.keyP) {
-      setState(() {
-        _paused = !_paused;
-        _lastTick = DateTime.now();
-        _addEvent(_paused ? 'CLOCK  PAUSED' : 'CLOCK  RESUMED');
-      });
+      setState(() => _energy = math.max(0.55, _energy - 0.12));
+    } else if (key == LogicalKey.arrowLeft) {
+      setState(() => _phaseShift -= 5);
+    } else if (key == LogicalKey.arrowRight) {
+      setState(() => _phaseShift += 5);
     } else if (key == LogicalKey.keyR) {
-      _reset();
+      setState(() {
+        _tick = 0;
+        _surgeUntil = 0;
+        _phaseShift = 0;
+        _energy = 1;
+        _paused = false;
+      });
     } else {
       return false;
     }
+
     return true;
   }
 
-  List<Widget> _buildTowers(int width, int height) {
-    final widgets = <Widget>[];
-    for (var i = 0; i < _towers.length; i++) {
-      final spec = _towers[i];
-      final art = _towerArt(spec.variant, i);
-      final lines = art.split('\n');
-      final artWidth = lines.fold<int>(
-        0,
-        (current, line) => math.max(current, line.length),
-      );
-      final artHeight = lines.length;
-      final left = (spec.x * (width - artWidth - 4)).round().clamp(
-            0,
-            math.max(0, width - artWidth - 2),
-          );
-      final top = (spec.y * (height - artHeight - 4)).round().clamp(
-            3,
-            math.max(3, height - artHeight - 3),
-          );
-      final selected = i == _selectedTower;
-      final hovered = i == _hoveredTower;
-      final active = _activeTowers.contains(i);
-
-      final color = hovered
-          ? _Palette.orangeBright
-          : selected
-              ? _Palette.white
-              : active
-                  ? _Palette.violetBright
-                  : _Palette.violetDim;
-
-      widgets.add(
-        Positioned(
-          left: left.toDouble(),
-          top: top.toDouble(),
-          width: (artWidth + 2).toDouble(),
-          height: (artHeight + 2).toDouble(),
-          child: MouseRegion(
-            onEnter: (_) {
-              setState(() {
-                _hoveredTower = i;
-                _addEvent('HOVER  NODE ${_nodeId(i)}');
-              });
-            },
-            onExit: (_) {
-              if (_hoveredTower == i) {
-                setState(() => _hoveredTower = null);
-              }
-            },
-            child: GestureDetector(
-              onTap: () {
-                setState(() => _selectedTower = i);
-                _toggleTower(i);
-              },
-              child: Container(
-                padding: const EdgeInsets.all(1),
-                decoration: BoxDecoration(
-                  color: selected ? _Palette.selectionSurface : null,
-                  border: selected || hovered
-                      ? BoxBorder.all(
-                          color: hovered ? _Palette.orange : _Palette.violet,
-                          style: hovered
-                              ? BoxBorderStyle.dotted
-                              : BoxBorderStyle.dashed,
-                        )
-                      : null,
-                ),
-                child: Text(
-                  art,
-                  softWrap: false,
-                  style: TextStyle(
-                    color: color,
-                    fontWeight:
-                        active || selected ? FontWeight.bold : FontWeight.dim,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-    return widgets;
-  }
-
-  List<Widget> _buildCore(int width, int height) {
-    final core = _coreArt();
-    final lines = core.split('\n');
-    final coreWidth = lines.fold<int>(
-      0,
-      (current, line) => math.max(current, line.length),
-    );
-    final coreHeight = lines.length;
-    final left = width / 2 - coreWidth / 2;
-    final top = height / 2 - coreHeight / 2 + 1;
-    final pulse = (_frame ~/ 3) % 4;
-    final coreColor = _coreBurst || _coreHovered
-        ? _Palette.orangeBright
-        : pulse == 0
-            ? _Palette.pink
-            : _Palette.orange;
-
-    return [
-      Positioned(
-        left: math.max(0.0, left - 5).toDouble(),
-        top: math.max(2.0, top - 2).toDouble(),
-        width: (coreWidth + 10).toDouble(),
-        height: (coreHeight + 4).toDouble(),
-        child: Text(
-          _coreHalo(coreWidth + 10, coreHeight + 4),
-          softWrap: false,
-          style: TextStyle(
-            color: _coreBurst ? _Palette.orange : _Palette.violetDim,
-            fontWeight: FontWeight.dim,
-          ),
-        ),
-      ),
-      Positioned(
-        left: math.max(0.0, left).toDouble(),
-        top: math.max(3.0, top).toDouble(),
-        width: coreWidth.toDouble(),
-        height: coreHeight.toDouble(),
-        child: MouseRegion(
-          onEnter: (_) {
-            setState(() {
-              _coreHovered = true;
-              _addEvent('HOVER  CINDER CORE');
-            });
-          },
-          onExit: (_) => setState(() => _coreHovered = false),
-          child: GestureDetector(
-            onTap: _pulseCore,
-            child: Text(
-              core,
-              softWrap: false,
-              style: TextStyle(color: coreColor, fontWeight: FontWeight.bold),
-            ),
-          ),
-        ),
-      ),
-      Positioned(
-        left: math.max(0.0, width / 2 - 6).toDouble(),
-        top: math.max(3.0, height / 2 + 4).toDouble(),
-        width: 12,
-        height: 2,
-        child: const Center(
-          child: Text(
-            '>_  CINDER',
-            softWrap: false,
-            style: TextStyle(
-              color: _Palette.white,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-      ),
-    ];
-  }
-
-  List<Widget> _buildDrone(int width, int height) {
-    final left = (width / 2 + _droneX).clamp(24, width - 25).toDouble();
-    final top = (height / 2 + _droneY).clamp(7, height - 8).toDouble();
-    final glyph = (_frame ~/ 5).isEven ? '╼[▸]' : '─[▸]';
-    return [
-      Positioned(
-        left: left,
-        top: top,
-        width: 6,
-        height: 1,
-        child: Text(
-          glyph,
-          softWrap: false,
-          style: const TextStyle(
-            color: _Palette.white,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
-    ];
-  }
-
-  List<Widget> _buildDamageRegions(int width, int height) {
-    final phase = (_frame ~/ 8) % 3;
-    final regions = <_Region>[
-      _Region(width * .29, height * .23, 18, 7),
-      _Region(width * .63, height * .18, 20, 8),
-      _Region(width * .47, height * .52, 16, 8),
-    ];
-
-    return [
-      for (var i = 0; i < regions.length; i++)
-        if (i != phase)
-          Positioned(
-            left: regions[i].left.clamp(0, width - regions[i].width).toDouble(),
-            top: regions[i]
-                .top
-                .clamp(3, height - regions[i].height - 2)
-                .toDouble(),
-            width: regions[i].width.toDouble(),
-            height: regions[i].height.toDouble(),
-            child: Container(
-              decoration: BoxDecoration(
-                border: BoxBorder.all(
-                  color: i.isEven ? _Palette.pinkDim : _Palette.orangeDim,
-                  style: BoxBorderStyle.dotted,
-                ),
-              ),
-              child: Align(
-                alignment: Alignment.topRight,
-                child: Text(
-                  ' Δ${12 + ((_frame + i * 17) % 88)} ',
-                  style: TextStyle(
-                    color: i.isEven ? _Palette.pink : _Palette.orange,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-          ),
-    ];
-  }
-
-  Widget _buildStatePanel() {
-    final active = _activeTowers.length;
-    return _panel(
-      width: 23,
-      height: 9,
-      title: 'STATE',
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              _counterBox(active.toString().padLeft(2, '0'), 'SYS'),
-              const SizedBox(width: 1),
-              _counterBox(
-                (_events.length % 100).toString().padLeft(2, '0'),
-                'NET',
-              ),
-            ],
-          ),
-          const Spacer(),
-          Text(
-            _paused ? '◌ CLOCK HOLD' : '● CORE STABLE',
-            style: TextStyle(
-              color: _paused ? _Palette.orange : _Palette.green,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDiffPanel() {
-    final low = (_frame * 7 + _activeTowers.length * 3) % 100;
-    final high = (_frame * 11 + _selectedTower * 9) % 100;
-    return _panel(
-      width: 23,
-      height: 9,
-      title: 'DIFF',
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              _counterBox(low.toString().padLeft(2, '0'), 'LOW'),
-              const SizedBox(width: 1),
-              _counterBox(high.toString().padLeft(2, '0'), 'HIGH'),
-            ],
-          ),
-          const Spacer(),
-          Text(
-            _showDiff ? 'TRACE  ${_miniBar(13)}' : 'TRACE  HIDDEN',
-            softWrap: false,
-            style: TextStyle(
-              color: _showDiff ? _Palette.orange : _Palette.label,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildEventsPanel() {
-    final width = _eventsExpanded ? 34.0 : 27.0;
-    final height = _eventsExpanded ? 14.0 : 10.0;
-    final visible = _eventsExpanded ? 8 : 4;
-    final rows = _events.reversed.take(visible).toList();
-
-    return _panel(
-      width: width,
-      height: height,
-      title: 'EVENTS',
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          for (final event in rows)
-            Text(
-              '> $event',
-              softWrap: false,
-              style: TextStyle(
-                color: event.startsWith('HOVER')
-                    ? _Palette.violetBright
-                    : event.startsWith('NODE') || event.startsWith('CORE')
-                        ? _Palette.orange
-                        : _Palette.labelBright,
-              ),
-            ),
-          const Spacer(),
-          Text(
-            _eventsExpanded ? '[E] COLLAPSE' : '[E] EXPAND',
-            style: const TextStyle(
-              color: _Palette.violet,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFramePanel() {
-    final average = _frameHistory.reduce((left, right) => left + right) /
-        _frameHistory.length;
-    return _panel(
-      width: 23,
-      height: 10,
-      title: 'FRAME',
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            '${_frameMs.toStringAsFixed(1)}ms',
-            style: const TextStyle(
-              color: _Palette.violetBright,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          Text(
-            _graph(_frameHistory, width: 17),
-            softWrap: false,
-            style: const TextStyle(color: _Palette.orange),
-          ),
-          const Spacer(),
-          Text(
-            'AVG ${average.toStringAsFixed(1)}  #${_frame.toString().padLeft(5, '0')}',
-            softWrap: false,
-            style: const TextStyle(color: _Palette.label),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _panel({
-    required double width,
-    required double height,
-    required String title,
-    required Widget child,
-  }) {
-    return Container(
-      width: width,
-      height: height,
-      padding: const EdgeInsets.all(1),
-      decoration: BoxDecoration(
-        color: _Palette.panel,
-        border: BoxBorder.all(
-          color: _Palette.panelLine,
-          style: BoxBorderStyle.dashed,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: const TextStyle(
-              color: _Palette.orange,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 1),
-          Expanded(child: child),
-        ],
-      ),
-    );
-  }
-
-  Widget _counterBox(String value, String label) {
-    return Container(
-      width: 8,
-      height: 4,
-      decoration: BoxDecoration(
-        border: BoxBorder.all(
-          color: _Palette.violetDim,
-          style: BoxBorderStyle.solid,
-        ),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            value,
-            style: const TextStyle(
-              color: _Palette.violetBright,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          Text(
-            label,
-            style: const TextStyle(
-              color: _Palette.label,
-              fontWeight: FontWeight.dim,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Positioned _positionTopLeft(Widget child) {
-    return Positioned(left: 1, top: 1, width: 23, height: 9, child: child);
-  }
-
-  Positioned _positionTopRight(int width, Widget child) {
-    return Positioned(
-      left: math.max(1, width - 24).toDouble(),
-      top: 1,
-      width: 23,
-      height: 9,
-      child: child,
-    );
-  }
-
-  Positioned _positionBottomLeft(int height, Widget child) {
-    final panelHeight = _eventsExpanded ? 14.0 : 10.0;
-    final panelWidth = _eventsExpanded ? 34.0 : 27.0;
-    return Positioned(
-      left: 1,
-      top: math.max(10.0, height - panelHeight - 1).toDouble(),
-      width: panelWidth,
-      height: panelHeight,
-      child: child,
-    );
-  }
-
-  Positioned _positionBottomRight(int width, int height, Widget child) {
-    return Positioned(
-      left: math.max(1, width - 24).toDouble(),
-      top: math.max(10, height - 11).toDouble(),
-      width: 23,
-      height: 10,
-      child: child,
-    );
-  }
-
-  void _moveDrone(double dx, double dy) {
+  void _triggerSurge() {
     setState(() {
-      _droneX = (_droneX + dx).clamp(-33, 33).toDouble();
-      _droneY = (_droneY + dy).clamp(-12, 12).toDouble();
-      _addEvent(
-        'DRONE  X${_droneX.toInt().toString().padLeft(3)} '
-        'Y${_droneY.toInt().toString().padLeft(3)}',
-      );
+      _surgeUntil = _tick + 34;
+      _energy = math.min(1.7, _energy + 0.08);
     });
-  }
-
-  void _toggleTower(int index) {
-    setState(() {
-      _selectedTower = index;
-      if (_activeTowers.remove(index)) {
-        _addEvent('NODE ${_nodeId(index)}  SLEEP');
-      } else {
-        _activeTowers.add(index);
-        _addEvent('NODE ${_nodeId(index)}  ACTIVE');
-      }
-    });
-  }
-
-  void _pulseCore() {
-    setState(() {
-      _coreBurst = true;
-      _addEvent('CORE  MANUAL PULSE');
-    });
-  }
-
-  void _reset() {
-    setState(() {
-      _paused = false;
-      _showDiff = true;
-      _eventsExpanded = false;
-      _coreBurst = true;
-      _selectedTower = 4;
-      _hoveredTower = null;
-      _droneX = 0;
-      _droneY = -1;
-      _activeTowers
-        ..clear()
-        ..addAll(<int>{1, 4, 6, 9});
-      _events
-        ..clear()
-        ..addAll(<String>[
-          'RESET  CITY STATE RESTORED',
-          'SYNC  CELL BUFFER STABLE',
-          'CORE  CINDER ONLINE',
-        ]);
-      _lastTick = DateTime.now();
-    });
-  }
-
-  void _addEvent(String event) {
-    if (_events.isNotEmpty && _events.last == event) return;
-    _events.add(event);
-    if (_events.length > 24) _events.removeAt(0);
-  }
-
-  String _buildStarfield(int width, int height) {
-    final grid = List.generate(
-      height,
-      (_) => List<String>.filled(width, ' ', growable: false),
-      growable: false,
-    );
-    final phase = _frame ~/ 4;
-
-    for (var y = 0; y < height; y++) {
-      for (var x = 0; x < width; x++) {
-        final hash = (x * 73 + y * 151 + phase * 17) % 211;
-        if (hash == 0 || hash == 19) {
-          grid[y][x] = (x + y + phase).isEven ? '·' : '∙';
-        } else if (hash == 41) {
-          grid[y][x] = phase.isEven ? '+' : '×';
-        } else if (hash == 97 && y > 3) {
-          grid[y][x] = '^';
-        }
-      }
-    }
-    return _gridToString(grid);
-  }
-
-  String _buildGrid(int width, int height) {
-    final grid = List.generate(
-      height,
-      (_) => List<String>.filled(width, ' ', growable: false),
-      growable: false,
-    );
-    for (var y = 4; y < height - 2; y += 4) {
-      for (var x = 0; x < width; x += 4) {
-        grid[y][x] = '·';
-      }
-    }
-    return _gridToString(grid);
-  }
-
-  String _buildRoads(int width, int height) {
-    final grid = List.generate(
-      height,
-      (_) => List<String>.filled(width, ' ', growable: false),
-      growable: false,
-    );
-    final cx = width ~/ 2;
-    final cy = height ~/ 2 + 2;
-
-    void put(int x, int y, String value) {
-      if (x >= 0 && x < width && y >= 0 && y < height) {
-        grid[y][x] = value;
-      }
-    }
-
-    for (var x = 18; x < width - 18; x++) {
-      if ((x + _frame ~/ 3) % 7 < 5) put(x, cy, '═');
-      if ((x + 2) % 11 == 0) put(x, cy - 1, '·');
-      if ((x + 7) % 13 == 0) put(x, cy + 1, '·');
-    }
-
-    for (var offset = 0; offset < math.min(cx - 16, cy - 4); offset++) {
-      final pulse = (offset + _frame ~/ 4) % 9;
-      if (pulse < 7) {
-        put(cx - offset, cy - offset ~/ 2, '╲');
-        put(cx + offset, cy - offset ~/ 2, '╱');
-        put(cx - offset, cy + offset ~/ 2, '╱');
-        put(cx + offset, cy + offset ~/ 2, '╲');
-      }
-    }
-
-    for (var y = 10; y < height - 7; y++) {
-      if ((y + _frame ~/ 5) % 5 != 0) {
-        put(cx - 27, y, '║');
-        put(cx + 27, y, '║');
-      }
-    }
-
-    for (var x = 24; x < width - 24; x++) {
-      if ((x + _frame ~/ 5) % 6 != 0) {
-        put(x, 12, '─');
-        put(x, height - 10, '─');
-      }
-    }
-
-    return _gridToString(grid);
-  }
-
-  String _towerArt(int variant, int index) {
-    final tick = (_frame ~/ 5 + index) % 4;
-    final a = tick.isEven ? '◆' : '◇';
-    final b = tick == 1 || tick == 2 ? '▓' : '▒';
-    final c = _activeTowers.contains(index) ? '◉' : '○';
-
-    switch (variant % 6) {
-      case 0:
-        return '''
-       $c
-      ╱│╲
-    ╱─┴─╲
-   ╱ $a $a ╲
-  ╱───────╲
-  │ $b  $b  │
-  │  $a $a  │
-  └───┬───┘''';
-      case 1:
-        return '''
-       ╷
-      ╱╲
-     ╱$a ╲
-   ╭─┴──┴─╮
-  ╱ $b $a $b ╲
- ╱─────────╲
- │ $a  $b  $a │
- │  $b  $a  │
- └────┬────┘''';
-      case 2:
-        return '''
-      $c
-      │
-    ╭─┴─╮
-   ╱ $a $a ╲
-  ╱──────╲
-  │$b $a $b │
-  │ $a $b  │
-  │$b   $a │
-  └──┬───┘''';
-      case 3:
-        return '''
-        ╷
-       ╱╲
-      ╱$a ╲
-   ╭──┴───╮
-  ╱ $b $a $b ╲
- ╱────────╲
- │ $a $b $a │
- └───┬────┘''';
-      case 4:
-        return '''
-      ╷
-   ╭──┴──╮
-  ╱ $a $b $a╲
- ╱────────╲
- │$b $a $b $a│
- │ $a $b  │
- └──┬─────┘''';
-      default:
-        return '''
-       $c
-      ╱╲
-    ╭─┴──╮
-   ╱$a $b $a╲
-  ╱───────╲
-  │ $b $a $b │
-  └───┬───┘''';
-    }
-  }
-
-  String _coreArt() {
-    final phase = (_frame ~/ 3) % 4;
-    final crown = const <String>['  ·  ', '  ✦  ', '  +  ', '  *  '][phase];
-    final fill = _coreBurst
-        ? '█'
-        : phase.isEven
-            ? '▓'
-            : '▒';
-    return '''
-            $crown
-            ╱│╲
-          ╱╱│││╲╲
-        ╱╱ $fill$fill$fill$fill$fill ╲╲
-      ╱╱ $fill$fill█████$fill$fill ╲╲
-     ╱  $fill█████████$fill  ╲
-     ╲  $fill█████████$fill  ╱
-      ╲╲ $fill$fill█████$fill$fill ╱╱
-        ╲╲ $fill$fill$fill$fill$fill ╱╱
-          ╲╲│││╱╱
-            ╲│╱
-       ╭─────────────╮
-       │             │
-       ╰─────────────╯''';
-  }
-
-  String _coreHalo(int width, int height) {
-    final grid = List.generate(
-      height,
-      (_) => List<String>.filled(width, ' ', growable: false),
-      growable: false,
-    );
-    final cx = width ~/ 2;
-    final cy = height ~/ 2;
-    for (var radius = 3; radius < math.min(width ~/ 2, height); radius += 3) {
-      final phase = (radius + _frame ~/ 3) % 4;
-      if (phase == 0) continue;
-      for (var x = -radius; x <= radius; x++) {
-        final y = (radius - x.abs()) ~/ 2;
-        final char = phase.isEven ? '·' : ':';
-        final x1 = cx + x;
-        final y1 = cy + y;
-        final y2 = cy - y;
-        if (x1 >= 0 && x1 < width && y1 >= 0 && y1 < height) {
-          grid[y1][x1] = char;
-        }
-        if (x1 >= 0 && x1 < width && y2 >= 0 && y2 < height) {
-          grid[y2][x1] = char;
-        }
-      }
-    }
-    return _gridToString(grid);
-  }
-
-  String _compactCore() {
-    final fill = _coreBurst
-        ? '█'
-        : (_frame ~/ 4).isEven
-            ? '▓'
-            : '▒';
-    return '''
-          ✦
-         ╱│╲
-       ╱ $fill$fill$fill ╲
-     ╱ $fill█████$fill ╲
-       $fill█████$fill
-        ╲│╱
-     ╭─────────╮
-     │ CINDER  │
-     ╰─────────╯''';
-  }
-
-  String _miniBar(int width) {
-    const chars = '▁▂▃▄▅▆▇█';
-    return List.generate(width, (index) {
-      final value =
-          (index * 5 + _frame ~/ 2 + _activeTowers.length) % chars.length;
-      return chars[value];
-    }).join();
-  }
-
-  String _graph(List<double> values, {required int width}) {
-    const chars = '▁▂▃▄▅▆▇█';
-    final source =
-        values.length > width ? values.sublist(values.length - width) : values;
-    if (source.isEmpty) return '';
-    final low = source.reduce((a, b) => math.min(a, b).toDouble());
-    final high = source.reduce((a, b) => math.max(a, b).toDouble());
-    final span = math.max(0.1, high - low);
-    final result = source.map((value) {
-      final index = (((value - low) / span) * (chars.length - 1))
-          .round()
-          .clamp(0, chars.length - 1)
-          .toInt();
-      return chars[index];
-    }).join();
-    return result.padLeft(width, '▁');
-  }
-
-  String _gridToString(List<List<String>> grid) {
-    return grid
-        .map((row) => row.join().replaceFirst(RegExp(r'\s+$'), ''))
-        .join('\n');
   }
 
   int _safeExtent(double value, {required int fallback}) {
     if (!value.isFinite || value <= 0) return fallback;
     return value.floor().clamp(1, 500).toInt();
   }
-
-  String _nodeId(int index) => (index + 1).toString().padLeft(2, '0');
 
   @override
   void dispose() {
@@ -1081,60 +145,825 @@ class _WebShowcaseState extends State<WebShowcase> {
   }
 }
 
-class _TowerSpec {
-  const _TowerSpec(this.x, this.y, this.variant);
+class _ElectricCityPainter {
+  _ElectricCityPainter({
+    required this.width,
+    required this.height,
+    required this.tick,
+    required this.energy,
+    required this.surging,
+    required this.hovered,
+  });
 
-  final double x;
-  final double y;
-  final int variant;
-}
-
-class _Region {
-  const _Region(this.left, this.top, this.width, this.height);
-
-  final double left;
-  final double top;
   final int width;
   final int height;
+  final int tick;
+  final double energy;
+  final bool surging;
+  final bool hovered;
+
+  late final _GlyphCanvas _stars = _GlyphCanvas(width, height);
+  late final _GlyphCanvas _depth = _GlyphCanvas(width, height);
+  late final _GlyphCanvas _structure = _GlyphCanvas(width, height);
+  late final _GlyphCanvas _violet = _GlyphCanvas(width, height);
+  late final _GlyphCanvas _orange = _GlyphCanvas(width, height);
+  late final _GlyphCanvas _pink = _GlyphCanvas(width, height);
+  late final _GlyphCanvas _glow = _GlyphCanvas(width, height);
+  late final _GlyphCanvas _white = _GlyphCanvas(width, height);
+
+  final List<_Point> _towerTips = <_Point>[];
+  final List<List<_Point>> _cables = <List<_Point>>[];
+
+  _WorldFrame paint() {
+    if (width < 34 || height < 14) {
+      _drawTinyWorld();
+      return _buildFrame();
+    }
+
+    _drawStars();
+    _drawAtmosphere();
+    _drawDistantCity();
+    _drawMidCity();
+    _drawRoadNetwork();
+    _drawForegroundCity();
+    final socket = _drawCoreDistrict();
+    _drawCableNetwork(socket);
+    _drawPlasmaColumn(socket);
+    _drawElectricityBetweenCables();
+    _drawTraffic();
+    _drawAmbientSparks();
+    _drawDrone();
+
+    return _buildFrame();
+  }
+
+  _WorldFrame _buildFrame() {
+    return _WorldFrame(
+      stars: _stars.build(),
+      depth: _depth.build(),
+      structure: _structure.build(),
+      violet: _violet.build(),
+      orange: _orange.build(),
+      pink: _pink.build(),
+      glow: _glow.build(),
+      white: _white.build(),
+    );
+  }
+
+  void _drawTinyWorld() {
+    final centerX = width ~/ 2;
+    final baseY = height - 2;
+    final topY = math.max(1, height ~/ 4);
+
+    for (var y = topY; y < baseY - 3; y++) {
+      final pulse = _noise(centerX, y, tick ~/ 2);
+      final half = 1 + pulse % 2;
+      for (var x = centerX - half; x <= centerX + half; x++) {
+        final heat = _noise(x, y, tick);
+        if (heat % 4 == 0) {
+          _pink.set(x, y, ':');
+        } else if (x == centerX) {
+          _white.set(x, y, heat.isEven ? '#' : '*');
+        } else {
+          _glow.set(x, y, heat.isEven ? '+' : '*');
+        }
+      }
+    }
+
+    _violet.write(centerX - 7, baseY - 3, '╭────────────╮');
+    _violet.write(centerX - 7, baseY - 2, '│   CINDER   │');
+    _violet.write(centerX - 7, baseY - 1, '╰────────────╯');
+  }
+
+  void _drawStars() {
+    final drift = tick ~/ 5;
+    for (var y = 0; y < height; y++) {
+      for (var x = 0; x < width; x++) {
+        final hash = _noise(x, y, drift);
+        if (hash % 173 == 0) {
+          _stars.set(x, y, hash.isEven ? '·' : '.');
+        } else if (hash % 433 == 0) {
+          _stars.set(x, y, tick.isEven ? '+' : '×');
+        } else if (hash % 617 == 0) {
+          _stars.set(x, y, '^');
+        }
+      }
+    }
+  }
+
+  void _drawAtmosphere() {
+    final centerX = width ~/ 2;
+    final top = math.max(2, height ~/ 14);
+    final bottom = math.max(top + 1, (height * 0.62).round());
+
+    for (var y = top; y < bottom; y++) {
+      final progress = (y - top) / math.max(1, bottom - top);
+      final radius = math.max(3, (progress * width * 0.22).round());
+      for (var x = centerX - radius; x <= centerX + radius; x++) {
+        final distance = (x - centerX).abs();
+        final hash = _noise(x, y, tick ~/ 3);
+        final threshold = 8 + (progress * 16).round();
+        if (distance < radius && hash % 97 < threshold) {
+          final glyph = hash % 5 == 0 ? ':' : '·';
+          if (distance < radius ~/ 3) {
+            _pink.set(x, y, glyph);
+          } else {
+            _depth.set(x, y, glyph);
+          }
+        }
+      }
+    }
+  }
+
+  void _drawDistantCity() {
+    final baseY = math.max(10, (height * 0.47).round());
+    final spacing = width < 90 ? 12 : 15;
+    var index = 0;
+
+    for (var x = 3; x < width - 3; x += spacing) {
+      final seed = _noise(x, baseY, 11);
+      final buildingWidth = 7 + seed % math.max(3, spacing - 5);
+      final buildingHeight = 7 + seed % math.max(6, height ~/ 4);
+      final center = math.min(width - 4, x + buildingWidth ~/ 2);
+      _drawTower(
+        centerX: center,
+        baseY: baseY + seed % 3,
+        towerWidth: buildingWidth,
+        towerHeight: buildingHeight,
+        seed: seed + index,
+        canvas: _depth,
+        foreground: false,
+      );
+      index++;
+    }
+  }
+
+  void _drawMidCity() {
+    final baseY = math.max(14, (height * 0.66).round());
+    final spacing = width < 100 ? 16 : 20;
+    var index = 0;
+
+    for (var x = -2; x < width + 4; x += spacing) {
+      final seed = _noise(x + 19, baseY, 29);
+      final buildingWidth = 10 + seed % 7;
+      final buildingHeight = 10 + seed % math.max(8, height ~/ 3);
+      final center = x + buildingWidth ~/ 2;
+      final tip = _drawTower(
+        centerX: center,
+        baseY: baseY + seed % 4,
+        towerWidth: buildingWidth,
+        towerHeight: buildingHeight,
+        seed: seed + index * 7,
+        canvas: _structure,
+        foreground: true,
+      );
+      if (tip.x > 2 && tip.x < width - 2) _towerTips.add(tip);
+      index++;
+    }
+  }
+
+  void _drawForegroundCity() {
+    final baseY = height - 1;
+    final centerX = width ~/ 2;
+    final exclusion = math.max(18, width ~/ 7);
+    final spacing = width < 110 ? 18 : 23;
+
+    for (var x = -4; x < width + 4; x += spacing) {
+      final center = x + spacing ~/ 2;
+      if ((center - centerX).abs() < exclusion) continue;
+      final seed = _noise(center, baseY, 47);
+      final towerWidth = 12 + seed % 9;
+      final towerHeight = 11 + seed % math.max(8, height ~/ 3);
+      final tip = _drawTower(
+        centerX: center,
+        baseY: baseY,
+        towerWidth: towerWidth,
+        towerHeight: towerHeight,
+        seed: seed,
+        canvas: _violet,
+        foreground: true,
+      );
+      if (tip.x > 2 && tip.x < width - 2) _towerTips.add(tip);
+    }
+  }
+
+  _Point _drawTower({
+    required int centerX,
+    required int baseY,
+    required int towerWidth,
+    required int towerHeight,
+    required int seed,
+    required _GlyphCanvas canvas,
+    required bool foreground,
+  }) {
+    final availableHeight = math.max(5, math.min(towerHeight, baseY - 2));
+    final levels = availableHeight < 12 ? 2 : 3;
+    var currentBottom = baseY;
+    var currentWidth = math.max(6, towerWidth);
+
+    for (var level = 0; level < levels; level++) {
+      final remainingLevels = levels - level;
+      final levelHeight = math.max(
+        3,
+        (availableHeight / levels).round() +
+            ((_noise(seed, level, 3) % 3) - 1),
+      );
+      final left = centerX - currentWidth ~/ 2;
+      final right = left + currentWidth - 1;
+      final top = math.max(2, currentBottom - levelHeight);
+
+      canvas.set(left, top, '╭');
+      canvas.hLine(left + 1, right - 1, top, '─');
+      canvas.set(right, top, '╮');
+      canvas.vLine(left, top + 1, currentBottom - 1, '│');
+      canvas.vLine(right, top + 1, currentBottom - 1, '│');
+      canvas.set(left, currentBottom, '╰');
+      canvas.hLine(left + 1, right - 1, currentBottom, '─');
+      canvas.set(right, currentBottom, '╯');
+
+      if (currentWidth >= 8) {
+        canvas.set(left + 1, top - 1, '╱');
+        canvas.hLine(left + 2, right - 2, top - 1, '─');
+        canvas.set(right - 1, top - 1, '╲');
+      }
+
+      _drawWindows(
+        left: left,
+        right: right,
+        top: top,
+        bottom: currentBottom,
+        seed: seed + level * 31,
+        foreground: foreground,
+      );
+
+      currentBottom = top - 1;
+      currentWidth = math.max(5, currentWidth - 2 - seed % 2);
+      if (remainingLevels == 1) break;
+    }
+
+    final antennaBottom = math.max(2, currentBottom);
+    final antennaHeight = 2 + seed % 5;
+    for (var y = antennaBottom - antennaHeight; y < antennaBottom; y++) {
+      canvas.set(centerX, y, '│');
+    }
+    canvas.set(centerX, antennaBottom - antennaHeight - 1, seed.isEven ? '^' : '·');
+
+    if (foreground) {
+      final pulseY = antennaBottom - antennaHeight - 1;
+      final pulse = (tick + seed) % 8;
+      if (pulse < 2) {
+        _pink.set(centerX - 1, pulseY, '·');
+        _white.set(centerX, pulseY, '*');
+        _pink.set(centerX + 1, pulseY, '·');
+      }
+    }
+
+    return _Point(centerX, antennaBottom - antennaHeight - 1);
+  }
+
+  void _drawWindows({
+    required int left,
+    required int right,
+    required int top,
+    required int bottom,
+    required int seed,
+    required bool foreground,
+  }) {
+    if (right - left < 5 || bottom - top < 3) return;
+
+    for (var y = top + 2; y < bottom; y += 2) {
+      for (var x = left + 2; x < right - 1; x += 3) {
+        final hash = _noise(x, y, seed + tick ~/ 7);
+        if (hash % 5 == 0) continue;
+        final glyph = foreground && hash % 7 == 0 ? '▥' : '·';
+        if (hash % 4 == 0) {
+          _orange.set(x, y, glyph);
+        } else if (hash % 3 == 0) {
+          _pink.set(x, y, glyph);
+        } else {
+          _violet.set(x, y, glyph);
+        }
+      }
+    }
+  }
+
+  void _drawRoadNetwork() {
+    final centerX = width ~/ 2;
+    final horizonY = math.max(12, (height * 0.53).round());
+    final lowerY = math.max(horizonY + 4, (height * 0.78).round());
+
+    final roads = <List<_Point>>[
+      <_Point>[
+        _Point(0, lowerY),
+        _Point(centerX - width ~/ 5, horizonY + 4),
+        _Point(centerX - 7, horizonY),
+      ],
+      <_Point>[
+        _Point(width - 1, lowerY),
+        _Point(centerX + width ~/ 5, horizonY + 4),
+        _Point(centerX + 7, horizonY),
+      ],
+      <_Point>[
+        _Point(0, height - 5),
+        _Point(centerX - width ~/ 4, lowerY),
+        _Point(centerX - 10, horizonY + 3),
+      ],
+      <_Point>[
+        _Point(width - 1, height - 5),
+        _Point(centerX + width ~/ 4, lowerY),
+        _Point(centerX + 10, horizonY + 3),
+      ],
+      <_Point>[
+        _Point(math.max(0, width ~/ 10), horizonY + 1),
+        _Point(centerX, horizonY + 6),
+        _Point(math.min(width - 1, width - width ~/ 10), horizonY + 1),
+      ],
+    ];
+
+    for (var index = 0; index < roads.length; index++) {
+      final path = _polyline(roads[index]);
+      _stroke(_structure, path, sparse: true, phase: index);
+      final offset = _positiveMod(tick * 2 + index * 17, math.max(1, path.length));
+      _drawMovingPulse(path, offset, radius: 3, hot: index.isEven);
+      final second = _positiveMod(offset + path.length ~/ 2, math.max(1, path.length));
+      _drawMovingPulse(path, second, radius: 2, hot: !index.isEven);
+    }
+
+    for (var ring = 0; ring < 3; ring++) {
+      final y = horizonY + 6 + ring * 4;
+      final inset = 7 + ring * math.max(5, width ~/ 16);
+      final left = inset.clamp(1, width - 2).toInt();
+      final right = (width - inset - 1).clamp(1, width - 2).toInt();
+      if (left >= right) continue;
+      for (var x = left; x <= right; x++) {
+        if ((x + tick ~/ 2 + ring * 3) % 7 < 5) {
+          _orange.set(x, y, '─');
+        }
+      }
+      _violet.set(left, y, '╲');
+      _violet.set(right, y, '╱');
+    }
+  }
+
+  _Point _drawCoreDistrict() {
+    final centerX = width ~/ 2;
+    final baseY = height - 2;
+    final districtWidth = math.max(20, math.min(48, width ~/ 3));
+    final left = centerX - districtWidth ~/ 2;
+    final right = centerX + districtWidth ~/ 2;
+    final roofY = math.max(12, (height * 0.64).round());
+    final shoulderY = math.min(baseY - 6, roofY + 5);
+
+    _violet.set(left, shoulderY, '╭');
+    _violet.hLine(left + 1, right - 1, shoulderY, '─');
+    _violet.set(right, shoulderY, '╮');
+    _violet.vLine(left, shoulderY + 1, baseY - 1, '│');
+    _violet.vLine(right, shoulderY + 1, baseY - 1, '│');
+    _violet.set(left, baseY, '╰');
+    _violet.hLine(left + 1, right - 1, baseY, '─');
+    _violet.set(right, baseY, '╯');
+
+    final roofLeft = left - math.min(8, width ~/ 18);
+    final roofRight = right + math.min(8, width ~/ 18);
+    final roofPath = _polyline(<_Point>[
+      _Point(roofLeft, shoulderY),
+      _Point(left + 4, roofY),
+      _Point(right - 4, roofY),
+      _Point(roofRight, shoulderY),
+    ]);
+    _stroke(_violet, roofPath);
+
+    final innerLeft = centerX - math.max(6, districtWidth ~/ 5);
+    final innerRight = centerX + math.max(6, districtWidth ~/ 5);
+    final socketY = math.max(7, roofY - 2);
+    _orange.write(centerX - 4, roofY + 2, 'CINDER');
+
+    for (var y = shoulderY + 2; y < baseY; y += 2) {
+      for (var x = left + 3; x < right - 2; x += 4) {
+        final hash = _noise(x, y, 73 + tick ~/ 8);
+        if (hash % 3 == 0) {
+          _orange.set(x, y, hash.isEven ? '·' : ':');
+        } else {
+          _violet.set(x, y, '·');
+        }
+      }
+    }
+
+    _violet.set(innerLeft, roofY, '╭');
+    _violet.hLine(innerLeft + 1, innerRight - 1, roofY, '─');
+    _violet.set(innerRight, roofY, '╮');
+    _violet.vLine(innerLeft, socketY + 1, roofY - 1, '│');
+    _violet.vLine(innerRight, socketY + 1, roofY - 1, '│');
+
+    _glow.set(centerX - 2, socketY, '╲');
+    _white.set(centerX, socketY, '*');
+    _glow.set(centerX + 2, socketY, '╱');
+
+    final platformY = math.min(baseY - 3, shoulderY + 3);
+    _structure.hLine(math.max(1, roofLeft - 8), math.min(width - 2, roofRight + 8), platformY, '═');
+    for (var x = math.max(1, roofLeft - 8); x <= math.min(width - 2, roofRight + 8); x++) {
+      if ((x + tick) % 9 == 0) _orange.set(x, platformY, '◆');
+    }
+
+    return _Point(centerX, socketY);
+  }
+
+  void _drawCableNetwork(_Point socket) {
+    if (_towerTips.isEmpty) return;
+
+    final selectedTips = <_Point>[];
+    final stride = math.max(1, _towerTips.length ~/ math.max(4, width ~/ 28));
+    for (var i = 0; i < _towerTips.length; i += stride) {
+      selectedTips.add(_towerTips[i]);
+    }
+
+    for (var i = 0; i < selectedTips.length; i++) {
+      final tip = selectedTips[i];
+      final side = tip.x < socket.x ? -1 : 1;
+      final bendY = math.max(tip.y + 2, socket.y - 8 - (i % 4) * 2);
+      final bendX = socket.x + side * (8 + (i % 3) * 5);
+      final path = _polyline(<_Point>[
+        tip,
+        _Point(tip.x, math.min(height - 2, tip.y + 3 + i % 3)),
+        _Point(bendX, bendY),
+        _Point(socket.x + side * 3, socket.y - 2),
+        socket,
+      ]);
+      if (path.length < 2) continue;
+      _cables.add(path);
+      _stroke(_violet, path, sparse: true, phase: i);
+      _animateCable(path, i);
+    }
+
+    final crossLinks = <List<_Point>>[];
+    for (var i = 1; i < selectedTips.length; i++) {
+      final left = selectedTips[i - 1];
+      final right = selectedTips[i];
+      if ((right.x - left.x).abs() > width ~/ 3) continue;
+      final y = math.max(left.y, right.y) + 2 + i % 3;
+      crossLinks.add(_polyline(<_Point>[
+        left,
+        _Point(left.x, y),
+        _Point(right.x, y),
+        right,
+      ]));
+    }
+
+    for (var i = 0; i < crossLinks.length; i++) {
+      final path = crossLinks[i];
+      _stroke(_structure, path, sparse: true, phase: i + 4);
+      if ((tick + i * 7) % 19 < 10 || surging) {
+        _drawMovingPulse(
+          path,
+          _positiveMod(tick * 3 + i * 13, math.max(1, path.length)),
+          radius: surging ? 4 : 2,
+          hot: i.isEven,
+        );
+      }
+    }
+  }
+
+  void _animateCable(List<_Point> path, int seed) {
+    final speed = surging ? 5 : 2 + (energy * 1.4).round();
+    final offset = _positiveMod(tick * speed + seed * 19, path.length);
+    _drawMovingPulse(path, offset, radius: surging ? 5 : 3, hot: seed.isEven);
+
+    if (surging || hovered) {
+      final second = _positiveMod(offset + path.length ~/ 3, path.length);
+      _drawMovingPulse(path, second, radius: 2, hot: !seed.isEven);
+    }
+  }
+
+  void _drawElectricityBetweenCables() {
+    if (_cables.length < 2) return;
+    final arcCount = surging ? math.min(8, _cables.length - 1) : math.min(3, _cables.length - 1);
+
+    for (var i = 0; i < arcCount; i++) {
+      final left = _cables[i];
+      final right = _cables[i + 1];
+      if (left.length < 4 || right.length < 4) continue;
+      final phase = _positiveMod(tick * 2 + i * 11, 100) / 100;
+      final leftIndex = (phase * (left.length - 1)).round();
+      final rightIndex = ((1 - phase * 0.65) * (right.length - 1)).round();
+      final start = left[leftIndex.clamp(0, left.length - 1).toInt()];
+      final end = right[rightIndex.clamp(0, right.length - 1).toInt()];
+      if ((start.x - end.x).abs() > math.max(22, width ~/ 4)) continue;
+      if ((start.y - end.y).abs() > math.max(12, height ~/ 3)) continue;
+      if (!surging && (tick + i * 5) % 17 > 5) continue;
+      _drawJaggedArc(start, end, seed: i * 97 + tick ~/ 2);
+    }
+  }
+
+  void _drawJaggedArc(_Point start, _Point end, {required int seed}) {
+    final segments = math.max(3, math.min(9, (start.x - end.x).abs() ~/ 4 + 3));
+    final controls = <_Point>[start];
+    for (var i = 1; i < segments; i++) {
+      final t = i / segments;
+      final x = (start.x + (end.x - start.x) * t).round();
+      final y = (start.y + (end.y - start.y) * t).round();
+      final jitter = (_noise(x, y, seed + i) % 5) - 2;
+      controls.add(_Point(x, y + jitter));
+    }
+    controls.add(end);
+    final path = _polyline(controls);
+    for (var i = 0; i < path.length; i++) {
+      final point = path[i];
+      if (i % 3 == 0) {
+        _white.set(point.x, point.y, i.isEven ? '*' : '+');
+      } else {
+        _glow.set(point.x, point.y, i.isEven ? '/' : '\\');
+      }
+      if (surging && i % 4 == 0) {
+        _pink.set(point.x - 1, point.y, '·');
+        _pink.set(point.x + 1, point.y, '·');
+      }
+    }
+  }
+
+  void _drawPlasmaColumn(_Point socket) {
+    final top = math.max(1, height ~/ 18);
+    final bottom = math.max(top + 2, socket.y - 1);
+    final centerX = socket.x;
+    final amplitude = surging ? 1.55 : hovered ? 1.2 : 1;
+
+    for (var y = bottom; y >= top; y--) {
+      final progress = (bottom - y) / math.max(1, bottom - top);
+      final plume = math.sin((y * 0.72) + tick * 0.28) * 2.2;
+      final turbulence = (_noise(centerX, y, tick ~/ 2) % 7) - 3;
+      final drift = ((plume + turbulence * 0.45) * amplitude).round();
+      final baseRadius = 2 + ((1 - progress) * math.max(2, width ~/ 36)).round();
+      final breathe = ((_noise(y, tick, 83) % 3) - 1) + (surging ? 2 : 0);
+      final radius = math.max(1, baseRadius + breathe);
+      final rowCenter = centerX + drift;
+
+      for (var x = rowCenter - radius - 2; x <= rowCenter + radius + 2; x++) {
+        final distance = (x - rowCenter).abs();
+        final heat = _noise(x, y, tick + y * 3);
+        if (distance > radius && heat % 4 != 0) continue;
+
+        if (distance == 0 || (distance <= 1 && heat % 3 != 0)) {
+          _white.set(x, y, heat.isEven ? '#' : '*');
+        } else if (distance <= math.max(1, radius ~/ 2)) {
+          _glow.set(x, y, const <String>['#', '*', '+'][heat % 3]);
+        } else if (distance <= radius) {
+          _orange.set(x, y, const <String>['*', '+', ':'][heat % 3]);
+        } else {
+          _pink.set(x, y, heat.isEven ? '·' : ':');
+        }
+      }
+
+      if ((y + tick) % 5 == 0) {
+        _pink.set(rowCenter - radius - 3, y, '·');
+        _pink.set(rowCenter + radius + 3, y, '·');
+      }
+    }
+
+    final crownY = math.max(1, top - 1);
+    _pink.set(centerX - 2, crownY + 1, '╲');
+    _white.set(centerX, crownY, '*');
+    _pink.set(centerX + 2, crownY + 1, '╱');
+  }
+
+  void _drawTraffic() {
+    final horizonY = math.max(10, (height * 0.58).round());
+    final tracks = <List<_Point>>[
+      _polyline(<_Point>[
+        _Point(0, horizonY + 2),
+        _Point(width ~/ 3, horizonY + 6),
+        _Point(width - 1, horizonY + 1),
+      ]),
+      _polyline(<_Point>[
+        _Point(width - 1, height - 4),
+        _Point(width * 2 ~/ 3, horizonY + 8),
+        _Point(0, horizonY + 5),
+      ]),
+    ];
+
+    for (var i = 0; i < tracks.length; i++) {
+      final path = tracks[i];
+      if (path.isEmpty) continue;
+      for (var vehicle = 0; vehicle < math.max(2, width ~/ 45); vehicle++) {
+        final offset = _positiveMod(
+          tick * (2 + i) + vehicle * math.max(7, path.length ~/ 4),
+          path.length,
+        );
+        final point = path[offset];
+        _white.set(point.x, point.y, i.isEven ? '>' : '<');
+        final tailIndex = _positiveMod(offset - 1 - i, path.length);
+        final tail = path[tailIndex];
+        _orange.set(tail.x, tail.y, '─');
+      }
+    }
+  }
+
+  void _drawAmbientSparks() {
+    final count = math.max(12, width * height ~/ 330);
+    for (var i = 0; i < count; i++) {
+      final seed = _noise(i, tick ~/ 2, 101);
+      final x = _positiveMod(seed * 17 + tick * (i.isEven ? 1 : -1), width);
+      final y = _positiveMod(seed * 7 - tick + i * 11, height);
+      final phase = _positiveMod(tick + i * 3, 9);
+      if (phase < 2) {
+        _white.set(x, y, phase == 0 ? '*' : '+');
+      } else if (phase < 5) {
+        _pink.set(x, y, '·');
+      } else {
+        _orange.set(x, y, '.');
+      }
+    }
+  }
+
+  void _drawDrone() {
+    if (width < 70 || height < 24) return;
+    final span = math.max(12, width - 32);
+    final travel = _positiveMod(tick, span * 2);
+    final x = travel < span ? 16 + travel : 16 + (span * 2 - travel);
+    final y = math.max(5, height ~/ 3 + (math.sin(tick * 0.13) * 3).round());
+    final facingRight = travel < span;
+    _white.write(x - 2, y, facingRight ? '─[>]' : '[<]─');
+    _orange.set(facingRight ? x - 3 : x + 3, y, '·');
+  }
+
+  void _drawMovingPulse(
+    List<_Point> path,
+    int center, {
+    required int radius,
+    required bool hot,
+  }) {
+    if (path.isEmpty) return;
+    for (var offset = -radius; offset <= radius; offset++) {
+      final point = path[_positiveMod(center + offset, path.length)];
+      final distance = offset.abs();
+      if (distance == 0) {
+        _white.set(point.x, point.y, '*');
+      } else if (distance <= 1) {
+        _glow.set(point.x, point.y, hot ? '#' : '+');
+      } else if (hot) {
+        _orange.set(point.x, point.y, distance.isEven ? ':' : '·');
+      } else {
+        _pink.set(point.x, point.y, distance.isEven ? ':' : '·');
+      }
+    }
+  }
+
+  List<_Point> _polyline(List<_Point> controls) {
+    final result = <_Point>[];
+    if (controls.isEmpty) return result;
+    result.add(controls.first);
+    for (var i = 1; i < controls.length; i++) {
+      final segment = _line(controls[i - 1], controls[i]);
+      if (segment.isNotEmpty) result.addAll(segment.skip(1));
+    }
+    return result;
+  }
+
+  List<_Point> _line(_Point start, _Point end) {
+    final points = <_Point>[];
+    var x0 = start.x;
+    var y0 = start.y;
+    final x1 = end.x;
+    final y1 = end.y;
+    final dx = (x1 - x0).abs();
+    final sx = x0 < x1 ? 1 : -1;
+    final dy = -(y1 - y0).abs();
+    final sy = y0 < y1 ? 1 : -1;
+    var error = dx + dy;
+
+    while (true) {
+      points.add(_Point(x0, y0));
+      if (x0 == x1 && y0 == y1) break;
+      final doubled = 2 * error;
+      if (doubled >= dy) {
+        error += dy;
+        x0 += sx;
+      }
+      if (doubled <= dx) {
+        error += dx;
+        y0 += sy;
+      }
+    }
+
+    return points;
+  }
+
+  void _stroke(
+    _GlyphCanvas canvas,
+    List<_Point> path, {
+    bool sparse = false,
+    int phase = 0,
+  }) {
+    for (var i = 0; i < path.length; i++) {
+      if (sparse && (i + phase + tick ~/ 4) % 6 == 0) continue;
+      final previous = i > 0 ? path[i - 1] : path[i];
+      final next = i < path.length - 1 ? path[i + 1] : path[i];
+      canvas.set(path[i].x, path[i].y, _pathGlyph(previous, next));
+    }
+  }
+
+  String _pathGlyph(_Point previous, _Point next) {
+    final dx = next.x - previous.x;
+    final dy = next.y - previous.y;
+    if (dx == 0) return '│';
+    if (dy == 0) return '─';
+    return dx.sign == dy.sign ? '╲' : '╱';
+  }
+
+  int _noise(int x, int y, int seed) {
+    var value = x * 374761393 + y * 668265263 + seed * 69069;
+    value = (value ^ (value >> 13)) * 1274126177;
+    return (value ^ (value >> 16)) & 0x7fffffff;
+  }
+
+  int _positiveMod(int value, int modulus) {
+    if (modulus <= 0) return 0;
+    final result = value % modulus;
+    return result < 0 ? result + modulus : result;
+  }
 }
 
-const _towers = <_TowerSpec>[
-  _TowerSpec(.03, .10, 2),
-  _TowerSpec(.14, .03, 0),
-  _TowerSpec(.25, .17, 4),
-  _TowerSpec(.36, .04, 1),
-  _TowerSpec(.47, .13, 3),
-  _TowerSpec(.61, .05, 2),
-  _TowerSpec(.73, .02, 1),
-  _TowerSpec(.86, .13, 4),
-  _TowerSpec(.03, .57, 5),
-  _TowerSpec(.17, .68, 3),
-  _TowerSpec(.31, .58, 0),
-  _TowerSpec(.68, .61, 5),
-  _TowerSpec(.80, .69, 0),
-  _TowerSpec(.90, .55, 2),
-];
+class _GlyphCanvas {
+  _GlyphCanvas(this.width, this.height)
+      : _rows = List<List<String>>.generate(
+          height,
+          (_) => List<String>.filled(width, ' ', growable: false),
+          growable: false,
+        );
+
+  final int width;
+  final int height;
+  final List<List<String>> _rows;
+
+  void set(int x, int y, String glyph) {
+    if (x < 0 || x >= width || y < 0 || y >= height || glyph.isEmpty) return;
+    _rows[y][x] = glyph;
+  }
+
+  void write(int x, int y, String text) {
+    for (var index = 0; index < text.length; index++) {
+      set(x + index, y, text[index]);
+    }
+  }
+
+  void hLine(int startX, int endX, int y, String glyph) {
+    final left = math.min(startX, endX);
+    final right = math.max(startX, endX);
+    for (var x = left; x <= right; x++) {
+      set(x, y, glyph);
+    }
+  }
+
+  void vLine(int x, int startY, int endY, String glyph) {
+    final top = math.min(startY, endY);
+    final bottom = math.max(startY, endY);
+    for (var y = top; y <= bottom; y++) {
+      set(x, y, glyph);
+    }
+  }
+
+  String build() {
+    return _rows.map((row) {
+      return row.join().replaceFirst(RegExp(r'\s+$'), '');
+    }).join('\n');
+  }
+}
+
+class _Point {
+  const _Point(this.x, this.y);
+
+  final int x;
+  final int y;
+}
+
+class _WorldFrame {
+  const _WorldFrame({
+    required this.stars,
+    required this.depth,
+    required this.structure,
+    required this.violet,
+    required this.orange,
+    required this.pink,
+    required this.glow,
+    required this.white,
+  });
+
+  final String stars;
+  final String depth;
+  final String structure;
+  final String violet;
+  final String orange;
+  final String pink;
+  final String glow;
+  final String white;
+}
 
 abstract class _Palette {
-  static const Color voidBlack = Color.fromRGB(3, 4, 9);
-  static const Color panel = Color.fromRGB(6, 7, 14);
-  static const Color selectionSurface = Color.fromRGB(18, 10, 25);
-
-  static const Color white = Color.fromRGB(239, 235, 246);
-  static const Color labelBright = Color.fromRGB(188, 181, 201);
-  static const Color label = Color.fromRGB(112, 105, 127);
-  static const Color panelLine = Color.fromRGB(104, 83, 123);
-
-  static const Color violetBright = Color.fromRGB(203, 95, 255);
-  static const Color violet = Color.fromRGB(160, 67, 226);
+  static const Color voidBlack = Color.fromRGB(2, 3, 8);
+  static const Color star = Color.fromRGB(75, 42, 96);
+  static const Color depth = Color.fromRGB(50, 34, 73);
   static const Color violetDim = Color.fromRGB(91, 48, 132);
-  static const Color grid = Color.fromRGB(39, 27, 54);
-  static const Color star = Color.fromRGB(103, 59, 135);
-
-  static const Color pink = Color.fromRGB(255, 65, 181);
-  static const Color pinkDim = Color.fromRGB(133, 38, 99);
-  static const Color orangeBright = Color.fromRGB(255, 188, 66);
-  static const Color orange = Color.fromRGB(255, 132, 35);
-  static const Color orangeDim = Color.fromRGB(151, 76, 28);
-  static const Color green = Color.fromRGB(113, 222, 139);
+  static const Color violetBright = Color.fromRGB(190, 84, 246);
+  static const Color pink = Color.fromRGB(255, 62, 184);
+  static const Color orange = Color.fromRGB(232, 105, 27);
+  static const Color orangeBright = Color.fromRGB(255, 174, 56);
+  static const Color white = Color.fromRGB(255, 241, 224);
 }
