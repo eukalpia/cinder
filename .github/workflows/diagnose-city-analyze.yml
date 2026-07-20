@@ -1,0 +1,38 @@
+name: Diagnose city analyze
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - example/web_showcase.dart
+      - .github/workflows/diagnose-city-analyze.yml
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout pull request
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Install stable Dart
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+      - name: Capture analyzer output
+        run: |
+          mkdir -p /tmp/city-analyze
+          dart pub get > /tmp/city-analyze/pub-get.txt 2>&1
+          set +e
+          dart analyze --fatal-infos > /tmp/city-analyze/analyze.txt 2>&1
+          echo "$?" > /tmp/city-analyze/exit-code.txt
+          set -e
+      - name: Upload analyzer diagnostic
+        uses: actions/upload-artifact@v4
+        with:
+          name: city-analyze-diagnostic
+          path: /tmp/city-analyze
+          if-no-files-found: error
