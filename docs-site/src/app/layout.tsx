@@ -2,6 +2,7 @@ import '@xterm/xterm/css/xterm.css';
 import './globals.css';
 import './tui.css';
 import './control-room.css';
+import './city-runtime.css';
 import './site-polish.css';
 import './site-polish-fixes.css';
 import './a11y.css';
@@ -79,7 +80,7 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   colorScheme: 'dark',
-  themeColor: '#05070b',
+  themeColor: '#030409',
   width: 'device-width',
   initialScale: 1,
 };
