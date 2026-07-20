@@ -10,7 +10,6 @@ import {
   examples,
   runnableExamples,
 } from '@/lib/examples';
-import { withBasePath } from '@/lib/site';
 
 const showcaseSource = `import 'package:cinder/cinder.dart';
 
@@ -183,13 +182,14 @@ export default function HomePage() {
               <h2>The artwork becomes the runtime.</h2>
               <p>
                 The fixed city above preserves the composition from the reference.
-                The live city beside it is built from Cinder widgets, layout, focus,
-                gestures, mouse regions, timers, terminal cells, and WebBackend.
+                Open the live city beside it to control a Dart application built from
+                Cinder widgets, layout, focus, gestures, timers, terminal cells, and
+                WebBackend.
               </p>
               <div className="control-live-runtime__facts">
                 <span>Source <b>{featured.repositoryPath}</b></span>
                 <span>Mode <b>{featured.runtimeMode}</b></span>
-                <span>Isolation <b>iframe document</b></span>
+                <span>Runtime <b>isolated document</b></span>
                 <span>Backend <b>WebBackend</b></span>
                 <span>Move <b>arrow keys</b></span>
                 <span>Nodes <b>Tab + Enter</b></span>
@@ -197,20 +197,56 @@ export default function HomePage() {
                 <span>Pause <b>Space</b></span>
               </div>
             </article>
-            <iframe
-              title={`${featured.title} interactive Cinder runtime`}
-              src={withBasePath('/city/')}
+            <Link
+              href={`/play/${featured.slug}`}
               className="control-live-runtime__frame"
-              loading="eager"
+              aria-label="Open the interactive Cinder cyber city"
               style={{
-                display: 'block',
-                width: '100%',
+                position: 'relative',
+                display: 'grid',
                 minWidth: 0,
-                height: '560px',
+                minHeight: '560px',
+                overflow: 'hidden',
                 border: '1px solid var(--tui-line)',
                 background: '#030409',
               }}
-            />
+            >
+              <HeroCity />
+              <span
+                aria-hidden="true"
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  background:
+                    'linear-gradient(180deg, transparent 35%, rgba(3, 4, 9, 0.22) 60%, rgba(3, 4, 9, 0.94) 100%)',
+                }}
+              />
+              <span
+                style={{
+                  position: 'absolute',
+                  right: '18px',
+                  bottom: '18px',
+                  left: '18px',
+                  display: 'grid',
+                  gap: '8px',
+                  padding: '14px 16px',
+                  border: '1px solid rgba(255, 132, 35, 0.55)',
+                  background: 'rgba(3, 4, 9, 0.9)',
+                  fontFamily: 'var(--tui-mono)',
+                  boxShadow: '0 0 34px rgba(203, 95, 255, 0.16)',
+                }}
+              >
+                <small style={{ color: '#7ee28e', letterSpacing: '0.08em' }}>
+                  ● CINDER WEB READY
+                </small>
+                <strong style={{ color: '#ff8423', fontSize: '16px' }}>
+                  OPEN INTERACTIVE CITY ↗
+                </strong>
+                <small style={{ color: '#8f879a' }}>
+                  Mouse · arrows · Tab · Enter · D · E · Space · R
+                </small>
+              </span>
+            </Link>
           </section>
         ) : null}
 
