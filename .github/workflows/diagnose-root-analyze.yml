@@ -6,6 +6,11 @@ on:
       - feature/cinder-web-city-runtime
     paths:
       - .github/workflows/diagnose-root-analyze.yml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .github/workflows/diagnose-root-analyze.yml
 
 permissions:
   contents: read
@@ -14,10 +19,8 @@ jobs:
   diagnose:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout branch
+      - name: Checkout pull request
         uses: actions/checkout@v6
-        with:
-          ref: feature/cinder-web-city-runtime
       - name: Install stable Dart
         uses: dart-lang/setup-dart@v1
         with:
