@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import { cinderVersion } from '@/lib/examples';
 import { withBasePath } from '@/lib/site';
@@ -13,7 +14,14 @@ export function SiteHeader() {
   return (
     <header className="site-header site-header--tui">
       <Link href="/" className="site-brand" aria-label="Cinder home">
-        <img src={withBasePath('/cinder-logo.png')} alt="Cinder" />
+        <Image
+          src={withBasePath('/cinder-logo.png')}
+          alt="Cinder"
+          width={142}
+          height={38}
+          priority
+          unoptimized
+        />
         <span className="site-brand__name">Cinder</span>
       </Link>
 
