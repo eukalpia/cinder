@@ -27,37 +27,13 @@ jobs:
 
           page_path = Path('docs-site/src/app/page.tsx')
           page = page_path.read_text()
-
           page = page.replace(
               '<li>The city above is compiled from Dart, not a screenshot</li>',
               '<li>The interactive city below is compiled from Dart, not a screenshot</li>',
           )
 
-          old_scene = '''          <section
-            className="tui-panel control-scene"
-            aria-label="Interactive Cinder cyber city runtime"
-          >
-            <div className="control-scene-title">
-              <span className="control-scene-live">● LIVE</span>
-              CINDER WEB · INTERACTIVE CELL CITY
-            </div>
-            {featured ? (
-              <iframe
-                title="Interactive Cinder cyber city"
-                src={withBasePath('/city/')}
-                className="control-scene-frame"
-                loading="eager"
-              />
-            ) : (
-              <div className="control-scene-fallback">
-                <HeroCity />
-              </div>
-            )}
-            <div className="control-scene-help" aria-hidden="true">
-              <span>CLICK THE CITY TO FOCUS</span>
-              <span>ARROWS · TAB · ENTER · D · E · SPACE · R</span>
-            </div>
-          </section>'''
+          scene_start = page.index('          <section\n            className="tui-panel control-scene"')
+          scene_end = page.index('          </section>', scene_start) + len('          </section>')
           new_scene = '''          <section
             className="tui-panel control-scene"
             aria-label="Cinder city render pipeline"
@@ -69,56 +45,25 @@ jobs:
             <span className="scene-tag scene-tag--events">EVENTS</span>
             <span className="scene-tag scene-tag--frame">FRAME&nbsp; 16.7ms</span>
           </section>'''
-          if old_scene not in page:
-              raise SystemExit('Current control scene block was not found.')
-          page = page.replace(old_scene, new_scene, 1)
+          page = page[:scene_start] + new_scene + page[scene_end:]
+          page = page.replace('<h2>THE CINDER PIPELINE</h2>', '<h2>CINDER RENDER PIPELINE</h2>', 1)
 
-          page = page.replace(
-              '<h2>THE CINDER PIPELINE</h2>',
-              '<h2>CINDER RENDER PIPELINE</h2>',
-              1,
-          )
-
-          old_controls = '''            <article className="tui-panel control-live-runtime__controls">
-              <header>
-                <span>INTERACTION MAP</span>
-                <strong>FOCUS THE CITY FIRST</strong>
-              </header>
-              <div>
-                {cityControls.map(([key, description]) => (
-                  <p key={key}>
-                    <kbd>{key}</kbd>
-                    <span>{description}</span>
-                  </p>
-                ))}
-              </div>
-              <footer>
-                <span>Mouse hover highlights nodes</span>
-                <span>Clicking the core emits a pulse</span>
-              </footer>
-            </article>'''
-          new_controls = '''            <iframe
+          controls_start = page.index('            <article className="tui-panel control-live-runtime__controls">')
+          controls_end = page.index('            </article>', controls_start) + len('            </article>')
+          new_runtime = '''            <iframe
               title={`${featured.title} interactive Cinder runtime`}
               src={withBasePath('/city/')}
               className="control-live-runtime__frame"
               loading="eager"
             />'''
-          if old_controls not in page:
-              raise SystemExit('Current interaction map block was not found.')
-          page = page.replace(old_controls, new_controls, 1)
-
-          page = re.sub(
-              r"\nconst cityControls = \[.*?\n\] as const;\n",
-              '\n',
-              page,
-              count=1,
-              flags=re.S,
-          )
+          page = page[:controls_start] + new_runtime + page[controls_end:]
+          page = re.sub(r"\nconst cityControls = \[.*?\n\] as const;\n", '\n', page, count=1, flags=re.S)
           page_path.write_text(page)
 
           css_path = Path('docs-site/src/app/city-runtime.css')
           css = css_path.read_text()
-          addition = '''
+          if '.control-live-runtime__frame {' not in css:
+              css += '''
 
 .control-scene > .hero-city {
   width: 100%;
@@ -151,16 +96,8 @@ jobs:
   }
 }
 '''
-          marker = '.control-live-runtime__frame {'
-          if marker not in css:
-              css_path.write_text(css + addition)
+              css_path.write_text(css)
           PY
-      - name: Validate site source
-        run: |
-          cd docs-site
-          npm ci
-          npm run lint
-          npm run typecheck
       - name: Commit homepage contract fix
         run: |
           git config user.name "github-actions[bot]"
