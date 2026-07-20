@@ -283,9 +283,9 @@ class _ElectricCityPainter {
 
     for (var x = 3; x < width - 3; x += spacing) {
       final seed = _noise(x, baseY, 11);
-      final buildingWidth = 7 + seed % math.max(3, spacing - 5);
-      final buildingHeight = 7 + seed % math.max(6, height ~/ 4);
-      final center = math.min(width - 4, x + buildingWidth ~/ 2);
+      final buildingWidth = 7 + seed % math.max(3, spacing - 5).toInt();
+      final buildingHeight = 7 + seed % math.max(6, height ~/ 4).toInt();
+      final center = math.min(width - 4, x + buildingWidth ~/ 2).toInt();
       _drawTower(
         centerX: center,
         baseY: baseY + seed % 3,
@@ -307,7 +307,7 @@ class _ElectricCityPainter {
     for (var x = -2; x < width + 4; x += spacing) {
       final seed = _noise(x + 19, baseY, 29);
       final buildingWidth = 10 + seed % 7;
-      final buildingHeight = 10 + seed % math.max(8, height ~/ 3);
+      final buildingHeight = 10 + seed % math.max(8, height ~/ 3).toInt();
       final center = x + buildingWidth ~/ 2;
       final tip = _drawTower(
         centerX: center,
@@ -326,7 +326,7 @@ class _ElectricCityPainter {
   void _drawForegroundCity() {
     final baseY = height - 1;
     final centerX = width ~/ 2;
-    final exclusion = math.max(18, width ~/ 7);
+    final exclusion = math.max(18, width ~/ 7).toInt();
     final spacing = width < 110 ? 18 : 23;
 
     for (var x = -4; x < width + 4; x += spacing) {
@@ -334,7 +334,7 @@ class _ElectricCityPainter {
       if ((center - centerX).abs() < exclusion) continue;
       final seed = _noise(center, baseY, 47);
       final towerWidth = 12 + seed % 9;
-      final towerHeight = 11 + seed % math.max(8, height ~/ 3);
+      final towerHeight = 11 + seed % math.max(8, height ~/ 3).toInt();
       final tip = _drawTower(
         centerX: center,
         baseY: baseY,
@@ -511,11 +511,11 @@ class _ElectricCityPainter {
   _Point _drawCoreDistrict() {
     final centerX = width ~/ 2;
     final baseY = height - 2;
-    final districtWidth = math.max(20, math.min(48, width ~/ 3));
+    final districtWidth = math.max(20, math.min(48, width ~/ 3)).toInt();
     final left = centerX - districtWidth ~/ 2;
     final right = centerX + districtWidth ~/ 2;
-    final roofY = math.max(12, (height * 0.64).round());
-    final shoulderY = math.min(baseY - 6, roofY + 5);
+    final roofY = math.max(12, (height * 0.64).round()).toInt();
+    final shoulderY = math.min(baseY - 6, roofY + 5).toInt();
 
     _violet.set(left, shoulderY, '╭');
     _violet.hLine(left + 1, right - 1, shoulderY, '─');
@@ -526,8 +526,8 @@ class _ElectricCityPainter {
     _violet.hLine(left + 1, right - 1, baseY, '─');
     _violet.set(right, baseY, '╯');
 
-    final roofLeft = left - math.min(8, width ~/ 18);
-    final roofRight = right + math.min(8, width ~/ 18);
+    final roofLeft = left - math.min(8, width ~/ 18).toInt();
+    final roofRight = right + math.min(8, width ~/ 18).toInt();
     final roofPath = _polyline(<_Point>[
       _Point(roofLeft, shoulderY),
       _Point(left + 4, roofY),
@@ -536,9 +536,9 @@ class _ElectricCityPainter {
     ]);
     _stroke(_violet, roofPath);
 
-    final innerLeft = centerX - math.max(6, districtWidth ~/ 5);
-    final innerRight = centerX + math.max(6, districtWidth ~/ 5);
-    final socketY = math.max(7, roofY - 2);
+    final innerLeft = centerX - math.max(6, districtWidth ~/ 5).toInt();
+    final innerRight = centerX + math.max(6, districtWidth ~/ 5).toInt();
+    final socketY = math.max(7, roofY - 2).toInt();
     _orange.write(centerX - 4, roofY + 2, 'CINDER');
 
     for (var y = shoulderY + 2; y < baseY; y += 2) {
@@ -562,12 +562,11 @@ class _ElectricCityPainter {
     _white.set(centerX, socketY, '*');
     _glow.set(centerX + 2, socketY, '╱');
 
-    final platformY = math.min(baseY - 3, shoulderY + 3);
-    _structure.hLine(math.max(1, roofLeft - 8),
-        math.min(width - 2, roofRight + 8), platformY, '═');
-    for (var x = math.max(1, roofLeft - 8);
-        x <= math.min(width - 2, roofRight + 8);
-        x++) {
+    final platformY = math.min(baseY - 3, shoulderY + 3).toInt();
+    final platformLeft = math.max(1, roofLeft - 8).toInt();
+    final platformRight = math.min(width - 2, roofRight + 8).toInt();
+    _structure.hLine(platformLeft, platformRight, platformY, '═');
+    for (var x = platformLeft; x <= platformRight; x++) {
       if ((x + tick) % 9 == 0) _orange.set(x, platformY, '◆');
     }
 
@@ -578,7 +577,12 @@ class _ElectricCityPainter {
     if (_towerTips.isEmpty) return;
 
     final selectedTips = <_Point>[];
-    final stride = math.max(1, _towerTips.length ~/ math.max(4, width ~/ 28));
+    final stride = math
+        .max(
+          1,
+          _towerTips.length ~/ math.max(4, width ~/ 28).toInt(),
+        )
+        .toInt();
     for (var i = 0; i < _towerTips.length; i += stride) {
       selectedTips.add(_towerTips[i]);
     }
@@ -586,7 +590,12 @@ class _ElectricCityPainter {
     for (var i = 0; i < selectedTips.length; i++) {
       final tip = selectedTips[i];
       final side = tip.x < socket.x ? -1 : 1;
-      final bendY = math.max(tip.y + 2, socket.y - 8 - (i % 4) * 2);
+      final bendY = math
+          .max(
+            tip.y + 2,
+            socket.y - 8 - (i % 4) * 2,
+          )
+          .toInt();
       final bendX = socket.x + side * (8 + (i % 3) * 5);
       final path = _polyline(<_Point>[
         tip,
