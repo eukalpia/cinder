@@ -28,7 +28,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
   pages: write
   id-token: write
 
@@ -51,80 +51,6 @@ jobs:
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
-
-      - name: Apply non-erasing living-city compositor
-        if: github.event_name == 'pull_request' && github.head_ref == 'feature/cinder-web-city-runtime'
-        shell: bash
-        run: |
-          git checkout feature/cinder-web-city-runtime
-          git pull --ff-only origin feature/cinder-web-city-runtime
-          python3 - <<'PY'
-          from pathlib import Path
-
-          source_path = Path('example/web_showcase.dart')
-          source = source_path.read_text(encoding='utf-8')
-          if 'text: frame.toTextSpan()' in source:
-              print('Living-city compositor is already applied.')
-              raise SystemExit(0)
-
-          donor = Path('.github/workflows/fix-living-city-compositing.yml').read_text(
-              encoding='utf-8'
-          )
-          world_frame = donor.split("          world_frame = '''", 1)[1].split(
-              "'''\n          world_pattern", 1
-          )[0]
-
-          render_start = source.index(
-              '              return Container(\n'
-              '                color: _Palette.voidBlack,\n'
-              '                child: Stack('
-          )
-          render_end_marker = '              );\n            },'
-          render_end = source.index(render_end_marker, render_start) + len(
-              render_end_marker
-          )
-          source = (
-              source[:render_start]
-              + '''              return Container(
-                color: _Palette.voidBlack,
-                child: RichText(
-                  text: frame.toTextSpan(),
-                  softWrap: false,
-                  overflow: TextOverflow.clip,
-                ),
-              );
-            },'''
-              + source[render_end:]
-          )
-
-          layer_start = source.index('  Widget _layer(')
-          handle_start = source.index('  bool _handleKey', layer_start)
-          source = source[:layer_start] + source[handle_start:]
-
-          source = source.replace(
-              '''    return _WorldFrame(
-      stars: _stars.build(),''',
-              '''    return _WorldFrame(
-      width: width,
-      height: height,
-      stars: _stars.build(),''',
-              1,
-          )
-
-          world_start = source.index('class _WorldFrame {')
-          palette_start = source.index('abstract class _Palette', world_start)
-          source = source[:world_start] + world_frame + '\n\n' + source[palette_start:]
-          source_path.write_text(source, encoding='utf-8')
-          PY
-          dart format example/web_showcase.dart
-          if git diff --quiet -- example/web_showcase.dart; then
-            exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add example/web_showcase.dart
-          git commit -m "fix(web): composite the living city without erasing layers"
-          git push origin HEAD:feature/cinder-web-city-runtime
 
       - name: Install Dart
         uses: dart-lang/setup-dart@v1
