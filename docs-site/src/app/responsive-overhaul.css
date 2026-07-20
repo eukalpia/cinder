@@ -37,7 +37,7 @@ code {
 
 .tui-frame,
 .marketing-shell {
-  width: min(calc(100% - 2 * var(--cinder-gutter)), var(--cinder-shell));
+  width: min(100%, var(--cinder-shell));
   max-width: none;
   margin-inline: auto;
 }
@@ -440,10 +440,10 @@ code {
   position: absolute;
   top: var(--y);
   left: var(--x);
-  width: calc(1px + var(--glow) * 0.35px);
-  height: calc(1px + var(--glow) * 0.35px);
+  width: 2px;
+  height: 2px;
   background: #cf6aff;
-  box-shadow: 0 0 calc(var(--glow) * 2px) #cf6aff;
+  box-shadow: 0 0 8px #cf6aff;
 }
 
 .preview-city pre {
@@ -527,7 +527,7 @@ code {
 
 /* Example details: runtime gets the space, metadata stays useful. */
 .example-page .marketing-shell {
-  width: min(calc(100% - 2 * var(--cinder-gutter)), var(--cinder-shell));
+  width: min(100%, var(--cinder-shell));
 }
 
 .example-detail-hero {
