@@ -1,0 +1,41 @@
+name: Diagnose living city
+
+on:
+  push:
+    branches:
+      - feature/cinder-web-city-runtime
+    paths:
+      - .github/workflows/diagnose-living-city.yml
+
+permissions:
+  contents: write
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout feature branch
+        uses: actions/checkout@v6
+        with:
+          ref: feature/cinder-web-city-runtime
+          fetch-depth: 0
+      - name: Install Dart
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+      - name: Capture analyzer output
+        run: |
+          git pull --ff-only origin feature/cinder-web-city-runtime
+          dart pub get
+          set +e
+          dart analyze --fatal-infos > .github/living-city-analyze.txt 2>&1
+          echo "exit_code=$?" >> .github/living-city-analyze.txt
+          set -e
+      - name: Commit diagnostics
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .github/living-city-analyze.txt
+          git commit -m "chore: capture living city analyzer diagnostics"
+          git push origin HEAD:feature/cinder-web-city-runtime
