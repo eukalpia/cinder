@@ -1,0 +1,39 @@
+name: Diagnose city formatting
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - example/web_showcase.dart
+      - .github/workflows/diagnose-city-format.yml
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout pull request
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Install stable Dart
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+      - name: Capture formatter output
+        run: |
+          mkdir -p /tmp/city-format
+          cp example/web_showcase.dart /tmp/city-format/before.dart
+          dart --version > /tmp/city-format/dart-version.txt 2>&1
+          dart format example/web_showcase.dart > /tmp/city-format/formatter-output.txt 2>&1
+          cp example/web_showcase.dart /tmp/city-format/after.dart
+          git diff -- example/web_showcase.dart > /tmp/city-format/format.diff
+          git diff --name-only > /tmp/city-format/changed-files.txt
+      - name: Upload formatter diagnostic
+        uses: actions/upload-artifact@v4
+        with:
+          name: city-format-diagnostic
+          path: /tmp/city-format
+          if-no-files-found: error
