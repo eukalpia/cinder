@@ -22,18 +22,30 @@ jobs:
         uses: dart-lang/setup-dart@v1
         with:
           sdk: stable
-      - name: Capture formatter output
+      - name: Reproduce CI formatter step exactly
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
           mkdir -p /tmp/city-format
-          cp example/web_showcase.dart /tmp/city-format/before.dart
           dart --version > /tmp/city-format/dart-version.txt 2>&1
-          dart format example/web_showcase.dart > /tmp/city-format/formatter-output.txt 2>&1
+          dart pub get > /tmp/city-format/pub-get.txt 2>&1
+          base="$BASE_SHA"
+          mapfile -t files < <(git diff --name-only --diff-filter=ACMR "$base" HEAD | grep -E '^(lib|test|example|benchmark)/.*\.dart$' || true)
+          printf '%s\n' "${files[@]}" > /tmp/city-format/selected-files.txt
+          git status --short > /tmp/city-format/status-before.txt
+          git diff > /tmp/city-format/diff-before.txt
+          set +e
+          dart format "${files[@]}" > /tmp/city-format/formatter-output.txt 2>&1
+          echo "$?" > /tmp/city-format/formatter-exit-code.txt
+          git diff --exit-code -- "${files[@]}" > /tmp/city-format/diff-exit-output.txt 2>&1
+          echo "$?" > /tmp/city-format/diff-exit-code.txt
+          set -e
+          git status --short > /tmp/city-format/status-after.txt
+          git diff > /tmp/city-format/diff-after.txt
           cp example/web_showcase.dart /tmp/city-format/after.dart
-          git diff -- example/web_showcase.dart > /tmp/city-format/format.diff
-          git diff --name-only > /tmp/city-format/changed-files.txt
       - name: Upload formatter diagnostic
         uses: actions/upload-artifact@v4
         with:
-          name: city-format-diagnostic
+          name: city-format-diagnostic-exact
           path: /tmp/city-format
           if-no-files-found: error
