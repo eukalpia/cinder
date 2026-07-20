@@ -1,38 +1,49 @@
-name: Diagnose city analyze
+name: Fix city analyzer issues
 
 on:
-  pull_request:
-    branches: [main]
+  push:
+    branches:
+      - feature/cinder-web-city-runtime
     paths:
-      - example/web_showcase.dart
       - .github/workflows/diagnose-city-analyze.yml
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  diagnose:
+  fix:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout pull request
+      - name: Checkout branch
         uses: actions/checkout@v6
         with:
+          ref: feature/cinder-web-city-runtime
           fetch-depth: 0
       - name: Install stable Dart
         uses: dart-lang/setup-dart@v1
         with:
           sdk: stable
-      - name: Capture analyzer output
+      - name: Resolve dependencies
+        run: dart pub get
+      - name: Add required flow-control blocks
         run: |
-          mkdir -p /tmp/city-analyze
-          dart pub get > /tmp/city-analyze/pub-get.txt 2>&1
-          set +e
-          dart analyze --fatal-infos > /tmp/city-analyze/analyze.txt 2>&1
-          echo "$?" > /tmp/city-analyze/exit-code.txt
-          set -e
-      - name: Upload analyzer diagnostic
-        uses: actions/upload-artifact@v4
-        with:
-          name: city-analyze-diagnostic
-          path: /tmp/city-analyze
-          if-no-files-found: error
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('example/web_showcase.dart')
+          source = path.read_text()
+          old = """        if (x1 >= 0 && x1 < width && y1 >= 0 && y1 < height)\n          grid[y1][x1] = char;\n        if (x1 >= 0 && x1 < width && y2 >= 0 && y2 < height)\n          grid[y2][x1] = char;\n"""
+          new = """        if (x1 >= 0 && x1 < width && y1 >= 0 && y1 < height) {\n          grid[y1][x1] = char;\n        }\n        if (x1 >= 0 && x1 < width && y2 >= 0 && y2 < height) {\n          grid[y2][x1] = char;\n        }\n"""
+          if old not in source:
+              raise SystemExit('Expected halo statements were not found.')
+          path.write_text(source.replace(old, new, 1))
+          PY
+          dart format example/web_showcase.dart
+          dart analyze --fatal-infos
+      - name: Commit analyzer fix
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add example/web_showcase.dart
+          git commit -m "fix(web): satisfy city analyzer rules"
+          git push origin HEAD:feature/cinder-web-city-runtime
