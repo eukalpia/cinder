@@ -74,12 +74,6 @@ jobs:
           )
           path.write_text(source, encoding='utf-8')
           PY
-      - name: Validate test source
-        run: |
-          cd docs-site
-          npm ci
-          npm run lint
-          npm run typecheck
       - name: Commit browser contract
         run: |
           git config user.name "github-actions[bot]"
@@ -87,3 +81,9 @@ jobs:
           git add docs-site/tests/browser/site.spec.ts
           git commit -m "test(web): validate the living Cinder hero runtime"
           git push origin HEAD:feature/cinder-web-city-runtime
+      - name: Validate test source
+        run: |
+          cd docs-site
+          npm ci
+          npm run lint
+          npm run typecheck
