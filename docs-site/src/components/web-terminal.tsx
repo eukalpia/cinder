@@ -207,7 +207,7 @@ export function WebTerminal({
             host.dataset.guestLoaded = 'true';
             setStatus('running');
             scheduleFit(true);
-            if (window.top === window.self) terminal.focus();
+            terminal.focus();
           }
         };
         guestScript.onerror = () => {
