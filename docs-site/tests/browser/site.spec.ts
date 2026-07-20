@@ -57,7 +57,7 @@ test('homepage presents a fixed terminal city and a separate live runtime', asyn
   await expect(page.getByText('CINDER RENDER PIPELINE').first()).toBeVisible();
   await expect(page.getByText('WEB RUNTIME AVAILABLE')).toBeVisible();
   await expect(page.locator('.hero-city')).toBeVisible();
-  await expect(page.locator('.hero-city__tone--f')).toBeVisible();
+  await expect(page.locator('.hero-city__tone--f').first()).toBeVisible();
   await expect(page.locator('.control-live-runtime__frame')).toBeVisible();
   await expect(page.locator('.control-scene iframe')).toHaveCount(0);
 
