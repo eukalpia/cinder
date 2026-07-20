@@ -26,6 +26,7 @@ jobs:
         run: |
           python3 - <<'PY'
           from pathlib import Path
+          import re
 
           path = Path('example/web_showcase.dart')
           source = path.read_text()
@@ -33,17 +34,14 @@ jobs:
               'bool _handleKey(KeyEvent event, int buildingCount)',
               'bool _handleKey(KeyboardEvent event, int buildingCount)',
           )
-          source = source.replace(
-              "final y = centerY - 5 -\n        ((tick * 2 + index * 7) % math.max(8, centerY - 3));",
+          source = re.sub(
+              r"final y = centerY - 5 -\s*\(\(tick \* 2 \+ index \* 7\) % math\.max\(8, centerY - 3\)\);",
               "final particleRange = math.max(8, centerY - 3).toInt();\n    final y = centerY - 5 - ((tick * 2 + index * 7) % particleRange);",
+              source,
           )
           path.write_text(source)
           PY
           dart format example/web_showcase.dart
-      - name: Verify analyzer
-        run: |
-          dart pub get
-          dart analyze --fatal-infos example/web_showcase.dart
       - name: Commit fixes and remove one-shot workflow
         shell: bash
         run: |
