@@ -131,7 +131,9 @@ export function WebTerminal({
             lastColumns = proposed.cols;
             lastRows = proposed.rows;
             terminal.resize(proposed.cols, proposed.rows);
-            bridge && updateBridgeGeometry(bridge, host, proposed.cols, proposed.rows);
+            if (bridge) {
+              updateBridgeGeometry(bridge, host, proposed.cols, proposed.rows);
+            }
           } catch {
             // Hidden tabs and freshly mounted iframes can report zero geometry.
           }
