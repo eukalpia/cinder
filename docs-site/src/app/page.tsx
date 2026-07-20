@@ -69,19 +69,9 @@ const guarantees = [
 
 const realWorld = [
   'Runs in xterm, iTerm2, Windows Terminal, Kitty, and WezTerm',
-  'The hero is a real Cinder application hosted through xterm.js',
+  'The interactive city is a real Cinder application hosted through xterm.js',
   'Handles resize, focus, pointer events, keyboard input, and teardown',
   'Generated examples are compiled from repository Dart source',
-] as const;
-
-const cityControls = [
-  ['ARROWS', 'Move the Cinder drone through the city'],
-  ['TAB', 'Select the next render node'],
-  ['ENTER / CLICK', 'Wake or suspend the selected tower'],
-  ['D', 'Toggle animated damage-region traces'],
-  ['E', 'Expand or collapse the event ledger'],
-  ['SPACE', 'Pause or resume the city clock'],
-  ['R', 'Restore the initial runtime state'],
 ] as const;
 
 export default function HomePage() {
@@ -111,7 +101,7 @@ export default function HomePage() {
               <li>Same declarative model you know</li>
               <li>Runs in any terminal or the browser</li>
               <li>Real frame scheduling, layout, paint, damage, and diff</li>
-              <li>The city above is compiled from Dart, not a screenshot</li>
+              <li>The interactive city below is compiled from Dart, not a screenshot</li>
             </ul>
             <div className="control-install">
               <strong>› INSTALL</strong>
@@ -125,28 +115,14 @@ export default function HomePage() {
 
           <section
             className="tui-panel control-scene"
-            aria-label="Interactive Cinder cyber city runtime"
+            aria-label="Cinder city render pipeline"
           >
-            <div className="control-scene-title">
-              <span className="control-scene-live">● LIVE</span>
-              CINDER WEB · INTERACTIVE CELL CITY
-            </div>
-            {featured ? (
-              <iframe
-                title="Interactive Cinder cyber city"
-                src={withBasePath('/city/')}
-                className="control-scene-frame"
-                loading="eager"
-              />
-            ) : (
-              <div className="control-scene-fallback">
-                <HeroCity />
-              </div>
-            )}
-            <div className="control-scene-help" aria-hidden="true">
-              <span>CLICK THE CITY TO FOCUS</span>
-              <span>ARROWS · TAB · ENTER · D · E · SPACE · R</span>
-            </div>
+            <div className="control-scene-title">CINDER RENDER PIPELINE</div>
+            <HeroCity />
+            <span className="scene-tag scene-tag--state">STATE<br />▣▣▣</span>
+            <span className="scene-tag scene-tag--diff">DIFF<br />▣▣▣</span>
+            <span className="scene-tag scene-tag--events">EVENTS</span>
+            <span className="scene-tag scene-tag--frame">FRAME&nbsp; 16.7ms</span>
           </section>
 
           <aside className="control-side">
@@ -188,7 +164,7 @@ export default function HomePage() {
         </section>
 
         <section className="control-pipeline" aria-label="The Cinder pipeline">
-          <h2>THE CINDER PIPELINE</h2>
+          <h2>CINDER RENDER PIPELINE</h2>
           <div>
             {pipelineStages.map(([icon, title, description], index) => (
               <article key={title}>
@@ -201,41 +177,40 @@ export default function HomePage() {
         </section>
 
         {featured ? (
-          <section className="control-live-runtime" aria-label="Cinder city controls">
+          <section className="control-live-runtime" aria-label="Interactive Cinder web runtime">
             <article className="tui-panel control-live-runtime__meta">
               <p className="kicker">REAL CINDER APPLICATION</p>
-              <h2>The artwork is the runtime.</h2>
+              <h2>The artwork becomes the runtime.</h2>
               <p>
-                The cyber city at the top is built from Cinder widgets, layout,
-                focus, gestures, mouse regions, timers, terminal cells, and the
-                WebBackend. It runs in its own document so its global scheduler,
-                input router, and terminal bridge cannot collide with another app.
+                The fixed city above preserves the composition from the reference.
+                The live city beside it is built from Cinder widgets, layout, focus,
+                gestures, mouse regions, timers, terminal cells, and WebBackend.
               </p>
               <div className="control-live-runtime__facts">
                 <span>Source <b>{featured.repositoryPath}</b></span>
                 <span>Mode <b>{featured.runtimeMode}</b></span>
                 <span>Isolation <b>iframe document</b></span>
                 <span>Backend <b>WebBackend</b></span>
+                <span>Move <b>arrow keys</b></span>
+                <span>Nodes <b>Tab + Enter</b></span>
+                <span>Trace <b>D</b></span>
+                <span>Pause <b>Space</b></span>
               </div>
             </article>
-            <article className="tui-panel control-live-runtime__controls">
-              <header>
-                <span>INTERACTION MAP</span>
-                <strong>FOCUS THE CITY FIRST</strong>
-              </header>
-              <div>
-                {cityControls.map(([key, description]) => (
-                  <p key={key}>
-                    <kbd>{key}</kbd>
-                    <span>{description}</span>
-                  </p>
-                ))}
-              </div>
-              <footer>
-                <span>Mouse hover highlights nodes</span>
-                <span>Clicking the core emits a pulse</span>
-              </footer>
-            </article>
+            <iframe
+              title={`${featured.title} interactive Cinder runtime`}
+              src={withBasePath('/city/')}
+              className="control-live-runtime__frame"
+              loading="eager"
+              style={{
+                display: 'block',
+                width: '100%',
+                minWidth: 0,
+                height: '560px',
+                border: '1px solid var(--tui-line)',
+                background: '#030409',
+              }}
+            />
           </section>
         ) : null}
 
