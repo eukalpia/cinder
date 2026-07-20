@@ -43,7 +43,7 @@ async function waitForRuntime(page: Page, title: RegExp) {
   return terminal;
 }
 
-test('homepage presents a fixed terminal city and a separate live runtime', async ({
+test('homepage presents the living Cinder city and a separate full runner', async ({
   page,
 }, testInfo) => {
   const assertNoPageErrors = failOnPageErrors(page);
@@ -56,10 +56,21 @@ test('homepage presents a fixed terminal city and a separate live runtime', asyn
   ).toBeVisible();
   await expect(page.getByText('CINDER RENDER PIPELINE').first()).toBeVisible();
   await expect(page.getByText('WEB RUNTIME AVAILABLE')).toBeVisible();
-  await expect(page.locator('.hero-city')).toBeVisible();
-  await expect(page.locator('.hero-city__tone--f').first()).toBeVisible();
+
+  const livingCity = page.locator('.control-scene--living');
+  const livingCityFrame = livingCity.locator('iframe');
+  await expect(livingCity).toBeVisible();
+  await expect(livingCityFrame).toBeVisible();
+  await expect(livingCityFrame).toHaveAttribute('title', 'Living Cinder electric city');
   await expect(page.locator('.control-live-runtime__frame')).toBeVisible();
-  await expect(page.locator('.control-scene iframe')).toHaveCount(0);
+
+  const embeddedTerminal = page
+    .frameLocator('.control-scene--living iframe')
+    .getByRole('application', { name: /Web Showcase terminal viewport/i });
+  await expect(embeddedTerminal).toBeVisible({ timeout: 60_000 });
+  await expect(embeddedTerminal).toHaveAttribute('data-guest-loaded', 'true', {
+    timeout: 60_000,
+  });
 
   await page.screenshot({
     path: testInfo.outputPath('homepage-1440x1000.png'),
@@ -256,7 +267,7 @@ test('responsive widths keep the city readable and avoid document overflow', asy
     await expect(
       page.getByRole('navigation', { name: 'Primary navigation' }),
     ).toBeVisible();
-    const city = page.locator('.hero-city');
+    const city = page.locator('.control-scene--living');
     await expect(city).toBeVisible();
 
     const overflow = await page.evaluate(
