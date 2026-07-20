@@ -3,7 +3,23 @@
 import Link from 'next/link';
 import { Maximize2, Pause, Play, RotateCcw, X } from 'lucide-react';
 import { useState } from 'react';
-import { HeroCity } from '@/components/hero-city';
+
+const launcherArt = String.raw`             ╷                 ╷                 ╷
+          ╭──┴──╮          ╭──┴──╮          ╭──┴──╮
+       ╭──┤░◆░◆░├──╮    ╭──┤◆░◆░◆├──╮    ╭──┤░◆░◆░├──╮
+       │░░│░░░░░│░░│    │░░│░░░░░│░░│    │░░│░░░░░│░░│
+       ╰──┴──┬──┴──╯    ╰──┴──┬──┴──╯    ╰──┴──┬──┴──╯
+             ╲═════════════════╬═════════════════╱
+              ╲ · ◆ · · ◆ · · ║ · · ◆ · · ◆ · ╱
+               ╲═══════════════╬═══════════════╱
+                               ║
+                       ·  ░▒▓████▓▒░  ·
+                    · ▒▓████████████▓▒ ·
+                       ╭──────────╮
+                    ╭──┤ >_ CINDER├──╮
+                    │░░│░◆░·░◆░·░│░░│
+                    ╰──┴──────────┴──╯
+             EVENT ─── DIFF ─── DAMAGE ─── WEB`;
 
 export function InteractiveCityLauncher({
   src,
@@ -18,7 +34,12 @@ export function InteractiveCityLauncher({
   if (!active) {
     return (
       <div className="city-launcher city-launcher--idle">
-        <HeroCity />
+        <div className="city-launcher__poster" aria-hidden="true">
+          <pre>{launcherArt}</pre>
+          <span>STATE 14</span>
+          <span>DIFF LIVE</span>
+          <span>FRAME 16.7ms</span>
+        </div>
         <div className="city-launcher__veil" aria-hidden="true" />
         <div className="city-launcher__prompt">
           <small>● COMPILED CINDER APPLICATION READY</small>
@@ -52,7 +73,11 @@ export function InteractiveCityLauncher({
           <Link href={fullScreenHref}>
             <Maximize2 size={12} /> Full screen
           </Link>
-          <button type="button" onClick={() => setActive(false)} aria-label="Close the inline runtime">
+          <button
+            type="button"
+            onClick={() => setActive(false)}
+            aria-label="Close the inline runtime"
+          >
             <X size={13} /> Close
           </button>
         </div>
