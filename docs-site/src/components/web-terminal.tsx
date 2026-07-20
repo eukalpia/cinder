@@ -24,12 +24,14 @@ export function WebTerminal({
   runnable,
   reason,
   embedded = false,
+  cinematic = false,
 }: {
   title: string;
   bundle: string | null;
   runnable: boolean;
   reason: string | null;
   embedded?: boolean;
+  cinematic?: boolean;
 }) {
   const hostRef = useRef<HTMLDivElement>(null);
   const terminalRef = useRef<XtermTerminal | null>(null);
@@ -76,8 +78,8 @@ export function WebTerminal({
           cursorWidth: 1,
           fontFamily:
             '"IBM Plex Mono", "JetBrains Mono", "Cascadia Code", ui-monospace, monospace',
-          fontSize: embedded ? 12 : 13,
-          lineHeight: 1,
+          fontSize: cinematic ? 8 : embedded ? 12 : 13,
+          lineHeight: cinematic ? 1.04 : 1,
           letterSpacing: 0,
           scrollback: embedded ? 0 : 1000,
           allowTransparency: false,
@@ -266,11 +268,11 @@ export function WebTerminal({
       terminalRef.current = null;
       delete window.cinderBridge;
     };
-  }, [bundle, embedded, runnable, title]);
+  }, [bundle, cinematic, embedded, runnable, title]);
 
   return (
     <section
-      className={`web-terminal${embedded ? ' web-terminal--embedded' : ''}`}
+      className={`web-terminal${embedded ? ' web-terminal--embedded' : ''}${cinematic ? ' web-terminal--cinematic' : ''}`}
       aria-label={`${title} live terminal`}
     >
       <header className="web-terminal__bar">
