@@ -1,0 +1,56 @@
+name: Fix living city focus
+
+on:
+  push:
+    branches:
+      - feature/cinder-web-city-runtime
+    paths:
+      - .github/workflows/fix-living-city-focus.yml
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout feature branch
+        uses: actions/checkout@v6
+        with:
+          ref: feature/cinder-web-city-runtime
+          fetch-depth: 0
+      - name: Install Dart
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+      - name: Replace autofocus manager with direct focusable input
+        run: |
+          git pull --ff-only origin feature/cinder-web-city-runtime
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('tool/web_showcase_world.dart')
+          source = path.read_text(encoding='utf-8')
+          old = '''    return Focus(
+      autofocus: true,
+      onKeyEvent: _handleKey,
+      child: MouseRegion('''
+          new = '''    return Focusable(
+      focused: true,
+      onKeyEvent: _handleKey,
+      child: MouseRegion('''
+          if old not in source:
+              raise SystemExit('Expected autofocus wrapper was not found.')
+          path.write_text(source.replace(old, new, 1), encoding='utf-8')
+          PY
+          dart format tool/web_showcase_world.dart example/web_showcase.dart
+          dart pub get
+          dart analyze --fatal-infos
+      - name: Commit focus fix
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tool/web_showcase_world.dart example/web_showcase.dart
+          git commit -m "fix(web): make the living city iframe-safe"
+          git push origin HEAD:feature/cinder-web-city-runtime
