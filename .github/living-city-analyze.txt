@@ -1,0 +1,20 @@
+Analyzing cinder...
+
+  error - example/web_showcase.dart:292:21 - The argument type 'num' can't be assigned to the parameter type 'int'.  - argument_type_not_assignable
+  error - example/web_showcase.dart:293:22 - The argument type 'num' can't be assigned to the parameter type 'int'.  - argument_type_not_assignable
+  error - example/web_showcase.dart:316:22 - The argument type 'num' can't be assigned to the parameter type 'int'.  - argument_type_not_assignable
+  error - example/web_showcase.dart:342:22 - The argument type 'num' can't be assigned to the parameter type 'int'.  - argument_type_not_assignable
+  error - example/web_showcase.dart:532:14 - The argument type 'num' can't be assigned to the parameter type 'int'.  - argument_type_not_assignable
+  error - example/web_showcase.dart:535:14 - The argument type 'num' can't be assigned to the parameter type 'int'.  - argument_type_not_assignable
+  error - example/web_showcase.dart:555:17 - The argument type 'num' can't be assigned to the parameter type 'int'.  - argument_type_not_assignable
+  error - example/web_showcase.dart:556:19 - The argument type 'num' can't be assigned to the parameter type 'int'.  - argument_type_not_assignable
+  error - example/web_showcase.dart:556:34 - The argument type 'num' can't be assigned to the parameter type 'int'.  - argument_type_not_assignable
+  error - example/web_showcase.dart:557:17 - The argument type 'num' can't be assigned to the parameter type 'int'.  - argument_type_not_assignable
+  error - example/web_showcase.dart:558:19 - The argument type 'num' can't be assigned to the parameter type 'int'.  - argument_type_not_assignable
+  error - example/web_showcase.dart:559:19 - The argument type 'num' can't be assigned to the parameter type 'int'.  - argument_type_not_assignable
+  error - example/web_showcase.dart:566:34 - The argument type 'num' can't be assigned to the parameter type 'int'.  - argument_type_not_assignable
+  error - example/web_showcase.dart:567:29 - The argument type 'num' can't be assigned to the parameter type 'int'.  - argument_type_not_assignable
+  error - example/web_showcase.dart:571:44 - The argument type 'num' can't be assigned to the parameter type 'int'.  - argument_type_not_assignable
+
+15 issues found.
+exit_code=3
