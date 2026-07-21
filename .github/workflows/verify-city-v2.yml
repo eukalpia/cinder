@@ -1,0 +1,40 @@
+name: Verify city v2
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/verify-city-v2.yml
+
+permissions:
+  contents: write
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Install Dart
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+      - name: Verify Cinder city
+        run: |
+          dart pub get
+          dart format tool/web_showcase_world.dart example/web_showcase.dart
+          dart analyze --fatal-infos
+          dart test
+      - name: Commit verified formatting and remove temporary workflow
+        run: |
+          rm .github/workflows/verify-city-v2.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tool/web_showcase_world.dart example/web_showcase.dart .github/workflows/verify-city-v2.yml
+          git commit -m "chore(web): verify and format isometric city"
+          git push origin HEAD:main
