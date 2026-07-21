@@ -4,7 +4,7 @@ import { WebTerminal } from '@/components/web-terminal';
 import { getExample } from '@/lib/examples';
 
 export const metadata: Metadata = {
-  title: 'Cinder Isometric City',
+  title: 'Cinder Living Isometric City',
   robots: {
     index: false,
     follow: false,
