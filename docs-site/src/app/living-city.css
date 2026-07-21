@@ -1,3 +1,4 @@
+/* Keep the live Cinder world inside the center dashboard column. */
 .control-hero .control-scene--living {
   position: relative;
   min-width: 0;
