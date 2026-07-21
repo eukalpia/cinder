@@ -119,7 +119,7 @@ export default function HomePage() {
           >
             <iframe
               title="Living Cinder electric city"
-              src={withBasePath('/city/')}
+              src={withBasePath('/city/web-showcase/')}
               className="control-scene-frame"
               loading="eager"
             />
