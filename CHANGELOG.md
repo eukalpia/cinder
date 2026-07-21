@@ -1,3 +1,14 @@
+# Unreleased
+
+- Add explicit `TerminalText.safe` / `TerminalText.trusted` trust boundaries.
+- Sanitize untrusted output at text, Markdown, canvas, buffer, cell, diff, and full-frame layers.
+- Validate OSC title/icon metadata and Kitty, iTerm2, and Sixel image payloads.
+- Harden failure-tolerant terminal state recovery and add fuzz/security tests.
+- Add first-party application widgets for navigation, data, AI/developer workflows, and forms.
+- Add `VirtualListView`, `SplitView`, `TreeView`, `DiffView`, and `CommandPalette` as the primary IDE building blocks.
+
+---
+
 # 1.0.0-dev.2
 
 - Renderer V2 cached repaint layers and damage-only partial painting.
@@ -5,7 +16,6 @@
 - Flutter-style core icon API plus complete Material and Lucide catalogs.
 - Protocol-aware Kitty, iTerm2, Sixel, and Unicode image rendering.
 - Renderer, icon, image, documentation, and benchmark coverage.
-
 
 ---
 

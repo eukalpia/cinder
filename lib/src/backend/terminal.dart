@@ -3,6 +3,9 @@ import 'dart:convert';
 import 'package:meta/meta.dart';
 import 'package:cinder/src/size.dart';
 import 'package:cinder/src/style.dart';
+import 'package:cinder/src/image/image_cleanup.dart';
+import 'package:cinder/src/security/terminal_image_payload_validator.dart';
+import 'package:cinder/src/security/terminal_sanitizer.dart';
 import 'package:cinder/src/utils/escape_codes.dart';
 
 import 'terminal_backend.dart';
@@ -143,14 +146,15 @@ class Terminal {
         ?.firstWhere(_fgRegexp.hasMatch)
         .timeout(timeout)
         .then((event) {
-      final match = _fgRegexp.firstMatch(event);
-      if (match == null) return null;
-      return Color.fromRGB(
-        int.parse(match.group(1)!, radix: 16) ~/ 256,
-        int.parse(match.group(2)!, radix: 16) ~/ 256,
-        int.parse(match.group(3)!, radix: 16) ~/ 256,
-      );
-    }).catchError((_) => null);
+          final match = _fgRegexp.firstMatch(event);
+          if (match == null) return null;
+          return Color.fromRGB(
+            int.parse(match.group(1)!, radix: 16) ~/ 256,
+            int.parse(match.group(2)!, radix: 16) ~/ 256,
+            int.parse(match.group(3)!, radix: 16) ~/ 256,
+          );
+        })
+        .catchError((_) => null);
   }
 
   /// Get the terminal's default background color
@@ -163,14 +167,15 @@ class Terminal {
         ?.firstWhere(_bgRegexp.hasMatch)
         .timeout(timeout)
         .then((event) {
-      final match = _bgRegexp.firstMatch(event);
-      if (match == null) return null;
-      return Color.fromRGB(
-        int.parse(match.group(1)!, radix: 16) ~/ 256,
-        int.parse(match.group(2)!, radix: 16) ~/ 256,
-        int.parse(match.group(3)!, radix: 16) ~/ 256,
-      );
-    }).catchError((_) => null);
+          final match = _bgRegexp.firstMatch(event);
+          if (match == null) return null;
+          return Color.fromRGB(
+            int.parse(match.group(1)!, radix: 16) ~/ 256,
+            int.parse(match.group(2)!, radix: 16) ~/ 256,
+            int.parse(match.group(3)!, radix: 16) ~/ 256,
+          );
+        })
+        .catchError((_) => null);
   }
 
   /// Restore terminal colors to defaults
@@ -203,6 +208,13 @@ class Terminal {
     write(sequence);
   }
 
+  String _sanitizeOscMetadata(String value) {
+    final safe = TerminalTextSanitizer.sanitize(value).replaceAll('\n', ' ');
+    // Keep title/icon updates bounded so hostile metadata cannot create a large
+    // terminal write even after controls have been neutralized.
+    return safe.length <= 1024 ? safe : '${safe.substring(0, 1023)}…';
+  }
+
   /// Set the terminal window title using OSC 2 sequence.
   /// Uses BEL terminator for maximum compatibility.
   ///
@@ -211,7 +223,7 @@ class Terminal {
     // OSC 2 ; <title> BEL
     const osc = '\x1b]';
     const bel = '\x07';
-    write('${osc}2;$title$bel');
+    write('${osc}2;${_sanitizeOscMetadata(title)}$bel');
   }
 
   /// Set the terminal icon name using OSC 1 sequence.
@@ -222,7 +234,7 @@ class Terminal {
     // OSC 1 ; <name> BEL
     const osc = '\x1b]';
     const bel = '\x07';
-    write('${osc}1;$name$bel');
+    write('${osc}1;${_sanitizeOscMetadata(name)}$bel');
   }
 
   /// Set both terminal window title and icon name using OSC 0 sequence.
@@ -233,7 +245,7 @@ class Terminal {
     // OSC 0 ; <text> BEL
     const osc = '\x1b]';
     const bel = '\x07';
-    write('${osc}0;$text$bel');
+    write('${osc}0;${_sanitizeOscMetadata(text)}$bel');
   }
 
   /// Write a sixel image to the terminal at the specified position.
@@ -253,13 +265,22 @@ class Terminal {
   /// terminal.writeSixel(sixelData, 10, 5);
   /// ```
   /// Writes a pre-encoded inline image protocol sequence at a cell position.
-  void writeInlineImage(String encodedData, int x, int y) {
+  void writeInlineImage(
+    String encodedData,
+    int x,
+    int y, {
+    required ImageProtocol protocol,
+  }) {
+    final safePayload = TerminalImagePayloadValidator.requireValid(
+      encodedData,
+      protocol,
+    );
     moveCursor(x, y);
-    write(encodedData);
+    write(safePayload);
   }
 
   /// Backwards-compatible Sixel-specific name.
   void writeSixel(String sixelData, int x, int y) {
-    writeInlineImage(sixelData, x, y);
+    writeInlineImage(sixelData, x, y, protocol: ImageProtocol.sixel);
   }
 }

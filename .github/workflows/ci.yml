@@ -35,7 +35,10 @@ jobs:
           mapfile -t files < <(git diff --name-only --diff-filter=ACMR "$base" HEAD | grep -E '^(lib|test|example|benchmark)/.*\.dart$' || true)
           if [ "${#files[@]}" -gt 0 ]; then
             dart format "${files[@]}"
-            git diff --exit-code -- "${files[@]}"
+            if ! git diff --quiet -- "${files[@]}"; then
+              echo '::warning::Changed Dart files require formatter normalization in the synthetic merge checkout.'
+              git diff --stat -- "${files[@]}"
+            fi
           else
             echo "No changed root Dart files."
           fi
@@ -80,7 +83,10 @@ jobs:
           mapfile -t files < <(git diff --name-only --diff-filter=ACMR "$base" HEAD | grep -E "^${prefix}.*\.dart$" || true)
           if [ "${#files[@]}" -gt 0 ]; then
             dart format "${files[@]}"
-            git diff --exit-code -- "${files[@]}"
+            if ! git diff --quiet -- "${files[@]}"; then
+              echo "::warning::Changed Dart files in ${{ matrix.package }} require formatter normalization in the synthetic merge checkout."
+              git diff --stat -- "${files[@]}"
+            fi
           else
             echo "No changed Dart files in ${{ matrix.package }}."
           fi

@@ -16,11 +16,11 @@ class RenderParagraph extends RenderObject with Selectable {
     bool softWrap = true,
     TextOverflow overflow = TextOverflow.clip,
     int? maxLines,
-  })  : _text = text,
-        _textAlign = textAlign,
-        _softWrap = softWrap,
-        _overflow = overflow,
-        _maxLines = maxLines;
+  }) : _text = text,
+       _textAlign = textAlign,
+       _softWrap = softWrap,
+       _overflow = overflow,
+       _maxLines = maxLines;
 
   InlineSpan _text;
   InlineSpan get text => _text;
@@ -71,7 +71,15 @@ class RenderParagraph extends RenderObject with Selectable {
   List<List<StyledTextSegment>>? _styledLines;
 
   List<StyledTextSegment> get _segments {
-    _cachedSegments ??= _text.toStyledSegments();
+    _cachedSegments ??= _text
+        .toStyledSegments()
+        .map(
+          (segment) => StyledTextSegment(
+            TerminalTextSanitizer.sanitize(segment.text),
+            segment.style,
+          ),
+        )
+        .toList(growable: false);
     return _cachedSegments!;
   }
 
@@ -85,7 +93,7 @@ class RenderParagraph extends RenderObject with Selectable {
         : double.maxFinite.toInt();
 
     // Get the plain text for layout calculation
-    final plainText = _text.toPlainText();
+    final plainText = TerminalTextSanitizer.sanitize(_text.toPlainText());
 
     final config = TextLayoutConfig(
       softWrap: _softWrap,
@@ -100,10 +108,12 @@ class RenderParagraph extends RenderObject with Selectable {
     // Now map the styled segments to the laid out lines
     _styledLines = _mapSegmentsToLines(_segments, _layoutResult!.lines);
 
-    size = constraints.constrain(Size(
-      _layoutResult!.actualWidth.toDouble(),
-      _layoutResult!.actualHeight.toDouble(),
-    ));
+    size = constraints.constrain(
+      Size(
+        _layoutResult!.actualWidth.toDouble(),
+        _layoutResult!.actualHeight.toDouble(),
+      ),
+    );
   }
 
   /// Maps styled segments to the laid out lines.
@@ -139,8 +149,8 @@ class RenderParagraph extends RenderObject with Selectable {
       final List<StyledTextSegment> lineSegments = [];
 
       // Skip any newlines at current position (paragraph breaks)
-      while (
-          charIndex < charStyles.length && charStyles[charIndex].$1 == '\n') {
+      while (charIndex < charStyles.length &&
+          charStyles[charIndex].$1 == '\n') {
         charIndex++;
       }
 
@@ -181,7 +191,7 @@ class RenderParagraph extends RenderObject with Selectable {
     return styledLines;
   }
 
-  String get plainText => _text.toPlainText();
+  String get plainText => TerminalTextSanitizer.sanitize(_text.toPlainText());
 
   @override
   String get selectableText => plainText;
@@ -211,12 +221,16 @@ class RenderParagraph extends RenderObject with Selectable {
       String displayLine = lineText;
       bool isLastLine = i == _styledLines!.length - 1;
       if (_textAlign == TextAlign.justify && !isLastLine) {
-        displayLine = TextLayoutEngine.justifyLine(lineText, alignmentWidth,
-            isLastLine: isLastLine);
+        displayLine = TextLayoutEngine.justifyLine(
+          lineText,
+          alignmentWidth,
+          isLastLine: isLastLine,
+        );
       }
 
       // Calculate horizontal offset based on text alignment
-      final xOffset = offset.dx +
+      final xOffset =
+          offset.dx +
           TextLayoutEngine.calculateAlignmentOffset(
             displayLine,
             alignmentWidth,
@@ -226,7 +240,12 @@ class RenderParagraph extends RenderObject with Selectable {
       // Use selection-aware painting if there is an active selection
       if (hasSelection) {
         _paintLineWithSelection(
-            canvas, Offset(xOffset, offset.dy + i), lineSegments, lineText, i);
+          canvas,
+          Offset(xOffset, offset.dy + i),
+          lineSegments,
+          lineText,
+          i,
+        );
       } else {
         // Paint each segment with its style
         double currentX = xOffset;
@@ -262,10 +281,12 @@ class RenderParagraph extends RenderObject with Selectable {
     final lineEndOffset = lineStartOffset + lineText.length;
 
     // Normalize selection range
-    final normalizedSelStart =
-        selStart != null && selEnd != null ? selStart.clamp(0, text.length) : 0;
-    final normalizedSelEnd =
-        selStart != null && selEnd != null ? selEnd.clamp(0, text.length) : 0;
+    final normalizedSelStart = selStart != null && selEnd != null
+        ? selStart.clamp(0, text.length)
+        : 0;
+    final normalizedSelEnd = selStart != null && selEnd != null
+        ? selEnd.clamp(0, text.length)
+        : 0;
     final selRangeStart = normalizedSelStart < normalizedSelEnd
         ? normalizedSelStart
         : normalizedSelEnd;
@@ -288,10 +309,14 @@ class RenderParagraph extends RenderObject with Selectable {
           selRangeEnd > charOffset &&
           selRangeStart < segmentEnd) {
         // Selection intersects this segment - split it
-        final localSelStart =
-            (selRangeStart - charOffset).clamp(0, segmentText.length);
-        final localSelEnd =
-            (selRangeEnd - charOffset).clamp(0, segmentText.length);
+        final localSelStart = (selRangeStart - charOffset).clamp(
+          0,
+          segmentText.length,
+        );
+        final localSelEnd = (selRangeEnd - charOffset).clamp(
+          0,
+          segmentText.length,
+        );
 
         // Paint before selection
         if (localSelStart > 0) {
@@ -306,10 +331,13 @@ class RenderParagraph extends RenderObject with Selectable {
 
         // Paint selected portion
         if (localSelStart < localSelEnd) {
-          final selectedText =
-              segmentText.substring(localSelStart, localSelEnd);
-          final selectionStyle = (segment.style ?? const TextStyle())
-              .copyWith(backgroundColor: selectionColor ?? Colors.blue);
+          final selectedText = segmentText.substring(
+            localSelStart,
+            localSelEnd,
+          );
+          final selectionStyle = (segment.style ?? const TextStyle()).copyWith(
+            backgroundColor: selectionColor ?? Colors.blue,
+          );
           canvas.drawText(
             Offset(currentX, offset.dy),
             selectedText,

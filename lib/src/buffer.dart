@@ -8,14 +8,23 @@ import 'package:cinder/src/rectangle.dart';
 import 'image/image_cleanup.dart';
 import 'style.dart';
 import 'utils/unicode_width.dart';
+import 'security/terminal_sanitizer.dart';
 
 /// A mutable terminal cell reused across frames.
 ///
 /// Cinder deliberately mutates existing cells instead of allocating a new
 /// object for every painted terminal position on every frame.
 class Cell {
-  Cell({this.char = ' ', TextStyle? style, this.isImagePlaceholder = false})
-      : style = style ?? const TextStyle();
+  Cell({String char = ' ', TextStyle? style, this.isImagePlaceholder = false})
+    : char = _normalizeCellChar(char),
+      style = style ?? const TextStyle();
+
+  static String _normalizeCellChar(String value) {
+    // The current renderer uses U+200B exclusively as the private continuation
+    // marker for the second column of a width-2 grapheme. It is never emitted.
+    if (value == '\u200B') return value;
+    return TerminalTextSanitizer.sanitizeCell(value);
+  }
 
   String char;
   TextStyle style;
@@ -36,8 +45,9 @@ class Cell {
     required TextStyle style,
     bool isImagePlaceholder = false,
   }) {
-    if (this.char != char) {
-      this.char = char;
+    final safeChar = _normalizeCellChar(char);
+    if (this.char != safeChar) {
+      this.char = safeChar;
       _cachedWidth = null;
     }
     this.style = style;
@@ -135,13 +145,13 @@ class PendingImage {
 /// once, reuses cells, and records only the horizontal span touched on each row.
 class Buffer {
   Buffer(this.width, this.height)
-      : _flatCells = List<Cell>.generate(
-          width * height,
-          (_) => Cell(),
-          growable: false,
-        ),
-        _dirtyStart = Int32List(height),
-        _dirtyEnd = Int32List(height) {
+    : _flatCells = List<Cell>.generate(
+        width * height,
+        (_) => Cell(),
+        growable: false,
+      ),
+      _dirtyStart = Int32List(height),
+      _dirtyEnd = Int32List(height) {
     for (var y = 0; y < height; y++) {
       _dirtyStart[y] = width;
       _dirtyEnd[y] = -1;
@@ -234,6 +244,7 @@ class Buffer {
   }
 
   void setString(int x, int y, String text, {TextStyle? style}) {
+    text = TerminalTextSanitizer.sanitize(text);
     var currentX = x;
     final effectiveStyle = style ?? const TextStyle();
 
