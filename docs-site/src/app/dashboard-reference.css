@@ -1,0 +1,49 @@
+.control-hero:has(.control-scene--living) .control-intro {
+  padding: 20px 22px 17px;
+}
+
+.control-hero:has(.control-scene--living) .control-intro h1 {
+  max-width: 100%;
+  font-size: clamp(29px, 2vw, 35px);
+  line-height: 1.1;
+  letter-spacing: -0.04em;
+}
+
+.control-hero:has(.control-scene--living) .control-intro > p {
+  margin-top: 13px;
+  font-size: 10px;
+  line-height: 1.55;
+}
+
+.control-hero:has(.control-scene--living) .control-intro ul {
+  gap: 5px;
+  margin-top: 12px;
+  font-size: 9px;
+}
+
+.control-hero:has(.control-scene--living) .control-install {
+  padding: 8px;
+}
+
+.control-hero:has(.control-scene--living) .control-install > strong {
+  margin-bottom: 6px;
+}
+
+.control-hero:has(.control-scene--living) .control-intro > small {
+  margin-top: 7px;
+  font-size: 8px;
+}
+
+@media (max-width: 760px) {
+  .control-hero:has(.control-scene--living) .control-intro h1 {
+    font-size: 32px;
+  }
+
+  .control-hero:has(.control-scene--living) .control-intro > p {
+    font-size: 11px;
+  }
+
+  .control-hero:has(.control-scene--living) .control-intro ul {
+    font-size: 10px;
+  }
+}
