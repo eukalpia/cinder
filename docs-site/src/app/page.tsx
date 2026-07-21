@@ -104,7 +104,7 @@ export default function HomePage() {
           >
             <iframe
               title="Interactive isometric Cinder city"
-              src={withBasePath('/city/web-showcase/')}
+              src={withBasePath('/city/')}
               className="control-scene-frame"
               loading="eager"
             />
