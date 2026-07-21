@@ -104,7 +104,7 @@ export default function HomePage() {
           >
             <iframe
               title="Interactive isometric Cinder city"
-              src={withBasePath('/city/')}
+              src={withBasePath('/city/web-showcase/')}
               className="control-scene-frame"
               loading="eager"
             />
@@ -160,7 +160,7 @@ export default function HomePage() {
               <footer>
                 <span>● Connected to web runtime</span>
                 <span>{cinderVersion}</span>
-                <span>keyboard + mouse</span>
+                <span>pointer + animation</span>
               </footer>
             </section>
           </aside>
