@@ -4,7 +4,7 @@ import { WebTerminal } from '@/components/web-terminal';
 import { getExample } from '@/lib/examples';
 
 export const metadata: Metadata = {
-  title: 'Cinder Electric City',
+  title: 'Cinder Isometric City',
   robots: {
     index: false,
     follow: false,
@@ -22,6 +22,7 @@ export default function CityRuntimePage() {
         bundle={example.bundle}
         runnable={example.runnable}
         reason={example.reason}
+        cinematic
       />
     </main>
   );
