@@ -264,7 +264,8 @@ class _ElectricCityPainter {
       canvas.set(crownLeft, top, '╱', _Tone.violetDim);
       canvas.hLine(crownLeft + 1, crownRight - 1, top, '─', _Tone.violetDim);
       canvas.set(crownRight, top, '╲', _Tone.violetDim);
-      canvas.vLine(center, math.max(0, top - 4).toInt(), top - 1, '│', _Tone.depth);
+      canvas.vLine(
+          center, math.max(0, top - 4).toInt(), top - 1, '│', _Tone.depth);
 
       for (var y = top + 4; y < baseY; y += 3) {
         for (var x = left + 2; x < right; x += 3) {
@@ -462,10 +463,12 @@ class _ElectricCityPainter {
 
     final baseY = _iso(building.x + building.w, building.y + building.d, 0).y;
     final maxHeight = math.max(5, baseY - 2).toInt();
-    final heightRows = math.min(
-      maxHeight,
-      (building.height * scene.heightScale).round(),
-    ).toInt();
+    final heightRows = math
+        .min(
+          maxHeight,
+          (building.height * scene.heightScale).round(),
+        )
+        .toInt();
     if (heightRows < 4) return null;
 
     final top = <_Point>[
@@ -560,7 +563,8 @@ class _ElectricCityPainter {
         );
 
         final rightHash = _noise(right.x, right.y, building.seed + tick ~/ 9);
-        final leftHash = _noise(left.x, left.y, building.seed + 31 + tick ~/ 11);
+        final leftHash =
+            _noise(left.x, left.y, building.seed + 31 + tick ~/ 11);
 
         if (rightHash % 5 != 0) {
           canvas.set(
@@ -656,8 +660,10 @@ class _ElectricCityPainter {
       density: 4,
     );
 
-    _drawPolygonEdges(<_Point>[deck[1], deck[2], base[2], base[1]], _Tone.violet);
-    _drawPolygonEdges(<_Point>[deck[2], deck[3], base[3], base[2]], _Tone.violet);
+    _drawPolygonEdges(
+        <_Point>[deck[1], deck[2], base[2], base[1]], _Tone.violet);
+    _drawPolygonEdges(
+        <_Point>[deck[2], deck[3], base[3], base[2]], _Tone.violet);
     _drawPolygonEdges(deck, _Tone.pink);
 
     final center = _iso(0, 0, deckZ);
@@ -674,7 +680,11 @@ class _ElectricCityPainter {
   void _drawPowerCables(_Point socket) {
     if (_roofNodes.isEmpty) return;
 
-    final maximum = width < 72 ? 4 : width < 120 ? 6 : 8;
+    final maximum = width < 72
+        ? 4
+        : width < 120
+            ? 6
+            : 8;
     final candidates = <_Point>[];
 
     for (var i = 0; i < _roofNodes.length; i++) {
@@ -733,7 +743,11 @@ class _ElectricCityPainter {
   void _drawCableArcs() {
     if (_powerCables.length < 2) return;
 
-    final arcLimit = surging ? 4 : hovered ? 2 : 1;
+    final arcLimit = surging
+        ? 4
+        : hovered
+            ? 2
+            : 1;
 
     for (var index = 0; index < arcLimit; index++) {
       if (!surging && (tick + index * 7) % 31 > 4) continue;
@@ -756,8 +770,8 @@ class _ElectricCityPainter {
 
   void _drawJaggedArc(_Point start, _Point end, {required int seed}) {
     final controls = <_Point>[start];
-    final segments = math.max(4, math.min(10, (start.x - end.x).abs() ~/ 4 + 4))
-        .toInt();
+    final segments =
+        math.max(4, math.min(10, (start.x - end.x).abs() ~/ 4 + 4)).toInt();
 
     for (var index = 1; index < segments; index++) {
       final t = index / segments;
@@ -774,7 +788,11 @@ class _ElectricCityPainter {
       canvas.set(
         point.x,
         point.y,
-        index % 3 == 0 ? '*' : index.isEven ? '╱' : '╲',
+        index % 3 == 0
+            ? '*'
+            : index.isEven
+                ? '╱'
+                : '╲',
         index % 3 == 0 ? _Tone.white : _Tone.glow,
       );
       if (surging && index % 5 == 0) {
@@ -789,7 +807,11 @@ class _ElectricCityPainter {
       final lane = _roadLanes[laneIndex];
       if (lane.isEmpty) continue;
 
-      final vehicleCount = width < 70 ? 2 : width < 130 ? 4 : 6;
+      final vehicleCount = width < 70
+          ? 2
+          : width < 130
+              ? 4
+              : 6;
       for (var vehicle = 0; vehicle < vehicleCount; vehicle++) {
         final offset = _positiveMod(
           tick * (1 + laneIndex) +
@@ -809,10 +831,12 @@ class _ElectricCityPainter {
   }
 
   void _drawCorePlasma(_Point socket) {
-    final plumeHeight = math.max(
-      9,
-      math.min(24, (height * 0.29 * energy).round()),
-    ).toInt();
+    final plumeHeight = math
+        .max(
+          9,
+          math.min(24, (height * 0.29 * energy).round()),
+        )
+        .toInt();
     final topY = math.max(1, socket.y - plumeHeight).toInt();
 
     for (var y = socket.y - 1; y >= topY; y--) {
@@ -868,7 +892,8 @@ class _ElectricCityPainter {
 
     for (var particle = 0; particle < (surging ? 18 : 9); particle++) {
       final seed = _noise(particle, tick ~/ 2, 211);
-      final y = topY + _positiveMod(seed - tick * (1 + particle % 2), plumeHeight);
+      final y =
+          topY + _positiveMod(seed - tick * (1 + particle % 2), plumeHeight);
       final spread = math.max(3, ((socket.y - y) * 0.35).round()).toInt();
       final x = socket.x + (seed % (spread * 2 + 1)) - spread;
       canvas.set(
@@ -881,8 +906,13 @@ class _ElectricCityPainter {
   }
 
   void _drawCoreAura(_Point socket) {
-    final ringCount = surging ? 4 : hovered ? 3 : 2;
-    final maximumRadius = math.max(5, math.min(width ~/ 8, height ~/ 4)).toInt();
+    final ringCount = surging
+        ? 4
+        : hovered
+            ? 3
+            : 2;
+    final maximumRadius =
+        math.max(5, math.min(width ~/ 8, height ~/ 4)).toInt();
 
     for (var ring = 0; ring < ringCount; ring++) {
       final radius = 4 + _positiveMod(tick ~/ 2 + ring * 7, maximumRadius);
@@ -923,10 +953,12 @@ class _ElectricCityPainter {
     final span = math.max(18, width - 42).toInt();
     final travel = _positiveMod(tick, span * 2);
     final x = travel < span ? 20 + travel : 20 + span * 2 - travel;
-    final y = math.max(
-      4,
-      scene.horizonY - 12 + (math.sin(tick * 0.13) * 2).round(),
-    ).toInt();
+    final y = math
+        .max(
+          4,
+          scene.horizonY - 12 + (math.sin(tick * 0.13) * 2).round(),
+        )
+        .toInt();
     final facingRight = travel < span;
 
     canvas.write(x - 2, y, facingRight ? '─[>]' : '[<]─', _Tone.white);
@@ -1012,9 +1044,11 @@ class _ElectricCityPainter {
       final yj = polygon[j].y.toDouble();
 
       final intersects = ((yi > y) != (yj > y)) &&
-          (x < (xj - xi) * (y - yi) /
-                  ((yj - yi).abs() < 0.0001 ? 0.0001 : yj - yi) +
-              xi);
+          (x <
+              (xj - xi) *
+                      (y - yi) /
+                      ((yj - yi).abs() < 0.0001 ? 0.0001 : yj - yi) +
+                  xi);
       if (intersects) inside = !inside;
     }
 
@@ -1044,7 +1078,8 @@ class _ElectricCityPainter {
       if (_positiveMod(index + phase, period) >= dash) continue;
       final previous = index > 0 ? path[index - 1] : path[index];
       final next = index < path.length - 1 ? path[index + 1] : path[index];
-      canvas.set(path[index].x, path[index].y, _pathGlyph(previous, next), tone);
+      canvas.set(
+          path[index].x, path[index].y, _pathGlyph(previous, next), tone);
     }
   }
 
@@ -1058,7 +1093,8 @@ class _ElectricCityPainter {
       if (sparse && (index + phase) % 5 == 0) continue;
       final previous = index > 0 ? path[index - 1] : path[index];
       final next = index < path.length - 1 ? path[index + 1] : path[index];
-      canvas.set(path[index].x, path[index].y, _pathGlyph(previous, next), tone);
+      canvas.set(
+          path[index].x, path[index].y, _pathGlyph(previous, next), tone);
     }
   }
 
@@ -1168,23 +1204,29 @@ class _Scene {
 
   factory _Scene.fromViewport(int width, int height) {
     final compact = width < 72;
-    final tileX = math.max(
-      4,
-      math.min(compact ? 5 : 9, width ~/ (compact ? 10 : 24)),
-    ).toInt();
-    final tileY = math.max(
-      1,
-      math.min(3, (height * 0.035).round()),
-    ).toInt();
+    final tileX = math
+        .max(
+          4,
+          math.min(compact ? 5 : 9, width ~/ (compact ? 10 : 24)),
+        )
+        .toInt();
+    final tileY = math
+        .max(
+          1,
+          math.min(3, (height * 0.035).round()),
+        )
+        .toInt();
     final radius = width < 62
         ? 3.15
         : width < 105
             ? 4.45
             : 5.65;
-    final horizon = math.max(
-      12,
-      math.min(height - 18, (height * (compact ? 0.44 : 0.49)).round()),
-    ).toInt();
+    final horizon = math
+        .max(
+          12,
+          math.min(height - 18, (height * (compact ? 0.44 : 0.49)).round()),
+        )
+        .toInt();
 
     return _Scene(
       centerX: width ~/ 2,
@@ -1192,7 +1234,11 @@ class _Scene {
       tileX: tileX,
       tileY: tileY,
       radius: radius,
-      heightScale: height < 42 ? 0.68 : height < 62 ? 0.84 : 1,
+      heightScale: height < 42
+          ? 0.68
+          : height < 62
+              ? 0.84
+              : 1,
     );
   }
 
