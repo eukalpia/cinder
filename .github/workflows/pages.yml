@@ -39,7 +39,7 @@ concurrency:
 jobs:
   repair-city-branch:
     name: Repair city feature branch
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'pull_request' && github.head_ref == 'trigger-city-repair'
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
