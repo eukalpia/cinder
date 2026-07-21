@@ -3,11 +3,11 @@ import 'dart:math' as math;
 
 import 'package:cinder/cinder.dart';
 
-/// A living terminal metropolis rendered entirely by Cinder.
+/// A responsive isometric cyber-city rendered entirely by Cinder.
 ///
-/// The browser only hosts a terminal surface. Every building, cable, electric
-/// pulse, plasma particle, road, vehicle, hover response, and resize pass is
-/// produced by Cinder widgets and terminal cells.
+/// The browser provides only the terminal surface. Buildings, roads, power
+/// cables, moving current, plasma, traffic, particles, hover state, keyboard
+/// input, and resize behavior are all painted into Cinder terminal cells.
 void main() {
   runApp(const CinderApp(child: WebShowcase()));
 }
@@ -33,7 +33,7 @@ class _WebShowcaseState extends State<WebShowcase> {
   @override
   void initState() {
     super.initState();
-    _ticker = Timer.periodic(const Duration(milliseconds: 50), (_) {
+    _ticker = Timer.periodic(const Duration(milliseconds: 58), (_) {
       if (!mounted || _paused) return;
       setState(() => _tick++);
     });
@@ -54,13 +54,14 @@ class _WebShowcaseState extends State<WebShowcase> {
               final width = _safeExtent(
                 constraints.maxWidth,
                 fallback: 160,
-                maximum: 280,
+                maximum: 240,
               );
               final height = _safeExtent(
                 constraints.maxHeight,
-                fallback: 56,
-                maximum: 120,
+                fallback: 62,
+                maximum: 104,
               );
+
               final world = _ElectricCityPainter(
                 width: width,
                 height: height,
@@ -93,9 +94,9 @@ class _WebShowcaseState extends State<WebShowcase> {
     } else if (key == LogicalKey.enter || key == LogicalKey.keyE) {
       _triggerSurge();
     } else if (key == LogicalKey.arrowUp) {
-      setState(() => _energy = math.min(1.8, _energy + 0.12));
+      setState(() => _energy = math.min(1.75, _energy + 0.12));
     } else if (key == LogicalKey.arrowDown) {
-      setState(() => _energy = math.max(0.5, _energy - 0.12));
+      setState(() => _energy = math.max(0.55, _energy - 0.12));
     } else if (key == LogicalKey.arrowLeft) {
       setState(() => _phaseShift -= 5);
     } else if (key == LogicalKey.arrowRight) {
@@ -117,8 +118,8 @@ class _WebShowcaseState extends State<WebShowcase> {
 
   void _triggerSurge() {
     setState(() {
-      _surgeUntil = _tick + 38;
-      _energy = math.min(1.8, _energy + 0.08);
+      _surgeUntil = _tick + 34;
+      _energy = math.min(1.75, _energy + 0.08);
     });
   }
 
@@ -156,688 +157,927 @@ class _ElectricCityPainter {
   final bool hovered;
   final _WorldCanvas canvas;
 
-  final List<_Point> _towerTips = <_Point>[];
-  final List<List<_Point>> _cables = <List<_Point>>[];
-  final List<List<_Point>> _roads = <List<_Point>>[];
+  final List<List<_Point>> _powerCables = <List<_Point>>[];
+  final List<List<_Point>> _roadLanes = <List<_Point>>[];
+  final List<_Point> _roofNodes = <_Point>[];
+
+  late final _Scene scene;
 
   _WorldCanvas paint() {
-    if (width < 34 || height < 14) {
+    if (width < 34 || height < 16) {
       _drawTinyWorld();
       return canvas;
     }
 
-    _drawStars();
-    _drawAtmosphere();
-    _drawDistantCity();
-    _drawMidCity();
+    scene = _Scene.fromViewport(width, height);
+
+    _drawSparseSky();
+    _drawDistantSkyline();
+    _drawGroundPlane();
     _drawRoadNetwork();
-    _drawForegroundCity();
-    final socket = _drawCoreDistrict();
-    _drawCableNetwork(socket);
-    _drawPlasmaColumn(socket);
-    _drawElectricityBetweenCables();
-    _drawTraffic();
-    _drawAmbientSparks();
+    _drawIsometricDistricts();
+
+    final core = _drawCentralPlatform();
+
+    _drawPowerCables(core);
+    _drawCableArcs();
+    _drawRoadTraffic();
+    _drawCorePlasma(core);
+    _drawCoreAura(core);
+    _drawAmbientLife(core);
     _drawDrone();
-    _drawEnergyHalo(socket);
 
     return canvas;
   }
 
   void _drawTinyWorld() {
     final centerX = width ~/ 2;
-    final baseY = height - 2;
-    final topY = math.max(1, height ~/ 4).toInt();
+    final platformY = height - 4;
+    final flameTop = math.max(1, height ~/ 4).toInt();
 
-    for (var y = topY; y < baseY - 3; y++) {
-      final pulse = _noise(centerX, y, tick ~/ 2);
-      final half = 1 + pulse % 2;
-      for (var x = centerX - half; x <= centerX + half; x++) {
-        final heat = _noise(x, y, tick);
-        if (x == centerX) {
-          canvas.set(x, y, heat.isEven ? '#' : '*', _Tone.white);
-        } else if (heat % 3 == 0) {
-          canvas.set(x, y, '+', _Tone.glow);
-        } else {
-          canvas.set(x, y, ':', _Tone.pink);
-        }
-      }
-    }
+    canvas.write(centerX - 8, platformY, '╱═══ >_ ═══╲', _Tone.violet);
+    canvas.write(centerX - 5, platformY + 1, ' CINDER ', _Tone.orange);
 
-    canvas.write(centerX - 7, baseY - 3, '╭────────────╮', _Tone.violet);
-    canvas.write(centerX - 7, baseY - 2, '│   CINDER   │', _Tone.orange);
-    canvas.write(centerX - 7, baseY - 1, '╰────────────╯', _Tone.violet);
-  }
-
-  void _drawStars() {
-    final drift = tick ~/ 6;
-    for (var y = 0; y < height; y++) {
-      for (var x = 0; x < width; x++) {
-        final hash = _noise(x, y, drift);
-        if (hash % 157 == 0) {
-          canvas.set(x, y, hash.isEven ? '·' : '.', _Tone.star);
-        } else if (hash % 389 == 0) {
-          canvas.set(x, y, tick.isEven ? '+' : '×', _Tone.pink);
-        } else if (hash % 587 == 0) {
-          canvas.set(x, y, '^', _Tone.violetDim);
-        }
-      }
-    }
-  }
-
-  void _drawAtmosphere() {
-    final centerX = width ~/ 2;
-    final top = math.max(1, height ~/ 18).toInt();
-    final bottom = math.max(top + 1, (height * 0.64).round()).toInt();
-
-    for (var y = top; y < bottom; y++) {
-      final progress = (y - top) / math.max(1, bottom - top);
-      final radius = math.max(4, (progress * width * 0.24).round()).toInt();
-      for (var x = centerX - radius; x <= centerX + radius; x++) {
-        final distance = (x - centerX).abs();
-        final hash = _noise(x, y, tick ~/ 3);
-        final threshold = 7 + (progress * 18).round();
-        if (distance >= radius || hash % 101 >= threshold) continue;
-        if (distance < radius ~/ 3) {
-          canvas.set(x, y, hash.isEven ? ':' : '·', _Tone.pink);
-        } else {
-          canvas.set(x, y, hash.isEven ? '·' : '.', _Tone.depth);
-        }
-      }
-    }
-  }
-
-  void _drawDistantCity() {
-    final baseY = math.max(10, (height * 0.47).round()).toInt();
-    final spacing = width < 90 ? 12 : 15;
-    var index = 0;
-
-    for (var x = 2; x < width - 2; x += spacing) {
-      final seed = _noise(x, baseY, 11);
-      final buildingWidth = 7 + seed % math.max(3, spacing - 5).toInt();
-      final buildingHeight =
-          7 + seed % math.max(6, height ~/ 4).toInt();
-      final center = math.min(width - 4, x + buildingWidth ~/ 2).toInt();
-      _drawTower(
-        centerX: center,
-        baseY: baseY + seed % 3,
-        towerWidth: buildingWidth,
-        towerHeight: buildingHeight,
-        seed: seed + index,
-        tone: _Tone.depth,
-        foreground: false,
-      );
-      index++;
-    }
-  }
-
-  void _drawMidCity() {
-    final baseY = math.max(14, (height * 0.67).round()).toInt();
-    final spacing = width < 100 ? 16 : 20;
-    var index = 0;
-
-    for (var x = -2; x < width + 4; x += spacing) {
-      final seed = _noise(x + 19, baseY, 29);
-      final buildingWidth = 10 + seed % 7;
-      final buildingHeight =
-          10 + seed % math.max(8, height ~/ 3).toInt();
-      final center = x + buildingWidth ~/ 2;
-      final tip = _drawTower(
-        centerX: center,
-        baseY: baseY + seed % 4,
-        towerWidth: buildingWidth,
-        towerHeight: buildingHeight,
-        seed: seed + index * 7,
-        tone: _Tone.violetDim,
-        foreground: true,
-      );
-      if (tip.x > 2 && tip.x < width - 2) _towerTips.add(tip);
-      index++;
-    }
-  }
-
-  void _drawForegroundCity() {
-    final baseY = height - 1;
-    final centerX = width ~/ 2;
-    final exclusion = math.max(18, width ~/ 7).toInt();
-    final spacing = width < 110 ? 18 : 23;
-
-    for (var x = -4; x < width + 4; x += spacing) {
-      final center = x + spacing ~/ 2;
-      if ((center - centerX).abs() < exclusion) continue;
-      final seed = _noise(center, baseY, 47);
-      final towerWidth = 12 + seed % 9;
-      final towerHeight =
-          11 + seed % math.max(8, height ~/ 3).toInt();
-      final tip = _drawTower(
-        centerX: center,
-        baseY: baseY,
-        towerWidth: towerWidth,
-        towerHeight: towerHeight,
-        seed: seed,
-        tone: _Tone.violet,
-        foreground: true,
-      );
-      if (tip.x > 2 && tip.x < width - 2) _towerTips.add(tip);
-    }
-  }
-
-  _Point _drawTower({
-    required int centerX,
-    required int baseY,
-    required int towerWidth,
-    required int towerHeight,
-    required int seed,
-    required int tone,
-    required bool foreground,
-  }) {
-    final availableHeight =
-        math.max(5, math.min(towerHeight, baseY - 2)).toInt();
-    final levels = availableHeight < 12 ? 2 : 3;
-    var currentBottom = baseY;
-    var currentWidth = math.max(6, towerWidth).toInt();
-
-    for (var level = 0; level < levels; level++) {
-      final levelHeight = math.max(
-        3,
-        (availableHeight / levels).round() +
-            ((_noise(seed, level, 3) % 3) - 1),
-      ).toInt();
-      final left = centerX - currentWidth ~/ 2;
-      final right = left + currentWidth - 1;
-      final top = math.max(2, currentBottom - levelHeight).toInt();
-
-      canvas.set(left, top, '╭', tone);
-      canvas.hLine(left + 1, right - 1, top, '─', tone);
-      canvas.set(right, top, '╮', tone);
-      canvas.vLine(left, top + 1, currentBottom - 1, '│', tone);
-      canvas.vLine(right, top + 1, currentBottom - 1, '│', tone);
-      canvas.set(left, currentBottom, '╰', tone);
-      canvas.hLine(left + 1, right - 1, currentBottom, '─', tone);
-      canvas.set(right, currentBottom, '╯', tone);
-
-      if (currentWidth >= 8) {
-        canvas.set(left + 1, top - 1, '╱', tone);
-        canvas.hLine(left + 2, right - 2, top - 1, '─', tone);
-        canvas.set(right - 1, top - 1, '╲', tone);
-      }
-
-      _drawWindows(
-        left: left,
-        right: right,
-        top: top,
-        bottom: currentBottom,
-        seed: seed + level * 31,
-        foreground: foreground,
-      );
-
-      currentBottom = top - 1;
-      currentWidth = math.max(5, currentWidth - 2 - seed % 2).toInt();
-    }
-
-    final antennaBottom = math.max(2, currentBottom).toInt();
-    final antennaHeight = 2 + seed % 5;
-    for (var y = antennaBottom - antennaHeight; y < antennaBottom; y++) {
-      canvas.set(centerX, y, '│', tone);
-    }
-    final tipY = antennaBottom - antennaHeight - 1;
-    canvas.set(centerX, tipY, seed.isEven ? '^' : '·', tone);
-
-    if (foreground && (tick + seed) % 8 < 2) {
-      canvas.set(centerX - 1, tipY, '·', _Tone.pink);
-      canvas.set(centerX, tipY, '*', _Tone.white);
-      canvas.set(centerX + 1, tipY, '·', _Tone.pink);
-    }
-
-    return _Point(centerX, tipY);
-  }
-
-  void _drawWindows({
-    required int left,
-    required int right,
-    required int top,
-    required int bottom,
-    required int seed,
-    required bool foreground,
-  }) {
-    if (right - left < 5 || bottom - top < 3) return;
-
-    for (var y = top + 2; y < bottom; y += 2) {
-      for (var x = left + 2; x < right - 1; x += 3) {
-        final hash = _noise(x, y, seed + tick ~/ 7);
-        if (hash % 5 == 0) continue;
-        final glyph = foreground && hash % 7 == 0 ? '▥' : '·';
-        final tone = switch (hash % 7) {
-          0 || 1 => _Tone.orange,
-          2 => _Tone.pink,
-          _ => _Tone.violet,
-        };
-        canvas.set(x, y, glyph, tone);
-      }
-    }
-  }
-
-  void _drawRoadNetwork() {
-    final centerX = width ~/ 2;
-    final horizonY = math.max(12, (height * 0.53).round()).toInt();
-    final lowerY = math.max(horizonY + 4, (height * 0.79).round()).toInt();
-
-    _roads.addAll(<List<_Point>>[
-      _polyline(<_Point>[
-        _Point(0, lowerY),
-        _Point(centerX - width ~/ 5, horizonY + 4),
-        _Point(centerX - 7, horizonY),
-      ]),
-      _polyline(<_Point>[
-        _Point(width - 1, lowerY),
-        _Point(centerX + width ~/ 5, horizonY + 4),
-        _Point(centerX + 7, horizonY),
-      ]),
-      _polyline(<_Point>[
-        _Point(0, height - 5),
-        _Point(centerX - width ~/ 4, lowerY),
-        _Point(centerX - 10, horizonY + 3),
-      ]),
-      _polyline(<_Point>[
-        _Point(width - 1, height - 5),
-        _Point(centerX + width ~/ 4, lowerY),
-        _Point(centerX + 10, horizonY + 3),
-      ]),
-      _polyline(<_Point>[
-        _Point(math.max(0, width ~/ 10).toInt(), horizonY + 1),
-        _Point(centerX, horizonY + 6),
-        _Point(math.min(width - 1, width - width ~/ 10).toInt(), horizonY + 1),
-      ]),
-    ]);
-
-    for (var index = 0; index < _roads.length; index++) {
-      final path = _roads[index];
-      _stroke(path, _Tone.violetDim, sparse: true, phase: index);
-      final offset = _positiveMod(
-        tick * 2 + index * 17,
-        math.max(1, path.length).toInt(),
-      );
-      _drawMovingPulse(
-        path,
-        offset,
-        radius: 3,
-        hot: index.isEven,
-      );
-      final second = _positiveMod(
-        offset + path.length ~/ 2,
-        math.max(1, path.length).toInt(),
-      );
-      _drawMovingPulse(
-        path,
-        second,
-        radius: 2,
-        hot: !index.isEven,
-      );
-    }
-
-    for (var ring = 0; ring < 3; ring++) {
-      final y = horizonY + 6 + ring * 4;
-      final inset = 7 + ring * math.max(5, width ~/ 16).toInt();
-      final left = inset.clamp(1, width - 2).toInt();
-      final right = (width - inset - 1).clamp(1, width - 2).toInt();
-      if (left >= right || y >= height) continue;
-      for (var x = left; x <= right; x++) {
-        if ((x + tick ~/ 2 + ring * 3) % 7 < 5) {
-          canvas.set(x, y, '─', _Tone.orange);
-        }
-      }
-      canvas.set(left, y, '╲', _Tone.violet);
-      canvas.set(right, y, '╱', _Tone.violet);
-    }
-  }
-
-  _Point _drawCoreDistrict() {
-    final centerX = width ~/ 2;
-    final baseY = height - 2;
-    final districtWidth =
-        math.max(20, math.min(48, width ~/ 3)).toInt();
-    final left = centerX - districtWidth ~/ 2;
-    final right = centerX + districtWidth ~/ 2;
-    final roofY = math.max(12, (height * 0.64).round()).toInt();
-    final shoulderY = math.min(baseY - 6, roofY + 5).toInt();
-
-    canvas.set(left, shoulderY, '╭', _Tone.violet);
-    canvas.hLine(left + 1, right - 1, shoulderY, '─', _Tone.violet);
-    canvas.set(right, shoulderY, '╮', _Tone.violet);
-    canvas.vLine(left, shoulderY + 1, baseY - 1, '│', _Tone.violet);
-    canvas.vLine(right, shoulderY + 1, baseY - 1, '│', _Tone.violet);
-    canvas.set(left, baseY, '╰', _Tone.violet);
-    canvas.hLine(left + 1, right - 1, baseY, '─', _Tone.violet);
-    canvas.set(right, baseY, '╯', _Tone.violet);
-
-    final roofLeft = left - math.min(8, width ~/ 18).toInt();
-    final roofRight = right + math.min(8, width ~/ 18).toInt();
-    _stroke(
-      _polyline(<_Point>[
-        _Point(roofLeft, shoulderY),
-        _Point(left + 4, roofY),
-        _Point(right - 4, roofY),
-        _Point(roofRight, shoulderY),
-      ]),
-      _Tone.violet,
-    );
-
-    final innerLeft = centerX - math.max(6, districtWidth ~/ 5).toInt();
-    final innerRight = centerX + math.max(6, districtWidth ~/ 5).toInt();
-    final socketY = math.max(7, roofY - 2).toInt();
-
-    for (var y = shoulderY + 2; y < baseY; y += 2) {
-      for (var x = left + 3; x < right - 2; x += 4) {
-        final hash = _noise(x, y, 73 + tick ~/ 8);
+    for (var y = platformY - 1; y >= flameTop; y--) {
+      final progress = (platformY - y) / math.max(1, platformY - flameTop);
+      final radius = math.max(0, (2.4 * (1 - progress)).round()).toInt();
+      final drift = (math.sin(y * 0.8 + tick * 0.35) * 1.2).round();
+      for (var x = centerX + drift - radius;
+          x <= centerX + drift + radius;
+          x++) {
+        final distance = (x - centerX - drift).abs();
         canvas.set(
           x,
           y,
-          hash.isEven ? '·' : ':',
-          hash % 3 == 0 ? _Tone.orange : _Tone.violet,
+          distance == 0 ? '*' : '+',
+          distance == 0 ? _Tone.white : _Tone.glow,
         );
       }
     }
+  }
 
-    canvas.set(innerLeft, roofY, '╭', _Tone.violet);
-    canvas.hLine(innerLeft + 1, innerRight - 1, roofY, '─', _Tone.violet);
-    canvas.set(innerRight, roofY, '╮', _Tone.violet);
-    canvas.vLine(innerLeft, socketY + 1, roofY - 1, '│', _Tone.violet);
-    canvas.vLine(innerRight, socketY + 1, roofY - 1, '│', _Tone.violet);
+  void _drawSparseSky() {
+    final drift = tick ~/ 10;
 
-    canvas.set(centerX - 2, socketY, '╲', _Tone.glow);
-    canvas.set(centerX, socketY, '*', _Tone.white);
-    canvas.set(centerX + 2, socketY, '╱', _Tone.glow);
-    canvas.write(centerX - 3, roofY + 2, 'CINDER', _Tone.orange);
+    for (var y = 0; y < scene.horizonY - 2; y++) {
+      for (var x = 0; x < width; x++) {
+        final hash = _noise(x, y, drift);
+        if (hash % 433 == 0) {
+          canvas.set(x, y, hash.isEven ? '·' : '.', _Tone.star);
+        } else if (hash % 947 == 0) {
+          canvas.set(
+            x,
+            y,
+            (tick + x + y) % 8 < 2 ? '*' : '·',
+            _Tone.violetDim,
+          );
+        }
+      }
+    }
+  }
 
-    final platformY = math.min(baseY - 3, shoulderY + 3).toInt();
-    final platformLeft = math.max(1, roofLeft - 8).toInt();
-    final platformRight = math.min(width - 2, roofRight + 8).toInt();
-    canvas.hLine(
-      platformLeft,
-      platformRight,
-      platformY,
-      '═',
+  void _drawDistantSkyline() {
+    if (width < 70 || height < 28) return;
+
+    final count = width < 120 ? 7 : 11;
+    final spacing = math.max(9, width ~/ count).toInt();
+    final baseY = scene.horizonY - 4;
+
+    for (var index = 0; index < count; index++) {
+      final center = spacing ~/ 2 + index * spacing;
+      final seed = _noise(center, baseY, 19);
+      final towerWidth = 5 + seed % math.max(3, spacing - 5).toInt();
+      final towerHeight = 5 + seed % math.max(6, height ~/ 5).toInt();
+      final left = center - towerWidth ~/ 2;
+      final right = center + towerWidth ~/ 2;
+      final top = math.max(2, baseY - towerHeight).toInt();
+
+      canvas.set(left, top + 2, '╭', _Tone.depth);
+      canvas.hLine(left + 1, right - 1, top + 2, '─', _Tone.depth);
+      canvas.set(right, top + 2, '╮', _Tone.depth);
+      canvas.vLine(left, top + 3, baseY, '│', _Tone.depth);
+      canvas.vLine(right, top + 3, baseY, '│', _Tone.depth);
+
+      final crownWidth = math.max(2, towerWidth - 4).toInt();
+      final crownLeft = center - crownWidth ~/ 2;
+      final crownRight = center + crownWidth ~/ 2;
+      canvas.set(crownLeft, top, '╱', _Tone.violetDim);
+      canvas.hLine(crownLeft + 1, crownRight - 1, top, '─', _Tone.violetDim);
+      canvas.set(crownRight, top, '╲', _Tone.violetDim);
+      canvas.vLine(center, math.max(0, top - 4).toInt(), top - 1, '│', _Tone.depth);
+
+      for (var y = top + 4; y < baseY; y += 3) {
+        for (var x = left + 2; x < right; x += 3) {
+          final hash = _noise(x, y, seed + tick ~/ 12);
+          if (hash % 4 != 0) {
+            canvas.set(
+              x,
+              y,
+              '·',
+              hash % 11 == 0 ? _Tone.orangeDim : _Tone.depth,
+            );
+          }
+        }
+      }
+    }
+  }
+
+  void _drawGroundPlane() {
+    final radius = scene.radius.floor();
+
+    for (var grid = -radius; grid <= radius; grid++) {
+      final xPath = _sampleLogicalLine(
+        x1: grid.toDouble(),
+        y1: -scene.radius,
+        x2: grid.toDouble(),
+        y2: scene.radius,
+        z: 0,
+      );
+      final yPath = _sampleLogicalLine(
+        x1: -scene.radius,
+        y1: grid.toDouble(),
+        x2: scene.radius,
+        y2: grid.toDouble(),
+        z: 0,
+      );
+
+      _strokePath(
+        xPath,
+        grid.isEven ? _Tone.depth : _Tone.shadow,
+        sparse: true,
+        phase: grid.abs(),
+      );
+      _strokePath(
+        yPath,
+        grid.isEven ? _Tone.depth : _Tone.shadow,
+        sparse: true,
+        phase: grid.abs() + 3,
+      );
+    }
+
+    final boundary = <_Point>[
+      _iso(-scene.radius, -scene.radius, 0),
+      _iso(scene.radius, -scene.radius, 0),
+      _iso(scene.radius, scene.radius, 0),
+      _iso(-scene.radius, scene.radius, 0),
+    ];
+    _drawPolygonEdges(boundary, _Tone.violetDim);
+  }
+
+  void _drawRoadNetwork() {
+    final r = scene.radius + 0.2;
+    final laneOffset = width < 70 ? 0.5 : 0.72;
+    final roadOffsets = <double>[-laneOffset, laneOffset];
+
+    for (final offset in roadOffsets) {
+      final xRoad = _sampleLogicalLine(
+        x1: -r,
+        y1: offset,
+        x2: r,
+        y2: offset,
+        z: 0.28,
+      );
+      final yRoad = _sampleLogicalLine(
+        x1: offset,
+        y1: -r,
+        x2: offset,
+        y2: r,
+        z: 0.28,
+      );
+
+      _strokePath(xRoad, _Tone.violet, phase: offset.isNegative ? 2 : 5);
+      _strokePath(yRoad, _Tone.violet, phase: offset.isNegative ? 7 : 1);
+    }
+
+    final xCenter = _sampleLogicalLine(
+      x1: -r,
+      y1: 0,
+      x2: r,
+      y2: 0,
+      z: 0.42,
+    );
+    final yCenter = _sampleLogicalLine(
+      x1: 0,
+      y1: -r,
+      x2: 0,
+      y2: r,
+      z: 0.42,
+    );
+
+    _roadLanes
+      ..add(xCenter)
+      ..add(yCenter);
+
+    _strokeDashed(xCenter, _Tone.orange, dash: 5, gap: 3, phase: tick ~/ 3);
+    _strokeDashed(yCenter, _Tone.orange, dash: 5, gap: 3, phase: tick ~/ 3 + 4);
+
+    for (var ring = 2.1; ring <= scene.radius - 0.8; ring += 1.65) {
+      final diamond = <_Point>[
+        _iso(-ring, 0, 0.34),
+        _iso(0, -ring, 0.34),
+        _iso(ring, 0, 0.34),
+        _iso(0, ring, 0.34),
+      ];
+      _drawPolygonEdges(
+        diamond,
+        ((ring * 10).round() + tick ~/ 5).isEven
+            ? _Tone.orangeDim
+            : _Tone.violetDim,
+      );
+    }
+  }
+
+  void _drawIsometricDistricts() {
+    final buildings = _buildingPlan()
+      ..sort((a, b) => (a.x + a.y).compareTo(b.x + b.y));
+
+    for (final building in buildings) {
+      final visible = building.x.abs() <= scene.radius + 0.7 &&
+          building.y.abs() <= scene.radius + 0.7;
+      if (!visible) continue;
+
+      final roofNode = _drawBuilding(building);
+      if (building.cabled && roofNode != null) _roofNodes.add(roofNode);
+    }
+  }
+
+  List<_CityBuilding> _buildingPlan() {
+    final all = <_CityBuilding>[
+      const _CityBuilding(-4.5, -4.2, 1.7, 1.5, 14, 11, true),
+      const _CityBuilding(-2.3, -4.7, 1.8, 1.5, 18, 13, false),
+      const _CityBuilding(1.7, -4.7, 1.7, 1.6, 20, 17, true),
+      const _CityBuilding(3.9, -4.1, 1.8, 1.6, 16, 19, false),
+      const _CityBuilding(4.5, -2.0, 1.6, 1.8, 22, 23, true),
+      const _CityBuilding(4.6, 1.8, 1.7, 1.8, 17, 29, false),
+      const _CityBuilding(3.8, 3.8, 1.9, 1.7, 23, 31, true),
+      const _CityBuilding(1.7, 4.5, 1.7, 1.7, 18, 37, false),
+      const _CityBuilding(-2.2, 4.5, 1.9, 1.6, 24, 41, true),
+      const _CityBuilding(-4.2, 3.7, 1.8, 1.8, 19, 43, false),
+      const _CityBuilding(-4.7, 1.6, 1.6, 1.9, 22, 47, true),
+      const _CityBuilding(-4.6, -2.0, 1.8, 1.6, 17, 53, false),
+      const _CityBuilding(-2.35, -2.35, 1.35, 1.35, 13, 59, true),
+      const _CityBuilding(1.15, -2.45, 1.45, 1.35, 15, 61, false),
+      const _CityBuilding(1.2, 1.25, 1.4, 1.45, 16, 67, true),
+      const _CityBuilding(-2.45, 1.2, 1.35, 1.45, 14, 71, false),
+    ];
+
+    if (width < 62) {
+      return <_CityBuilding>[
+        all[12],
+        all[13],
+        all[14],
+        all[15],
+        all[1],
+        all[6],
+      ];
+    }
+
+    if (width < 105) {
+      return <_CityBuilding>[
+        ...all.sublist(0, 4),
+        ...all.sublist(6, 10),
+        ...all.sublist(12),
+      ];
+    }
+
+    if (height < 42) {
+      return all.where((building) => building.height <= 20).toList();
+    }
+
+    return all;
+  }
+
+  _Point? _drawBuilding(_CityBuilding building) {
+    final baseCenter = _iso(
+      building.x + building.w / 2,
+      building.y + building.d / 2,
+      0,
+    );
+    if (baseCenter.x < -24 ||
+        baseCenter.x > width + 24 ||
+        baseCenter.y < -12 ||
+        baseCenter.y > height + 10) {
+      return null;
+    }
+
+    final baseY = _iso(building.x + building.w, building.y + building.d, 0).y;
+    final maxHeight = math.max(5, baseY - 2).toInt();
+    final heightRows = math.min(
+      maxHeight,
+      (building.height * scene.heightScale).round(),
+    ).toInt();
+    if (heightRows < 4) return null;
+
+    final top = <_Point>[
+      _iso(building.x, building.y, heightRows.toDouble()),
+      _iso(building.x + building.w, building.y, heightRows.toDouble()),
+      _iso(
+        building.x + building.w,
+        building.y + building.d,
+        heightRows.toDouble(),
+      ),
+      _iso(building.x, building.y + building.d, heightRows.toDouble()),
+    ];
+    final base = <_Point>[
+      _iso(building.x, building.y, 0),
+      _iso(building.x + building.w, building.y, 0),
+      _iso(building.x + building.w, building.y + building.d, 0),
+      _iso(building.x, building.y + building.d, 0),
+    ];
+
+    final rightFace = <_Point>[top[1], top[2], base[2], base[1]];
+    final leftFace = <_Point>[top[2], top[3], base[3], base[2]];
+
+    _fillPolygon(
+      rightFace,
+      glyphs: const <String>[' ', '·', ':', ' '],
+      tone: _Tone.shadow,
+      seed: building.seed,
+      density: 3,
+    );
+    _fillPolygon(
+      leftFace,
+      glyphs: const <String>[' ', '·', ' ', ':'],
+      tone: _Tone.depth,
+      seed: building.seed + 7,
+      density: 3,
+    );
+    _fillPolygon(
+      top,
+      glyphs: const <String>['░', '·', '░', ' '],
+      tone: _Tone.violetDim,
+      seed: building.seed + 13,
+      density: 4,
+    );
+
+    _drawPolygonEdges(rightFace, _Tone.violetDim);
+    _drawPolygonEdges(leftFace, _Tone.violet);
+    _drawPolygonEdges(top, _Tone.violet);
+
+    _drawFacadeWindows(building, heightRows);
+    _drawRoofDetails(building, heightRows);
+
+    final roofCenter = _iso(
+      building.x + building.w / 2,
+      building.y + building.d / 2,
+      heightRows.toDouble(),
+    );
+    final antennaHeight = 2 + building.seed % 5;
+    canvas.vLine(
+      roofCenter.x,
+      roofCenter.y - antennaHeight,
+      roofCenter.y - 1,
+      '│',
       _Tone.violetDim,
     );
-    for (var x = platformLeft; x <= platformRight; x++) {
-      if ((x + tick) % 9 == 0) {
-        canvas.set(x, platformY, '◆', _Tone.orange);
-      }
-    }
-
-    return _Point(centerX, socketY);
-  }
-
-  void _drawCableNetwork(_Point socket) {
-    if (_towerTips.isEmpty) return;
-
-    final selectedTips = <_Point>[];
-    final divisor = math.max(4, width ~/ 28).toInt();
-    final stride =
-        math.max(1, _towerTips.length ~/ divisor).toInt();
-    for (var i = 0; i < _towerTips.length; i += stride) {
-      selectedTips.add(_towerTips[i]);
-    }
-
-    for (var i = 0; i < selectedTips.length; i++) {
-      final tip = selectedTips[i];
-      final side = tip.x < socket.x ? -1 : 1;
-      final bendY = math.max(
-        tip.y + 2,
-        socket.y - 8 - (i % 4) * 2,
-      ).toInt();
-      final bendX = socket.x + side * (8 + (i % 3) * 5);
-      final path = _polyline(<_Point>[
-        tip,
-        _Point(tip.x, math.min(height - 2, tip.y + 3 + i % 3).toInt()),
-        _Point(bendX, bendY),
-        _Point(socket.x + side * 3, socket.y - 2),
-        socket,
-      ]);
-      if (path.length < 2) continue;
-      _cables.add(path);
-      _stroke(path, _Tone.violet, sparse: true, phase: i);
-      _animateCable(path, i);
-    }
-
-    for (var i = 1; i < selectedTips.length; i++) {
-      final left = selectedTips[i - 1];
-      final right = selectedTips[i];
-      if ((right.x - left.x).abs() > width ~/ 3) continue;
-      final y = math.max(left.y, right.y).toInt() + 2 + i % 3;
-      final path = _polyline(<_Point>[
-        left,
-        _Point(left.x, y),
-        _Point(right.x, y),
-        right,
-      ]);
-      _stroke(path, _Tone.violetDim, sparse: true, phase: i + 4);
-      if ((tick + i * 7) % 19 < 10 || surging) {
-        _drawMovingPulse(
-          path,
-          _positiveMod(tick * 3 + i * 13, math.max(1, path.length).toInt()),
-          radius: surging ? 4 : 2,
-          hot: i.isEven,
-        );
-      }
-    }
-  }
-
-  void _animateCable(List<_Point> path, int seed) {
-    final speed = surging ? 5 : 2 + (energy * 1.4).round();
-    final offset = _positiveMod(tick * speed + seed * 19, path.length);
-    _drawMovingPulse(
-      path,
-      offset,
-      radius: surging ? 5 : 3,
-      hot: seed.isEven,
+    final tip = _Point(roofCenter.x, roofCenter.y - antennaHeight - 1);
+    canvas.set(
+      tip.x,
+      tip.y,
+      (tick + building.seed) % 14 < 3 ? '*' : '·',
+      building.cabled ? _Tone.pink : _Tone.violet,
     );
 
-    if (surging || hovered) {
-      final second = _positiveMod(offset + path.length ~/ 3, path.length);
-      _drawMovingPulse(path, second, radius: 2, hot: !seed.isEven);
+    return tip;
+  }
+
+  void _drawFacadeWindows(_CityBuilding building, int buildingHeight) {
+    final rowStep = buildingHeight < 10 ? 3 : 2;
+
+    for (var z = 2; z < buildingHeight - 2; z += rowStep) {
+      for (var index = 1; index <= 4; index++) {
+        final t = index / 5;
+
+        final right = _iso(
+          building.x + building.w,
+          building.y + building.d * t,
+          z.toDouble(),
+        );
+        final left = _iso(
+          building.x + building.w * t,
+          building.y + building.d,
+          z.toDouble(),
+        );
+
+        final rightHash = _noise(right.x, right.y, building.seed + tick ~/ 9);
+        final leftHash = _noise(left.x, left.y, building.seed + 31 + tick ~/ 11);
+
+        if (rightHash % 5 != 0) {
+          canvas.set(
+            right.x,
+            right.y,
+            rightHash % 9 == 0 ? '▪' : '·',
+            _windowTone(rightHash),
+          );
+        }
+        if (leftHash % 5 != 0) {
+          canvas.set(
+            left.x,
+            left.y,
+            leftHash % 8 == 0 ? '▪' : '·',
+            _windowTone(leftHash),
+          );
+        }
+      }
     }
   }
 
-  void _drawElectricityBetweenCables() {
-    if (_cables.length < 2) return;
-    final arcCount = surging
-        ? math.min(9, _cables.length - 1).toInt()
-        : math.min(4, _cables.length - 1).toInt();
+  int _windowTone(int hash) {
+    return switch (hash % 12) {
+      0 || 1 => _Tone.glow,
+      2 || 3 => _Tone.orange,
+      4 => _Tone.pink,
+      _ => _Tone.violetDim,
+    };
+  }
 
-    for (var i = 0; i < arcCount; i++) {
-      final first = _cables[i];
-      final second = _cables[i + 1];
-      if (first.length < 4 || second.length < 4) continue;
-      final phase = _positiveMod(tick * 2 + i * 11, 100) / 100;
-      final firstIndex = (phase * (first.length - 1)).round();
-      final secondIndex = ((1 - phase * 0.65) * (second.length - 1)).round();
+  void _drawRoofDetails(_CityBuilding building, int buildingHeight) {
+    if (building.w < 1.5 || building.d < 1.4) return;
+
+    final inset = 0.34;
+    final z = buildingHeight + 1.0;
+    final tier = <_Point>[
+      _iso(building.x + inset, building.y + inset, z),
+      _iso(building.x + building.w - inset, building.y + inset, z),
+      _iso(
+        building.x + building.w - inset,
+        building.y + building.d - inset,
+        z,
+      ),
+      _iso(building.x + inset, building.y + building.d - inset, z),
+    ];
+
+    _fillPolygon(
+      tier,
+      glyphs: const <String>['░', ' ', '·'],
+      tone: _Tone.violetDim,
+      seed: building.seed + 89,
+      density: 4,
+    );
+    _drawPolygonEdges(tier, _Tone.violet);
+  }
+
+  _Point _drawCentralPlatform() {
+    const radius = 1.65;
+    const deckZ = 1.1;
+
+    final deck = <_Point>[
+      _iso(-radius, -radius, deckZ),
+      _iso(radius, -radius, deckZ),
+      _iso(radius, radius, deckZ),
+      _iso(-radius, radius, deckZ),
+    ];
+    final base = <_Point>[
+      _iso(-radius, -radius, 0),
+      _iso(radius, -radius, 0),
+      _iso(radius, radius, 0),
+      _iso(-radius, radius, 0),
+    ];
+
+    _fillPolygon(
+      <_Point>[deck[1], deck[2], base[2], base[1]],
+      glyphs: const <String>[' ', ':', '·'],
+      tone: _Tone.shadow,
+      seed: 131,
+      density: 3,
+    );
+    _fillPolygon(
+      <_Point>[deck[2], deck[3], base[3], base[2]],
+      glyphs: const <String>[' ', '·', ':'],
+      tone: _Tone.depth,
+      seed: 137,
+      density: 3,
+    );
+    _fillPolygon(
+      deck,
+      glyphs: const <String>['░', '·', ' ', '░'],
+      tone: _Tone.violetDim,
+      seed: 149 + tick ~/ 8,
+      density: 4,
+    );
+
+    _drawPolygonEdges(<_Point>[deck[1], deck[2], base[2], base[1]], _Tone.violet);
+    _drawPolygonEdges(<_Point>[deck[2], deck[3], base[3], base[2]], _Tone.violet);
+    _drawPolygonEdges(deck, _Tone.pink);
+
+    final center = _iso(0, 0, deckZ);
+    final labelY = math.min(height - 2, center.y + 3).toInt();
+    canvas.write(center.x - 4, labelY, '>_ CINDER', _Tone.white);
+
+    final socket = _iso(0, 0, 5.2);
+    canvas.write(socket.x - 3, socket.y + 1, '╲╱╲╱╲', _Tone.orange);
+    canvas.set(socket.x, socket.y, '◆', _Tone.white);
+
+    return socket;
+  }
+
+  void _drawPowerCables(_Point socket) {
+    if (_roofNodes.isEmpty) return;
+
+    final maximum = width < 72 ? 4 : width < 120 ? 6 : 8;
+    final candidates = <_Point>[];
+
+    for (var i = 0; i < _roofNodes.length; i++) {
+      if (candidates.length >= maximum) break;
+      final node = _roofNodes[i];
+      if ((node.x - socket.x).abs() < 8) continue;
+      candidates.add(node);
+    }
+
+    candidates.sort((a, b) => a.x.compareTo(b.x));
+
+    for (var index = 0; index < candidates.length; index++) {
+      final start = candidates[index];
+      final path = _saggingCable(start, socket, index);
+      _powerCables.add(path);
+      _strokePath(
+        path,
+        index.isEven ? _Tone.violet : _Tone.violetDim,
+        sparse: false,
+      );
+
+      final speed = surging ? 5 : 2 + (energy * 1.2).round();
+      final pulse = _positiveMod(tick * speed + index * 23, path.length);
+      _drawPulse(
+        path,
+        pulse,
+        radius: surging ? 5 : 3,
+        hot: index.isEven,
+      );
+
+      if (hovered || surging) {
+        final second = _positiveMod(pulse + path.length ~/ 2, path.length);
+        _drawPulse(path, second, radius: 2, hot: !index.isEven);
+      }
+    }
+  }
+
+  List<_Point> _saggingCable(_Point start, _Point end, int seed) {
+    final path = <_Point>[];
+    final distance = (start.x - end.x).abs();
+    final steps = math.max(16, distance + (start.y - end.y).abs()).toInt();
+    final sag = 2.0 + distance / 24 + seed % 3;
+
+    for (var step = 0; step <= steps; step++) {
+      final t = step / steps;
+      final x = _lerp(start.x, end.x, t).round();
+      final baseY = _lerp(start.y, end.y, t);
+      final y = (baseY + math.sin(math.pi * t) * sag).round();
+      final point = _Point(x, y);
+      if (path.isEmpty || path.last != point) path.add(point);
+    }
+
+    return path;
+  }
+
+  void _drawCableArcs() {
+    if (_powerCables.length < 2) return;
+
+    final arcLimit = surging ? 4 : hovered ? 2 : 1;
+
+    for (var index = 0; index < arcLimit; index++) {
+      if (!surging && (tick + index * 7) % 31 > 4) continue;
+
+      final first = _powerCables[index % _powerCables.length];
+      final second = _powerCables[(index + 1) % _powerCables.length];
+      final firstIndex = ((first.length - 1) * (0.42 + index * 0.07)).round();
+      final secondIndex = ((second.length - 1) * (0.52 - index * 0.04)).round();
       final start = first[firstIndex.clamp(0, first.length - 1).toInt()];
       final end = second[secondIndex.clamp(0, second.length - 1).toInt()];
-      if ((start.x - end.x).abs() > math.max(22, width ~/ 4).toInt()) {
+
+      if ((start.x - end.x).abs() > width ~/ 4 ||
+          (start.y - end.y).abs() > height ~/ 4) {
         continue;
       }
-      if ((start.y - end.y).abs() > math.max(12, height ~/ 3).toInt()) {
-        continue;
-      }
-      if (!surging && (tick + i * 5) % 17 > 6) continue;
-      _drawJaggedArc(start, end, seed: i * 97 + tick ~/ 2);
+
+      _drawJaggedArc(start, end, seed: tick + index * 97);
     }
   }
 
   void _drawJaggedArc(_Point start, _Point end, {required int seed}) {
-    final segments = math.max(
-      3,
-      math.min(10, (start.x - end.x).abs() ~/ 4 + 3),
-    ).toInt();
     final controls = <_Point>[start];
-    for (var i = 1; i < segments; i++) {
-      final progress = i / segments;
-      final x = (start.x + (end.x - start.x) * progress).round();
-      final y = (start.y + (end.y - start.y) * progress).round();
-      final jitter = (_noise(x, y, seed + i) % 5) - 2;
+    final segments = math.max(4, math.min(10, (start.x - end.x).abs() ~/ 4 + 4))
+        .toInt();
+
+    for (var index = 1; index < segments; index++) {
+      final t = index / segments;
+      final x = _lerp(start.x, end.x, t).round();
+      final y = _lerp(start.y, end.y, t).round();
+      final jitter = (_noise(x, y, seed + index) % 5) - 2;
       controls.add(_Point(x, y + jitter));
     }
     controls.add(end);
 
     final path = _polyline(controls);
-    for (var i = 0; i < path.length; i++) {
-      final point = path[i];
-      if (i % 3 == 0) {
-        canvas.set(point.x, point.y, i.isEven ? '*' : '+', _Tone.white);
-      } else {
-        canvas.set(point.x, point.y, i.isEven ? '╱' : '╲', _Tone.glow);
-      }
-      if (surging && i % 4 == 0) {
+    for (var index = 0; index < path.length; index++) {
+      final point = path[index];
+      canvas.set(
+        point.x,
+        point.y,
+        index % 3 == 0 ? '*' : index.isEven ? '╱' : '╲',
+        index % 3 == 0 ? _Tone.white : _Tone.glow,
+      );
+      if (surging && index % 5 == 0) {
         canvas.set(point.x - 1, point.y, '·', _Tone.pink);
         canvas.set(point.x + 1, point.y, '·', _Tone.pink);
       }
     }
   }
 
-  void _drawPlasmaColumn(_Point socket) {
-    final top = math.max(1, height ~/ 18).toInt();
-    final bottom = math.max(top + 2, socket.y - 1).toInt();
-    final centerX = socket.x;
-    final amplitude = surging ? 1.6 : hovered ? 1.25 : 1;
+  void _drawRoadTraffic() {
+    for (var laneIndex = 0; laneIndex < _roadLanes.length; laneIndex++) {
+      final lane = _roadLanes[laneIndex];
+      if (lane.isEmpty) continue;
 
-    for (var y = bottom; y >= top; y--) {
-      final progress = (bottom - y) / math.max(1, bottom - top);
-      final plume = math.sin((y * 0.72) + tick * 0.28) * 2.2;
-      final turbulence = (_noise(centerX, y, tick ~/ 2) % 7) - 3;
-      final drift = ((plume + turbulence * 0.45) * amplitude).round();
-      final baseRadius = math.max(
-        2,
-        ((1 - progress) * math.max(2, width ~/ 36)).round(),
-      ).toInt();
-      final breathe = ((_noise(y, tick, 83) % 3) - 1) + (surging ? 2 : 0);
-      final radius = math.max(1, baseRadius + breathe).toInt();
-      final rowCenter = centerX + drift;
+      final vehicleCount = width < 70 ? 2 : width < 130 ? 4 : 6;
+      for (var vehicle = 0; vehicle < vehicleCount; vehicle++) {
+        final offset = _positiveMod(
+          tick * (1 + laneIndex) +
+              vehicle * math.max(8, lane.length ~/ vehicleCount).toInt(),
+          lane.length,
+        );
+        final point = lane[offset];
+        final previous = lane[_positiveMod(offset - 1, lane.length)];
+        final next = lane[_positiveMod(offset + 1, lane.length)];
+        final glyph = _pathGlyph(previous, next);
 
-      for (var x = rowCenter - radius - 2; x <= rowCenter + radius + 2; x++) {
-        final distance = (x - rowCenter).abs();
-        final heat = _noise(x, y, tick + y * 3);
-        if (distance > radius && heat % 4 != 0) continue;
+        canvas.set(point.x, point.y, '◆', _Tone.white);
+        canvas.set(previous.x, previous.y, glyph, _Tone.orange);
+        if (surging) canvas.set(next.x, next.y, '·', _Tone.glow);
+      }
+    }
+  }
 
-        if (distance == 0 || (distance <= 1 && heat % 3 != 0)) {
-          canvas.set(x, y, heat.isEven ? '#' : '*', _Tone.white);
+  void _drawCorePlasma(_Point socket) {
+    final plumeHeight = math.max(
+      9,
+      math.min(24, (height * 0.29 * energy).round()),
+    ).toInt();
+    final topY = math.max(1, socket.y - plumeHeight).toInt();
+
+    for (var y = socket.y - 1; y >= topY; y--) {
+      final progress = (socket.y - y) / math.max(1, socket.y - topY);
+      final envelope = math.sin(math.pi * math.min(1, progress * 0.92));
+      final baseRadius = (1.4 + envelope * 3.8 * energy).round();
+      final taper = progress > 0.72
+          ? ((1 - progress) / 0.28).clamp(0, 1).toDouble()
+          : 1.0;
+      final radius = math.max(1, (baseRadius * taper).round()).toInt();
+      final turbulence = math.sin(y * 0.78 + tick * 0.31) +
+          math.sin(y * 0.31 - tick * 0.19) * 0.6;
+      final drift = (turbulence * (surging ? 2.1 : 1.3)).round();
+      final center = socket.x + drift;
+
+      for (var x = center - radius - 2; x <= center + radius + 2; x++) {
+        final distance = (x - center).abs();
+        final heat = _noise(x, y, tick * 3 + y);
+
+        if (distance > radius && heat % 6 != 0) continue;
+
+        if (distance == 0 || (distance <= 1 && heat % 4 != 0)) {
+          canvas.set(
+            x,
+            y,
+            heat.isEven ? '█' : '#',
+            _Tone.white,
+          );
         } else if (distance <= math.max(1, radius ~/ 2).toInt()) {
           canvas.set(
             x,
             y,
-            const <String>['#', '*', '+'][heat % 3],
+            const <String>['▓', '#', '*'][heat % 3],
             _Tone.glow,
           );
         } else if (distance <= radius) {
           canvas.set(
             x,
             y,
-            const <String>['*', '+', ':'][heat % 3],
+            const <String>['▒', '*', '+'][heat % 3],
             _Tone.orange,
           );
         } else {
-          canvas.set(x, y, heat.isEven ? '·' : ':', _Tone.pink);
+          canvas.set(
+            x,
+            y,
+            heat.isEven ? '·' : ':',
+            _Tone.pink,
+          );
         }
       }
-
-      if ((y + tick) % 5 == 0) {
-        canvas.set(rowCenter - radius - 3, y, '·', _Tone.pink);
-        canvas.set(rowCenter + radius + 3, y, '·', _Tone.pink);
-      }
     }
 
-    final crownY = math.max(1, top - 1).toInt();
-    canvas.set(centerX - 2, crownY + 1, '╲', _Tone.pink);
-    canvas.set(centerX, crownY, '*', _Tone.white);
-    canvas.set(centerX + 2, crownY + 1, '╱', _Tone.pink);
+    for (var particle = 0; particle < (surging ? 18 : 9); particle++) {
+      final seed = _noise(particle, tick ~/ 2, 211);
+      final y = topY + _positiveMod(seed - tick * (1 + particle % 2), plumeHeight);
+      final spread = math.max(3, ((socket.y - y) * 0.35).round()).toInt();
+      final x = socket.x + (seed % (spread * 2 + 1)) - spread;
+      canvas.set(
+        x,
+        y,
+        particle % 4 == 0 ? '*' : '·',
+        particle % 3 == 0 ? _Tone.white : _Tone.pink,
+      );
+    }
   }
 
-  void _drawEnergyHalo(_Point socket) {
-    final maximumRadius = math.min(width ~/ 5, height ~/ 3).toInt();
-    if (maximumRadius < 4) return;
-    final rings = surging ? 4 : 2;
+  void _drawCoreAura(_Point socket) {
+    final ringCount = surging ? 4 : hovered ? 3 : 2;
+    final maximumRadius = math.max(5, math.min(width ~/ 8, height ~/ 4)).toInt();
 
-    for (var ring = 0; ring < rings; ring++) {
-      final radius = 4 + _positiveMod(tick + ring * 7, maximumRadius);
+    for (var ring = 0; ring < ringCount; ring++) {
+      final radius = 4 + _positiveMod(tick ~/ 2 + ring * 7, maximumRadius);
       for (var dx = -radius; dx <= radius; dx++) {
-        final dy = (radius - dx.abs()) ~/ 2;
-        if ((_noise(dx, dy, tick + ring) % 4) != 0) continue;
-        final tone = ring.isEven ? _Tone.pink : _Tone.orange;
-        canvas.set(socket.x + dx, socket.y + dy, '·', tone);
-        canvas.set(socket.x + dx, socket.y - dy, '·', tone);
+        if ((dx + ring + tick) % 3 != 0) continue;
+        final dy = math.max(1, (radius - dx.abs()) ~/ 3).toInt();
+        final tone = ring.isEven ? _Tone.pink : _Tone.orangeDim;
+        canvas.set(socket.x + dx, socket.y + dy + 2, '·', tone);
+        canvas.set(socket.x + dx, socket.y - dy + 2, '·', tone);
       }
     }
   }
 
-  void _drawTraffic() {
-    for (var roadIndex = 0; roadIndex < _roads.length; roadIndex++) {
-      final path = _roads[roadIndex];
-      if (path.isEmpty) continue;
-      final vehicleCount = math.max(2, width ~/ 48).toInt();
-      for (var vehicle = 0; vehicle < vehicleCount; vehicle++) {
-        final offset = _positiveMod(
-          tick * (2 + roadIndex % 3) +
-              vehicle * math.max(7, path.length ~/ vehicleCount).toInt(),
-          path.length,
-        );
-        final point = path[offset];
-        canvas.set(
-          point.x,
-          point.y,
-          roadIndex.isEven ? '>' : '<',
-          _Tone.white,
-        );
-        final tail = path[_positiveMod(offset - 1 - roadIndex % 2, path.length)];
-        canvas.set(tail.x, tail.y, '─', _Tone.orange);
-      }
-    }
-  }
+  void _drawAmbientLife(_Point socket) {
+    final count = math.max(8, width * height ~/ 850).toInt();
 
-  void _drawAmbientSparks() {
-    final count = math.max(12, width * height ~/ 330).toInt();
-    for (var i = 0; i < count; i++) {
-      final seed = _noise(i, tick ~/ 2, 101);
-      final x = _positiveMod(seed * 17 + tick * (i.isEven ? 1 : -1), width);
-      final y = _positiveMod(seed * 7 - tick + i * 11, height);
-      final phase = _positiveMod(tick + i * 3, 9);
+    for (var index = 0; index < count; index++) {
+      final seed = _noise(index, tick ~/ 2, 251);
+      final x = _positiveMod(seed * 13 + tick * (index.isEven ? 1 : -1), width);
+      final y = _positiveMod(seed * 7 - tick + index * 17, height);
+      final distanceFromCore = (x - socket.x).abs() + (y - socket.y).abs();
+      if (distanceFromCore < 10) continue;
+
+      final phase = _positiveMod(tick + index * 5, 17);
       if (phase < 2) {
-        canvas.set(x, y, phase == 0 ? '*' : '+', _Tone.white);
-      } else if (phase < 5) {
+        canvas.set(x, y, '*', _Tone.white);
+      } else if (phase < 6) {
         canvas.set(x, y, '·', _Tone.pink);
       } else {
-        canvas.set(x, y, '.', _Tone.orange);
+        canvas.set(x, y, '.', _Tone.orangeDim);
       }
     }
   }
 
   void _drawDrone() {
-    if (width < 70 || height < 24) return;
-    final span = math.max(12, width - 32).toInt();
+    if (width < 86 || height < 30) return;
+
+    final span = math.max(18, width - 42).toInt();
     final travel = _positiveMod(tick, span * 2);
-    final x = travel < span ? 16 + travel : 16 + (span * 2 - travel);
+    final x = travel < span ? 20 + travel : 20 + span * 2 - travel;
     final y = math.max(
-      5,
-      height ~/ 3 + (math.sin(tick * 0.13) * 3).round(),
+      4,
+      scene.horizonY - 12 + (math.sin(tick * 0.13) * 2).round(),
     ).toInt();
     final facingRight = travel < span;
+
     canvas.write(x - 2, y, facingRight ? '─[>]' : '[<]─', _Tone.white);
     canvas.set(facingRight ? x - 3 : x + 3, y, '·', _Tone.orange);
   }
 
-  void _drawMovingPulse(
+  List<_Point> _sampleLogicalLine({
+    required double x1,
+    required double y1,
+    required double x2,
+    required double y2,
+    required double z,
+  }) {
+    final distance = math.max((x2 - x1).abs(), (y2 - y1).abs());
+    final steps = math.max(8, (distance * scene.tileX * 1.4).round()).toInt();
+    final points = <_Point>[];
+
+    for (var step = 0; step <= steps; step++) {
+      final t = step / steps;
+      final point = _iso(
+        _lerp(x1, x2, t),
+        _lerp(y1, y2, t),
+        z,
+      );
+      if (points.isEmpty || points.last != point) points.add(point);
+    }
+
+    return points;
+  }
+
+  _Point _iso(double x, double y, double z) {
+    return _Point(
+      scene.centerX + ((x - y) * scene.tileX).round(),
+      scene.horizonY + ((x + y) * scene.tileY).round() - z.round(),
+    );
+  }
+
+  void _fillPolygon(
+    List<_Point> polygon, {
+    required List<String> glyphs,
+    required int tone,
+    required int seed,
+    required int density,
+  }) {
+    if (polygon.length < 3) return;
+
+    var minX = polygon.first.x;
+    var maxX = polygon.first.x;
+    var minY = polygon.first.y;
+    var maxY = polygon.first.y;
+
+    for (final point in polygon.skip(1)) {
+      minX = math.min(minX, point.x).toInt();
+      maxX = math.max(maxX, point.x).toInt();
+      minY = math.min(minY, point.y).toInt();
+      maxY = math.max(maxY, point.y).toInt();
+    }
+
+    minX = minX.clamp(0, width - 1).toInt();
+    maxX = maxX.clamp(0, width - 1).toInt();
+    minY = minY.clamp(0, height - 1).toInt();
+    maxY = maxY.clamp(0, height - 1).toInt();
+
+    for (var y = minY; y <= maxY; y++) {
+      for (var x = minX; x <= maxX; x++) {
+        if (!_pointInsidePolygon(x + 0.5, y + 0.5, polygon)) continue;
+        final hash = _noise(x, y, seed);
+        if (hash % density == 0) continue;
+        final glyph = glyphs[hash % glyphs.length];
+        if (glyph == ' ') continue;
+        canvas.set(x, y, glyph, tone);
+      }
+    }
+  }
+
+  bool _pointInsidePolygon(double x, double y, List<_Point> polygon) {
+    var inside = false;
+
+    for (var i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+      final xi = polygon[i].x.toDouble();
+      final yi = polygon[i].y.toDouble();
+      final xj = polygon[j].x.toDouble();
+      final yj = polygon[j].y.toDouble();
+
+      final intersects = ((yi > y) != (yj > y)) &&
+          (x < (xj - xi) * (y - yi) /
+                  ((yj - yi).abs() < 0.0001 ? 0.0001 : yj - yi) +
+              xi);
+      if (intersects) inside = !inside;
+    }
+
+    return inside;
+  }
+
+  void _drawPolygonEdges(List<_Point> polygon, int tone) {
+    if (polygon.length < 2) return;
+
+    for (var index = 0; index < polygon.length; index++) {
+      final start = polygon[index];
+      final end = polygon[(index + 1) % polygon.length];
+      _strokePath(_line(start, end), tone);
+    }
+  }
+
+  void _strokeDashed(
+    List<_Point> path,
+    int tone, {
+    required int dash,
+    required int gap,
+    required int phase,
+  }) {
+    final period = math.max(1, dash + gap).toInt();
+
+    for (var index = 0; index < path.length; index++) {
+      if (_positiveMod(index + phase, period) >= dash) continue;
+      final previous = index > 0 ? path[index - 1] : path[index];
+      final next = index < path.length - 1 ? path[index + 1] : path[index];
+      canvas.set(path[index].x, path[index].y, _pathGlyph(previous, next), tone);
+    }
+  }
+
+  void _strokePath(
+    List<_Point> path,
+    int tone, {
+    bool sparse = false,
+    int phase = 0,
+  }) {
+    for (var index = 0; index < path.length; index++) {
+      if (sparse && (index + phase) % 5 == 0) continue;
+      final previous = index > 0 ? path[index - 1] : path[index];
+      final next = index < path.length - 1 ? path[index + 1] : path[index];
+      canvas.set(path[index].x, path[index].y, _pathGlyph(previous, next), tone);
+    }
+  }
+
+  void _drawPulse(
     List<_Point> path,
     int center, {
     required int radius,
     required bool hot,
   }) {
     if (path.isEmpty) return;
+
     for (var offset = -radius; offset <= radius; offset++) {
       final point = path[_positiveMod(center + offset, path.length)];
       final distance = offset.abs();
+
       if (distance == 0) {
-        canvas.set(point.x, point.y, '*', _Tone.white);
-      } else if (distance <= 1) {
-        canvas.set(point.x, point.y, hot ? '#' : '+', _Tone.glow);
+        canvas.set(point.x, point.y, '◆', _Tone.white);
+      } else if (distance == 1) {
+        canvas.set(point.x, point.y, '*', _Tone.glow);
       } else {
         canvas.set(
           point.x,
@@ -853,10 +1093,12 @@ class _ElectricCityPainter {
     final result = <_Point>[];
     if (controls.isEmpty) return result;
     result.add(controls.first);
-    for (var i = 1; i < controls.length; i++) {
-      final segment = _line(controls[i - 1], controls[i]);
+
+    for (var index = 1; index < controls.length; index++) {
+      final segment = _line(controls[index - 1], controls[index]);
       if (segment.isNotEmpty) result.addAll(segment.skip(1));
     }
+
     return result;
   }
 
@@ -889,26 +1131,16 @@ class _ElectricCityPainter {
     return points;
   }
 
-  void _stroke(
-    List<_Point> path,
-    int tone, {
-    bool sparse = false,
-    int phase = 0,
-  }) {
-    for (var i = 0; i < path.length; i++) {
-      if (sparse && (i + phase + tick ~/ 4) % 6 == 0) continue;
-      final previous = i > 0 ? path[i - 1] : path[i];
-      final next = i < path.length - 1 ? path[i + 1] : path[i];
-      canvas.set(path[i].x, path[i].y, _pathGlyph(previous, next), tone);
-    }
-  }
-
   String _pathGlyph(_Point previous, _Point next) {
     final dx = next.x - previous.x;
     final dy = next.y - previous.y;
     if (dx == 0) return '│';
     if (dy == 0) return '─';
     return dx.sign == dy.sign ? '╲' : '╱';
+  }
+
+  double _lerp(num start, num end, double t) {
+    return (start + (end - start) * t).toDouble();
   }
 
   int _noise(int x, int y, int seed) {
@@ -922,6 +1154,74 @@ class _ElectricCityPainter {
     final result = value % modulus;
     return result < 0 ? result + modulus : result;
   }
+}
+
+class _Scene {
+  const _Scene({
+    required this.centerX,
+    required this.horizonY,
+    required this.tileX,
+    required this.tileY,
+    required this.radius,
+    required this.heightScale,
+  });
+
+  factory _Scene.fromViewport(int width, int height) {
+    final compact = width < 72;
+    final tileX = math.max(
+      4,
+      math.min(compact ? 5 : 9, width ~/ (compact ? 10 : 24)),
+    ).toInt();
+    final tileY = math.max(
+      1,
+      math.min(3, (height * 0.035).round()),
+    ).toInt();
+    final radius = width < 62
+        ? 3.15
+        : width < 105
+            ? 4.45
+            : 5.65;
+    final horizon = math.max(
+      12,
+      math.min(height - 18, (height * (compact ? 0.44 : 0.49)).round()),
+    ).toInt();
+
+    return _Scene(
+      centerX: width ~/ 2,
+      horizonY: horizon,
+      tileX: tileX,
+      tileY: tileY,
+      radius: radius,
+      heightScale: height < 42 ? 0.68 : height < 62 ? 0.84 : 1,
+    );
+  }
+
+  final int centerX;
+  final int horizonY;
+  final int tileX;
+  final int tileY;
+  final double radius;
+  final double heightScale;
+}
+
+class _CityBuilding {
+  const _CityBuilding(
+    this.x,
+    this.y,
+    this.w,
+    this.d,
+    this.height,
+    this.seed,
+    this.cabled,
+  );
+
+  final double x;
+  final double y;
+  final double w;
+  final double d;
+  final int height;
+  final int seed;
+  final bool cabled;
 }
 
 class _WorldCanvas {
@@ -942,14 +1242,13 @@ class _WorldCanvas {
 
   void set(int x, int y, String glyph, int tone) {
     if (x < 0 || x >= width || y < 0 || y >= height || glyph.isEmpty) return;
-    final current = _rows[y][x];
-    if (tone < current.tone) return;
     _rows[y][x] = _WorldCell(glyph, tone);
   }
 
   void write(int x, int y, String text, int tone) {
-    for (var index = 0; index < text.length; index++) {
-      set(x + index, y, text[index], tone);
+    final glyphs = text.runes.map(String.fromCharCode).toList(growable: false);
+    for (var index = 0; index < glyphs.length; index++) {
+      set(x + index, y, glyphs[index], tone);
     }
   }
 
@@ -1027,37 +1326,53 @@ class _Point {
 
   final int x;
   final int y;
+
+  @override
+  bool operator ==(Object other) {
+    return other is _Point && other.x == x && other.y == y;
+  }
+
+  @override
+  int get hashCode => Object.hash(x, y);
 }
 
 abstract class _Tone {
   static const int empty = 0;
   static const int star = 1;
-  static const int depth = 2;
-  static const int violetDim = 3;
-  static const int violet = 4;
-  static const int orange = 5;
-  static const int pink = 6;
-  static const int glow = 7;
-  static const int white = 8;
+  static const int shadow = 2;
+  static const int depth = 3;
+  static const int violetDim = 4;
+  static const int orangeDim = 5;
+  static const int violet = 6;
+  static const int orange = 7;
+  static const int pink = 8;
+  static const int glow = 9;
+  static const int white = 10;
 }
 
 abstract class _Palette {
   static const Color voidBlack = Color.fromRGB(2, 3, 8);
-  static const Color star = Color.fromRGB(75, 42, 96);
-  static const Color depth = Color.fromRGB(50, 34, 73);
-  static const Color violetDim = Color.fromRGB(91, 48, 132);
+  static const Color star = Color.fromRGB(44, 29, 62);
+  static const Color shadow = Color.fromRGB(35, 24, 53);
+  static const Color depth = Color.fromRGB(58, 35, 83);
+  static const Color violetDim = Color.fromRGB(105, 55, 151);
+  static const Color orangeDim = Color.fromRGB(140, 65, 20);
   static const Color violet = Color.fromRGB(190, 84, 246);
-  static const Color pink = Color.fromRGB(255, 62, 184);
   static const Color orange = Color.fromRGB(232, 105, 27);
+  static const Color pink = Color.fromRGB(255, 62, 184);
   static const Color glow = Color.fromRGB(255, 174, 56);
   static const Color white = Color.fromRGB(255, 241, 224);
 
   static TextStyle? styleFor(int tone) {
     return switch (tone) {
       _Tone.star => const TextStyle(color: star, fontWeight: FontWeight.dim),
+      _Tone.shadow =>
+        const TextStyle(color: shadow, fontWeight: FontWeight.dim),
       _Tone.depth => const TextStyle(color: depth, fontWeight: FontWeight.dim),
       _Tone.violetDim =>
         const TextStyle(color: violetDim, fontWeight: FontWeight.dim),
+      _Tone.orangeDim =>
+        const TextStyle(color: orangeDim, fontWeight: FontWeight.dim),
       _Tone.violet =>
         const TextStyle(color: violet, fontWeight: FontWeight.bold),
       _Tone.orange =>
