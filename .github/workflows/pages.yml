@@ -28,7 +28,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -37,6 +37,75 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  repair-city-branch:
+    name: Repair city feature branch
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout feature branch
+        uses: actions/checkout@v6
+        with:
+          ref: feature/cinder-dashboard-world-v3
+          fetch-depth: 0
+      - name: Install Dart
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+      - name: Remove iframe-unsafe global focus state
+        run: |
+          git pull --ff-only origin feature/cinder-dashboard-world-v3
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('tool/web_showcase_world.dart')
+          source = path.read_text(encoding='utf-8')
+          source = source.replace('  int _phase = 0;\n', '')
+          source = source.replace('  bool _paused = false;\n', '')
+          source = source.replace('      if (!mounted || _paused) return;\n', '      if (!mounted) return;\n')
+          source = source.replace(
+              '''    return Focusable(
+      focused: true,
+      onKeyEvent: _handleKey,
+      child: MouseRegion(''',
+              '''    return MouseRegion(''',
+              1,
+          )
+          source = source.replace(
+              '''        ),
+      ),
+    );
+  }
+
+  bool _handleKey(dynamic event) {''',
+              '''        ),
+      );
+  }
+
+  bool _handleKey(dynamic event) {''',
+              1,
+          )
+          start = source.index('  bool _handleKey(dynamic event) {')
+          end = source.index('  void _surge() {', start)
+          source = source[:start] + source[end:]
+          source = source.replace('                tick: _tick + _phase,\n', '                tick: _tick,\n')
+          source = source.replace(
+              '/// input handling, hover response, and responsive terminal composition.',
+              '/// hover response, click interaction, and responsive terminal composition.',
+          )
+          path.write_text(source, encoding='utf-8')
+          PY
+          dart pub get
+          dart format tool/web_showcase_world.dart example/web_showcase.dart
+          dart analyze --fatal-infos
+      - name: Commit feature fix
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tool/web_showcase_world.dart example/web_showcase.dart
+          git commit -m "fix(web): keep the embedded city outside global focus state"
+          git push origin HEAD:feature/cinder-dashboard-world-v3
+
   build:
     name: Build and verify static site
     runs-on: ubuntu-latest
