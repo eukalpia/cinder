@@ -2,10 +2,16 @@ import '@xterm/xterm/css/xterm.css';
 import './globals.css';
 import './tui.css';
 import './control-room.css';
+import './city-runtime.css';
 import './site-polish.css';
 import './site-polish-fixes.css';
 import './a11y.css';
 import './runtime-modes.css';
+import './responsive-overhaul.css';
+import './responsive-corrections.css';
+import './example-ui-polish.css';
+import './theme-gallery.css';
+import './living-city.css';
 import { RootProvider } from 'fumadocs-ui/provider/next';
 import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
@@ -79,7 +85,7 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   colorScheme: 'dark',
-  themeColor: '#05070b',
+  themeColor: '#030409',
   width: 'device-width',
   initialScale: 1,
 };

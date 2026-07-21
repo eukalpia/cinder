@@ -46,49 +46,103 @@ export function ExampleDeck({ examples }: { examples: CinderExample[] }) {
     });
   }, [category, examples, query, runtime]);
 
+  const activeFilters = Number(Boolean(query.trim())) + Number(category !== 'All') + Number(runtime !== 'all');
+  const runnableCount = filtered.filter((example) => example.runnable).length;
+
+  const clearFilters = () => {
+    setQuery('');
+    setCategory('All');
+    setRuntime('all');
+  };
+
   return (
     <section className="example-index" aria-labelledby="example-index-title">
       <div className="example-index__tools">
         <label className="example-search">
           <span>Find an example</span>
-          <input
-            type="search"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="TextField, renderer, image…"
-          />
+          <div className="example-search__field">
+            <span aria-hidden="true">⌕</span>
+            <input
+              type="search"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="TextField, renderer, image…"
+            />
+            {query ? (
+              <button type="button" onClick={() => setQuery('')} aria-label="Clear search">
+                ×
+              </button>
+            ) : null}
+          </div>
         </label>
 
-        <div className="runtime-filter" aria-label="Filter examples by runtime mode">
-          {runtimeOrder.map((value) => (
-            <button
-              type="button"
-              key={value}
-              className={value === runtime ? 'is-active' : undefined}
-              onClick={() => setRuntime(value)}
-            >
-              {value === 'all' ? 'All runtimes' : runtimeModeLabel(value)}
-            </button>
-          ))}
+        <div className="example-filter-group">
+          <div className="example-filter-group__label">
+            <span>Runtime</span>
+            <small>{runtime === 'all' ? 'all modes' : runtimeModeLabel(runtime)}</small>
+          </div>
+          <div className="runtime-filter" aria-label="Filter examples by runtime mode">
+            {runtimeOrder.map((value) => {
+              const count =
+                value === 'all'
+                  ? examples.length
+                  : examples.filter((example) => example.runtimeMode === value).length;
+              return (
+                <button
+                  type="button"
+                  key={value}
+                  className={value === runtime ? 'is-active' : undefined}
+                  onClick={() => setRuntime(value)}
+                >
+                  <span>{value === 'all' ? 'All runtimes' : runtimeModeLabel(value)}</span>
+                  <b>{count}</b>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
-        <div className="category-filter" aria-label="Filter examples by category">
-          {['All', ...categories].map((value) => (
-            <button
-              type="button"
-              key={value}
-              className={value === category ? 'is-active' : undefined}
-              onClick={() => setCategory(value)}
-            >
-              {value}
-            </button>
-          ))}
+        <div className="example-filter-group">
+          <div className="example-filter-group__label">
+            <span>Category</span>
+            <small>{category}</small>
+          </div>
+          <div className="category-filter" aria-label="Filter examples by category">
+            {['All', ...categories].map((value) => {
+              const count =
+                value === 'All'
+                  ? examples.length
+                  : examples.filter((example) => example.category === value).length;
+              return (
+                <button
+                  type="button"
+                  key={value}
+                  className={value === category ? 'is-active' : undefined}
+                  onClick={() => setCategory(value)}
+                >
+                  <span>{value}</span>
+                  <b>{count}</b>
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 
       <div className="example-index__summary" id="example-index-title">
-        <span>{filtered.length} detailed previews</span>
-        <span>{filtered.filter((example) => example.runnable).length} run in the browser</span>
+        <div>
+          <strong>{filtered.length}</strong>
+          <span> detailed previews</span>
+          <i>·</i>
+          <strong>{runnableCount}</strong>
+          <span> live in browser</span>
+        </div>
+        <div>
+          {activeFilters > 0 ? <span>{activeFilters} active filters</span> : <span>Showing the full repository</span>}
+          {activeFilters > 0 ? (
+            <button type="button" onClick={clearFilters}>Reset filters</button>
+          ) : null}
+        </div>
       </div>
 
       <div className="example-gallery">
@@ -128,7 +182,9 @@ export function ExampleDeck({ examples }: { examples: CinderExample[] }) {
 
       {filtered.length === 0 ? (
         <div className="example-index__empty">
-          No matching repository example. Change the search or filters.
+          <strong>No repository example matches.</strong>
+          <p>Try another phrase or clear the active runtime and category filters.</p>
+          <button type="button" onClick={clearFilters}>Show all examples</button>
         </div>
       ) : null}
     </section>

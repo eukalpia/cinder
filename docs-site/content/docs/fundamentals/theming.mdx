@@ -4,6 +4,8 @@ description: Applying consistent colors and styles across your app
 icon: palette
 ---
 
+import { ThemeGallery } from '@/components/theme-gallery';
+
 Cinder includes a theming system that makes it easy to apply consistent colors across your app. You can use built-in themes, customize them, or create your own.
 
 ## Quick start
@@ -88,32 +90,7 @@ Cinder includes six popular themes:
 
 ### Theme gallery
 
-<div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '24px', marginTop: '16px', marginBottom: '24px' }}>
-  <figure style={{ margin: 0 }}>
-    <img src="/assets/theme-dark.png" alt="Dark theme" style={{ borderRadius: '8px', width: '100%', display: 'block' }} />
-    <figcaption style={{ textAlign: 'center', marginTop: '8px', fontSize: '14px', color: 'var(--fd-foreground-secondary)' }}>Dark (Default)</figcaption>
-  </figure>
-  <figure style={{ margin: 0 }}>
-    <img src="/assets/theme-light.png" alt="Light theme" style={{ borderRadius: '8px', width: '100%', display: 'block' }} />
-    <figcaption style={{ textAlign: 'center', marginTop: '8px', fontSize: '14px', color: 'var(--fd-foreground-secondary)' }}>Light</figcaption>
-  </figure>
-  <figure style={{ margin: 0 }}>
-    <img src="/assets/theme-nord.png" alt="Nord theme" style={{ borderRadius: '8px', width: '100%', display: 'block' }} />
-    <figcaption style={{ textAlign: 'center', marginTop: '8px', fontSize: '14px', color: 'var(--fd-foreground-secondary)' }}>Nord</figcaption>
-  </figure>
-  <figure style={{ margin: 0 }}>
-    <img src="/assets/theme-dracula.png" alt="Dracula theme" style={{ borderRadius: '8px', width: '100%', display: 'block' }} />
-    <figcaption style={{ textAlign: 'center', marginTop: '8px', fontSize: '14px', color: 'var(--fd-foreground-secondary)' }}>Dracula</figcaption>
-  </figure>
-  <figure style={{ margin: 0 }}>
-    <img src="/assets/theme-catppuccin.png" alt="Catppuccin Mocha theme" style={{ borderRadius: '8px', width: '100%', display: 'block' }} />
-    <figcaption style={{ textAlign: 'center', marginTop: '8px', fontSize: '14px', color: 'var(--fd-foreground-secondary)' }}>Catppuccin Mocha</figcaption>
-  </figure>
-  <figure style={{ margin: 0 }}>
-    <img src="/assets/theme-gruvbox.png" alt="Gruvbox Dark theme" style={{ borderRadius: '8px', width: '100%', display: 'block' }} />
-    <figcaption style={{ textAlign: 'center', marginTop: '8px', fontSize: '14px', color: 'var(--fd-foreground-secondary)' }}>Gruvbox Dark</figcaption>
-  </figure>
-</div>
+<ThemeGallery />
 
 Switch themes by changing the `data` property:
 

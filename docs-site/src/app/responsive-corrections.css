@@ -1,0 +1,28 @@
+@import './city-launcher.css';
+
+/* Browser-safe corrections for the final responsive layer. */
+
+.tui-frame {
+  width: 100%;
+  min-height: calc(100dvh - 16px);
+}
+
+.marketing-shell,
+.example-page .marketing-shell {
+  width: min(calc(100% - clamp(16px, 2.3vw, 48px)), var(--cinder-shell));
+}
+
+.preview-city__sky i {
+  width: 2px;
+  height: 2px;
+  box-shadow: 0 0 8px #cf6aff;
+}
+
+@media (max-width: 820px) {
+  .tui-frame,
+  .marketing-shell,
+  .example-page .marketing-shell {
+    width: 100%;
+    min-height: 100dvh;
+  }
+}

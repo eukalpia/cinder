@@ -23,11 +23,15 @@ export function WebTerminal({
   bundle,
   runnable,
   reason,
+  embedded = false,
+  cinematic = false,
 }: {
   title: string;
   bundle: string | null;
   runnable: boolean;
   reason: string | null;
+  embedded?: boolean;
+  cinematic?: boolean;
 }) {
   const hostRef = useRef<HTMLDivElement>(null);
   const terminalRef = useRef<XtermTerminal | null>(null);
@@ -50,6 +54,7 @@ export function WebTerminal({
     let lastMeasuredHeight = -1;
     let lastColumns = -1;
     let lastRows = -1;
+    let bridge: CinderBridge | null = null;
     const subscriptions: IDisposable[] = [];
 
     host.dataset.outputWrites = '0';
@@ -73,34 +78,34 @@ export function WebTerminal({
           cursorWidth: 1,
           fontFamily:
             '"IBM Plex Mono", "JetBrains Mono", "Cascadia Code", ui-monospace, monospace',
-          fontSize: 13,
-          lineHeight: 1,
+          fontSize: cinematic ? 8 : embedded ? 12 : 13,
+          lineHeight: cinematic ? 1.04 : 1,
           letterSpacing: 0,
-          scrollback: 1000,
+          scrollback: embedded ? 0 : 1000,
           allowTransparency: false,
           convertEol: false,
           drawBoldTextInBrightColors: false,
           screenReaderMode: true,
           theme: {
-            background: '#06080d',
+            background: '#030409',
             foreground: '#d8d5e2',
             cursor: '#ff8b3d',
-            cursorAccent: '#06080d',
+            cursorAccent: '#030409',
             selectionBackground: '#55311f',
-            black: '#06080d',
+            black: '#030409',
             red: '#ff6b73',
             green: '#8dc891',
             yellow: '#e6bf69',
             blue: '#8ea7d8',
-            magenta: '#aa8ee8',
+            magenta: '#cb5fff',
             cyan: '#77bec2',
             white: '#d8d5e2',
             brightBlack: '#626775',
             brightRed: '#ff858b',
             brightGreen: '#a4d9a7',
-            brightYellow: '#f0ce82',
+            brightYellow: '#ffbc42',
             brightBlue: '#a7bce6',
-            brightMagenta: '#c0a8f2',
+            brightMagenta: '#e0a0ff',
             brightCyan: '#91d0d3',
             brightWhite: '#ffffff',
           },
@@ -110,46 +115,57 @@ export function WebTerminal({
         terminal.open(host);
         terminalRef.current = terminal;
 
-        const fitIfNeeded = () => {
+        const fitIfNeeded = (force = false) => {
           if (disposed) return;
           const bounds = host.getBoundingClientRect();
           const width = Math.round(bounds.width);
           const height = Math.round(bounds.height);
           if (width < 2 || height < 2) return;
-          if (width === lastMeasuredWidth && height === lastMeasuredHeight) return;
+          if (!force && width === lastMeasuredWidth && height === lastMeasuredHeight) return;
 
           lastMeasuredWidth = width;
           lastMeasuredHeight = height;
 
           try {
             const proposed = fitAddon.proposeDimensions();
-            if (!proposed) return;
-            if (proposed.cols === lastColumns && proposed.rows === lastRows) return;
+            if (!proposed || proposed.cols < 2 || proposed.rows < 2) return;
+            if (!force && proposed.cols === lastColumns && proposed.rows === lastRows) return;
             lastColumns = proposed.cols;
             lastRows = proposed.rows;
             terminal.resize(proposed.cols, proposed.rows);
+            if (bridge) {
+              updateBridgeGeometry(bridge, host, proposed.cols, proposed.rows);
+            }
           } catch {
             // Hidden tabs and freshly mounted iframes can report zero geometry.
           }
         };
 
-        const scheduleFit = (immediate = false) => {
+        const scheduleFit = (immediate = false, force = false) => {
           if (fitTimer !== null) clearTimeout(fitTimer);
           if (animationFrame !== null) cancelAnimationFrame(animationFrame);
 
+          const run = () => {
+            animationFrame = requestAnimationFrame(() => fitIfNeeded(force));
+          };
+
           if (immediate) {
-            animationFrame = requestAnimationFrame(fitIfNeeded);
+            run();
             return;
           }
 
-          fitTimer = setTimeout(() => {
-            animationFrame = requestAnimationFrame(fitIfNeeded);
-          }, 90);
+          fitTimer = setTimeout(run, 72);
         };
 
-        scheduleFit(true);
+        try {
+          fitAddon.fit();
+          lastColumns = terminal.cols;
+          lastRows = terminal.rows;
+        } catch {
+          // The forced frame below retries after layout has settled.
+        }
 
-        const bridge: CinderBridge = {
+        bridge = {
           width: terminal.cols,
           height: terminal.rows,
           onOutput: (data) => {
@@ -166,20 +182,21 @@ export function WebTerminal({
         const forwardInput = (data: string) => {
           incrementMetric(host, 'inputEvents');
           host.dataset.inputLog = `${host.dataset.inputLog ?? ''}${data}`.slice(-512);
-          bridge.onInput?.(data);
+          bridge?.onInput?.(data);
         };
 
         subscriptions.push(
           terminal.onData(forwardInput),
           terminal.onBinary(forwardInput),
           terminal.onResize(({ cols, rows }) => {
-            bridge.width = cols;
-            bridge.height = rows;
-            updateGeometry(host, cols, rows);
+            if (bridge) updateBridgeGeometry(bridge, host, cols, rows);
             incrementMetric(host, 'resizeEvents');
-            bridge.onResize?.(cols, rows);
+            bridge?.onResize?.(cols, rows);
           }),
         );
+
+        const handleWindowResize = () => scheduleFit(false, true);
+        window.addEventListener('resize', handleWindowResize, { passive: true });
 
         resizeObserver = new ResizeObserver((entries) => {
           const entry = entries[0];
@@ -187,9 +204,18 @@ export function WebTerminal({
           const width = Math.round(entry.contentRect.width);
           const height = Math.round(entry.contentRect.height);
           if (width === lastMeasuredWidth && height === lastMeasuredHeight) return;
-          scheduleFit();
+          scheduleFit(false, true);
         });
         resizeObserver.observe(host);
+
+        void document.fonts.ready.then(() => {
+          if (!disposed) scheduleFit(true, true);
+        });
+
+        scheduleFit(true, true);
+        setTimeout(() => {
+          if (!disposed) scheduleFit(true, true);
+        }, 180);
 
         guestScript = document.createElement('script');
         guestScript.src = guestBundle;
@@ -199,7 +225,10 @@ export function WebTerminal({
           if (!disposed) {
             host.dataset.guestLoaded = 'true';
             setStatus('running');
-            scheduleFit(true);
+            scheduleFit(true, true);
+            setTimeout(() => {
+              if (!disposed) scheduleFit(true, true);
+            }, 120);
             if (window.top === window.self) terminal.focus();
           }
         };
@@ -211,6 +240,10 @@ export function WebTerminal({
           }
         };
         document.body.appendChild(guestScript);
+
+        subscriptions.push({
+          dispose: () => window.removeEventListener('resize', handleWindowResize),
+        });
       } catch (error) {
         if (!disposed) {
           host.dataset.guestLoaded = 'failed';
@@ -235,10 +268,13 @@ export function WebTerminal({
       terminalRef.current = null;
       delete window.cinderBridge;
     };
-  }, [bundle, runnable, title]);
+  }, [bundle, cinematic, embedded, runnable, title]);
 
   return (
-    <section className="web-terminal" aria-label={`${title} live terminal`}>
+    <section
+      className={`web-terminal${embedded ? ' web-terminal--embedded' : ''}${cinematic ? ' web-terminal--cinematic' : ''}`}
+      aria-label={`${title} live terminal`}
+    >
       <header className="web-terminal__bar">
         <div className="web-terminal__identity">
           <span className="web-terminal__prompt" aria-hidden="true">&gt;_</span>
@@ -265,7 +301,7 @@ export function WebTerminal({
           className="web-terminal__viewport"
           role="application"
           aria-label={`${title} terminal viewport`}
-          aria-describedby="web-terminal-help"
+          aria-describedby={embedded ? undefined : 'web-terminal-help'}
           data-runtime-status={status}
           tabIndex={0}
           onClick={() => terminalRef.current?.focus()}
@@ -291,6 +327,17 @@ function incrementMetric(
 ) {
   const current = Number(host.dataset[key] ?? '0');
   host.dataset[key] = String(current + 1);
+}
+
+function updateBridgeGeometry(
+  bridge: CinderBridge,
+  host: HTMLElement,
+  cols: number,
+  rows: number,
+) {
+  bridge.width = cols;
+  bridge.height = rows;
+  updateGeometry(host, cols, rows);
 }
 
 function updateGeometry(host: HTMLElement, cols: number, rows: number) {
