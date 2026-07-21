@@ -1,11 +1,17 @@
 import 'package:args/command_runner.dart';
+import 'package:cinder_cli/src/commands/create_command.dart';
+import 'package:cinder_cli/src/commands/doctor_command.dart';
 import 'package:cinder_cli/src/commands/logs_command.dart';
 import 'package:cinder_cli/src/commands/run_command.dart';
 import 'package:cinder_cli/src/commands/shell_command.dart';
+import 'package:cinder_cli/src/commands/version_command.dart';
 import 'package:cinder_cli/src/deps/log.dart';
 
 class Runner extends CommandRunner<int> {
-  Runner() : super('cinder', 'CLI - Tools for cinder TUI framework') {
+  Runner() : super('cinder', 'CLI tools for the Cinder TUI framework') {
+    addCommand(CreateCommand());
+    addCommand(DoctorCommand());
+    addCommand(VersionCommand());
     addCommand(ShellCommand());
     addCommand(LogsCommand());
     addCommand(RunCommand());
@@ -18,8 +24,8 @@ class Runner extends CommandRunner<int> {
         log(usage);
         return 1;
       }
-    } on FormatException catch (e) {
-      log('Error: ${e.message}');
+    } on FormatException catch (error) {
+      log('Error: ${error.message}');
       log('');
       log(usage);
       return 1;

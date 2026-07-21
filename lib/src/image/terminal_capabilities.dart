@@ -45,6 +45,13 @@ class TerminalCapabilities {
     final override =
         _parseProtocolOverride(environment['CINDER_IMAGE_PROTOCOL']);
 
+    final isVSCode = termProgram.contains('vscode');
+    final isWindowsTerminal = environment.containsKey('WT_SESSION') ||
+        environment.containsKey('WT_PROFILE_ID') ||
+        termProgram.contains('windows terminal') ||
+        termProgram.contains('windows_terminal');
+    final forcesTextFallback = isVSCode || isWindowsTerminal;
+
     final isWezTerm =
         term.contains('wezterm') || termProgram.contains('wezterm');
     final isKitty =
@@ -55,9 +62,15 @@ class TerminalCapabilities {
         environment.containsKey('ITERM_SESSION_ID');
 
     return TerminalCapabilities(
-      supportsKittyGraphics: isKitty || isWezTerm || isGhostty,
-      supportsITerm2Images: isITerm || isWezTerm,
-      supportsSixel: _isSixelTermByName(term),
+      // VS Code and Windows Terminal frequently expose TERM=xterm-256color even
+      // though they do not implement Kitty, iTerm2, or Sixel image protocols.
+      // Treat them as text-only unless the user explicitly sets
+      // CINDER_IMAGE_PROTOCOL.
+      supportsKittyGraphics:
+          !forcesTextFallback && (isKitty || isWezTerm || isGhostty),
+      supportsITerm2Images: !forcesTextFallback && (isITerm || isWezTerm),
+      supportsSixel:
+          !forcesTextFallback && _isSixelTermByName(term, termProgram),
       supportsTrueColor: term.contains('truecolor') ||
           term.contains('24bit') ||
           colorterm == 'truecolor' ||
@@ -105,9 +118,12 @@ class TerminalCapabilities {
     };
   }
 
-  static bool _isSixelTermByName(String term) {
+  static bool _isSixelTermByName(String term, String termProgram) {
+    // Generic xterm-256color is intentionally not considered proof of Sixel
+    // support. VS Code, Windows Terminal, tmux, SSH sessions, and many other
+    // terminals use that value without implementing Sixel.
     const sixelTerms = <String>[
-      'xterm',
+      'xterm-sixel',
       'mlterm',
       'yaft',
       'foot',
@@ -116,7 +132,8 @@ class TerminalCapabilities {
       'mintty',
       'sixel',
     ];
-    return sixelTerms.any(term.contains);
+    return sixelTerms.any(term.contains) ||
+        sixelTerms.any(termProgram.contains);
   }
 
   static Future<TerminalCapabilities?> _queryDA1({
