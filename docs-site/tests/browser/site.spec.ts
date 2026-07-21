@@ -43,7 +43,7 @@ async function waitForRuntime(page: Page, title: RegExp) {
   return terminal;
 }
 
-test('homepage presents the living Cinder city and a separate full runner', async ({
+test('homepage presents the isometric Cinder city inside the dashboard', async ({
   page,
 }, testInfo) => {
   const assertNoPageErrors = failOnPageErrors(page);
@@ -54,15 +54,17 @@ test('homepage presents the living Cinder city and a separate full runner', asyn
   await expect(
     page.getByRole('heading', { name: /Build terminal UIs the Flutter way/i }),
   ).toBeVisible();
-  await expect(page.getByText('CINDER RENDER PIPELINE').first()).toBeVisible();
+  await expect(page.getByText('THE CINDER PIPELINE').first()).toBeVisible();
   await expect(page.getByText('WEB RUNTIME AVAILABLE')).toBeVisible();
 
   const livingCity = page.locator('.control-scene--living');
   const livingCityFrame = livingCity.locator('iframe');
   await expect(livingCity).toBeVisible();
   await expect(livingCityFrame).toBeVisible();
-  await expect(livingCityFrame).toHaveAttribute('title', 'Living Cinder electric city');
-  await expect(page.locator('.control-live-runtime__frame')).toBeVisible();
+  await expect(livingCityFrame).toHaveAttribute(
+    'title',
+    'Interactive isometric Cinder city',
+  );
 
   const embeddedTerminal = page
     .frameLocator('.control-scene--living iframe')
