@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'image_cleanup.dart';
 
-/// Graphics and color capabilities available in the current terminal session.
+/// Graphics, color, input, and control capabilities for a terminal session.
 class TerminalCapabilities {
   TerminalCapabilities({
     this.supportsKittyGraphics = false,
@@ -11,6 +11,16 @@ class TerminalCapabilities {
     this.supportsSixel = false,
     this.supportsTrueColor = false,
     this.supports256Colors = false,
+    this.supportsMouse = false,
+    this.supportsBracketedPaste = false,
+    this.supportsFocusEvents = false,
+    this.supportsKittyKeyboard = false,
+    this.supportsHyperlinks = false,
+    this.supportsOsc52Clipboard = false,
+    this.supportsSynchronizedOutput = false,
+    this.isTmux = false,
+    this.isSsh = false,
+    this.isDumb = false,
     this.termType,
     this.termProgram,
     this.imageProtocolOverride,
@@ -21,6 +31,16 @@ class TerminalCapabilities {
   bool supportsSixel;
   bool supportsTrueColor;
   bool supports256Colors;
+  bool supportsMouse;
+  bool supportsBracketedPaste;
+  bool supportsFocusEvents;
+  bool supportsKittyKeyboard;
+  bool supportsHyperlinks;
+  bool supportsOsc52Clipboard;
+  bool supportsSynchronizedOutput;
+  bool isTmux;
+  bool isSsh;
+  bool isDumb;
   String? termType;
   String? termProgram;
   ImageProtocol? imageProtocolOverride;
@@ -39,12 +59,18 @@ class TerminalCapabilities {
 
   /// Performs deterministic environment-based capability detection.
   static TerminalCapabilities fromEnvironment(Map<String, String> environment) {
-    final term = environment['TERM']?.toLowerCase() ?? '';
-    final termProgram = environment['TERM_PROGRAM']?.toLowerCase() ?? '';
-    final colorterm = environment['COLORTERM']?.toLowerCase() ?? '';
+    final term = environment['TERM']?.trim().toLowerCase() ?? '';
+    final termProgram =
+        environment['TERM_PROGRAM']?.trim().toLowerCase() ?? '';
+    final colorterm = environment['COLORTERM']?.trim().toLowerCase() ?? '';
     final override =
         _parseProtocolOverride(environment['CINDER_IMAGE_PROTOCOL']);
 
+    final isDumb = term == 'dumb';
+    final isTmux = environment.containsKey('TMUX');
+    final isSsh = environment.containsKey('SSH_CONNECTION') ||
+        environment.containsKey('SSH_CLIENT') ||
+        environment.containsKey('SSH_TTY');
     final isWezTerm =
         term.contains('wezterm') || termProgram.contains('wezterm');
     final isKitty =
@@ -53,25 +79,77 @@ class TerminalCapabilities {
         term.contains('ghostty') || termProgram.contains('ghostty');
     final isITerm = termProgram.contains('iterm') ||
         environment.containsKey('ITERM_SESSION_ID');
+    final isWindowsTerminal = environment.containsKey('WT_SESSION');
+    final isVte = environment.containsKey('VTE_VERSION');
+    final isXtermLike = term.contains('xterm') ||
+        term.contains('screen') ||
+        term.contains('tmux') ||
+        isVte;
+    final isModern = !isDumb &&
+        (term.isNotEmpty ||
+            termProgram.isNotEmpty ||
+            isWindowsTerminal ||
+            isKitty ||
+            isWezTerm ||
+            isGhostty ||
+            isITerm);
+
+    final trueColor = !isDumb &&
+        (term.contains('truecolor') ||
+            term.contains('24bit') ||
+            colorterm == 'truecolor' ||
+            colorterm == '24bit' ||
+            isKitty ||
+            isWezTerm ||
+            isGhostty ||
+            isITerm ||
+            isWindowsTerminal);
 
     return TerminalCapabilities(
-      supportsKittyGraphics: isKitty || isWezTerm || isGhostty,
-      supportsITerm2Images: isITerm || isWezTerm,
-      supportsSixel: _isSixelTermByName(term),
-      supportsTrueColor: term.contains('truecolor') ||
-          term.contains('24bit') ||
-          colorterm == 'truecolor' ||
-          colorterm == '24bit',
-      supports256Colors: term.contains('256color') ||
-          term.contains('truecolor') ||
-          term.contains('24bit'),
+      supportsKittyGraphics: !isDumb &&
+          (isKitty || isWezTerm || isGhostty) &&
+          (!isTmux || environment.containsKey('KITTY_WINDOW_ID')),
+      supportsITerm2Images: !isDumb && (isITerm || isWezTerm),
+      supportsSixel: !isDumb && _isSixelTerm(environment, term),
+      supportsTrueColor: trueColor,
+      supports256Colors:
+          trueColor || (!isDumb && term.contains('256color')),
+      supportsMouse: isModern,
+      supportsBracketedPaste: isModern,
+      supportsFocusEvents: isModern &&
+          (isXtermLike ||
+              isKitty ||
+              isWezTerm ||
+              isGhostty ||
+              isITerm ||
+              isWindowsTerminal),
+      supportsKittyKeyboard: !isDumb && (isKitty || isWezTerm || isGhostty),
+      supportsHyperlinks: isModern &&
+          (isXtermLike ||
+              isKitty ||
+              isWezTerm ||
+              isGhostty ||
+              isITerm ||
+              isWindowsTerminal),
+      supportsOsc52Clipboard: isModern &&
+          (isXtermLike ||
+              isKitty ||
+              isWezTerm ||
+              isGhostty ||
+              isITerm ||
+              isWindowsTerminal),
+      supportsSynchronizedOutput: !isDumb &&
+          (isKitty || isWezTerm || isGhostty || isITerm || isWindowsTerminal),
+      isTmux: isTmux,
+      isSsh: isSsh,
+      isDumb: isDumb,
       termType: environment['TERM'],
       termProgram: environment['TERM_PROGRAM'],
       imageProtocolOverride: override,
     );
   }
 
-  /// Detects environment capabilities and upgrades them with DA1 responses.
+  /// Detects environment capabilities and upgrades them with a DA1 response.
   static Future<TerminalCapabilities> detect({
     Duration timeout = const Duration(milliseconds: 100),
     Stream<List<int>>? stdinStream,
@@ -90,7 +168,7 @@ class TerminalCapabilities {
         capabilities.supports256Colors |= detected.supports256Colors;
       }
     } catch (_) {
-      // Environment detection remains a safe fallback.
+      // Environment detection remains the safe fallback.
     }
     return capabilities;
   }
@@ -105,18 +183,22 @@ class TerminalCapabilities {
     };
   }
 
-  static bool _isSixelTermByName(String term) {
-    const sixelTerms = <String>[
-      'xterm',
+  static bool _isSixelTerm(Map<String, String> environment, String term) {
+    final explicit = environment['CINDER_SIXEL']?.trim().toLowerCase();
+    if (explicit == '1' || explicit == 'true' || explicit == 'yes') return true;
+    if (explicit == '0' || explicit == 'false' || explicit == 'no') return false;
+
+    final features = environment['TERM_FEATURES']?.toLowerCase() ?? '';
+    if (features.split(RegExp(r'[,;\s]+')).contains('sixel')) return true;
+
+    const knownSixelTerms = <String>[
+      'sixel',
       'mlterm',
       'yaft',
-      'foot',
       'contour',
-      'wezterm',
       'mintty',
-      'sixel',
     ];
-    return sixelTerms.any(term.contains);
+    return knownSixelTerms.any(term.contains);
   }
 
   static Future<TerminalCapabilities?> _queryDA1({
@@ -186,6 +268,16 @@ class TerminalCapabilities {
     bool? supportsSixel,
     bool? supportsTrueColor,
     bool? supports256Colors,
+    bool? supportsMouse,
+    bool? supportsBracketedPaste,
+    bool? supportsFocusEvents,
+    bool? supportsKittyKeyboard,
+    bool? supportsHyperlinks,
+    bool? supportsOsc52Clipboard,
+    bool? supportsSynchronizedOutput,
+    bool? isTmux,
+    bool? isSsh,
+    bool? isDumb,
     String? termType,
     String? termProgram,
     ImageProtocol? imageProtocolOverride,
@@ -197,6 +289,20 @@ class TerminalCapabilities {
       supportsSixel: supportsSixel ?? this.supportsSixel,
       supportsTrueColor: supportsTrueColor ?? this.supportsTrueColor,
       supports256Colors: supports256Colors ?? this.supports256Colors,
+      supportsMouse: supportsMouse ?? this.supportsMouse,
+      supportsBracketedPaste:
+          supportsBracketedPaste ?? this.supportsBracketedPaste,
+      supportsFocusEvents: supportsFocusEvents ?? this.supportsFocusEvents,
+      supportsKittyKeyboard:
+          supportsKittyKeyboard ?? this.supportsKittyKeyboard,
+      supportsHyperlinks: supportsHyperlinks ?? this.supportsHyperlinks,
+      supportsOsc52Clipboard:
+          supportsOsc52Clipboard ?? this.supportsOsc52Clipboard,
+      supportsSynchronizedOutput:
+          supportsSynchronizedOutput ?? this.supportsSynchronizedOutput,
+      isTmux: isTmux ?? this.isTmux,
+      isSsh: isSsh ?? this.isSsh,
+      isDumb: isDumb ?? this.isDumb,
       termType: termType ?? this.termType,
       termProgram: termProgram ?? this.termProgram,
       imageProtocolOverride:
@@ -207,13 +313,20 @@ class TerminalCapabilities {
   @override
   String toString() {
     return 'TerminalCapabilities('
-        'kitty: $supportsKittyGraphics, '
-        'iterm2: $supportsITerm2Images, '
+        'kittyGraphics: $supportsKittyGraphics, '
+        'iterm2Images: $supportsITerm2Images, '
         'sixel: $supportsSixel, '
         'trueColor: $supportsTrueColor, '
         'colors256: $supports256Colors, '
+        'mouse: $supportsMouse, '
+        'bracketedPaste: $supportsBracketedPaste, '
+        'focusEvents: $supportsFocusEvents, '
+        'kittyKeyboard: $supportsKittyKeyboard, '
+        'hyperlinks: $supportsHyperlinks, '
+        'osc52Clipboard: $supportsOsc52Clipboard, '
+        'synchronizedOutput: $supportsSynchronizedOutput, '
+        'tmux: $isTmux, ssh: $isSsh, dumb: $isDumb, '
         'preferredImageProtocol: $preferredImageProtocol, '
-        'termType: $termType, '
-        'termProgram: $termProgram)';
+        'termType: $termType, termProgram: $termProgram)';
   }
 }
