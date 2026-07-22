@@ -1,28 +1,29 @@
-/// Debug flags for the cinder rendering system.
+/// Debug flags for the Cinder rendering system.
 library;
 
 import '../style.dart';
 
-// Default repaint color: less saturated (0.5), semi-transparent (0.3 alpha)
-// Starting hue at 60 (yellow) like Flutter
 const HSVColor _kDebugDefaultRepaintColor =
     HSVColor.fromAHSV(0.3, 60.0, 0.5, 1.0);
 
-/// Overlay a rotating set of colors when repainting render objects in debug mode.
-///
-/// When enabled, every render object that repaints will have its background
-/// tinted with a color from the rainbow spectrum. The color rotates each frame,
-/// making it easy to see which objects are being repainted frequently.
+/// Overlays a rotating set of colors when render objects repaint.
 bool debugRepaintRainbowEnabled = false;
 
-/// The current color to overlay when repainting a render object.
+/// Enables additional diagnostics for repeated layout invalidation in a frame.
 ///
-/// This value is incremented by the frame drawing callback when
-/// [debugRepaintRainbowEnabled] is true.
+/// The flag is deliberately separate from repaint visualization so applications
+/// can collect layout diagnostics without changing the rendered output.
+bool debugDetectLayoutThrashing = false;
+
+/// The current color overlaid on repainting render objects.
 HSVColor debugCurrentRepaintColor = _kDebugDefaultRepaintColor;
 
-/// Reset debug state to defaults (useful for testing).
-void debugResetRepaintRainbow() {
+/// Resets rendering diagnostics to their default state.
+void debugResetRenderingDiagnostics() {
   debugRepaintRainbowEnabled = false;
+  debugDetectLayoutThrashing = false;
   debugCurrentRepaintColor = _kDebugDefaultRepaintColor;
 }
+
+/// Backwards-compatible alias for older tests and integrations.
+void debugResetRepaintRainbow() => debugResetRenderingDiagnostics();
