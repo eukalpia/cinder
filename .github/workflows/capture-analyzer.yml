@@ -1,0 +1,38 @@
+name: Capture analyzer diagnostics
+
+on:
+  push:
+    branches:
+      - feature/production-foundation
+    paths:
+      - .github/workflows/capture-analyzer.yml
+
+permissions:
+  contents: write
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: feature/production-foundation
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+      - run: dart pub get
+      - name: Capture analyzer output
+        shell: bash
+        run: |
+          mkdir -p .ci-diagnostics
+          set +e
+          dart analyze --fatal-infos > .ci-diagnostics/analyzer.log 2>&1
+          status=$?
+          set -e
+          printf '%s\n' "$status" > .ci-diagnostics/analyzer.status
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .ci-diagnostics
+          git commit -m "ci: capture analyzer diagnostics"
+          git push origin HEAD:feature/production-foundation
