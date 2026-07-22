@@ -8,8 +8,8 @@ import 'stack.dart' show Alignment, TextDirection;
 
 /// Controls how an [IconData] is converted into terminal cells.
 enum IconRenderMode {
-  /// Prefer a terminal-safe Unicode fallback and use the icon-font code point
-  /// only when [IconThemeData.usePrivateUseGlyphs] is enabled.
+  /// Use an icon-font code point when explicitly enabled; otherwise render a
+  /// monochrome, terminal-safe Unicode text fallback.
   auto,
 
   /// Render the original icon-font code point.
@@ -17,8 +17,14 @@ enum IconRenderMode {
   /// This requires the active terminal font to contain the icon pack.
   font,
 
-  /// Render the terminal-safe Unicode fallback.
+  /// Render the terminal-safe Unicode fallback with text presentation.
+  ///
+  /// Emoji-capable symbols are normalized to Unicode text presentation so the
+  /// terminal draws a monochrome glyph instead of a colorful emoji.
   unicode,
+
+  /// Render the Unicode fallback exactly as declared, including emoji style.
+  emoji,
 
   /// Render the ASCII fallback.
   ascii,
@@ -65,25 +71,42 @@ class IconData {
     TextDirection textDirection = TextDirection.ltr,
   }) {
     final unicode = _resolveDirection(unicodeFallback, textDirection);
+    final terminalUnicode = _forceTextPresentation(unicode);
     final fontGlyph =
         codePoint == null ? null : String.fromCharCode(codePoint!);
 
     switch (mode) {
       case IconRenderMode.font:
-        return fontGlyph ?? unicode ?? asciiFallbackOr(fallbackGlyph);
+        return fontGlyph ?? terminalUnicode ?? asciiFallbackOr(fallbackGlyph);
       case IconRenderMode.unicode:
+        return terminalUnicode ?? asciiFallbackOr(fallbackGlyph);
+      case IconRenderMode.emoji:
         return unicode ?? asciiFallbackOr(fallbackGlyph);
       case IconRenderMode.ascii:
         return asciiFallbackOr(fallbackGlyph);
       case IconRenderMode.auto:
-        if (unicode != null && unicode.isNotEmpty) return unicode;
+        // Opting into private-use glyphs means the application has selected a
+        // terminal font that contains the original icon pack. Prefer the real
+        // icon-font code point in that case. Otherwise use a monochrome text
+        // fallback rather than an emoji presentation.
         if (usePrivateUseGlyphs && fontGlyph != null) return fontGlyph;
-        return asciiFallbackOr(fallbackGlyph);
+        return terminalUnicode ?? asciiFallbackOr(fallbackGlyph);
     }
   }
 
   String asciiFallbackOr(String fallbackGlyph) {
     return asciiFallback.isEmpty ? fallbackGlyph : asciiFallback;
+  }
+
+  static String? _forceTextPresentation(String? glyph) {
+    if (glyph == null || glyph.isEmpty) return glyph;
+
+    // ASCII never has emoji presentation. For Unicode symbols, replace an
+    // explicit emoji selector (VS16) and otherwise append the text selector
+    // (VS15). Unsupported selectors are zero-width and safely ignored.
+    if (glyph.codeUnits.every((codeUnit) => codeUnit < 0x80)) return glyph;
+    final normalized = glyph.replaceAll('️', '︎');
+    return normalized.contains('︎') ? normalized : '$normalized︎';
   }
 
   String? _resolveDirection(String? glyph, TextDirection direction) {
@@ -188,22 +211,13 @@ class IconThemeData {
   }
 
   @override
-  int get hashCode => Object.hash(
-        color,
-        size,
-        renderMode,
-        usePrivateUseGlyphs,
-        fallbackGlyph,
-      );
+  int get hashCode =>
+      Object.hash(color, size, renderMode, usePrivateUseGlyphs, fallbackGlyph);
 }
 
 /// Applies icon defaults to a subtree.
 class IconTheme extends InheritedWidget {
-  const IconTheme({
-    super.key,
-    required this.data,
-    required super.child,
-  });
+  const IconTheme({super.key, required this.data, required super.child});
 
   final IconThemeData data;
 
@@ -255,6 +269,10 @@ class _MergedIconTheme extends StatelessWidget {
 }
 
 /// Displays an [IconData] using terminal-safe glyph selection.
+///
+/// The default mode prevents emoji presentation. Applications that configure a
+/// compatible terminal icon font can opt into private-use glyphs through
+/// [IconThemeData.usePrivateUseGlyphs].
 class Icon extends StatelessWidget {
   const Icon(
     this.icon, {
@@ -345,40 +363,96 @@ class IconButton extends StatelessWidget {
 
 /// Terminal-native icons that do not require an icon font.
 abstract final class TerminalIcons {
-  static const IconData home =
-      IconData.terminal('⌂', name: 'home', asciiFallback: 'H');
-  static const IconData search =
-      IconData.terminal('⌕', name: 'search', asciiFallback: '?');
-  static const IconData menu =
-      IconData.terminal('☰', name: 'menu', asciiFallback: '=');
-  static const IconData close =
-      IconData.terminal('×', name: 'close', asciiFallback: 'x');
-  static const IconData check =
-      IconData.terminal('✓', name: 'check', asciiFallback: 'v');
-  static const IconData add =
-      IconData.terminal('+', name: 'add', asciiFallback: '+');
-  static const IconData remove =
-      IconData.terminal('−', name: 'remove', asciiFallback: '-');
-  static const IconData arrowLeft = IconData.terminal('←',
-      name: 'arrowLeft', asciiFallback: '<', matchTextDirection: true);
-  static const IconData arrowRight = IconData.terminal('→',
-      name: 'arrowRight', asciiFallback: '>', matchTextDirection: true);
-  static const IconData arrowUp =
-      IconData.terminal('↑', name: 'arrowUp', asciiFallback: '^');
-  static const IconData arrowDown =
-      IconData.terminal('↓', name: 'arrowDown', asciiFallback: 'v');
-  static const IconData warning =
-      IconData.terminal('⚠', name: 'warning', asciiFallback: '!');
-  static const IconData info =
-      IconData.terminal('ⓘ', name: 'info', asciiFallback: 'i');
-  static const IconData star =
-      IconData.terminal('★', name: 'star', asciiFallback: '*');
-  static const IconData heart =
-      IconData.terminal('♥', name: 'heart', asciiFallback: '<3');
-  static const IconData play =
-      IconData.terminal('▶', name: 'play', asciiFallback: '>');
-  static const IconData pause =
-      IconData.terminal('Ⅱ', name: 'pause', asciiFallback: '||');
-  static const IconData stop =
-      IconData.terminal('■', name: 'stop', asciiFallback: '#');
+  static const IconData home = IconData.terminal(
+    '⌂',
+    name: 'home',
+    asciiFallback: 'H',
+  );
+  static const IconData search = IconData.terminal(
+    '⌕',
+    name: 'search',
+    asciiFallback: '?',
+  );
+  static const IconData menu = IconData.terminal(
+    '☰',
+    name: 'menu',
+    asciiFallback: '=',
+  );
+  static const IconData close = IconData.terminal(
+    '×',
+    name: 'close',
+    asciiFallback: 'x',
+  );
+  static const IconData check = IconData.terminal(
+    '✓',
+    name: 'check',
+    asciiFallback: 'v',
+  );
+  static const IconData add = IconData.terminal(
+    '+',
+    name: 'add',
+    asciiFallback: '+',
+  );
+  static const IconData remove = IconData.terminal(
+    '−',
+    name: 'remove',
+    asciiFallback: '-',
+  );
+  static const IconData arrowLeft = IconData.terminal(
+    '←',
+    name: 'arrowLeft',
+    asciiFallback: '<',
+    matchTextDirection: true,
+  );
+  static const IconData arrowRight = IconData.terminal(
+    '→',
+    name: 'arrowRight',
+    asciiFallback: '>',
+    matchTextDirection: true,
+  );
+  static const IconData arrowUp = IconData.terminal(
+    '↑',
+    name: 'arrowUp',
+    asciiFallback: '^',
+  );
+  static const IconData arrowDown = IconData.terminal(
+    '↓',
+    name: 'arrowDown',
+    asciiFallback: 'v',
+  );
+  static const IconData warning = IconData.terminal(
+    '⚠',
+    name: 'warning',
+    asciiFallback: '!',
+  );
+  static const IconData info = IconData.terminal(
+    'ⓘ',
+    name: 'info',
+    asciiFallback: 'i',
+  );
+  static const IconData star = IconData.terminal(
+    '★',
+    name: 'star',
+    asciiFallback: '*',
+  );
+  static const IconData heart = IconData.terminal(
+    '♥',
+    name: 'heart',
+    asciiFallback: '<3',
+  );
+  static const IconData play = IconData.terminal(
+    '▶',
+    name: 'play',
+    asciiFallback: '>',
+  );
+  static const IconData pause = IconData.terminal(
+    'Ⅱ',
+    name: 'pause',
+    asciiFallback: '||',
+  );
+  static const IconData stop = IconData.terminal(
+    '■',
+    name: 'stop',
+    asciiFallback: '#',
+  );
 }

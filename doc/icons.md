@@ -51,15 +51,32 @@ and `TerminalIcons`.
 
 | Mode | Behavior |
 | --- | --- |
-| `auto` | Unicode fallback first, optionally private-use glyphs |
-| `unicode` | Terminal-safe Unicode representation |
+| `auto` | Real icon-font glyph when explicitly enabled, otherwise monochrome Unicode text |
+| `unicode` | Terminal-safe Unicode text presentation; emoji selectors are removed |
+| `emoji` | Preserve the Unicode fallback exactly, including emoji presentation |
 | `ascii` | ASCII-only fallback |
-| `font` | Original icon-font code point |
+| `font` | Original icon-font private-use code point |
 
-Font mode only works when the user's terminal font contains the corresponding
-Material or Lucide glyphs. Cinder does not and cannot change the terminal font
-for an individual cell. Unicode and ASCII modes therefore remain the reliable
-portable defaults.
+The default no longer renders emoji-capable symbols as colorful emoji. Cinder
+normalizes Unicode fallbacks to text presentation (`VS15`) so icons stay
+monochrome and align with surrounding terminal text.
+
+To use the original Material or Lucide icon-font glyphs, configure a terminal
+font containing the corresponding private-use code points and opt in:
+
+```dart
+IconTheme(
+  data: const IconThemeData(
+    renderMode: IconRenderMode.auto,
+    usePrivateUseGlyphs: true,
+  ),
+  child: const Icon(LucideIcons.settings),
+);
+```
+
+`auto` then prefers the actual icon-font code point. Without that explicit
+opt-in, Unicode text and ASCII remain the portable fallbacks. Cinder cannot
+select a different font family for one terminal cell.
 
 ## Complete generated catalogs
 

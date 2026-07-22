@@ -1,5 +1,7 @@
 # 1.0.0-dev.2
 
+- Add Flutter-style named color aliases, extended palette values, RGBO construction, and AARRGGBB integer support.
+- Render Unicode icon fallbacks as monochrome text instead of emoji and prefer real private-use icon glyphs when explicitly enabled.
 - Renderer V2 cached repaint layers and damage-only partial painting.
 - Safe terminal scroll-region acceleration for vertical viewports.
 - Flutter-style core icon API plus complete Material and Lucide catalogs.
