@@ -1,8 +1,0 @@
-Analyzing cinder...
-
-warning - test/backend/terminal_security_test.dart:41:11 - The value of the local variable 'terminal' isn't used. Try removing the variable or using it. - unused_local_variable
-   info - lib/src/binding/terminal_binding.dart:12:8 - The import of '../keyboard/input_event.dart' is unnecessary because all of the used elements are also provided by the import of 'package:cinder/cinder.dart'. Try removing the import directive. - unnecessary_import
-   info - lib/src/image/terminal_capabilities.dart:189:7 - Statements in an if should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
-   info - test/input/kitty_keyboard_protocol_test.dart:4:8 - The import of 'package:cinder/src/keyboard/input_event.dart' is unnecessary because all of the used elements are also provided by the import of 'package:cinder/cinder.dart'. Try removing the import directive. - unnecessary_import
-
-4 issues found.
