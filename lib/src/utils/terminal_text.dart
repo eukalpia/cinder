@@ -45,10 +45,9 @@ abstract final class TerminalText {
       }
 
       if (rune == 0x0D) {
-        if (preserveNewlines) {
-          if (index + 1 >= runes.length || runes[index + 1] != 0x0A) {
-            output.write('\n');
-          }
+        if (preserveNewlines &&
+            (index + 1 >= runes.length || runes[index + 1] != 0x0A)) {
+          output.write('\n');
         }
         index++;
         continue;
@@ -147,9 +146,7 @@ abstract final class TerminalText {
     if (index + 1 >= runes.length) return runes.length;
     final next = runes[index + 1];
 
-    if (next == 0x5B) {
-      return _consumeCsi(runes, index + 2);
-    }
+    if (next == 0x5B) return _consumeCsi(runes, index + 2);
     if (next == 0x5D) {
       return _consumeStringSequence(runes, index + 2, allowBell: true);
     }
@@ -157,8 +154,8 @@ abstract final class TerminalText {
       return _consumeStringSequence(runes, index + 2, allowBell: false);
     }
 
-    // Two-byte Fe escape sequence, or an incomplete escape at end of input.
-    return (index + 2).clamp(0, runes.length);
+    final nextIndex = index + 2;
+    return nextIndex < runes.length ? nextIndex : runes.length;
   }
 
   static int _consumeC1Sequence(List<int> runes, int index) {
@@ -190,7 +187,9 @@ abstract final class TerminalText {
       final rune = runes[index];
       if (allowBell && rune == 0x07) return index + 1;
       if (rune == 0x9C) return index + 1;
-      if (rune == 0x1B && index + 1 < runes.length && runes[index + 1] == 0x5C) {
+      if (rune == 0x1B &&
+          index + 1 < runes.length &&
+          runes[index + 1] == 0x5C) {
         return index + 2;
       }
       index++;
