@@ -1,0 +1,38 @@
+name: Inspect application platform archive
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .github/workflows/inspect-application-archive.yml
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: feature/application-platform-and-charts
+      - name: Inspect archive payload
+        shell: bash
+        run: |
+          mkdir -p /tmp/archive-report
+          grep '^H4sI' .github/workflows/apply-application-platform.yml \
+            > /tmp/archive-report/payload.b64 || true
+          wc -c /tmp/archive-report/payload.b64 \
+            > /tmp/archive-report/metadata.txt
+          sha256sum /tmp/archive-report/payload.b64 \
+            >> /tmp/archive-report/metadata.txt
+          set +e
+          base64 --decode /tmp/archive-report/payload.b64 \
+            > /tmp/archive-report/payload.tar.gz
+          echo "base64_status=$?" >> /tmp/archive-report/metadata.txt
+          gzip -t /tmp/archive-report/payload.tar.gz
+          echo "gzip_status=$?" >> /tmp/archive-report/metadata.txt
+          set -e
+      - uses: actions/upload-artifact@v4
+        with:
+          name: application-platform-archive-report
+          path: /tmp/archive-report
+          retention-days: 1
