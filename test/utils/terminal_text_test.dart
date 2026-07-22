@@ -4,7 +4,8 @@ import 'package:test/test.dart';
 void main() {
   group('TerminalText.safe', () {
     test('removes ANSI, OSC, DCS, and terminal state injection', () {
-      const input = 'before'
+      const input =
+          'before'
           '\x1b[31mred\x1b[0m'
           '\x1b]52;c;c2VjcmV0\x07'
           '\x1b]2;spoofed title\x1b\\'

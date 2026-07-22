@@ -25,9 +25,7 @@ void main() {
     final controller = StreamController<int>();
     var eventCount = 0;
 
-    final timer = scope.trackTimer(
-      Timer(const Duration(minutes: 1), () {}),
-    );
+    final timer = scope.trackTimer(Timer(const Duration(minutes: 1), () {}));
     final subscription = scope.trackSubscription(
       controller.stream.listen((_) => eventCount++),
     );

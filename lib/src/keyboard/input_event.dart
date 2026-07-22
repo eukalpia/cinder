@@ -39,10 +39,7 @@ class PasteInputEvent extends TextInputEvent {
 
 /// A change in the terminal viewport size.
 class ResizeInputEvent extends InputEvent {
-  const ResizeInputEvent({
-    required this.previousSize,
-    required this.size,
-  });
+  const ResizeInputEvent({required this.previousSize, required this.size});
 
   final Size? previousSize;
   final Size size;

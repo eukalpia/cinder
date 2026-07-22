@@ -3,8 +3,12 @@ library;
 
 import '../style.dart';
 
-const HSVColor _kDebugDefaultRepaintColor =
-    HSVColor.fromAHSV(0.3, 60.0, 0.5, 1.0);
+const HSVColor _kDebugDefaultRepaintColor = HSVColor.fromAHSV(
+  0.3,
+  60.0,
+  0.5,
+  1.0,
+);
 
 /// Overlays a rotating set of colors when render objects repaint.
 bool debugRepaintRainbowEnabled = false;

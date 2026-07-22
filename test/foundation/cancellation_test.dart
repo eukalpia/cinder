@@ -20,8 +20,11 @@ void main() {
       expect(
         source.token.throwIfCancelled,
         throwsA(
-          isA<CancellationException>()
-              .having((error) => error.reason, 'reason', 'shutdown'),
+          isA<CancellationException>().having(
+            (error) => error.reason,
+            'reason',
+            'shutdown',
+          ),
         ),
       );
     });
@@ -52,10 +55,7 @@ void main() {
 
       final disposeFuture = scope.dispose('screen closed');
 
-      await expectLater(
-        task.future,
-        throwsA(isA<CancellationException>()),
-      );
+      await expectLater(task.future, throwsA(isA<CancellationException>()));
       await disposeFuture;
       await cleanupComplete.future;
 
@@ -79,10 +79,7 @@ void main() {
       final scope = CinderTaskScope();
       await scope.dispose();
 
-      expect(
-        () => scope.run<void>((_) {}),
-        throwsStateError,
-      );
+      expect(() => scope.run<void>((_) {}), throwsStateError);
     });
   });
 }

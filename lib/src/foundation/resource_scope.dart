@@ -22,7 +22,9 @@ final class CinderResourceScope {
   /// Registers a cleanup callback.
   void add(ResourceDisposer disposer) {
     if (_disposed) {
-      throw StateError('Cannot add resources to a disposed CinderResourceScope.');
+      throw StateError(
+        'Cannot add resources to a disposed CinderResourceScope.',
+      );
     }
     _disposers.add(disposer);
   }

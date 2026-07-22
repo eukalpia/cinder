@@ -174,14 +174,13 @@ final class CinderTaskScope {
     final task = CinderTask<T>._(source, future);
 
     late final Future<void> completion;
-    completion = future.then<void>(
-      (_) {},
-      onError: (Object _, StackTrace __) {},
-    ).whenComplete(() {
-      task._markCompleted();
-      _sources.remove(source);
-      _pending.remove(completion);
-    });
+    completion = future
+        .then<void>((_) {}, onError: (Object _, StackTrace __) {})
+        .whenComplete(() {
+          task._markCompleted();
+          _sources.remove(source);
+          _pending.remove(completion);
+        });
     _pending.add(completion);
 
     return task;
