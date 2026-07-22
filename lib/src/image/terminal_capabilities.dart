@@ -185,8 +185,9 @@ class TerminalCapabilities {
   static bool _isSixelTerm(Map<String, String> environment, String term) {
     final explicit = environment['CINDER_SIXEL']?.trim().toLowerCase();
     if (explicit == '1' || explicit == 'true' || explicit == 'yes') return true;
-    if (explicit == '0' || explicit == 'false' || explicit == 'no')
+    if (explicit == '0' || explicit == 'false' || explicit == 'no') {
       return false;
+    }
 
     final features = environment['TERM_FEATURES']?.toLowerCase() ?? '';
     if (features.split(RegExp(r'[,;\s]+')).contains('sixel')) return true;
