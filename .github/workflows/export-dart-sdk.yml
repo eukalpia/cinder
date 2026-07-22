@@ -1,0 +1,26 @@
+name: Export Dart SDK
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .github/workflows/export-dart-sdk.yml
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+      - name: Archive Dart SDK
+        run: |
+          sdk_root="$(dirname "$(dirname "$(readlink -f "$(command -v dart)")")")"
+          tar -C "$(dirname "$sdk_root")" -czf /tmp/dart-sdk.tar.gz "$(basename "$sdk_root")"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dart-sdk-linux
+          path: /tmp/dart-sdk.tar.gz
+          retention-days: 1
