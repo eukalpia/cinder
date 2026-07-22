@@ -21,9 +21,9 @@ final class CancellationException implements Exception {
 
 /// A read-only cancellation signal passed to asynchronous work.
 ///
-/// Tokens are intentionally cooperative: long-running operations should call
-/// [throwIfCancelled] at natural suspension points or subscribe with
-/// [addListener] when they own resources that must be closed immediately.
+/// Cancellation is cooperative. Long-running operations should call
+/// [throwIfCancelled] at natural suspension points or register a listener when
+/// they own a resource that must be closed immediately.
 final class CancellationToken {
   CancellationToken._();
 
@@ -47,15 +47,13 @@ final class CancellationToken {
 
   /// Throws [CancellationException] when cancellation has been requested.
   void throwIfCancelled() {
-    if (_isCancelled) {
-      throw CancellationException(_reason);
-    }
+    if (_isCancelled) throw CancellationException(_reason);
   }
 
-  /// Registers [listener] and invokes it synchronously when cancellation occurs.
+  /// Registers [listener] for synchronous cancellation notification.
   ///
-  /// A listener added after cancellation is invoked immediately. Registering the
-  /// same callback more than once has no additional effect.
+  /// A listener added after cancellation is invoked immediately. Registering
+  /// the same callback more than once has no additional effect.
   void addListener(CancellationCallback listener) {
     if (_isCancelled) {
       listener();
@@ -78,7 +76,6 @@ final class CancellationToken {
 
     final listeners = List<CancellationCallback>.of(_listeners);
     _listeners.clear();
-
     for (final listener in listeners) {
       try {
         listener();
@@ -103,9 +100,7 @@ final class CancellationTokenSource {
 
   /// Requests cancellation. Repeated calls are ignored.
   void cancel([Object? reason]) {
-    if (_disposed && !token.isCancelled) {
-      throw StateError('Cannot cancel a disposed CancellationTokenSource.');
-    }
+    if (_disposed) return;
     token._cancel(reason);
   }
 
@@ -126,21 +121,32 @@ final class CinderTask<T> {
   /// The result of the operation.
   final Future<T> future;
 
+  bool _isCompleted = false;
+
   /// The token observed by the operation.
   CancellationToken get token => _source.token;
 
   /// Whether cancellation has been requested.
   bool get isCancelled => token.isCancelled;
 
-  /// Requests cooperative cancellation.
-  void cancel([Object? reason]) => _source.cancel(reason);
+  /// Whether the operation has completed with either a value or an error.
+  bool get isCompleted => _isCompleted;
+
+  /// Requests cooperative cancellation while the task is still running.
+  void cancel([Object? reason]) {
+    if (!_isCompleted) _source.cancel(reason);
+  }
+
+  void _markCompleted() {
+    _isCompleted = true;
+  }
 }
 
 /// Owns cancellable work for a widget, controller, session, or application.
 ///
-/// Call [dispose] from the owner's lifecycle method. Every task receives a
-/// token, all tokens are cancelled together, and disposal can await the cleanup
-/// paths of operations that are still unwinding.
+/// Call [dispose] from the owner's lifecycle method. Every operation receives a
+/// token, all tokens are cancelled together, and disposal waits for cleanup
+/// paths that are still unwinding.
 final class CinderTaskScope {
   final Set<CancellationTokenSource> _sources = <CancellationTokenSource>{};
   final Set<Future<void>> _pending = <Future<void>>{};
@@ -165,18 +171,20 @@ final class CinderTaskScope {
     _sources.add(source);
 
     final future = Future<T>.sync(() => operation(source.token));
+    final task = CinderTask<T>._(source, future);
+
     late final Future<void> completion;
     completion = future.then<void>(
       (_) {},
       onError: (Object _, StackTrace __) {},
     ).whenComplete(() {
+      task._markCompleted();
       _sources.remove(source);
-      source.dispose('task completed');
       _pending.remove(completion);
     });
     _pending.add(completion);
 
-    return CinderTask<T>._(source, future);
+    return task;
   }
 
   /// Requests cancellation for every task currently owned by the scope.
@@ -193,9 +201,7 @@ final class CinderTaskScope {
     cancelAll(reason ?? 'task scope disposed');
 
     final pending = List<Future<void>>.of(_pending);
-    if (pending.isNotEmpty) {
-      await Future.wait(pending);
-    }
+    if (pending.isNotEmpty) await Future.wait(pending);
 
     _sources.clear();
     _pending.clear();
