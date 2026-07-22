@@ -1,6 +1,6 @@
 export 'src/backend/terminal.dart';
 export 'src/backend/terminal_backend.dart';
-// Platform-specific backends use conditional exports
+// Platform-specific backends use conditional exports.
 export 'src/backend/stdio_backend_export.dart';
 export 'src/backend/socket_backend_export.dart';
 export 'src/backend/web_backend_export.dart';
@@ -44,7 +44,7 @@ export 'src/components/render_stack.dart' show Stack;
 export 'src/components/clip.dart';
 export 'src/components/performance_overlay.dart';
 
-// Navigation
+// Navigation.
 export 'src/navigation/navigator.dart';
 export 'src/navigation/route.dart';
 export 'src/navigation/route_settings.dart';
@@ -57,9 +57,9 @@ export 'src/components/rich_text.dart';
 export 'src/framework/listenable.dart';
 export 'src/framework/value_listenable.dart';
 export 'src/components/value_listenable_builder.dart';
-// LayoutBuilder is exported via framework.dart (it's a part file)
+// LayoutBuilder is exported via framework.dart (it is a part file).
 
-// Mouse and Gesture Support
+// Mouse and gesture support.
 export 'src/components/mouse_region.dart';
 export 'src/components/gesture_detector.dart';
 export 'src/gestures/events.dart';
@@ -68,42 +68,48 @@ export 'src/gestures/recognizer.dart';
 export 'src/gestures/tap.dart';
 export 'src/gestures/long_press.dart';
 
-// Utilities
+// Utilities.
 export 'src/utils/clipboard.dart';
 export 'src/utils/log_server.dart';
 export 'src/utils/logger.dart';
 export 'src/utils/cinder_paths.dart';
 export 'src/utils/escape_codes.dart';
+export 'src/utils/terminal_text.dart';
 
-// Performance and Debugging
+// Lifecycle and structured concurrency.
+export 'src/foundation/cancellation.dart';
+export 'src/foundation/resource_scope.dart';
+
+// Performance and debugging.
 export 'src/foundation/performance.dart';
 export 'src/foundation/cinder_error.dart';
+export 'src/foundation/debug_options.dart';
 export 'src/rendering/debug.dart';
 export 'src/components/debug_overlay.dart';
 
-// Widgets
+// Widgets.
 export 'src/widgets/cinder_app.dart';
 
-// Theme
+// Theme.
 export 'src/theme/theme.dart';
 
-// ASCII Text
+// ASCII text.
 export 'src/components/ascii_text.dart';
 export 'src/components/ascii_font.dart' show AsciiFont, AsciiGlyph;
 
-// Animation
+// Animation.
 export 'src/animation/animations.dart';
 export 'src/animation/animated_builder.dart';
 
-// Modal Barrier
+// Modal barrier.
 export 'src/components/modal_barrier.dart';
 
-// Image support
+// Image support.
 export 'src/components/image.dart';
 export 'src/image/image_cleanup.dart' show ImageProtocol;
 export 'src/image/terminal_capabilities.dart';
 
-// Text Selection
+// Text selection.
 export 'src/components/selection_area.dart';
 export 'src/components/selection_scope.dart';
 export 'src/components/selectable.dart';

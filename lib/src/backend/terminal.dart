@@ -1,45 +1,42 @@
 import 'dart:convert';
 
-import 'package:meta/meta.dart';
 import 'package:cinder/src/size.dart';
 import 'package:cinder/src/style.dart';
 import 'package:cinder/src/utils/escape_codes.dart';
+import 'package:cinder/src/utils/terminal_text.dart';
+import 'package:meta/meta.dart';
 
 import 'terminal_backend.dart';
 
 class Position {
+  const Position(this.x, this.y);
+
   final int x;
   final int y;
-
-  const Position(this.x, this.y);
 }
 
+/// A buffered terminal control surface backed by [TerminalBackend].
 class Terminal {
+  Terminal(this.backend, {Size? size}) {
+    _size = size ?? backend.getSize();
+  }
+
   final TerminalBackend backend;
   late Size _size;
   Stream<String>? _oscStream;
 
   /// Whether alternate screen mode is enabled.
-  /// Protected for subclass access (e.g., WebTerminal).
   @protected
   bool altScreenEnabled = false;
 
   /// Write buffer for batching output.
-  /// Protected for subclass access (e.g., WebTerminal).
   @protected
   final StringBuffer writeBuffer = StringBuffer();
 
-  // ANSI escape codes for terminal control
-
-  // Regex pattern to match RGB color responses
   static const _rgbPattern =
       'rgb:([0-9a-fA-F]{4})/([0-9a-fA-F]{4})/([0-9a-fA-F]{4})';
   static final _bgRegexp = RegExp('11;$_rgbPattern');
   static final _fgRegexp = RegExp('10;$_rgbPattern');
-
-  Terminal(this.backend, {Size? size}) {
-    _size = size ?? backend.getSize();
-  }
 
   Size get size => _size;
 
@@ -52,43 +49,35 @@ class Terminal {
   }
 
   void enterAlternateScreen() {
-    if (!altScreenEnabled) {
-      // These need immediate effect, so flush any pending writes first
-      flush();
-      backend.writeRaw(EscapeCodes.alternateBuffer);
-      clear();
-      altScreenEnabled = true;
-    }
+    if (altScreenEnabled) return;
+    flush();
+    backend.writeRaw(EscapeCodes.alternateBuffer);
+    clear();
+    altScreenEnabled = true;
   }
 
   void leaveAlternateScreen() {
-    if (altScreenEnabled) {
-      // These need immediate effect, so flush any pending writes first
-      flush();
-      backend.writeRaw(EscapeCodes.mainBuffer);
-      altScreenEnabled = false;
-    }
+    if (!altScreenEnabled) return;
+    flush();
+    backend.writeRaw(EscapeCodes.mainBuffer);
+    altScreenEnabled = false;
   }
 
   void hideCursor() {
-    // Buffer this - will be flushed with frame
     write(EscapeCodes.hideCursor);
   }
 
   void showCursor() {
-    // This needs immediate effect when exiting
     flush();
     backend.writeRaw(EscapeCodes.showCursor);
   }
 
   void clear() {
-    // Buffer this - will be flushed with frame
     write(EscapeCodes.clearScreen);
     write(EscapeCodes.moveCursorHome);
   }
 
   void clearLine() {
-    // Buffer this - will be flushed with frame
     write(EscapeCodes.clearLine);
   }
 
@@ -104,19 +93,21 @@ class Terminal {
     moveCursor(x, y);
   }
 
+  /// Writes trusted terminal control or already-sanitized application output.
+  ///
+  /// Prefer rendering untrusted text through widgets after applying
+  /// [TerminalText.safe]. This method intentionally preserves escape sequences.
   void write(String text) {
     writeBuffer.write(text);
   }
 
   void flush() {
-    if (writeBuffer.isNotEmpty) {
-      final bufferContent = writeBuffer.toString();
-      backend.writeRaw(bufferContent);
-      writeBuffer.clear();
-    }
+    if (writeBuffer.isEmpty) return;
+    backend.writeRaw(writeBuffer.toString());
+    writeBuffer.clear();
   }
 
-  /// Set terminal foreground color
+  /// Sets the terminal foreground color.
   void setForeground(Color color) {
     write('\x1b]10;#');
     write(color.red.toRadixString(16).padLeft(2, '0'));
@@ -125,7 +116,7 @@ class Terminal {
     write('\x07');
   }
 
-  /// Set terminal background color
+  /// Sets the terminal background color.
   void setBackground(Color color) {
     write('\x1b]11;#');
     write(color.red.toRadixString(16).padLeft(2, '0'));
@@ -134,26 +125,20 @@ class Terminal {
     write('\x07');
   }
 
-  /// Get the terminal's default foreground color
+  /// Reads the terminal's default foreground color.
   Future<Color?> getForegroundColor({
     Duration timeout = const Duration(milliseconds: 100),
   }) async {
     write('\x1b]10;?\x07');
+    flush();
     return _oscStream
         ?.firstWhere(_fgRegexp.hasMatch)
         .timeout(timeout)
-        .then((event) {
-      final match = _fgRegexp.firstMatch(event);
-      if (match == null) return null;
-      return Color.fromRGB(
-        int.parse(match.group(1)!, radix: 16) ~/ 256,
-        int.parse(match.group(2)!, radix: 16) ~/ 256,
-        int.parse(match.group(3)!, radix: 16) ~/ 256,
-      );
-    }).catchError((_) => null);
+        .then(_parseForegroundResponse)
+        .catchError((_) => null);
   }
 
-  /// Get the terminal's default background color
+  /// Reads the terminal's default background color.
   Future<Color?> getBackgroundColor({
     Duration timeout = const Duration(milliseconds: 100),
   }) async {
@@ -162,97 +147,80 @@ class Terminal {
     return _oscStream
         ?.firstWhere(_bgRegexp.hasMatch)
         .timeout(timeout)
-        .then((event) {
-      final match = _bgRegexp.firstMatch(event);
-      if (match == null) return null;
-      return Color.fromRGB(
-        int.parse(match.group(1)!, radix: 16) ~/ 256,
-        int.parse(match.group(2)!, radix: 16) ~/ 256,
-        int.parse(match.group(3)!, radix: 16) ~/ 256,
-      );
-    }).catchError((_) => null);
+        .then(_parseBackgroundResponse)
+        .catchError((_) => null);
   }
 
-  /// Restore terminal colors to defaults
+  Color? _parseForegroundResponse(String event) {
+    return _parseColorResponse(_fgRegexp, event);
+  }
+
+  Color? _parseBackgroundResponse(String event) {
+    return _parseColorResponse(_bgRegexp, event);
+  }
+
+  Color? _parseColorResponse(RegExp expression, String event) {
+    final match = expression.firstMatch(event);
+    if (match == null) return null;
+    return Color.fromRGB(
+      int.parse(match.group(1)!, radix: 16) ~/ 256,
+      int.parse(match.group(2)!, radix: 16) ~/ 256,
+      int.parse(match.group(3)!, radix: 16) ~/ 256,
+    );
+  }
+
+  /// Restores terminal foreground and background colors to their defaults.
   void restoreColors() {
-    backend.writeRaw('\x1b]110'); // foreground
-    backend.writeRaw('\x1b]111'); // background
+    backend.writeRaw('\x1b]110\x07');
+    backend.writeRaw('\x1b]111\x07');
   }
 
+  /// Restores terminal state owned by this instance.
   void reset() {
     showCursor();
     restoreColors();
     leaveAlternateScreen();
-    backend.writeRaw('\x1b[0m'); // Reset all attributes
+    backend.writeRaw('\x1b[0m');
   }
 
-  /// Write OSC 52 clipboard sequence to copy text to system clipboard.
-  /// This must be written to the write buffer and flushed with the frame
-  /// to avoid corrupting the terminal output.
+  /// Writes an OSC 52 clipboard sequence.
+  ///
+  /// The payload is base64-encoded, so text cannot terminate the OSC sequence.
   void writeClipboardCopy(String text) {
-    // Encode the text in base64 (base64Encode doesn't add newlines in Dart)
     final base64Text = base64Encode(utf8.encode(text));
-
-    // Build the OSC 52 sequence: ESC ] 52 ; c ; <base64-data> BEL
-    // Format: \033]52;c;<base64>\a
-    const osc = '\x1b]';
-    const bel = '\x07'; // Use BEL terminator (more compatible than ST)
-    final sequence = '${osc}52;c;$base64Text$bel';
-
-    // Add to write buffer - will be flushed with next frame
-    write(sequence);
+    write('\x1b]52;c;$base64Text\x07');
   }
 
-  /// Set the terminal window title using OSC 2 sequence.
-  /// Uses BEL terminator for maximum compatibility.
+  /// Sets the terminal window title using OSC 2.
   ///
-  /// Example: `setWindowTitle('My App')`
+  /// Control characters and nested escape sequences are always removed, even
+  /// when this low-level method is called directly.
   void setWindowTitle(String title) {
-    // OSC 2 ; <title> BEL
-    const osc = '\x1b]';
-    const bel = '\x07';
-    write('${osc}2;$title$bel');
+    write('\x1b]2;${_sanitizeOscMetadata(title)}\x07');
   }
 
-  /// Set the terminal icon name using OSC 1 sequence.
-  /// Uses BEL terminator for maximum compatibility.
-  ///
-  /// Example: `setIconName('MyApp')`
+  /// Sets the terminal icon name using OSC 1.
   void setIconName(String name) {
-    // OSC 1 ; <name> BEL
-    const osc = '\x1b]';
-    const bel = '\x07';
-    write('${osc}1;$name$bel');
+    write('\x1b]1;${_sanitizeOscMetadata(name)}\x07');
   }
 
-  /// Set both terminal window title and icon name using OSC 0 sequence.
-  /// Uses BEL terminator for maximum compatibility.
-  ///
-  /// Example: `setTitleAndIcon('My App')`
+  /// Sets both terminal window title and icon name using OSC 0.
   void setTitleAndIcon(String text) {
-    // OSC 0 ; <text> BEL
-    const osc = '\x1b]';
-    const bel = '\x07';
-    write('${osc}0;$text$bel');
+    write('\x1b]0;${_sanitizeOscMetadata(text)}\x07');
   }
 
-  /// Write a sixel image to the terminal at the specified position.
-  ///
-  /// Sixel is a bitmap graphics format supported by terminals like xterm,
-  /// mlterm, and others. The sixel data should be a complete escape sequence
-  /// starting with DCS (Device Control String) and ending with ST (String Terminator).
-  ///
-  /// [sixelData] - Pre-encoded sixel escape sequence (DCS...ST).
-  /// [x], [y] - Position in cells where the image should be rendered.
-  ///
-  /// Note: The cursor must be positioned before writing sixel data, as the
-  /// sixel data itself doesn't contain positioning information.
-  ///
-  /// Example:
-  /// ```dart
-  /// terminal.writeSixel(sixelData, 10, 5);
-  /// ```
+  String _sanitizeOscMetadata(String value) {
+    return TerminalText.safe(
+      value,
+      preserveNewlines: false,
+      preserveTabs: false,
+    );
+  }
+
   /// Writes a pre-encoded inline image protocol sequence at a cell position.
+  ///
+  /// [encodedData] is trusted protocol data and must never be populated from
+  /// arbitrary process or network output.
   void writeInlineImage(String encodedData, int x, int y) {
     moveCursor(x, y);
     write(encodedData);
