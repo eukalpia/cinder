@@ -1,0 +1,24 @@
+name: Inspect platform payload parts
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .github/workflows/inspect-platform-parts.yml
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: feature/application-platform-and-charts
+      - name: Print payload metadata
+        shell: bash
+        run: |
+          wc -c .github/platform-payload/part-*.b64
+          sha256sum .github/platform-payload/part-*.b64
+          cat .github/platform-payload/part-*.b64 > /tmp/payload.b64
+          wc -c /tmp/payload.b64
+          sha256sum /tmp/payload.b64
