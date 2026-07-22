@@ -95,3 +95,16 @@ jobs:
           else
             echo "No tests in ${{ matrix.package }}"
           fi
+
+  source_snapshot:
+    name: Stabilization source snapshot
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Archive repository
+        run: tar --exclude=.git -czf /tmp/cinder-stabilization-source.tar.gz .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cinder-stabilization-source
+          path: /tmp/cinder-stabilization-source.tar.gz
+          retention-days: 1
