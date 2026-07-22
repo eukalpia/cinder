@@ -18,11 +18,11 @@ void main() {
     test('detects modern kitty sessions over SSH', () {
       final capabilities =
           TerminalCapabilities.fromEnvironment(const <String, String>{
-            'TERM': 'xterm-kitty',
-            'KITTY_WINDOW_ID': '1',
-            'SSH_CONNECTION': 'client server',
-            'COLORTERM': 'truecolor',
-          });
+        'TERM': 'xterm-kitty',
+        'KITTY_WINDOW_ID': '1',
+        'SSH_CONNECTION': 'client server',
+        'COLORTERM': 'truecolor',
+      });
 
       expect(capabilities.isSsh, isTrue);
       expect(capabilities.supportsKittyGraphics, isTrue);
@@ -45,10 +45,10 @@ void main() {
     test('supports explicit sixel detection and protocol overrides', () {
       final capabilities =
           TerminalCapabilities.fromEnvironment(const <String, String>{
-            'TERM': 'xterm-256color',
-            'CINDER_SIXEL': 'true',
-            'CINDER_IMAGE_PROTOCOL': 'unicode',
-          });
+        'TERM': 'xterm-256color',
+        'CINDER_SIXEL': 'true',
+        'CINDER_IMAGE_PROTOCOL': 'unicode',
+      });
 
       expect(capabilities.supportsSixel, isTrue);
       expect(capabilities.preferredImageProtocol, ImageProtocol.unicodeBlocks);

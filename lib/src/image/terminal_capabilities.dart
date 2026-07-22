@@ -68,8 +68,7 @@ class TerminalCapabilities {
 
     final isDumb = term == 'dumb';
     final isTmux = environment.containsKey('TMUX');
-    final isSsh =
-        environment.containsKey('SSH_CONNECTION') ||
+    final isSsh = environment.containsKey('SSH_CONNECTION') ||
         environment.containsKey('SSH_CLIENT') ||
         environment.containsKey('SSH_TTY');
     final isWezTerm =
@@ -78,18 +77,15 @@ class TerminalCapabilities {
         term.contains('kitty') || environment.containsKey('KITTY_WINDOW_ID');
     final isGhostty =
         term.contains('ghostty') || termProgram.contains('ghostty');
-    final isITerm =
-        termProgram.contains('iterm') ||
+    final isITerm = termProgram.contains('iterm') ||
         environment.containsKey('ITERM_SESSION_ID');
     final isWindowsTerminal = environment.containsKey('WT_SESSION');
     final isVte = environment.containsKey('VTE_VERSION');
-    final isXtermLike =
-        term.contains('xterm') ||
+    final isXtermLike = term.contains('xterm') ||
         term.contains('screen') ||
         term.contains('tmux') ||
         isVte;
-    final isModern =
-        !isDumb &&
+    final isModern = !isDumb &&
         (term.isNotEmpty ||
             termProgram.isNotEmpty ||
             isWindowsTerminal ||
@@ -98,8 +94,7 @@ class TerminalCapabilities {
             isGhostty ||
             isITerm);
 
-    final trueColor =
-        !isDumb &&
+    final trueColor = !isDumb &&
         (term.contains('truecolor') ||
             term.contains('24bit') ||
             colorterm == 'truecolor' ||
@@ -111,8 +106,7 @@ class TerminalCapabilities {
             isWindowsTerminal);
 
     return TerminalCapabilities(
-      supportsKittyGraphics:
-          !isDumb &&
+      supportsKittyGraphics: !isDumb &&
           (isKitty || isWezTerm || isGhostty) &&
           (!isTmux || environment.containsKey('KITTY_WINDOW_ID')),
       supportsITerm2Images: !isDumb && (isITerm || isWezTerm),
@@ -121,8 +115,7 @@ class TerminalCapabilities {
       supports256Colors: trueColor || (!isDumb && term.contains('256color')),
       supportsMouse: isModern,
       supportsBracketedPaste: isModern,
-      supportsFocusEvents:
-          isModern &&
+      supportsFocusEvents: isModern &&
           (isXtermLike ||
               isKitty ||
               isWezTerm ||
@@ -130,24 +123,21 @@ class TerminalCapabilities {
               isITerm ||
               isWindowsTerminal),
       supportsKittyKeyboard: !isDumb && (isKitty || isWezTerm || isGhostty),
-      supportsHyperlinks:
-          isModern &&
+      supportsHyperlinks: isModern &&
           (isXtermLike ||
               isKitty ||
               isWezTerm ||
               isGhostty ||
               isITerm ||
               isWindowsTerminal),
-      supportsOsc52Clipboard:
-          isModern &&
+      supportsOsc52Clipboard: isModern &&
           (isXtermLike ||
               isKitty ||
               isWezTerm ||
               isGhostty ||
               isITerm ||
               isWindowsTerminal),
-      supportsSynchronizedOutput:
-          !isDumb &&
+      supportsSynchronizedOutput: !isDumb &&
           (isKitty || isWezTerm || isGhostty || isITerm || isWindowsTerminal),
       isTmux: isTmux,
       isSsh: isSsh,

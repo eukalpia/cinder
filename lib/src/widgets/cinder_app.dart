@@ -21,22 +21,22 @@ class CinderApp extends StatefulWidget {
     this.theme,
     this.debug = CinderDebugOptions.disabled,
     super.key,
-  }) : assert(
-         child != null ||
-             home != null ||
-             routes != null ||
-             onGenerateRoute != null,
-         'Either child, home, routes, or onGenerateRoute must be provided',
-       ),
-       assert(
-         child == null ||
-             (home == null &&
-                 routes == null &&
-                 initialRoute == null &&
-                 onGenerateRoute == null &&
-                 onUnknownRoute == null),
-         'If child is provided, navigation parameters cannot be used',
-       );
+  })  : assert(
+          child != null ||
+              home != null ||
+              routes != null ||
+              onGenerateRoute != null,
+          'Either child, home, routes, or onGenerateRoute must be provided',
+        ),
+        assert(
+          child == null ||
+              (home == null &&
+                  routes == null &&
+                  initialRoute == null &&
+                  onGenerateRoute == null &&
+                  onUnknownRoute == null),
+          'If child is provided, navigation parameters cannot be used',
+        );
 
   /// A one-line description shown in the terminal window title.
   final String? title;
@@ -152,23 +152,21 @@ class _CinderAppState extends State<CinderApp> {
       return;
     }
 
-    detectTerminalBrightness(terminal)
-        .then((brightness) {
-          if (!mounted) return;
-          setState(() {
-            _detectedTheme = brightness == Brightness.light
-                ? TuiThemeData.light
-                : TuiThemeData.dark;
-            _detectingTheme = false;
-          });
-        })
-        .catchError((_) {
-          if (!mounted) return;
-          setState(() {
-            _detectedTheme = TuiThemeData.dark;
-            _detectingTheme = false;
-          });
-        });
+    detectTerminalBrightness(terminal).then((brightness) {
+      if (!mounted) return;
+      setState(() {
+        _detectedTheme = brightness == Brightness.light
+            ? TuiThemeData.light
+            : TuiThemeData.dark;
+        _detectingTheme = false;
+      });
+    }).catchError((_) {
+      if (!mounted) return;
+      setState(() {
+        _detectedTheme = TuiThemeData.dark;
+        _detectingTheme = false;
+      });
+    });
   }
 
   void _updateTitle() {
