@@ -7,6 +7,8 @@ import 'package:meta/meta.dart';
 import 'package:cinder/src/components/basic.dart';
 import 'package:cinder/src/foundation/persistent_hash_map.dart';
 import 'package:cinder/src/foundation/cinder_error.dart';
+import 'package:cinder/src/foundation/cancellation.dart';
+import 'package:cinder/src/foundation/resource_scope.dart';
 import 'package:cinder/src/rectangle.dart';
 import 'package:cinder/src/size.dart';
 import 'package:cinder/src/style.dart';
