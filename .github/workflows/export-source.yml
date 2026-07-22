@@ -19,9 +19,9 @@ jobs:
       - uses: actions/checkout@v6
       - name: Archive repository
         run: |
-          tar --exclude=.git -czf cinder-source.tar.gz .
+          tar --exclude=.git -czf /tmp/cinder-source.tar.gz .
       - uses: actions/upload-artifact@v4
         with:
           name: cinder-source
-          path: cinder-source.tar.gz
+          path: /tmp/cinder-source.tar.gz
           retention-days: 1
