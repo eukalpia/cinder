@@ -12,6 +12,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+        with:
+          ref: stabilization/runtime-input-unicode
+          fetch-depth: 0
+      - name: Report repository tree
+        run: |
+          git rev-parse HEAD
+          git rev-parse 'HEAD^{tree}'
       - name: Archive repository
         run: tar --exclude=.git -czf /tmp/cinder-stabilization-source.tar.gz .
       - uses: actions/upload-artifact@v4
