@@ -1,0 +1,42 @@
+name: Capture Dart formatting diagnostics
+
+on:
+  push:
+    branches:
+      - feature/production-foundation
+    paths:
+      - .github/workflows/capture-dart-format.yml
+
+permissions:
+  contents: write
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: feature/production-foundation
+          fetch-depth: 0
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+      - name: Reproduce root formatting check
+        shell: bash
+        run: |
+          git fetch origin main
+          mapfile -t files < <(git diff --name-only --diff-filter=ACMR origin/main HEAD | grep -E '^(lib|test|example|benchmark)/.*\.dart$' || true)
+          mkdir -p .ci-diagnostics
+          printf '%s\n' "${files[@]}" > .ci-diagnostics/dart-files.txt
+          set +e
+          dart format "${files[@]}" > .ci-diagnostics/dart-format.log 2>&1
+          status=$?
+          set -e
+          git diff -- "${files[@]}" > .ci-diagnostics/dart-format.patch || true
+          printf '%s\n' "$status" > .ci-diagnostics/dart-format.status
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- "${files[@]}" .ci-diagnostics
+          git commit -m "ci: capture Dart formatting diagnostics"
+          git push origin HEAD:feature/production-foundation
