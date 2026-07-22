@@ -43,6 +43,18 @@ export 'src/components/stack.dart';
 export 'src/components/render_stack.dart' show Stack;
 export 'src/components/clip.dart';
 export 'src/components/performance_overlay.dart';
+export 'src/components/controls.dart';
+export 'src/components/application_widgets.dart';
+
+// Application actions and shared interaction state.
+export 'src/actions/actions.dart';
+export 'src/actions/command_palette.dart';
+export 'src/foundation/widget_state.dart';
+
+// Data visualization and virtualized data views.
+export 'src/data/charts.dart';
+export 'src/data/data_table.dart';
+export 'src/data/tree_view.dart';
 
 // Navigation.
 export 'src/navigation/navigator.dart';
@@ -86,6 +98,11 @@ export 'src/foundation/cinder_error.dart';
 export 'src/foundation/debug_options.dart';
 export 'src/rendering/debug.dart';
 export 'src/components/debug_overlay.dart';
+
+// Semantics, plain output, and development diagnostics.
+export 'src/semantics/semantics.dart';
+export 'src/output/plain_output.dart';
+export 'src/devtools/diagnostics.dart';
 
 // Widgets.
 export 'src/widgets/cinder_app.dart';

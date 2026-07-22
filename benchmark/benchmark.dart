@@ -651,6 +651,75 @@ T? _findState<T extends State>(Element element) {
 }
 
 // ---------------------------------------------------------------------------
+// Data visualization
+// ---------------------------------------------------------------------------
+
+BenchmarkSuite dataVisualizationSuite() {
+  final samples = List<num>.generate(
+    1000,
+    (index) => math.sin(index / 23) * 40 + math.cos(index / 11) * 12 + 80,
+  );
+  final series = <ChartSeries>[
+    for (var seriesIndex = 0; seriesIndex < 4; seriesIndex++)
+      ChartSeries(
+        name: 'series-$seriesIndex',
+        points: <ChartPoint>[
+          for (var index = 0; index < samples.length; index++)
+            ChartPoint(
+              index.toDouble(),
+              samples[index].toDouble() + seriesIndex * 8,
+            ),
+        ],
+      ),
+  ];
+  final nodes = <GraphNode>[
+    for (var index = 0; index < 50; index++)
+      GraphNode(id: index, label: 'N$index'),
+  ];
+  final edges = <GraphEdge>[
+    for (var index = 0; index < 100; index++)
+      GraphEdge(
+        from: index % nodes.length,
+        to: (index * 7 + 3) % nodes.length,
+        directed: true,
+      ),
+  ];
+
+  return BenchmarkSuite('Data visualization', <Benchmark>[
+    Benchmark.sync(
+      'Sparkline 1k samples → 80 columns',
+      () => ChartRasterizer.sparkline(samples, width: 80),
+      iterations: 500,
+    ),
+    Benchmark.sync(
+      'Line chart 4x1k points (100x30)',
+      () => ChartRasterizer.line(series, width: 100, height: 30),
+      iterations: 100,
+    ),
+    Benchmark.sync(
+      'Histogram 1k samples (20 bins)',
+      () => ChartRasterizer.histogram(
+        samples,
+        bins: 20,
+        width: 80,
+        height: 20,
+      ),
+      iterations: 250,
+    ),
+    Benchmark.sync(
+      'Network graph 50 nodes / 100 edges',
+      () => ChartRasterizer.networkGraph(
+        nodes,
+        edges,
+        width: 100,
+        height: 30,
+      ),
+      iterations: 100,
+    ),
+  ]);
+}
+
+// ---------------------------------------------------------------------------
 // Main
 // ---------------------------------------------------------------------------
 
@@ -666,6 +735,7 @@ Future<void> main(List<String> args) async {
     canvasSuite(),
     widgetPipelineSuite('80x24', const Size(80, 24)),
     widgetPipelineSuite('200x50', const Size(200, 50)),
+    dataVisualizationSuite(),
   ];
 
   final baseline = loadBaseline();

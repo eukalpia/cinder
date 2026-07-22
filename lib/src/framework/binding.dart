@@ -4,6 +4,7 @@ part of 'framework.dart';
 abstract class CinderBinding {
   static CinderBinding? _instance;
   static CinderBinding get instance => _instance!;
+  static bool get hasInstance => _instance != null;
 
   CinderBinding() {
     assert(_instance == null, 'Only one TuiBinding instance allowed');
@@ -69,6 +70,13 @@ abstract class CinderBinding {
   }
 
   /// Clear the singleton instance - only for testing
+  @protected
+  void disposeBinding() {
+    if (identical(_instance, this)) {
+      _instance = null;
+    }
+  }
+
   @visibleForTesting
   static void resetInstance() {
     _instance = null;

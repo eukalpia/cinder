@@ -102,6 +102,18 @@ Disposal follows these rules:
 Operations that ignore their cancellation token are application defects. A
 scope cannot safely force an arbitrary Dart future to stop.
 
+
+## Non-interactive output
+
+Applications may render a Widget tree through `renderPlainWidget` without
+entering raw mode or the alternate screen. The result contains the terminal
+buffer, trimmed text lines, and a JSON representation. This path must not write
+ANSI control sequences or mutate the user's physical terminal.
+
+Semantic output is independent from visual output. `SemanticsSnapshot` exports
+roles, labels, values, and state as plain text or JSON even when the interactive
+visual layout uses borders, color, or chart glyphs.
+
 ## Capability degradation
 
 The minimum supported environment is a basic terminal capable of displaying
