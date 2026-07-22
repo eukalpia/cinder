@@ -1,90 +1,12 @@
 import 'package:cinder/cinder.dart';
 
-/// A widget that describes this app to the terminal emulator and provides navigation.
+/// The root configuration for a Cinder application.
 ///
-/// [CinderApp] provides:
-/// - Declarative terminal window title and icon name setting (via OSC escape sequences)
-/// - Built-in navigation support via [Navigator]
-/// - Routing configuration similar to Flutter's [MaterialApp]
-///
-/// Similar to Flutter's [MaterialApp] and [WidgetsApp], this widget should
-/// typically be the root of your TUI application.
-///
-/// ## Simple Usage (No Navigation):
-/// ```dart
-/// void main() async {
-///   await runApp(
-///     CinderApp(
-///       title: 'My TUI App',
-///       iconName: 'MyApp',
-///       child: MyHomeScreen(),
-///     ),
-///   );
-/// }
-/// ```
-///
-/// ## With Navigation:
-/// ```dart
-/// void main() async {
-///   await runApp(
-///     CinderApp(
-///       title: 'My TUI App',
-///       home: HomeScreen(),
-///       routes: {
-///         '/settings': (context) => SettingsScreen(),
-///         '/about': (context) => AboutScreen(),
-///       },
-///     ),
-///   );
-/// }
-/// ```
-///
-/// The [title] parameter sets the terminal window title (OSC 2), and [iconName]
-/// sets the terminal icon name (OSC 1). If only [title] is provided, both the
-/// window title and icon name will be set to the same value (OSC 0).
-///
-/// These escape sequences are supported by most modern terminal emulators
-/// including xterm, iTerm2, GNOME Terminal, Windows Terminal, and others.
-///
-/// ## Auto Theme Detection
-///
-/// When no explicit [theme] is provided, the terminal's background color is
-/// automatically detected and the appropriate light or dark theme is applied:
-///
-/// ```dart
-/// CinderApp(
-///   child: MyApp(),  // Auto-detects light/dark theme
-/// )
-/// ```
-///
-/// To use a specific theme, provide it explicitly:
-///
-/// ```dart
-/// CinderApp(
-///   theme: TuiThemeData.nord,  // Use Nord theme
-///   child: MyApp(),
-/// )
-/// ```
-///
-/// Auto-detection uses multiple fallback methods:
-/// 1. OSC 11 query for actual terminal background color
-/// 2. COLORFGBG environment variable
-/// 3. macOS system appearance (Dark Mode setting)
-/// 4. Defaults to dark theme if all methods fail
+/// [CinderApp] owns terminal metadata, application routing, theming, and
+/// declarative runtime diagnostics. Provide either [child] for a simple
+/// application or navigation configuration through [home], [routes], and the
+/// route factories.
 class CinderApp extends StatefulWidget {
-  /// Creates a widget that describes this app to the terminal emulator.
-  ///
-  /// Either [child], [home], or [routes] must be provided.
-  ///
-  /// If [child] is provided without navigation parameters, no Navigator will be created.
-  /// If [home] or [routes] are provided, a Navigator will be created automatically.
-  ///
-  /// The [title] parameter sets the terminal window title. If [iconName] is not
-  /// provided, the title will also be used as the icon name.
-  ///
-  /// The [iconName] parameter optionally sets a separate icon name. This is
-  /// typically used in X11 window managers to display a short name when the
-  /// window is minimized or iconified.
   const CinderApp({
     this.title,
     this.iconName,
@@ -97,6 +19,7 @@ class CinderApp extends StatefulWidget {
     this.navigatorObservers = const [],
     this.navigatorKey,
     this.theme,
+    this.debug = CinderDebugOptions.disabled,
     super.key,
   })  : assert(
           child != null ||
@@ -112,98 +35,51 @@ class CinderApp extends StatefulWidget {
                   initialRoute == null &&
                   onGenerateRoute == null &&
                   onUnknownRoute == null),
-          'If child is provided, navigation parameters (home, routes, initialRoute, onGenerateRoute, onUnknownRoute) cannot be used',
+          'If child is provided, navigation parameters cannot be used',
         );
 
-  /// A one-line description of this app for use in the terminal window title.
-  ///
-  /// This is displayed in the terminal emulator's window title bar.
-  /// Uses OSC 2 escape sequence to set the window title.
-  ///
-  /// If [iconName] is not provided, this value will also be used for the icon name.
+  /// A one-line description shown in the terminal window title.
   final String? title;
 
-  /// A short name for this app used when the terminal window is iconified.
-  ///
-  /// This is primarily used by X11 window managers to show a short name when
-  /// the window is minimized. Uses OSC 1 escape sequence.
-  ///
-  /// If not provided, [title] will be used for both window title and icon name.
+  /// A short application name used by terminal window managers.
   final String? iconName;
 
-  /// The widget below this widget in the tree.
-  ///
-  /// If this is provided, no Navigator will be created. Use this for simple apps
-  /// that don't need navigation.
-  ///
-  /// Cannot be used with [home], [routes], [initialRoute], or [onGenerateRoute].
+  /// The application content when navigation is not required.
   final Widget? child;
 
-  /// The widget for the default route of the app (Navigator.defaultRouteName, `/`).
-  ///
-  /// This is the route that is displayed first when the application starts normally.
-  ///
-  /// If [home] is specified, a Navigator will be created automatically.
+  /// The widget for the default route.
   final Widget? home;
 
-  /// The application's top-level routing table.
-  ///
-  /// When a named route is pushed with [Navigator.pushNamed], the route name is
-  /// looked up in this map.
-  ///
-  /// If [routes] are provided, a Navigator will be created automatically.
+  /// The application's named route table.
   final Map<String, Widget Function(BuildContext)>? routes;
 
-  /// The name of the first route to show, if a Navigator is created.
-  ///
-  /// Defaults to [Navigator.defaultRouteName] (`/`).
-  ///
-  /// The value is passed to [Navigator.initialRoute].
+  /// The first named route shown by the generated [Navigator].
   final String? initialRoute;
 
-  /// The route generator callback used when the app is navigated to a named route.
-  ///
-  /// This is used if [routes] does not contain the requested route.
+  /// Generates a route that is not present in [routes].
   final RouteFactory? onGenerateRoute;
 
-  /// Called when [onGenerateRoute] fails to generate a route.
-  ///
-  /// This callback is typically used for error handling. For example, this
-  /// callback might always generate a "not found" page that describes the route
-  /// that wasn't found.
+  /// Generates a fallback route when normal generation fails.
   final RouteFactory? onUnknownRoute;
 
-  /// A list of observers for the Navigator created for this app.
-  ///
-  /// This list is empty by default. To observe navigation events, provide
-  /// a list of NavigatorObserver instances.
+  /// Observers attached to the generated [Navigator].
   final List<NavigatorObserver> navigatorObservers;
 
-  /// A key to use for the Navigator created for this app.
-  ///
-  /// This can be used to access the NavigatorState directly via
-  /// [GlobalKey.currentState].
+  /// Key used by the generated [Navigator].
   final GlobalKey<NavigatorState>? navigatorKey;
 
-  /// The theme to use for this application.
-  ///
-  /// If provided, this theme will be applied to all descendant components
-  /// via [TuiTheme]. Widgets can access it using `TuiTheme.of(context)`.
-  ///
-  /// If null, the theme will be auto-detected based on terminal brightness.
-  /// See the class documentation for details on the detection methods.
+  /// The application theme. When omitted, terminal brightness is detected.
   final TuiThemeData? theme;
+
+  /// Runtime rendering and performance diagnostics.
+  final CinderDebugOptions debug;
 
   @override
   State<CinderApp> createState() => _CinderAppState();
 }
 
 class _CinderAppState extends State<CinderApp> {
-  /// The detected theme when autoDetectTheme is enabled.
-  /// Null until detection completes or if autoDetectTheme is false.
   TuiThemeData? _detectedTheme;
-
-  /// Whether theme detection is in progress.
   bool _detectingTheme = false;
 
   @override
@@ -211,127 +87,133 @@ class _CinderAppState extends State<CinderApp> {
     super.initState();
     _updateTitle();
     _detectThemeIfNeeded();
+    _applyDebugOptions();
   }
 
   @override
   void didUpdateWidget(CinderApp oldWidget) {
     super.didUpdateWidget(oldWidget);
+
     if (oldWidget.title != widget.title ||
         oldWidget.iconName != widget.iconName) {
       _updateTitle();
     }
-    // Re-detect theme if explicit theme was removed
     if (oldWidget.theme != null && widget.theme == null) {
       _detectThemeIfNeeded();
+    }
+    if (oldWidget.debug != widget.debug) {
+      _applyDebugOptions();
+    }
+  }
+
+  @override
+  void dispose() {
+    CinderTimeline.debugTimelineEnabled = false;
+    CinderTimeline.metricsEnabled = false;
+    debugDetectLayoutThrashing = false;
+    debugRepaintRainbowEnabled = false;
+    super.dispose();
+  }
+
+  void _applyDebugOptions() {
+    final options = widget.debug;
+
+    CinderTimeline.debugTimelineEnabled = options.emitTimelineEvents;
+    CinderTimeline.metricsEnabled = options.showFrameTimings;
+    debugDetectLayoutThrashing = options.detectLayoutThrashing;
+    debugRepaintRainbowEnabled = options.showRepaintRegions;
+
+    void updateOverlay() {
+      if (!mounted) return;
+      if (debugMode != options.showPerformanceOverlay) {
+        toggleDebugMode();
+      }
+      // DebugOverlay historically enables repaint visualization when toggled.
+      // Restore the independently configured value afterwards.
+      debugRepaintRainbowEnabled = options.showRepaintRegions;
+    }
+
+    try {
+      SchedulerBinding.instance.addPostFrameCallback((_) => updateOverlay());
+    } catch (_) {
+      // A binding may not exist while constructing isolated documentation or
+      // static analysis examples. Other diagnostic flags still apply.
     }
   }
 
   void _detectThemeIfNeeded() {
-    // Don't detect if:
-    // - a theme is explicitly provided
-    // - detection is already in progress
-    if (widget.theme != null || _detectingTheme) {
-      return;
-    }
-
+    if (widget.theme != null || _detectingTheme) return;
     _detectingTheme = true;
 
-    // Try to get the terminal
-    Terminal? terminal;
-    try {
-      final binding = CinderBinding.instance;
-      if (binding is TerminalBinding) {
-        terminal = binding.terminal;
-      } else if (binding is CinderTestBinding) {
-        terminal = binding.terminal;
-      }
-    } catch (e) {
-      // Binding not available
-    }
-
+    final terminal = _currentTerminal();
     if (terminal == null) {
-      // No terminal available, use default dark theme
       _detectingTheme = false;
-      setState(() {
-        _detectedTheme = TuiThemeData.dark;
-      });
+      setState(() => _detectedTheme = TuiThemeData.dark);
       return;
     }
 
-    // Detect brightness asynchronously
     detectTerminalBrightness(terminal).then((brightness) {
-      if (mounted) {
-        setState(() {
-          _detectedTheme = brightness == Brightness.light
-              ? TuiThemeData.light
-              : TuiThemeData.dark;
-          _detectingTheme = false;
-        });
-      }
+      if (!mounted) return;
+      setState(() {
+        _detectedTheme = brightness == Brightness.light
+            ? TuiThemeData.light
+            : TuiThemeData.dark;
+        _detectingTheme = false;
+      });
     }).catchError((_) {
-      // On error, default to dark theme
-      if (mounted) {
-        setState(() {
-          _detectedTheme = TuiThemeData.dark;
-          _detectingTheme = false;
-        });
-      }
+      if (!mounted) return;
+      setState(() {
+        _detectedTheme = TuiThemeData.dark;
+        _detectingTheme = false;
+      });
     });
   }
 
   void _updateTitle() {
-    final title = widget.title;
-    final iconName = widget.iconName;
+    final terminal = _currentTerminal();
+    if (terminal == null) return;
 
-    // In test mode, there's no TerminalBinding, so we skip setting the title
-    // We use a try-catch to handle both test and production environments
-    try {
-      // Try to get the terminal from the current binding
-      final binding = CinderBinding.instance;
+    final title = _safeMetadata(widget.title);
+    final iconName = _safeMetadata(widget.iconName);
 
-      // Check if this is a TerminalBinding (production) or CinderTestBinding (test)
-      if (binding is TerminalBinding) {
-        final terminal = binding.terminal;
-
-        if (title != null && iconName != null) {
-          // Set both separately
-          terminal.setWindowTitle(title);
-          terminal.setIconName(iconName);
-          terminal.flush();
-        } else if (title != null) {
-          // Set both to the same value using OSC 0
-          terminal.setTitleAndIcon(title);
-          terminal.flush();
-        }
-      } else if (binding is CinderTestBinding) {
-        // In test mode, also set the title on the mock terminal
-        final terminal = binding.terminal;
-
-        if (title != null && iconName != null) {
-          terminal.setWindowTitle(title);
-          terminal.setIconName(iconName);
-          terminal.flush();
-        } else if (title != null) {
-          terminal.setTitleAndIcon(title);
-          terminal.flush();
-        }
-      }
-      // If both are null, do nothing (keep existing terminal title)
-    } catch (e) {
-      // In case binding is not available, silently ignore
-      // This can happen during early initialization or in certain test scenarios
+    if (title != null && iconName != null) {
+      terminal
+        ..setWindowTitle(title)
+        ..setIconName(iconName)
+        ..flush();
+    } else if (title != null) {
+      terminal
+        ..setTitleAndIcon(title)
+        ..flush();
     }
+  }
+
+  Terminal? _currentTerminal() {
+    try {
+      final binding = CinderBinding.instance;
+      if (binding is TerminalBinding) return binding.terminal;
+      if (binding is CinderTestBinding) return binding.terminal;
+    } catch (_) {
+      return null;
+    }
+    return null;
+  }
+
+  String? _safeMetadata(String? value) {
+    if (value == null) return null;
+    return TerminalText.safe(
+      value,
+      preserveNewlines: false,
+      preserveTabs: false,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     Widget content;
-
-    // If child is provided, use it directly without Navigator
     if (widget.child != null) {
       content = widget.child!;
     } else {
-      // Otherwise, create a Navigator with the provided configuration
       content = Navigator(
         key: widget.navigatorKey,
         home: widget.home,
@@ -343,29 +225,21 @@ class _CinderAppState extends State<CinderApp> {
       );
     }
 
-    // Wrap in TuiTheme if a theme is provided or auto-detected
     final effectiveTheme = widget.theme ?? _detectedTheme;
-    if (effectiveTheme != null) {
-      // Fill the entire screen with the theme's background and foreground
-      // colors. This ensures every cell in the buffer has explicit RGB values,
-      // which is required for correct alpha blending in applyTint / modal
-      // barriers. Without this, cells would have null colors (meaning
-      // "terminal default") and blending would have to guess the RGB values.
-      content = SizedBox.expand(
-        child: ColoredBox(
-          color: effectiveTheme.background,
-          foregroundColor: effectiveTheme.onBackground,
-          obscure: true,
-          child: content,
-        ),
-      );
+    if (effectiveTheme == null) return content;
 
-      content = TuiTheme(
-        data: effectiveTheme,
+    content = SizedBox.expand(
+      child: ColoredBox(
+        color: effectiveTheme.background,
+        foregroundColor: effectiveTheme.onBackground,
+        obscure: true,
         child: content,
-      );
-    }
+      ),
+    );
 
-    return content;
+    return TuiTheme(
+      data: effectiveTheme,
+      child: content,
+    );
   }
 }
