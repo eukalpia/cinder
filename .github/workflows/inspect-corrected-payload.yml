@@ -1,0 +1,47 @@
+name: Inspect corrected platform payload
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .github/workflows/inspect-corrected-payload.yml
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: feature/application-platform-and-charts
+      - name: Build integrity report
+        shell: bash
+        run: |
+          mkdir -p /tmp/corrected-report
+          files=(
+            .github/platform-payload/part-00.b64
+            .github/platform-payload/part-01.b64
+            .github/platform-payload/part-02.b64
+            .github/platform-payload/part-03a.b64
+            .github/platform-payload/part-03b.b64
+            .github/platform-payload/part-04.b64
+            .github/platform-payload/part-05.b64
+            .github/platform-payload/part-06.b64
+            .github/platform-payload/part-07.b64
+          )
+          wc -c "${files[@]}" > /tmp/corrected-report/report.txt
+          sha256sum "${files[@]}" >> /tmp/corrected-report/report.txt
+          cat "${files[@]}" > /tmp/corrected-report/payload.b64
+          wc -c /tmp/corrected-report/payload.b64 >> /tmp/corrected-report/report.txt
+          sha256sum /tmp/corrected-report/payload.b64 >> /tmp/corrected-report/report.txt
+          set +e
+          base64 --decode /tmp/corrected-report/payload.b64 > /tmp/corrected-report/payload.tar.gz
+          echo "base64_status=$?" >> /tmp/corrected-report/report.txt
+          gzip -t /tmp/corrected-report/payload.tar.gz
+          echo "gzip_status=$?" >> /tmp/corrected-report/report.txt
+          set -e
+      - uses: actions/upload-artifact@v4
+        with:
+          name: corrected-platform-payload-report
+          path: /tmp/corrected-report/report.txt
+          retention-days: 1
