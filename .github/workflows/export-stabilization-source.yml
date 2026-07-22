@@ -1,9 +1,9 @@
 name: Export stabilization source
 
 on:
-  push:
+  pull_request:
     branches:
-      - stabilization/runtime-input-unicode
+      - main
     paths:
       - .github/workflows/export-stabilization-source.yml
 
