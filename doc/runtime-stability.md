@@ -108,4 +108,5 @@ split and malformed escape sequences, standalone Escape, Kitty key lifecycle,
 terminal focus, Unicode offsets, capability profiles, non-interactive startup,
 protocol restoration, and repeated binding sessions. The benchmark suite tracks
 input parsing, Unicode geometry, capability negotiation, routing, and task
-lifecycle overhead.
+lifecycle overhead. These contracts are enforced by the repository analyzer,
+full test suite, runtime benchmark, and cross-runtime CI release gates.
