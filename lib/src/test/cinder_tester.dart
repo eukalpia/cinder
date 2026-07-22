@@ -41,10 +41,7 @@ class CinderTester {
       );
     }
 
-    return TerminalState(
-      buffer: buffer,
-      size: _binding.size,
-    );
+    return TerminalState(buffer: buffer, size: _binding.size);
   }
 
   /// Get the number of frames that have been rendered
@@ -121,9 +118,7 @@ class CinderTester {
 
   /// Send a key press by logical key
   Future<void> sendKey(LogicalKey key) async {
-    await sendKeyEvent(KeyboardEvent(
-      logicalKey: key,
-    ));
+    await sendKeyEvent(KeyboardEvent(logicalKey: key));
   }
 
   /// Send common key combinations
@@ -143,82 +138,78 @@ class CinderTester {
     await pump();
   }
 
-  /// Simulate a mouse tap at the given position
-  Future<void> tap(int x, int y) async {
-    // Send press event
-    await sendMouseEvent(MouseEvent(
-      button: MouseButton.left,
-      x: x,
-      y: y,
-      pressed: true,
-    ));
-
-    // Send release event
-    await sendMouseEvent(MouseEvent(
-      button: MouseButton.left,
-      x: x,
-      y: y,
-      pressed: false,
-    ));
+  /// Simulate a mouse tap at the given position.
+  Future<void> tap(
+    int x,
+    int y, {
+    MouseButton button = MouseButton.left,
+  }) async {
+    await press(x, y, button: button);
+    await release(x, y, button: button);
   }
 
-  /// Simulate mouse hover at the given position
+  Future<void> secondaryTap(int x, int y) =>
+      tap(x, y, button: MouseButton.right);
+
+  Future<void> middleTap(int x, int y) => tap(x, y, button: MouseButton.middle);
+
+  /// Simulate mouse hover at the given position.
   Future<void> hover(int x, int y) async {
-    await sendMouseEvent(MouseEvent(
-      button: MouseButton.left,
-      x: x,
-      y: y,
-      pressed: false,
-    ));
+    await sendMouseEvent(
+      MouseEvent(
+        button: MouseButton.left,
+        x: x,
+        y: y,
+        pressed: false,
+        isMotion: true,
+      ),
+    );
   }
 
-  /// Simulate a mouse press at the given position (without releasing)
-  Future<void> press(int x, int y) async {
-    await sendMouseEvent(MouseEvent(
-      button: MouseButton.left,
-      x: x,
-      y: y,
-      pressed: true,
-    ));
+  /// Simulate a mouse press at the given position without releasing.
+  Future<void> press(
+    int x,
+    int y, {
+    MouseButton button = MouseButton.left,
+  }) async {
+    await sendMouseEvent(MouseEvent(button: button, x: x, y: y, pressed: true));
   }
 
-  /// Simulate a mouse release at the given position
-  Future<void> release(int x, int y) async {
-    await sendMouseEvent(MouseEvent(
-      button: MouseButton.left,
-      x: x,
-      y: y,
-      pressed: false,
-    ));
+  /// Simulate a mouse release at the given position.
+  Future<void> release(
+    int x,
+    int y, {
+    MouseButton button = MouseButton.left,
+  }) async {
+    await sendMouseEvent(
+      MouseEvent(button: button, x: x, y: y, pressed: false),
+    );
   }
 
-  /// Simulate mouse movement from one position to another
-  Future<void> mouseMove(int startX, int startY, int endX, int endY) async {
-    // Send press at start
-    await press(startX, startY);
+  /// Simulate a button drag from one position to another.
+  Future<void> mouseMove(
+    int startX,
+    int startY,
+    int endX,
+    int endY, {
+    MouseButton button = MouseButton.left,
+  }) async {
+    await press(startX, startY, button: button);
 
-    // Move gradually towards end (for smooth movement simulation)
     final dx = (endX - startX).abs();
     final dy = (endY - startY).abs();
     final steps = dx > dy ? dx : dy;
 
-    if (steps > 0) {
-      for (int i = 1; i <= steps; i++) {
-        final t = i / steps;
-        final x = (startX + (endX - startX) * t).round();
-        final y = (startY + (endY - startY) * t).round();
-
-        await sendMouseEvent(MouseEvent(
-          button: MouseButton.left,
-          x: x,
-          y: y,
-          pressed: true,
-        ));
-      }
+    for (var i = 1; i <= steps; i++) {
+      final t = i / steps;
+      final x = (startX + (endX - startX) * t).round();
+      final y = (startY + (endY - startY) * t).round();
+      await sendMouseEvent(
+        MouseEvent(button: button, x: x, y: y, pressed: true, isMotion: true),
+      );
     }
 
-    // Release at end
-    await release(endX, endY);
+    await release(endX, endY, button: button);
   }
 
   /// Render the current state as a string for debugging
@@ -271,7 +262,8 @@ class CinderTester {
 
   void _printDebugOutput() {
     print(
-        '\n╔═ Terminal Output ═══════════════════════════════════════════════════════════╗');
+      '\n╔═ Terminal Output ═══════════════════════════════════════════════════════════╗',
+    );
     final lines = renderToString(showBorders: false).split('\n');
     for (final line in lines) {
       // Pad or truncate line to fit within 78 chars
@@ -280,7 +272,8 @@ class CinderTester {
       print('║$displayLine║');
     }
     print(
-        '╚══════════════════════════════════════════════════════════════════════════════╝');
+      '╚══════════════════════════════════════════════════════════════════════════════╝',
+    );
   }
 }
 

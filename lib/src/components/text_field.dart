@@ -11,69 +11,39 @@ import '../utils/unicode_width.dart';
 import '../text/selection_utils.dart' as selection_utils;
 import 'text_field/cursor_movement.dart';
 
-/// Controls the text being edited.
-class TextEditingController {
-  TextEditingController({String? text})
-      : _text = text ?? '',
-        _selection = TextSelection.collapsed(offset: text?.length ?? 0);
+/// A complete text editing value containing both text and selection.
+class TextEditingValue {
+  const TextEditingValue({required this.text, required this.selection});
 
-  String _text;
-  TextSelection _selection;
-  final _listeners = <VoidCallback>[];
+  const TextEditingValue.empty()
+      : text = '',
+        selection = const TextSelection.collapsed(offset: 0);
 
-  /// The current text being edited.
-  String get text => _text;
-  set text(String newText) {
-    if (_text != newText) {
-      _text = newText;
-      _selection = TextSelection.collapsed(offset: newText.length);
-      notifyListeners();
-    }
+  final String text;
+  final TextSelection selection;
+
+  TextEditingValue copyWith({String? text, TextSelection? selection}) {
+    return TextEditingValue(
+      text: text ?? this.text,
+      selection: selection ?? this.selection,
+    );
   }
 
-  /// The current selection.
-  TextSelection get selection => _selection;
-  set selection(TextSelection newSelection) {
-    if (_selection != newSelection) {
-      _selection = newSelection;
-      notifyListeners();
-    }
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        other is TextEditingValue &&
+            other.text == text &&
+            other.selection == selection;
   }
 
-  /// Clear the text.
-  void clear() {
-    text = '';
-  }
-
-  /// Add a listener.
-  void addListener(VoidCallback listener) {
-    _listeners.add(listener);
-  }
-
-  /// Remove a listener.
-  void removeListener(VoidCallback listener) {
-    _listeners.remove(listener);
-  }
-
-  /// Notify all listeners.
-  void notifyListeners() {
-    for (final listener in _listeners) {
-      listener();
-    }
-  }
-
-  /// Dispose of the controller.
-  void dispose() {
-    _listeners.clear();
-  }
+  @override
+  int get hashCode => Object.hash(text, selection);
 }
 
 /// Text selection representation.
 class TextSelection {
-  const TextSelection({
-    required this.baseOffset,
-    required this.extentOffset,
-  });
+  const TextSelection({required this.baseOffset, required this.extentOffset});
 
   const TextSelection.collapsed({required int offset})
       : baseOffset = offset,
@@ -105,6 +75,174 @@ class TextSelection {
   int get hashCode => Object.hash(baseOffset, extentOffset);
 }
 
+/// Controls the text being edited and owns its undo/redo history.
+class TextEditingController {
+  TextEditingController({String? text, this.historyLimit = 100})
+      : _value = TextEditingValue(
+          text: text ?? '',
+          selection: TextSelection.collapsed(offset: text?.length ?? 0),
+        );
+
+  TextEditingValue _value;
+  final List<TextEditingValue> _undoStack = <TextEditingValue>[];
+  final List<TextEditingValue> _redoStack = <TextEditingValue>[];
+  final _listeners = <VoidCallback>[];
+
+  /// Maximum number of text mutations retained for undo.
+  final int historyLimit;
+
+  TextEditingValue get value => _value;
+  set value(TextEditingValue newValue) => setValue(newValue);
+
+  /// The current text being edited.
+  String get text => _value.text;
+  set text(String newText) {
+    setValue(
+      TextEditingValue(
+        text: newText,
+        selection: TextSelection.collapsed(offset: newText.length),
+      ),
+    );
+  }
+
+  /// The current selection.
+  TextSelection get selection => _value.selection;
+  set selection(TextSelection newSelection) {
+    setValue(_value.copyWith(selection: newSelection), recordHistory: false);
+  }
+
+  bool get canUndo => _undoStack.isNotEmpty;
+  bool get canRedo => _redoStack.isNotEmpty;
+
+  /// Atomically updates text and selection.
+  ///
+  /// Selection-only changes are never added to undo history. Text changes are
+  /// recorded unless [recordHistory] is false (useful for restoring drafts).
+  void setValue(TextEditingValue newValue, {bool recordHistory = true}) {
+    final normalized = _normalize(newValue);
+    if (normalized == _value) return;
+
+    final textChanged = normalized.text != _value.text;
+    if (recordHistory && textChanged && historyLimit > 0) {
+      _undoStack.add(_value);
+      if (_undoStack.length > historyLimit) {
+        _undoStack.removeAt(0);
+      }
+      _redoStack.clear();
+    }
+
+    _value = normalized;
+    notifyListeners();
+  }
+
+  TextEditingValue _normalize(TextEditingValue candidate) {
+    final length = candidate.text.length;
+    return candidate.copyWith(
+      selection: TextSelection(
+        baseOffset: candidate.selection.baseOffset.clamp(0, length),
+        extentOffset: candidate.selection.extentOffset.clamp(0, length),
+      ),
+    );
+  }
+
+  bool undo() {
+    if (_undoStack.isEmpty) return false;
+    final previous = _undoStack.removeLast();
+    _redoStack.add(_value);
+    _value = _normalize(previous);
+    notifyListeners();
+    return true;
+  }
+
+  bool redo() {
+    if (_redoStack.isEmpty) return false;
+    final next = _redoStack.removeLast();
+    _undoStack.add(_value);
+    _value = _normalize(next);
+    notifyListeners();
+    return true;
+  }
+
+  void clearHistory() {
+    _undoStack.clear();
+    _redoStack.clear();
+  }
+
+  /// Clear the text.
+  void clear() {
+    value = const TextEditingValue.empty();
+  }
+
+  /// Add a listener.
+  void addListener(VoidCallback listener) {
+    _listeners.add(listener);
+  }
+
+  /// Remove a listener.
+  void removeListener(VoidCallback listener) {
+    _listeners.remove(listener);
+  }
+
+  /// Notify all listeners.
+  void notifyListeners() {
+    for (final listener in List<VoidCallback>.of(_listeners)) {
+      listener();
+    }
+  }
+
+  /// Dispose of the controller.
+  void dispose() {
+    _listeners.clear();
+    clearHistory();
+  }
+}
+
+/// Persistence contract for per-conversation text drafts.
+abstract class TextDraftStore {
+  const TextDraftStore();
+
+  TextEditingValue? read(Object key);
+  void write(Object key, TextEditingValue value);
+  void remove(Object key);
+}
+
+/// In-memory draft store suitable for chat tabs and workspace panes.
+class MemoryTextDraftStore extends TextDraftStore {
+  MemoryTextDraftStore();
+
+  final Map<Object, TextEditingValue> _drafts = <Object, TextEditingValue>{};
+
+  @override
+  TextEditingValue? read(Object key) => _drafts[key];
+
+  @override
+  void write(Object key, TextEditingValue value) {
+    _drafts[key] = value;
+  }
+
+  @override
+  void remove(Object key) {
+    _drafts.remove(key);
+  }
+
+  void clear() => _drafts.clear();
+}
+
+/// Determines which Enter chord submits a [TextField].
+enum TextFieldSubmitMode {
+  /// Plain Enter submits. Shift+Enter inserts a newline in multiline fields.
+  enter,
+
+  /// Ctrl+Enter or Meta+Enter submits. Plain Enter inserts a newline.
+  controlOrMetaEnter,
+
+  /// Shift+Enter submits. Plain Enter inserts a newline.
+  shiftEnter,
+
+  /// Enter never submits and inserts a newline when multiline.
+  never,
+}
+
 /// A Material Design text field for terminal UI.
 class TextField extends StatefulWidget {
   const TextField({
@@ -128,7 +266,13 @@ class TextField extends StatefulWidget {
     this.onEditingComplete,
     this.onSubmitted,
     this.onPaste,
+    this.onEditorKeyEvent,
+    this.onAppKeyEvent,
     this.onKeyEvent,
+    this.submitMode = TextFieldSubmitMode.enter,
+    this.draftKey,
+    this.draftStore,
+    this.clearDraftOnSubmit = false,
     this.enabled = true,
     this.cursorColor,
     this.cursorStyle = CursorStyle.block,
@@ -143,8 +287,10 @@ class TextField extends StatefulWidget {
           (maxLines == null) || (minLines == null) || (maxLines >= minLines),
           "minLines can't be greater than maxLines",
         ),
-        assert(!obscureText || maxLines == 1,
-            'Obscured fields cannot be multiline.'),
+        assert(
+          !obscureText || maxLines == 1,
+          'Obscured fields cannot be multiline.',
+        ),
         assert(maxLength == null || maxLength > 0);
 
   final TextEditingController? controller;
@@ -171,11 +317,27 @@ class TextField extends StatefulWidget {
   /// Return `false` or null to proceed with default insertion.
   final bool Function(String pastedText)? onPaste;
 
-  /// Callback invoked when a key event occurs, before TextField processes it.
-  /// Return `true` to indicate the event was handled (TextField will skip processing).
-  /// Return `false` to let TextField handle the event normally.
-  /// This allows parent widgets to intercept keys like arrow up/down for custom handling.
+  /// Editor-level interception invoked before Cinder's built-in editing intents.
+  final bool Function(KeyboardEvent event)? onEditorKeyEvent;
+
+  /// Application shortcut handler invoked only after editor shortcuts decline.
+  final bool Function(KeyboardEvent event)? onAppKeyEvent;
+
+  /// Backwards-compatible alias for [onAppKeyEvent].
   final bool Function(KeyboardEvent event)? onKeyEvent;
+
+  /// Configures the Enter chord used for submit/send.
+  final TextFieldSubmitMode submitMode;
+
+  /// Stable conversation/document identifier used for draft persistence.
+  final Object? draftKey;
+
+  /// Store used to persist and restore [draftKey].
+  final TextDraftStore? draftStore;
+
+  /// Removes the persisted draft after a successful submit callback.
+  final bool clearDraftOnSubmit;
+
   final bool enabled;
 
   /// The color of the text cursor.
@@ -207,6 +369,7 @@ class _TextFieldState extends State<TextField> {
   Timer? _cursorTimer;
   bool _cursorVisible = true;
   int _viewOffset = 0; // For horizontal scrolling
+  bool _restoringDraft = false;
 
   // Reference to the render object for cursor movement
   RenderTextField? _renderTextField;
@@ -254,18 +417,45 @@ class _TextFieldState extends State<TextField> {
     super.initState();
     _initFocusNode();
 
-    if (widget.controller == null) {
-      _controller = TextEditingController();
-      _controllerIsInternal = true;
-    } else {
-      _controller = widget.controller!;
-    }
-
+    _attachController(widget.controller);
+    _restoreDraft(widget.draftStore, widget.draftKey);
     _controller.addListener(_handleControllerChanged);
 
     if (_hasFocus && widget.showCursor) {
       _startCursorBlink();
     }
+  }
+
+  void _attachController(TextEditingController? controller) {
+    _controllerIsInternal = controller == null;
+    _controller = controller ?? TextEditingController();
+  }
+
+  void _persistDraft(TextDraftStore? store, Object? key) {
+    if (_restoringDraft || store == null || key == null) return;
+    store.write(key, _controller.value);
+  }
+
+  void _restoreDraft(
+    TextDraftStore? store,
+    Object? key, {
+    bool clearWhenMissing = false,
+  }) {
+    if (store == null || key == null) return;
+    final draft = store.read(key);
+    if (draft == null && !clearWhenMissing) return;
+    _restoringDraft = true;
+    _controller.setValue(
+      draft ?? const TextEditingValue.empty(),
+      recordHistory: false,
+    );
+    _controller.clearHistory();
+    _restoringDraft = false;
+  }
+
+  void _replaceEditingValue(String text, TextSelection selection) {
+    _controller.value = TextEditingValue(text: text, selection: selection);
+    _renderTextField?.resetTargetColumn();
   }
 
   @override
@@ -282,6 +472,7 @@ class _TextFieldState extends State<TextField> {
   }
 
   void _handleControllerChanged() {
+    _persistDraft(widget.draftStore, widget.draftKey);
     widget.onChanged?.call(_controller.text);
     setState(() {
       // Update view offset for horizontal scrolling
@@ -292,6 +483,37 @@ class _TextFieldState extends State<TextField> {
   @override
   void didUpdateWidget(TextField oldWidget) {
     super.didUpdateWidget(oldWidget);
+
+    final controllerChanged = !identical(
+      widget.controller,
+      oldWidget.controller,
+    );
+    final draftChanged = widget.draftKey != oldWidget.draftKey ||
+        !identical(widget.draftStore, oldWidget.draftStore);
+
+    if (controllerChanged || draftChanged) {
+      _persistDraft(oldWidget.draftStore, oldWidget.draftKey);
+    }
+
+    if (controllerChanged) {
+      _controller.removeListener(_handleControllerChanged);
+      if (_controllerIsInternal) {
+        _controller.dispose();
+      }
+      _attachController(widget.controller);
+    }
+
+    if (controllerChanged || draftChanged) {
+      _restoreDraft(
+        widget.draftStore,
+        widget.draftKey,
+        clearWhenMissing: draftChanged,
+      );
+    }
+
+    if (controllerChanged) {
+      _controller.addListener(_handleControllerChanged);
+    }
 
     final focusNodeChanged = !identical(widget.focusNode, oldWidget.focusNode);
     if (focusNodeChanged) {
@@ -355,15 +577,18 @@ class _TextFieldState extends State<TextField> {
       if (maxVisibleWidth <= 0) return; // No space to display text
 
       // Calculate visual column position of cursor (accounting for wide characters)
-      final textBeforeCursor =
-          text.substring(0, math.min(cursorPos, text.length));
+      final textBeforeCursor = text.substring(
+        0,
+        math.min(cursorPos, text.length),
+      );
       final cursorVisualColumn = UnicodeWidth.stringWidth(textBeforeCursor);
 
       // Calculate visual width of currently visible text
       int viewOffsetVisualColumn = 0;
       if (_viewOffset > 0 && _viewOffset <= text.length) {
-        viewOffsetVisualColumn =
-            UnicodeWidth.stringWidth(text.substring(0, _viewOffset));
+        viewOffsetVisualColumn = UnicodeWidth.stringWidth(
+          text.substring(0, _viewOffset),
+        );
       }
 
       // Adjust view offset to keep cursor visible
@@ -395,125 +620,154 @@ class _TextFieldState extends State<TextField> {
   }
 
   bool _handleKeyEvent(KeyboardEvent event) {
-    if (widget.readOnly || !widget.enabled) {
-      return false;
-    }
+    if (!widget.enabled) return false;
 
-    // Allow parent widgets to intercept key events first
-    if (widget.onKeyEvent != null && widget.onKeyEvent!(event)) {
+    if (widget.onEditorKeyEvent?.call(event) ?? false) {
       return true;
-    }
-
-    // Let Ctrl+C bubble up to allow app termination
-    if (event.logicalKey == LogicalKey.keyC && event.isControlPressed) {
-      return false;
     }
 
     final key = event.logicalKey;
+    final controlOrMeta = event.isControlPressed || event.isMetaPressed;
 
-    // Handle Tab/Shift+Tab for focus navigation
-    if (key == LogicalKey.tab) {
-      // Don't consume tab keys - let them bubble up for focus navigation
-      return false;
+    // Focus traversal is owned by Focus/FocusScope, not the editor.
+    if (key == LogicalKey.tab) return false;
+
+    // Modifier-specific editor commands must precede their unmodified keys.
+    if (controlOrMeta && key == LogicalKey.keyZ) {
+      final changed =
+          event.isShiftPressed ? _controller.redo() : _controller.undo();
+      if (changed) _renderTextField?.resetTargetColumn();
+      return changed || _dispatchAppShortcut(event);
     }
-
-    // Handle newline insertion: Shift+Enter, Ctrl+Enter, Alt+Enter, or Ctrl+J
-    // With kitty keyboard protocol enabled, terminals can distinguish modified Enter.
-    // Ctrl+J (linefeed) is a universal fallback that works in all terminals.
-    if (key == LogicalKey.enter &&
-        (event.isShiftPressed ||
-            event.isControlPressed ||
-            event.isAltPressed)) {
-      if (widget.maxLines != 1) {
-        _insertText('\n');
+    if (event.matches(LogicalKey.keyY, ctrl: true)) {
+      final changed = _controller.redo();
+      if (changed) _renderTextField?.resetTargetColumn();
+      return changed || _dispatchAppShortcut(event);
+    }
+    if (controlOrMeta && key == LogicalKey.keyA) {
+      _selectAll();
+      return true;
+    }
+    if (controlOrMeta && key == LogicalKey.keyC) {
+      if (!_controller.selection.isCollapsed) {
+        _copy();
+        return true;
       }
-      return true;
-    } else if (event.matches(LogicalKey.keyJ, ctrl: true)) {
-      // Ctrl+J = universal newline fallback (works in all terminals)
-      if (widget.maxLines != 1) {
-        _insertText('\n');
+      return _dispatchAppShortcut(event);
+    }
+    if (controlOrMeta && key == LogicalKey.keyX) {
+      if (!widget.readOnly && !_controller.selection.isCollapsed) {
+        _cut();
+        return true;
       }
+      return _dispatchAppShortcut(event);
+    }
+    if (controlOrMeta && key == LogicalKey.keyV) {
+      if (widget.readOnly) return _dispatchAppShortcut(event);
+      _paste();
       return true;
-    } else if (key == LogicalKey.enter) {
-      // Plain Enter submits in all fields (both single-line and multi-line)
-      widget.onEditingComplete?.call();
-      widget.onSubmitted?.call(_controller.text);
+    }
+    if (!widget.readOnly && controlOrMeta && key == LogicalKey.backspace) {
+      _deleteWordBackward();
       return true;
-    } else if (key == LogicalKey.backspace) {
-      _handleBackspace();
+    }
+    if (!widget.readOnly && controlOrMeta && key == LogicalKey.delete) {
+      _deleteWordForward();
       return true;
-    } else if (key == LogicalKey.delete) {
-      _handleDelete();
+    }
+    if (controlOrMeta && event.isShiftPressed && key == LogicalKey.arrowLeft) {
+      _moveCursorByWord(-1, true);
       return true;
-    } else if (key == LogicalKey.arrowLeft && event.isShiftPressed) {
-      _moveCursor(-1, true);
+    }
+    if (controlOrMeta && event.isShiftPressed && key == LogicalKey.arrowRight) {
+      _moveCursorByWord(1, true);
       return true;
-    } else if (key == LogicalKey.arrowRight && event.isShiftPressed) {
-      _moveCursor(1, true);
-      return true;
-    } else if (key == LogicalKey.arrowLeft && event.isControlPressed) {
+    }
+    if (controlOrMeta && key == LogicalKey.arrowLeft) {
       _moveCursorByWord(-1, false);
       return true;
-    } else if (key == LogicalKey.arrowRight && event.isControlPressed) {
+    }
+    if (controlOrMeta && key == LogicalKey.arrowRight) {
       _moveCursorByWord(1, false);
       return true;
-    } else if (key == LogicalKey.arrowUp &&
+    }
+    if (!widget.readOnly && event.matches(LogicalKey.keyT, ctrl: true)) {
+      _transposeCharacters();
+      return true;
+    }
+
+    if (key == LogicalKey.enter || event.matches(LogicalKey.keyJ, ctrl: true)) {
+      return _handleEnter(event);
+    }
+
+    if (key == LogicalKey.arrowLeft && event.isShiftPressed) {
+      _moveCursor(-1, true);
+      return true;
+    }
+    if (key == LogicalKey.arrowRight && event.isShiftPressed) {
+      _moveCursor(1, true);
+      return true;
+    }
+    if (key == LogicalKey.arrowUp &&
         event.isShiftPressed &&
         widget.maxLines != 1) {
       _moveCursorVertically(-1, true);
       return true;
-    } else if (key == LogicalKey.arrowDown &&
+    }
+    if (key == LogicalKey.arrowDown &&
         event.isShiftPressed &&
         widget.maxLines != 1) {
       _moveCursorVertically(1, true);
       return true;
-    } else if (key == LogicalKey.arrowLeft) {
+    }
+    if (key == LogicalKey.arrowLeft) {
       _moveCursor(-1, false);
       return true;
-    } else if (key == LogicalKey.arrowRight) {
+    }
+    if (key == LogicalKey.arrowRight) {
       _moveCursor(1, false);
       return true;
-    } else if (key == LogicalKey.arrowUp && widget.maxLines != 1) {
+    }
+    if (key == LogicalKey.arrowUp && widget.maxLines != 1) {
       _moveCursorVertically(-1, false);
       return true;
-    } else if (key == LogicalKey.arrowDown && widget.maxLines != 1) {
+    }
+    if (key == LogicalKey.arrowDown && widget.maxLines != 1) {
       _moveCursorVertically(1, false);
       return true;
-    } else if (key == LogicalKey.home) {
+    }
+    if (key == LogicalKey.home) {
       _moveCursorToStart();
       return true;
-    } else if (key == LogicalKey.end) {
+    }
+    if (key == LogicalKey.end) {
       _moveCursorToEnd();
       return true;
-    } else if (event.matches(LogicalKey.keyA, ctrl: true)) {
-      _selectAll();
-      return true;
-    } else if (event.matches(LogicalKey.keyC, ctrl: true)) {
-      _copy();
-      return true;
-    } else if (event.matches(LogicalKey.keyX, ctrl: true)) {
-      _cut();
-      return true;
-    } else if (event.matches(LogicalKey.keyV, ctrl: true)) {
-      _paste();
-      return true;
-    } else if (key == LogicalKey.backspace && event.isControlPressed) {
-      _deleteWordBackward();
-      return true;
-    } else if (key == LogicalKey.delete && event.isControlPressed) {
-      _deleteWordForward();
-      return true;
-    } else if (event.matches(LogicalKey.keyT, ctrl: true)) {
-      _transposeCharacters();
-      return true;
-    } else {
-      // Use the character from the event if available (supports UTF-8 and composed characters)
-      if (event.character != null) {
-        _insertText(event.character!);
-        return true;
-      }
+    }
 
-      // Fallback to getting character from key
+    if (!widget.readOnly && key == LogicalKey.backspace) {
+      _handleBackspace();
+      return true;
+    }
+    if (!widget.readOnly && key == LogicalKey.delete) {
+      _handleDelete();
+      return true;
+    }
+
+    // Modified keys not claimed by the editor belong to the application.
+    if (event.modifiers.hasAnyModifier && _dispatchAppShortcut(event)) {
+      return true;
+    }
+
+    if (!widget.readOnly &&
+        !controlOrMeta &&
+        !event.isAltPressed &&
+        event.character != null) {
+      _insertText(event.character!);
+      return true;
+    }
+
+    if (!widget.readOnly && !event.modifiers.hasAnyModifier) {
       final char = _getCharacterFromKey(key);
       if (char != null) {
         _insertText(char);
@@ -521,7 +775,42 @@ class _TextFieldState extends State<TextField> {
       }
     }
 
-    return false;
+    return _dispatchAppShortcut(event);
+  }
+
+  bool _dispatchAppShortcut(KeyboardEvent event) {
+    final handler = widget.onAppKeyEvent ?? widget.onKeyEvent;
+    return handler?.call(event) ?? false;
+  }
+
+  bool _handleEnter(KeyboardEvent event) {
+    final isCtrlJ = event.matches(LogicalKey.keyJ, ctrl: true);
+    final shouldSubmit = !isCtrlJ &&
+        switch (widget.submitMode) {
+          TextFieldSubmitMode.enter => !event.modifiers.hasAnyModifier,
+          TextFieldSubmitMode.controlOrMetaEnter =>
+            event.isControlPressed || event.isMetaPressed,
+          TextFieldSubmitMode.shiftEnter => event.isShiftPressed,
+          TextFieldSubmitMode.never => false,
+        };
+
+    if (shouldSubmit) {
+      widget.onEditingComplete?.call();
+      widget.onSubmitted?.call(_controller.text);
+      if (widget.clearDraftOnSubmit &&
+          widget.draftStore != null &&
+          widget.draftKey != null) {
+        widget.draftStore!.remove(widget.draftKey!);
+      }
+      return true;
+    }
+
+    if (!widget.readOnly && widget.maxLines != 1) {
+      _insertText('\n');
+      return true;
+    }
+
+    return _dispatchAppShortcut(event);
   }
 
   String? _getCharacterFromKey(LogicalKey key) {
@@ -629,11 +918,7 @@ class _TextFieldState extends State<TextField> {
       newOffset = clampedExtentOffset + char.length;
     }
 
-    _controller.text = newText;
-    _controller.selection = TextSelection.collapsed(offset: newOffset);
-
-    // Reset target column after text modification
-    _renderTextField?.resetTargetColumn();
+    _replaceEditingValue(newText, TextSelection.collapsed(offset: newOffset));
   }
 
   void _handleBackspace() {
@@ -649,9 +934,10 @@ class _TextFieldState extends State<TextField> {
 
     if (!isCollapsed) {
       // Delete selected text
-      _controller.text =
-          text.substring(0, clampedStart) + text.substring(clampedEnd);
-      _controller.selection = TextSelection.collapsed(offset: clampedStart);
+      _replaceEditingValue(
+        text.substring(0, clampedStart) + text.substring(clampedEnd),
+        TextSelection.collapsed(offset: clampedStart),
+      );
     } else if (clampedExtentOffset > 0) {
       // Delete the grapheme cluster before cursor
       final textBefore = text.substring(0, clampedExtentOffset);
@@ -661,9 +947,10 @@ class _TextFieldState extends State<TextField> {
       final graphemes = textBefore.characters;
       if (graphemes.isNotEmpty) {
         final newTextBefore = graphemes.skipLast(1).toString();
-        _controller.text = newTextBefore + textAfter;
-        _controller.selection =
-            TextSelection.collapsed(offset: newTextBefore.length);
+        _replaceEditingValue(
+          newTextBefore + textAfter,
+          TextSelection.collapsed(offset: newTextBefore.length),
+        );
       }
     }
   }
@@ -681,9 +968,10 @@ class _TextFieldState extends State<TextField> {
 
     if (!isCollapsed) {
       // Delete selected text
-      _controller.text =
-          text.substring(0, clampedStart) + text.substring(clampedEnd);
-      _controller.selection = TextSelection.collapsed(offset: clampedStart);
+      _replaceEditingValue(
+        text.substring(0, clampedStart) + text.substring(clampedEnd),
+        TextSelection.collapsed(offset: clampedStart),
+      );
     } else if (clampedExtentOffset < textLength) {
       // Delete the grapheme cluster after cursor
       final textBefore = text.substring(0, clampedExtentOffset);
@@ -693,8 +981,10 @@ class _TextFieldState extends State<TextField> {
       final graphemesAfter = textAfter.characters;
       if (graphemesAfter.isNotEmpty) {
         final newTextAfter = graphemesAfter.skip(1).toString();
-        _controller.text = textBefore + newTextAfter;
-        // Cursor position stays the same
+        _replaceEditingValue(
+          textBefore + newTextAfter,
+          TextSelection.collapsed(offset: clampedExtentOffset),
+        );
       }
     }
   }
@@ -724,9 +1014,10 @@ class _TextFieldState extends State<TextField> {
 
     if (!isCollapsed) {
       // Delete selected text
-      _controller.text =
-          text.substring(0, clampedStart) + text.substring(clampedEnd);
-      _controller.selection = TextSelection.collapsed(offset: clampedStart);
+      _replaceEditingValue(
+        text.substring(0, clampedStart) + text.substring(clampedEnd),
+        TextSelection.collapsed(offset: clampedStart),
+      );
       return;
     }
 
@@ -744,9 +1035,10 @@ class _TextFieldState extends State<TextField> {
       start--;
     }
 
-    _controller.text =
-        text.substring(0, start) + text.substring(clampedExtentOffset);
-    _controller.selection = TextSelection.collapsed(offset: start);
+    _replaceEditingValue(
+      text.substring(0, start) + text.substring(clampedExtentOffset),
+      TextSelection.collapsed(offset: start),
+    );
   }
 
   void _deleteWordForward() {
@@ -762,9 +1054,10 @@ class _TextFieldState extends State<TextField> {
 
     if (!isCollapsed) {
       // Delete selected text
-      _controller.text =
-          text.substring(0, clampedStart) + text.substring(clampedEnd);
-      _controller.selection = TextSelection.collapsed(offset: clampedStart);
+      _replaceEditingValue(
+        text.substring(0, clampedStart) + text.substring(clampedEnd),
+        TextSelection.collapsed(offset: clampedStart),
+      );
       return;
     }
 
@@ -782,9 +1075,10 @@ class _TextFieldState extends State<TextField> {
       end++;
     }
 
-    _controller.text =
-        text.substring(0, clampedExtentOffset) + text.substring(end);
-    // Cursor position stays the same
+    _replaceEditingValue(
+      text.substring(0, clampedExtentOffset) + text.substring(end),
+      TextSelection.collapsed(offset: clampedExtentOffset),
+    );
   }
 
   void _transposeCharacters() {
@@ -818,12 +1112,10 @@ class _TextFieldState extends State<TextField> {
           chars[charIndex == chars.length ? charIndex - 1 : charIndex];
       chars[charIndex == chars.length ? charIndex - 1 : charIndex] = temp;
 
-      _controller.text = chars.join();
-
-      // Move cursor forward if not at end
-      if (pos < text.length) {
-        _moveCursor(1, false);
-      }
+      final newText = chars.join();
+      final newOffset =
+          pos < text.length ? math.min(pos + 1, newText.length) : pos;
+      _replaceEditingValue(newText, TextSelection.collapsed(offset: newOffset));
     }
   }
 
@@ -837,8 +1129,9 @@ class _TextFieldState extends State<TextField> {
   }
 
   void _moveCursorToEnd() {
-    _controller.selection =
-        TextSelection.collapsed(offset: _controller.text.length);
+    _controller.selection = TextSelection.collapsed(
+      offset: _controller.text.length,
+    );
     _renderTextField?.resetTargetColumn();
   }
 
@@ -885,9 +1178,10 @@ class _TextFieldState extends State<TextField> {
         ClipboardManager.copy(selectedText);
 
         // Delete the selected text
-        _controller.text =
-            text.substring(0, clampedStart) + text.substring(clampedEnd);
-        _controller.selection = TextSelection.collapsed(offset: clampedStart);
+        _replaceEditingValue(
+          text.substring(0, clampedStart) + text.substring(clampedEnd),
+          TextSelection.collapsed(offset: clampedStart),
+        );
       }
     }
   }
@@ -1449,8 +1743,10 @@ class RenderTextField extends RenderObject with MouseTrackerAnnotationProvider {
 
       if (charCount + lineLength >= _selection.extentOffset ||
           i == lines.length - 1) {
-        final positionInLine =
-            (_selection.extentOffset - charCount).clamp(0, lineLength);
+        final positionInLine = (_selection.extentOffset - charCount).clamp(
+          0,
+          lineLength,
+        );
 
         // Calculate visual position using Unicode width
         final textBeforeCursor = line.substring(0, positionInLine);
@@ -1458,10 +1754,7 @@ class RenderTextField extends RenderObject with MouseTrackerAnnotationProvider {
 
         // Combine global offset with cursor position within the field
         final globalOffset = _globalPaintOffset;
-        return Offset(
-          globalOffset.dx + visualColumn,
-          globalOffset.dy + i,
-        );
+        return Offset(globalOffset.dx + visualColumn, globalOffset.dy + i);
       }
 
       charCount += lineLength;
@@ -1748,10 +2041,7 @@ class RenderTextField extends RenderObject with MouseTrackerAnnotationProvider {
 
     // Size based on actual layout result
     final actualHeight = _layoutResult!.actualHeight.toDouble();
-    size = constraints.constrain(Size(
-      constraints.maxWidth,
-      actualHeight,
-    ));
+    size = constraints.constrain(Size(constraints.maxWidth, actualHeight));
   }
 
   @override
@@ -1782,12 +2072,20 @@ class RenderTextField extends RenderObject with MouseTrackerAnnotationProvider {
       // Apply justification if needed
       String displayLine = line;
       if (_textAlign == TextAlign.justify && i < lines.length - 1) {
-        displayLine = TextLayoutEngine.justifyLine(line, alignmentWidth,
-            isLastLine: false);
+        displayLine = TextLayoutEngine.justifyLine(
+          line,
+          alignmentWidth,
+          isLastLine: false,
+        );
       }
 
       _paintLineWithSelection(
-          canvas, Offset(xOffset, offset.dy + i), displayLine, textStyle, i);
+        canvas,
+        Offset(xOffset, offset.dy + i),
+        displayLine,
+        textStyle,
+        i,
+      );
     }
 
     // Paint cursor only for the focused field
@@ -1796,8 +2094,13 @@ class RenderTextField extends RenderObject with MouseTrackerAnnotationProvider {
     }
   }
 
-  void _paintLineWithSelection(TerminalCanvas canvas, Offset offset,
-      String line, TextStyle style, int lineIndex) {
+  void _paintLineWithSelection(
+    TerminalCanvas canvas,
+    Offset offset,
+    String line,
+    TextStyle style,
+    int lineIndex,
+  ) {
     selection_utils.paintTextWithSelection(
       canvas: canvas,
       offset: offset,
@@ -1833,8 +2136,10 @@ class RenderTextField extends RenderObject with MouseTrackerAnnotationProvider {
       // Check if cursor is on this line
       if (charCount + lineLength >= _selection.extentOffset ||
           i == lines.length - 1) {
-        final positionInLine =
-            (_selection.extentOffset - charCount).clamp(0, lineLength);
+        final positionInLine = (_selection.extentOffset - charCount).clamp(
+          0,
+          lineLength,
+        );
 
         // Calculate visual position using Unicode width
         final textBeforeCursor = line.substring(0, positionInLine);
@@ -1848,7 +2153,12 @@ class RenderTextField extends RenderObject with MouseTrackerAnnotationProvider {
             positionInLine < line.length ? line[positionInLine] : ' ';
 
         _drawCursorAtPosition(
-            canvas, cursorOffset, charAtCursor, positionInLine, cursorColor);
+          canvas,
+          cursorOffset,
+          charAtCursor,
+          positionInLine,
+          cursorColor,
+        );
         break;
       }
 

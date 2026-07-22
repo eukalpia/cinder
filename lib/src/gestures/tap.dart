@@ -45,6 +45,8 @@ class TapGestureRecognizer extends GestureRecognizer {
       final details = TapDownDetails(
         globalPosition: Offset(event.x.toDouble(), event.y.toDouble()),
         localPosition: localPosition,
+        button: event.button,
+        buttons: event.buttons,
       );
       onTapDown?.call(details);
       _sentTapDown = true;
@@ -72,6 +74,8 @@ class TapGestureRecognizer extends GestureRecognizer {
       final details = TapUpDetails(
         globalPosition: Offset(event.x.toDouble(), event.y.toDouble()),
         localPosition: localPosition,
+        button: event.button,
+        buttons: event.buttons,
       );
       onTapUp?.call(details);
     }
@@ -154,9 +158,7 @@ class TapGestureRecognizer extends GestureRecognizer {
 
 /// Recognizes double tap gestures.
 class DoubleTapGestureRecognizer extends GestureRecognizer {
-  DoubleTapGestureRecognizer({
-    this.onDoubleTap,
-  });
+  DoubleTapGestureRecognizer({this.onDoubleTap});
 
   /// Called when a double tap has been detected.
   GestureTapCallback? onDoubleTap;
