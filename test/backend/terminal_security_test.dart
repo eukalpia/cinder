@@ -38,7 +38,7 @@ void main() {
 
   test('reset emits terminated color restore sequences', () {
     final backend = _RecordingBackend();
-    final terminal = Terminal(backend)..reset();
+    Terminal(backend).reset();
 
     expect(backend.output.toString(), contains('\x1b]110\x07'));
     expect(backend.output.toString(), contains('\x1b]111\x07'));
