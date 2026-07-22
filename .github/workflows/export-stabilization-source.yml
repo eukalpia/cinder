@@ -1,0 +1,21 @@
+name: Export stabilization source
+
+on:
+  push:
+    branches:
+      - stabilization/runtime-input-unicode
+    paths:
+      - .github/workflows/export-stabilization-source.yml
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Archive repository
+        run: tar --exclude=.git -czf /tmp/cinder-stabilization-source.tar.gz .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cinder-stabilization-source
+          path: /tmp/cinder-stabilization-source.tar.gz
+          retention-days: 1
