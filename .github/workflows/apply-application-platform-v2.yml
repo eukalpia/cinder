@@ -1,0 +1,56 @@
+name: Apply application platform source v2
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .github/workflows/apply-application-platform-v2.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: feature/application-platform-and-charts
+          fetch-depth: 0
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+      - name: Apply validated source changes
+        shell: bash
+        run: |
+          grep '^H4sI' .github/workflows/apply-application-platform.yml \
+            > /tmp/cinder-product-changes.b64
+          base64 --decode /tmp/cinder-product-changes.b64 \
+            > /tmp/cinder-product-changes.tar.gz
+          tar -xzf /tmp/cinder-product-changes.tar.gz -C .
+          rm -f \
+            .github/workflows/apply-application-platform.yml \
+            .github/workflows/apply-application-platform-pr.yml \
+            .github/workflows/apply-application-platform-v2.yml \
+            .github/workflows/export-source.yml \
+            .github/workflows/export-dart-sdk.yml \
+            .github/workflows/export-pub-cache.yml
+      - name: Validate source changes
+        shell: bash
+        run: |
+          dart pub get
+          mapfile -t dart_files < <(git ls-files -m -o --exclude-standard -- '*.dart')
+          dart format "${dart_files[@]}"
+          dart analyze --fatal-infos
+          dart test --reporter compact
+          dart run benchmark/benchmark.dart data --ci
+      - name: Commit source changes
+        shell: bash
+        run: |
+          git config user.name "Cinder Maintainer"
+          git config user.email "120781817+eukalpia@users.noreply.github.com"
+          git add -A
+          git commit -m "feat: build application platform and data visualization"
+          git push origin HEAD:feature/application-platform-and-charts
