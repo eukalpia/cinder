@@ -44,6 +44,12 @@ export 'src/components/render_stack.dart' show Stack;
 export 'src/components/clip.dart';
 export 'src/components/performance_overlay.dart';
 
+// Input and focus.
+export 'src/keyboard/input_event.dart';
+export 'src/keyboard/keyboard_event.dart';
+export 'src/keyboard/logical_key.dart';
+export 'src/keyboard/mouse_event.dart';
+
 // Navigation.
 export 'src/navigation/navigator.dart';
 export 'src/navigation/route.dart';
