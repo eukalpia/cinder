@@ -1,0 +1,24 @@
+name: Export source snapshot
+
+on:
+  push:
+    branches:
+      - feature/application-platform-and-charts
+    paths:
+      - .github/workflows/export-source.yml
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: feature/application-platform-and-charts
+      - name: Archive repository
+        run: |
+          tar --exclude=.git -czf cinder-source.tar.gz .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cinder-source
+          path: cinder-source.tar.gz
+          retention-days: 1
