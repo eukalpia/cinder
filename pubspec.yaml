@@ -1,12 +1,22 @@
 name: cinder
 description: A Flutter-style, high-performance terminal UI framework for Dart.
-version: 1.0.0-dev.2
+version: 1.0.0-dev.3
 repository: https://github.com/eukalpia/cinder
 homepage: https://github.com/eukalpia/cinder
 documentation: https://github.com/eukalpia/cinder#readme
+issue_tracker: https://github.com/eukalpia/cinder/issues
 
 topics:
   - tui
+  - terminal
+  - cli
+  - widgets
+  - dart
+
+platforms:
+  linux:
+  macos:
+  windows:
 
 environment:
   sdk: '>=3.5.0 <4.0.0'
