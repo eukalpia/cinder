@@ -22,7 +22,9 @@ All visualizations have two layers:
 2. widgets such as `LineChart` and `NetworkGraphChart` integrate the frame into
    layout, themes, legends, and application composition.
 
-This separation makes the output deterministic and testable.
+This separation makes the output deterministic and testable. Rasterization does
+not write terminal control sequences directly, so the same frame is safe to use
+inside interactive rendering, widget tests, plain output, and redirected logs.
 
 ## Line chart
 
