@@ -1,0 +1,42 @@
+name: Normalize pull request Dart files
+
+on:
+  push:
+    branches:
+      - feature/production-foundation
+    paths:
+      - .github/workflows/normalize-pr-dart.yml
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: feature/production-foundation
+          fetch-depth: 0
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+      - name: Format every Dart file changed from main
+        run: |
+          git fetch origin main
+          mapfile -t files < <(git diff --name-only --diff-filter=ACMR origin/main...HEAD | grep -E '^(lib|test|example|benchmark)/.*\.dart$' || true)
+          if [ "${#files[@]}" -eq 0 ]; then
+            echo "No changed Dart files."
+            exit 0
+          fi
+          dart format "${files[@]}"
+          if git diff --quiet -- "${files[@]}"; then
+            echo "Formatting already normalized."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- "${files[@]}"
+          git commit -m "style: normalize pull request Dart files"
+          git push origin HEAD:feature/production-foundation
