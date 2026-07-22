@@ -1,6 +1,12 @@
 # 1.0.0-dev.2
 
 - Renderer V2 cached repaint layers and damage-only partial painting.
+- Actions, shortcuts, commands, and a searchable command palette.
+- Shared widget state styling with focus, hover, pressed, disabled, and error states.
+- Terminal-native line, scatter, bar, histogram, heatmap, donut, gauge, sparkline, and network graph rendering.
+- Virtualized typed data tables and hierarchical tree views.
+- Production controls, menus, dialogs, tabs, tooltips, and application state widgets.
+- Semantics snapshots, plain-text/JSON export, non-interactive widget rendering, and diagnostics capture.
 - Safe terminal scroll-region acceleration for vertical viewports.
 - Flutter-style core icon API plus complete Material and Lucide catalogs.
 - Protocol-aware Kitty, iTerm2, Sixel, and Unicode image rendering.

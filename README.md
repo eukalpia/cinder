@@ -15,7 +15,7 @@ integrations — without bringing Flutter or Node.js into your CLI runtime.
 [![Dart](https://img.shields.io/badge/Dart-%3E%3D3.5-0175C2?logo=dart)](https://dart.dev)
 [![License](https://img.shields.io/badge/license-APACHE2-blue.svg)](LICENSE)
 
-[Quick start](#quick-start) · [Icons](#material-and-lucide-icons) · [Images](#terminal-images) · [Focus](#focus-and-keyboard-input) · [State management](#state-management) · [Testing](#testing) · [Architecture](#architecture)
+[Quick start](#quick-start) · [Icons](#material-and-lucide-icons) · [Images](#terminal-images) · [Data](#data-visualization) · [Focus](#focus-and-keyboard-input) · [State management](#state-management) · [Testing](#testing) · [Architecture](#architecture)
 
 </div>
 
@@ -34,6 +34,9 @@ Cinder brings Flutter's declarative programming model to terminal applications:
 - render-object layout and painting;
 - frame scheduling and coalesced rebuilds;
 - keyboard, mouse, gestures, focus, selection, and navigation;
+- actions, shortcuts, commands, and a searchable command palette;
+- terminal-native charts, network graphs, virtualized tables, and trees;
+- semantics snapshots for plain-text and JSON output;
 - deterministic widget tests with a virtual terminal;
 - Provider, Riverpod, and BLoC integrations.
 
@@ -63,6 +66,9 @@ The current development line is **Cinder 1.0**.
 | Hardware terminal scroll regions | Available with safe fallback |
 | Material and Lucide icon packs | Available |
 | Kitty, iTerm2, Sixel, and Unicode images | Available |
+| Actions, shortcuts, commands, and command palette | Available |
+| Charts, network graphs, virtualized tables, and trees | Available |
+| Semantics snapshots, plain rendering, and diagnostics capture | Available |
 | Stable `1.0.0` release | Planned |
 
 ## Installation
@@ -204,6 +210,34 @@ regions so terminal graphics do not become detached from the widget tree.
 Set `CINDER_IMAGE_PROTOCOL=kitty|iterm2|sixel|unicode` to override detection.
 See [`doc/images.md`](doc/images.md) for the capability matrix and protocol notes.
 
+
+## Data visualization
+
+Cinder renders structured data directly into terminal cells. The visualization
+layer includes line and scatter charts, horizontal and vertical bars,
+histograms, heatmaps, donut charts, gauges, sparklines, and deterministic
+network graphs.
+
+```dart
+LineChart(
+  title: 'Requests per second',
+  series: <ChartSeries>[
+    ChartSeries.values(
+      name: 'RPS',
+      values: <num>[920, 1110, 1080, 1340, 1290],
+    ),
+  ],
+)
+```
+
+`ChartRasterizer` can also produce an immutable `ChartFrame` without mounting a
+widget, which is useful for tests, logs, SSH output, and plain-text export.
+Large collections use `VirtualizedDataTable` and `TreeView`, both backed by the
+lazy list viewport instead of creating one Element per data item.
+
+See [`doc/data-visualization.md`](doc/data-visualization.md) and the runnable
+[`example/data_observatory.dart`](example/data_observatory.dart).
+
 ## Core programming model
 
 ### Stateless widgets
@@ -322,6 +356,8 @@ blocks:
 
 - `Row`, `Column`, `Stack`, `Center`, `Container`, and `Spacer`;
 - text, rich text, Markdown, ASCII text, and selection widgets;
+- buttons, toggles, tabs, menus, dialogs, tooltips, and application states;
+- charts, network graphs, virtualized data tables, and tree views;
 - `ListView`, `SingleChildScrollView`, scroll controllers, and scrollbars;
 - `TextField`, keyboard listeners, focus scopes, and modal barriers;
 - overlays, routes, navigator observers, and navigation;
@@ -547,8 +583,13 @@ sizes, terminals, and benchmark configurations.
 - [x] terminal scroll-region acceleration with fallback
 - [x] Material and Lucide icon packs
 - [x] Kitty, iTerm2, Sixel, and Unicode image rendering
+- [x] actions, shortcuts, commands, and command palette
+- [x] terminal-native charts and network graph rendering
+- [x] virtualized typed data table and tree view
+- [x] semantics snapshots, plain-text/JSON export, and diagnostics capture
+- [x] in-memory non-interactive widget rendering
 - [ ] broader production widget kit
-- [ ] semantics and non-interactive output mode
+- [ ] automatic CLI flag integration for process startup
 - [ ] stable `1.0.0` release
 
 ## Contributing
