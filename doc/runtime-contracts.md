@@ -49,8 +49,9 @@ occupy two cells and are never split at a clipping boundary. Combining marks,
 variation selectors, and zero-width joiners remain attached to their base
 cluster.
 
-Use `TerminalText.measure`, `TerminalText.truncate`, and
-`TerminalText.sliceColumns` instead of `String.length` or `substring` for
+Use `TerminalText.measure`, `TerminalText.truncate`,
+`TerminalText.sliceColumns`, `TerminalText.columnForOffset`, and
+`TerminalText.offsetForColumn` instead of `String.length` or `substring` for
 terminal geometry.
 
 ## Trust boundary
@@ -79,6 +80,10 @@ Focus is owned by `FocusManager`, `FocusScopeNode`, and `FocusNode`. Keyboard
 handlers run against the primary focus path. Traversal must use attached,
 focusable nodes and remain deterministic after rebuilds and route changes.
 
+Input handlers follow capture, target, and bubble phases. Key lifecycle state
+distinguishes down, repeat, and up events; paste and IME composition remain text
+events rather than synthetic physical keys.
+
 Terminal features are conditional. Applications must read
 `TerminalCapabilities` and provide fallbacks instead of assuming true color,
 mouse tracking, graphics protocols, hyperlinks, clipboard access, or enhanced
@@ -100,8 +105,11 @@ Disposal follows these rules:
 6. terminal restoration is attempted even after an application error.
 
 Operations that ignore their cancellation token are application defects. A
-scope cannot safely force an arbitrary Dart future to stop.
+scope cannot safely force an arbitrary Dart future to stop. Completed task
+diagnostics are bounded so long-running owners do not retain unbounded history.
 
+See [runtime-stability.md](runtime-stability.md) for the complete input, Unicode,
+capability, and shutdown contracts.
 
 ## Non-interactive output
 

@@ -16,6 +16,7 @@ import 'dart:math' as math;
 import 'package:characters/characters.dart';
 import 'package:cinder/cinder.dart';
 import 'package:cinder/src/framework/terminal_canvas.dart';
+import 'package:cinder/src/keyboard/input_parser.dart';
 import 'package:cinder/src/utils/unicode_width.dart';
 
 // ---------------------------------------------------------------------------
@@ -651,6 +652,74 @@ T? _findState<T extends State>(Element element) {
 }
 
 // ---------------------------------------------------------------------------
+// Runtime stability
+// ---------------------------------------------------------------------------
+
+BenchmarkSuite runtimeStabilitySuite() {
+  final mixedText = List<String>.filled(128, 'A中e\u0301👨‍👩‍👧‍👦').join();
+  final parserPayload = utf8.encode(
+    List<String>.filled(64, '\x1b[97;5:2uhello\x1b[I').join(),
+  );
+  final environment = <String, String>{
+    'TERM': 'xterm-256color',
+    'COLORTERM': 'truecolor',
+    'TERM_PROGRAM': 'WezTerm',
+  };
+  final router = InputRouter(
+    capture: <InputHandler>[
+      (_, __) => InputDisposition.ignored,
+      (_, __) => InputDisposition.handled,
+    ],
+    target: <InputHandler>[(_, __) => InputDisposition.handled],
+    bubble: <InputHandler>[(_, __) => InputDisposition.ignored],
+  );
+  const routedEvent = TextInputEvent('input');
+
+  return BenchmarkSuite('Runtime stability', <Benchmark>[
+    Benchmark.sync(
+      'Unicode geometry 128 mixed graphemes',
+      () {
+        final width = TerminalText.measure(mixedText);
+        TerminalText.offsetForColumn(mixedText, width ~/ 2);
+      },
+      iterations: 500,
+    ),
+    Benchmark.sync(
+      'Capability profile negotiation',
+      () => TerminalCapabilities.fromEnvironment(environment),
+      iterations: 1000,
+    ),
+    Benchmark.sync(
+      'Capture-target-bubble routing',
+      () => router.route(routedEvent),
+      iterations: 2000,
+    ),
+    Benchmark.sync(
+      'Enhanced input parser batch',
+      () {
+        final parser = InputParser();
+        parser.addBytes(parserPayload);
+        while (parser.parseNext() != null) {}
+      },
+      iterations: 250,
+    ),
+    Benchmark.async(
+      '100 owned task lifecycles',
+      () async {
+        final scope = CinderTaskScope(historyLimit: 8);
+        final tasks = <CinderTask<int>>[
+          for (var index = 0; index < 100; index++)
+            scope.run<int>((_) => index, label: 'task-$index'),
+        ];
+        await Future.wait<int>(tasks.map((task) => task.future));
+        await scope.dispose();
+      },
+      iterations: 25,
+    ),
+  ]);
+}
+
+// ---------------------------------------------------------------------------
 // Data visualization
 // ---------------------------------------------------------------------------
 
@@ -735,6 +804,7 @@ Future<void> main(List<String> args) async {
     canvasSuite(),
     widgetPipelineSuite('80x24', const Size(80, 24)),
     widgetPipelineSuite('200x50', const Size(200, 50)),
+    runtimeStabilitySuite(),
     dataVisualizationSuite(),
   ];
 

@@ -17,7 +17,19 @@ Future<void> runAppImpl(
   final effectiveBackend = backend ?? WebBackend();
   final terminal = term.Terminal(effectiveBackend);
   // TerminalBinding is exported from package:cinder/cinder.dart
-  final binding = TerminalBinding(terminal);
+  final binding = TerminalBinding(
+    terminal,
+    capabilities: const TerminalCapabilities(
+      isInteractive: true,
+      supportsRawMode: true,
+      supportsAlternateScreen: true,
+      supportsMouse: true,
+      supportsBracketedPaste: true,
+      supportsFocusEvents: true,
+      supportsTrueColor: true,
+      supports256Colors: true,
+    ),
+  );
 
   binding.initialize();
   binding.attachRootWidget(wrappedApp);

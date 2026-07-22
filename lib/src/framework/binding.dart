@@ -3,6 +3,7 @@ part of 'framework.dart';
 /// The glue between the widget layer and the terminal rendering layer
 abstract class CinderBinding {
   static CinderBinding? _instance;
+  static final Set<String> _registeredServiceExtensions = <String>{};
   static CinderBinding get instance => _instance!;
   static bool get hasInstance => _instance != null;
 
@@ -40,8 +41,10 @@ abstract class CinderBinding {
             Map<String, String> parameters)
         callback,
   }) {
+    final extensionName = 'ext.cinder.$name';
+    if (!_registeredServiceExtensions.add(extensionName)) return;
     developer.registerExtension(
-      'ext.cinder.$name',
+      extensionName,
       (String method, Map<String, String> parameters) async {
         final result = await callback(parameters);
         return developer.ServiceExtensionResponse.result(
@@ -94,14 +97,24 @@ abstract class CinderBinding {
   }
 
   void attachRootWidget(Widget rootWidget) {
-    if (_rootElement != null) {
-      _rootElement!.deactivate();
-      _rootElement!.unmount();
-    }
+    detachRootWidget();
     _rootElement = rootWidget.createElement();
     // Set the owner before mounting (root has no parent to inherit from)
     _rootElement!._owner = buildOwner;
     _rootElement!.mount(null, null);
+  }
+
+  /// Permanently unmounts the current widget tree.
+  ///
+  /// Shutdown paths call this before restoring terminal modes so State-owned
+  /// tasks, timers, subscriptions, and controllers cannot outlive the app.
+  void detachRootWidget() {
+    final root = _rootElement;
+    if (root == null) return;
+    _rootElement = null;
+    root.deactivate();
+    root.unmount();
+    buildOwner.finalizeTree();
   }
 
   void scheduleFrame() {

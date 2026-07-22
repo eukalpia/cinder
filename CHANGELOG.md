@@ -1,5 +1,12 @@
 # 1.0.0-dev.2
 
+- Structured task and resource ownership for State, controllers, and sessions.
+- Deterministic capture, target, and bubble input routing with key lifecycle events.
+- Bracketed paste, terminal focus, Kitty repeat/release, and IME composition support.
+- Grapheme-safe UTF-16 offset and terminal-column conversion APIs.
+- Conservative capability profiles for CI, redirected output, SSH, tmux, screen, and modern terminals.
+- Bounded malformed-input buffering and standalone Escape ambiguity handling.
+- Failure-resilient shutdown that unmounts the root and restores every enabled terminal protocol.
 - Renderer V2 cached repaint layers and damage-only partial painting.
 - Actions, shortcuts, commands, and a searchable command palette.
 - Shared widget state styling with focus, hover, pressed, disabled, and error states.

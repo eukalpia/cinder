@@ -79,7 +79,14 @@ Future<void> _runApp(
 
     await runZoned(() async {
       final terminal = term.Terminal(backend);
-      binding = TerminalBinding(terminal);
+      final usesNativeStdio = backend is StdioBackend;
+      final capabilities = TerminalCapabilities.fromEnvironment(
+        Platform.environment,
+        stdinHasTerminal: isShellMode || !usesNativeStdio || stdin.hasTerminal,
+        stdoutHasTerminal:
+            isShellMode || !usesNativeStdio || stdout.hasTerminal,
+      );
+      binding = TerminalBinding(terminal, capabilities: capabilities);
 
       binding!.initialize();
       binding!.attachRootWidget(app);

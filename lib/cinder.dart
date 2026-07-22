@@ -87,6 +87,9 @@ export 'src/utils/logger.dart';
 export 'src/utils/cinder_paths.dart';
 export 'src/utils/escape_codes.dart';
 export 'src/utils/terminal_text.dart';
+export 'src/keyboard/input_event.dart';
+export 'src/keyboard/input_router.dart';
+export 'src/keyboard/keyboard_event.dart';
 
 // Lifecycle and structured concurrency.
 export 'src/foundation/cancellation.dart';

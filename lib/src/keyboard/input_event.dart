@@ -51,3 +51,22 @@ class TerminalFocusInputEvent extends InputEvent {
 
   final bool hasFocus;
 }
+
+/// Lifecycle stage of terminal text composition.
+enum CompositionStage { start, update, commit, end }
+
+/// Pre-edit or committed text produced by an input method editor.
+class CompositionInputEvent extends TextInputEvent {
+  const CompositionInputEvent(
+    super.text, {
+    required this.stage,
+    this.selectionStart,
+    this.selectionEnd,
+  });
+
+  final CompositionStage stage;
+  final int? selectionStart;
+  final int? selectionEnd;
+
+  bool get isCommit => stage == CompositionStage.commit;
+}

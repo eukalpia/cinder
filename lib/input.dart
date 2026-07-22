@@ -2,6 +2,7 @@
 library;
 
 export 'src/keyboard/input_event.dart';
+export 'src/keyboard/input_router.dart';
 export 'src/keyboard/keyboard_event.dart';
 export 'src/keyboard/logical_key.dart';
 export 'src/keyboard/mouse_event.dart';

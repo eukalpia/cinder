@@ -52,9 +52,9 @@ The current development line is **Cinder 1.0**.
 | Area | Status |
 | --- | --- |
 | Flutter-style widget and element API | Available |
-| Stateful lifecycle and `setState` | Available |
+| Stateful lifecycle, structured tasks, and deterministic cleanup | Available |
 | Render-object layout and painting | Available |
-| Keyboard, mouse, gestures, and selection | Available |
+| Keyboard, mouse, paste, IME, focus, gestures, and selection | Available |
 | `FocusNode` / `FocusManager` traversal | Available |
 | `TextField` with `focusNode` and `autofocus` | Available |
 | Provider integration | Available |
@@ -69,6 +69,7 @@ The current development line is **Cinder 1.0**.
 | Actions, shortcuts, commands, and command palette | Available |
 | Charts, network graphs, virtualized tables, and trees | Available |
 | Semantics snapshots, plain rendering, and diagnostics capture | Available |
+| Unicode grapheme/column contracts and terminal capability profiles | Available |
 | Stable `1.0.0` release | Planned |
 
 ## Installation
@@ -588,6 +589,9 @@ sizes, terminals, and benchmark configurations.
 - [x] virtualized typed data table and tree view
 - [x] semantics snapshots, plain-text/JSON export, and diagnostics capture
 - [x] in-memory non-interactive widget rendering
+- [x] structured task/resource lifetime and failure-resilient shutdown
+- [x] normalized input routing, paste, IME, and enhanced keyboard lifecycle
+- [x] Unicode grapheme/column mapping and conservative capability profiles
 - [ ] broader production widget kit
 - [ ] automatic CLI flag integration for process startup
 - [ ] stable `1.0.0` release

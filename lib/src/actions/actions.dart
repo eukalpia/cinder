@@ -161,6 +161,8 @@ final class SingleActivator implements ShortcutActivator {
 
   @override
   bool accepts(KeyboardEvent event) {
+    if (!includeRepeats && event.isRepeat) return false;
+    if (event.isUp) return false;
     return event.logicalKey == trigger &&
         event.modifiers.ctrl == control &&
         event.modifiers.shift == shift &&
