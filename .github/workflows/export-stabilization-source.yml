@@ -15,14 +15,14 @@ jobs:
         with:
           ref: stabilization/runtime-input-unicode
           fetch-depth: 0
-      - name: Report repository tree
+      - name: Export repository tree metadata
         run: |
-          git rev-parse HEAD
-          git rev-parse 'HEAD^{tree}'
-      - name: Archive repository
-        run: tar --exclude=.git -czf /tmp/cinder-stabilization-source.tar.gz .
+          git rev-parse HEAD > /tmp/commit.txt
+          git rev-parse 'HEAD^{tree}' > /tmp/tree.txt
       - uses: actions/upload-artifact@v4
         with:
-          name: cinder-stabilization-source
-          path: /tmp/cinder-stabilization-source.tar.gz
+          name: cinder-stabilization-tree
+          path: |
+            /tmp/commit.txt
+            /tmp/tree.txt
           retention-days: 1
