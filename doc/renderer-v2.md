@@ -1,5 +1,10 @@
 # Renderer V2 architecture
 
+> This file is an implementation snapshot. The normative renderer contract is
+> [`renderer.md`](../renderer.md) and the documents in [`doc/rendering/`](rendering/overview.md).
+> When this implementation note conflicts with the normative contract, the implementation
+> is incomplete and must be migrated.
+
 Renderer V2 is Cinder's terminal-cell rendering pipeline.
 
 ## Frame storage
