@@ -50,7 +50,22 @@ jobs:
             dart format --output=none --set-exit-if-changed "${files[@]}"
           fi
       - name: Analyze
-        run: dart analyze --fatal-infos
+        id: analyze
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -o pipefail
+          dart analyze --fatal-infos --format machine 2>&1 | tee /tmp/analyzer.log
+      - name: Upload analyzer diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stabilization-analyzer-log
+          path: /tmp/analyzer.log
+          retention-days: 1
+      - name: Enforce analyzer result
+        if: steps.analyze.outcome == 'failure'
+        run: exit 1
       - name: Test
         run: dart test --reporter compact
       - name: Runtime stability benchmark
