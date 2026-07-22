@@ -1,0 +1,30 @@
+name: Inspect platform payload artifact
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .github/workflows/inspect-platform-parts-artifact.yml
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: feature/application-platform-and-charts
+      - name: Write payload metadata
+        shell: bash
+        run: |
+          mkdir -p /tmp/platform-report
+          wc -c .github/platform-payload/part-*.b64 > /tmp/platform-report/report.txt
+          sha256sum .github/platform-payload/part-*.b64 >> /tmp/platform-report/report.txt
+          cat .github/platform-payload/part-*.b64 > /tmp/platform-report/payload.b64
+          wc -c /tmp/platform-report/payload.b64 >> /tmp/platform-report/report.txt
+          sha256sum /tmp/platform-report/payload.b64 >> /tmp/platform-report/report.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: platform-payload-report
+          path: /tmp/platform-report/report.txt
+          retention-days: 1
