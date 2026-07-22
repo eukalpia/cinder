@@ -33,6 +33,7 @@ class _Disable {
   String get buttonEventTracking => '\x1B[?1002l';
   String get basicMouseTracking => '\x1B[?1000l';
   String get bracketedPasteMode => '\x1B[?2004l';
+  String get focusReporting => '\x1B[?1004l';
 
   /// Pop kitty keyboard mode from the stack.
   String get kittyKeyboard => '\x1B[<u';
@@ -46,6 +47,7 @@ class _Disable {
         buttonEventTracking,
         basicMouseTracking,
         bracketedPasteMode,
+        focusReporting,
         kittyKeyboard,
         modifyOtherKeys,
       ];
@@ -59,6 +61,7 @@ class _Enable {
   String get buttonEventTracking => '\x1B[?1002h';
   String get basicMouseTracking => '\x1B[?1000h';
   String get bracketedPasteMode => '\x1B[?2004h';
+  String get focusReporting => '\x1B[?1004h';
 
   /// Push kitty keyboard mode with flags:
   /// - Bit 0 (1): Disambiguate escape codes
@@ -74,6 +77,7 @@ class _Enable {
         buttonEventTracking,
         basicMouseTracking,
         bracketedPasteMode,
+        focusReporting,
         kittyKeyboard,
         modifyOtherKeys,
       ];

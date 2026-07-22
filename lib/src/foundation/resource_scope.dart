@@ -67,4 +67,12 @@ final class CinderResourceScope {
       Error.throwWithStackTrace(firstError, firstStackTrace!);
     }
   }
+
+  /// Begins disposal without blocking a synchronous owner lifecycle.
+  void disposeDetached() {
+    final zone = Zone.current;
+    unawaited(dispose().catchError((Object error, StackTrace stackTrace) {
+      zone.handleUncaughtError(error, stackTrace);
+    }));
+  }
 }

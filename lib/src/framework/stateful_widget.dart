@@ -14,13 +14,69 @@ abstract class StatefulWidget extends Widget {
 
 /// The logic and internal state for a [StatefulWidget].
 abstract class State<T extends StatefulWidget> {
-  T get widget => _component!;
+  T get widget {
+    final component = _component;
+    if (component == null) {
+      throw StateError('Cannot access widget after State.dispose().');
+    }
+    return component;
+  }
+
   T? _component;
 
-  BuildContext get context => _element!;
+  BuildContext get context {
+    final element = _element;
+    if (element == null) {
+      throw StateError('Cannot access context after State.dispose().');
+    }
+    return element;
+  }
+
   StatefulElement? _element;
 
+  CinderTaskScope? _taskScope;
+  CinderResourceScope? _resourceScope;
+
   bool get mounted => _element != null;
+
+  /// Structured asynchronous work owned by this State.
+  @protected
+  CinderTaskScope get tasks => _taskScope ??= CinderTaskScope();
+
+  /// Timers, subscriptions, and other disposable resources owned by this State.
+  @protected
+  CinderResourceScope get resources => _resourceScope ??= CinderResourceScope();
+
+  /// Starts cancellable work that is automatically cancelled on unmount.
+  @protected
+  CinderTask<R> runTask<R>(
+    FutureOr<R> Function(CancellationToken token) operation, {
+    String? label,
+  }) {
+    return tasks.run(operation, label: label);
+  }
+
+  /// Tracks a timer for automatic cancellation on unmount.
+  @protected
+  Timer trackTimer(Timer timer) => resources.trackTimer(timer);
+
+  /// Tracks a subscription for automatic cancellation on unmount.
+  @protected
+  StreamSubscription<R> trackSubscription<R>(
+    StreamSubscription<R> subscription,
+  ) {
+    return resources.trackSubscription(subscription);
+  }
+
+  void _disposeFrameworkResources() {
+    final taskScope = _taskScope;
+    _taskScope = null;
+    taskScope?.disposeDetached('$runtimeType unmounted');
+
+    final resourceScope = _resourceScope;
+    _resourceScope = null;
+    resourceScope?.disposeDetached();
+  }
 
   /// Initialize state. Called once when the State object is created.
   @protected
@@ -84,12 +140,14 @@ abstract class State<T extends StatefulWidget> {
   /// Notify the framework that the internal state has changed.
   @protected
   void setState(VoidCallback fn) {
-    assert(_element != null);
-    assert(_element!._lifecycleState == _ElementLifecycle.active,
-        'Element is not active but ${_element!._lifecycleState} instead');
+    final element = _element;
+    if (element == null ||
+        element._lifecycleState != _ElementLifecycle.active) {
+      throw StateError('setState() called after $runtimeType.dispose().');
+    }
 
     fn();
-    _element!.markNeedsBuild();
+    element.markNeedsBuild();
   }
 }
 
@@ -167,12 +225,39 @@ class StatefulElement extends BuildableElement {
 
   @override
   void unmount() {
-    super.unmount();
-    _state.dispose();
+    Object? firstError;
+    StackTrace? firstStackTrace;
+
+    try {
+      super.unmount();
+    } catch (error, stackTrace) {
+      firstError = error;
+      firstStackTrace = stackTrace;
+    }
+
+    try {
+      _state.dispose();
+    } catch (error, stackTrace) {
+      firstError ??= error;
+      firstStackTrace ??= stackTrace;
+    }
+
+    // Framework-owned cleanup must run even when user dispose throws.
+    try {
+      _state._disposeFrameworkResources();
+    } catch (error, stackTrace) {
+      firstError ??= error;
+      firstStackTrace ??= stackTrace;
+    }
+
     _state._element = null;
     // Release resources to reduce the severity of memory leaks caused by
     // defunct, but accidentally retained Elements.
     _state._component = null;
+
+    if (firstError != null) {
+      Error.throwWithStackTrace(firstError, firstStackTrace!);
+    }
   }
 
   @override

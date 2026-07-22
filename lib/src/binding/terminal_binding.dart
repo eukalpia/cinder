@@ -9,7 +9,6 @@ import 'package:cinder/src/image/image_cleanup.dart';
 
 import '../backend/terminal.dart' as term;
 import '../buffer.dart' as buf;
-import '../keyboard/input_event.dart';
 import '../keyboard/input_parser.dart';
 import '../rendering/frame_diff.dart';
 import '../rendering/mouse_hit_test.dart';
@@ -19,7 +18,15 @@ import 'hot_reload_mixin.dart';
 /// Terminal UI binding that handles terminal input/output and event loop
 class TerminalBinding extends CinderBinding
     with SchedulerBinding, HotReloadBinding {
-  TerminalBinding(this.terminal) {
+  TerminalBinding(
+    this.terminal, {
+    TerminalCapabilities? capabilities,
+  }) : capabilities = capabilities ??
+            TerminalCapabilities.fromEnvironment(
+              const <String, String>{},
+              stdinHasTerminal: terminal.backend.inputStream != null,
+              stdoutHasTerminal: terminal.backend.isAvailable,
+            ) {
     _instance = this;
     _initializePipelineOwner();
   }
@@ -28,6 +35,13 @@ class TerminalBinding extends CinderBinding
   static TerminalBinding get instance => _instance!;
 
   final term.Terminal terminal;
+
+  /// Immutable feature profile selected before terminal initialization.
+  final TerminalCapabilities capabilities;
+
+  /// Global normalized input phases that run before widget-tree dispatch.
+  final InputRouter inputRouter = InputRouter();
+
   PipelineOwner? _pipelineOwner;
   PipelineOwner get pipelineOwner => _pipelineOwner!;
 
@@ -37,9 +51,14 @@ class TerminalBinding extends CinderBinding
   bool get shouldExit => _shouldExit;
 
   final _inputController = StreamController<String>.broadcast();
+  final _normalizedInputController = StreamController<InputEvent>.broadcast();
   final _keyboardEventController = StreamController<KeyboardEvent>.broadcast();
   final _inputParser = InputParser();
   final _mouseEventController = StreamController<MouseEvent>.broadcast();
+  Timer? _escapeResolutionTimer;
+
+  /// Delay used to distinguish a standalone Escape key from a split sequence.
+  Duration escapeAmbiguityTimeout = const Duration(milliseconds: 25);
 
   /// Timestamp of last input bytes added to parser (for buffer staleness detection)
   DateTime? _lastInputTime;
@@ -168,6 +187,9 @@ class TerminalBinding extends CinderBinding
   /// Stream of keyboard input events (raw strings)
   Stream<String> get input => _inputController.stream;
 
+  /// Stream of every normalized input event before widget dispatch.
+  Stream<InputEvent> get inputEvents => _normalizedInputController.stream;
+
   /// Stream of parsed keyboard events
   Stream<KeyboardEvent> get keyboardEvents => _keyboardEventController.stream;
 
@@ -179,80 +201,67 @@ class TerminalBinding extends CinderBinding
 
   /// Initialize the terminal and start the event loop
   void initialize() {
-    // Setup terminal
-    terminal.enterAlternateScreen();
-    terminal.hideCursor();
+    if (capabilities.supportsAlternateScreen) {
+      terminal.enterAlternateScreen();
+    }
+    if (capabilities.isInteractive) {
+      terminal.hideCursor();
+    }
     terminal.bindOSCStream(_oscEventsController.stream);
-    terminal.clear();
+    if (capabilities.isInteractive) {
+      terminal.clear();
+    }
 
-    // Initialize image cleanup manager with terminal writer
     ImageCleanupManager.instance.setTerminalWriter((data) {
+      if (!capabilities.isInteractive) return;
       terminal.write(data);
       terminal.flush();
     });
 
-    // Enable mouse tracking (SGR mode for better coordinate support)
-    // ESC [ ? 1000 h - Send Mouse X & Y on button press and release
-    // ESC [ ? 1002 h - Use Cell Motion Mouse Tracking
-    // ESC [ ? 1003 h - Enable all motion mouse tracking
-    // ESC [ ? 1006 h - Enable SGR mouse mode
-    terminal.write(EscapeCodes.enable.basicMouseTracking);
-    terminal.write(EscapeCodes.enable.buttonEventTracking);
-    terminal.write(EscapeCodes.enable.motionTracking);
-    terminal.write(EscapeCodes.enable.sgrMouseMode);
+    if (capabilities.supportsMouse) {
+      terminal.write(EscapeCodes.enable.basicMouseTracking);
+      terminal.write(EscapeCodes.enable.buttonEventTracking);
+      terminal.write(EscapeCodes.enable.motionTracking);
+      terminal.write(EscapeCodes.enable.sgrMouseMode);
+    }
+    if (capabilities.supportsBracketedPaste) {
+      terminal.write(EscapeCodes.enable.bracketedPasteMode);
+    }
+    if (capabilities.supportsFocusEvents) {
+      terminal.write(EscapeCodes.enable.focusReporting);
+    }
+    if (capabilities.supportsKittyKeyboard) {
+      terminal.write(EscapeCodes.enable.kittyKeyboard);
+    } else if (capabilities.supportsModifyOtherKeys) {
+      terminal.write(EscapeCodes.enable.modifyOtherKeys);
+    }
+    if (capabilities.isInteractive) {
+      terminal.flush();
+    }
 
-    // Enable bracketed paste mode
-    // ESC [ ? 2004 h - Enables bracketed paste mode
-    // When enabled, pasted text is wrapped in ESC[200~ ... ESC[201~
-    // This allows applications to distinguish pasted text from typed text
-    terminal.write(EscapeCodes.enable.bracketedPasteMode);
-
-    // Enable kitty keyboard protocol for enhanced modifier key detection.
-    // This allows distinguishing Shift+Enter from Enter, Ctrl+Enter, etc.
-    // Terminals that don't support it will silently ignore the sequence.
-    // We also enable modifyOtherKeys as a fallback for terminals like xterm.
-    terminal.write(EscapeCodes.enable.kittyKeyboard);
-    terminal.write(EscapeCodes.enable.modifyOtherKeys);
-    terminal.flush();
-
-    // Store initial size
     _lastKnownSize = terminal.size;
-
-    // Start listening for keyboard input
     _startInputHandling();
-
-    // Start listening for terminal resize events
     _startResizeHandling();
-
-    // Start listening for termination signals
     _startSignalHandling();
   }
 
   void _startInputHandling() {
-    // Get input stream from the terminal's backend
     final inputStream = terminal.backend.inputStream;
-    if (inputStream == null) {
-      throw StateError('Terminal backend does not provide input stream');
+    if (inputStream == null) return;
+
+    if (capabilities.supportsRawMode) {
+      try {
+        terminal.backend.enableRawMode();
+      } catch (_) {
+        // A conservative capability profile may still encounter a backend that
+        // loses its TTY between detection and initialization.
+      }
     }
 
-    // Enable raw mode via backend
-    try {
-      terminal.backend.enableRawMode();
-    } catch (e) {
-      // Ignore errors when running without a proper terminal
-      // This happens in CI/CD environments or when piping output
-    }
+    _inputSubscription = inputStream.listen((incomingBytes) {
+      var bytes = _processOscSequences(incomingBytes);
+      if (bytes.isEmpty) return;
 
-    // Listen for input at the byte level for proper escape sequence handling
-    _inputSubscription = inputStream.listen((bytes) {
-      // Extract OSC sequences from input stream:
-      // - Normal mode: Terminal emulator responses (color queries, clipboard, etc.)
-      // - Shell mode: Above + custom protocol (e.g., OSC 9999 size updates)
-      bytes = _processOscSequences(bytes);
-
-      // Check for stale buffer - if too much time has passed since last input,
-      // clear any incomplete sequences that may be blocking the parser.
-      // This handles edge cases where rapid key sequences get corrupted.
       final now = DateTime.now();
       if (_lastInputTime != null &&
           now.difference(_lastInputTime!) > _bufferStaleTimeout) {
@@ -260,75 +269,87 @@ class TerminalBinding extends CinderBinding
       }
       _lastInputTime = now;
 
-      // Parse the bytes and process ALL events in the buffer
-      _inputParser.addBytes(bytes);
-
-      // Collect all events from this stdin read
-      final events = <InputEvent>[];
-      InputEvent? inputEvent;
-      while ((inputEvent = _inputParser.parseNext()) != null) {
-        events.add(inputEvent!);
-      }
-
-      // Batch consecutive printable character events into a synthetic paste
-      // This handles terminals (like Warp) that don't use bracketed paste for drag-drop
-      final batchedEvents = _batchCharacterEvents(events);
-
-      // Process all batched events
-      for (final event in batchedEvents) {
-        if (event is KeyboardInputEvent) {
-          final keyEvent = event.event;
-          // Add to keyboard event stream
-          _keyboardEventController.add(keyEvent);
-
-          // Check for global debug key (F12)
-          // Only works in debug mode (assertions enabled)
-          if (_handleDebugKeyEvent(keyEvent)) {
-            continue; // Event was handled by debug system
-          }
-
-          // Route the event through the widget tree
-          _routeKeyboardEvent(keyEvent);
-
-          // Note: Ctrl+C (SIGINT) is routed through the event system first,
-          // allowing components to intercept it. Falls back to shutdown if unhandled.
-        } else if (event is MouseInputEvent) {
-          final mouseEvent = event.event;
-
-          // Add to mouse event stream
-          _mouseEventController.add(mouseEvent);
-
-          // Route the mouse event through the widget tree
-          _routeMouseEvent(mouseEvent);
-        } else if (event is PasteInputEvent) {
-          // Handle bracketed paste (or batched characters): copy to clipboard then send Ctrl+V
-          ClipboardManager.copy(event.text);
-
-          // Generate a Ctrl+V keyboard event to trigger the paste
-          final pasteEvent = KeyboardEvent(
-            logicalKey: LogicalKey.keyV,
-            modifiers: const ModifierKeys(ctrl: true),
-          );
-          _keyboardEventController.add(pasteEvent);
-          _routeKeyboardEvent(pasteEvent);
-        }
-      }
-
-      // After processing ALL events in the buffer, schedule a frame if needed
-      // The scheduler will batch all state changes and render once
-      // This ensures rapid events (scroll, paste) don't trigger excessive renders
-      if (buildOwner.hasDirtyElements) {
-        scheduleFrame();
-      }
-
-      // Also add raw string for backwards compatibility
+      _escapeResolutionTimer?.cancel();
       try {
-        final str = utf8.decode(bytes);
-        _inputController.add(str);
-      } catch (e) {
-        // Ignore decode errors for escape sequences
+        _inputParser.addBytes(bytes);
+      } on FormatException {
+        _inputParser.clear();
+        return;
+      }
+
+      InputEvent? event;
+      while ((event = _inputParser.parseNext()) != null) {
+        _dispatchInputEvent(event!);
+      }
+
+      if (_inputParser.hasPendingEscape) {
+        _escapeResolutionTimer = Timer(escapeAmbiguityTimeout, () {
+          final escape = _inputParser.flushPendingEscape();
+          if (escape != null) _dispatchInputEvent(escape);
+        });
+      }
+
+      if (buildOwner.hasDirtyElements) scheduleFrame();
+
+      try {
+        _inputController.add(utf8.decode(bytes));
+      } catch (_) {
+        // Escape sequences and chunked UTF-8 are represented by inputEvents.
       }
     });
+  }
+
+  /// Injects a normalized event from an alternate input source such as a web
+  /// IME bridge, remote session, or test harness.
+  void dispatchInputEvent(InputEvent event) => _dispatchInputEvent(event);
+
+  void _dispatchInputEvent(InputEvent event) {
+    if (!_normalizedInputController.isClosed) {
+      _normalizedInputController.add(event);
+    }
+
+    final disposition = inputRouter.route(event);
+    if (disposition != InputDisposition.ignored) return;
+
+    if (event is KeyboardInputEvent) {
+      final keyEvent = event.event;
+      if (!_keyboardEventController.isClosed) {
+        _keyboardEventController.add(keyEvent);
+      }
+      if (_handleDebugKeyEvent(keyEvent)) return;
+      _routeKeyboardEvent(keyEvent);
+      return;
+    }
+
+    if (event is MouseInputEvent) {
+      if (!_mouseEventController.isClosed) {
+        _mouseEventController.add(event.event);
+      }
+      _routeMouseEvent(event.event);
+      return;
+    }
+
+    if (event is CompositionInputEvent) {
+      if (event.isCommit) _dispatchCommittedText(event.text);
+      return;
+    }
+
+    if (event is TextInputEvent) {
+      _dispatchCommittedText(event.text);
+    }
+  }
+
+  void _dispatchCommittedText(String text) {
+    if (text.isEmpty) return;
+    final firstRune = text.runes.first;
+    final keyEvent = KeyboardEvent(
+      logicalKey: LogicalKey(firstRune, 'text-input'),
+      character: text,
+    );
+    if (!_keyboardEventController.isClosed) {
+      _keyboardEventController.add(keyEvent);
+    }
+    _routeKeyboardEvent(keyEvent);
   }
 
   /// Process bytes in shell mode to extract terminal size OSC sequences
@@ -446,62 +467,6 @@ class TerminalBinding extends CinderBinding
     }
   }
 
-  /// Batch consecutive printable character events into a single PasteInputEvent.
-  ///
-  /// This handles terminals (like Warp) that don't wrap drag-drop in bracketed
-  /// paste mode. When multiple printable characters arrive in a single stdin
-  /// read, they're clearly from a paste/drag-drop rather than typing, so we
-  /// batch them together for efficient processing.
-  ///
-  /// Single characters pass through unchanged for responsive typing.
-  List<InputEvent> _batchCharacterEvents(List<InputEvent> events) {
-    if (events.length <= 1) {
-      // Single event or empty - no batching needed, keeps typing responsive
-      return events;
-    }
-
-    final result = <InputEvent>[];
-    final charBuffer = StringBuffer();
-
-    void flushCharBuffer() {
-      if (charBuffer.isNotEmpty) {
-        // Convert batched characters to a PasteInputEvent
-        result.add(PasteInputEvent(charBuffer.toString()));
-        charBuffer.clear();
-      }
-    }
-
-    for (final event in events) {
-      if (event is KeyboardInputEvent) {
-        final keyEvent = event.event;
-        // Check if this is a simple printable character (no modifiers except shift)
-        final isPrintable = keyEvent.character != null &&
-            keyEvent.character!.isNotEmpty &&
-            !keyEvent.isControlPressed &&
-            !keyEvent.isAltPressed &&
-            !keyEvent.isMetaPressed;
-
-        if (isPrintable) {
-          // Add to batch
-          charBuffer.write(keyEvent.character);
-        } else {
-          // Non-printable key (arrow, enter, ctrl+x, etc.) - flush buffer first
-          flushCharBuffer();
-          result.add(event);
-        }
-      } else {
-        // Mouse event or other - flush buffer first
-        flushCharBuffer();
-        result.add(event);
-      }
-    }
-
-    // Flush any remaining characters
-    flushCharBuffer();
-
-    return result;
-  }
-
   void _startResizeHandling() {
     // Listen to backend's resize stream
     final resizeStream = terminal.backend.resizeStream;
@@ -548,73 +513,102 @@ class TerminalBinding extends CinderBinding
     }
   }
 
-  /// Perform immediate synchronous shutdown for signal handlers
+  void _cancelRuntimeResources() {
+    pendingFrameTimer?.cancel();
+    _perfLogTimer?.cancel();
+    _escapeResolutionTimer?.cancel();
+    unawaited(_inputSubscription?.cancel() ?? Future<void>.value());
+    unawaited(_resizeSubscription?.cancel() ?? Future<void>.value());
+    unawaited(_shutdownSubscription?.cancel() ?? Future<void>.value());
+  }
+
+  void _closeRuntimeControllers() {
+    for (final controller in <StreamController<dynamic>>[
+      _inputController,
+      _normalizedInputController,
+      _keyboardEventController,
+      _mouseEventController,
+      _oscEventsController,
+    ]) {
+      if (!controller.isClosed) unawaited(controller.close());
+    }
+
+    if (!_eventLoopController.isClosed) {
+      _eventLoopController.add(null);
+      unawaited(_eventLoopController.close());
+    }
+  }
+
+  void _restoreTerminalState() {
+    if (capabilities.isInteractive) {
+      try {
+        if (capabilities.supportsMouse) {
+          terminal.backend.writeRaw(EscapeCodes.disable.motionTracking);
+          terminal.backend.writeRaw(EscapeCodes.disable.sgrMouseMode);
+          terminal.backend.writeRaw(EscapeCodes.disable.buttonEventTracking);
+          terminal.backend.writeRaw(EscapeCodes.disable.basicMouseTracking);
+        }
+        if (capabilities.supportsBracketedPaste) {
+          terminal.backend.writeRaw(EscapeCodes.disable.bracketedPasteMode);
+        }
+        if (capabilities.supportsFocusEvents) {
+          terminal.backend.writeRaw(EscapeCodes.disable.focusReporting);
+        }
+        if (capabilities.supportsKittyKeyboard) {
+          terminal.backend.writeRaw(EscapeCodes.disable.kittyKeyboard);
+        }
+        if (capabilities.supportsModifyOtherKeys) {
+          terminal.backend.writeRaw(EscapeCodes.disable.modifyOtherKeys);
+        }
+        terminal.restoreColors();
+        terminal.showCursor();
+        if (capabilities.supportsAlternateScreen) {
+          terminal.leaveAlternateScreen();
+        }
+        terminal.flush();
+      } catch (_) {
+        // Continue to raw-mode restoration even if the output backend failed.
+      }
+    }
+
+    if (capabilities.supportsRawMode) {
+      try {
+        terminal.backend.disableRawMode();
+      } catch (_) {
+        // The TTY may already have disappeared during process shutdown.
+      }
+    }
+  }
+
+  /// Perform immediate synchronous shutdown for signal handlers.
+  ///
+  /// Every cleanup stage is isolated so a failing user dispose callback cannot
+  /// prevent terminal restoration or singleton release.
   void _performImmediateShutdown() {
-    // Prevent multiple shutdowns
     if (_shouldExit) return;
     _shouldExit = true;
 
-    // Cancel all subscriptions immediately
-    pendingFrameTimer?.cancel();
-    _inputSubscription?.cancel();
-    _resizeSubscription?.cancel();
-    _shutdownSubscription?.cancel();
+    _cancelRuntimeResources();
 
-    // Close all controllers
     try {
-      _inputController.close();
-    } catch (_) {}
-    try {
-      _keyboardEventController.close();
-    } catch (_) {}
-    try {
-      _mouseEventController.close();
-    } catch (_) {}
-    try {
-      _eventLoopController.close();
-    } catch (_) {}
-    try {
-      _oscEventsController.close();
-    } catch (_) {}
+      detachRootWidget();
+    } catch (error, stackTrace) {
+      Zone.current.handleUncaughtError(error, stackTrace);
+    }
 
-    // Stop hot reload if it was initialized
+    _closeRuntimeControllers();
+
     try {
       shutdownWithHotReload();
     } catch (_) {}
 
-    // Clear all images before leaving alternate screen
     try {
       ImageCleanupManager.instance.clearAllImages();
     } catch (_) {}
 
-    // Perform terminal cleanup synchronously
-    try {
-      // IMPORTANT: Disable mouse tracking BEFORE leaving alternate screen
-      terminal.backend.writeRaw('\x1B[?1003l'); // Disable all motion tracking
-      terminal.backend.writeRaw('\x1B[?1006l'); // Disable SGR mouse mode
-      terminal.backend.writeRaw('\x1B[?1002l'); // Disable button event tracking
-      terminal.backend.writeRaw('\x1B[?1000l'); // Disable basic mouse tracking
-      // Pop kitty keyboard mode and reset modifyOtherKeys
-      terminal.backend.writeRaw(EscapeCodes.disable.kittyKeyboard);
-      terminal.backend.writeRaw(EscapeCodes.disable.modifyOtherKeys);
-      terminal.restoreColors(); // Restore terminal colors
-      terminal.flush();
-
-      // Restore terminal
-      terminal.showCursor();
-      terminal.leaveAlternateScreen();
-      terminal.clear();
-    } catch (_) {
-      // Ignore any errors during cleanup
-    }
-
-    // Restore terminal mode in its own try-catch to ensure it runs
-    // even if writing escape codes above fails
-    try {
-      terminal.backend.disableRawMode();
-    } catch (_) {
-      // Ignore errors when running without a proper terminal
-    }
+    _restoreTerminalState();
+    disposeBinding();
+    if (identical(_instance, this)) _instance = null;
   }
 
   /// Handle global debug key combinations.
@@ -823,107 +817,27 @@ class TerminalBinding extends CinderBinding
 
   /// Run the main event loop
   Future<void> runEventLoop() async {
-    // Initial frame - use executeFrame() to render synchronously before entering event loop
-    // Note: drawFrame() only builds the tree, it doesn't render to terminal.
-    // We need to go through the scheduler to invoke persistent callbacks (_drawFrameCallback).
     executeFrame();
 
-    // Keep the app running until shutdown is called
-    // Use a completer-based approach for truly event-driven behavior
     final exitCompleter = Completer<void>();
-
-    // Listen to the event stream
-    final subscription = _eventLoopStream.listen((_) {
-      // Events are handled by scheduleFrame, nothing to do here
-    });
-
-    // Check periodically for exit condition (much less frequently)
-    Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (_shouldExit) {
-        timer.cancel();
-        subscription.cancel();
-        if (!exitCompleter.isCompleted) {
-          exitCompleter.complete();
-        }
+    final subscription = _eventLoopStream.listen((_) {});
+    final exitPoll = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (_shouldExit && !exitCompleter.isCompleted) {
+        exitCompleter.complete();
       }
     });
 
-    // Wait until we should exit
-    await exitCompleter.future;
+    try {
+      await exitCompleter.future;
+    } finally {
+      exitPoll.cancel();
+      await subscription.cancel();
+    }
   }
 
-  /// Shutdown the terminal and cleanup
+  /// Shutdown the terminal and cleanup.
   void shutdown() {
-    // Prevent multiple shutdowns
-    if (_shouldExit) return;
-
-    _shouldExit = true;
-    _inputSubscription?.cancel();
-    _resizeSubscription?.cancel();
-
-    // Don't cancel shutdown subscription here - let it stay active
-    // so it can handle additional signals if needed
-    // _shutdownSubscription?.cancel();
-
-    try {
-      _inputController.close();
-    } catch (_) {}
-    try {
-      _keyboardEventController.close();
-    } catch (_) {}
-    try {
-      _mouseEventController.close();
-    } catch (_) {}
-
-    // Wake up event loop one last time before closing
-    if (!_eventLoopController.isClosed) {
-      _eventLoopController.add(null);
-      _eventLoopController.close();
-    }
-
-    // Stop hot reload if it was initialized
-    shutdownWithHotReload();
-
-    // Try to cleanup terminal, but handle errors gracefully
-    try {
-      // IMPORTANT: Disable mouse tracking and bracketed paste BEFORE leaving alternate screen
-      // This ensures the terminal properly processes the disable commands
-      terminal.backend.writeRaw(EscapeCodes.disable.motionTracking);
-      terminal.backend.writeRaw(EscapeCodes.disable.sgrMouseMode);
-      terminal.backend.writeRaw(EscapeCodes.disable.buttonEventTracking);
-      terminal.backend.writeRaw(EscapeCodes.disable.basicMouseTracking);
-      terminal.backend.writeRaw(EscapeCodes.disable.bracketedPasteMode);
-      // Pop kitty keyboard mode and reset modifyOtherKeys
-      terminal.backend.writeRaw(EscapeCodes.disable.kittyKeyboard);
-      terminal.backend.writeRaw(EscapeCodes.disable.modifyOtherKeys);
-
-      // Restore terminal (this includes leaving alternate screen)
-      terminal.showCursor();
-      terminal.leaveAlternateScreen();
-
-      // CRITICAL: Disable mouse tracking again after leaving alternate screen
-      // Some terminals restore previous state when switching buffers
-      terminal.backend.writeRaw(EscapeCodes.disable.motionTracking);
-      terminal.backend.writeRaw(EscapeCodes.disable.sgrMouseMode);
-      terminal.backend.writeRaw(EscapeCodes.disable.buttonEventTracking);
-      terminal.backend.writeRaw(EscapeCodes.disable.basicMouseTracking);
-
-      terminal.clear();
-
-      // Final flush to ensure all cleanup is complete
-      terminal.flush();
-    } catch (e) {
-      // If backend is already closed, we can't write to it
-      // This can happen during signal-based shutdown
-      // The important thing is we tried to cleanup
-    }
-
-    // Restore raw mode via backend
-    try {
-      terminal.backend.disableRawMode();
-    } catch (e) {
-      // Ignore errors when running without a proper terminal
-    }
+    _performImmediateShutdown();
   }
 
   @override

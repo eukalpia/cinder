@@ -1,7 +1,6 @@
 import 'package:cinder/cinder.dart';
 import 'package:cinder/src/keyboard/keyboard_parser.dart';
 import 'package:cinder/src/keyboard/input_parser.dart';
-import 'package:cinder/src/keyboard/input_event.dart';
 import 'package:test/test.dart';
 
 void main() {

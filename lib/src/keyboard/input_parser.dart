@@ -6,11 +6,39 @@ import 'input_event.dart';
 
 /// Parses raw terminal input bytes into input events (keyboard and mouse).
 class InputParser {
-  final List<int> _buffer = [];
+  InputParser({this.maxBufferedBytes = 1024 * 1024})
+      : assert(maxBufferedBytes > 0, 'maxBufferedBytes must be positive');
 
-  /// Add bytes to the buffer for parsing
+  /// Hard limit that prevents malformed or unterminated input sequences from
+  /// growing the parser buffer without bound.
+  final int maxBufferedBytes;
+  final List<int> _buffer = <int>[];
+
+  int get bufferedByteCount => _buffer.length;
+
+  /// True when a standalone Escape byte is waiting for the ambiguity timeout.
+  bool get hasPendingEscape => _buffer.length == 1 && _buffer.first == 0x1B;
+
+  /// Add bytes to the buffer for parsing.
   void addBytes(List<int> bytes) {
+    if (bytes.isEmpty) return;
+    if (_buffer.length + bytes.length > maxBufferedBytes) {
+      _buffer.clear();
+      throw FormatException(
+        'Terminal input exceeded $maxBufferedBytes buffered bytes.',
+      );
+    }
     _buffer.addAll(bytes);
+  }
+
+  /// Resolves a pending standalone Escape key after the caller's ambiguity
+  /// timeout has elapsed. Longer CSI/SS3/Alt sequences are never consumed.
+  KeyboardInputEvent? flushPendingEscape() {
+    if (!hasPendingEscape) return null;
+    _buffer.clear();
+    return const KeyboardInputEvent(
+      KeyboardEvent(logicalKey: LogicalKey.escape),
+    );
   }
 
   /// Parse the next event from the buffer
@@ -67,6 +95,16 @@ class InputParser {
           // If we don't find the end marker yet, wait for more data
           return null;
         }
+      }
+    }
+
+    // Focus reporting: CSI I = focus in, CSI O = focus out.
+    if (first == 0x1B && _buffer.length >= 3 && _buffer[1] == 0x5B) {
+      if (_buffer[2] == 0x49) {
+        return (const TerminalFocusInputEvent(hasFocus: true), 3);
+      }
+      if (_buffer[2] == 0x4F) {
+        return (const TerminalFocusInputEvent(hasFocus: false), 3);
       }
     }
 
@@ -276,14 +314,9 @@ class InputParser {
 
   (KeyboardEvent, int)? _parseEscapeSequence() {
     if (_buffer.length == 1) {
-      // Just ESC key pressed
-      return (
-        KeyboardEvent(
-          logicalKey: LogicalKey.escape,
-          modifiers: const ModifierKeys(),
-        ),
-        1
-      );
+      // ESC is ambiguous with the prefix of CSI/SS3/Alt sequences. The owner
+      // resolves it through [flushPendingEscape] after a short timeout.
+      return null;
     }
 
     // Check for Alt+key combinations (ESC followed by character)
@@ -752,9 +785,6 @@ class InputParser {
 
   /// Parse bracketed paste content (ESC[200~ ... ESC[201~)
   (InputEvent, int)? _parseBracketedPaste() {
-    print(
-        '[DEBUG] InputParser: Detected bracketed paste START marker (ESC[200~)');
-
     // We know buffer starts with ESC[200~ (6 bytes)
     // Look for the end marker ESC[201~
     int endMarkerStart = -1;
@@ -772,19 +802,12 @@ class InputParser {
 
     if (endMarkerStart == -1) {
       // Haven't received the end marker yet, wait for more data
-      print(
-          '[DEBUG] InputParser: Waiting for paste END marker (ESC[201~), buffer.length=${_buffer.length}');
       return null;
     }
 
     // Extract the pasted text (between start and end markers)
     final pasteBytes = _buffer.sublist(6, endMarkerStart);
     final pasteText = utf8.decode(pasteBytes, allowMalformed: true);
-
-    print(
-        '[DEBUG] InputParser: Found paste END marker, extracted ${pasteText.length} chars');
-    print(
-        '[DEBUG] InputParser: Pasted text: "${pasteText.substring(0, pasteText.length > 100 ? 100 : pasteText.length)}${pasteText.length > 100 ? '...' : ''}"');
 
     // Total bytes consumed: start marker (6) + paste content + end marker (6)
     final totalBytes = endMarkerStart + 6;
@@ -836,9 +859,20 @@ class InputParser {
     final modifiers = modifierValue != null
         ? _decodeModifiers(modifierValue)
         : const ModifierKeys();
+    final eventTypeValue =
+        parts.length >= 3 ? int.tryParse(parts[2].split(':').first) : null;
+    final eventType = switch (eventTypeValue) {
+      2 => KeyEventType.repeat,
+      3 => KeyEventType.up,
+      _ => KeyEventType.down,
+    };
 
     final totalBytes = uIndex + 1; // Include the 'u' terminator
-    final keyEvent = _codepointToKeyEvent(codepoint, modifiers);
+    final keyEvent = _codepointToKeyEvent(
+      codepoint,
+      modifiers,
+      type: eventType,
+    );
 
     return (keyEvent, totalBytes);
   }
@@ -898,7 +932,11 @@ class InputParser {
   }
 
   /// Convert a Unicode codepoint to a KeyboardEvent with the given modifiers.
-  KeyboardEvent _codepointToKeyEvent(int codepoint, ModifierKeys modifiers) {
+  KeyboardEvent _codepointToKeyEvent(
+    int codepoint,
+    ModifierKeys modifiers, {
+    KeyEventType type = KeyEventType.down,
+  }) {
     // Map well-known codepoints to LogicalKeys
     switch (codepoint) {
       case 13: // Enter/Return
@@ -906,22 +944,26 @@ class InputParser {
           logicalKey: LogicalKey.enter,
           character: '\n',
           modifiers: modifiers,
+          type: type,
         );
       case 9: // Tab
         return KeyboardEvent(
           logicalKey: LogicalKey.tab,
           character: '\t',
           modifiers: modifiers,
+          type: type,
         );
       case 27: // Escape
         return KeyboardEvent(
           logicalKey: LogicalKey.escape,
           modifiers: modifiers,
+          type: type,
         );
       case 127: // Backspace
         return KeyboardEvent(
           logicalKey: LogicalKey.backspace,
           modifiers: modifiers,
+          type: type,
         );
       default:
         // Regular character
@@ -932,6 +974,7 @@ class InputParser {
           logicalKey: key,
           character: char,
           modifiers: modifiers,
+          type: type,
         );
     }
   }

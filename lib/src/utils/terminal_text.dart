@@ -71,6 +71,68 @@ abstract final class TerminalText {
     return output.toString();
   }
 
+  /// Number of user-perceived grapheme clusters in [text].
+  static int graphemeCount(String text) => text.characters.length;
+
+  /// Converts a UTF-16 string offset into a terminal column.
+  ///
+  /// Offsets inside a grapheme are snapped to the grapheme start so cursor and
+  /// selection geometry never split combining marks or ZWJ emoji sequences.
+  static int columnForOffset(String text, int offset) {
+    if (offset <= 0 || text.isEmpty) return 0;
+    final clamped = offset > text.length ? text.length : offset;
+    var codeUnits = 0;
+    var column = 0;
+    for (final grapheme in text.characters) {
+      final nextCodeUnits = codeUnits + grapheme.length;
+      if (clamped < nextCodeUnits) break;
+      if (grapheme == '\n') break;
+      column += UnicodeWidth.graphemeWidth(grapheme);
+      codeUnits = nextCodeUnits;
+    }
+    return column;
+  }
+
+  /// Converts a terminal column into a UTF-16 string offset.
+  ///
+  /// A column that intersects the second cell of a wide grapheme snaps to that
+  /// grapheme's leading offset by default. Set [roundUpWide] to move after it.
+  static int offsetForColumn(
+    String text,
+    int column, {
+    bool roundUpWide = false,
+  }) {
+    if (column <= 0 || text.isEmpty) return 0;
+    var offset = 0;
+    var currentColumn = 0;
+    for (final grapheme in text.characters) {
+      if (grapheme == '\n') break;
+      final width = UnicodeWidth.graphemeWidth(grapheme);
+      final nextColumn = currentColumn + width;
+      if (column < nextColumn) {
+        return roundUpWide ? offset + grapheme.length : offset;
+      }
+      offset += grapheme.length;
+      currentColumn = nextColumn;
+      if (column == currentColumn) return offset;
+    }
+    return offset;
+  }
+
+  /// Returns the nearest valid grapheme boundary for a UTF-16 offset.
+  static int normalizeOffset(String text, int offset, {bool roundUp = false}) {
+    if (offset <= 0 || text.isEmpty) return 0;
+    if (offset >= text.length) return text.length;
+    var current = 0;
+    for (final grapheme in text.characters) {
+      final next = current + grapheme.length;
+      if (offset < next) return roundUp ? next : current;
+      if (offset == next) return next;
+      current = next;
+    }
+    return text.length;
+  }
+
   /// Returns the width of the widest line in terminal columns.
   static int measure(String text) {
     var widest = 0;

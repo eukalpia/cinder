@@ -1,5 +1,8 @@
 import 'logical_key.dart';
 
+/// Physical lifecycle reported by enhanced keyboard protocols.
+enum KeyEventType { down, repeat, up }
+
 /// Represents the state of modifier keys during a keyboard event.
 class ModifierKeys {
   const ModifierKeys({
@@ -68,6 +71,7 @@ class KeyboardEvent {
     required this.logicalKey,
     this.character,
     this.modifiers = const ModifierKeys(),
+    this.type = KeyEventType.down,
   });
 
   /// The logical key that was pressed.
@@ -79,6 +83,13 @@ class KeyboardEvent {
 
   /// The state of modifier keys during this event.
   final ModifierKeys modifiers;
+
+  /// Whether this is a key press, repeat, or release notification.
+  final KeyEventType type;
+
+  bool get isDown => type == KeyEventType.down;
+  bool get isRepeat => type == KeyEventType.repeat;
+  bool get isUp => type == KeyEventType.up;
 
   /// Convenience getters for modifier states.
   bool get isControlPressed => modifiers.ctrl;
@@ -108,6 +119,7 @@ class KeyboardEvent {
     if (modifiers.hasAnyModifier) {
       parts.add('modifiers: $modifiers');
     }
+    parts.add('type: $type');
     parts.add('key: $logicalKey');
     if (character != null) {
       parts.add('character: "$character"');
