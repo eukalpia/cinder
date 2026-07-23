@@ -3,28 +3,26 @@ import 'dart:math' as math;
 
 import 'package:cinder/cinder.dart';
 
-/// The live isometric city shown on the Cinder website.
+/// A coherent, animated isometric terminal city rendered by Cinder.
 ///
-/// Everything is rendered by Cinder: the city, power network, plasma, traffic,
-/// input handling, hover response, and responsive terminal composition.
+/// The page hosts xterm.js, but Cinder owns every visible terminal cell,
+/// animation frame, pointer reaction, resize pass, road light, cable pulse,
+/// electric arc, building, window, and plasma particle.
 void main() {
-  runApp(const CinderApp(child: WebShowcase()));
+  runApp(const CinderApp(child: CinderCityV2()));
 }
 
-class WebShowcase extends StatefulWidget {
-  const WebShowcase({super.key});
+class CinderCityV2 extends StatefulWidget {
+  const CinderCityV2({super.key});
 
   @override
-  State<WebShowcase> createState() => _WebShowcaseState();
+  State<CinderCityV2> createState() => _CinderCityV2State();
 }
 
-class _WebShowcaseState extends State<WebShowcase> {
+class _CinderCityV2State extends State<CinderCityV2> {
   Timer? _ticker;
   int _tick = 0;
   int _surgeUntil = 0;
-  int _phase = 0;
-  double _energy = 1;
-  bool _paused = false;
   bool _hovered = false;
 
   bool get _surging => _tick < _surgeUntil;
@@ -33,92 +31,50 @@ class _WebShowcaseState extends State<WebShowcase> {
   void initState() {
     super.initState();
     _ticker = Timer.periodic(const Duration(milliseconds: 55), (_) {
-      if (!mounted || _paused) return;
+      if (!mounted) return;
       setState(() => _tick++);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Focusable(
-      focused: true,
-      onKeyEvent: _handleKey,
-      child: MouseRegion(
-        onEnter: (_) => setState(() => _hovered = true),
-        onExit: (_) => setState(() => _hovered = false),
-        child: GestureDetector(
-          onTap: _surge,
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final width = _extent(
-                constraints.maxWidth,
-                fallback: 130,
-                maximum: 220,
-              );
-              final height = _extent(
-                constraints.maxHeight,
-                fallback: 52,
-                maximum: 90,
-              );
-              final world = _CityPainter(
-                width: width,
-                height: height,
-                tick: _tick + _phase,
-                energy: _energy,
-                surging: _surging,
-                hovered: _hovered,
-              ).paint();
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: GestureDetector(
+        onTap: () => setState(() => _surgeUntil = _tick + 40),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final width = _extent(
+              constraints.maxWidth,
+              fallback: 126,
+              maximum: 196,
+            );
+            final height = _extent(
+              constraints.maxHeight,
+              fallback: 50,
+              maximum: 82,
+            );
+            final frame = _CityFramePainter(
+              width: width,
+              height: height,
+              tick: _tick,
+              hovered: _hovered,
+              surging: _surging,
+            ).paint();
 
-              return Container(
-                color: _Palette.background,
-                child: RichText(
-                  text: world.toTextSpan(),
-                  softWrap: false,
-                  overflow: TextOverflow.clip,
-                ),
-              );
-            },
-          ),
+            return Container(
+              color: _CityPalette.background,
+              child: RichText(
+                text: frame.toTextSpan(),
+                softWrap: false,
+                overflow: TextOverflow.clip,
+              ),
+            );
+          },
         ),
       ),
     );
-  }
-
-  bool _handleKey(dynamic event) {
-    final key = event.logicalKey;
-
-    if (key == LogicalKey.space || key == LogicalKey.keyP) {
-      setState(() => _paused = !_paused);
-    } else if (key == LogicalKey.enter || key == LogicalKey.keyE) {
-      _surge();
-    } else if (key == LogicalKey.arrowUp) {
-      setState(() => _energy = math.min(1.7, _energy + 0.1));
-    } else if (key == LogicalKey.arrowDown) {
-      setState(() => _energy = math.max(0.55, _energy - 0.1));
-    } else if (key == LogicalKey.arrowLeft) {
-      setState(() => _phase -= 4);
-    } else if (key == LogicalKey.arrowRight) {
-      setState(() => _phase += 4);
-    } else if (key == LogicalKey.keyR) {
-      setState(() {
-        _tick = 0;
-        _surgeUntil = 0;
-        _phase = 0;
-        _energy = 1;
-        _paused = false;
-      });
-    } else {
-      return false;
-    }
-
-    return true;
-  }
-
-  void _surge() {
-    setState(() {
-      _surgeUntil = _tick + 34;
-      _energy = math.min(1.7, _energy + 0.08);
-    });
   }
 
   int _extent(
@@ -137,94 +93,96 @@ class _WebShowcaseState extends State<WebShowcase> {
   }
 }
 
-class _CityPainter {
-  _CityPainter({
+class _CityFramePainter {
+  _CityFramePainter({
     required this.width,
     required this.height,
     required this.tick,
-    required this.energy,
-    required this.surging,
     required this.hovered,
-  }) : canvas = _WorldCanvas(width, height);
+    required this.surging,
+  }) : canvas = _CityCanvas(width, height);
 
   final int width;
   final int height;
   final int tick;
-  final double energy;
-  final bool surging;
   final bool hovered;
-  final _WorldCanvas canvas;
+  final bool surging;
+  final _CityCanvas canvas;
 
-  final List<_Point> _roofNodes = <_Point>[];
-  final List<List<_Point>> _powerLines = <List<_Point>>[];
+  final List<_Point> _powerNodes = <_Point>[];
+  final List<List<_Point>> _cables = <List<_Point>>[];
   final List<List<_Point>> _roads = <List<_Point>>[];
 
-  _WorldCanvas paint() {
-    if (width < 46 || height < 20) {
-      _drawCompactCore();
+  _CityCanvas paint() {
+    if (width < 44 || height < 20) {
+      _compactScene();
       return canvas;
     }
 
-    _drawSky();
-    _drawHud();
-    _drawBackRoads();
-    _drawBackDistrict();
-    _drawMidDistrict();
-    _drawFrontRoads();
-    _drawFrontDistrict();
-    final core = _drawCorePlatform();
-    _drawPowerNetwork(core);
-    _drawElectricalArcs();
-    _drawPlasma(core);
-    _drawTraffic();
-    _drawParticles(core);
-    _drawDrone();
+    _starField();
+    _hud();
+    _backSkyline();
+    _backRoadRing();
+    _middleSkyline();
+    _middleRoadRing();
+    _frontSkyline();
+    final core = _centralPlatform();
+    _powerNetwork(core);
+    _cableArcs();
+    _plasma(core);
+    _roadTraffic();
+    _ambientParticles(core);
+    _drone();
 
     return canvas;
   }
 
-  void _drawCompactCore() {
-    final cx = width ~/ 2;
+  void _compactScene() {
+    final center = width ~/ 2;
     final bottom = height - 2;
     final top = math.max(1, height ~/ 5).toInt();
 
     for (var y = bottom - 5; y >= top; y--) {
-      final sway = (math.sin(y * 0.8 + tick * 0.3) * 2).round();
-      final radius = math.max(1, 3 - (bottom - y) ~/ 5).toInt();
-      for (var x = cx + sway - radius; x <= cx + sway + radius; x++) {
-        final distance = (x - cx - sway).abs();
+      final sway = (math.sin(y * 0.82 + tick * 0.3) * 2).round();
+      final radius = y > bottom - 10 ? 3 : y > bottom - 16 ? 2 : 1;
+      for (var x = center + sway - radius; x <= center + sway + radius; x++) {
+        final distance = (x - center - sway).abs();
         canvas.set(
           x,
           y,
           distance == 0 ? '#' : distance == 1 ? '*' : '·',
-          distance == 0 ? _Tone.white : distance == 1 ? _Tone.glow : _Tone.pink,
+          distance == 0
+              ? _Tone.white
+              : distance == 1
+                  ? _Tone.glow
+                  : _Tone.pink,
         );
       }
     }
 
-    canvas.write(cx - 9, bottom - 3, '╭────────────────╮', _Tone.violet);
-    canvas.write(cx - 9, bottom - 2, '│     CINDER     │', _Tone.orange);
-    canvas.write(cx - 9, bottom - 1, '╰────────────────╯', _Tone.violet);
+    canvas.write(center - 9, bottom - 3, '╭────────────────╮', _Tone.violet);
+    canvas.write(center - 9, bottom - 2, '│     CINDER     │', _Tone.orange);
+    canvas.write(center - 9, bottom - 1, '╰────────────────╯', _Tone.violet);
   }
 
-  void _drawSky() {
-    final drift = tick ~/ 8;
+  void _starField() {
+    final drift = tick ~/ 9;
     for (var y = 0; y < height; y++) {
       for (var x = 0; x < width; x++) {
-        final hash = _noise(x, y, drift);
-        if (hash % 331 == 0) {
-          canvas.set(x, y, hash.isEven ? '·' : '.', _Tone.star);
-        } else if (hash % 887 == 0) {
+        final value = _noise(x, y, drift);
+        if (value % 389 == 0) {
+          canvas.set(x, y, value.isEven ? '·' : '.', _Tone.star);
+        } else if (value % 997 == 0) {
           canvas.set(x, y, tick.isEven ? '+' : '×', _Tone.pink);
         }
       }
     }
   }
 
-  void _drawHud() {
-    if (width < 96 || height < 36) return;
+  void _hud() {
+    if (width < 98 || height < 38) return;
     _panel(2, 2, 12, 5, 'STATE', <String>['CORE', 'LIVE']);
-    _panel(width - 14, 2, 12, 5, 'DIFF', <String>['CLEAN', 'LIVE']);
+    _panel(width - 14, 2, 12, 5, 'DIFF', <String>['MIN', 'LIVE']);
     _panel(2, height - 7, 15, 5, 'EVENTS', <String>['PULSE', 'ARC']);
     _panel(width - 17, height - 7, 15, 5, 'FRAME', <String>['ACTIVE', 'SYNC']);
   }
@@ -235,7 +193,7 @@ class _CityPainter {
     int panelWidth,
     int panelHeight,
     String title,
-    List<String> rows,
+    List<String> values,
   ) {
     canvas.set(x, y, '╭', _Tone.violetDim);
     canvas.hLine(x + 1, x + panelWidth - 2, y, '─', _Tone.violetDim);
@@ -258,175 +216,282 @@ class _CityPainter {
     );
     canvas.set(x + panelWidth - 1, y + panelHeight - 1, '╯', _Tone.violetDim);
     canvas.write(x + 2, y + 1, title, _Tone.orange);
-    for (var index = 0; index < rows.length && index < panelHeight - 2; index++) {
-      canvas.write(x + 2, y + 2 + index, rows[index], _Tone.violet);
+    for (var index = 0; index < values.length; index++) {
+      canvas.write(x + 2, y + 2 + index, values[index], _Tone.violet);
     }
   }
 
-  void _drawBackRoads() {
-    final y = math.max(15, (height * 0.38).round()).toInt();
-    final first = _polyline(<_Point>[
-      _Point(0, y + 3),
-      _Point(width ~/ 4, y),
-      _Point(width ~/ 2, y + 4),
-      _Point(width * 3 ~/ 4, y),
-      _Point(width - 1, y + 3),
-    ]);
-    final second = _polyline(<_Point>[
-      _Point(width ~/ 8, y + 7),
-      _Point(width ~/ 3, y + 3),
-      _Point(width ~/ 2, y + 6),
-      _Point(width * 2 ~/ 3, y + 3),
-      _Point(width - width ~/ 8, y + 7),
-    ]);
-    _roads.add(first);
-    _roads.add(second);
-    _stroke(first, _Tone.violetDim, sparse: true, phase: 1);
-    _stroke(second, _Tone.orangeDim, sparse: true, phase: 4);
+  void _backSkyline() {
+    final base = math.max(20, (height * 0.43).round()).toInt();
+    _powerNodes.add(_building(width * 10 ~/ 100, base, 5, 8, 2, 11, _Tone.depth));
+    _powerNodes.add(_building(width * 22 ~/ 100, base - 2, 6, 12, 3, 17, _Tone.violetDim));
+    _powerNodes.add(_building(width * 35 ~/ 100, base, 5, 9, 2, 19, _Tone.depth));
+    _powerNodes.add(_building(width * 65 ~/ 100, base, 5, 9, 2, 23, _Tone.depth));
+    _powerNodes.add(_building(width * 78 ~/ 100, base - 2, 6, 12, 3, 29, _Tone.violetDim));
+    _powerNodes.add(_building(width * 90 ~/ 100, base, 5, 8, 2, 31, _Tone.depth));
   }
 
-  void _drawFrontRoads() {
-    final y = height - 10;
-    final first = _polyline(<_Point>[
-      _Point(0, y - 2),
-      _Point(width ~/ 4, y + 2),
-      _Point(width ~/ 2, y - 1),
-      _Point(width * 3 ~/ 4, y + 2),
-      _Point(width - 1, y - 2),
-    ]);
-    final second = _polyline(<_Point>[
-      _Point(width ~/ 9, height - 3),
-      _Point(width ~/ 3, y + 1),
-      _Point(width ~/ 2, height - 4),
-      _Point(width * 2 ~/ 3, y + 1),
-      _Point(width - width ~/ 9, height - 3),
-    ]);
-    _roads.add(first);
-    _roads.add(second);
-    _stroke(first, _Tone.orangeDim, sparse: true, phase: 2);
-    _stroke(second, _Tone.violet, sparse: true, phase: 5);
+  void _middleSkyline() {
+    final base = math.max(30, (height * 0.65).round()).toInt();
+    _powerNodes.add(_building(width * 7 ~/ 100, base, 7, 13, 3, 37, _Tone.violetDim));
+    _powerNodes.add(_building(width * 21 ~/ 100, base - 1, 8, 12, 3, 41, _Tone.violet));
+    _powerNodes.add(_building(width * 34 ~/ 100, base + 1, 7, 10, 3, 43, _Tone.violetDim));
+    _powerNodes.add(_building(width * 66 ~/ 100, base + 1, 7, 10, 3, 47, _Tone.violetDim));
+    _powerNodes.add(_building(width * 79 ~/ 100, base - 1, 8, 12, 3, 53, _Tone.violet));
+    _powerNodes.add(_building(width * 93 ~/ 100, base, 7, 13, 3, 59, _Tone.violetDim));
   }
 
-  void _drawBackDistrict() {
-    final base = math.max(21, (height * 0.45).round()).toInt();
-    _roofNodes.add(_drawTower(width * 13 ~/ 100, base, 6, 8, 2, 11));
-    _roofNodes.add(_drawTower(width * 28 ~/ 100, base - 2, 7, 12, 3, 17));
-    _roofNodes.add(_drawTower(width * 72 ~/ 100, base - 2, 7, 12, 3, 23));
-    _roofNodes.add(_drawTower(width * 87 ~/ 100, base, 6, 8, 2, 29));
-  }
-
-  void _drawMidDistrict() {
-    final base = math.max(29, (height * 0.66).round()).toInt();
-    _roofNodes.add(_drawTower(width * 8 ~/ 100, base, 8, 14, 3, 31));
-    _roofNodes.add(_drawTower(width * 24 ~/ 100, base - 2, 9, 12, 3, 37));
-    _roofNodes.add(_drawTower(width * 76 ~/ 100, base - 2, 9, 12, 3, 41));
-    _roofNodes.add(_drawTower(width * 92 ~/ 100, base, 8, 14, 3, 43));
-  }
-
-  void _drawFrontDistrict() {
+  void _frontSkyline() {
     final base = height - 3;
-    _roofNodes.add(_drawTower(width * 15 ~/ 100, base, 10, 16, 4, 47));
-    _roofNodes.add(_drawTower(width * 34 ~/ 100, base - 2, 10, 12, 4, 53));
-    _roofNodes.add(_drawTower(width * 66 ~/ 100, base - 2, 10, 12, 4, 59));
-    _roofNodes.add(_drawTower(width * 85 ~/ 100, base, 10, 16, 4, 61));
+    _powerNodes.add(_building(width * 13 ~/ 100, base, 10, 16, 4, 61, _Tone.violet));
+    _powerNodes.add(_building(width * 31 ~/ 100, base - 1, 10, 12, 4, 67, _Tone.violet));
+    _powerNodes.add(_building(width * 69 ~/ 100, base - 1, 10, 12, 4, 71, _Tone.violet));
+    _powerNodes.add(_building(width * 87 ~/ 100, base, 10, 16, 4, 73, _Tone.violet));
   }
 
-  _Point _drawTower(
+  _Point _building(
     int centerX,
     int baseY,
     int halfWidth,
     int bodyHeight,
     int roofDepth,
     int seed,
+    int wallTone,
   ) {
     final topY = baseY - bodyHeight;
-    final top = _Point(centerX, topY - roofDepth);
-    final left = _Point(centerX - halfWidth, topY);
-    final front = _Point(centerX, topY + roofDepth);
-    final right = _Point(centerX + halfWidth, topY);
-    final baseLeft = _Point(left.x, left.y + bodyHeight);
-    final baseFront = _Point(front.x, front.y + bodyHeight);
-    final baseRight = _Point(right.x, right.y + bodyHeight);
+    final roofBack = _Point(centerX, topY - roofDepth);
+    final roofLeft = _Point(centerX - halfWidth, topY);
+    final roofFront = _Point(centerX, topY + roofDepth);
+    final roofRight = _Point(centerX + halfWidth, topY);
+    final baseLeft = _Point(roofLeft.x, roofLeft.y + bodyHeight);
+    final baseFront = _Point(roofFront.x, roofFront.y + bodyHeight);
+    final baseRight = _Point(roofRight.x, roofRight.y + bodyHeight);
 
-    _stroke(_polyline(<_Point>[top, right, front, left, top]), _Tone.violet);
-    _stroke(_line(left, baseLeft), _Tone.violetDim);
-    _stroke(_line(front, baseFront), _Tone.violet);
-    _stroke(_line(right, baseRight), _Tone.violetDim);
+    _stroke(
+      _polyline(<_Point>[
+        roofBack,
+        roofRight,
+        roofFront,
+        roofLeft,
+        roofBack,
+      ]),
+      _Tone.violet,
+    );
+    _stroke(_line(roofLeft, baseLeft), wallTone);
+    _stroke(_line(roofFront, baseFront), _Tone.violet);
+    _stroke(_line(roofRight, baseRight), wallTone);
     _stroke(_line(baseLeft, baseFront), _Tone.depth);
     _stroke(_line(baseFront, baseRight), _Tone.depth);
 
-    final floors = math.max(2, bodyHeight ~/ 4).toInt();
-    for (var floor = 1; floor < floors; floor++) {
-      final t = floor / floors;
-      final leftEdge = _lerp(left, baseLeft, t);
-      final frontEdge = _lerp(front, baseFront, t);
-      final rightEdge = _lerp(right, baseRight, t);
+    final floorCount = math.max(2, bodyHeight ~/ 3).toInt();
+    for (var floor = 1; floor < floorCount; floor++) {
+      final t = floor / floorCount;
+      final leftEdge = _lerp(roofLeft, baseLeft, t);
+      final frontEdge = _lerp(roofFront, baseFront, t);
+      final rightEdge = _lerp(roofRight, baseRight, t);
       final leftFloor = _line(leftEdge, frontEdge);
       final rightFloor = _line(frontEdge, rightEdge);
-      _stroke(leftFloor, _Tone.depth, sparse: true, phase: seed + floor);
-      _stroke(rightFloor, _Tone.violetDim, sparse: true, phase: seed - floor);
+      _stroke(leftFloor, _Tone.depth);
+      _stroke(rightFloor, wallTone);
       _windows(leftFloor, seed + floor * 13);
       _windows(rightFloor, seed + floor * 17);
     }
 
+    _facadeColumn(
+      roofLeft,
+      roofFront,
+      baseLeft,
+      baseFront,
+      0.38,
+      wallTone,
+    );
+    _facadeColumn(
+      roofLeft,
+      roofFront,
+      baseLeft,
+      baseFront,
+      0.68,
+      wallTone,
+    );
+    _facadeColumn(
+      roofFront,
+      roofRight,
+      baseFront,
+      baseRight,
+      0.32,
+      wallTone,
+    );
+    _facadeColumn(
+      roofFront,
+      roofRight,
+      baseFront,
+      baseRight,
+      0.62,
+      wallTone,
+    );
+
     canvas.set(centerX, topY, '◆', _Tone.pink);
-    final antenna = 2 + seed % 4;
-    canvas.vLine(centerX, topY - antenna, topY - 1, '│', _Tone.violetDim);
+    final antennaHeight = 2 + seed % 4;
+    canvas.vLine(
+      centerX,
+      topY - antennaHeight,
+      topY - 1,
+      '│',
+      _Tone.violetDim,
+    );
     canvas.set(
       centerX,
-      topY - antenna - 1,
+      topY - antennaHeight - 1,
       (tick + seed) % 9 < 2 ? '*' : '^',
       (tick + seed) % 9 < 2 ? _Tone.white : _Tone.violet,
     );
 
-    return _Point(centerX, topY - antenna - 1);
+    if (halfWidth >= 8) {
+      _roofUnit(centerX - halfWidth ~/ 3, topY, 3, seed);
+      _roofUnit(centerX + halfWidth ~/ 3, topY, 2, seed + 5);
+    }
+
+    return _Point(centerX, topY - antennaHeight - 1);
   }
 
-  void _windows(List<_Point> line, int seed) {
-    for (var index = 2; index < line.length - 1; index += 3) {
-      final point = line[index];
-      final hash = _noise(point.x, point.y, seed + tick ~/ 11);
-      if (hash % 5 == 0) continue;
+  void _roofUnit(int centerX, int baseY, int unitHeight, int seed) {
+    final halfWidth = 2;
+    final topY = baseY - unitHeight;
+    canvas.set(centerX - halfWidth, topY, '╭', _Tone.violetDim);
+    canvas.hLine(
+      centerX - halfWidth + 1,
+      centerX + halfWidth - 1,
+      topY,
+      '─',
+      _Tone.violetDim,
+    );
+    canvas.set(centerX + halfWidth, topY, '╮', _Tone.violetDim);
+    canvas.vLine(centerX - halfWidth, topY + 1, baseY - 1, '│', _Tone.depth);
+    canvas.vLine(centerX + halfWidth, topY + 1, baseY - 1, '│', _Tone.violetDim);
+    canvas.set(centerX, topY, seed.isEven ? '·' : '◆', _Tone.pink);
+  }
+
+  void _facadeColumn(
+    _Point roofA,
+    _Point roofB,
+    _Point baseA,
+    _Point baseB,
+    double fraction,
+    int tone,
+  ) {
+    final top = _lerp(roofA, roofB, fraction);
+    final bottom = _lerp(baseA, baseB, fraction);
+    _stroke(_line(top, bottom), tone, sparse: true, phase: (fraction * 10).round());
+  }
+
+  void _windows(List<_Point> edge, int seed) {
+    for (var index = 2; index < edge.length - 1; index += 3) {
+      final point = edge[index];
+      final value = _noise(point.x, point.y, seed + tick ~/ 11);
+      if (value % 5 == 0) continue;
       canvas.set(
         point.x,
         point.y,
-        hash % 7 == 0 ? '▥' : '·',
-        hash % 4 == 0 ? _Tone.orange : _Tone.pink,
+        value % 7 == 0 ? '▥' : '·',
+        value % 4 == 0 ? _Tone.orange : _Tone.pink,
       );
     }
   }
 
-  _Point _drawCorePlatform() {
+  void _backRoadRing() {
+    final y = math.max(17, (height * 0.44).round()).toInt();
+    final outer = _polyline(<_Point>[
+      _Point(0, y + 3),
+      _Point(width * 18 ~/ 100, y - 1),
+      _Point(width * 36 ~/ 100, y + 5),
+      _Point(width ~/ 2, y + 1),
+      _Point(width * 64 ~/ 100, y + 5),
+      _Point(width * 82 ~/ 100, y - 1),
+      _Point(width - 1, y + 3),
+    ]);
+    final inner = _polyline(<_Point>[
+      _Point(width * 10 ~/ 100, y + 8),
+      _Point(width * 28 ~/ 100, y + 3),
+      _Point(width ~/ 2, y + 8),
+      _Point(width * 72 ~/ 100, y + 3),
+      _Point(width * 90 ~/ 100, y + 8),
+    ]);
+    _roads.add(outer);
+    _roads.add(inner);
+    _stroke(outer, _Tone.violetDim, sparse: true, phase: 1);
+    _stroke(inner, _Tone.orangeDim, sparse: true, phase: 4);
+  }
+
+  void _middleRoadRing() {
+    final y = math.max(27, (height * 0.69).round()).toInt();
+    final outer = _polyline(<_Point>[
+      _Point(0, y - 1),
+      _Point(width * 20 ~/ 100, y + 5),
+      _Point(width * 38 ~/ 100, y + 1),
+      _Point(width ~/ 2, y + 6),
+      _Point(width * 62 ~/ 100, y + 1),
+      _Point(width * 80 ~/ 100, y + 5),
+      _Point(width - 1, y - 1),
+    ]);
+    final inner = _polyline(<_Point>[
+      _Point(width * 8 ~/ 100, height - 4),
+      _Point(width * 28 ~/ 100, y + 5),
+      _Point(width ~/ 2, height - 5),
+      _Point(width * 72 ~/ 100, y + 5),
+      _Point(width * 92 ~/ 100, height - 4),
+    ]);
+    _roads.add(outer);
+    _roads.add(inner);
+    _stroke(outer, _Tone.orangeDim, sparse: true, phase: 2);
+    _stroke(inner, _Tone.violet, sparse: true, phase: 5);
+  }
+
+  _Point _centralPlatform() {
     final centerX = width ~/ 2;
     final baseY = height - 8;
     const halfWidth = 15;
     const bodyHeight = 8;
     const roofDepth = 5;
     final topY = baseY - bodyHeight;
-    final top = _Point(centerX, topY - roofDepth);
-    final left = _Point(centerX - halfWidth, topY);
-    final front = _Point(centerX, topY + roofDepth);
-    final right = _Point(centerX + halfWidth, topY);
-    final baseLeft = _Point(left.x, left.y + bodyHeight);
-    final baseFront = _Point(front.x, front.y + bodyHeight);
-    final baseRight = _Point(right.x, right.y + bodyHeight);
+    final roofBack = _Point(centerX, topY - roofDepth);
+    final roofLeft = _Point(centerX - halfWidth, topY);
+    final roofFront = _Point(centerX, topY + roofDepth);
+    final roofRight = _Point(centerX + halfWidth, topY);
+    final baseLeft = _Point(roofLeft.x, roofLeft.y + bodyHeight);
+    final baseFront = _Point(roofFront.x, roofFront.y + bodyHeight);
+    final baseRight = _Point(roofRight.x, roofRight.y + bodyHeight);
 
-    _stroke(_polyline(<_Point>[top, right, front, left, top]), _Tone.violet);
-    _stroke(_line(left, baseLeft), _Tone.violetDim);
-    _stroke(_line(front, baseFront), _Tone.violet);
-    _stroke(_line(right, baseRight), _Tone.violetDim);
+    _stroke(
+      _polyline(<_Point>[
+        roofBack,
+        roofRight,
+        roofFront,
+        roofLeft,
+        roofBack,
+      ]),
+      _Tone.violet,
+    );
+    _stroke(_line(roofLeft, baseLeft), _Tone.violetDim);
+    _stroke(_line(roofFront, baseFront), _Tone.violet);
+    _stroke(_line(roofRight, baseRight), _Tone.violetDim);
     _stroke(_line(baseLeft, baseFront), _Tone.orangeDim);
     _stroke(_line(baseFront, baseRight), _Tone.orangeDim);
 
-    canvas.write(centerX - 3, front.y + 3, 'CINDER', _Tone.white);
-    canvas.set(centerX, top.y + 2, '◆', _Tone.white);
+    final lowerFloorLeft = _lerp(roofLeft, baseLeft, 0.55);
+    final lowerFloorFront = _lerp(roofFront, baseFront, 0.55);
+    final lowerFloorRight = _lerp(roofRight, baseRight, 0.55);
+    _stroke(_line(lowerFloorLeft, lowerFloorFront), _Tone.depth);
+    _stroke(_line(lowerFloorFront, lowerFloorRight), _Tone.violetDim);
+
+    canvas.write(centerX - 3, roofFront.y + 3, 'CINDER', _Tone.white);
+    canvas.set(centerX, roofBack.y + 2, '◆', _Tone.white);
 
     for (var ring = 0; ring < 3; ring++) {
       final inset = ring * 3;
       final path = _polyline(<_Point>[
-        _Point(left.x - inset, left.y + ring),
-        _Point(top.x, top.y - ring),
-        _Point(right.x + inset, right.y + ring),
+        _Point(roofLeft.x - inset, roofLeft.y + ring),
+        _Point(roofBack.x, roofBack.y - ring),
+        _Point(roofRight.x + inset, roofRight.y + ring),
       ]);
       _stroke(
         path,
@@ -436,35 +501,41 @@ class _CityPainter {
       );
     }
 
-    return _Point(centerX, top.y + 1);
+    return _Point(centerX, roofBack.y + 1);
   }
 
-  void _drawPowerNetwork(_Point core) {
-    if (_roofNodes.isEmpty) return;
-    final step = math.max(1, _roofNodes.length ~/ 8).toInt();
+  void _powerNetwork(_Point core) {
+    if (_powerNodes.isEmpty) return;
+    final selected = <_Point>[];
+    final stride = math.max(1, _powerNodes.length ~/ 7).toInt();
+    for (var index = 0; index < _powerNodes.length; index += stride) {
+      selected.add(_powerNodes[index]);
+    }
 
-    for (var index = 0; index < _roofNodes.length; index += step) {
-      final node = _roofNodes[index];
+    for (var index = 0; index < selected.length; index++) {
+      final node = selected[index];
       final side = node.x < core.x ? -1 : 1;
-      final bendY = math.min(core.y - 4, node.y + 4 + index % 3).toInt();
-      final bendX = core.x + side * (9 + index % 4 * 3);
-      final path = _polyline(<_Point>[
+      final bend = _Point(
+        core.x + side * (10 + index % 3 * 4),
+        math.min(core.y - 4, node.y + 4 + index % 3).toInt(),
+      );
+      final cable = _polyline(<_Point>[
         node,
         _Point(node.x, node.y + 2),
-        _Point(bendX, bendY),
+        bend,
         _Point(core.x + side * 3, core.y - 2),
         core,
       ]);
-      _powerLines.add(path);
-      _stroke(path, _Tone.violetDim, sparse: true, phase: index);
+      _cables.add(cable);
+      _stroke(cable, _Tone.violetDim, sparse: true, phase: index);
 
-      final speed = surging ? 5 : 2 + (energy * 1.4).round();
-      final offset = _positiveMod(tick * speed + index * 13, path.length);
-      _movingPulse(path, offset, radius: surging ? 5 : 3, hot: index.isEven);
+      final speed = surging ? 5 : 2;
+      final pulse = _positiveMod(tick * speed + index * 17, cable.length);
+      _movingPulse(cable, pulse, radius: surging ? 5 : 3, hot: index.isEven);
       if (hovered || surging) {
         _movingPulse(
-          path,
-          _positiveMod(offset + path.length ~/ 2, path.length),
+          cable,
+          _positiveMod(pulse + cable.length ~/ 2, cable.length),
           radius: 2,
           hot: !index.isEven,
         );
@@ -472,27 +543,31 @@ class _CityPainter {
     }
   }
 
-  void _drawElectricalArcs() {
-    if (_powerLines.length < 2) return;
+  void _cableArcs() {
+    if (_cables.length < 2) return;
     final count = surging
-        ? math.min(7, _powerLines.length - 1).toInt()
-        : math.min(3, _powerLines.length - 1).toInt();
+        ? math.min(6, _cables.length - 1).toInt()
+        : math.min(2, _cables.length - 1).toInt();
 
     for (var index = 0; index < count; index++) {
-      if (!surging && (tick + index * 5) % 17 > 4) continue;
-      final first = _powerLines[index];
-      final second = _powerLines[index + 1];
-      final a = first[_positiveMod(tick * 2 + index * 7, first.length)];
-      final b = second[
+      if (!surging && (tick + index * 5) % 19 > 4) continue;
+      final first = _cables[index];
+      final second = _cables[index + 1];
+      final start = first[_positiveMod(tick * 2 + index * 7, first.length)];
+      final end = second[
         _positiveMod(second.length - 1 - tick * 2 - index * 9, second.length)
       ];
-      if ((a.x - b.x).abs() > math.max(18, width ~/ 5).toInt()) continue;
-      if ((a.y - b.y).abs() > math.max(9, height ~/ 4).toInt()) continue;
-      _jaggedArc(a, b, index * 101 + tick ~/ 2);
+      if ((start.x - end.x).abs() > math.max(20, width ~/ 5).toInt()) {
+        continue;
+      }
+      if ((start.y - end.y).abs() > math.max(9, height ~/ 4).toInt()) {
+        continue;
+      }
+      _electricArc(start, end, index * 101 + tick ~/ 2);
     }
   }
 
-  void _jaggedArc(_Point start, _Point end, int seed) {
+  void _electricArc(_Point start, _Point end, int seed) {
     final segments = math.max(
       3,
       math.min(9, (start.x - end.x).abs() ~/ 3 + 3),
@@ -512,7 +587,11 @@ class _CityPainter {
       canvas.set(
         point.x,
         point.y,
-        index % 3 == 0 ? '*' : index.isEven ? '╱' : '╲',
+        index % 3 == 0
+            ? '*'
+            : index.isEven
+                ? '╱'
+                : '╲',
         index % 3 == 0 ? _Tone.white : _Tone.glow,
       );
       if (surging && index % 4 == 0) {
@@ -522,10 +601,10 @@ class _CityPainter {
     }
   }
 
-  void _drawPlasma(_Point core) {
+  void _plasma(_Point core) {
     final top = math.max(2, height ~/ 13).toInt();
     final bottom = core.y - 1;
-    final amplitude = surging ? 1.55 : hovered ? 1.2 : 1;
+    final amplitude = surging ? 1.5 : hovered ? 1.2 : 1;
 
     for (var y = bottom; y >= top; y--) {
       final progress = (bottom - y) / math.max(1, bottom - top);
@@ -535,7 +614,7 @@ class _CityPainter {
       final radius = math.max(
         1,
         2 +
-            ((1 - progress) * math.max(2, width ~/ 45)).round() +
+            ((1 - progress) * math.max(2, width ~/ 48)).round() +
             ((_noise(y, tick, 83) % 3) - 1) +
             (surging ? 1 : 0),
       ).toInt();
@@ -570,7 +649,7 @@ class _CityPainter {
     final ringCount = surging ? 4 : 2;
     for (var ring = 0; ring < ringCount; ring++) {
       final radius = 4 +
-          _positiveMod(tick + ring * 7, math.max(5, width ~/ 11).toInt());
+          _positiveMod(tick + ring * 7, math.max(5, width ~/ 12).toInt());
       for (var dx = -radius; dx <= radius; dx++) {
         final dy = (radius - dx.abs()) ~/ 3;
         if (_noise(dx, dy, tick + ring) % 4 != 0) continue;
@@ -581,15 +660,15 @@ class _CityPainter {
     }
   }
 
-  void _drawTraffic() {
+  void _roadTraffic() {
     for (var roadIndex = 0; roadIndex < _roads.length; roadIndex++) {
       final road = _roads[roadIndex];
       if (road.isEmpty) continue;
-      final count = math.max(2, width ~/ 46).toInt();
-      for (var vehicle = 0; vehicle < count; vehicle++) {
+      final vehicleCount = math.max(2, width ~/ 48).toInt();
+      for (var vehicle = 0; vehicle < vehicleCount; vehicle++) {
         final offset = _positiveMod(
           tick * (2 + roadIndex % 3) +
-              vehicle * math.max(8, road.length ~/ count).toInt(),
+              vehicle * math.max(8, road.length ~/ vehicleCount).toInt(),
           road.length,
         );
         final head = road[offset];
@@ -600,8 +679,8 @@ class _CityPainter {
     }
   }
 
-  void _drawParticles(_Point core) {
-    final count = math.max(10, width * height ~/ 600).toInt();
+  void _ambientParticles(_Point core) {
+    final count = math.max(10, width * height ~/ 680).toInt();
     for (var index = 0; index < count; index++) {
       final seed = _noise(index, tick ~/ 2, 131);
       final x = _positiveMod(seed * 13 + tick * (index.isEven ? 1 : -1), width);
@@ -616,7 +695,7 @@ class _CityPainter {
     }
   }
 
-  void _drawDrone() {
+  void _drone() {
     if (width < 78 || height < 28) return;
     final span = math.max(12, width - 38).toInt();
     final travel = _positiveMod(tick, span * 2);
@@ -655,10 +734,10 @@ class _CityPainter {
     }
   }
 
-  _Point _lerp(_Point a, _Point b, double t) {
+  _Point _lerp(_Point first, _Point second, double t) {
     return _Point(
-      (a.x + (b.x - a.x) * t).round(),
-      (a.y + (b.y - a.y) * t).round(),
+      (first.x + (second.x - first.x) * t).round(),
+      (first.y + (second.y - first.y) * t).round(),
     );
   }
 
@@ -737,13 +816,13 @@ class _CityPainter {
   }
 }
 
-class _WorldCanvas {
-  _WorldCanvas(this.width, this.height)
-      : _rows = List<List<_Cell>>.generate(
+class _CityCanvas {
+  _CityCanvas(this.width, this.height)
+      : _rows = List<List<_CityCell>>.generate(
           height,
-          (_) => List<_Cell>.generate(
+          (_) => List<_CityCell>.generate(
             width,
-            (_) => const _Cell(' ', _Tone.empty),
+            (_) => const _CityCell(' ', _Tone.empty),
             growable: false,
           ),
           growable: false,
@@ -751,12 +830,12 @@ class _WorldCanvas {
 
   final int width;
   final int height;
-  final List<List<_Cell>> _rows;
+  final List<List<_CityCell>> _rows;
 
   void set(int x, int y, String glyph, int tone) {
     if (x < 0 || x >= width || y < 0 || y >= height || glyph.isEmpty) return;
     if (tone < _rows[y][x].tone) return;
-    _rows[y][x] = _Cell(glyph, tone);
+    _rows[y][x] = _CityCell(glyph, tone);
   }
 
   void write(int x, int y, String text, int tone) {
@@ -783,7 +862,6 @@ class _WorldCanvas {
 
   TextSpan toTextSpan() {
     final spans = <InlineSpan>[];
-
     for (var y = 0; y < height; y++) {
       var activeTone = _Tone.empty;
       var buffer = StringBuffer();
@@ -793,7 +871,7 @@ class _WorldCanvas {
         spans.add(
           TextSpan(
             text: buffer.toString(),
-            style: _Palette.styleFor(activeTone),
+            style: _CityPalette.styleFor(activeTone),
           ),
         );
         buffer = StringBuffer();
@@ -810,13 +888,12 @@ class _WorldCanvas {
       flush();
       if (y < height - 1) spans.add(const TextSpan(text: '\n'));
     }
-
     return TextSpan(children: spans);
   }
 }
 
-class _Cell {
-  const _Cell(this.glyph, this.tone);
+class _CityCell {
+  const _CityCell(this.glyph, this.tone);
 
   final String glyph;
   final int tone;
@@ -842,12 +919,12 @@ abstract class _Tone {
   static const int white = 9;
 }
 
-abstract class _Palette {
+abstract class _CityPalette {
   static const Color background = Color.fromRGB(2, 3, 8);
-  static const Color star = Color.fromRGB(72, 47, 91);
+  static const Color star = Color.fromRGB(70, 45, 90);
   static const Color depth = Color.fromRGB(48, 37, 67);
   static const Color violetDim = Color.fromRGB(93, 57, 129);
-  static const Color orangeDim = Color.fromRGB(139, 67, 25);
+  static const Color orangeDim = Color.fromRGB(143, 68, 25);
   static const Color violet = Color.fromRGB(185, 83, 244);
   static const Color orange = Color.fromRGB(239, 111, 30);
   static const Color pink = Color.fromRGB(255, 64, 183);

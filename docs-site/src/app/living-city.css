@@ -1,66 +1,86 @@
-.control-hero .control-scene--living {
-  position: relative;
-  grid-column: 1 / -1 !important;
-  grid-row: 1 !important;
-  min-height: clamp(640px, 74dvh, 980px) !important;
-  height: clamp(640px, 74dvh, 980px) !important;
-  padding: 0 !important;
-  overflow: hidden !important;
-  border-color: rgba(190, 84, 246, 0.42) !important;
-  background: #020308 !important;
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 174, 56, 0.06),
-    inset 0 0 140px rgba(116, 30, 164, 0.14),
-    0 24px 90px rgba(0, 0, 0, 0.32) !important;
+/* Desktop composition mirrors the compact Cinder control-room reference. */
+.control-hero:has(.control-scene--living) {
+  display: grid;
+  grid-template-columns:
+    minmax(280px, 0.78fr)
+    minmax(470px, 1.34fr)
+    minmax(350px, 0.98fr);
+  grid-template-rows: 446px;
+  align-items: stretch;
+  gap: 6px;
 }
 
-.control-hero .control-scene--living::before {
+.control-hero:has(.control-scene--living) .control-intro {
+  grid-column: 1;
+  grid-row: 1;
+  min-width: 0;
+  min-height: 446px;
+}
+
+.control-hero:has(.control-scene--living) .control-scene--living {
+  position: relative;
+  grid-column: 2;
+  grid-row: 1;
+  min-width: 0;
+  min-height: 446px;
+  height: 446px;
+  padding: 0;
+  overflow: hidden;
+  border-color: rgba(190, 84, 246, 0.42);
+  background: #020308;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 174, 56, 0.05),
+    inset 0 0 90px rgba(116, 30, 164, 0.1);
+}
+
+.control-hero:has(.control-scene--living) .control-side {
+  grid-column: 3;
+  grid-row: 1;
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: 242px 198px;
+}
+
+.control-scene--living::before {
+  position: absolute;
   z-index: 2;
+  inset: 0;
+  pointer-events: none;
+  content: '';
   background:
     radial-gradient(
-      circle at 50% 42%,
-      transparent 0 42%,
-      rgba(2, 3, 8, 0.12) 72%,
-      rgba(2, 3, 8, 0.62) 100%
+      circle at 50% 44%,
+      transparent 0 48%,
+      rgba(2, 3, 8, 0.08) 73%,
+      rgba(2, 3, 8, 0.46) 100%
     ),
     repeating-linear-gradient(
       to bottom,
       transparent 0,
       transparent 3px,
-      rgba(255, 255, 255, 0.012) 4px
-    ) !important;
-  mix-blend-mode: normal !important;
+      rgba(255, 255, 255, 0.01) 4px
+    );
 }
 
-.control-hero .control-scene--living .control-scene-frame {
+.control-scene--living .control-scene-frame {
   position: absolute;
   z-index: 1;
   inset: 0;
   display: block;
   width: 100%;
   height: 100%;
+  min-width: 0;
   min-height: 0;
   border: 0;
   background: #020308;
 }
 
-.control-hero .control-scene--living:focus-within {
-  border-color: rgba(255, 174, 56, 0.72) !important;
+.control-scene--living:focus-within {
+  border-color: rgba(255, 174, 56, 0.68);
   box-shadow:
-    inset 0 0 0 1px rgba(255, 174, 56, 0.12),
-    inset 0 0 150px rgba(116, 30, 164, 0.18),
-    0 0 42px rgba(190, 84, 246, 0.18) !important;
-}
-
-.control-hero:has(.control-scene--living) .control-intro {
-  grid-column: 1 !important;
-  grid-row: 2 !important;
-}
-
-.control-hero:has(.control-scene--living) .control-side {
-  grid-column: 2 !important;
-  grid-row: 2 !important;
-  min-width: 0;
+    inset 0 0 0 1px rgba(255, 174, 56, 0.1),
+    inset 0 0 110px rgba(116, 30, 164, 0.14),
+    0 0 28px rgba(190, 84, 246, 0.12);
 }
 
 .city-runtime-page {
@@ -110,50 +130,75 @@
   overflow: hidden !important;
 }
 
-@media (max-width: 1180px) {
-  .control-hero .control-scene--living {
-    min-height: clamp(560px, 70dvh, 840px) !important;
-    height: clamp(560px, 70dvh, 840px) !important;
+@media (max-width: 1240px) {
+  .control-hero:has(.control-scene--living) {
+    grid-template-columns: minmax(280px, 0.78fr) minmax(470px, 1.22fr);
+    grid-template-rows: 446px 260px;
+  }
+
+  .control-hero:has(.control-scene--living) .control-intro {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .control-hero:has(.control-scene--living) .control-scene--living {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .control-hero:has(.control-scene--living) .control-side {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: 260px;
   }
 }
 
 @media (max-width: 760px) {
   .control-hero:has(.control-scene--living) {
-    grid-template-columns: minmax(0, 1fr) !important;
-  }
-
-  .control-hero .control-scene--living {
-    grid-column: 1 !important;
-    grid-row: 1 !important;
-    min-height: clamp(440px, 66dvh, 650px) !important;
-    height: clamp(440px, 66dvh, 650px) !important;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto 360px auto;
   }
 
   .control-hero:has(.control-scene--living) .control-intro {
-    grid-column: 1 !important;
-    grid-row: 2 !important;
+    grid-column: 1;
+    grid-row: 1;
+    min-height: auto;
+  }
+
+  .control-hero:has(.control-scene--living) .control-scene--living {
+    grid-column: 1;
+    grid-row: 2;
+    min-height: 360px;
+    height: 360px;
   }
 
   .control-hero:has(.control-scene--living) .control-side {
-    grid-column: 1 !important;
-    grid-row: 3 !important;
+    grid-column: 1;
+    grid-row: 3;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: 300px 245px;
   }
 }
 
 @media (max-width: 430px) {
-  .control-hero .control-scene--living {
-    min-height: 420px !important;
-    height: 64dvh !important;
+  .control-hero:has(.control-scene--living) {
+    grid-template-rows: auto 310px auto;
+  }
+
+  .control-hero:has(.control-scene--living) .control-scene--living {
+    min-height: 310px;
+    height: 310px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .control-hero .control-scene--living::before {
+  .control-scene--living::before {
     background: radial-gradient(
-      circle at 50% 42%,
-      transparent 0 42%,
-      rgba(2, 3, 8, 0.16) 72%,
-      rgba(2, 3, 8, 0.62) 100%
-    ) !important;
+      circle at 50% 44%,
+      transparent 0 48%,
+      rgba(2, 3, 8, 0.1) 73%,
+      rgba(2, 3, 8, 0.46) 100%
+    );
   }
 }

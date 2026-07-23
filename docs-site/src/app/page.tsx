@@ -2,7 +2,6 @@ import Link from 'next/link';
 import { CopyCommand } from '@/components/copy-command';
 import { DartCode } from '@/components/dart-code';
 import { ExamplePreview } from '@/components/example-preview';
-import { InteractiveCityLauncher } from '@/components/interactive-city-launcher';
 import { SiteHeader } from '@/components/site-header';
 import {
   cinderVersion,
@@ -12,39 +11,28 @@ import {
 } from '@/lib/examples';
 import { withBasePath } from '@/lib/site';
 
-const showcaseSource = `import 'dart:async';
-import 'package:cinder/cinder.dart';
+const showcaseSource = `import 'package:cinder/cinder.dart';
 
 void main() {
-  runApp(const CinderApp(child: WebShowcase()));
+  runApp(const CinderApp(child: Dashboard()));
 }
 
-class WebShowcase extends StatefulWidget {
-  const WebShowcase({super.key});
+class Dashboard extends StatefulWidget {
+  const Dashboard({super.key});
 
   @override
-  State<WebShowcase> createState() => _WebShowcaseState();
+  State<Dashboard> createState() => _DashboardState();
 }
 
-class _WebShowcaseState extends State<WebShowcase> {
-  Timer? ticker;
-  int tick = 0;
+class _DashboardState extends State<Dashboard> {
+  double energy = 1.0;
+  bool paused = false;
 
   @override
   Widget build(BuildContext context) {
-    return Focus(
-      autofocus: true,
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final world = ElectricCityPainter(
-            width: constraints.maxWidth.floor(),
-            height: constraints.maxHeight.floor(),
-            tick: tick,
-          ).paint();
-
-          return Stack(children: world.layers);
-        },
-      ),
+    return ElectricCity(
+      energy: energy,
+      paused: paused,
     );
   }
 }`;
@@ -69,15 +57,12 @@ const guarantees = [
 
 const realWorld = [
   'Runs in xterm, iTerm2, Windows Terminal, Kitty, and WezTerm',
-  'The electric city is a real Cinder application hosted through xterm.js',
+  'Real Cinder application hosted through xterm.js',
   'Handles resize, focus, pointer events, keyboard input, and teardown',
   'Generated examples are compiled from repository Dart source',
 ] as const;
 
 export default function HomePage() {
-  const featured =
-    runnableExamples.find((example) => example.slug === 'web-showcase') ??
-    runnableExamples[0];
   const visibleExamples = pickDiverseExamples(6);
 
   return (
@@ -101,7 +86,7 @@ export default function HomePage() {
               <li>Same declarative model you know</li>
               <li>Runs in any terminal or the browser</li>
               <li>Real frame scheduling, layout, paint, damage, and diff</li>
-              <li>The world above is compiled Dart, not a screenshot</li>
+              <li>The city beside this panel is compiled Dart, not a screenshot</li>
             </ul>
             <div className="control-install">
               <strong>› INSTALL</strong>
@@ -115,10 +100,10 @@ export default function HomePage() {
 
           <section
             className="tui-panel control-scene control-scene--living"
-            aria-label="Living Cinder electric city"
+            aria-label="Interactive isometric Cinder city"
           >
             <iframe
-              title="Living Cinder electric city"
+              title="Interactive isometric Cinder city"
               src={withBasePath('/city/web-showcase/')}
               className="control-scene-frame"
               loading="eager"
@@ -127,85 +112,75 @@ export default function HomePage() {
 
           <aside className="control-side">
             <section className="tui-panel control-code-panel">
-              <header><span>● web_showcase.dart</span><span>DART</span></header>
+              <header>
+                <span>● main.dart</span>
+                <span>DART</span>
+              </header>
               <DartCode code={showcaseSource} className="control-code" lineNumbers />
             </section>
 
             <section className="tui-panel control-dashboard">
-              <header><span>› RUNTIME TELEMETRY</span><strong>CONNECTED</strong></header>
+              <header>
+                <span>› LIVE RUN (WEB)</span>
+                <strong>60 FPS</strong>
+              </header>
               <div className="dashboard-body">
                 <nav>
-                  <b>Electric City</b>
-                  <span className="is-active">◉ World</span>
-                  <span>◎ Cable arcs</span>
-                  <span>◎ Plasma core</span>
-                  <span>◎ Traffic flow</span>
-                  <span>◎ Responsive</span>
-                  <span>◎ WebBackend</span>
+                  <b>Cinder Dashboard</b>
+                  <span className="is-active">◉ Overview</span>
+                  <span>◎ Widgets</span>
+                  <span>◎ Events</span>
+                  <span>◎ Performance</span>
+                  <span>◎ Logs</span>
+                  <span>◎ Settings</span>
                 </nav>
                 <div className="dashboard-main">
-                  <label>ENERGY FLOW</label>
+                  <label>ACTIVE FRAMES</label>
                   <pre aria-hidden="true">▁▃▆█▅▂▇▄▁▆█▃▅▇▂▄█▆▃▇▅▁▆█</pre>
                   <div className="dashboard-stats">
-                    <span><b>INPUT</b><em>2-WAY</em></span>
-                    <span><b>EXAMPLES</b><em>{examples.length}</em></span>
-                    <span><b>DOCS</b><em>{documentationCount}</em></span>
-                    <span><b>BACKEND</b><em>WEB</em></span>
+                    <span>
+                      <b>FPS</b>
+                      <em>60</em>
+                    </span>
+                    <span>
+                      <b>EVENTS</b>
+                      <em>LIVE</em>
+                    </span>
+                    <span>
+                      <b>DIFFS</b>
+                      <em>MIN</em>
+                    </span>
+                    <span>
+                      <b>LATENCY</b>
+                      <em>LOW</em>
+                    </span>
                   </div>
                 </div>
               </div>
               <footer>
-                <span>● Living Cinder runtime</span>
+                <span>● Connected to web runtime</span>
                 <span>{cinderVersion}</span>
-                <span>keyboard + mouse</span>
+                <span>pointer + animation</span>
               </footer>
             </section>
           </aside>
         </section>
 
         <section className="control-pipeline" aria-label="The Cinder pipeline">
-          <h2>CINDER RENDER PIPELINE</h2>
+          <h2>THE CINDER PIPELINE</h2>
           <div>
             {pipelineStages.map(([icon, title, description], index) => (
               <article key={title}>
                 <span>{icon}</span>
-                <p><b>{title}</b><small>{description}</small></p>
+                <p>
+                  <b>{title}</b>
+                  <small>{description}</small>
+                </p>
                 {index < pipelineStages.length - 1 ? <i>→</i> : null}
               </article>
             ))}
           </div>
         </section>
-
-        {featured ? (
-          <section className="control-live-runtime" aria-label="Interactive Cinder web runtime">
-            <article className="tui-panel control-live-runtime__meta">
-              <p className="kicker">REAL CINDER APPLICATION</p>
-              <h2>The world is the runtime.</h2>
-              <p>
-                Electricity moves through the cable network, arcs jump between
-                conductors, plasma climbs from the core, traffic crosses the districts,
-                windows flicker, and the whole world recomposes whenever the terminal
-                changes size.
-              </p>
-              <div className="control-live-runtime__facts">
-                <span>Source <b>{featured.repositoryPath}</b></span>
-                <span>Mode <b>{featured.runtimeMode}</b></span>
-                <span>Runtime <b>continuous</b></span>
-                <span>Backend <b>WebBackend</b></span>
-                <span>Energy <b>↑ / ↓</b></span>
-                <span>Phase <b>← / →</b></span>
-                <span>Surge <b>E / Enter / click</b></span>
-                <span>Pause <b>Space</b></span>
-              </div>
-            </article>
-            <div className="control-live-runtime__frame">
-              <InteractiveCityLauncher
-                src={withBasePath(`/play/${featured.slug}/`)}
-                fullScreenHref={`/play/${featured.slug}`}
-              />
-            </div>
-          </section>
-        ) : null}
 
         <section className="control-ledgers">
           <article className="tui-panel">
@@ -218,25 +193,33 @@ export default function HomePage() {
           </article>
           <article className="tui-panel control-install-panel">
             <h2>INSTALL</h2>
-            <label>Dart</label><code>$ dart pub add cinder</code>
-            <label>Run the city</label><code>$ dart run example/web_showcase.dart</code>
+            <label>Dart</label>
+            <code>$ dart pub add cinder</code>
+            <label>Run an example</label>
+            <code>$ dart run example/web_showcase.dart</code>
           </article>
           <article className="tui-panel control-numbers">
             <h2>BY THE NUMBERS</h2>
             <div>
               <dl>
-                <dt>{examples.length}</dt><dd>Examples indexed</dd>
-                <dt>{runnableExamples.length}</dt><dd>Browser runners</dd>
-                <dt>{documentationCount}</dt><dd>Reference docs</dd>
+                <dt>{examples.length}</dt>
+                <dd>Examples indexed</dd>
+                <dt>{runnableExamples.length}</dt>
+                <dd>Browser runners</dd>
+                <dt>{documentationCount}</dt>
+                <dd>Reference docs</dd>
               </dl>
-              <pre aria-hidden="true">   ░{'\n'}  ▒▓▒{'\n'} ▓███▓{'\n'}▒█████▒{'\n'} ▓███▓{'\n'}  ▒▓▒</pre>
+              <pre aria-hidden="true">   ░{`\n`}  ▒▓▒{`\n`} ▓███▓{`\n`}▒█████▒{`\n`} ▓███▓{`\n`}  ▒▓▒</pre>
             </div>
           </article>
         </section>
 
         <section className="control-bottom">
           <article className="tui-panel control-examples">
-            <header><span>EXAMPLES</span><Link href="/examples">+ all {examples.length}</Link></header>
+            <header>
+              <span>EXAMPLES</span>
+              <Link href="/examples">+ all {examples.length}</Link>
+            </header>
             <div>
               {visibleExamples.map((example) => (
                 <Link href={`/examples/${example.slug}`} key={example.slug}>
@@ -268,7 +251,12 @@ export default function HomePage() {
         </section>
 
         <footer className="control-status">
-          <span>? HELP</span><span>q QUIT</span><span>←→ NAVIGATE</span><span>j/k SCROLL</span><span>g TOP</span><span>G BOTTOM</span>
+          <span>? HELP</span>
+          <span>q QUIT</span>
+          <span>←→ NAVIGATE</span>
+          <span>j/k SCROLL</span>
+          <span>g TOP</span>
+          <span>G BOTTOM</span>
           <a href="https://github.com/eukalpia/cinder">GITHUB.COM/EUKALPIA/CINDER</a>
           <strong>WEB RUNTIME: ONLINE</strong>
         </footer>
