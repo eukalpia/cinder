@@ -1,0 +1,84 @@
+class EscapeCodes {
+  const EscapeCodes._();
+
+  static const disable = _Disable._();
+  static const enable = _Enable._();
+
+  static const hideCursor = '\x1b[?25l';
+  static const showCursor = '\x1b[?25h';
+  static const clearScreen = '\x1b[2J';
+  static const clearLine = '\x1b[2K';
+  static const moveCursorHome = '\x1b[H';
+  static const alternateBuffer = '\x1b[?1049h';
+  static const mainBuffer = '\x1b[?1049l';
+
+  /// Begin a synchronized terminal update (DEC private mode 2026).
+  static const beginSynchronizedOutput = '\x1b[?2026h';
+
+  /// End a synchronized terminal update. Unsupported terminals ignore it.
+  static const endSynchronizedOutput = '\x1b[?2026l';
+
+  static String setScrollRegion(int top, int bottom) =>
+      '\x1b[${top + 1};${bottom}r';
+  static const resetScrollRegion = '\x1b[r';
+  static String scrollUp(int lines) => '\x1b[${lines}S';
+  static String scrollDown(int lines) => '\x1b[${lines}T';
+}
+
+class _Disable {
+  const _Disable._();
+
+  String get motionTracking => '\x1B[?1003l';
+  String get sgrMouseMode => '\x1B[?1006l';
+  String get buttonEventTracking => '\x1B[?1002l';
+  String get basicMouseTracking => '\x1B[?1000l';
+  String get bracketedPasteMode => '\x1B[?2004l';
+  String get focusReporting => '\x1B[?1004l';
+
+  /// Pop kitty keyboard mode from the stack.
+  String get kittyKeyboard => '\x1B[<u';
+
+  /// Reset xterm modifyOtherKeys mode to disabled.
+  String get modifyOtherKeys => '\x1B[>4;0m';
+
+  List<String> get values => [
+        motionTracking,
+        sgrMouseMode,
+        buttonEventTracking,
+        basicMouseTracking,
+        bracketedPasteMode,
+        focusReporting,
+        kittyKeyboard,
+        modifyOtherKeys,
+      ];
+}
+
+class _Enable {
+  const _Enable._();
+
+  String get motionTracking => '\x1B[?1003h';
+  String get sgrMouseMode => '\x1B[?1006h';
+  String get buttonEventTracking => '\x1B[?1002h';
+  String get basicMouseTracking => '\x1B[?1000h';
+  String get bracketedPasteMode => '\x1B[?2004h';
+  String get focusReporting => '\x1B[?1004h';
+
+  /// Push kitty keyboard mode with flags:
+  /// - Bit 0 (1): Disambiguate escape codes
+  /// This is sufficient for detecting Shift+Enter, Ctrl+Enter, etc.
+  String get kittyKeyboard => '\x1B[>1u';
+
+  /// Enable xterm modifyOtherKeys mode (level 1).
+  String get modifyOtherKeys => '\x1B[>4;1m';
+
+  List<String> get values => [
+        motionTracking,
+        sgrMouseMode,
+        buttonEventTracking,
+        basicMouseTracking,
+        bracketedPasteMode,
+        focusReporting,
+        kittyKeyboard,
+        modifyOtherKeys,
+      ];
+}

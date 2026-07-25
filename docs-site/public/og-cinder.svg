@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">Cinder terminal UI framework for Dart</title>
+  <desc id="desc">A dark terminal frame with Cinder branding, a render pipeline, and an isometric ASCII city around an ember.</desc>
+  <rect width="1200" height="630" fill="#05070b"/>
+  <g stroke="#29283a" stroke-width="1" fill="none">
+    <rect x="24" y="24" width="1152" height="582"/>
+    <path d="M24 86h1152M780 86v520M24 510h1152"/>
+  </g>
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">
+    <text x="54" y="64" fill="#ded8e9" font-size="30" font-weight="700">&gt;_ Cinder</text>
+    <text x="924" y="62" fill="#72d572" font-size="14">● WEB RUNTIME AVAILABLE</text>
+    <text x="58" y="148" fill="#f5f0fa" font-size="48" font-weight="600">Build terminal UIs</text>
+    <text x="58" y="205" fill="#f5f0fa" font-size="48" font-weight="600">the Flutter way.<tspan fill="#ff8a2b">_</tspan></text>
+    <text x="60" y="255" fill="#888198" font-size="17">Widget → Element → RenderObject → Buffer → Diff → Backend</text>
+    <text x="60" y="306" fill="#ff8a2b" font-size="14">$ dart pub add cinder</text>
+    <g fill="#a76cff" font-size="15">
+      <text x="820" y="124">CINDER RENDER PIPELINE</text>
+      <text x="824" y="164">        ┌────┐      ┌──────┐</text>
+      <text x="824" y="188">     ┌──┤░░░░├──┐ ┌─┤░░░░░░├─┐</text>
+      <text x="824" y="212">   ┌─┤░░│░░░░│░░├─┤░│░░░░░░│░├─┐</text>
+      <text x="824" y="236">   └─┴──┴─┬──┴──┴─┴─┴──┬───┴─┴─┘</text>
+      <text x="824" y="356">   ┌──────┴──────┐ ┌────┴─────┐</text>
+      <text x="824" y="380">  /░░░░░░░░░░░░/│ /░░░░░░░░/│</text>
+      <text x="824" y="404"> /_____________/░│/_________/░│</text>
+      <text x="824" y="428"> │░░ CELL GRID │░││ WEB     │░│</text>
+      <text x="824" y="452"> └─────────────┴─┘└─BACKEND─┴─┘</text>
+    </g>
+    <g fill="#ff8a2b" font-size="18" font-weight="700">
+      <text x="986" y="258">      ░</text>
+      <text x="986" y="282">     ▒▓▒</text>
+      <text x="986" y="306">    ▓███▓</text>
+      <text x="986" y="330">   ▒█████▒</text>
+    </g>
+    <g font-size="13">
+      <text x="58" y="558" fill="#a76cff">[1] DOCS   [2] EXAMPLES   [3] API   [4] REFERENCE</text>
+      <text x="906" y="558" fill="#72d572">● RENDERED BY CINDER</text>
+    </g>
+  </g>
+</svg>

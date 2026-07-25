@@ -1,0 +1,22 @@
+#main-content {
+  min-height: 100vh;
+}
+
+.skip-link {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 9999;
+  padding: 9px 12px;
+  border: 1px solid #ff8a2b;
+  background: #05070b;
+  color: #ff8a2b;
+  font-family: 'IBM Plex Mono', 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 12px;
+  transform: translateY(-160%);
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+  outline: none;
+}

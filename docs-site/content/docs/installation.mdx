@@ -1,0 +1,58 @@
+---
+title: Installation
+description: Get Cinder installed and ready to use
+icon: download
+---
+
+## Prerequisites
+
+You need:
+
+- Dart SDK 3.5.0 or later
+- A terminal emulator (any modern terminal works)
+
+## Add Cinder to your project
+
+Add `cinder` to your `pubspec.yaml`:
+
+```yaml
+dependencies:
+  cinder: ^0.4.2
+```
+
+Then install the package:
+
+```bash
+dart pub get
+```
+
+## Verify the installation
+
+Create a file called `hello.dart` and add this code:
+
+```dart
+import 'package:cinder/cinder.dart';
+
+void main() {
+  runApp(
+    Center(
+      child: Text('Hello, Cinder!'),
+    ),
+  );
+}
+```
+
+Run the app:
+
+```bash
+dart run hello.dart
+```
+
+You should see "Hello, Cinder!" displayed in the center of your terminal.
+
+Press `Ctrl+C` to exit.
+
+## Next steps
+
+- [Your First App](/docs/first-app) - Build an interactive counter app
+- [How terminals work](/docs/terminal-concepts/how-terminals-work) - Understand terminal basics

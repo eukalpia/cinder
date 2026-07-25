@@ -1,0 +1,9 @@
+# Cinder - TUI Framework for Dart
+# https://cinder.dev
+
+User-agent: *
+Allow: /
+
+Sitemap: https://cinder.dev/sitemap.xml
+
+Disallow: /demos/*.js

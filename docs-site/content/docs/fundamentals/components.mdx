@@ -1,0 +1,212 @@
+---
+title: Widgets
+description: Understanding StatelessWidget and StatefulWidget
+icon: cube
+---
+
+Widgets are the building blocks of Cinder apps. This guide explains the two types of components and when to use each.
+
+## StatelessWidget
+
+A `StatelessWidget` describes a UI that doesn't change over time. It takes input through its constructor and returns a widget tree from its `build()` method.
+
+Use stateless components when your UI depends only on the widget's properties, not on changing state.
+
+### Example
+
+Here's a simple greeting widget:
+
+```dart
+class Greeting extends StatelessWidget {
+  const Greeting({required this.name, super.key});
+
+  final String name;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text('Hello, $name!');
+  }
+}
+```
+
+Usage:
+
+```dart
+Greeting(name: 'Alice')
+```
+
+Every time you use this widget with `name: 'Alice'`, it displays "Hello, Alice!". The widget itself never changes—only its input changes.
+
+### When to use StatelessWidget
+
+Use stateless components when:
+- The UI depends only on constructor parameters
+- You don't need to track changing state
+- The widget just transforms data into UI
+
+Examples:
+- Display components that show data (labels, headers, formatted text)
+- Layout wrappers that arrange children
+- Reusable UI patterns that don't change
+
+## StatefulWidget
+
+A `StatefulWidget` describes UI that changes over time. It creates a `State` object that holds mutable state and rebuilds the UI when state changes.
+
+Use stateful components when your UI needs to change in response to user input, timers, or other events.
+
+### Example
+
+Here's a toggle widget:
+
+```dart
+class Toggle extends StatefulWidget {
+  const Toggle({super.key});
+
+  @override
+  State<Toggle> createState() => _ToggleState();
+}
+
+class _ToggleState extends State<Toggle> {
+  bool _isOn = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Focusable(
+      focused: true,
+      onKeyEvent: (event) {
+        if (event.logicalKey == LogicalKey.space) {
+          setState(() {
+            _isOn = !_isOn;
+          });
+          return true;
+        }
+        return false;
+      },
+      child: Text(_isOn ? '[X] On' : '[ ] Off'),
+    );
+  }
+}
+```
+
+The `_isOn` field holds state that changes when the user presses space. Calling `setState()` tells Cinder to rebuild the UI.
+
+### Widget and State separation
+
+Stateful components split into two parts:
+- **Widget** (immutable): Configuration that can be rebuilt
+- **State** (mutable): Internal state that persists across rebuilds
+
+The widget is your configuration. The state is where you store changing data.
+
+### When to use StatefulWidget
+
+Use stateful components when:
+- You need to track changing values (counters, toggles, form input)
+- You respond to user interaction
+- You use timers or async operations
+- You need lifecycle methods
+
+## The build method
+
+Both widget types have a `build()` method that returns the UI:
+
+```dart
+@override
+Widget build(BuildContext context) {
+  return Text('Your UI here');
+}
+```
+
+Cinder calls `build()` when:
+- The widget first appears
+- `setState()` is called (stateful components)
+- The parent widget rebuilds
+
+Keep `build()` fast. It may be called frequently.
+
+## Widget tree
+
+Widgets form a tree structure. Each widget can have children, and those children can have their own children.
+
+Example tree:
+
+```
+Container
+  └─ Column
+      ├─ Text('Title')
+      ├─ SizedBox(height: 1)
+      └─ Row
+          ├─ Text('Left')
+          └─ Text('Right')
+```
+
+When you write:
+
+```dart
+Container(
+  child: Column(
+    children: [
+      Text('Title'),
+      SizedBox(height: 1),
+      Row(
+        children: [
+          Text('Left'),
+          Text('Right'),
+        ],
+      ),
+    ],
+  ),
+)
+```
+
+Cinder builds this tree. Changes propagate down the tree—if `Container` rebuilds, its children rebuild too.
+
+## Keys
+
+Keys help Cinder identify specific components in the tree. Use keys when you need to preserve state or distinguish between components of the same type.
+
+### ValueKey
+
+Use `ValueKey` to identify components by a unique value:
+
+```dart
+ListView(
+  children: [
+    for (var item in items)
+      ItemWidget(
+        key: ValueKey(item.id),
+        item: item,
+      ),
+  ],
+)
+```
+
+Without keys, Cinder might reuse the wrong widget's state when the list changes.
+
+### GlobalKey
+
+Use `GlobalKey` to access a widget's state from anywhere:
+
+```dart
+final formKey = GlobalKey<FormState>();
+
+// Later, access the state:
+formKey.currentState?.validate();
+```
+
+Global keys are rare in most apps. You usually manage state through normal parent-child communication.
+
+### When to use keys
+
+Use keys when:
+- Reordering lists or collections
+- Distinguishing between components of the same type
+- Accessing a widget's state from outside its tree
+
+Most components don't need keys. Only add them when you encounter issues with state preservation or widget identity.
+
+## Next steps
+
+- [Building UIs](/docs/fundamentals/building-uis) - Compose components into interfaces
+- [State Management](/docs/fundamentals/state) - Learn more about managing state
