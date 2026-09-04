@@ -26,19 +26,14 @@ void main() {
   });
 
   test('bar, heatmap, donut and gauge frames are deterministic', () {
-    final bars = ChartRasterizer.horizontalBars(
-      const <ChartBar>[
-        ChartBar(label: 'API', value: 80),
-        ChartBar(label: 'Web', value: 45),
-      ],
-      width: 30,
-    );
-    final heatmap = ChartRasterizer.heatmap(
-      const <List<num>>[
-        <num>[0, 1, 2],
-        <num>[3, 4, 5],
-      ],
-    );
+    final bars = ChartRasterizer.horizontalBars(const <ChartBar>[
+      ChartBar(label: 'API', value: 80),
+      ChartBar(label: 'Web', value: 45),
+    ], width: 30);
+    final heatmap = ChartRasterizer.heatmap(const <List<num>>[
+      <num>[0, 1, 2],
+      <num>[3, 4, 5],
+    ]);
     final donut = ChartRasterizer.donut(
       const <ChartBar>[
         ChartBar(label: 'Used', value: 70),

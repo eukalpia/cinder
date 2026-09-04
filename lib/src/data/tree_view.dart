@@ -100,7 +100,8 @@ class _TreeViewState<T> extends State<TreeView<T>> {
 
     append(widget.nodes, 0, null);
     _visible = output;
-    final selectedId = widget.selectedId ??
+    final selectedId =
+        widget.selectedId ??
         (_selectedIndex != null && _selectedIndex! < output.length
             ? output[_selectedIndex!].node.id
             : null);
@@ -189,14 +190,14 @@ class _TreeViewState<T> extends State<TreeView<T>> {
     final branch = entry.node.isLeaf
         ? ' '
         : expanded
-            ? '▾'
-            : '▸';
+        ? '▾'
+        : '▸';
     final prefix = ' ' * (entry.depth * widget.indent);
     final foreground = entry.node.disabled
         ? theme.outline
         : selected
-            ? theme.onPrimary
-            : theme.onBackground;
+        ? theme.onPrimary
+        : theme.onBackground;
     return GestureDetector(
       onTap: () {
         _select(index);

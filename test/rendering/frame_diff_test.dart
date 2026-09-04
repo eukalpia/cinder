@@ -65,17 +65,46 @@ void main() {
       expect(stats.writtenCells, 2);
     });
 
+    test(
+      'overwriting a wide continuation paints the overlapping character',
+      () {
+        final current = Buffer(4, 1)
+          ..setString(0, 0, '界A')
+          ..setString(1, 0, 'B');
+        final runs = <_Run>[];
+
+        emitFrameDiff(
+          current: current,
+          previous: Buffer(4, 1),
+          emitRun: (x, y, output) => runs.add(_Run(x, y, output)),
+        );
+
+        expect(current.getCell(0, 0).char, ' ');
+        expect(runs.single, const _Run(1, 0, 'BA'));
+      },
+    );
+
+    test('overwriting a wide lead clears its stale continuation', () {
+      final previous = Buffer(4, 1)..setString(0, 0, '界A');
+      final current = Buffer(4, 1)
+        ..setString(0, 0, '界A')
+        ..setString(0, 0, 'B');
+      final runs = <_Run>[];
+
+      emitFrameDiff(
+        current: current,
+        previous: previous,
+        emitRun: (x, y, output) => runs.add(_Run(x, y, output)),
+      );
+
+      expect(current.getCell(1, 0).char, ' ');
+      expect(runs.single, const _Run(0, 0, 'B '));
+    });
+
     test('clears old text before an image placeholder is rendered', () {
       final previous = Buffer(4, 1)..writeCell(0, 0, char: 'X');
       final current = Buffer(4, 1)
-        ..markImageRegion(
-          0,
-          0,
-          1,
-          1,
-          'sixel',
-          protocol: ImageProtocol.sixel,
-        );
+        ..markImageRegion(0, 0, 1, 1, 'sixel', protocol: ImageProtocol.sixel);
       final runs = <_Run>[];
 
       emitFrameDiff(
@@ -111,6 +140,30 @@ void main() {
       expect(runs.single.output, contains('B'));
       expect(runs.single.output, contains(TextStyle.reset));
     });
+
+    for (final (name, decoration, ansi) in [
+      ('line-through', TextDecoration.lineThrough, '\x1b[9m'),
+      ('overline', TextDecoration.overline, '\x1b[53m'),
+    ]) {
+      test('preserves standalone $name decoration', () {
+        final current = Buffer(1, 1)
+          ..writeCell(
+            0,
+            0,
+            char: 'X',
+            style: TextStyle(decoration: decoration),
+          );
+        final runs = <_Run>[];
+
+        emitFrameDiff(
+          current: current,
+          previous: Buffer(1, 1),
+          emitRun: (x, y, output) => runs.add(_Run(x, y, output)),
+        );
+
+        expect(runs.single.output, '${ansi}X\x1b[0m');
+      });
+    }
 
     test('merges short unchanged gaps but splits distant updates', () {
       final previous = Buffer(30, 1);

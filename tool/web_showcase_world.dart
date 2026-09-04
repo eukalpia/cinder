@@ -123,11 +123,7 @@ class _WebShowcaseState extends State<WebShowcase> {
     });
   }
 
-  int _safeExtent(
-    double value, {
-    required int fallback,
-    required int maximum,
-  }) {
+  int _safeExtent(double value, {required int fallback, required int maximum}) {
     if (!value.isFinite || value <= 0) return fallback;
     return value.floor().clamp(1, maximum).toInt();
   }
@@ -202,9 +198,11 @@ class _ElectricCityPainter {
       final progress = (platformY - y) / math.max(1, platformY - flameTop);
       final radius = math.max(0, (2.4 * (1 - progress)).round()).toInt();
       final drift = (math.sin(y * 0.8 + tick * 0.35) * 1.2).round();
-      for (var x = centerX + drift - radius;
-          x <= centerX + drift + radius;
-          x++) {
+      for (
+        var x = centerX + drift - radius;
+        x <= centerX + drift + radius;
+        x++
+      ) {
         final distance = (x - centerX - drift).abs();
         canvas.set(
           x,
@@ -225,12 +223,7 @@ class _ElectricCityPainter {
         if (hash % 433 == 0) {
           canvas.set(x, y, hash.isEven ? '·' : '.', _Tone.star);
         } else if (hash % 947 == 0) {
-          canvas.set(
-            x,
-            y,
-            (tick + x + y) % 8 < 2 ? '*' : '·',
-            _Tone.violetDim,
-          );
+          canvas.set(x, y, (tick + x + y) % 8 < 2 ? '*' : '·', _Tone.violetDim);
         }
       }
     }
@@ -265,7 +258,12 @@ class _ElectricCityPainter {
       canvas.hLine(crownLeft + 1, crownRight - 1, top, '─', _Tone.violetDim);
       canvas.set(crownRight, top, '╲', _Tone.violetDim);
       canvas.vLine(
-          center, math.max(0, top - 4).toInt(), top - 1, '│', _Tone.depth);
+        center,
+        math.max(0, top - 4).toInt(),
+        top - 1,
+        '│',
+        _Tone.depth,
+      );
 
       for (var y = top + 4; y < baseY; y += 3) {
         for (var x = left + 2; x < right; x += 3) {
@@ -350,20 +348,8 @@ class _ElectricCityPainter {
       _strokePath(yRoad, _Tone.violet, phase: offset.isNegative ? 7 : 1);
     }
 
-    final xCenter = _sampleLogicalLine(
-      x1: -r,
-      y1: 0,
-      x2: r,
-      y2: 0,
-      z: 0.42,
-    );
-    final yCenter = _sampleLogicalLine(
-      x1: 0,
-      y1: -r,
-      x2: 0,
-      y2: r,
-      z: 0.42,
-    );
+    final xCenter = _sampleLogicalLine(x1: -r, y1: 0, x2: r, y2: 0, z: 0.42);
+    final yCenter = _sampleLogicalLine(x1: 0, y1: -r, x2: 0, y2: r, z: 0.42);
 
     _roadLanes
       ..add(xCenter)
@@ -393,7 +379,8 @@ class _ElectricCityPainter {
       ..sort((a, b) => (a.x + a.y).compareTo(b.x + b.y));
 
     for (final building in buildings) {
-      final visible = building.x.abs() <= scene.radius + 0.7 &&
+      final visible =
+          building.x.abs() <= scene.radius + 0.7 &&
           building.y.abs() <= scene.radius + 0.7;
       if (!visible) continue;
 
@@ -464,10 +451,7 @@ class _ElectricCityPainter {
     final baseY = _iso(building.x + building.w, building.y + building.d, 0).y;
     final maxHeight = math.max(5, baseY - 2).toInt();
     final heightRows = math
-        .min(
-          maxHeight,
-          (building.height * scene.heightScale).round(),
-        )
+        .min(maxHeight, (building.height * scene.heightScale).round())
         .toInt();
     if (heightRows < 4) return null;
 
@@ -563,8 +547,11 @@ class _ElectricCityPainter {
         );
 
         final rightHash = _noise(right.x, right.y, building.seed + tick ~/ 9);
-        final leftHash =
-            _noise(left.x, left.y, building.seed + 31 + tick ~/ 11);
+        final leftHash = _noise(
+          left.x,
+          left.y,
+          building.seed + 31 + tick ~/ 11,
+        );
 
         if (rightHash % 5 != 0) {
           canvas.set(
@@ -603,11 +590,7 @@ class _ElectricCityPainter {
     final tier = <_Point>[
       _iso(building.x + inset, building.y + inset, z),
       _iso(building.x + building.w - inset, building.y + inset, z),
-      _iso(
-        building.x + building.w - inset,
-        building.y + building.d - inset,
-        z,
-      ),
+      _iso(building.x + building.w - inset, building.y + building.d - inset, z),
       _iso(building.x + inset, building.y + building.d - inset, z),
     ];
 
@@ -660,10 +643,18 @@ class _ElectricCityPainter {
       density: 4,
     );
 
-    _drawPolygonEdges(
-        <_Point>[deck[1], deck[2], base[2], base[1]], _Tone.violet);
-    _drawPolygonEdges(
-        <_Point>[deck[2], deck[3], base[3], base[2]], _Tone.violet);
+    _drawPolygonEdges(<_Point>[
+      deck[1],
+      deck[2],
+      base[2],
+      base[1],
+    ], _Tone.violet);
+    _drawPolygonEdges(<_Point>[
+      deck[2],
+      deck[3],
+      base[3],
+      base[2],
+    ], _Tone.violet);
     _drawPolygonEdges(deck, _Tone.pink);
 
     final center = _iso(0, 0, deckZ);
@@ -683,8 +674,8 @@ class _ElectricCityPainter {
     final maximum = width < 72
         ? 4
         : width < 120
-            ? 6
-            : 8;
+        ? 6
+        : 8;
     final candidates = <_Point>[];
 
     for (var i = 0; i < _roofNodes.length; i++) {
@@ -708,12 +699,7 @@ class _ElectricCityPainter {
 
       final speed = surging ? 5 : 2 + (energy * 1.2).round();
       final pulse = _positiveMod(tick * speed + index * 23, path.length);
-      _drawPulse(
-        path,
-        pulse,
-        radius: surging ? 5 : 3,
-        hot: index.isEven,
-      );
+      _drawPulse(path, pulse, radius: surging ? 5 : 3, hot: index.isEven);
 
       if (hovered || surging) {
         final second = _positiveMod(pulse + path.length ~/ 2, path.length);
@@ -746,8 +732,8 @@ class _ElectricCityPainter {
     final arcLimit = surging
         ? 4
         : hovered
-            ? 2
-            : 1;
+        ? 2
+        : 1;
 
     for (var index = 0; index < arcLimit; index++) {
       if (!surging && (tick + index * 7) % 31 > 4) continue;
@@ -770,8 +756,9 @@ class _ElectricCityPainter {
 
   void _drawJaggedArc(_Point start, _Point end, {required int seed}) {
     final controls = <_Point>[start];
-    final segments =
-        math.max(4, math.min(10, (start.x - end.x).abs() ~/ 4 + 4)).toInt();
+    final segments = math
+        .max(4, math.min(10, (start.x - end.x).abs() ~/ 4 + 4))
+        .toInt();
 
     for (var index = 1; index < segments; index++) {
       final t = index / segments;
@@ -791,8 +778,8 @@ class _ElectricCityPainter {
         index % 3 == 0
             ? '*'
             : index.isEven
-                ? '╱'
-                : '╲',
+            ? '╱'
+            : '╲',
         index % 3 == 0 ? _Tone.white : _Tone.glow,
       );
       if (surging && index % 5 == 0) {
@@ -810,8 +797,8 @@ class _ElectricCityPainter {
       final vehicleCount = width < 70
           ? 2
           : width < 130
-              ? 4
-              : 6;
+          ? 4
+          : 6;
       for (var vehicle = 0; vehicle < vehicleCount; vehicle++) {
         final offset = _positiveMod(
           tick * (1 + laneIndex) +
@@ -832,10 +819,7 @@ class _ElectricCityPainter {
 
   void _drawCorePlasma(_Point socket) {
     final plumeHeight = math
-        .max(
-          9,
-          math.min(24, (height * 0.29 * energy).round()),
-        )
+        .max(9, math.min(24, (height * 0.29 * energy).round()))
         .toInt();
     final topY = math.max(1, socket.y - plumeHeight).toInt();
 
@@ -847,7 +831,8 @@ class _ElectricCityPainter {
           ? ((1 - progress) / 0.28).clamp(0, 1).toDouble()
           : 1.0;
       final radius = math.max(1, (baseRadius * taper).round()).toInt();
-      final turbulence = math.sin(y * 0.78 + tick * 0.31) +
+      final turbulence =
+          math.sin(y * 0.78 + tick * 0.31) +
           math.sin(y * 0.31 - tick * 0.19) * 0.6;
       final drift = (turbulence * (surging ? 2.1 : 1.3)).round();
       final center = socket.x + drift;
@@ -859,19 +844,9 @@ class _ElectricCityPainter {
         if (distance > radius && heat % 6 != 0) continue;
 
         if (distance == 0 || (distance <= 1 && heat % 4 != 0)) {
-          canvas.set(
-            x,
-            y,
-            heat.isEven ? '█' : '#',
-            _Tone.white,
-          );
+          canvas.set(x, y, heat.isEven ? '█' : '#', _Tone.white);
         } else if (distance <= math.max(1, radius ~/ 2).toInt()) {
-          canvas.set(
-            x,
-            y,
-            const <String>['▓', '#', '*'][heat % 3],
-            _Tone.glow,
-          );
+          canvas.set(x, y, const <String>['▓', '#', '*'][heat % 3], _Tone.glow);
         } else if (distance <= radius) {
           canvas.set(
             x,
@@ -880,12 +855,7 @@ class _ElectricCityPainter {
             _Tone.orange,
           );
         } else {
-          canvas.set(
-            x,
-            y,
-            heat.isEven ? '·' : ':',
-            _Tone.pink,
-          );
+          canvas.set(x, y, heat.isEven ? '·' : ':', _Tone.pink);
         }
       }
     }
@@ -909,10 +879,11 @@ class _ElectricCityPainter {
     final ringCount = surging
         ? 4
         : hovered
-            ? 3
-            : 2;
-    final maximumRadius =
-        math.max(5, math.min(width ~/ 8, height ~/ 4)).toInt();
+        ? 3
+        : 2;
+    final maximumRadius = math
+        .max(5, math.min(width ~/ 8, height ~/ 4))
+        .toInt();
 
     for (var ring = 0; ring < ringCount; ring++) {
       final radius = 4 + _positiveMod(tick ~/ 2 + ring * 7, maximumRadius);
@@ -954,10 +925,7 @@ class _ElectricCityPainter {
     final travel = _positiveMod(tick, span * 2);
     final x = travel < span ? 20 + travel : 20 + span * 2 - travel;
     final y = math
-        .max(
-          4,
-          scene.horizonY - 12 + (math.sin(tick * 0.13) * 2).round(),
-        )
+        .max(4, scene.horizonY - 12 + (math.sin(tick * 0.13) * 2).round())
         .toInt();
     final facingRight = travel < span;
 
@@ -978,11 +946,7 @@ class _ElectricCityPainter {
 
     for (var step = 0; step <= steps; step++) {
       final t = step / steps;
-      final point = _iso(
-        _lerp(x1, x2, t),
-        _lerp(y1, y2, t),
-        z,
-      );
+      final point = _iso(_lerp(x1, x2, t), _lerp(y1, y2, t), z);
       if (points.isEmpty || points.last != point) points.add(point);
     }
 
@@ -1043,7 +1007,8 @@ class _ElectricCityPainter {
       final xj = polygon[j].x.toDouble();
       final yj = polygon[j].y.toDouble();
 
-      final intersects = ((yi > y) != (yj > y)) &&
+      final intersects =
+          ((yi > y) != (yj > y)) &&
           (x <
               (xj - xi) *
                       (y - yi) /
@@ -1079,7 +1044,11 @@ class _ElectricCityPainter {
       final previous = index > 0 ? path[index - 1] : path[index];
       final next = index < path.length - 1 ? path[index + 1] : path[index];
       canvas.set(
-          path[index].x, path[index].y, _pathGlyph(previous, next), tone);
+        path[index].x,
+        path[index].y,
+        _pathGlyph(previous, next),
+        tone,
+      );
     }
   }
 
@@ -1094,7 +1063,11 @@ class _ElectricCityPainter {
       final previous = index > 0 ? path[index - 1] : path[index];
       final next = index < path.length - 1 ? path[index + 1] : path[index];
       canvas.set(
-          path[index].x, path[index].y, _pathGlyph(previous, next), tone);
+        path[index].x,
+        path[index].y,
+        _pathGlyph(previous, next),
+        tone,
+      );
     }
   }
 
@@ -1205,22 +1178,14 @@ class _Scene {
   factory _Scene.fromViewport(int width, int height) {
     final compact = width < 72;
     final tileX = math
-        .max(
-          4,
-          math.min(compact ? 5 : 9, width ~/ (compact ? 10 : 24)),
-        )
+        .max(4, math.min(compact ? 5 : 9, width ~/ (compact ? 10 : 24)))
         .toInt();
-    final tileY = math
-        .max(
-          1,
-          math.min(3, (height * 0.035).round()),
-        )
-        .toInt();
+    final tileY = math.max(1, math.min(3, (height * 0.035).round())).toInt();
     final radius = width < 62
         ? 3.15
         : width < 105
-            ? 4.45
-            : 5.65;
+        ? 4.45
+        : 5.65;
     final horizon = math
         .max(
           12,
@@ -1237,8 +1202,8 @@ class _Scene {
       heightScale: height < 42
           ? 0.68
           : height < 62
-              ? 0.84
-              : 1,
+          ? 0.84
+          : 1,
     );
   }
 
@@ -1272,15 +1237,15 @@ class _CityBuilding {
 
 class _WorldCanvas {
   _WorldCanvas(this.width, this.height)
-      : _rows = List<List<_WorldCell>>.generate(
-          height,
-          (_) => List<_WorldCell>.generate(
-            width,
-            (_) => const _WorldCell(' ', _Tone.empty),
-            growable: false,
-          ),
+    : _rows = List<List<_WorldCell>>.generate(
+        height,
+        (_) => List<_WorldCell>.generate(
+          width,
+          (_) => const _WorldCell(' ', _Tone.empty),
           growable: false,
-        );
+        ),
+        growable: false,
+      );
 
   final int width;
   final int height;
@@ -1298,13 +1263,7 @@ class _WorldCanvas {
     }
   }
 
-  void hLine(
-    int startX,
-    int endX,
-    int y,
-    String glyph,
-    int tone,
-  ) {
+  void hLine(int startX, int endX, int y, String glyph, int tone) {
     final left = math.min(startX, endX).toInt();
     final right = math.max(startX, endX).toInt();
     for (var x = left; x <= right; x++) {
@@ -1312,13 +1271,7 @@ class _WorldCanvas {
     }
   }
 
-  void vLine(
-    int x,
-    int startY,
-    int endY,
-    String glyph,
-    int tone,
-  ) {
+  void vLine(int x, int startY, int endY, String glyph, int tone) {
     final top = math.min(startY, endY).toInt();
     final bottom = math.max(startY, endY).toInt();
     for (var y = top; y <= bottom; y++) {
@@ -1412,17 +1365,27 @@ abstract class _Palette {
   static TextStyle? styleFor(int tone) {
     return switch (tone) {
       _Tone.star => const TextStyle(color: star, fontWeight: FontWeight.dim),
-      _Tone.shadow =>
-        const TextStyle(color: shadow, fontWeight: FontWeight.dim),
+      _Tone.shadow => const TextStyle(
+        color: shadow,
+        fontWeight: FontWeight.dim,
+      ),
       _Tone.depth => const TextStyle(color: depth, fontWeight: FontWeight.dim),
-      _Tone.violetDim =>
-        const TextStyle(color: violetDim, fontWeight: FontWeight.dim),
-      _Tone.orangeDim =>
-        const TextStyle(color: orangeDim, fontWeight: FontWeight.dim),
-      _Tone.violet =>
-        const TextStyle(color: violet, fontWeight: FontWeight.bold),
-      _Tone.orange =>
-        const TextStyle(color: orange, fontWeight: FontWeight.bold),
+      _Tone.violetDim => const TextStyle(
+        color: violetDim,
+        fontWeight: FontWeight.dim,
+      ),
+      _Tone.orangeDim => const TextStyle(
+        color: orangeDim,
+        fontWeight: FontWeight.dim,
+      ),
+      _Tone.violet => const TextStyle(
+        color: violet,
+        fontWeight: FontWeight.bold,
+      ),
+      _Tone.orange => const TextStyle(
+        color: orange,
+        fontWeight: FontWeight.bold,
+      ),
       _Tone.pink => const TextStyle(color: pink, fontWeight: FontWeight.bold),
       _Tone.glow => const TextStyle(color: glow, fontWeight: FontWeight.bold),
       _Tone.white => const TextStyle(color: white, fontWeight: FontWeight.bold),

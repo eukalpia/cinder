@@ -42,15 +42,15 @@ class _Disable {
   String get modifyOtherKeys => '\x1B[>4;0m';
 
   List<String> get values => [
-        motionTracking,
-        sgrMouseMode,
-        buttonEventTracking,
-        basicMouseTracking,
-        bracketedPasteMode,
-        focusReporting,
-        kittyKeyboard,
-        modifyOtherKeys,
-      ];
+    motionTracking,
+    sgrMouseMode,
+    buttonEventTracking,
+    basicMouseTracking,
+    bracketedPasteMode,
+    focusReporting,
+    kittyKeyboard,
+    modifyOtherKeys,
+  ];
 }
 
 class _Enable {
@@ -72,13 +72,13 @@ class _Enable {
   String get modifyOtherKeys => '\x1B[>4;1m';
 
   List<String> get values => [
-        motionTracking,
-        sgrMouseMode,
-        buttonEventTracking,
-        basicMouseTracking,
-        bracketedPasteMode,
-        focusReporting,
-        kittyKeyboard,
-        modifyOtherKeys,
-      ];
+    motionTracking,
+    sgrMouseMode,
+    buttonEventTracking,
+    basicMouseTracking,
+    bracketedPasteMode,
+    focusReporting,
+    kittyKeyboard,
+    modifyOtherKeys,
+  ];
 }

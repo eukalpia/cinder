@@ -16,11 +16,11 @@ class DiagnosticsNodeData {
   final List<DiagnosticsNodeData> children;
 
   Map<String, Object?> toJson() => <String, Object?>{
-        'name': name,
-        if (properties.isNotEmpty) 'properties': properties,
-        if (children.isNotEmpty)
-          'children': children.map((child) => child.toJson()).toList(),
-      };
+    'name': name,
+    if (properties.isNotEmpty) 'properties': properties,
+    if (children.isNotEmpty)
+      'children': children.map((child) => child.toJson()).toList(),
+  };
 
   String format({int depth = 0}) {
     final prefix = '  ' * depth;
@@ -53,13 +53,13 @@ class CinderDiagnosticsSnapshot {
   final Map<String, Object?> frameMetrics;
 
   Map<String, Object?> toJson() => <String, Object?>{
-        'capturedAt': capturedAt.toIso8601String(),
-        if (widgetTree != null) 'widgetTree': widgetTree!.toJson(),
-        'renderTrees': renderTrees.map((node) => node.toJson()).toList(),
-        'focusTree': focusTree.toJson(),
-        'semantics': semantics.toJson()['semantics'],
-        'frameMetrics': frameMetrics,
-      };
+    'capturedAt': capturedAt.toIso8601String(),
+    if (widgetTree != null) 'widgetTree': widgetTree!.toJson(),
+    'renderTrees': renderTrees.map((node) => node.toJson()).toList(),
+    'focusTree': focusTree.toJson(),
+    'semantics': semantics.toJson()['semantics'],
+    'frameMetrics': frameMetrics,
+  };
 }
 
 /// Collects development diagnostics without changing rendering semantics.
@@ -103,8 +103,9 @@ abstract final class CinderDiagnostics {
     List<RenderObject> output,
     bool insideRenderSubtree,
   ) {
-    final current =
-        element is RenderObjectElement ? element.renderObject : null;
+    final current = element is RenderObjectElement
+        ? element.renderObject
+        : null;
     final isInside = insideRenderSubtree || current != null;
     if (current != null && !insideRenderSubtree) output.add(current);
     element.visitChildren(

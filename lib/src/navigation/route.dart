@@ -13,9 +13,7 @@ abstract class Route<T> {
   /// The settings for this route (name, arguments)
   final RouteSettings settings;
 
-  Route({
-    required this.settings,
-  });
+  Route({required this.settings});
 
   /// The overlay entries for this route.
   List<OverlayEntry> get overlayEntries => _overlayEntries;
@@ -55,19 +53,12 @@ abstract class Route<T> {
 class PageRoute<T> extends Route<T> {
   final WidgetBuilder builder;
 
-  PageRoute({
-    required this.builder,
-    required super.settings,
-  });
+  PageRoute({required this.builder, required super.settings});
 
   @override
   Iterable<OverlayEntry> createOverlayEntries() {
     return <OverlayEntry>[
-      OverlayEntry(
-        builder: builder,
-        maintainState: true,
-        opaque: true,
-      ),
+      OverlayEntry(builder: builder, maintainState: true, opaque: true),
     ];
   }
 }
@@ -172,10 +163,7 @@ class ModalRoute<T> extends Route<T> {
 
           // Apply alignment
           return Positioned.fill(
-            child: Align(
-              alignment: alignment,
-              child: modalContent,
-            ),
+            child: Align(alignment: alignment, child: modalContent),
           );
         },
         maintainState: true,

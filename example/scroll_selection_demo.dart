@@ -59,7 +59,8 @@ class _ScrollSelectionDemoState extends State<ScrollSelectionDemo> {
                     const Text(''),
                     for (int i = 0; i < 60; i++)
                       Text(
-                          'Line $i: The quick brown fox jumps over the lazy dog.'),
+                        'Line $i: The quick brown fox jumps over the lazy dog.',
+                      ),
                     const Text(''),
                     const Text(
                       'End of content.',

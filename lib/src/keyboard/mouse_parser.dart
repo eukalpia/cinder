@@ -165,11 +165,6 @@ class MouseParser {
 
     if (button == null) return null;
 
-    return MouseEvent(
-      button: button,
-      x: x,
-      y: y,
-      pressed: pressed,
-    );
+    return MouseEvent(button: button, x: x, y: y, pressed: pressed);
   }
 }

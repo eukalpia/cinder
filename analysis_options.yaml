@@ -24,6 +24,7 @@ analyzer:
     - example/legacy_demos/**
     - third_party/**
     - packages/**
+    - docs-site/**
 
 # For more information about the core and recommended set of lints, see
 # https://dart.dev/go/core-lints

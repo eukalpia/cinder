@@ -77,7 +77,8 @@ class _CinderAppDemoAppState extends State<CinderAppDemoApp> {
                   const SizedBox(height: 1),
                   Text(''),
                   Text(
-                      'This demo showcases the CinderApp widget, which provides'),
+                    'This demo showcases the CinderApp widget, which provides',
+                  ),
                   Text('a declarative way to set terminal window titles.'),
                   Text(''),
                   const Divider(),

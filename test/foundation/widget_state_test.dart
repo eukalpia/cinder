@@ -3,14 +3,11 @@ import 'package:test/test.dart';
 
 void main() {
   test('WidgetStateMapper chooses the most specific matching state set', () {
-    final property = WidgetStateMapper<String>(
-      <Set<WidgetState>, String>{
-        <WidgetState>{WidgetState.hovered}: 'hovered',
-        <WidgetState>{WidgetState.hovered, WidgetState.focused}: 'active',
-        <WidgetState>{WidgetState.disabled}: 'disabled',
-      },
-      fallback: 'idle',
-    );
+    final property = WidgetStateMapper<String>(<Set<WidgetState>, String>{
+      <WidgetState>{WidgetState.hovered}: 'hovered',
+      <WidgetState>{WidgetState.hovered, WidgetState.focused}: 'active',
+      <WidgetState>{WidgetState.disabled}: 'disabled',
+    }, fallback: 'idle');
 
     expect(property.resolve(const <WidgetState>{}), 'idle');
     expect(property.resolve(<WidgetState>{WidgetState.hovered}), 'hovered');

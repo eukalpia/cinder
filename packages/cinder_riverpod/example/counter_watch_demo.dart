@@ -19,11 +19,7 @@ final messageProvider = Provider<String>((ref) {
 });
 
 void main() {
-  runApp(
-    ProviderScope(
-      child: const CounterApp(),
-    ),
-  );
+  runApp(ProviderScope(child: const CounterApp()));
 }
 
 class CounterApp extends StatelessWidget {
@@ -67,9 +63,7 @@ class CounterDisplay extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 1),
-      decoration: BoxDecoration(
-        border: BoxBorder.all(color: Colors.cyan),
-      ),
+      decoration: BoxDecoration(border: BoxBorder.all(color: Colors.cyan)),
       child: Text(
         'Counter: $count',
         style: const TextStyle(color: Colors.cyan),
@@ -102,10 +96,7 @@ class MessageDisplay extends StatelessWidget {
   Widget build(BuildContext context) {
     final message = context.watch(messageProvider);
 
-    return Text(
-      message,
-      style: const TextStyle(color: Colors.yellow),
-    );
+    return Text(message, style: const TextStyle(color: Colors.yellow));
   }
 }
 
@@ -128,9 +119,7 @@ class CounterControls extends StatelessWidget {
       },
       child: Container(
         padding: const EdgeInsets.all(1),
-        decoration: BoxDecoration(
-          border: BoxBorder.all(color: Colors.blue),
-        ),
+        decoration: BoxDecoration(border: BoxBorder.all(color: Colors.blue)),
         child: const Text('Controls: [+] Increment, [-] Decrement, [R] Reset'),
       ),
     );
@@ -144,9 +133,7 @@ class Instructions extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(1),
-      decoration: BoxDecoration(
-        border: BoxBorder.all(color: Colors.grey),
-      ),
+      decoration: BoxDecoration(border: BoxBorder.all(color: Colors.grey)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: const [

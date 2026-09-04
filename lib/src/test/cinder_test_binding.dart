@@ -7,14 +7,13 @@ import 'package:cinder/src/rendering/mouse_tracker.dart';
 
 import '../backend/terminal.dart' as term;
 import '../buffer.dart' as buf;
+import '../keyboard/tree_keyboard_dispatch.dart';
 
 /// Test binding for TUI applications that provides controlled frame rendering
 /// and state inspection capabilities for testing.
 class CinderTestBinding extends CinderBinding with SchedulerBinding {
-  CinderTestBinding({
-    term.Terminal? terminal,
-    this.size = const Size(80, 24),
-  }) : terminal = terminal ?? _MockTerminal(size) {
+  CinderTestBinding({term.Terminal? terminal, this.size = const Size(80, 24)})
+    : terminal = terminal ?? _MockTerminal(size) {
     _instance = this;
     _initializePipelineOwner();
   }
@@ -71,8 +70,9 @@ class CinderTestBinding extends CinderBinding with SchedulerBinding {
     }
 
     // Execute a frame using the scheduler
-    final timestamp =
-        Duration(microseconds: DateTime.now().microsecondsSinceEpoch);
+    final timestamp = Duration(
+      microseconds: DateTime.now().microsecondsSinceEpoch,
+    );
     handleBeginFrame(timestamp);
     _frameCount++;
 
@@ -113,10 +113,9 @@ class CinderTestBinding extends CinderBinding with SchedulerBinding {
     for (int i = 0; i < text.length; i++) {
       final key = LogicalKey.fromCharacter(text[i]);
       if (key != null) {
-        _pendingKeyboardEvents.add(KeyboardEvent(
-          logicalKey: key,
-          character: text[i],
-        ));
+        _pendingKeyboardEvents.add(
+          KeyboardEvent(logicalKey: key, character: text[i]),
+        );
       }
     }
   }
@@ -163,9 +162,11 @@ class CinderTestBinding extends CinderBinding with SchedulerBinding {
       }
 
       // Layout phase
-      renderObject.layout(BoxConstraints.tight(
-        Size(size.width.toDouble(), size.height.toDouble()),
-      ));
+      renderObject.layout(
+        BoxConstraints.tight(
+          Size(size.width.toDouble(), size.height.toDouble()),
+        ),
+      );
 
       // Flush layout pipeline
       pipelineOwner.flushLayout();
@@ -194,10 +195,14 @@ class CinderTestBinding extends CinderBinding with SchedulerBinding {
 
   /// Shutdown the test binding
   void shutdown() {
-    _testKeyboardController.close();
-    // Clear the singleton instance to allow multiple tests
-    CinderBinding.resetInstance();
-    _instance = null;
+    try {
+      detachRootWidget();
+    } finally {
+      pendingFrameTimer?.cancel();
+      _testKeyboardController.close();
+      disposeBinding();
+      if (identical(_instance, this)) _instance = null;
+    }
   }
 
   /// Handle global debug key combinations.
@@ -258,36 +263,15 @@ class CinderTestBinding extends CinderBinding with SchedulerBinding {
 
   /// Dispatch a keyboard event to an element and its children
   bool _dispatchKeyToElement(Element element, KeyboardEvent event) {
-    // Check if this element is a BlockFocus that's blocking
-    // Import BlockFocusElement dynamically to avoid circular dependencies
-    if (element.runtimeType.toString() == 'BlockFocusElement') {
-      final dynamic blockFocusElement = element;
-      if (blockFocusElement.isBlocking == true) {
-        // Block all keyboard events from reaching children
-        return true; // Event is "handled" (blocked)
-      }
-    }
-
-    // First, try to dispatch to children (depth-first)
-    bool handled = false;
-    element.visitChildren((child) {
-      if (!handled) {
-        handled = _dispatchKeyToElement(child, event);
-      }
-    });
-
-    // Check if this is a FocusableElement
-    if (!handled && element is FocusableElement) {
-      handled = element.handleKeyEvent(event);
-    }
-
-    // If no child handled it, and this element's widget can handle keys, try it
-    if (!handled && element.widget is KeyboardHandler) {
-      final handler = element.widget as KeyboardHandler;
-      handled = handler.handleKeyEvent(event);
-    }
-
-    return handled;
+    return dispatchKeyboardToTree(
+      element,
+      event,
+      onUnhandled: (element, event) {
+        final widget = element.widget;
+        return widget is KeyboardHandler &&
+            (widget as KeyboardHandler).handleKeyEvent(event);
+      },
+    );
   }
 }
 

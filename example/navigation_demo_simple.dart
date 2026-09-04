@@ -15,10 +15,7 @@ class NavigationDemo extends StatelessWidget {
         '/': (context) => const HomePage(),
         '/about': (context) => const AboutPage(),
       },
-      popBehavior: const PopBehavior(
-        escapeEnabled: true,
-        customPopKey: 'q',
-      ),
+      popBehavior: const PopBehavior(escapeEnabled: true, customPopKey: 'q'),
       observers: [LoggingNavigatorObserver()],
     );
   }
@@ -35,9 +32,7 @@ class HomePage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           MenuList(
-            items: const [
-              MenuItem('About', '/about'),
-            ],
+            items: const [MenuItem('About', '/about')],
             onSelect: (value) async {
               Navigator.of(context).pushNamed(value);
             },
@@ -102,11 +97,7 @@ class MenuList extends StatefulWidget {
   final List<MenuItem> items;
   final Function(dynamic) onSelect;
 
-  const MenuList({
-    super.key,
-    required this.items,
-    required this.onSelect,
-  });
+  const MenuList({super.key, required this.items, required this.onSelect});
 
   @override
   State<MenuList> createState() => _MenuListState();
@@ -148,7 +139,8 @@ class _MenuListState extends State<MenuList> {
               style: i == _selectedIndex
                   ? const TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: Color.fromRGB(100, 200, 100))
+                      color: Color.fromRGB(100, 200, 100),
+                    )
                   : null,
             ),
         ],

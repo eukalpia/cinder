@@ -11,16 +11,13 @@ class BlocProvider<T extends StateStreamableSource<Object?>>
     super.key,
     super.child,
     this.lazy = true,
-  })  : _create = create,
-        _value = null;
+  }) : _create = create,
+       _value = null;
 
-  const BlocProvider.value({
-    required T value,
-    super.key,
-    super.child,
-  })  : _value = value,
-        _create = null,
-        lazy = true;
+  const BlocProvider.value({required T value, super.key, super.child})
+    : _value = value,
+      _create = null,
+      lazy = true;
 
   final bool lazy;
   final T Function(BuildContext context)? _create;

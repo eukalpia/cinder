@@ -23,11 +23,7 @@ void main() {
               _RowData('Gamma', 20),
             ],
             columns: const <DataColumn<_RowData>>[
-              DataColumn<_RowData>(
-                label: 'Name',
-                width: 16,
-                value: _name,
-              ),
+              DataColumn<_RowData>(label: 'Name', width: 16, value: _name),
               DataColumn<_RowData>(
                 label: 'Value',
                 width: 10,

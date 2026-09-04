@@ -2,8 +2,8 @@ import 'dart:math' as math;
 
 /// An abstract class providing an interface for evaluating a parametric curve.
 ///
-/// A parametric curve maps a parameter value (t) in the range [0.0, 1.0] to
-/// a transformed output value also typically in the range [0.0, 1.0].
+/// A parametric curve maps a parameter value (t) in the range `0.0–1.0` to
+/// a transformed output value also typically in the range `0.0–1.0`.
 ///
 /// See [Curves] for pre-defined curves.
 abstract class Curve {
@@ -257,8 +257,8 @@ class _DecelerateCurve extends Curve {
 
 /// A collection of commonly used animation curves.
 ///
-/// These curves are typically used with [AnimationController.animateTo] or
-/// [AnimationController.animateWith] to create smooth animations.
+/// These curves are typically used with [AnimationController.animateTo]
+/// to create smooth animations.
 abstract class Curves {
   Curves._();
 

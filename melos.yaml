@@ -8,6 +8,8 @@ packages:
 # Exclude third_party packages from Melos management
 ignore:
   - third_party/**
+  - packages/cinder_web
+  - packages/cinder_web/**
 
 # Include the root package as part of the workspace
 useRootAsPackage: true
@@ -57,7 +59,7 @@ scripts:
   # Check formatting without modifying
   format:check:
     description: Check formatting in all packages
-    run: dart format --set-exit-if-changed .
+    run: dart format --output=none --set-exit-if-changed .
     exec:
       concurrency: 5
 

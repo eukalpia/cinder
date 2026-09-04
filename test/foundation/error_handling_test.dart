@@ -36,91 +36,78 @@ void main() {
     });
 
     test('paint error is caught and displayed', () async {
-      await testCinder(
-        'paint error handling',
-        (tester) async {
-          // Create a widget that will throw during paint
-          await tester.pumpWidget(
-            const ErrorThrowingWidget(
-              throwInLayout: false,
-              throwInPaint: true,
-              errorMessage: 'Test paint error',
-            ),
-          );
+      await testCinder('paint error handling', (tester) async {
+        // Create a widget that will throw during paint
+        await tester.pumpWidget(
+          const ErrorThrowingWidget(
+            throwInLayout: false,
+            throwInPaint: true,
+            errorMessage: 'Test paint error',
+          ),
+        );
 
-          // The app should not crash and should display an error
-          final output = tester.terminalState.getText();
+        // The app should not crash and should display an error
+        final output = tester.terminalState.getText();
 
-          // Should contain error border
-          expect(output, contains('┌'));
-          expect(output, contains('│'));
+        // Should contain error border
+        expect(output, contains('┌'));
+        expect(output, contains('│'));
 
-          // The error should be related to paint
-          expect(output, contains('Paint Error'));
-        },
-        debugPrintAfterPump: true,
-      );
+        // The error should be related to paint
+        expect(output, contains('Paint Error'));
+      }, debugPrintAfterPump: true);
     });
 
-    test('nested errors are isolated',
-        skip: 'Known issue: Error isolation not working as expected', () async {
-      await testCinder(
-        'nested error isolation',
-        (tester) async {
-          // Create a column with one failing and one working widget
-          await tester.pumpWidget(
-            Column(
-              children: [
-                const Text('Before Error'),
-                const ErrorThrowingWidget(
-                  throwInLayout: true,
-                  errorMessage: 'Middle widget error',
-                ),
-                const Text('After Error'),
-              ],
-            ),
-          );
+    test('nested errors are isolated', () async {
+      await testCinder('nested error isolation', (tester) async {
+        // Create a column with one failing and one working widget
+        await tester.pumpWidget(
+          Column(
+            children: [
+              const Text('Before Error'),
+              const ErrorThrowingWidget(
+                throwInLayout: true,
+                errorMessage: 'Middle widget error',
+              ),
+              const Text('After Error'),
+            ],
+          ),
+        );
 
-          final output = tester.terminalState.getText();
+        final output = tester.terminalState.getText();
 
-          // The working widgets should still render
-          expect(output, contains('Before Error'));
-          expect(output, contains('After Error'));
+        // The working widgets should still render
+        expect(output, contains('Before Error'));
+        expect(output, contains('After Error'));
 
-          // The error is caught and isolated - the widget shows "No Error"
-          // because the error was in layout but the paint still runs
-          // This demonstrates that errors don't crash the whole app
-          expect(output, contains('No Error'));
-        },
-        debugPrintAfterPump: true,
-      );
+        // The narrow fallback wraps its error title without hiding siblings.
+        expect(output, contains('Layout'));
+        expect(output, contains('Error in'));
+        expect(output, isNot(contains('No Error')));
+      }, debugPrintAfterPump: true);
     });
 
     test('TUIErrorWidget displays custom error message', () async {
-      await testCinder(
-        'custom error widget',
-        (tester) async {
-          await tester.pumpWidget(
-            const TUIErrorWidget(
-              message: 'Custom Error: Something went wrong',
-              error: 'TestError',
-            ),
-          );
+      await testCinder('custom error widget', (tester) async {
+        await tester.pumpWidget(
+          const TUIErrorWidget(
+            message: 'Custom Error: Something went wrong',
+            error: 'TestError',
+          ),
+        );
 
-          final output = tester.terminalState.getText();
+        final output = tester.terminalState.getText();
 
-          // Should show the custom message
-          expect(output, contains('Custom'));
-          expect(output, contains('Error'));
+        // Should show the custom message
+        expect(output, contains('Custom'));
+        expect(output, contains('Error'));
 
-          // Should have error box border
-          expect(output, contains('┌'));
-          expect(output, contains('┐'));
-          expect(output, contains('└'));
-          expect(output, contains('┘'));
-        },
-        debugPrintAfterPump: true,
-      );
+        // Should have error box border
+        expect(output, contains('┌'));
+        expect(output, contains('┐'));
+        expect(output, contains('└'));
+        expect(output, contains('┘'));
+      }, debugPrintAfterPump: true);
     });
 
     test('error box respects size constraints', () async {

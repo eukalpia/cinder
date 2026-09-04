@@ -32,9 +32,9 @@ class ChartSeries {
     this.connectPoints = true,
     this.showPoints = true,
   }) : points = List<ChartPoint>.unmodifiable(<ChartPoint>[
-          for (var index = 0; index < values.length; index++)
-            ChartPoint(index.toDouble(), values[index].toDouble()),
-        ]);
+         for (var index = 0; index < values.length; index++)
+           ChartPoint(index.toDouble(), values[index].toDouble()),
+       ]);
 
   final String name;
   final List<ChartPoint> points;
@@ -157,9 +157,9 @@ class ChartCell {
 /// Immutable terminal chart output.
 class ChartFrame {
   ChartFrame(List<List<ChartCell>> rows)
-      : rows = List<List<ChartCell>>.unmodifiable(
-          rows.map(List<ChartCell>.unmodifiable),
-        );
+    : rows = List<List<ChartCell>>.unmodifiable(
+        rows.map(List<ChartCell>.unmodifiable),
+      );
 
   final List<List<ChartCell>> rows;
 
@@ -211,8 +211,8 @@ abstract final class ChartRasterizer {
             _sparkBlocks[span == 0
                 ? _sparkBlocks.length ~/ 2
                 : (((value - minValue) / span) * (_sparkBlocks.length - 1))
-                    .round()
-                    .clamp(0, _sparkBlocks.length - 1)],
+                      .round()
+                      .clamp(0, _sparkBlocks.length - 1)],
             color: color,
             backgroundColor: backgroundColor,
           ),
@@ -410,9 +410,11 @@ abstract final class ChartRasterizer {
       }
       if (showAxis && index * (barWidth + gap) + startX < safeWidth) {
         final label = _fitLabel(bar.label, barWidth);
-        for (var offset = 0;
-            offset < label.length && xStart + offset < safeWidth;
-            offset++) {
+        for (
+          var offset = 0;
+          offset < label.length && xStart + offset < safeWidth;
+          offset++
+        ) {
           frame[safeHeight - 1][xStart + offset] = ChartCell(
             label[offset],
             color: theme.labelColor,
@@ -455,17 +457,19 @@ abstract final class ChartRasterizer {
           cells.add(const ChartCell(' '));
           continue;
         }
-        final normalized =
-            span == 0 ? 0.5 : (row[x].toDouble() - minValue) / span;
+        final normalized = span == 0
+            ? 0.5
+            : (row[x].toDouble() - minValue) / span;
         final level = (normalized * (_heatBlocks.length - 1)).round().clamp(
-              0,
-              _heatBlocks.length - 1,
-            );
+          0,
+          _heatBlocks.length - 1,
+        );
         cells.add(
           ChartCell(
             _heatBlocks[level],
-            color:
-                useColor ? Color.lerp(cold, hot, normalized) : theme.valueColor,
+            color: useColor
+                ? Color.lerp(cold, hot, normalized)
+                : theme.valueColor,
           ),
         );
       }
@@ -576,11 +580,14 @@ abstract final class ChartRasterizer {
       for (var index = 0; index < nodes.length; index++) {
         final column = index % columns;
         final row = index ~/ columns;
-        final x = ((column + 0.5) * safeWidth / columns)
-            .round()
-            .clamp(1, safeWidth - 2);
-        final y =
-            ((row + 0.5) * safeHeight / rows).round().clamp(1, safeHeight - 2);
+        final x = ((column + 0.5) * safeWidth / columns).round().clamp(
+          1,
+          safeWidth - 2,
+        );
+        final y = ((row + 0.5) * safeHeight / rows).round().clamp(
+          1,
+          safeHeight - 2,
+        );
         positions[nodes[index].id] = _GraphPosition(x, y);
       }
     } else {
@@ -592,9 +599,10 @@ abstract final class ChartRasterizer {
         final angle = -math.pi / 2 + (2 * math.pi * index / nodes.length);
         positions[nodes[index].id] = _GraphPosition(
           (centerX + math.cos(angle) * radiusX).round().clamp(1, safeWidth - 2),
-          (centerY + math.sin(angle) * radiusY)
-              .round()
-              .clamp(1, safeHeight - 2),
+          (centerY + math.sin(angle) * radiusY).round().clamp(
+            1,
+            safeHeight - 2,
+          ),
         );
       }
     }
@@ -617,8 +625,10 @@ abstract final class ChartRasterizer {
       final node = nodes[index];
       final position = positions[node.id]!;
       final color = node.color ?? theme.seriesColor(index);
-      final label =
-          _fitLabel(node.label, math.max(1, maxLabelWidth)).trimRight();
+      final label = _fitLabel(
+        node.label,
+        math.max(1, maxLabelWidth),
+      ).trimRight();
       _drawGraphText(
         frame,
         position.x,
@@ -653,10 +663,10 @@ abstract final class ChartRasterizer {
         final char = dx > -dy * 2
             ? '─'
             : -dy > dx * 2
-                ? '│'
-                : sx == sy
-                    ? '╲'
-                    : '╱';
+            ? '│'
+            : sx == sy
+            ? '╲'
+            : '╱';
         if (y0 >= 0 && y0 < frame.length && x0 >= 0 && x0 < frame[y0].length) {
           frame[y0][x0] = ChartCell(char, color: color);
         }
@@ -720,9 +730,9 @@ abstract final class ChartRasterizer {
       final index = span == 0
           ? safeBins ~/ 2
           : (((sample - minValue) / span) * safeBins).floor().clamp(
-                0,
-                safeBins - 1,
-              );
+              0,
+              safeBins - 1,
+            );
       counts[index]++;
     }
     return verticalBars(
@@ -821,9 +831,11 @@ abstract final class ChartRasterizer {
         }
       }
       if (y < frame.length) {
-        for (var column = left;
-            column < left + width && column < frame[y].length;
-            column++) {
+        for (
+          var column = left;
+          column < left + width && column < frame[y].length;
+          column++
+        ) {
           frame[y][column] = ChartCell('┄', color: color);
         }
       }
@@ -878,9 +890,9 @@ abstract final class ChartRasterizer {
       return <double>[
         for (var index = 0; index < width; index++)
           values[(index * values.length / width).floor().clamp(
-                    0,
-                    values.length - 1,
-                  )]
+                0,
+                values.length - 1,
+              )]
               .toDouble(),
       ];
     }
@@ -1350,9 +1362,11 @@ class _ChartPanel extends StatelessWidget {
             softWrap: true,
             text: TextSpan(
               children: <InlineSpan>[
-                for (var index = 0;
-                    index < legend.length;
-                    index++) ...<InlineSpan>[
+                for (
+                  var index = 0;
+                  index < legend.length;
+                  index++
+                ) ...<InlineSpan>[
                   TextSpan(
                     text: '● ',
                     style: TextStyle(color: legend[index].color),
@@ -1450,10 +1464,10 @@ final class _BrailleCell {
 
 final class _BrailleCanvas {
   _BrailleCanvas(this.width, this.height)
-      : _cells = List<List<_BrailleCell>>.generate(
-          height,
-          (_) => List<_BrailleCell>.generate(width, (_) => _BrailleCell()),
-        );
+    : _cells = List<List<_BrailleCell>>.generate(
+        height,
+        (_) => List<_BrailleCell>.generate(width, (_) => _BrailleCell()),
+      );
 
   final int width;
   final int height;

@@ -11,9 +11,7 @@ class DialogTextFieldTest extends StatelessWidget {
   Widget build(BuildContext context) {
     return Navigator(
       home: const HomePage(),
-      popBehavior: const PopBehavior(
-        escapeEnabled: true,
-      ),
+      popBehavior: const PopBehavior(escapeEnabled: true),
     );
   }
 }
@@ -71,9 +69,7 @@ class _TextFieldDialogState extends State<TextFieldDialog> {
         children: [
           const Text('Dialog with TextField'),
           const SizedBox(height: 1),
-          TextField(
-            onChanged: (v) => setState(() => _value = v),
-          ),
+          TextField(onChanged: (v) => setState(() => _value = v)),
           const SizedBox(height: 1),
           Text('Value: $_value'),
           const Text('Press ESC to close'),

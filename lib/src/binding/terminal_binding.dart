@@ -10,6 +10,7 @@ import 'package:cinder/src/image/image_cleanup.dart';
 import '../backend/terminal.dart' as term;
 import '../buffer.dart' as buf;
 import '../keyboard/input_parser.dart';
+import '../keyboard/tree_keyboard_dispatch.dart';
 import '../rendering/frame_diff.dart';
 import '../rendering/mouse_hit_test.dart';
 import '../rendering/mouse_tracker.dart';
@@ -18,15 +19,14 @@ import 'hot_reload_mixin.dart';
 /// Terminal UI binding that handles terminal input/output and event loop
 class TerminalBinding extends CinderBinding
     with SchedulerBinding, HotReloadBinding {
-  TerminalBinding(
-    this.terminal, {
-    TerminalCapabilities? capabilities,
-  }) : capabilities = capabilities ??
-            TerminalCapabilities.fromEnvironment(
-              const <String, String>{},
-              stdinHasTerminal: terminal.backend.inputStream != null,
-              stdoutHasTerminal: terminal.backend.isAvailable,
-            ) {
+  TerminalBinding(this.terminal, {TerminalCapabilities? capabilities})
+    : capabilities =
+          capabilities ??
+          TerminalCapabilities.fromEnvironment(
+            const <String, String>{},
+            stdinHasTerminal: terminal.backend.inputStream != null,
+            stdoutHasTerminal: terminal.backend.isAvailable,
+          ) {
     _instance = this;
     _initializePipelineOwner();
   }
@@ -159,7 +159,8 @@ class TerminalBinding extends CinderBinding
     _statsStartTime = DateTime.now();
     _perfLogTimer = Timer.periodic(interval, (_) {
       final stats = getPerformanceStats();
-      final msg = 'PERF: fps=${stats['fps']!.toStringAsFixed(1)}, '
+      final msg =
+          'PERF: fps=${stats['fps']!.toStringAsFixed(1)}, '
           'builds=${stats['builds']!.toStringAsFixed(1)}/s, '
           'layouts=${stats['layouts']!.toStringAsFixed(1)}/s, '
           'paints=${stats['paints']!.toStringAsFixed(1)}/s';
@@ -517,6 +518,15 @@ class TerminalBinding extends CinderBinding
     pendingFrameTimer?.cancel();
     _perfLogTimer?.cancel();
     _escapeResolutionTimer?.cancel();
+    // stdin cancellation closes its file descriptor immediately on POSIX.
+    // Restore input modes while the terminal handle is still available.
+    if (capabilities.supportsRawMode) {
+      try {
+        terminal.backend.disableRawMode();
+      } catch (_) {
+        // A disconnected terminal must not prevent the remaining cleanup.
+      }
+    }
     unawaited(_inputSubscription?.cancel() ?? Future<void>.value());
     unawaited(_resizeSubscription?.cancel() ?? Future<void>.value());
     unawaited(_shutdownSubscription?.cancel() ?? Future<void>.value());
@@ -540,43 +550,42 @@ class TerminalBinding extends CinderBinding
   }
 
   void _restoreTerminalState() {
-    if (capabilities.isInteractive) {
+    void restore(void Function() callback) {
       try {
-        if (capabilities.supportsMouse) {
-          terminal.backend.writeRaw(EscapeCodes.disable.motionTracking);
-          terminal.backend.writeRaw(EscapeCodes.disable.sgrMouseMode);
-          terminal.backend.writeRaw(EscapeCodes.disable.buttonEventTracking);
-          terminal.backend.writeRaw(EscapeCodes.disable.basicMouseTracking);
-        }
-        if (capabilities.supportsBracketedPaste) {
-          terminal.backend.writeRaw(EscapeCodes.disable.bracketedPasteMode);
-        }
-        if (capabilities.supportsFocusEvents) {
-          terminal.backend.writeRaw(EscapeCodes.disable.focusReporting);
-        }
-        if (capabilities.supportsKittyKeyboard) {
-          terminal.backend.writeRaw(EscapeCodes.disable.kittyKeyboard);
-        }
-        if (capabilities.supportsModifyOtherKeys) {
-          terminal.backend.writeRaw(EscapeCodes.disable.modifyOtherKeys);
-        }
-        terminal.restoreColors();
-        terminal.showCursor();
-        if (capabilities.supportsAlternateScreen) {
-          terminal.leaveAlternateScreen();
-        }
-        terminal.flush();
+        callback();
       } catch (_) {
-        // Continue to raw-mode restoration even if the output backend failed.
+        // The output backend or TTY may already be unavailable. Continue
+        // restoring the remaining modes independently.
       }
     }
 
-    if (capabilities.supportsRawMode) {
-      try {
-        terminal.backend.disableRawMode();
-      } catch (_) {
-        // The TTY may already have disappeared during process shutdown.
+    if (capabilities.isInteractive) {
+      final sequences = <String>[
+        EscapeCodes.endSynchronizedOutput,
+        if (capabilities.supportsMouse) ...[
+          EscapeCodes.disable.motionTracking,
+          EscapeCodes.disable.sgrMouseMode,
+          EscapeCodes.disable.buttonEventTracking,
+          EscapeCodes.disable.basicMouseTracking,
+        ],
+        if (capabilities.supportsBracketedPaste)
+          EscapeCodes.disable.bracketedPasteMode,
+        if (capabilities.supportsFocusEvents)
+          EscapeCodes.disable.focusReporting,
+        if (capabilities.supportsKittyKeyboard)
+          EscapeCodes.disable.kittyKeyboard,
+        if (capabilities.supportsModifyOtherKeys)
+          EscapeCodes.disable.modifyOtherKeys,
+      ];
+      for (final sequence in sequences) {
+        restore(() => terminal.backend.writeRaw(sequence));
       }
+      restore(terminal.restoreColors);
+      restore(terminal.showCursor);
+      if (capabilities.supportsAlternateScreen) {
+        restore(terminal.leaveAlternateScreen);
+      }
+      restore(terminal.flush);
     }
   }
 
@@ -607,8 +616,14 @@ class TerminalBinding extends CinderBinding
     } catch (_) {}
 
     _restoreTerminalState();
-    disposeBinding();
-    if (identical(_instance, this)) _instance = null;
+    try {
+      terminal.backend.dispose();
+    } catch (error, stackTrace) {
+      Zone.current.handleUncaughtError(error, stackTrace);
+    } finally {
+      disposeBinding();
+      if (identical(_instance, this)) _instance = null;
+    }
   }
 
   /// Handle global debug key combinations.
@@ -689,36 +704,7 @@ class TerminalBinding extends CinderBinding
 
   /// Dispatch a keyboard event to an element and its children
   bool _dispatchKeyToElement(Element element, KeyboardEvent event) {
-    // Check if this element is a BlockFocus that's blocking
-    if (element is BlockFocusElement && element.isBlocking) {
-      // Block all keyboard events from reaching children
-      return true; // Event is handled (blocked)
-    }
-
-    // TODO: This is a hack to handle RenderTheater specially for Navigator
-    // Should be properly integrated into the render object hierarchy
-    if (element.renderObject is RenderTheater) {
-      final multiChildRenderObject = element as MultiChildRenderObjectElement;
-      if (multiChildRenderObject.children.isNotEmpty) {
-        final child = multiChildRenderObject.children.last;
-        return _dispatchKeyToElement(child, event);
-      }
-    }
-
-    // First, try to dispatch to children (depth-first)
-    bool handled = false;
-    element.visitChildren((child) {
-      if (!handled) {
-        handled = _dispatchKeyToElement(child, event);
-      }
-    });
-
-    // If no child handled it, and this element can handle keys, try it
-    if (!handled && element is FocusableElement) {
-      handled = element.handleKeyEvent(event);
-    }
-
-    return handled;
+    return dispatchKeyboardToTree(element, event);
   }
 
   /// Dispatch a mouse wheel event to scrollable RenderObjects at a specific position
@@ -935,8 +921,7 @@ class TerminalBinding extends CinderBinding
         ancestor = ancestor.parent;
       }
       return true;
-    }).toList()
-      ..sort((a, b) => a.depth.compareTo(b.depth));
+    }).toList()..sort((a, b) => a.depth.compareTo(b.depth));
   }
 
   void _applyHardwareScrollRequests(buf.Buffer previous, int screenWidth) {
@@ -957,9 +942,11 @@ class TerminalBinding extends CinderBinding
 
       terminal.write(EscapeCodes.setScrollRegion(top, bottom));
       terminal.moveCursor(0, top);
-      terminal.write(lines > 0
-          ? EscapeCodes.scrollUp(lines)
-          : EscapeCodes.scrollDown(-lines));
+      terminal.write(
+        lines > 0
+            ? EscapeCodes.scrollUp(lines)
+            : EscapeCodes.scrollDown(-lines),
+      );
       terminal.write(EscapeCodes.resetScrollRegion);
       previous.scrollRegion(top, bottom, lines);
     }
@@ -1027,13 +1014,7 @@ class TerminalBinding extends CinderBinding
         }
 
         // Handle style
-        final hasStyle = cell.style.color != null ||
-            cell.style.backgroundColor != null ||
-            cell.style.fontWeight == FontWeight.bold ||
-            cell.style.fontWeight == FontWeight.dim ||
-            cell.style.fontStyle == FontStyle.italic ||
-            cell.style.decoration?.hasUnderline == true ||
-            cell.style.reverse;
+        final hasStyle = hasVisibleTextStyle(cell.style);
 
         if (hasStyle) {
           if (currentStyle != cell.style) {
@@ -1352,12 +1333,15 @@ class TerminalBinding extends CinderBinding
 
       final dirtyPaintNodes = pipelineOwner.takeNodesNeedingPaint();
       final boundaries = _topmostDirtyBoundaries(dirtyPaintNodes);
-      final canPartialPaint = _previousBuffer != null &&
+      final canPartialPaint =
+          _previousBuffer != null &&
           !layoutWasDirty &&
           dirtyPaintNodes.isNotEmpty &&
           boundaries.length == dirtyPaintNodes.toSet().length &&
-          boundaries.every((node) =>
-              node is RenderRepaintBoundary && node.lastPaintOffset != null);
+          boundaries.every(
+            (node) =>
+                node is RenderRepaintBoundary && node.lastPaintOffset != null,
+          );
 
       final buffer = canPartialPaint
           ? _preparePartialBuffer(width, height)

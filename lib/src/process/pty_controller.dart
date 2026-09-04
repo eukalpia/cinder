@@ -8,6 +8,8 @@ import 'pty_handler.dart';
 ///
 /// This controller follows the same pattern as Flutter's [TextEditingController],
 /// providing a clean separation between the terminal's state management and UI.
+/// Unix uses the system `script` utility; Windows uses redirected process
+/// streams without native ConPTY support.
 ///
 /// Example usage:
 /// ```dart
@@ -51,6 +53,10 @@ class PtyController {
   StreamSubscription<String>? _outputSubscription;
   StreamSubscription<int>? _exitSubscription;
   final List<String> _outputBuffer = [];
+  String _partialLine = '';
+  bool _disposed = false;
+  Future<void>? _startFuture;
+  Future<void>? _disposeFuture;
   PtyStatus _status = PtyStatus.notStarted;
   int _rows = 24;
   int _columns = 80;
@@ -70,6 +76,13 @@ class PtyController {
     void Function(Object)? onError,
     this.maxBufferLines = 10000,
   }) : command = command ?? _getDefaultShell() {
+    if (maxBufferLines < 0) {
+      throw ArgumentError.value(
+        maxBufferLines,
+        'maxBufferLines',
+        'Must not be negative',
+      );
+    }
     if (onOutput != null) _outputCallbacks.add(onOutput);
     if (onExit != null) _exitCallbacks.add(onExit);
     if (onError != null) _errorCallbacks.add(onError);
@@ -90,7 +103,7 @@ class PtyController {
   /// Whether the terminal is running.
   bool get isRunning => _status == PtyStatus.running;
 
-  /// Process ID of the running terminal, or null if not running.
+  /// Process ID of the terminal transport, null before startup or after disposal.
   int? get pid => _ptyHandler?.pid;
 
   /// Exit code of the process, or null if still running.
@@ -103,73 +116,82 @@ class PtyController {
   int get columns => _columns;
 
   /// Output buffer containing recent terminal output.
-  List<String> get outputBuffer => List.unmodifiable(_outputBuffer);
+  List<String> get outputBuffer => List.unmodifiable([
+    ..._outputBuffer,
+    if (_partialLine.isNotEmpty) _partialLine,
+  ]);
 
   /// Starts the PTY process with the specified dimensions.
-  Future<void> start({
-    required int columns,
-    required int rows,
-  }) async {
-    if (_status == PtyStatus.running) {
-      throw StateError('Terminal is already running');
+  Future<void> start({required int columns, required int rows}) async {
+    if (_disposed) throw StateError('Terminal controller has been disposed');
+    if (_status == PtyStatus.starting || _status == PtyStatus.running) {
+      throw StateError('Terminal is already starting or running');
+    }
+    if (columns <= 0 || rows <= 0) {
+      throw ArgumentError('Terminal dimensions must be positive');
     }
 
+    final settled = Completer<void>();
+    _startFuture = settled.future;
     _rows = rows;
     _columns = columns;
     _exitCode = null;
+    _status = PtyStatus.starting;
 
     try {
-      _status = PtyStatus.starting;
       _notifyListeners();
-
-      // Create the PTY handler
-      _ptyHandler = PtyHandlerFactory.create(
+      await _releaseProcess();
+      if (_disposed) return;
+      final handler = PtyHandlerFactory.create(
         command: command,
         arguments: arguments,
         workingDirectory: workingDirectory,
         environment: environment,
       );
-
-      // Start the process
-      await _ptyHandler!.start(columns: columns, rows: rows);
-
-      // Subscribe to output
-      _outputSubscription = _ptyHandler!.output.listen(
+      _ptyHandler = handler;
+      _outputSubscription = handler.output.listen(
         (data) {
+          if (_disposed) return;
           _addToBuffer(data);
-          for (final callback in _outputCallbacks) {
+          for (final callback in _outputCallbacks.toList()) {
             callback(data);
           }
         },
-        onError: (error) {
-          for (final callback in _errorCallbacks) {
+        onError: (Object error) {
+          if (_disposed) return;
+          for (final callback in _errorCallbacks.toList()) {
             callback(error);
           }
         },
       );
+      await handler.start(columns: columns, rows: rows);
+      if (_disposed) return;
 
-      // Subscribe to exit
-      _exitSubscription = _ptyHandler!.exitCode.asStream().listen(
-        (code) {
-          _exitCode = code;
-          _status = PtyStatus.exited;
-          _notifyListeners();
-          for (final callback in _exitCallbacks) {
-            callback(code);
-          }
-        },
-      );
-
+      _exitSubscription = handler.exitCode.asStream().listen((code) {
+        if (_disposed || !identical(_ptyHandler, handler)) return;
+        _exitCode = code;
+        _status = PtyStatus.exited;
+        _notifyListeners();
+        for (final callback in _exitCallbacks.toList()) {
+          callback(code);
+        }
+      });
       _status = PtyStatus.running;
       _notifyListeners();
-    } catch (e) {
-      _status = PtyStatus.error;
-      _exitCode = -1;
-      _notifyListeners();
-      for (final callback in _errorCallbacks) {
-        callback(e);
+    } catch (error) {
+      await _releaseProcess();
+      if (!_disposed) {
+        _status = PtyStatus.error;
+        _exitCode = -1;
+        _notifyListeners();
+        for (final callback in _errorCallbacks.toList()) {
+          callback(error);
+        }
       }
       rethrow;
+    } finally {
+      settled.complete();
+      _startFuture = null;
     }
   }
 
@@ -189,7 +211,9 @@ class PtyController {
     _ptyHandler?.writeBytes(bytes);
   }
 
-  /// Resizes the terminal.
+  /// Updates the display dimensions and notifies the terminal transport.
+  ///
+  /// The current script/pipe transport cannot set a live PTY's window size.
   void resize(int columns, int rows) {
     if (!isRunning) return;
 
@@ -203,46 +227,42 @@ class PtyController {
   bool kill([ProcessSignal signal = ProcessSignal.sigterm]) {
     if (!isRunning) return false;
 
-    final killed = _ptyHandler?.kill(signal) ?? false;
-    if (killed) {
-      _status = PtyStatus.exited;
-      _notifyListeners();
-    }
-    return killed;
+    return _ptyHandler?.kill(signal) ?? false;
   }
 
   /// Clears the output buffer.
   void clearBuffer() {
     _outputBuffer.clear();
+    _partialLine = '';
     _notifyListeners();
   }
 
   /// Adds output to the buffer, maintaining max size.
   void _addToBuffer(String data) {
-    // Split by lines and add to buffer
-    final lines = data.split('\n');
+    final lines = (_partialLine + data).split('\n');
+    _partialLine = lines.removeLast();
     for (final line in lines) {
-      if (line.isNotEmpty || lines.length > 1) {
-        _outputBuffer.add(line);
+      _outputBuffer.add(
+        line.endsWith('\r') ? line.substring(0, line.length - 1) : line,
+      );
+    }
+    while (_outputBuffer.length + (_partialLine.isEmpty ? 0 : 1) >
+        maxBufferLines) {
+      if (_outputBuffer.isNotEmpty) {
+        _outputBuffer.removeAt(0);
+      } else {
+        _partialLine = '';
       }
     }
-
-    // Trim buffer if needed
-    while (_outputBuffer.length > maxBufferLines) {
-      _outputBuffer.removeAt(0);
-    }
-
     _notifyListeners();
   }
 
-  /// Restarts the terminal with the same configuration.
+  /// Restarts the process while retaining callbacks, listeners, and dimensions.
   Future<void> restart() async {
-    if (isRunning) {
-      kill();
-      await Future.delayed(const Duration(milliseconds: 100));
-    }
-
-    await dispose();
+    if (_disposed) throw StateError('Terminal controller has been disposed');
+    await _startFuture;
+    _status = PtyStatus.notStarted;
+    await _releaseProcess();
     await start(columns: _columns, rows: _rows);
   }
 
@@ -288,19 +308,35 @@ class PtyController {
 
   /// Notifies all listeners of a change.
   void _notifyListeners() {
-    for (final listener in _listeners) {
+    for (final listener in _listeners.toList()) {
       listener();
     }
   }
 
   /// Disposes of the controller and releases all resources.
-  Future<void> dispose() async {
+  Future<void> dispose() {
+    _disposed = true;
+    _status = PtyStatus.disposed;
+    return _disposeFuture ??= _dispose();
+  }
+
+  Future<void> _dispose() async {
+    await _startFuture;
+    await _releaseProcess();
+    _listeners.clear();
+    _outputCallbacks.clear();
+    _exitCallbacks.clear();
+    _errorCallbacks.clear();
+  }
+
+  Future<void> _releaseProcess() async {
+    final handler = _ptyHandler;
+    _ptyHandler = null;
     await _outputSubscription?.cancel();
     await _exitSubscription?.cancel();
-    await _ptyHandler?.dispose();
-    _ptyHandler = null;
-    _status = PtyStatus.disposed;
-    _listeners.clear();
+    _outputSubscription = null;
+    _exitSubscription = null;
+    await handler?.dispose();
   }
 }
 

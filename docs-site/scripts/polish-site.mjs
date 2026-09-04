@@ -3,6 +3,7 @@ import { access, mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
+import { findPackageRoot } from './package-root.mjs';
 
 const execFileAsync = promisify(execFile);
 const scriptFile = fileURLToPath(import.meta.url);
@@ -99,6 +100,10 @@ async function main() {
       .map(([mode, count]) => `${mode}=${count}`)
       .join(', ')}.`,
   );
+  if (counts.has('build-failed')) {
+    console.error('Browser compilation failed; inspect public/generated/examples/*.build-error.txt.');
+    process.exitCode = 1;
+  }
 }
 
 async function compileOne(
@@ -108,7 +113,7 @@ async function compileOne(
   useSourcePackage,
 ) {
   const packageRoot = useSourcePackage
-    ? packageRootFor(example.repositoryPath)
+    ? await findPackageRoot(sourceFile, repositoryRoot)
     : repositoryRoot;
   const packageScoped = packageRoot !== repositoryRoot;
   const currentLauncherRoot = packageScoped
@@ -188,13 +193,6 @@ async function preparePackageRoot(packageRoot) {
   });
 }
 
-function packageRootFor(repositoryPath) {
-  const match = /^packages\/([^/]+)\//.exec(repositoryPath);
-  return match
-    ? path.join(repositoryRoot, 'packages', match[1])
-    : repositoryRoot;
-}
-
 function isPortableCandidate(source) {
   if (/(?:import|export)\s+['"]dart:(?:io|ffi|isolate)['"]/.test(source)) return false;
   if (/\b(?:PtyController|FfmpegProcessBackend|MediaController)\b/.test(source)) {
@@ -218,7 +216,7 @@ function runtimeNoteFor(mode) {
     case 'build-failed':
       return 'The example is indexed, but the current Dart web compiler did not produce a runnable bundle.';
     default:
-      return 'Runs directly from repository Dart source through Cinder WebBackend.';
+      return 'Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal.';
   }
 }
 

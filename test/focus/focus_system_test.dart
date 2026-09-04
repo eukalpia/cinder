@@ -56,10 +56,7 @@ void main() {
                 autofocus: true,
                 child: _focusLabel('first'),
               ),
-              Focus(
-                focusNode: second,
-                child: _focusLabel('second'),
-              ),
+              Focus(focusNode: second, child: _focusLabel('second')),
             ],
           ),
         ),
@@ -86,42 +83,48 @@ void main() {
     second.dispose();
   });
 
-  test('skipTraversal is skipped but explicit focus remains available',
-      () async {
-    final first = FocusNode(debugLabel: 'first');
-    final skipped = FocusNode(debugLabel: 'skipped');
-    final last = FocusNode(debugLabel: 'last');
+  test(
+    'skipTraversal is skipped but explicit focus remains available',
+    () async {
+      final first = FocusNode(debugLabel: 'first');
+      final skipped = FocusNode(debugLabel: 'skipped');
+      final last = FocusNode(debugLabel: 'last');
 
-    await testCinder('skip traversal', (tester) async {
-      await tester.pumpWidget(
-        FocusScope(
-          child: Row(
-            children: [
-              Focus(focusNode: first, autofocus: true, child: const Text('1')),
-              Focus(
-                focusNode: skipped,
-                skipTraversal: true,
-                child: const Text('2'),
-              ),
-              Focus(focusNode: last, child: const Text('3')),
-            ],
+      await testCinder('skip traversal', (tester) async {
+        await tester.pumpWidget(
+          FocusScope(
+            child: Row(
+              children: [
+                Focus(
+                  focusNode: first,
+                  autofocus: true,
+                  child: const Text('1'),
+                ),
+                Focus(
+                  focusNode: skipped,
+                  skipTraversal: true,
+                  child: const Text('2'),
+                ),
+                Focus(focusNode: last, child: const Text('3')),
+              ],
+            ),
           ),
-        ),
-      );
-      await tester.pump();
+        );
+        await tester.pump();
 
-      await tester.sendTab();
-      expect(last.hasPrimaryFocus, isTrue);
+        await tester.sendTab();
+        expect(last.hasPrimaryFocus, isTrue);
 
-      skipped.requestFocus();
-      await tester.pump();
-      expect(skipped.hasPrimaryFocus, isTrue);
-    });
+        skipped.requestFocus();
+        await tester.pump();
+        expect(skipped.hasPrimaryFocus, isTrue);
+      });
 
-    first.dispose();
-    skipped.dispose();
-    last.dispose();
-  });
+      first.dispose();
+      skipped.dispose();
+      last.dispose();
+    },
+  );
 
   test('scope autofocus restores its first traversable descendant', () async {
     final node = FocusNode(debugLabel: 'scoped child');
@@ -130,10 +133,7 @@ void main() {
       await tester.pumpWidget(
         FocusScope(
           autofocus: true,
-          child: Focus(
-            focusNode: node,
-            child: _focusLabel('child'),
-          ),
+          child: Focus(focusNode: node, child: _focusLabel('child')),
         ),
       );
       await tester.pump();

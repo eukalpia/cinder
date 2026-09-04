@@ -32,10 +32,10 @@ class PlainOutputResult {
   String get text => lines.join('\n');
 
   Map<String, Object?> toJson() => <String, Object?>{
-        'width': size.width.toInt(),
-        'height': size.height.toInt(),
-        'lines': lines,
-      };
+    'width': size.width.toInt(),
+    'height': size.height.toInt(),
+    'lines': lines,
+  };
 }
 
 /// Renders [widget] in memory without raw mode, alternate screen, or ANSI I/O.
@@ -99,8 +99,9 @@ class _PlainOutputBinding extends CinderBinding with SchedulerBinding {
   }
 
   Future<void> pump() async {
-    final timestamp =
-        Duration(microseconds: DateTime.now().microsecondsSinceEpoch);
+    final timestamp = Duration(
+      microseconds: DateTime.now().microsecondsSinceEpoch,
+    );
     handleBeginFrame(timestamp);
     await Future<void>.delayed(Duration.zero);
   }
@@ -136,8 +137,10 @@ class _PlainOutputBinding extends CinderBinding with SchedulerBinding {
   }
 
   void shutdown() {
-    rootElement?.deactivate();
-    rootElement?.unmount();
-    disposeBinding();
+    try {
+      detachRootWidget();
+    } finally {
+      disposeBinding();
+    }
   }
 }

@@ -87,12 +87,14 @@ List<_AnsiColorEntry> _buildAnsi256Palette() {
         final rr = _ansiCubeValue(r);
         final gg = _ansiCubeValue(g);
         final bb = _ansiCubeValue(b);
-        entries.add(_AnsiColorEntry(
-          index,
-          _srgb8ToLinear(rr),
-          _srgb8ToLinear(gg),
-          _srgb8ToLinear(bb),
-        ));
+        entries.add(
+          _AnsiColorEntry(
+            index,
+            _srgb8ToLinear(rr),
+            _srgb8ToLinear(gg),
+            _srgb8ToLinear(bb),
+          ),
+        );
       }
     }
   }

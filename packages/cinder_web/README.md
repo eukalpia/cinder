@@ -1,16 +1,29 @@
-# cinder_web
+# Cinder Flutter web host
 
-A new Flutter project.
+This optional Flutter application hosts a compiled Cinder guest using the Dart
+`xterm` widget and `WebBackend` bridge. The public documentation site uses its own
+JavaScript xterm.js host under `docs-site/`.
 
-## Getting Started
+The host and guest are separate builds. From this directory:
 
-This project is a starting point for a Flutter application.
+```bash
+flutter pub get
+cd example
+dart pub get
+dart compile js lib/main.dart -O2 -o ../web/app.js
+cd ..
+flutter run -d chrome
+```
 
-A few resources to get you started if this is your first Flutter project:
+For a static export, run `flutter build web` after compiling the guest. Serve
+`build/web/` over HTTP. For deployment under a subdirectory, pass its full path
+with a trailing slash, for example `flutter build web --base-href /demo/`.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+By default the host loads `app.js` relative to the page. The `?app=` query
+parameter can select another compiled guest script. Only use guest scripts you
+trust; they execute in the host page.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+The host forwards terminal output, keyboard input, and resize events through
+`WebBackend`, and requests guest shutdown when the widget is disposed.
+
+Validate the wrapper with `flutter analyze` and `flutter build web`.

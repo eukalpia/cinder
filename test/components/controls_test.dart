@@ -6,11 +6,7 @@ void main() {
     var presses = 0;
     await testCinder('button keyboard activation', (tester) async {
       await tester.pumpWidget(
-        Button.text(
-          'Run',
-          autofocus: true,
-          onPressed: () => presses++,
-        ),
+        Button.text('Run', autofocus: true, onPressed: () => presses++),
       );
       await tester.sendKey(LogicalKey.enter);
       expect(presses, 1);

@@ -8,7 +8,7 @@ import 'package:cinder/src/backend/stdio_backend.dart';
 import 'package:cinder/src/backend/terminal.dart' as term;
 
 (File?, bool) _useShellMode() {
-// Check for shell mode
+  // Check for shell mode
   final shellHandleFile = File(getShellHandlePath());
   if (shellHandleFile.existsSync() case false) {
     return (null, false);
@@ -77,42 +77,51 @@ Future<void> _runApp(
       stderr.writeln('Failed to start log server: $e');
     }
 
-    await runZoned(() async {
-      final terminal = term.Terminal(backend);
-      final usesNativeStdio = backend is StdioBackend;
-      final capabilities = TerminalCapabilities.fromEnvironment(
-        Platform.environment,
-        stdinHasTerminal: isShellMode || !usesNativeStdio || stdin.hasTerminal,
-        stdoutHasTerminal:
-            isShellMode || !usesNativeStdio || stdout.hasTerminal,
-      );
-      binding = TerminalBinding(terminal, capabilities: capabilities);
+    await runZoned(
+      () async {
+        final terminal = term.Terminal(backend);
+        final usesNativeStdio = backend is StdioBackend;
+        final capabilities = TerminalCapabilities.fromEnvironment(
+          Platform.environment,
+          stdinHasTerminal:
+              isShellMode || !usesNativeStdio || stdin.hasTerminal,
+          stdoutHasTerminal:
+              isShellMode || !usesNativeStdio || stdout.hasTerminal,
+        );
+        binding = TerminalBinding(terminal, capabilities: capabilities);
 
-      binding!.initialize();
-      binding!.attachRootWidget(app);
+        binding!.initialize();
+        binding!.attachRootWidget(app);
 
-      if (enableHotReload && !bool.fromEnvironment('dart.vm.product')) {
-        await binding!.initializeHotReload();
-      }
+        if (enableHotReload && !bool.fromEnvironment('dart.vm.product')) {
+          await binding!.initializeHotReload();
+        }
 
-      await binding!.runEventLoop();
-    },
-        zoneSpecification: ZoneSpecification(
-          print: (Zone self, ZoneDelegate parent, Zone zone, String message) {
-            logger?.log(message);
-            if (isShellMode) {
-              parent.print(zone, message);
-            }
-          },
-          handleUncaughtError: (Zone self, ZoneDelegate parent, Zone zone,
-              Object error, StackTrace stackTrace) {
-            final errorMessage = 'ERROR: $error\n$stackTrace';
-            logger?.log(errorMessage);
-            if (isShellMode) {
-              stderr.writeln(errorMessage);
-            }
-          },
-        ));
+        await binding!.runEventLoop();
+      },
+      zoneSpecification: ZoneSpecification(
+        print: (Zone self, ZoneDelegate parent, Zone zone, String message) {
+          logger?.log(message);
+          if (isShellMode) {
+            parent.print(zone, message);
+          }
+        },
+        handleUncaughtError:
+            (
+              Zone self,
+              ZoneDelegate parent,
+              Zone zone,
+              Object error,
+              StackTrace stackTrace,
+            ) {
+              final errorMessage = 'ERROR: $error\n$stackTrace';
+              logger?.log(errorMessage);
+              if (isShellMode) {
+                stderr.writeln(errorMessage);
+              }
+            },
+      ),
+    );
   } catch (e) {
     if (isShellMode) {
       stderr.writeln('Shell mode error: $e');

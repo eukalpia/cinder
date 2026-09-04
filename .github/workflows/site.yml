@@ -1,0 +1,57 @@
+name: Documentation site
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      NEXT_PUBLIC_BASE_PATH: /cinder
+      NEXT_PUBLIC_SITE_ORIGIN: https://eukalpia.github.io
+    defaults:
+      run:
+        working-directory: docs-site
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: 3.12.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: docs-site/package-lock.json
+      - name: Resolve Dart dependencies
+        run: dart pub get
+        working-directory: .
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run build
+      - run: npm run test:routes
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:browser
+      - run: npm audit --audit-level=low
+      - name: Upload failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: site-diagnostics
+          path: |
+            docs-site/test-results/
+            docs-site/playwright-report/
+            docs-site/public/generated/examples/*.build-error.txt
+          if-no-files-found: ignore
+      - name: Upload static export
+        uses: actions/upload-artifact@v4
+        with:
+          name: cinder-documentation-site
+          path: docs-site/out/
+          include-hidden-files: true

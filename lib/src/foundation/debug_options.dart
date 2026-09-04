@@ -57,10 +57,10 @@ final class CinderDebugOptions {
 
   @override
   int get hashCode => Object.hash(
-        showPerformanceOverlay,
-        showRepaintRegions,
-        showFrameTimings,
-        emitTimelineEvents,
-        detectLayoutThrashing,
-      );
+    showPerformanceOverlay,
+    showRepaintRegions,
+    showFrameTimings,
+    emitTimelineEvents,
+    detectLayoutThrashing,
+  );
 }

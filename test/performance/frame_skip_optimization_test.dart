@@ -14,30 +14,26 @@ import 'package:test/test.dart';
 void main() {
   group('Frame Skip Optimization', () {
     test('setState marks elements dirty and triggers rebuild', () async {
-      await testCinder(
-        'setState marks dirty',
-        (tester) async {
-          await tester.pumpWidget(const _BuildCounter());
+      await testCinder('setState marks dirty', (tester) async {
+        await tester.pumpWidget(const _BuildCounter());
 
-          expect(tester.terminalState, containsText('Build count: 1'));
+        expect(tester.terminalState, containsText('Build count: 1'));
 
-          // Get the state and trigger rebuild
-          final state = _BuildCounter.lastState!;
-          state.triggerRebuild();
+        // Get the state and trigger rebuild
+        final state = _BuildCounter.lastState!;
+        state.triggerRebuild();
 
-          // Pump to process the rebuild
-          await tester.pump();
+        // Pump to process the rebuild
+        await tester.pump();
 
-          expect(tester.terminalState, containsText('Build count: 2'));
-        },
-      );
+        expect(tester.terminalState, containsText('Build count: 2'));
+      });
     });
 
-    test('static widget does not cause rebuilds on subsequent frames',
-        () async {
-      await testCinder(
-        'static no rebuilds',
-        (tester) async {
+    test(
+      'static widget does not cause rebuilds on subsequent frames',
+      () async {
+        await testCinder('static no rebuilds', (tester) async {
           await tester.pumpWidget(const _BuildCounter());
 
           expect(tester.terminalState, containsText('Build count: 1'));
@@ -49,125 +45,112 @@ void main() {
 
           // Build count should still be 1 - no unnecessary rebuilds
           expect(tester.terminalState, containsText('Build count: 1'));
-        },
-      );
-    });
+        });
+      },
+    );
 
     test('timer-based animation only rebuilds when state changes', () async {
-      await testCinder(
-        'timer rebuilds only on change',
-        (tester) async {
-          await tester.pumpWidget(const _TimerCounter());
+      await testCinder('timer rebuilds only on change', (tester) async {
+        await tester.pumpWidget(const _TimerCounter());
 
-          expect(tester.terminalState, containsText('Value: 0'));
+        expect(tester.terminalState, containsText('Value: 0'));
 
-          // Wait for timer to tick a few times
-          await Future.delayed(const Duration(milliseconds: 350));
-          await tester.pump();
+        // Wait for timer to tick a few times
+        await Future.delayed(const Duration(milliseconds: 350));
+        await tester.pump();
 
-          // Value should have increased
-          final state = _TimerCounter.lastState!;
-          expect(state.value, greaterThan(0));
+        // Value should have increased
+        final state = _TimerCounter.lastState!;
+        expect(state.value, greaterThan(0));
 
-          // Stop the timer
-          state.stopTimer();
-          final valueAfterStop = state.value;
-          final buildCountAfterStop = state.buildCount;
+        // Stop the timer
+        state.stopTimer();
+        final valueAfterStop = state.value;
+        final buildCountAfterStop = state.buildCount;
 
-          // Pump more frames - should NOT rebuild since timer is stopped
-          await tester.pump();
-          await tester.pump();
-          await Future.delayed(const Duration(milliseconds: 150));
-          await tester.pump();
+        // Pump more frames - should NOT rebuild since timer is stopped
+        await tester.pump();
+        await tester.pump();
+        await Future.delayed(const Duration(milliseconds: 150));
+        await tester.pump();
 
-          expect(state.value, equals(valueAfterStop));
-          expect(state.buildCount, equals(buildCountAfterStop));
-        },
-      );
+        expect(state.value, equals(valueAfterStop));
+        expect(state.buildCount, equals(buildCountAfterStop));
+      });
     });
 
     test('unchanged widget tree reuses previous frame', () async {
-      await testCinder(
-        'unchanged reuses frame',
-        (tester) async {
-          await tester.pumpWidget(const Text('Static content'));
+      await testCinder('unchanged reuses frame', (tester) async {
+        await tester.pumpWidget(const Text('Static content'));
 
-          // Get initial state as string
-          final initialOutput = tester.terminalState.toString();
+        // Get initial state as string
+        final initialOutput = tester.terminalState.toString();
 
-          // Pump more frames
-          await tester.pump();
-          await tester.pump();
+        // Pump more frames
+        await tester.pump();
+        await tester.pump();
 
-          // Output should be identical (frame was skipped, buffer reused)
-          expect(tester.terminalState.toString(), equals(initialOutput));
-        },
-      );
+        // Output should be identical (frame was skipped, buffer reused)
+        expect(tester.terminalState.toString(), equals(initialOutput));
+      });
     });
 
     test('nested widgets only rebuild when their state changes', () async {
-      await testCinder(
-        'nested rebuild isolation',
-        (tester) async {
-          await tester.pumpWidget(const _NestedCounters());
+      await testCinder('nested rebuild isolation', (tester) async {
+        await tester.pumpWidget(const _NestedCounters());
 
-          expect(tester.terminalState, containsText('Outer: 1'));
-          expect(tester.terminalState, containsText('Inner: 1'));
+        expect(tester.terminalState, containsText('Outer: 1'));
+        expect(tester.terminalState, containsText('Inner: 1'));
 
-          // Trigger only inner rebuild
-          final innerState = _InnerCounter.lastState!;
-          innerState.triggerRebuild();
-          await tester.pump();
+        // Trigger only inner rebuild
+        final innerState = _InnerCounter.lastState!;
+        innerState.triggerRebuild();
+        await tester.pump();
 
-          // Outer should NOT have rebuilt
-          expect(tester.terminalState, containsText('Outer: 1'));
-          // Inner should have rebuilt
-          expect(tester.terminalState, containsText('Inner: 2'));
-        },
-      );
+        // Outer should NOT have rebuilt
+        expect(tester.terminalState, containsText('Outer: 1'));
+        // Inner should have rebuilt
+        expect(tester.terminalState, containsText('Inner: 2'));
+      });
     });
   });
 
   group('Frame Skip Regression Prevention', () {
     test('spinner widget causes rebuilds only when animating', () async {
-      await testCinder(
-        'spinner rebuild behavior',
-        (tester) async {
-          await tester.pumpWidget(const _AnimatingSpinner());
+      await testCinder('spinner rebuild behavior', (tester) async {
+        await tester.pumpWidget(const _AnimatingSpinner());
 
-          final state = _AnimatingSpinner.lastState!;
-          expect(state.buildCount, equals(1));
+        final state = _AnimatingSpinner.lastState!;
+        expect(state.buildCount, equals(1));
 
-          // Wait for some animation frames
-          await Future.delayed(const Duration(milliseconds: 350));
-          await tester.pump();
+        // Wait for some animation frames
+        await Future.delayed(const Duration(milliseconds: 350));
+        await tester.pump();
 
-          final animatingBuildCount = state.buildCount;
-          expect(animatingBuildCount, greaterThan(1));
+        final animatingBuildCount = state.buildCount;
+        expect(animatingBuildCount, greaterThan(1));
 
-          // Stop the animation
-          state.stopAnimation();
-          await tester.pump();
+        // Stop the animation
+        state.stopAnimation();
+        await tester.pump();
 
-          final stoppedBuildCount = state.buildCount;
+        final stoppedBuildCount = state.buildCount;
 
-          // Pump more frames - should NOT rebuild
-          await tester.pump();
-          await tester.pump();
-          await Future.delayed(const Duration(milliseconds: 150));
-          await tester.pump();
+        // Pump more frames - should NOT rebuild
+        await tester.pump();
+        await tester.pump();
+        await Future.delayed(const Duration(milliseconds: 150));
+        await tester.pump();
 
-          // Build count should be same as when stopped
-          expect(state.buildCount, equals(stoppedBuildCount));
-        },
-      );
+        // Build count should be same as when stopped
+        expect(state.buildCount, equals(stoppedBuildCount));
+      });
     });
 
-    test('high-frequency setState calls are batched into single frame',
-        () async {
-      await testCinder(
-        'frame batching',
-        (tester) async {
+    test(
+      'high-frequency setState calls are batched into single frame',
+      () async {
+        await testCinder('frame batching', (tester) async {
           await tester.pumpWidget(const _BuildCounter());
 
           expect(tester.terminalState, containsText('Build count: 1'));
@@ -184,37 +167,33 @@ void main() {
 
           // Should have built only twice total (initial + 1 batch)
           expect(state.buildCount, equals(2));
-        },
-      );
-    });
+        });
+      },
+    );
 
     test('frame skip works with complex widget tree', () async {
-      await testCinder(
-        'complex tree skip',
-        (tester) async {
-          _ComplexTreeTracker.reset();
+      await testCinder('complex tree skip', (tester) async {
+        _ComplexTreeTracker.reset();
 
-          await tester.pumpWidget(const _ComplexTree());
+        await tester.pumpWidget(const _ComplexTree());
 
-          // Count initial builds
-          final initialBuilds = _ComplexTreeTracker.totalBuilds;
-          expect(initialBuilds, greaterThan(0));
+        // Count initial builds
+        final initialBuilds = _ComplexTreeTracker.totalBuilds;
+        expect(initialBuilds, greaterThan(0));
 
-          // Pump frames - no rebuilds should occur
-          await tester.pump();
-          await tester.pump();
-          await tester.pump();
+        // Pump frames - no rebuilds should occur
+        await tester.pump();
+        await tester.pump();
+        await tester.pump();
 
-          expect(_ComplexTreeTracker.totalBuilds, equals(initialBuilds));
-        },
-      );
+        expect(_ComplexTreeTracker.totalBuilds, equals(initialBuilds));
+      });
     });
 
-    test('multiple independent stateful widgets do not affect each other',
-        () async {
-      await testCinder(
-        'independent widgets',
-        (tester) async {
+    test(
+      'multiple independent stateful widgets do not affect each other',
+      () async {
+        await testCinder('independent widgets', (tester) async {
           await tester.pumpWidget(const _TwoIndependentCounters());
 
           final stateA = _CounterA.lastState!;
@@ -238,38 +217,35 @@ void main() {
           // B rebuilt, A should not
           expect(stateA.buildCount, equals(2));
           expect(stateB.buildCount, equals(2));
-        },
-      );
-    });
+        });
+      },
+    );
 
     test('frame skip after animation completes', () async {
-      await testCinder(
-        'post animation skip',
-        (tester) async {
-          await tester.pumpWidget(const _AnimatingSpinner());
+      await testCinder('post animation skip', (tester) async {
+        await tester.pumpWidget(const _AnimatingSpinner());
 
-          final state = _AnimatingSpinner.lastState!;
+        final state = _AnimatingSpinner.lastState!;
 
-          // Let animation run
-          await Future.delayed(const Duration(milliseconds: 250));
+        // Let animation run
+        await Future.delayed(const Duration(milliseconds: 250));
+        await tester.pump();
+
+        // Stop animation
+        state.stopAnimation();
+        await tester.pump();
+
+        final buildCountAfterStop = state.buildCount;
+
+        // Wait and pump multiple times - no rebuilds should happen
+        for (int i = 0; i < 5; i++) {
+          await Future.delayed(const Duration(milliseconds: 50));
           await tester.pump();
+        }
 
-          // Stop animation
-          state.stopAnimation();
-          await tester.pump();
-
-          final buildCountAfterStop = state.buildCount;
-
-          // Wait and pump multiple times - no rebuilds should happen
-          for (int i = 0; i < 5; i++) {
-            await Future.delayed(const Duration(milliseconds: 50));
-            await tester.pump();
-          }
-
-          // Build count should not have increased
-          expect(state.buildCount, equals(buildCountAfterStop));
-        },
-      );
+        // Build count should not have increased
+        expect(state.buildCount, equals(buildCountAfterStop));
+      });
     });
   });
 }
@@ -374,10 +350,7 @@ class _NestedCountersState extends State<_NestedCounters> {
   Widget build(BuildContext context) {
     outerBuildCount++;
     return Column(
-      children: [
-        Text('Outer: $outerBuildCount'),
-        const _InnerCounter(),
-      ],
+      children: [Text('Outer: $outerBuildCount'), const _InnerCounter()],
     );
   }
 }
@@ -484,19 +457,23 @@ class _ComplexTree extends StatelessWidget {
     return Column(
       children: [
         for (int i = 0; i < 10; i++)
-          Builder(builder: (context) {
-            _ComplexTreeTracker.recordBuild();
-            return Row(
-              children: [
-                Text('Row $i'),
-                for (int j = 0; j < 5; j++)
-                  Builder(builder: (context) {
-                    _ComplexTreeTracker.recordBuild();
-                    return Text(' Cell $j');
-                  }),
-              ],
-            );
-          }),
+          Builder(
+            builder: (context) {
+              _ComplexTreeTracker.recordBuild();
+              return Row(
+                children: [
+                  Text('Row $i'),
+                  for (int j = 0; j < 5; j++)
+                    Builder(
+                      builder: (context) {
+                        _ComplexTreeTracker.recordBuild();
+                        return Text(' Cell $j');
+                      },
+                    ),
+                ],
+              );
+            },
+          ),
       ],
     );
   }
@@ -508,12 +485,7 @@ class _TwoIndependentCounters extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: const [
-        _CounterA(),
-        _CounterB(),
-      ],
-    );
+    return Column(children: const [_CounterA(), _CounterB()]);
   }
 }
 

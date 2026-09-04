@@ -20,8 +20,10 @@ String getCinderDirectory() {
 
   // Get current working directory and create a hash
   final proj = getProjectDirectory();
-  final projHash =
-      sha256.convert(utf8.encode(proj)).toString().substring(0, 16);
+  final projHash = sha256
+      .convert(utf8.encode(proj))
+      .toString()
+      .substring(0, 16);
 
   // Return path: ~/.cinder/<hash>/
   return p.join(home, '.cinder', projHash);

@@ -56,9 +56,11 @@ class Dialog extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: <Widget>[
-                for (var index = 0;
-                    index < actions.length;
-                    index++) ...<Widget>[
+                for (
+                  var index = 0;
+                  index < actions.length;
+                  index++
+                ) ...<Widget>[
                   if (index > 0) const SizedBox(width: 1),
                   actions[index],
                 ],
@@ -161,15 +163,16 @@ class Menu extends StatelessWidget {
                 autofocus: autofocus && index == 0,
                 onPressed: items[index].onSelected,
                 style: ButtonStyle(
-                  borderColor:
-                      WidgetStateProperty.all<Color?>(theme.outlineVariant),
+                  borderColor: WidgetStateProperty.all<Color?>(
+                    theme.outlineVariant,
+                  ),
                   foregroundColor: WidgetStateProperty.resolveWith<Color?>(
                     (states) => items[index].destructive
                         ? theme.error
                         : states.contains(WidgetState.focused) ||
-                                states.contains(WidgetState.hovered)
-                            ? theme.onPrimary
-                            : theme.onSurface,
+                              states.contains(WidgetState.hovered)
+                        ? theme.onPrimary
+                        : theme.onSurface,
                   ),
                   padding: EdgeInsets.zero,
                   borderStyle: BoxBorderStyle.none,
@@ -215,16 +218,13 @@ class Tabs extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final safeIndex =
-        children.isEmpty ? 0 : selectedIndex.clamp(0, children.length - 1);
+    final safeIndex = children.isEmpty
+        ? 0
+        : selectedIndex.clamp(0, children.length - 1);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        TabBar(
-          tabs: tabs,
-          selectedIndex: safeIndex,
-          onSelected: onSelected,
-        ),
+        TabBar(tabs: tabs, selectedIndex: safeIndex, onSelected: onSelected),
         SizedBox(height: spacing),
         if (children.isNotEmpty) Expanded(child: children[safeIndex]),
       ],

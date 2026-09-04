@@ -6,157 +6,126 @@ import 'package:cinder_cli/src/deps/fs.dart';
 import 'package:cinder_cli/src/deps/log.dart';
 import 'package:cinder_cli/utils/cli_command.dart';
 
-/// A broadcast stream of the stdin stream.
-// ignore: unnecessary_late
-late final Stream<List<int>> _stdinStream = stdin.asBroadcastStream();
-StreamSubscription? _clientSubscription;
-
 class ShellCommand extends CliCommand {
   ShellCommand();
 
   @override
-  String get description => '''
-Start a cinder shell server that cinder apps can render into. This allows running cinder apps from IDEs with debugger support.
-
-This allows running cinder apps from IDEs with debugger support.''';
+  String get description =>
+      'Start a Cinder shell that apps can render into from an IDE or debugger.';
 
   @override
   String get name => 'shell';
 
   @override
   Future<int> run() async {
+    if (Platform.isWindows) {
+      log('The Cinder shell requires Unix domain sockets on macOS or Linux.');
+      return 1;
+    }
+
     log('Starting cinder shell server...');
-
-    // Create global cinder directory for this project
     await ensureCinderDirectoryExists();
-
-    // Create a Unix domain socket
     final socketPath = getShellSocketPath();
     final socketFile = fs.file(socketPath);
-    if (await socketFile.exists()) {
-      await socketFile.delete(); // Remove stale socket
+    if (await fs.type(socketPath) != FileSystemEntityType.notFound) {
+      await socketFile.delete();
     }
 
     final server = await ServerSocket.bind(
       InternetAddress(socketPath, type: InternetAddressType.unix),
       0,
     );
-
-    // Write socket path to handle file
     final handleFile = fs.file(getShellHandlePath());
-    await handleFile.writeAsString(socketPath);
+    final stopped = Completer<void>();
+    Socket? activeClient;
+    Future<void>? clientTask;
+    StreamSubscription<Socket>? serverSubscription;
+    StreamSubscription<List<int>>? inputSubscription;
+    final signalSubscriptions = <StreamSubscription<ProcessSignal>>[];
 
-    log('Shell server ready at: $socketPath');
-    log('Waiting for cinder app to connect...');
-    log('Press Ctrl+C to stop the shell.');
-
-    try {
-      if (stdin.echoMode) stdin.echoMode = false;
-      if (stdin.lineMode) stdin.lineMode = false;
-    } catch (_) {}
-
-    _cleanUpOnQuit();
+    void stop() {
+      if (!stopped.isCompleted) stopped.complete();
+    }
 
     try {
-      _clientSubscription = server.listen((client) async {
-        await _handleClient(client);
-
-        // exit alternate screen
-        stdout.write(EscapeCodes.mainBuffer);
-
-        // TODO(mrgnhnt): User is required to ctrl+c twice to exit the program.. why?
-      });
-
-      await _clientSubscription?.asFuture();
-    } finally {
-      await server.close();
-      if (await handleFile.exists()) {
-        await handleFile.delete();
+      await handleFile.writeAsString(socketPath);
+      for (final signal in [ProcessSignal.sigint, ProcessSignal.sigterm]) {
+        signalSubscriptions.add(signal.watch().listen((_) => stop()));
       }
-      if (await socketFile.exists()) {
+      if (stdin.hasTerminal) {
+        stdin.echoMode = false;
+        stdin.lineMode = false;
+      }
+      inputSubscription = stdin.listen((data) {
+        if (data.contains(3)) {
+          stop();
+        } else {
+          activeClient?.add(data);
+        }
+      });
+      serverSubscription = server.listen(
+        (client) {
+          if (activeClient != null || stopped.isCompleted) {
+            client.destroy();
+            return;
+          }
+          activeClient = client;
+          clientTask = _handleClient(client)
+              .catchError((Object error) {
+                stderr.writeln('Shell client disconnected: $error');
+              })
+              .whenComplete(() {
+                client.destroy();
+                activeClient = null;
+                if (stdout.hasTerminal) stdout.write(EscapeCodes.mainBuffer);
+              });
+        },
+        onError: stopped.completeError,
+        onDone: stop,
+      );
+
+      log('Shell server ready at: $socketPath');
+      log('Waiting for cinder app to connect...');
+      log('Press Ctrl+C to stop the shell.');
+      await stopped.future;
+    } finally {
+      await serverSubscription?.cancel();
+      await server.close();
+      activeClient?.destroy();
+      await clientTask;
+      await inputSubscription?.cancel();
+      for (final subscription in signalSubscriptions) {
+        await subscription.cancel();
+      }
+      if (stdout.hasTerminal) {
+        stdout.write(EscapeCodes.disable.values.join(''));
+        stdout.write(EscapeCodes.mainBuffer);
+        stdout.write(EscapeCodes.showCursor);
+      }
+      if (stdin.hasTerminal) {
+        stdin.echoMode = true;
+        stdin.lineMode = true;
+      }
+      if (await handleFile.exists()) await handleFile.delete();
+      if (await fs.type(socketPath) != FileSystemEntityType.notFound) {
         await socketFile.delete();
       }
     }
-
     return 0;
   }
 
-  void _cleanUpOnQuit() {
-    StreamSubscription? sigintSubscription;
-    StreamSubscription? sigtermSubscription;
-
-    void clean() {
-      _clientSubscription?.cancel();
-      sigintSubscription?.cancel();
-      sigtermSubscription?.cancel();
-
-      // IMPORTANT: Disable mouse tracking and bracketed paste BEFORE leaving alternate screen
-      // This ensures the terminal properly processes the disable commands
-      stdout.write(EscapeCodes.disable.motionTracking);
-      stdout.write(EscapeCodes.disable.sgrMouseMode);
-      stdout.write(EscapeCodes.disable.buttonEventTracking);
-      stdout.write(EscapeCodes.disable.basicMouseTracking);
-
-      stdout.write(EscapeCodes.showCursor);
-
-      try {
-        if (!stdin.echoMode) stdin.echoMode = true;
-        if (!stdin.lineMode) stdin.lineMode = true;
-      } catch (_) {}
-    }
-
-    // Forward signals to child process
-    sigintSubscription = ProcessSignal.sigint.watch().listen((_) {
-      clean();
-    });
-
-    if (Platform.isMacOS || Platform.isLinux) {
-      sigtermSubscription = ProcessSignal.sigterm.watch().listen((_) {
-        clean();
-      });
-    }
-  }
-
   Future<void> _handleClient(Socket client) async {
-    StreamSubscription? stdinSubscription;
-    StreamSubscription? sigwinchSubscription;
-
+    StreamSubscription<ProcessSignal>? resizeSubscription;
     try {
-      // Put terminal in raw mode to pass through all input
-      if (stdin.echoMode) stdin.echoMode = false;
-      if (stdin.lineMode) stdin.lineMode = false;
-
-      // Send initial terminal size to client using a custom OSC sequence
-      // Format: ESC ] 9999 ; <cols> ; <rows> BEL
       _sendTerminalSize(client);
-
-      // Forward stdin to client app (input events)
-      stdinSubscription = _stdinStream.listen((data) {
-        client.add(data);
+      resizeSubscription = ProcessSignal.sigwinch.watch().listen((_) {
+        _sendTerminalSize(client);
       });
-
-      // Forward client output to stdout (terminal rendering)
-      final clientSubscription = client.listen(
-        (data) {
-          stdout.add(data);
-        },
-        onDone: () {
-          // Client disconnected
-        },
-      );
-
-      // Send terminal size changes to client on SIGWINCH
-      if (Platform.isMacOS || Platform.isLinux) {
-        sigwinchSubscription = ProcessSignal.sigwinch.watch().listen((_) {
-          _sendTerminalSize(client);
-        });
+      await for (final data in client) {
+        stdout.add(data);
       }
-
-      // Wait for client to disconnect
-      await clientSubscription.asFuture();
     } finally {
-      await stdinSubscription?.cancel();
-      await sigwinchSubscription?.cancel();
+      await resizeSubscription?.cancel();
     }
   }
 

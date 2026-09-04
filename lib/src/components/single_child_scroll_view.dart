@@ -130,10 +130,7 @@ class _SingleChildScrollViewState extends State<SingleChildScrollView> {
     Widget? child = widget.child;
 
     if (widget.padding != null && child != null) {
-      child = Padding(
-        padding: widget.padding!,
-        child: child,
-      );
+      child = Padding(padding: widget.padding!, child: child);
     }
 
     Widget viewport = _SingleChildViewport(
@@ -176,7 +173,9 @@ class _SingleChildViewport extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(
-      BuildContext context, RenderSingleChildViewport renderObject) {
+    BuildContext context,
+    RenderSingleChildViewport renderObject,
+  ) {
     renderObject
       ..scrollDirection = scrollDirection
       ..controller = controller;
@@ -189,8 +188,8 @@ class RenderSingleChildViewport extends RenderObject
   RenderSingleChildViewport({
     required Axis scrollDirection,
     required ScrollController controller,
-  })  : _scrollDirection = scrollDirection,
-        _controller = controller {
+  }) : _scrollDirection = scrollDirection,
+       _controller = controller {
     _controller.addListener(_handleScrollUpdate);
   }
 
@@ -301,8 +300,9 @@ class RenderSingleChildViewport extends RenderObject
     size = constraints.constrain(clampedSize);
 
     // Update scroll controller metrics
-    final double viewportExtent =
-        scrollDirection == Axis.vertical ? size.height : size.width;
+    final double viewportExtent = scrollDirection == Axis.vertical
+        ? size.height
+        : size.width;
     final double scrollExtent = scrollDirection == Axis.vertical
         ? child!.size.height
         : child!.size.width;

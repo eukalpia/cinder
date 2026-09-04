@@ -67,13 +67,13 @@ FrameDiffStats emitFrameDiff({
     final start = currentDirty && previousDirty
         ? _min(current.dirtyStartForRow(y), previous.dirtyStartForRow(y))
         : currentDirty
-            ? current.dirtyStartForRow(y)
-            : previous.dirtyStartForRow(y);
+        ? current.dirtyStartForRow(y)
+        : previous.dirtyStartForRow(y);
     final end = currentDirty && previousDirty
         ? _max(current.dirtyEndForRow(y), previous.dirtyEndForRow(y))
         : currentDirty
-            ? current.dirtyEndForRow(y)
-            : previous.dirtyEndForRow(y);
+        ? current.dirtyEndForRow(y)
+        : previous.dirtyEndForRow(y);
 
     var scan = start;
     while (scan <= end) {
@@ -138,7 +138,7 @@ FrameDiffStats emitFrameDiff({
     }
 
     final style = cell.isImagePlaceholder ? const TextStyle() : cell.style;
-    final hasStyle = _hasVisibleStyle(style);
+    final hasStyle = hasVisibleTextStyle(style);
     if (hasStyle) {
       if (activeStyle != style) {
         if (activeStyle != null) output.write(TextStyle.reset);
@@ -167,13 +167,16 @@ FrameDiffStats emitFrameDiff({
   return (output: output.toString(), writtenCells: writtenCells);
 }
 
-bool _hasVisibleStyle(TextStyle style) {
+/// Whether a style requires ANSI graphics attributes during terminal output.
+bool hasVisibleTextStyle(TextStyle style) {
   return style.color != null ||
       style.backgroundColor != null ||
       style.fontWeight == FontWeight.bold ||
       style.fontWeight == FontWeight.dim ||
       style.fontStyle == FontStyle.italic ||
       style.decoration?.hasUnderline == true ||
+      style.decoration?.hasLineThrough == true ||
+      style.decoration?.hasOverline == true ||
       style.reverse;
 }
 

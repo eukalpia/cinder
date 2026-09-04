@@ -77,7 +77,8 @@ class _ListViewPerformanceTestState extends State<ListViewPerformanceTest> {
                 Text(
                   'Scroll: ${_scrollController.offset.toStringAsFixed(0)} / ${_scrollController.maxScrollExtent.toStringAsFixed(0)}',
                   style: TextStyle(
-                    color: _scrollController.offset >
+                    color:
+                        _scrollController.offset >
                             _scrollController.maxScrollExtent
                         ? const Color(0xFFFF0000)
                         : const Color(0xFF00AAFF),
@@ -152,25 +153,17 @@ class _ListViewPerformanceTestState extends State<ListViewPerformanceTest> {
     final color = colors[index % colors.length];
 
     return Container(
-      decoration: const BoxDecoration(
-        border: BoxBorder(bottom: BorderSide()),
-      ),
+      decoration: const BoxDecoration(border: BoxBorder(bottom: BorderSide())),
       padding: const EdgeInsets.symmetric(horizontal: 2),
       child: Row(
         children: [
           Container(
             width: 10,
             alignment: Alignment.centerRight,
-            child: Text(
-              '$index',
-              style: TextStyle(color: color),
-            ),
+            child: Text('$index', style: TextStyle(color: color)),
           ),
           const SizedBox(width: 2),
-          Text(
-            '|',
-            style: TextStyle(color: color),
-          ),
+          Text('|', style: TextStyle(color: color)),
           const SizedBox(width: 2),
           Expanded(
             child: Text(

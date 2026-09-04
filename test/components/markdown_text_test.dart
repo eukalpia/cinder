@@ -4,73 +4,49 @@ import 'package:test/test.dart';
 void main() {
   group('MarkdownText', () {
     test('renders plain text', () async {
-      await testCinder(
-        'plain text',
-        (tester) async {
-          await tester.pumpWidget(
-            const MarkdownText('This is plain text'),
-          );
+      await testCinder('plain text', (tester) async {
+        await tester.pumpWidget(const MarkdownText('This is plain text'));
 
-          expect(tester.terminalState, containsText('This is plain text'));
-        },
-        debugPrintAfterPump: true,
-      );
+        expect(tester.terminalState, containsText('This is plain text'));
+      }, debugPrintAfterPump: true);
     });
 
     test('renders bold text', () async {
-      await testCinder(
-        'bold text',
-        (tester) async {
-          await tester.pumpWidget(
-            const MarkdownText('This is **bold** text'),
-          );
+      await testCinder('bold text', (tester) async {
+        await tester.pumpWidget(const MarkdownText('This is **bold** text'));
 
-          expect(tester.terminalState, containsText('This is bold text'));
-        },
-        debugPrintAfterPump: true,
-      );
+        expect(tester.terminalState, containsText('This is bold text'));
+      }, debugPrintAfterPump: true);
     });
 
     test('renders italic text', () async {
-      await testCinder(
-        'italic text',
-        (tester) async {
-          await tester.pumpWidget(
-            const MarkdownText('This is *italic* text'),
-          );
+      await testCinder('italic text', (tester) async {
+        await tester.pumpWidget(const MarkdownText('This is *italic* text'));
 
-          expect(tester.terminalState, containsText('This is italic text'));
-        },
-        debugPrintAfterPump: true,
-      );
+        expect(tester.terminalState, containsText('This is italic text'));
+      }, debugPrintAfterPump: true);
     });
 
     test('renders headers', () async {
-      await testCinder(
-        'headers',
-        (tester) async {
-          await tester.pumpWidget(
-            const MarkdownText('''# Header 1
+      await testCinder('headers', (tester) async {
+        await tester.pumpWidget(
+          const MarkdownText('''# Header 1
 ## Header 2
 ### Header 3
 Regular text'''),
-          );
+        );
 
-          expect(tester.terminalState, containsText('# Header 1'));
-          expect(tester.terminalState, containsText('## Header 2'));
-          expect(tester.terminalState, containsText('### Header 3'));
-          expect(tester.terminalState, containsText('Regular text'));
-        },
-        debugPrintAfterPump: true,
-      );
+        expect(tester.terminalState, containsText('# Header 1'));
+        expect(tester.terminalState, containsText('## Header 2'));
+        expect(tester.terminalState, containsText('### Header 3'));
+        expect(tester.terminalState, containsText('Regular text'));
+      }, debugPrintAfterPump: true);
     });
 
     test('renders code blocks', () async {
-      await testCinder(
-        'code blocks',
-        (tester) async {
-          await tester.pumpWidget(
-            const MarkdownText('''Some text with `inline code` and:
+      await testCinder('code blocks', (tester) async {
+        await tester.pumpWidget(
+          const MarkdownText('''Some text with `inline code` and:
 
 ```
 code block
@@ -78,24 +54,22 @@ with multiple lines
 ```
 
 More text'''),
-          );
+        );
 
-          expect(
-              tester.terminalState, containsText('Some text with inline code'));
-          expect(tester.terminalState, containsText('code block'));
-          expect(tester.terminalState, containsText('with multiple lines'));
-          expect(tester.terminalState, containsText('More text'));
-        },
-        debugPrintAfterPump: true,
-      );
+        expect(
+          tester.terminalState,
+          containsText('Some text with inline code'),
+        );
+        expect(tester.terminalState, containsText('code block'));
+        expect(tester.terminalState, containsText('with multiple lines'));
+        expect(tester.terminalState, containsText('More text'));
+      }, debugPrintAfterPump: true);
     });
 
     test('renders lists', () async {
-      await testCinder(
-        'lists',
-        (tester) async {
-          await tester.pumpWidget(
-            const MarkdownText('''Unordered list:
+      await testCinder('lists', (tester) async {
+        await tester.pumpWidget(
+          const MarkdownText('''Unordered list:
 - Item 1
 - Item 2
 - Item 3
@@ -104,78 +78,63 @@ Ordered list:
 1. First
 2. Second
 3. Third'''),
-          );
+        );
 
-          expect(tester.terminalState, containsText('• Item 1'));
-          expect(tester.terminalState, containsText('• Item 2'));
-          expect(tester.terminalState, containsText('• Item 3'));
-          // Note: ordered lists default to bullet points in our simple implementation
-          expect(tester.terminalState, containsText('First'));
-          expect(tester.terminalState, containsText('Second'));
-          expect(tester.terminalState, containsText('Third'));
-        },
-        debugPrintAfterPump: true,
-      );
+        expect(tester.terminalState, containsText('• Item 1'));
+        expect(tester.terminalState, containsText('• Item 2'));
+        expect(tester.terminalState, containsText('• Item 3'));
+        // Note: ordered lists default to bullet points in our simple implementation
+        expect(tester.terminalState, containsText('First'));
+        expect(tester.terminalState, containsText('Second'));
+        expect(tester.terminalState, containsText('Third'));
+      }, debugPrintAfterPump: true);
     });
 
     test('renders links', () async {
-      await testCinder(
-        'links',
-        (tester) async {
-          await tester.pumpWidget(
-            const MarkdownText('Check out [Flutter](https://flutter.dev)!'),
-          );
+      await testCinder('links', (tester) async {
+        await tester.pumpWidget(
+          const MarkdownText('Check out [Flutter](https://flutter.dev)!'),
+        );
 
-          expect(tester.terminalState, containsText('Flutter'));
-          expect(tester.terminalState, containsText('[https://flutter.dev]'));
-        },
-        debugPrintAfterPump: true,
-      );
+        expect(tester.terminalState, containsText('Flutter'));
+        expect(tester.terminalState, containsText('[https://flutter.dev]'));
+      }, debugPrintAfterPump: true);
     });
 
     test('renders blockquotes', () async {
-      await testCinder(
-        'blockquotes',
-        (tester) async {
-          await tester.pumpWidget(
-            const MarkdownText('''Normal text
+      await testCinder('blockquotes', (tester) async {
+        await tester.pumpWidget(
+          const MarkdownText('''Normal text
 
 > This is a blockquote
 > with multiple lines
 
 More normal text'''),
-          );
+        );
 
-          expect(tester.terminalState, containsText('Normal text'));
-          expect(tester.terminalState, containsText('│ This is a blockquote'));
-          expect(tester.terminalState, containsText('More normal text'));
-        },
-        debugPrintAfterPump: true,
-      );
+        expect(tester.terminalState, containsText('Normal text'));
+        expect(tester.terminalState, containsText('│ This is a blockquote'));
+        expect(tester.terminalState, containsText('More normal text'));
+      }, debugPrintAfterPump: true);
     });
 
     test('renders horizontal rules', () async {
-      await testCinder(
-        'horizontal rules',
-        (tester) async {
-          await tester.pumpWidget(
-            const MarkdownText('''Above the line
+      await testCinder('horizontal rules', (tester) async {
+        await tester.pumpWidget(
+          const MarkdownText('''Above the line
 
 ---
 
 Below the line'''),
-          );
+        );
 
-          expect(tester.terminalState, containsText('Above the line'));
-          expect(tester.terminalState, containsText('────')); // Horizontal rule
-          expect(tester.terminalState, containsText('Below the line'));
-        },
-        debugPrintAfterPump: true,
-      );
+        expect(tester.terminalState, containsText('Above the line'));
+        expect(tester.terminalState, containsText('────')); // Horizontal rule
+        expect(tester.terminalState, containsText('Below the line'));
+      }, debugPrintAfterPump: true);
     });
 
-    test('renders complex markdown',
-        skip: 'Known issue: Complex markdown rendering', () async {
+    test('renders complex markdown', () async {
       await testCinder(
         'complex markdown',
         (tester) async {
@@ -219,42 +178,35 @@ That's all folks!'''),
           expect(tester.terminalState, containsText("That's all folks!"));
         },
         debugPrintAfterPump: true,
+        size: const Size(80, 40),
       );
     });
 
     test('handles images', () async {
-      await testCinder(
-        'images',
-        (tester) async {
-          await tester.pumpWidget(
-            const MarkdownText('Here is an image: ![Alt text](image.png)'),
-          );
+      await testCinder('images', (tester) async {
+        await tester.pumpWidget(
+          const MarkdownText('Here is an image: ![Alt text](image.png)'),
+        );
 
-          expect(tester.terminalState, containsText('[Image: Alt text]'));
-        },
-        debugPrintAfterPump: true,
-      );
+        expect(tester.terminalState, containsText('[Image: Alt text]'));
+      }, debugPrintAfterPump: true);
     });
 
     test('renders simple table', () async {
-      await testCinder(
-        'simple table',
-        (tester) async {
-          await tester.pumpWidget(
-            const MarkdownText('''| Header 1 | Header 2 |
+      await testCinder('simple table', (tester) async {
+        await tester.pumpWidget(
+          const MarkdownText('''| Header 1 | Header 2 |
 |----------|----------|
 | Cell 1   | Cell 2   |
 | Cell 3   | Cell 4   |'''),
-          );
+        );
 
-          // Check for table structure
-          expect(tester.terminalState, containsText('Header 1'));
-          expect(tester.terminalState, containsText('Header 2'));
-          expect(tester.terminalState, containsText('Cell 1'));
-          expect(tester.terminalState, containsText('Cell 2'));
-        },
-        debugPrintAfterPump: true,
-      );
+        // Check for table structure
+        expect(tester.terminalState, containsText('Header 1'));
+        expect(tester.terminalState, containsText('Header 2'));
+        expect(tester.terminalState, containsText('Cell 1'));
+        expect(tester.terminalState, containsText('Cell 2'));
+      }, debugPrintAfterPump: true);
     });
 
     test('table wraps cell content in narrow terminal', () async {
@@ -290,25 +242,21 @@ That's all folks!'''),
     });
 
     test('table preserves structure when it fits', () async {
-      await testCinder(
-        'table fits',
-        (tester) async {
-          await tester.pumpWidget(
-            const MarkdownText('''| A | B |
+      await testCinder('table fits', (tester) async {
+        await tester.pumpWidget(
+          const MarkdownText('''| A | B |
 |---|---|
 | 1 | 2 |'''),
-          );
+        );
 
-          // Small table should fit perfectly with borders
-          expect(tester.terminalState, containsText('│ A │ B │'));
-          expect(tester.terminalState, containsText('│ 1 │ 2 │'));
-          expect(tester.terminalState, containsText('┌'));
-          expect(tester.terminalState, containsText('┐'));
-          expect(tester.terminalState, containsText('└'));
-          expect(tester.terminalState, containsText('┘'));
-        },
-        debugPrintAfterPump: true,
-      );
+        // Small table should fit perfectly with borders
+        expect(tester.terminalState, containsText('│ A │ B │'));
+        expect(tester.terminalState, containsText('│ 1 │ 2 │'));
+        expect(tester.terminalState, containsText('┌'));
+        expect(tester.terminalState, containsText('┐'));
+        expect(tester.terminalState, containsText('└'));
+        expect(tester.terminalState, containsText('┘'));
+      }, debugPrintAfterPump: true);
     });
 
     test('table with multi-line cells pads shorter cells', () async {

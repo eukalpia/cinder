@@ -11,17 +11,20 @@ void main() {
         final log = <String>[];
         final observer = _RecordingObserver(log);
 
-        await tester.pumpWidget(Navigator(
-          observers: [observer],
-          home: const Text('Home Page'),
-          routes: {
-            '/settings': (context) => const Text('Settings Page'),
-            '/about': (context) => const Text('About Page'),
-          },
-        ));
+        await tester.pumpWidget(
+          Navigator(
+            observers: [observer],
+            home: const Text('Home Page'),
+            routes: {
+              '/settings': (context) => const Text('Settings Page'),
+              '/about': (context) => const Text('About Page'),
+            },
+          ),
+        );
 
-        expect(log, ['push:/:none'],
-            reason: 'installing the home route must notify didPush');
+        expect(log, [
+          'push:/:none',
+        ], reason: 'installing the home route must notify didPush');
 
         final navigator = tester.findState<NavigatorState>();
 

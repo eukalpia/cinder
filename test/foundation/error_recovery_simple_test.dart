@@ -32,9 +32,9 @@ void main() {
           expect(output, contains('A'));
           expect(output, contains('B'));
 
-          // The error should show "No Error" because ErrorThrowingWidget
-          // still paints normally after a layout error
-          expect(output, contains('No Error'));
+          // The constrained child must retain its layout failure during paint.
+          expect(output, contains('Layout Error'));
+          expect(output, isNot(contains('No Error')));
 
           // Verify horizontal layout
           final lines = output.split('\n');
@@ -54,58 +54,49 @@ void main() {
     });
 
     test('direct error widget shows error box properly', () async {
-      await testCinder(
-        'direct error widget',
-        (tester) async {
-          await tester.pumpWidget(
-            const Center(
-              child: SizedBox(
-                width: 40,
-                height: 10,
-                child: ErrorThrowingWidget(
-                  throwInLayout: true,
-                  errorMessage: 'Layout Test',
-                ),
+      await testCinder('direct error widget', (tester) async {
+        await tester.pumpWidget(
+          const Center(
+            child: SizedBox(
+              width: 40,
+              height: 10,
+              child: ErrorThrowingWidget(
+                throwInLayout: true,
+                errorMessage: 'Layout Test',
               ),
             ),
-          );
+          ),
+        );
 
-          final output = tester.terminalState.getText();
+        final output = tester.terminalState.getText();
 
-          // When layout fails, the widget gets a default size and continues
-          // The ErrorThrowingWidget will show "No Error" in its paint
-          expect(output, contains('No Error'));
-        },
-        debugPrintAfterPump: true,
-      );
+        expect(output, contains('Layout Error'));
+        expect(output, isNot(contains('No Error')));
+      }, debugPrintAfterPump: true);
     });
 
     test('paint error shows error box', () async {
-      await testCinder(
-        'paint error display',
-        (tester) async {
-          await tester.pumpWidget(
-            const Center(
-              child: SizedBox(
-                width: 40,
-                height: 10,
-                child: ErrorThrowingWidget(
-                  throwInLayout: false,
-                  throwInPaint: true,
-                  errorMessage: 'Paint Test',
-                ),
+      await testCinder('paint error display', (tester) async {
+        await tester.pumpWidget(
+          const Center(
+            child: SizedBox(
+              width: 40,
+              height: 10,
+              child: ErrorThrowingWidget(
+                throwInLayout: false,
+                throwInPaint: true,
+                errorMessage: 'Paint Test',
               ),
             ),
-          );
+          ),
+        );
 
-          final output = tester.terminalState.getText();
+        final output = tester.terminalState.getText();
 
-          // When paint fails, we should see the error box
-          expect(output, contains('Paint Error'));
-          expect(output, contains('┌')); // Error box border
-        },
-        debugPrintAfterPump: true,
-      );
+        // When paint fails, we should see the error box
+        expect(output, contains('Paint Error'));
+        expect(output, contains('┌')); // Error box border
+      }, debugPrintAfterPump: true);
     });
   });
 }

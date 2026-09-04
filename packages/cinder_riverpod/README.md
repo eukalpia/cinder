@@ -7,7 +7,6 @@ Riverpod support for cinder - A reactive caching and data-binding framework for 
 - 🎯 **Full Riverpod Integration** - Use all Riverpod providers in your TUI apps
 - 🔄 **Automatic Rebuilds** - Widgets rebuild automatically when providers change
 - 📦 **State Management** - Manage complex state with providers
-- 🎨 **ChangeNotifier Support** - Use ChangeNotifier for mutable state
 - 🔍 **Computed Values** - Create derived state with Provider
 - ♻️ **Auto-Dispose** - Automatic cleanup of unused providers
 
@@ -55,18 +54,15 @@ final doubledProvider = Provider<int>((ref) {
   return count * 2;
 });
 
-// ChangeNotifier provider
-class Counter extends ChangeNotifier {
-  int _count = 0;
-  int get count => _count;
-  
-  void increment() {
-    _count++;
-    notifyListeners();
-  }
+// Notifier provider for mutable state
+class Counter extends Notifier<int> {
+  @override
+  int build() => 0;
+
+  void increment() => state++;
 }
 
-final counterNotifierProvider = ChangeNotifierProvider((ref) => Counter());
+final counterNotifierProvider = NotifierProvider<Counter, int>(Counter.new);
 ```
 
 ### Using Providers in Widgets
@@ -84,7 +80,7 @@ class MyWidget extends StatelessWidget {
         Text(greeting),
         Text('Count: $count'),
         // Read - doesn't rebuild
-        TextButton(
+        Button(
           onPressed: () {
             // Modify state
             context.read(counterProvider.notifier).state++;
@@ -129,7 +125,7 @@ class _ListenerWidgetState extends State<ListenerWidget> {
 // Useful for testing or different configurations
 ProviderScope(
   overrides: [
-    counterProvider.overrideWithValue(StateController(42)),
+    counterProvider.overrideWith((ref) => 42),
   ],
   child: MyApp(),
 )
@@ -141,7 +137,8 @@ ProviderScope(
 
 - `context.watch(provider)` - Read and subscribe to changes
 - `context.read(provider)` - Read without subscribing
-- `context.listen(provider, callback)` - Listen with callback
+- `context.listen(provider, callback)` - Listen until the widget is removed; repeated calls replace its callback
+- `context.subscribe(provider, callback)` - Create a subscription that the caller closes
 - `context.refresh(provider)` - Refresh a provider
 - `context.invalidate(provider)` - Invalidate a provider
 
@@ -155,21 +152,16 @@ All standard Riverpod providers are supported:
 - `StateNotifierProvider`
 - `NotifierProvider`
 - `AsyncNotifierProvider`
-- `ChangeNotifierProvider` (cinder-specific)
 
 ## Example
 
-See the [example](example/) directory for a complete Todo app demonstrating:
-- State management with providers
-- Computed values
-- Filtering and derived state
-- User interaction handling
+See [counter_watch_demo.dart](example/counter_watch_demo.dart) for a keyboard-controlled counter demonstrating automatic rebuilds and derived state.
 
 Run the example:
 
 ```bash
 cd packages/cinder_riverpod
-dart run example/todo_app.dart
+dart run example/counter_watch_demo.dart
 ```
 
 ## Testing

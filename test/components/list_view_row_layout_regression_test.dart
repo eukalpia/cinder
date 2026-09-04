@@ -31,10 +31,16 @@ void main() {
         await tester.pump();
 
         final stateFinder = tester.findState<_LogViewerState>();
-        expect(tester.terminalState, hasTextAt(0, 0, 'info'),
-            reason: 'initial frame must show the level label column');
-        expect(tester.terminalState, hasTextAt(5, 0, 'boot'),
-            reason: 'initial frame must show the message column');
+        expect(
+          tester.terminalState,
+          hasTextAt(0, 0, 'info'),
+          reason: 'initial frame must show the level label column',
+        );
+        expect(
+          tester.terminalState,
+          hasTextAt(5, 0, 'boot'),
+          reason: 'initial frame must show the message column',
+        );
 
         // Append more entries. This is exactly the serverpod scenario: the
         // ListView's parent rebuilds with a larger itemCount, and existing
@@ -60,12 +66,16 @@ void main() {
         ];
         for (var y = 0; y < rows.length; y++) {
           final (level, message) = rows[y];
-          expect(tester.terminalState, hasTextAt(0, y, level),
-              reason: 'row $y level column must stay at x=0');
+          expect(
+            tester.terminalState,
+            hasTextAt(0, y, level),
+            reason: 'row $y level column must stay at x=0',
+          );
           expect(
             tester.terminalState,
             hasTextAt(level.length + 1, y, message),
-            reason: 'row $y message must stay right of the level column; '
+            reason:
+                'row $y message must stay right of the level column; '
                 'at column 0 it would mean the row offsets were clobbered '
                 'without a relayout',
           );

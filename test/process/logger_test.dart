@@ -53,12 +53,13 @@ void main() {
       expect(logServer.buffer.length, lessThanOrEqualTo(100));
       // Oldest messages should be dropped
       expect(
-          logServer.buffer.any((entry) => entry.message.contains('Message 0')),
-          isFalse);
+        logServer.buffer.any((entry) => entry.message.contains('Message 0')),
+        isFalse,
+      );
       expect(
-          logServer.buffer
-              .any((entry) => entry.message.contains('Message 149')),
-          isTrue);
+        logServer.buffer.any((entry) => entry.message.contains('Message 149')),
+        isTrue,
+      );
     });
 
     test('streams logs to WebSocket client', () async {
@@ -67,8 +68,9 @@ void main() {
       logServer.log('Buffered message 2');
 
       // Connect WebSocket client
-      final ws =
-          await WebSocket.connect('ws://127.0.0.1:${logServer.port}/logs');
+      final ws = await WebSocket.connect(
+        'ws://127.0.0.1:${logServer.port}/logs',
+      );
 
       // Collect messages
       final messages = <String>[];
@@ -112,6 +114,41 @@ void main() {
       expect(int.tryParse(portString), equals(logServer.port));
     });
 
+    test('snapshot closes after sending buffered logs', () async {
+      logServer.log('first');
+      logServer.log('second');
+      final socket = await WebSocket.connect(
+        'ws://127.0.0.1:${logServer.port}/logs?mode=get',
+      );
+      try {
+        final messages = await socket.toList().timeout(
+          const Duration(seconds: 2),
+        );
+        expect(
+          messages.map(
+            (message) => (jsonDecode(message as String) as Map)['message'],
+          ),
+          ['first', 'second'],
+        );
+      } finally {
+        await socket.close();
+      }
+    });
+
+    test('snapshot closes when the log buffer is empty', () async {
+      final socket = await WebSocket.connect(
+        'ws://127.0.0.1:${logServer.port}/logs?mode=get',
+      );
+      try {
+        final messages = await socket.toList().timeout(
+          const Duration(seconds: 2),
+        );
+        expect(messages, isEmpty);
+      } finally {
+        await socket.close();
+      }
+    });
+
     test('cleans up log_port file on close', () async {
       final portFile = File(getLogPortPath());
       expect(await portFile.exists(), isTrue);
@@ -147,8 +184,10 @@ void main() {
     test('includes timestamps', () {
       logger.log('Timestamped message');
 
-      expect(logServer.buffer.first.message,
-          matches(r'\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}'));
+      expect(
+        logServer.buffer.first.message,
+        matches(r'\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}'),
+      );
       expect(logServer.buffer.first.message, contains('Timestamped message'));
     });
 

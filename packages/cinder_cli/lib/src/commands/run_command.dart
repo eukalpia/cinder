@@ -1,11 +1,16 @@
+import 'dart:async';
 import 'dart:io';
 
+import 'package:args/args.dart';
 import 'package:cinder_cli/src/deps/log.dart';
 import 'package:cinder_cli/utils/cli_command.dart';
 
 /// Run a dart command with --enable-vm-service automatically added
 class RunCommand extends CliCommand {
   RunCommand();
+
+  @override
+  final ArgParser argParser = ArgParser(allowTrailingOptions: false);
 
   @override
   String get description => '''
@@ -61,19 +66,21 @@ Usage: cinder run dart <script.dart> [arguments]
       mode: ProcessStartMode.inheritStdio,
     );
 
-    // Forward signals to child process
-    ProcessSignal.sigint.watch().listen((_) {
-      process.kill(ProcessSignal.sigint);
-    });
-
-    if (Platform.isMacOS || Platform.isLinux) {
-      ProcessSignal.sigterm.watch().listen((_) {
-        process.kill(ProcessSignal.sigterm);
-      });
+    final subscriptions = <StreamSubscription<ProcessSignal>>[
+      ProcessSignal.sigint.watch().listen((_) {
+        process.kill(ProcessSignal.sigint);
+      }),
+      if (Platform.isMacOS || Platform.isLinux)
+        ProcessSignal.sigterm.watch().listen((_) {
+          process.kill(ProcessSignal.sigterm);
+        }),
+    ];
+    try {
+      return await process.exitCode;
+    } finally {
+      for (final subscription in subscriptions) {
+        await subscription.cancel();
+      }
     }
-
-    // Wait for process to complete
-    final exitCode = await process.exitCode;
-    exit(exitCode);
   }
 }

@@ -3,11 +3,7 @@ import 'dart:math' as math;
 import 'package:cinder/cinder.dart';
 
 void main() {
-  runApp(
-    const Navigator(
-      home: MyAppWithNavigation(depth: 0),
-    ),
-  );
+  runApp(const Navigator(home: MyAppWithNavigation(depth: 0)));
 }
 
 class NoNavigation extends StatefulWidget {
@@ -29,9 +25,7 @@ class _NoNavigationState extends State<NoNavigation> {
         child: Container(
           width: 56,
           padding: const EdgeInsets.all(1),
-          decoration: BoxDecoration(
-            border: BoxBorder.all(color: Colors.gray),
-          ),
+          decoration: BoxDecoration(border: BoxBorder.all(color: Colors.gray)),
           child: TextField(controller: controller, autofocus: true),
         ),
       ),
@@ -76,21 +70,17 @@ class _MyAppWithNavigationState extends State<MyAppWithNavigation> {
       },
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final availableWidth =
-              constraints.maxWidth.isFinite ? constraints.maxWidth : 80.0;
-          final availableHeight =
-              constraints.maxHeight.isFinite ? constraints.maxHeight : 28.0;
+          final availableWidth = constraints.maxWidth.isFinite
+              ? constraints.maxWidth
+              : 80.0;
+          final availableHeight = constraints.maxHeight.isFinite
+              ? constraints.maxHeight
+              : 28.0;
           final panelWidth = math
-              .max(
-                20.0,
-                math.min(72.0, availableWidth - 4),
-              )
+              .max(20.0, math.min(72.0, availableWidth - 4))
               .toDouble();
           final panelHeight = math
-              .max(
-                8.0,
-                math.min(18.0, availableHeight - 4),
-              )
+              .max(8.0, math.min(18.0, availableHeight - 4))
               .toDouble();
 
           if (widget.depth != 5 && widget.depth != 0) {

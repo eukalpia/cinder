@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -41,16 +40,6 @@ Examples:
   @override
   String get name => 'logs';
 
-  /// Check if a process with the given PID is alive.
-  bool _isProcessAlive(int pid) {
-    try {
-      // Sending signal 0 checks if process exists without affecting it
-      return Process.killPid(pid, ProcessSignal.sigcont);
-    } catch (_) {
-      return false;
-    }
-  }
-
   /// Clean up a stale port file.
   Future<void> _cleanupStalePortFile(String path) async {
     try {
@@ -66,20 +55,20 @@ Examples:
     final liveInstances = <({int pid, int port, String path})>[];
 
     for (final file in portFiles) {
-      // Check if process is alive
-      if (!_isProcessAlive(file.pid)) {
-        // Clean up stale port file
-        await _cleanupStalePortFile(file.path);
-        continue;
-      }
-
       // Read port from file
       try {
         final portFile = fs.file(file.path);
         final portString = await portFile.readAsString();
         final port = int.tryParse(portString.trim());
 
-        if (port != null) {
+        if (file.pid > 0 && port != null && port > 0 && port <= 65535) {
+          // Probe the endpoint without signaling (or resuming) its process.
+          final probe = await Socket.connect(
+            InternetAddress.loopbackIPv4,
+            port,
+            timeout: const Duration(seconds: 1),
+          );
+          probe.destroy();
           liveInstances.add((pid: file.pid, port: port, path: file.path));
         } else {
           // Invalid port file, clean it up
@@ -126,7 +115,7 @@ Examples:
       final mode = argResults['mode'] as String;
       final isGetMode = mode == 'get';
 
-      if (pidArg != null && targetPid == null) {
+      if (pidArg != null && (targetPid == null || targetPid <= 0)) {
         stderr.writeln('Error: Invalid PID: $pidArg');
         return 1;
       }
@@ -169,11 +158,13 @@ Examples:
       }
 
       // Connect to WebSocket
-      final url = 'ws://127.0.0.1:$port/logs';
+      final url = 'ws://127.0.0.1:$port/logs${isGetMode ? '?mode=get' : ''}';
       WebSocket? socket;
 
       try {
-        socket = await WebSocket.connect(url);
+        socket = await WebSocket.connect(
+          url,
+        ).timeout(const Duration(seconds: 5));
       } catch (e) {
         stderr.writeln('Error: Failed to connect to log server at $url');
         stderr.writeln('The cinder app may have exited. Details: $e');
@@ -182,49 +173,13 @@ Examples:
 
       // Stream log messages to stdout
       try {
-        if (isGetMode) {
-          // Get mode: fetch buffered logs and exit
-          // The server sends all buffered logs immediately on connect,
-          // so we wait briefly for them and then exit.
-          final logs = <String>[];
-          Timer? exitTimer;
-
-          await for (final message in socket) {
-            // Reset/start timer on each message - exit after 100ms of no new messages
-            exitTimer?.cancel();
-            exitTimer = Timer(const Duration(milliseconds: 100), () {
-              socket?.close();
-            });
-
-            try {
-              final json =
-                  jsonDecode(message as String) as Map<String, dynamic>;
-              final logMessage = json['message'] as String;
-              logs.add(logMessage);
-            } catch (e) {
-              logs.add(message.toString());
-            }
-          }
-
-          // Print all collected logs
-          for (final log in logs) {
-            stdout.writeln(log);
-          }
-        } else {
-          // Listen mode: stream continuously
-          await for (final message in socket) {
-            try {
-              final json =
-                  jsonDecode(message as String) as Map<String, dynamic>;
-              final logMessage = json['message'] as String;
-
-              // Note: message already includes timestamp from logger
-              stdout.writeln(logMessage);
-            } catch (e) {
-              // If JSON parsing fails, print raw message
-              stderr.writeln('Warning: Failed to parse log message: $e');
-              stdout.writeln(message);
-            }
+        await for (final message in socket) {
+          try {
+            final json = jsonDecode(message as String) as Map<String, dynamic>;
+            stdout.writeln(json['message'] as String);
+          } catch (e) {
+            stderr.writeln('Warning: Failed to parse log message: $e');
+            stdout.writeln(message);
           }
         }
       } catch (e) {

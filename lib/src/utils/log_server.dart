@@ -14,7 +14,8 @@ import 'cinder_paths.dart';
 /// Features:
 /// - **Circular buffer**: Stores last N log entries in memory
 /// - **WebSocket streaming**: Multiple clients can connect simultaneously
-/// - **Port discovery**: Writes port to `~/.cinder/<hash>/log_port` for CLI discovery
+/// - **Port discovery**: Writes port to `~/.cinder/<hash>/log_port.<pid>` for CLI discovery
+/// - **Snapshots**: `/logs?mode=get` sends buffered entries and closes the connection
 /// - **Graceful shutdown**: Cleans up connections and port file on close
 ///
 /// Example:
@@ -28,9 +29,7 @@ import 'cinder_paths.dart';
 /// await server.close();
 /// ```
 class LogServer {
-  LogServer({
-    this.maxBufferSize = 10000,
-  });
+  LogServer({this.maxBufferSize = 10000});
 
   /// Maximum number of log entries to keep in buffer
   final int maxBufferSize;
@@ -89,23 +88,32 @@ class LogServer {
   Future<void> _handleWebSocketConnection(HttpRequest request) async {
     try {
       final ws = await WebSocketTransformer.upgrade(request);
+      final snapshotOnly = request.uri.queryParameters['mode'] == 'get';
 
-      // Add to clients set
-      _clients.add(ws);
+      // Snapshot clients receive only the buffer that exists at connection time.
+      if (!snapshotOnly) _clients.add(ws);
 
       // Send all buffered logs to new client
       for (final entry in _buffer) {
-        if (!_closed && !_clients.contains(ws)) break;
+        if (_closed) break;
 
         try {
-          ws.add(jsonEncode({
-            'timestamp': entry.timestamp.toIso8601String(),
-            'message': entry.message,
-          }));
+          ws.add(
+            jsonEncode({
+              'timestamp': entry.timestamp.toIso8601String(),
+              'message': entry.message,
+            }),
+          );
         } catch (_) {
           // Client may have disconnected
           break;
         }
+      }
+
+      if (snapshotOnly) {
+        ws.listen((_) {}, onError: (Object error) {});
+        await ws.close(WebSocketStatus.normalClosure);
+        return;
       }
 
       // Listen for client disconnect
@@ -134,10 +142,7 @@ class LogServer {
   void log(String message) {
     if (_closed) return;
 
-    final entry = LogEntry(
-      timestamp: DateTime.now(),
-      message: message,
-    );
+    final entry = LogEntry(timestamp: DateTime.now(), message: message);
 
     // Add to buffer
     _buffer.add(entry);
@@ -200,7 +205,7 @@ class LogServer {
     _closed = true;
 
     // Close all client connections
-    for (final client in _clients) {
+    for (final client in _clients.toList()) {
       try {
         await client.close();
       } catch (_) {
@@ -239,10 +244,7 @@ class LogServer {
 
 /// A log entry with timestamp and message
 class LogEntry {
-  LogEntry({
-    required this.timestamp,
-    required this.message,
-  });
+  LogEntry({required this.timestamp, required this.message});
 
   final DateTime timestamp;
   final String message;

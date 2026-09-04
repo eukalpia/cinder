@@ -20,8 +20,11 @@ void main() {
       expect(scope.startedTaskCount, 10);
       expect(scope.completedTaskCount, 10);
       expect(scope.history, hasLength(3));
-      expect(scope.history.map((entry) => entry.label),
-          <String>['job-7', 'job-8', 'job-9']);
+      expect(scope.history.map((entry) => entry.label), <String>[
+        'job-7',
+        'job-8',
+        'job-9',
+      ]);
       expect(
         scope.history.every(
           (entry) => entry.state == CinderTaskState.succeeded,
@@ -41,34 +44,39 @@ void main() {
       });
       cancelled.cancel('stop');
       await expectLater(
-          cancelled.future, throwsA(isA<CancellationException>()));
+        cancelled.future,
+        throwsA(isA<CancellationException>()),
+      );
       await Future<void>.delayed(Duration.zero);
 
       expect(failed.state, CinderTaskState.failed);
       expect(cancelled.state, CinderTaskState.cancelled);
       expect(
-          scope.history.map((entry) => entry.state),
-          containsAll(<CinderTaskState>[
-            CinderTaskState.failed,
-            CinderTaskState.cancelled,
-          ]));
+        scope.history.map((entry) => entry.state),
+        containsAll(<CinderTaskState>[
+          CinderTaskState.failed,
+          CinderTaskState.cancelled,
+        ]),
+      );
       await scope.dispose();
     });
 
-    test('cancellation listeners may release owned resources immediately',
-        () async {
-      final scope = CinderTaskScope();
-      final timer = Timer(const Duration(minutes: 1), () {});
-      final task = scope.run<void>((token) async {
-        token.addListener(timer.cancel);
-        await token.whenCancelled;
-      });
+    test(
+      'cancellation listeners may release owned resources immediately',
+      () async {
+        final scope = CinderTaskScope();
+        final timer = Timer(const Duration(minutes: 1), () {});
+        final task = scope.run<void>((token) async {
+          token.addListener(timer.cancel);
+          await token.whenCancelled;
+        });
 
-      task.cancel('screen closed');
-      await task.future;
+        task.cancel('screen closed');
+        await task.future;
 
-      expect(timer.isActive, isFalse);
-      await scope.dispose();
-    });
+        expect(timer.isActive, isFalse);
+        await scope.dispose();
+      },
+    );
   });
 }

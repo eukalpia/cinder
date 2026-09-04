@@ -39,3 +39,14 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Regenerated from Dart and repository documentation
+/.generated/
+/.source/
+/public/generated/
+/public/doc-assets/
+/public/cinder-logo.png
+/public/api/
+/content/docs/reference/
+/test-results/
+/playwright-report/

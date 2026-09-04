@@ -26,8 +26,8 @@ extension SelectContext on BuildContext {
   R selectState<B extends StateStreamableSource<S>, S, R>(
     R Function(S state) selector,
   ) {
-    return provider.SelectContext(this).select<B, R>(
-      (bloc) => selector(bloc.state),
-    );
+    return provider.SelectContext(
+      this,
+    ).select<B, R>((bloc) => selector(bloc.state));
   }
 }

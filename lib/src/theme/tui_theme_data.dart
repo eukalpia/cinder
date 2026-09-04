@@ -154,8 +154,10 @@ class TuiThemeData {
     Terminal terminal, {
     Duration timeout = const Duration(milliseconds: 50),
   }) async {
-    final brightness =
-        await detectTerminalBrightness(terminal, timeout: timeout);
+    final brightness = await detectTerminalBrightness(
+      terminal,
+      timeout: timeout,
+    );
     return brightness == Brightness.light
         ? TuiThemeData.light
         : TuiThemeData.dark;
@@ -331,25 +333,25 @@ class TuiThemeData {
 
   @override
   int get hashCode => Object.hash(
-        brightness,
-        background,
-        onBackground,
-        surface,
-        onSurface,
-        primary,
-        onPrimary,
-        secondary,
-        onSecondary,
-        error,
-        onError,
-        success,
-        onSuccess,
-        warning,
-        onWarning,
-        outline,
-        outlineVariant,
-        selectionColor,
-      );
+    brightness,
+    background,
+    onBackground,
+    surface,
+    onSurface,
+    primary,
+    onPrimary,
+    secondary,
+    onSecondary,
+    error,
+    onError,
+    success,
+    onSuccess,
+    warning,
+    onWarning,
+    outline,
+    outlineVariant,
+    selectionColor,
+  );
 
   @override
   String toString() => 'TuiThemeData(brightness: $brightness)';

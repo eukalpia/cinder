@@ -10,8 +10,9 @@ import {
   writeFile,
 } from 'node:fs/promises';
 import path from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
+import { readCinderVersion } from './version.mjs';
 
 const execFileAsync = promisify(execFile);
 const scriptFile = fileURLToPath(import.meta.url);
@@ -213,7 +214,9 @@ async function discoverExamples() {
       runnable: false,
       bundle: null,
       reason: blocker?.reason ?? (hasMain ? 'Pending browser compilation.' : 'This source file has no executable main() entrypoint.'),
-      webCandidate: !blocker && hasMain,
+      // Package examples must resolve imports using their own pubspec.
+      // The isolated compilation pass selects their nearest package root.
+      webCandidate: !blocker && hasMain && !repositoryPath.startsWith('packages/'),
       acceptsArguments,
       description: inferDescription(source, title, category),
     });
@@ -283,7 +286,7 @@ async function compileGroup(groupName, groupExamples) {
       }
       return;
     } catch (error) {
-      const stderr = String(error.stderr ?? error.message ?? 'Unknown compiler error');
+      const stderr = [error.stdout, error.stderr, error.message].filter(Boolean).join('\n');
       const offender = active.find((example) =>
         stderr.includes(example.repositoryPath),
       );
@@ -334,10 +337,15 @@ async function writeLauncher(output, examples) {
 }
 
 async function writeExampleManifest(examples, documentationCount) {
-  const cleaned = examples.map(({ webCandidate, acceptsArguments, ...example }) => example);
+  const cleaned = examples.map((entry) => {
+    const example = { ...entry };
+    delete example.webCandidate;
+    delete example.acceptsArguments;
+    return example;
+  });
   const manifest = {
     generatedAt: new Date().toISOString(),
-    version: '1.0.0-dev.2',
+    version: await readCinderVersion(repositoryRoot),
     documentationCount,
     examples: cleaned,
   };

@@ -6,10 +6,8 @@ enum InputPhase { capture, target, bubble }
 /// Result returned by an input handler.
 enum InputDisposition { ignored, handled, stopPropagation }
 
-typedef InputHandler = InputDisposition Function(
-  InputEvent event,
-  InputPhase phase,
-);
+typedef InputHandler =
+    InputDisposition Function(InputEvent event, InputPhase phase);
 
 /// Deterministic three-phase input dispatcher.
 ///
@@ -23,9 +21,9 @@ final class InputRouter {
     Iterable<InputHandler> capture = const <InputHandler>[],
     Iterable<InputHandler> target = const <InputHandler>[],
     Iterable<InputHandler> bubble = const <InputHandler>[],
-  })  : _capture = List<InputHandler>.of(capture),
-        _target = List<InputHandler>.of(target),
-        _bubble = List<InputHandler>.of(bubble);
+  }) : _capture = List<InputHandler>.of(capture),
+       _target = List<InputHandler>.of(target),
+       _bubble = List<InputHandler>.of(bubble);
 
   final List<InputHandler> _capture;
   final List<InputHandler> _target;
@@ -76,8 +74,8 @@ final class InputRouter {
   }
 
   List<InputHandler> _handlersFor(InputPhase phase) => switch (phase) {
-        InputPhase.capture => _capture,
-        InputPhase.target => _target,
-        InputPhase.bubble => _bubble,
-      };
+    InputPhase.capture => _capture,
+    InputPhase.target => _target,
+    InputPhase.bubble => _bubble,
+  };
 }

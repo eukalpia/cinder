@@ -60,8 +60,8 @@ class _BentoFullDemoState extends State<BentoFullDemo> {
 
           // Calculate layout dimensions
           final heroWidth = (totalWidth * 0.65).toInt().toDouble();
-          final sidebarWidth =
-              (totalWidth - heroWidth - 3).toDouble(); // -3 for padding and gap
+          final sidebarWidth = (totalWidth - heroWidth - 3)
+              .toDouble(); // -3 for padding and gap
           // Bottom bar: 3 rows (1 padding top + 1 content + 1 padding bottom) + 2 border = 5
           // Feature cards: 6 rows
           // Gaps: 2 (SizedBox height 1 each)
@@ -84,7 +84,9 @@ class _BentoFullDemoState extends State<BentoFullDemo> {
                       SizedBox(
                         width: heroWidth,
                         child: _buildHeroPanel(
-                            heroWidth.toInt(), heroHeight.toInt()),
+                          heroWidth.toInt(),
+                          heroHeight.toInt(),
+                        ),
                       ),
                       SizedBox(width: 1),
                       // Sidebar
@@ -114,24 +116,54 @@ class _BentoFullDemoState extends State<BentoFullDemo> {
                   child: Row(
                     children: [
                       Expanded(
-                          child: _buildFeatureCard('⚡', 'setState()',
-                              'Reactive updates', Color(0xFFff6b9d), 0)),
+                        child: _buildFeatureCard(
+                          '⚡',
+                          'setState()',
+                          'Reactive updates',
+                          Color(0xFFff6b9d),
+                          0,
+                        ),
+                      ),
                       SizedBox(width: 1),
                       Expanded(
-                          child: _buildFeatureCard('📦', '50+ Widgets',
-                              'Row, Column...', Color(0xFFfeca57), 1)),
+                        child: _buildFeatureCard(
+                          '📦',
+                          '50+ Widgets',
+                          'Row, Column...',
+                          Color(0xFFfeca57),
+                          1,
+                        ),
+                      ),
                       SizedBox(width: 1),
                       Expanded(
-                          child: _buildFeatureCard('🎨', '6 Themes',
-                              'Nord, Dracula...', Color(0xFF48dbfb), 2)),
+                        child: _buildFeatureCard(
+                          '🎨',
+                          '6 Themes',
+                          'Nord, Dracula...',
+                          Color(0xFF48dbfb),
+                          2,
+                        ),
+                      ),
                       SizedBox(width: 1),
                       Expanded(
-                          child: _buildFeatureCard('🔥', 'Hot Reload',
-                              'Instant updates', Color(0xFFff9f43), 3)),
+                        child: _buildFeatureCard(
+                          '🔥',
+                          'Hot Reload',
+                          'Instant updates',
+                          Color(0xFFff9f43),
+                          3,
+                        ),
+                      ),
                       SizedBox(width: 1),
                       Expanded(
-                          child: _buildFeatureCard('✓', 'Testing',
-                              'testCinder()', Color(0xFF1dd1a1), 4)),
+                        child: _buildFeatureCard(
+                          '✓',
+                          'Testing',
+                          'testCinder()',
+                          Color(0xFF1dd1a1),
+                          4,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -230,8 +262,10 @@ class _BentoFullDemoState extends State<BentoFullDemo> {
     final v = _plasmaValue(x / w, y / h);
     final r = (math.sin(v * 3 + _time * 1) * 60 + 80).toInt().clamp(20, 140);
     final g = (math.sin(v * 3 + 2) * 40 + 30).toInt().clamp(10, 80);
-    final b =
-        (math.sin(v * 3 + 4 + _time * 1) * 80 + 140).toInt().clamp(60, 220);
+    final b = (math.sin(v * 3 + 4 + _time * 1) * 80 + 140).toInt().clamp(
+      60,
+      220,
+    );
     return Color.fromRGB(r, g, b);
   }
 
@@ -281,8 +315,10 @@ class _BentoFullDemoState extends State<BentoFullDemo> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(label, style: TextStyle(color: Color(0xFF6a6a8a))),
-        Text(value,
-            style: TextStyle(color: color, fontWeight: FontWeight.bold)),
+        Text(
+          value,
+          style: TextStyle(color: color, fontWeight: FontWeight.bold),
+        ),
       ],
     );
   }
@@ -309,41 +345,56 @@ class _BentoFullDemoState extends State<BentoFullDemo> {
           Text('📝 Code', style: TextStyle(color: Color(0xFF6a6a8a))),
           Text('─' * (width - 4), style: TextStyle(color: Color(0xFF2a2a3a))),
           for (int i = 0; i < lines.length; i++)
-            Builder(builder: (context) {
-              // Smooth wave that travels down the code lines
-              final wave = math.sin(_time * 1 - i * 0.8);
-              final intensity = ((wave + 1) / 2).clamp(0.0, 1.0); // 0 to 1
+            Builder(
+              builder: (context) {
+                // Smooth wave that travels down the code lines
+                final wave = math.sin(_time * 1 - i * 0.8);
+                final intensity = ((wave + 1) / 2).clamp(0.0, 1.0); // 0 to 1
 
-              return Container(
-                decoration: BoxDecoration(
-                  color: Color.fromRGB(
-                    (0x1a + (intensity * 0x10)).toInt(),
-                    (0x1a + (intensity * 0x10)).toInt(),
-                    (0x2a + (intensity * 0x15)).toInt(),
+                return Container(
+                  decoration: BoxDecoration(
+                    color: Color.fromRGB(
+                      (0x1a + (intensity * 0x10)).toInt(),
+                      (0x1a + (intensity * 0x10)).toInt(),
+                      (0x2a + (intensity * 0x15)).toInt(),
+                    ),
                   ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(lines[i].$1,
-                        style: TextStyle(color: Color(0xFFc678dd))),
-                    Text(lines[i].$2,
-                        style: TextStyle(color: Color(0xFF98c379))),
-                    Text(lines[i].$3,
-                        style: TextStyle(color: Color(0xFFe5c07b))),
-                    Text(lines[i].$4,
-                        style: TextStyle(color: Color(0xFF61afef))),
-                  ],
-                ),
-              );
-            }),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        lines[i].$1,
+                        style: TextStyle(color: Color(0xFFc678dd)),
+                      ),
+                      Text(
+                        lines[i].$2,
+                        style: TextStyle(color: Color(0xFF98c379)),
+                      ),
+                      Text(
+                        lines[i].$3,
+                        style: TextStyle(color: Color(0xFFe5c07b)),
+                      ),
+                      Text(
+                        lines[i].$4,
+                        style: TextStyle(color: Color(0xFF61afef)),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
         ],
       ),
     );
   }
 
   Widget _buildFeatureCard(
-      String icon, String title, String desc, Color color, int idx) {
+    String icon,
+    String title,
+    String desc,
+    Color color,
+    int idx,
+  ) {
     // Smooth wave across feature cards - each card has a phase offset
     final wave = math.sin(_time * 1 - idx * 1.2);
     final intensity = ((wave + 1) / 2).clamp(0.0, 1.0); // 0 to 1
@@ -386,21 +437,27 @@ class _BentoFullDemoState extends State<BentoFullDemo> {
               Text(
                 title,
                 style: TextStyle(
-                  color: Color.fromRGB(titleBrightness, titleBrightness,
-                      lerp(titleBrightness, 255, 0.1)),
+                  color: Color.fromRGB(
+                    titleBrightness,
+                    titleBrightness,
+                    lerp(titleBrightness, 255, 0.1),
+                  ),
                   fontWeight: FontWeight.normal,
                 ),
               ),
             ],
           ),
+          Text('─────────────', style: TextStyle(color: Color(0xFF1a1a2a))),
           Text(
-            '─────────────',
-            style: TextStyle(color: Color(0xFF1a1a2a)),
+            desc,
+            style: TextStyle(
+              color: Color.fromRGB(
+                descBrightness,
+                descBrightness,
+                lerp(descBrightness, 255, 0.1),
+              ),
+            ),
           ),
-          Text(desc,
-              style: TextStyle(
-                  color: Color.fromRGB(descBrightness, descBrightness,
-                      lerp(descBrightness, 255, 0.1)))),
         ],
       ),
     );
@@ -420,17 +477,18 @@ class _BentoFullDemoState extends State<BentoFullDemo> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text('✦ ', style: TextStyle(color: _glow(Color(0xFFc678dd), 2))),
-              Text('cinder',
-                  style: TextStyle(
-                      color: Color(0xFFffffff), fontWeight: FontWeight.bold)),
+              Text(
+                'cinder',
+                style: TextStyle(
+                  color: Color(0xFFffffff),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
               Text(' v0.3.5', style: TextStyle(color: Color(0xFF4a4a5a))),
             ],
           ),
           // Wave animation
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: _buildWave(),
-          ),
+          Row(mainAxisSize: MainAxisSize.min, children: _buildWave()),
           Text('[q] quit', style: TextStyle(color: Color(0xFF4a4a5a))),
         ],
       ),

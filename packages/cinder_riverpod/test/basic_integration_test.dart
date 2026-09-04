@@ -11,79 +11,69 @@ void main() {
       return 'Hello, $name!';
     });
 
-    await testCinder(
-      'riverpod basic functionality',
-      (tester) async {
-        // Test 1: Basic provider read
-        await tester.pumpWidget(
-          ProviderScope(
-            child: _SimpleBuilder(
-              builder: (context) {
-                final greeting = context.read(greetingProvider);
-                return Text(greeting);
-              },
-            ),
+    await testCinder('riverpod basic functionality', (tester) async {
+      // Test 1: Basic provider read
+      await tester.pumpWidget(
+        ProviderScope(
+          child: _SimpleBuilder(
+            builder: (context) {
+              final greeting = context.read(greetingProvider);
+              return Text(greeting);
+            },
           ),
-        );
+        ),
+      );
 
-        expect(tester.terminalState, containsText('Hello, Cinder!'));
+      expect(tester.terminalState, containsText('Hello, Cinder!'));
 
-        // Test 2: Provider overrides
-        await tester.pumpWidget(
-          ProviderScope(
-            overrides: [
-              nameProvider.overrideWith((ref) => 'Riverpod'),
-            ],
-            child: _SimpleBuilder(
-              builder: (context) {
-                final greeting = context.read(greetingProvider);
-                return Text(greeting);
-              },
-            ),
+      // Test 2: Provider overrides
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [nameProvider.overrideWith((ref) => 'Riverpod')],
+          child: _SimpleBuilder(
+            builder: (context) {
+              final greeting = context.read(greetingProvider);
+              return Text(greeting);
+            },
           ),
-        );
+        ),
+      );
 
-        expect(tester.terminalState, containsText('Hello, Riverpod!'));
-      },
-    );
+      expect(tester.terminalState, containsText('Hello, Riverpod!'));
+    });
   });
 
   test('Riverpod integration - nested scopes', () async {
     final colorProvider = Provider<String>((ref) => 'blue');
 
-    await testCinder(
-      'nested provider scopes',
-      (tester) async {
-        await tester.pumpWidget(
-          ProviderScope(
-            child: Column(
-              children: [
-                _SimpleBuilder(
+    await testCinder('nested provider scopes', (tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          child: Column(
+            children: [
+              _SimpleBuilder(
+                builder: (context) {
+                  final color = context.read(colorProvider);
+                  return Text('Outer: $color');
+                },
+              ),
+              ProviderScope(
+                overrides: [colorProvider.overrideWith((ref) => 'red')],
+                child: _SimpleBuilder(
                   builder: (context) {
                     final color = context.read(colorProvider);
-                    return Text('Outer: $color');
+                    return Text('Inner: $color');
                   },
                 ),
-                ProviderScope(
-                  overrides: [
-                    colorProvider.overrideWith((ref) => 'red'),
-                  ],
-                  child: _SimpleBuilder(
-                    builder: (context) {
-                      final color = context.read(colorProvider);
-                      return Text('Inner: $color');
-                    },
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-        );
+        ),
+      );
 
-        expect(tester.terminalState, containsText('Outer: blue'));
-        expect(tester.terminalState, containsText('Inner: red'));
-      },
-    );
+      expect(tester.terminalState, containsText('Outer: blue'));
+      expect(tester.terminalState, containsText('Inner: red'));
+    });
   });
 
   test('Riverpod integration - multiple providers', () async {
@@ -95,23 +85,20 @@ void main() {
       return '$user is $age years old';
     });
 
-    await testCinder(
-      'multiple providers',
-      (tester) async {
-        await tester.pumpWidget(
-          ProviderScope(
-            child: _SimpleBuilder(
-              builder: (context) {
-                final profile = context.read(profileProvider);
-                return Text(profile);
-              },
-            ),
+    await testCinder('multiple providers', (tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          child: _SimpleBuilder(
+            builder: (context) {
+              final profile = context.read(profileProvider);
+              return Text(profile);
+            },
           ),
-        );
+        ),
+      );
 
-        expect(tester.terminalState, containsText('Alice is 30 years old'));
-      },
-    );
+      expect(tester.terminalState, containsText('Alice is 30 years old'));
+    });
   });
 }
 

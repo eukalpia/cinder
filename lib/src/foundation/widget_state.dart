@@ -59,14 +59,14 @@ final class WidgetStatePropertyAll<T> implements WidgetStateProperty<T> {
 
 final class WidgetStateMapper<T> implements WidgetStateProperty<T> {
   WidgetStateMapper(Map<Set<WidgetState>, T> values, {required this.fallback})
-      : _entries = List<MapEntry<Set<WidgetState>, T>>.unmodifiable(
-          values.entries.map(
-            (entry) => MapEntry<Set<WidgetState>, T>(
-              Set<WidgetState>.unmodifiable(entry.key),
-              entry.value,
-            ),
+    : _entries = List<MapEntry<Set<WidgetState>, T>>.unmodifiable(
+        values.entries.map(
+          (entry) => MapEntry<Set<WidgetState>, T>(
+            Set<WidgetState>.unmodifiable(entry.key),
+            entry.value,
           ),
-        );
+        ),
+      );
 
   final List<MapEntry<Set<WidgetState>, T>> _entries;
   final T fallback;
@@ -96,7 +96,7 @@ final class _WidgetStatePropertyWith<T> implements WidgetStateProperty<T> {
 /// Mutable helper used by stateful controls to keep state transitions coherent.
 final class WidgetStatesController {
   WidgetStatesController([Iterable<WidgetState> initialStates = const []])
-      : _states = <WidgetState>{...initialStates};
+    : _states = <WidgetState>{...initialStates};
 
   final Set<WidgetState> _states;
 

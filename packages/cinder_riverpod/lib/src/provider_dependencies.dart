@@ -23,7 +23,6 @@ class ProviderDependencies {
 
   /// Previous subscriptions from the last build, retained for reuse.
   final Map<ProviderListenable, ProviderSubscription> _oldWatchers = {};
-  final Map<ProviderListenable, ProviderSubscription> _oldListeners = {};
 
   /// Watch a provider and rebuild when it changes.
   T watch<T>(ProviderListenable<T> provider, ProviderContainer container) {
@@ -65,7 +64,6 @@ class ProviderDependencies {
     _container = container;
 
     _listeners.remove(provider)?.close();
-    _oldListeners.remove(provider)?.close();
 
     _listeners[provider] = container.listen<T>(
       provider,
@@ -75,24 +73,20 @@ class ProviderDependencies {
     );
   }
 
-  /// Rotate active subscriptions after a dependent rebuild.
-  void didRebuildDependent() {
-    for (final subscription in _oldWatchers.values) {
-      subscription.close();
-    }
-    for (final subscription in _oldListeners.values) {
-      subscription.close();
-    }
-
+  /// Retain watchers for reuse during the dependent's next build.
+  void willBuildDependent() {
     _oldWatchers
       ..clear()
       ..addAll(_watchers);
     _watchers.clear();
+  }
 
-    _oldListeners
-      ..clear()
-      ..addAll(_listeners);
-    _listeners.clear();
+  /// Close watchers that were not used during the completed build.
+  void didBuildDependent() {
+    for (final subscription in _oldWatchers.values) {
+      subscription.close();
+    }
+    _oldWatchers.clear();
   }
 
   /// Release every subscription owned by this dependent.
@@ -110,14 +104,10 @@ class ProviderDependencies {
     for (final subscription in _listeners.values) {
       subscription.close();
     }
-    for (final subscription in _oldListeners.values) {
-      subscription.close();
-    }
 
     _watchers.clear();
     _oldWatchers.clear();
     _listeners.clear();
-    _oldListeners.clear();
     _container = null;
   }
 }

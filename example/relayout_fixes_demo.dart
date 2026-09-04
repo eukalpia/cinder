@@ -60,10 +60,16 @@ class _RelayoutFixesDemoState extends State<RelayoutFixesDemo> {
   int _alignStep = 0;
 
   // [s] Swap scenario
-  static const _childA = Text('AAA',
-      key: ValueKey('a'), style: TextStyle(color: Color(0xFFFF6666)));
-  static const _childB = Text('BB',
-      key: ValueKey('b'), style: TextStyle(color: Color(0xFF66AAFF)));
+  static const _childA = Text(
+    'AAA',
+    key: ValueKey('a'),
+    style: TextStyle(color: Color(0xFFFF6666)),
+  );
+  static const _childB = Text(
+    'BB',
+    key: ValueKey('b'),
+    style: TextStyle(color: Color(0xFF66AAFF)),
+  );
   bool _aFirst = true;
 
   // [h] Hoisted-builder scenario: the SAME closure instances across
@@ -73,8 +79,8 @@ class _RelayoutFixesDemoState extends State<RelayoutFixesDemo> {
   late final Widget Function(BuildContext, int) _itemBuilder =
       (context, index) => Text('item $index -> counter=$_counter');
   // ignore: prefer_function_declarations_over_variables
-  late final LayoutBuilderCallback _layoutBuilder =
-      (context, constraints) => Text('LayoutBuilder -> counter=$_counter');
+  late final LayoutBuilderCallback _layoutBuilder = (context, constraints) =>
+      Text('LayoutBuilder -> counter=$_counter');
 
   bool _handleKeyEvent(KeyboardEvent event) {
     switch (event.logicalKey) {
@@ -111,9 +117,13 @@ class _RelayoutFixesDemoState extends State<RelayoutFixesDemo> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title,
-                style: const TextStyle(
-                    fontWeight: FontWeight.bold, color: Color(0xFFFFAA00))),
+            Text(
+              title,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Color(0xFFFFAA00),
+              ),
+            ),
             Expanded(child: child),
           ],
         ),
@@ -133,43 +143,50 @@ class _RelayoutFixesDemoState extends State<RelayoutFixesDemo> {
             ' relayout fixes demo - press each key repeatedly; q quits ',
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
-          Row(children: [
-            _panel(
-              '[o] Overlay left=$_overlayLeft',
-              SizedBox(
-                width: 34,
-                height: 4,
-                child: Overlay(initialEntries: [_entry]),
+          Row(
+            children: [
+              _panel(
+                '[o] Overlay left=$_overlayLeft',
+                SizedBox(
+                  width: 34,
+                  height: 4,
+                  child: Overlay(initialEntries: [_entry]),
+                ),
               ),
-            ),
-            _panel(
-              '[p] Padding all(${_paddings[_paddingStep].toInt()})',
-              Padding(
-                padding: EdgeInsets.all(_paddings[_paddingStep]),
-                // double style (═) so the divider is distinguishable from
-                // the single-line (─) panel borders.
-                child: const Divider(style: DividerStyle.double),
+              _panel(
+                '[p] Padding all(${_paddings[_paddingStep].toInt()})',
+                Padding(
+                  padding: EdgeInsets.all(_paddings[_paddingStep]),
+                  // double style (═) so the divider is distinguishable from
+                  // the single-line (─) panel borders.
+                  child: const Divider(style: DividerStyle.double),
+                ),
               ),
-            ),
-          ]),
-          Row(children: [
-            _panel(
-              '[a] Align ${_alignmentNames[_alignStep]}',
-              Align(
-                alignment: _alignments[_alignStep],
-                child: const Text('@@',
-                    style: TextStyle(color: Color(0xFF00FFAA))),
+            ],
+          ),
+          Row(
+            children: [
+              _panel(
+                '[a] Align ${_alignmentNames[_alignStep]}',
+                Align(
+                  alignment: _alignments[_alignStep],
+                  child: const Text(
+                    '@@',
+                    style: TextStyle(color: Color(0xFF00FFAA)),
+                  ),
+                ),
               ),
-            ),
-            _panel(
-              '[s] Swap order=${_aFirst ? "A,B" : "B,A"}',
-              Row(
+              _panel(
+                '[s] Swap order=${_aFirst ? "A,B" : "B,A"}',
+                Row(
                   children: _aFirst
                       ? const [_childA, _childB]
-                      : const [_childB, _childA]),
-              height: 7,
-            ),
-          ]),
+                      : const [_childB, _childA],
+                ),
+                height: 7,
+              ),
+            ],
+          ),
           _panel(
             '[h] Hoisted builders counter=$_counter',
             Column(

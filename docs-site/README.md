@@ -23,7 +23,9 @@ npm ci
 npm run dev
 ```
 
-Development mode scans documentation and examples but skips the expensive full browser compilation pass. Existing generated metadata remains available for route development.
+Development mode prepares documentation and compiles example bundles before
+starting Next.js. The initial compilation takes longer than subsequent page
+edits, which use the Next.js development server.
 
 ## Production build
 
@@ -41,10 +43,14 @@ The build performs these stages:
 6. resolve nested package examples with their own package configuration;
 7. classify every example runtime mode;
 8. synchronize the package version from `../pubspec.yaml`;
-9. build the static Next.js export;
-10. write `.nojekyll` for GitHub Pages.
+9. regenerate the Dart API reference;
+10. build the static Next.js export;
+11. write `.nojekyll` for GitHub Pages.
 
-A nested example under `packages/<name>/example/` is compiled from that package root. The recovery pass runs `dart pub get` only for a nested package that needs an isolated browser build, so its package imports and dependency overrides remain authoritative.
+A nested example under `packages/<name>/example/` is compiled from its nearest
+`pubspec.yaml`, including a standalone example package when present. The
+isolated pass runs `dart pub get` there so its imports and dependency overrides
+remain authoritative.
 
 Verify the export:
 
@@ -60,9 +66,14 @@ Project Pages is deployed below `/cinder`:
 NEXT_PUBLIC_BASE_PATH=/cinder \
 NEXT_PUBLIC_SITE_ORIGIN=https://eukalpia.github.io \
 npm run build
+
+NEXT_PUBLIC_BASE_PATH=/cinder npm run test:routes
+NEXT_PUBLIC_BASE_PATH=/cinder npm run test:browser
 ```
 
-The repository Pages source must be set to **GitHub Actions**. A push affecting `docs-site/**` then builds, verifies, and deploys the static export automatically.
+The documentation workflow builds and verifies the Pages export on pushes and
+pull requests, then uploads a `cinder-documentation-site` artifact. It does not
+publish the site. Deploy that verified artifact through a separate Pages release.
 
 All public assets, example bundles, iframe routes, sitemap entries, and generated source links must use the normalized base path.
 
@@ -73,7 +84,15 @@ npx playwright install chromium
 npm run test:browser
 ```
 
-The suite checks real Cinder output, keyboard input, resize propagation, restart isolation, compatibility disclosures, Unicode input, keyboard navigation, and responsive widths. Screenshots are written to Playwright test artifacts rather than committed to the repository.
+The suite boots every runnable example and checks terminal output and runtime
+errors. It also checks keyboard input, resize propagation, restart isolation,
+compatibility disclosures, Unicode input, keyboard navigation, and responsive
+widths. Screenshots are written to Playwright test artifacts rather than
+committed to the repository.
+
+`npm start` serves the static export on port 4173. Use the same
+`NEXT_PUBLIC_BASE_PATH` value for building, serving, and testing. The default is
+an empty base path for local development or a custom domain.
 
 ## Example runtime modes
 

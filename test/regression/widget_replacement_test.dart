@@ -5,183 +5,138 @@ import 'package:test/test.dart';
 void main() {
   group('Widget Replacement', () {
     test('can replace widget with different type', () async {
-      await testCinder(
-        'widget replacement',
-        (tester) async {
-          // Initial state with Text widget
-          await tester.pumpWidget(
-            TestReplacementWidget(phase: 0),
-          );
-          expect(tester.terminalState, containsText('Initial Text Widget'));
-          expect(tester.terminalState, containsText('Phase: 0'));
+      await testCinder('widget replacement', (tester) async {
+        // Initial state with Text widget
+        await tester.pumpWidget(TestReplacementWidget(phase: 0));
+        expect(tester.terminalState, containsText('Initial Text Widget'));
+        expect(tester.terminalState, containsText('Phase: 0'));
 
-          // Change to DecoratedBox
-          await tester.pumpWidget(
-            TestReplacementWidget(phase: 1),
-          );
-          expect(tester.terminalState, containsText('Decorated Box'));
-          expect(tester.terminalState, containsText('Phase: 1'));
+        // Change to DecoratedBox
+        await tester.pumpWidget(TestReplacementWidget(phase: 1));
+        expect(tester.terminalState, containsText('Decorated Box'));
+        expect(tester.terminalState, containsText('Phase: 1'));
 
-          // Change back to Text
-          await tester.pumpWidget(
-            TestReplacementWidget(phase: 2),
-          );
-          expect(tester.terminalState, containsText('Back to Text Widget'));
-          expect(tester.terminalState, containsText('Phase: 2'));
-        },
-      );
+        // Change back to Text
+        await tester.pumpWidget(TestReplacementWidget(phase: 2));
+        expect(tester.terminalState, containsText('Back to Text Widget'));
+        expect(tester.terminalState, containsText('Phase: 2'));
+      });
     });
 
     test('stateful widget replacement', () async {
-      await testCinder(
-        'stateful replacement',
-        (tester) async {
-          await tester.pumpWidget(const StatefulReplacementTest());
+      await testCinder('stateful replacement', (tester) async {
+        await tester.pumpWidget(const StatefulReplacementTest());
 
-          // Initial state
-          expect(tester.terminalState, containsText('State: 0'));
-          expect(tester.terminalState, containsText('Text Widget'));
+        // Initial state
+        expect(tester.terminalState, containsText('State: 0'));
+        expect(tester.terminalState, containsText('Text Widget'));
 
-          // After multiple pumps, the state should change
-          // Note: In a real test environment, we'd need to trigger state changes
-          // through user input or timers
-        },
-      );
+        // After multiple pumps, the state should change
+        // Note: In a real test environment, we'd need to trigger state changes
+        // through user input or timers
+      });
     });
 
     test('conditional widget rendering', () async {
-      await testCinder(
-        'conditional rendering',
-        (tester) async {
-          // Show first widget
-          await tester.pumpWidget(
-            ConditionalWidget(showFirst: true),
-          );
-          expect(tester.terminalState, containsText('First Widget'));
+      await testCinder('conditional rendering', (tester) async {
+        // Show first widget
+        await tester.pumpWidget(ConditionalWidget(showFirst: true));
+        expect(tester.terminalState, containsText('First Widget'));
 
-          // Switch to second widget
-          await tester.pumpWidget(
-            ConditionalWidget(showFirst: false),
-          );
-          expect(tester.terminalState, containsText('Second Widget'));
-          expect(tester.terminalState, isNot(containsText('First Widget')));
-        },
-      );
+        // Switch to second widget
+        await tester.pumpWidget(ConditionalWidget(showFirst: false));
+        expect(tester.terminalState, containsText('Second Widget'));
+        expect(tester.terminalState, isNot(containsText('First Widget')));
+      });
     });
 
     test('list widget replacement', () async {
-      await testCinder(
-        'list replacement',
-        (tester) async {
-          // Initial list
-          await tester.pumpWidget(
-            Column(
-              children: [
-                Text('Item 1'),
-                Text('Item 2'),
-                Text('Item 3'),
-              ],
-            ),
-          );
-          expect(tester.terminalState, containsText('Item 1'));
-          expect(tester.terminalState, containsText('Item 2'));
-          expect(tester.terminalState, containsText('Item 3'));
+      await testCinder('list replacement', (tester) async {
+        // Initial list
+        await tester.pumpWidget(
+          Column(children: [Text('Item 1'), Text('Item 2'), Text('Item 3')]),
+        );
+        expect(tester.terminalState, containsText('Item 1'));
+        expect(tester.terminalState, containsText('Item 2'));
+        expect(tester.terminalState, containsText('Item 3'));
 
-          // Replace with different widgets
-          await tester.pumpWidget(
-            Column(
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                    border: BoxBorder.all(color: Colors.blue),
-                  ),
-                  child: Text('New Item 1'),
+        // Replace with different widgets
+        await tester.pumpWidget(
+          Column(
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  border: BoxBorder.all(color: Colors.blue),
                 ),
-                Text('Item 2'), // Keep this one
-                Container(
-                  color: Color.fromRGB(0, 64, 0),
-                  child: Text('New Item 3'),
-                ),
-              ],
-            ),
-          );
-          expect(tester.terminalState, containsText('New Item 1'));
-          expect(tester.terminalState, containsText('Item 2'));
-          expect(tester.terminalState, containsText('New Item 3'));
-        },
-      );
+                child: Text('New Item 1'),
+              ),
+              Text('Item 2'), // Keep this one
+              Container(
+                color: Color.fromRGB(0, 64, 0),
+                child: Text('New Item 3'),
+              ),
+            ],
+          ),
+        );
+        expect(tester.terminalState, containsText('New Item 1'));
+        expect(tester.terminalState, containsText('Item 2'));
+        expect(tester.terminalState, containsText('New Item 3'));
+      });
     });
 
     test('nested widget replacement', () async {
-      await testCinder(
-        'nested replacement',
-        (tester) async {
-          // Initial nested structure
-          await tester.pumpWidget(
-            Container(
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Text('A'),
-                      Text('B'),
-                    ],
-                  ),
-                ],
-              ),
+      await testCinder('nested replacement', (tester) async {
+        // Initial nested structure
+        await tester.pumpWidget(
+          Container(
+            child: Column(
+              children: [
+                Row(children: [Text('A'), Text('B')]),
+              ],
             ),
-          );
-          expect(tester.terminalState, containsText('A'));
-          expect(tester.terminalState, containsText('B'));
+          ),
+        );
+        expect(tester.terminalState, containsText('A'));
+        expect(tester.terminalState, containsText('B'));
 
-          // Replace inner structure
-          await tester.pumpWidget(
-            Container(
-              child: Column(
-                children: [
-                  Center(
-                    child: Text('Replaced'),
-                  ),
-                ],
-              ),
-            ),
-          );
-          expect(tester.terminalState, containsText('Replaced'));
-          expect(tester.terminalState, isNot(containsText('A')));
-          expect(tester.terminalState, isNot(containsText('B')));
-        },
-      );
+        // Replace inner structure
+        await tester.pumpWidget(
+          Container(
+            child: Column(children: [Center(child: Text('Replaced'))]),
+          ),
+        );
+        expect(tester.terminalState, containsText('Replaced'));
+        expect(tester.terminalState, isNot(containsText('A')));
+        expect(tester.terminalState, isNot(containsText('B')));
+      });
     });
 
     // Visual test for manual inspection
-    test('replacement visual test',
-        skip: 'Run with debugPrintAfterPump for visual inspection', () async {
-      await testCinder(
-        'replacement visual',
-        (tester) async {
-          // Show different phases visually
-          print('Phase 0 - Text Widget:');
-          await tester.pumpWidget(
-            TestReplacementWidget(phase: 0),
-          );
+    test(
+      'replacement visual test',
+      skip: 'Run with debugPrintAfterPump for visual inspection',
+      () async {
+        await testCinder(
+          'replacement visual',
+          (tester) async {
+            // Show different phases visually
+            print('Phase 0 - Text Widget:');
+            await tester.pumpWidget(TestReplacementWidget(phase: 0));
 
-          await Future.delayed(Duration(milliseconds: 100));
+            await Future.delayed(Duration(milliseconds: 100));
 
-          print('\nPhase 1 - DecoratedBox:');
-          await tester.pumpWidget(
-            TestReplacementWidget(phase: 1),
-          );
+            print('\nPhase 1 - DecoratedBox:');
+            await tester.pumpWidget(TestReplacementWidget(phase: 1));
 
-          await Future.delayed(Duration(milliseconds: 100));
+            await Future.delayed(Duration(milliseconds: 100));
 
-          print('\nPhase 2 - Back to Text:');
-          await tester.pumpWidget(
-            TestReplacementWidget(phase: 2),
-          );
-        },
-        // debugPrintAfterPump: true, // Uncomment to see visual output
-      );
-    });
+            print('\nPhase 2 - Back to Text:');
+            await tester.pumpWidget(TestReplacementWidget(phase: 2));
+          },
+          // debugPrintAfterPump: true, // Uncomment to see visual output
+        );
+      },
+    );
   });
 }
 

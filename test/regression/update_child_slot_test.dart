@@ -28,7 +28,8 @@ void main() {
         expect(
           tester.terminalState,
           containsText('AAA'),
-          reason: 'After reordering const children, the new last child '
+          reason:
+              'After reordering const children, the new last child '
               'should paint on top',
         );
       });

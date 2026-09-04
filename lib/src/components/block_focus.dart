@@ -15,11 +15,7 @@ class BlockFocus extends StatelessWidget {
   /// The child widget tree.
   final Widget child;
 
-  const BlockFocus({
-    super.key,
-    this.blocking = true,
-    required this.child,
-  });
+  const BlockFocus({super.key, this.blocking = true, required this.child});
 
   @override
   Widget build(BuildContext context) {

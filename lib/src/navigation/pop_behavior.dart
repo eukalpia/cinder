@@ -1,4 +1,4 @@
-import 'package:cinder/cinder_test.dart';
+import '../keyboard/logical_key.dart';
 
 import 'route.dart';
 
@@ -44,7 +44,13 @@ class PopBehavior {
     if (key == LogicalKey.backspace && backspaceEnabled) {
       return true; // Backspace
     }
-    if (customPopKey != null && key.debugName == customPopKey) return true;
+    final customKey = customPopKey;
+    if (customKey != null &&
+        (key.debugName == customKey ||
+            (customKey.runes.length == 1 &&
+                key == LogicalKey.fromCharacter(customKey)))) {
+      return true;
+    }
     return false;
   }
 }

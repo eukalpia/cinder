@@ -4,13 +4,13 @@ Cinder is a terminal framework, not a collection of screenshots. Changes must pr
 
 ## Branch flow
 
-Create feature and fix branches from `dev` unless a release-maintenance change explicitly targets another branch.
+Create a focused feature, fix, or release-maintenance branch from `main` and
+submit a pull request back to `main`. The repository currently has one permanent
+branch; additional promotion branches are not required.
 
-```text
-feature/* → dev → test → main
-```
-
-Do not develop directly on `main`.
+Do not merge while the CI, benchmark, or documentation checks fail. See
+[the release checklist](doc/release.md) for the distinction between a release
+candidate and a stable release.
 
 ## Local setup
 
@@ -32,9 +32,8 @@ npm ci
 Run the relevant checks before opening a pull request:
 
 ```bash
-dart format --output=none --set-exit-if-changed lib test example benchmark packages
-dart analyze --fatal-infos
-dart test
+dart pub get
+dart tool/check.dart
 ```
 
 For public-site, documentation, example, browser-backend, or routing changes:

@@ -58,4 +58,44 @@ void main() {
 
     expect(() => scope.add(() {}), throwsStateError);
   });
+
+  test('concurrent disposal waits for the same resource cleanup', () async {
+    final scope = CinderResourceScope();
+    final release = Completer<void>();
+    var cleanupFinished = false;
+    scope.add(() async {
+      await release.future;
+      cleanupFinished = true;
+    });
+
+    final firstDisposal = scope.dispose();
+    var secondDisposalFinished = false;
+    final secondDisposal = scope.dispose().then((_) {
+      secondDisposalFinished = true;
+    });
+    await Future<void>.delayed(Duration.zero);
+
+    try {
+      expect(secondDisposalFinished, isFalse);
+    } finally {
+      release.complete();
+      await Future.wait([firstDisposal, secondDisposal]);
+    }
+    expect(cleanupFinished, isTrue);
+  });
+
+  test('concurrent disposal reports the same cleanup failure', () async {
+    final scope = CinderResourceScope();
+    final release = Completer<void>();
+    final error = StateError('cleanup failed');
+    scope.add(() async {
+      await release.future;
+      throw error;
+    });
+
+    final firstDisposal = expectLater(scope.dispose(), throwsA(same(error)));
+    final secondDisposal = expectLater(scope.dispose(), throwsA(same(error)));
+    release.complete();
+    await Future.wait([firstDisposal, secondDisposal]);
+  });
 }

@@ -110,9 +110,7 @@ void main() {
     test('stopPropagation prevents later phases', () {
       var targetCalled = false;
       final router = InputRouter(
-        capture: <InputHandler>[
-          (_, __) => InputDisposition.stopPropagation,
-        ],
+        capture: <InputHandler>[(_, __) => InputDisposition.stopPropagation],
         target: <InputHandler>[
           (_, __) {
             targetCalled = true;

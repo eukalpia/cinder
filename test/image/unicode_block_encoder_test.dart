@@ -73,8 +73,11 @@ void main() {
           pixels4x4[i + 2] = 200;
           pixels4x4[i + 3] = 255;
         }
-        final result4x4 =
-            encoder.encode(pixels: pixels4x4, width: 4, height: 4);
+        final result4x4 = encoder.encode(
+          pixels: pixels4x4,
+          width: 4,
+          height: 4,
+        );
         expect(result4x4.length, 2); // height 4 -> 2 rows
         expect(result4x4[0].length, 4); // width stays 4
 
@@ -86,8 +89,11 @@ void main() {
           pixels4x5[i + 2] = 200;
           pixels4x5[i + 3] = 255;
         }
-        final result4x5 =
-            encoder.encode(pixels: pixels4x5, width: 4, height: 5);
+        final result4x5 = encoder.encode(
+          pixels: pixels4x5,
+          width: 4,
+          height: 5,
+        );
         expect(result4x5.length, 3); // height 5 -> 3 rows (ceil(5/2))
         expect(result4x5[0].length, 4);
 
@@ -99,8 +105,11 @@ void main() {
           pixels4x1[i + 2] = 200;
           pixels4x1[i + 3] = 255;
         }
-        final result4x1 =
-            encoder.encode(pixels: pixels4x1, width: 4, height: 1);
+        final result4x1 = encoder.encode(
+          pixels: pixels4x1,
+          width: 4,
+          height: 1,
+        );
         expect(result4x1.length, 1); // height 1 -> 1 row
         expect(result4x1[0].length, 4);
       });
@@ -124,7 +133,9 @@ void main() {
           expect(cell.char, UnicodeBlockEncoder.lowerHalf);
           expect(cell.foreground.green, 255); // green for bottom pixels
           expect(
-              cell.background.isDefault, true); // default for transparent top
+            cell.background.isDefault,
+            true,
+          ); // default for transparent top
         }
       });
 
@@ -149,40 +160,48 @@ void main() {
         }
       });
 
-      test('handles odd height (last row uses same color for top and bottom)',
-          () {
-        // Create a 1x3 image (odd height)
-        final pixels = Uint8List.fromList([
-          255, 0, 0, 255, // (0,0) red
-          0, 255, 0, 255, // (0,1) green
-          0, 0, 255, 255, // (0,2) blue
-        ]);
+      test(
+        'handles odd height (last row uses same color for top and bottom)',
+        () {
+          // Create a 1x3 image (odd height)
+          final pixels = Uint8List.fromList([
+            255, 0, 0, 255, // (0,0) red
+            0, 255, 0, 255, // (0,1) green
+            0, 0, 255, 255, // (0,2) blue
+          ]);
 
-        const encoder = UnicodeBlockEncoder();
-        final result = encoder.encode(pixels: pixels, width: 1, height: 3);
+          const encoder = UnicodeBlockEncoder();
+          final result = encoder.encode(pixels: pixels, width: 1, height: 3);
 
-        // Should produce 2 rows (ceil(3/2))
-        expect(result.length, 2);
+          // Should produce 2 rows (ceil(3/2))
+          expect(result.length, 2);
 
-        // First row: red on top, green on bottom
-        expect(result[0][0].char, UnicodeBlockEncoder.upperHalf);
-        expect(result[0][0].foreground.red, 255); // red
-        expect(result[0][0].background.green, 255); // green
+          // First row: red on top, green on bottom
+          expect(result[0][0].char, UnicodeBlockEncoder.upperHalf);
+          expect(result[0][0].foreground.red, 255); // red
+          expect(result[0][0].background.green, 255); // green
 
-        // Second row: blue only (uses blue for both since no bottom pixel)
-        expect(result[1][0].char, UnicodeBlockEncoder.space);
-        expect(result[1][0].background.blue, 255);
-      });
+          // Second row: blue only (uses blue for both since no bottom pixel)
+          expect(result[1][0].char, UnicodeBlockEncoder.space);
+          expect(result[1][0].background.blue, 255);
+        },
+      );
 
       test('handles empty dimensions', () {
         const encoder = UnicodeBlockEncoder();
 
         expect(
-            encoder.encode(pixels: Uint8List(0), width: 0, height: 0), isEmpty);
+          encoder.encode(pixels: Uint8List(0), width: 0, height: 0),
+          isEmpty,
+        );
         expect(
-            encoder.encode(pixels: Uint8List(0), width: 0, height: 5), isEmpty);
+          encoder.encode(pixels: Uint8List(0), width: 0, height: 5),
+          isEmpty,
+        );
         expect(
-            encoder.encode(pixels: Uint8List(0), width: 5, height: 0), isEmpty);
+          encoder.encode(pixels: Uint8List(0), width: 5, height: 0),
+          isEmpty,
+        );
       });
     });
 
@@ -264,8 +283,11 @@ void main() {
         // Should only have one background color code, not 4
         // Match either 24-bit or 256-color format
         final bgMatches = RegExp(r'\x1b\[48;[25];').allMatches(rows[0]).length;
-        expect(bgMatches, 1,
-            reason: 'Background color should only be set once');
+        expect(
+          bgMatches,
+          1,
+          reason: 'Background color should only be set once',
+        );
       });
     });
 
@@ -388,14 +410,20 @@ void main() {
 
         // With default threshold (128), red should be transparent
         const defaultEncoder = UnicodeBlockEncoder();
-        final defaultResult =
-            defaultEncoder.encode(pixels: pixels, width: 2, height: 2);
+        final defaultResult = defaultEncoder.encode(
+          pixels: pixels,
+          width: 2,
+          height: 2,
+        );
         expect(defaultResult[0][0].char, UnicodeBlockEncoder.lowerHalf);
 
         // With threshold of 50, red should be visible
         const lowThresholdEncoder = UnicodeBlockEncoder(alphaThreshold: 50);
-        final lowResult =
-            lowThresholdEncoder.encode(pixels: pixels, width: 2, height: 2);
+        final lowResult = lowThresholdEncoder.encode(
+          pixels: pixels,
+          width: 2,
+          height: 2,
+        );
         expect(lowResult[0][0].char, UnicodeBlockEncoder.upperHalf);
         expect(lowResult[0][0].foreground.red, 255); // red is now visible
       });

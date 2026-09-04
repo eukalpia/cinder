@@ -1,6 +1,6 @@
 import { defineConfig, devices } from '@playwright/test';
 
-const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? '/cinder';
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? '';
 const baseURL = `http://127.0.0.1:4173${basePath}/`;
 
 export default defineConfig({

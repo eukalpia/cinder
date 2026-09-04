@@ -42,8 +42,10 @@ class Navigator extends StatefulWidget {
     this.onUnknownRoute,
     this.popBehavior = const PopBehavior(),
     this.observers = const [],
-  }) : assert(home != null || routes != null || onGenerateRoute != null,
-            'Either home, routes, or onGenerateRoute must be provided');
+  }) : assert(
+         home != null || routes != null || onGenerateRoute != null,
+         'Either home, routes, or onGenerateRoute must be provided',
+       );
 
   @override
   State<Navigator> createState() => NavigatorState();
@@ -110,8 +112,10 @@ class NavigatorState extends State<Navigator> {
   }
 
   void _buildInitialRouteStack(String initialRoute) {
-    final segments =
-        initialRoute.split('/').where((s) => s.isNotEmpty).toList();
+    final segments = initialRoute
+        .split('/')
+        .where((s) => s.isNotEmpty)
+        .toList();
 
     // Always start with home route if available
     if (widget.home != null || (widget.routes?.containsKey('/') ?? false)) {
@@ -140,10 +144,7 @@ class NavigatorState extends State<Navigator> {
     if (settings.name != null && widget.routes != null) {
       final builder = widget.routes![settings.name];
       if (builder != null) {
-        return PageRoute(
-          builder: builder,
-          settings: settings,
-        );
+        return PageRoute(builder: builder, settings: settings);
       }
     }
 
@@ -179,7 +180,9 @@ class NavigatorState extends State<Navigator> {
     // Notify observers
     for (final observer in widget.observers) {
       observer.didPush(
-          route, _routes.length > 1 ? _routes[_routes.length - 2] : null);
+        route,
+        _routes.length > 1 ? _routes[_routes.length - 2] : null,
+      );
     }
 
     final completer = Completer<T?>();
@@ -254,8 +257,11 @@ class NavigatorState extends State<Navigator> {
   }
 
   /// Push a named route and replace the current top route
-  Future<T?> pushReplacementNamed<T, TO>(String name,
-      {Object? arguments, TO? result}) {
+  Future<T?> pushReplacementNamed<T, TO>(
+    String name, {
+    Object? arguments,
+    TO? result,
+  }) {
     final settings = RouteSettings(name: name, arguments: arguments);
     final route = _createRoute(settings);
 
@@ -267,8 +273,11 @@ class NavigatorState extends State<Navigator> {
   }
 
   /// Push a widget and replace the current top route
-  Future<T?> pushReplacementWidget<T, TO>(Widget widget,
-      {String? name, TO? result}) {
+  Future<T?> pushReplacementWidget<T, TO>(
+    Widget widget, {
+    String? name,
+    TO? result,
+  }) {
     final route = PageRoute<T>(
       builder: (context) => widget,
       settings: RouteSettings(name: name),
@@ -399,10 +408,7 @@ class NavigatorState extends State<Navigator> {
     return KeyboardListener(
       onKeyEvent: _handleKeyPress,
       autofocus: true,
-      child: Overlay(
-        key: _overlayKey,
-        initialEntries: allEntries,
-      ),
+      child: Overlay(key: _overlayKey, initialEntries: allEntries),
     );
   }
 }

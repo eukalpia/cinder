@@ -2,11 +2,7 @@ import 'package:cinder/cinder.dart';
 import 'package:cinder/src/framework/terminal_canvas.dart';
 
 /// Title alignment options for border titles
-enum TitleAlignment {
-  left,
-  center,
-  right,
-}
+enum TitleAlignment { left, center, right }
 
 /// Configuration for a title embedded in a border
 class BorderTitle {
@@ -21,8 +17,8 @@ class BorderTitle {
   const BorderTitle.rich({
     required InlineSpan this.textSpan,
     this.alignment = TitleAlignment.left,
-  })  : text = '',
-        style = null;
+  }) : text = '',
+       style = null;
 
   /// Plain text for the title. Used when [textSpan] is null.
   final String text;
@@ -101,14 +97,7 @@ class BorderSide {
 }
 
 /// Border style options
-enum BoxBorderStyle {
-  none,
-  solid,
-  dashed,
-  dotted,
-  double,
-  rounded,
-}
+enum BoxBorderStyle { none, solid, dashed, dotted, double, rounded }
 
 /// Box border configuration
 class BoxBorder {
@@ -123,10 +112,10 @@ class BoxBorder {
     Color color = _defaultBorderColor,
     double width = 1.0,
     BoxBorderStyle style = BoxBorderStyle.solid,
-  })  : top = BorderSide(color: color, width: width, style: style),
-        right = BorderSide(color: color, width: width, style: style),
-        bottom = BorderSide(color: color, width: width, style: style),
-        left = BorderSide(color: color, width: width, style: style);
+  }) : top = BorderSide(color: color, width: width, style: style),
+       right = BorderSide(color: color, width: width, style: style),
+       bottom = BorderSide(color: color, width: width, style: style),
+       left = BorderSide(color: color, width: width, style: style);
 
   final BorderSide top;
   final BorderSide right;
@@ -141,8 +130,9 @@ class BoxBorder {
     return BoxBorder(
       top: top.usesDefaultColor ? top.copyWith(color: themeColor) : top,
       right: right.usesDefaultColor ? right.copyWith(color: themeColor) : right,
-      bottom:
-          bottom.usesDefaultColor ? bottom.copyWith(color: themeColor) : bottom,
+      bottom: bottom.usesDefaultColor
+          ? bottom.copyWith(color: themeColor)
+          : bottom,
       left: left.usesDefaultColor ? left.copyWith(color: themeColor) : left,
     );
   }
@@ -199,16 +189,16 @@ class BorderRadius {
   });
 
   const BorderRadius.all(Radius radius)
-      : topLeft = radius,
-        topRight = radius,
-        bottomLeft = radius,
-        bottomRight = radius;
+    : topLeft = radius,
+      topRight = radius,
+      bottomLeft = radius,
+      bottomRight = radius;
 
   BorderRadius.circular(double radius)
-      : topLeft = Radius.circular(radius),
-        topRight = Radius.circular(radius),
-        bottomLeft = Radius.circular(radius),
-        bottomRight = Radius.circular(radius);
+    : topLeft = Radius.circular(radius),
+      topRight = Radius.circular(radius),
+      bottomLeft = Radius.circular(radius),
+      bottomRight = Radius.circular(radius);
 
   final Radius topLeft;
   final Radius topRight;
@@ -239,9 +229,7 @@ class BorderRadius {
 
 /// Radius configuration
 class Radius {
-  const Radius.circular(double radius)
-      : x = radius,
-        y = radius;
+  const Radius.circular(double radius) : x = radius, y = radius;
   const Radius.elliptical(this.x, this.y);
 
   final double x;
@@ -322,23 +310,20 @@ class BoxDecoration {
 
   @override
   int get hashCode => Object.hash(
-        color,
-        image,
-        border,
-        borderRadius,
-        boxShadow != null ? Object.hashAll(boxShadow!) : null,
-        gradient,
-        backgroundBlendMode,
-        shape,
-        title,
-      );
+    color,
+    image,
+    border,
+    borderRadius,
+    boxShadow != null ? Object.hashAll(boxShadow!) : null,
+    gradient,
+    backgroundBlendMode,
+    shape,
+    title,
+  );
 }
 
 /// Shape of the box
-enum BoxShape {
-  rectangle,
-  circle,
-}
+enum BoxShape { rectangle, circle }
 
 /// Decoration image (placeholder for future implementation)
 class DecorationImage {
@@ -397,20 +382,15 @@ class LinearGradient extends Gradient {
 
   @override
   int get hashCode => Object.hash(
-        begin,
-        end,
-        Object.hashAll(colors),
-        stops != null ? Object.hashAll(stops!) : null,
-      );
+    begin,
+    end,
+    Object.hashAll(colors),
+    stops != null ? Object.hashAll(stops!) : null,
+  );
 }
 
 /// Blend mode (placeholder)
-enum BlendMode {
-  normal,
-  multiply,
-  screen,
-  overlay,
-}
+enum BlendMode { normal, multiply, screen, overlay }
 
 /// RenderObject that applies decoration to its child
 class RenderDecoratedBox extends RenderObject
@@ -418,8 +398,8 @@ class RenderDecoratedBox extends RenderObject
   RenderDecoratedBox({
     required BoxDecoration decoration,
     DecorationPosition position = DecorationPosition.background,
-  })  : _decoration = decoration,
-        _position = position;
+  }) : _decoration = decoration,
+       _position = position;
 
   BoxDecoration _decoration;
   BoxDecoration get decoration => _decoration;
@@ -485,8 +465,12 @@ class RenderDecoratedBox extends RenderObject
     if (!size.width.isFinite || !size.height.isFinite) return;
 
     // Create rect in absolute canvas coordinates for background
-    final absoluteRect =
-        Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height);
+    final absoluteRect = Rect.fromLTWH(
+      offset.dx,
+      offset.dy,
+      size.width,
+      size.height,
+    );
 
     // Paint background color
     if (_decoration.color != null) {
@@ -506,13 +490,14 @@ class RenderDecoratedBox extends RenderObject
   }
 
   void _setCell(
-      TerminalCanvas canvas, int x, int y, String char, TextStyle style) {
+    TerminalCanvas canvas,
+    int x,
+    int y,
+    String char,
+    TextStyle style,
+  ) {
     // Use drawText with a single character at the given position
-    canvas.drawText(
-      Offset(x.toDouble(), y.toDouble()),
-      char,
-      style: style,
-    );
+    canvas.drawText(Offset(x.toDouble(), y.toDouble()), char, style: style);
   }
 
   void _paintBorder(TerminalCanvas canvas, Offset offset, BoxBorder border) {
@@ -530,8 +515,10 @@ class RenderDecoratedBox extends RenderObject
 
     // Paint top border
     if (!border.top.isNone) {
-      final borderStyle =
-          TextStyle(color: border.top.color, backgroundColor: borderBackground);
+      final borderStyle = TextStyle(
+        color: border.top.color,
+        backgroundColor: borderBackground,
+      );
       if (left == right) {
         // Special case: width is 1
         // Determine which character to use based on what borders exist
@@ -550,8 +537,9 @@ class RenderDecoratedBox extends RenderObject
         _setCell(canvas, left, top, charToUse, borderStyle);
       } else {
         // Use corner only if left border connects, otherwise use horizontal
-        final leftTopChar =
-            !border.left.isNone ? chars.topLeft : chars.horizontal;
+        final leftTopChar = !border.left.isNone
+            ? chars.topLeft
+            : chars.horizontal;
         _setCell(canvas, left, top, leftTopChar, borderStyle);
 
         // Check if we have a title to render
@@ -613,14 +601,20 @@ class RenderDecoratedBox extends RenderObject
             // Paint left horizontal chars
             for (int i = 0; i < leftBorderLen; i++) {
               _setCell(
-                  canvas, left + 1 + i, top, chars.horizontal, borderStyle);
+                canvas,
+                left + 1 + i,
+                top,
+                chars.horizontal,
+                borderStyle,
+              );
             }
 
             // Paint title
             if (title.textSpan != null) {
               // Rich text - paint with per-character styles
-              final styledSegments =
-                  title.textSpan!.toStyledSegments(titleStyle);
+              final styledSegments = title.textSpan!.toStyledSegments(
+                titleStyle,
+              );
               // Paint leading space
               _setCell(canvas, titleStartX, top, ' ', titleStyle);
               // Paint styled characters
@@ -628,23 +622,40 @@ class RenderDecoratedBox extends RenderObject
                   displayTitle.length - 2; // Minus padding spaces
               int charIndex = 0;
               for (final segment in styledSegments) {
-                for (int i = 0;
-                    i < segment.text.length && charIndex < contentLen;
-                    i++) {
-                  _setCell(canvas, titleStartX + 1 + charIndex, top,
-                      segment.text[i], segment.style ?? titleStyle);
+                for (
+                  int i = 0;
+                  i < segment.text.length && charIndex < contentLen;
+                  i++
+                ) {
+                  _setCell(
+                    canvas,
+                    titleStartX + 1 + charIndex,
+                    top,
+                    segment.text[i],
+                    segment.style ?? titleStyle,
+                  );
                   charIndex++;
                 }
                 if (charIndex >= contentLen) break;
               }
               // Paint trailing space
-              _setCell(canvas, titleStartX + displayTitle.length - 1, top, ' ',
-                  titleStyle);
+              _setCell(
+                canvas,
+                titleStartX + displayTitle.length - 1,
+                top,
+                ' ',
+                titleStyle,
+              );
             } else {
               // Plain text - use single style
               for (int i = 0; i < displayTitle.length; i++) {
                 _setCell(
-                    canvas, titleStartX + i, top, displayTitle[i], titleStyle);
+                  canvas,
+                  titleStartX + i,
+                  top,
+                  displayTitle[i],
+                  titleStyle,
+                );
               }
             }
 
@@ -652,7 +663,12 @@ class RenderDecoratedBox extends RenderObject
             final rightStartX = titleStartX + titleWidth;
             for (int i = 0; i < rightBorderLen; i++) {
               _setCell(
-                  canvas, rightStartX + i, top, chars.horizontal, borderStyle);
+                canvas,
+                rightStartX + i,
+                top,
+                chars.horizontal,
+                borderStyle,
+              );
             }
           } else {
             // Title too short, render normal border
@@ -668,8 +684,9 @@ class RenderDecoratedBox extends RenderObject
         }
 
         // Use corner only if right border connects, otherwise use horizontal
-        final rightTopChar =
-            !border.right.isNone ? chars.topRight : chars.horizontal;
+        final rightTopChar = !border.right.isNone
+            ? chars.topRight
+            : chars.horizontal;
         _setCell(canvas, right, top, rightTopChar, borderStyle);
       }
     }
@@ -677,7 +694,9 @@ class RenderDecoratedBox extends RenderObject
     // Paint bottom border
     if (!border.bottom.isNone && bottom > top) {
       final style = TextStyle(
-          color: border.bottom.color, backgroundColor: borderBackground);
+        color: border.bottom.color,
+        backgroundColor: borderBackground,
+      );
       if (left == right) {
         // Special case: width is 1
         // Determine which character to use based on what borders exist
@@ -696,15 +715,17 @@ class RenderDecoratedBox extends RenderObject
         _setCell(canvas, left, bottom, charToUse, style);
       } else {
         // Use corner only if left border connects, otherwise use horizontal
-        final leftBottomChar =
-            !border.left.isNone ? chars.bottomLeft : chars.horizontal;
+        final leftBottomChar = !border.left.isNone
+            ? chars.bottomLeft
+            : chars.horizontal;
         _setCell(canvas, left, bottom, leftBottomChar, style);
         for (int x = left + 1; x < right; x++) {
           _setCell(canvas, x, bottom, chars.horizontal, style);
         }
         // Use corner only if right border connects, otherwise use horizontal
-        final rightBottomChar =
-            !border.right.isNone ? chars.bottomRight : chars.horizontal;
+        final rightBottomChar = !border.right.isNone
+            ? chars.bottomRight
+            : chars.horizontal;
         _setCell(canvas, right, bottom, rightBottomChar, style);
       }
     }
@@ -712,7 +733,9 @@ class RenderDecoratedBox extends RenderObject
     // Paint left border
     if (!border.left.isNone) {
       final style = TextStyle(
-          color: border.left.color, backgroundColor: borderBackground);
+        color: border.left.color,
+        backgroundColor: borderBackground,
+      );
       // Only paint vertical lines if there's space between top and bottom
       if (bottom > top) {
         for (int y = top + 1; y < bottom; y++) {
@@ -724,7 +747,9 @@ class RenderDecoratedBox extends RenderObject
     // Paint right border
     if (!border.right.isNone && right > left) {
       final style = TextStyle(
-          color: border.right.color, backgroundColor: borderBackground);
+        color: border.right.color,
+        backgroundColor: borderBackground,
+      );
       // Only paint vertical lines if there's space between top and bottom
       if (bottom > top) {
         for (int y = top + 1; y < bottom; y++) {
@@ -856,10 +881,7 @@ class _BorderCharacters {
 }
 
 /// Position of the decoration relative to the child
-enum DecorationPosition {
-  background,
-  foreground,
-}
+enum DecorationPosition { background, foreground }
 
 /// Widget that paints a decoration either before or after its child
 class DecoratedBox extends SingleChildRenderObjectWidget {
@@ -884,7 +906,9 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(
-      BuildContext context, RenderDecoratedBox renderObject) {
+    BuildContext context,
+    RenderDecoratedBox renderObject,
+  ) {
     final theme = TuiTheme.of(context);
     renderObject
       ..decoration = decoration.withThemeColor(theme.outline)
@@ -939,10 +963,7 @@ class Container extends StatelessWidget {
         (constraints == null ||
             !constraints!.hasBoundedWidth ||
             !constraints!.hasBoundedHeight)) {
-      current = const LimitedBox(
-        maxWidth: 0.0,
-        maxHeight: 0.0,
-      );
+      current = const LimitedBox(maxWidth: 0.0, maxHeight: 0.0);
     }
 
     if (alignment != null) {

@@ -53,10 +53,7 @@ class MouseTracker {
   final Set<MouseButton> _pressedButtons = {};
 
   /// Update the hovered annotations based on hit test results and dispatch events.
-  void updateAnnotations(
-    MouseHitTestResult hitTestResult,
-    MouseEvent event,
-  ) {
+  void updateAnnotations(MouseHitTestResult hitTestResult, MouseEvent event) {
     _updatePressedButtons(event);
     final effectiveEvent = _eventWithButtons(event);
 

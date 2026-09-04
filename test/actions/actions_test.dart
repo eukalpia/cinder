@@ -6,40 +6,42 @@ final class _SaveIntent extends Intent {
 }
 
 void main() {
-  test('Shortcuts resolves an intent through the nearest Actions scope',
-      () async {
-    var invocations = 0;
-    await testCinder('actions and shortcuts', (tester) async {
-      await tester.pumpWidget(
-        Actions(
-          actions: <Type, Action<dynamic>>{
-            _SaveIntent: CallbackAction<_SaveIntent>(
-              onInvoke: (_) {
-                invocations++;
-                return null;
-              },
-            ),
-          },
-          child: Shortcuts(
-            autofocus: true,
-            shortcuts: <ShortcutActivator, Intent>{
-              const SingleActivator(LogicalKey.keyS, control: true):
-                  const _SaveIntent(),
+  test(
+    'Shortcuts resolves an intent through the nearest Actions scope',
+    () async {
+      var invocations = 0;
+      await testCinder('actions and shortcuts', (tester) async {
+        await tester.pumpWidget(
+          Actions(
+            actions: <Type, Action<dynamic>>{
+              _SaveIntent: CallbackAction<_SaveIntent>(
+                onInvoke: (_) {
+                  invocations++;
+                  return null;
+                },
+              ),
             },
-            child: const Text('Editor'),
+            child: Shortcuts(
+              autofocus: true,
+              shortcuts: <ShortcutActivator, Intent>{
+                const SingleActivator(LogicalKey.keyS, control: true):
+                    const _SaveIntent(),
+              },
+              child: const Text('Editor'),
+            ),
           ),
-        ),
-      );
+        );
 
-      await tester.sendKeyEvent(
-        const KeyboardEvent(
-          logicalKey: LogicalKey.keyS,
-          modifiers: ModifierKeys(ctrl: true),
-        ),
-      );
-      expect(invocations, 1);
-    });
-  });
+        await tester.sendKeyEvent(
+          const KeyboardEvent(
+            logicalKey: LogicalKey.keyS,
+            modifiers: ModifierKeys(ctrl: true),
+          ),
+        );
+        expect(invocations, 1);
+      });
+    },
+  );
 
   test('Command matching considers labels, categories and keywords', () {
     const command = Command(

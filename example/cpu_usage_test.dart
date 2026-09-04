@@ -86,8 +86,10 @@ class _CpuUsageTestAppState extends State<CpuUsageTestApp> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('CPU Usage Test',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
+                const Text(
+                  'CPU Usage Test',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
                 const Text('Watch cinder logs for frame count'),
               ],
             ),
@@ -112,9 +114,7 @@ class _CpuUsageTestAppState extends State<CpuUsageTestApp> {
           // Test area
           Expanded(
             child: Container(
-              decoration: BoxDecoration(
-                border: BoxBorder.all(),
-              ),
+              decoration: BoxDecoration(border: BoxBorder.all()),
               child: Column(
                 children: [
                   // Spinner area
@@ -159,7 +159,8 @@ class _CpuUsageTestAppState extends State<CpuUsageTestApp> {
                     Expanded(
                       child: Center(
                         child: const Text(
-                            'All features disabled - should be ~0% CPU'),
+                          'All features disabled - should be ~0% CPU',
+                        ),
                       ),
                     ),
                 ],

@@ -71,8 +71,10 @@ class _ProfilingAppState extends State<ProfilingApp> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('Profiling App',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
+                const Text(
+                  'Profiling App',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
                 Text('Frame: $_frameCount'),
               ],
             ),

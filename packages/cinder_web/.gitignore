@@ -32,6 +32,9 @@ migrate_working_dir/
 .pub/
 /build/
 /coverage/
+/web/app.js
+/web/app.js.deps
+/web/app.js.map
 
 # Symbolication related
 app.*.symbols

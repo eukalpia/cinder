@@ -3,7 +3,7 @@ import path from 'node:path';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { ArrowLeft, ArrowUpRight, CircleAlert, Maximize2, Play } from 'lucide-react';
+import { ArrowLeft, ArrowUpRight, CircleAlert, Maximize2 } from 'lucide-react';
 import { DartCode } from '@/components/dart-code';
 import { ExamplePreview } from '@/components/example-preview';
 import { SiteHeader } from '@/components/site-header';

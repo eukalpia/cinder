@@ -21,10 +21,7 @@ class AsciiTextDemo extends StatelessWidget {
 
           // Standard font (default)
           Text('Standard Font:', style: TextStyle(color: Colors.yellow)),
-          AsciiText(
-            'HELLO',
-            style: TextStyle(color: Colors.green),
-          ),
+          AsciiText('HELLO', style: TextStyle(color: Colors.green)),
           SizedBox(height: 1),
 
           // Banner font
@@ -72,10 +69,7 @@ class AsciiTextDemo extends StatelessWidget {
           ),
           SizedBox(height: 2),
 
-          Text(
-            'Press Ctrl+C to exit',
-            style: TextStyle(color: Colors.grey),
-          ),
+          Text('Press Ctrl+C to exit', style: TextStyle(color: Colors.grey)),
         ],
       ),
     );

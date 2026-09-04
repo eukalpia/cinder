@@ -74,8 +74,9 @@ class _CommandPaletteState extends State<CommandPalette> {
         .toList(growable: false);
     void update() {
       _results = matches;
-      _selectedIndex =
-          matches.isEmpty ? 0 : _selectedIndex.clamp(0, matches.length - 1);
+      _selectedIndex = matches.isEmpty
+          ? 0
+          : _selectedIndex.clamp(0, matches.length - 1);
     }
 
     if (rebuild && mounted) {

@@ -150,9 +150,7 @@ void main() {
           // The `)` should be right after the text
 
           // Update with SHORT path - this is where the bug might appear
-          await tester.pumpWidget(
-            _TestToolRenderer(filePath: 'short.dart'),
-          );
+          await tester.pumpWidget(_TestToolRenderer(filePath: 'short.dart'));
 
           print('\n--- Short path ---');
           // If there's a bug, we might see: "(file_path: short.dart      )"
@@ -237,13 +235,7 @@ void main() {
         (tester) async {
           // Render with SizedBox(width: 1)
           await tester.pumpWidget(
-            Row(
-              children: [
-                Text('A'),
-                SizedBox(width: 1),
-                Text('B'),
-              ],
-            ),
+            Row(children: [Text('A'), SizedBox(width: 1), Text('B')]),
           );
 
           print('\n--- Width 1 ---');
@@ -252,13 +244,7 @@ void main() {
 
           // Update with SizedBox(width: 3)
           await tester.pumpWidget(
-            Row(
-              children: [
-                Text('A'),
-                SizedBox(width: 3),
-                Text('B'),
-              ],
-            ),
+            Row(children: [Text('A'), SizedBox(width: 3), Text('B')]),
           );
 
           print('\n--- Width 3 ---');

@@ -38,20 +38,19 @@ abstract class CinderBinding {
   void registerServiceExtension({
     required String name,
     required Future<Map<String, dynamic>> Function(
-            Map<String, String> parameters)
-        callback,
+      Map<String, String> parameters,
+    )
+    callback,
   }) {
     final extensionName = 'ext.cinder.$name';
     if (!_registeredServiceExtensions.add(extensionName)) return;
-    developer.registerExtension(
-      extensionName,
-      (String method, Map<String, String> parameters) async {
-        final result = await callback(parameters);
-        return developer.ServiceExtensionResponse.result(
-          json.encode(result),
-        );
-      },
-    );
+    developer.registerExtension(extensionName, (
+      String method,
+      Map<String, String> parameters,
+    ) async {
+      final result = await callback(parameters);
+      return developer.ServiceExtensionResponse.result(json.encode(result));
+    });
   }
 
   /// Registers a service extension for a boolean value.
@@ -112,9 +111,23 @@ abstract class CinderBinding {
     final root = _rootElement;
     if (root == null) return;
     _rootElement = null;
-    root.deactivate();
-    root.unmount();
-    buildOwner.finalizeTree();
+    Object? firstError;
+    StackTrace? firstStackTrace;
+    try {
+      buildOwner._inactiveElements.add(root);
+    } catch (error, stackTrace) {
+      firstError = error;
+      firstStackTrace = stackTrace;
+    }
+    try {
+      buildOwner.finalizeTree();
+    } catch (error, stackTrace) {
+      firstError ??= error;
+      firstStackTrace ??= stackTrace;
+    }
+    if (firstError != null) {
+      Error.throwWithStackTrace(firstError, firstStackTrace!);
+    }
   }
 
   void scheduleFrame() {
@@ -191,8 +204,10 @@ class InheritedElement extends ProxyElement {
   @override
   void _updateInheritance() {
     _inheritedElements =
-        (_parent?._inheritedElements ?? const PersistentHashMap.empty())
-            .put(widget.runtimeType, this);
+        (_parent?._inheritedElements ?? const PersistentHashMap.empty()).put(
+          widget.runtimeType,
+          this,
+        );
   }
 
   @protected
@@ -209,6 +224,14 @@ class InheritedElement extends ProxyElement {
     setDependencies(dependent, null);
   }
 
+  /// Called before an existing dependent builds, allowing integrations to
+  /// retain resources that the build may reuse.
+  void willBuildDependent(Element dependent) {}
+
+  /// Called after a dependent builds, including the build that first
+  /// registered its dependency, so unused resources can be released.
+  void didBuildDependent(Element dependent) {}
+
   @override
   void notifyClients(covariant InheritedWidget oldWidget) {
     for (final Element dependent in _dependents.keys) {
@@ -218,7 +241,9 @@ class InheritedElement extends ProxyElement {
 
   @protected
   void notifyDependent(
-      covariant InheritedWidget oldWidget, covariant Element dependent) {
+    covariant InheritedWidget oldWidget,
+    covariant Element dependent,
+  ) {
     dependent.didChangeDependencies();
   }
 

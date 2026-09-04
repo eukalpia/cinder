@@ -85,9 +85,7 @@ void main() {
         await testCinder(
           'emoji text rendering',
           (tester) async {
-            await tester.pumpWidget(
-              const Text('Hello 🌍 World'),
-            );
+            await tester.pumpWidget(const Text('Hello 🌍 World'));
 
             // Verify the text is rendered correctly
             expect(tester.terminalState, containsText('Hello'));
@@ -115,9 +113,7 @@ void main() {
         await testCinder(
           'chinese text rendering',
           (tester) async {
-            await tester.pumpWidget(
-              const Text('你好世界'),
-            );
+            await tester.pumpWidget(const Text('你好世界'));
 
             expect(tester.terminalState, containsText('你好世界'));
 
@@ -140,9 +136,7 @@ void main() {
         await testCinder(
           'mixed content rendering',
           (tester) async {
-            await tester.pumpWidget(
-              const Text('Code💻中文🎯End'),
-            );
+            await tester.pumpWidget(const Text('Code💻中文🎯End'));
 
             expect(tester.terminalState, containsText('Code'));
             expect(tester.terminalState, containsText('💻'));
@@ -175,17 +169,13 @@ void main() {
           'emoji differential update',
           (tester) async {
             // First render with emoji
-            await tester.pumpWidget(
-              const Text('Status: 🚀 Loading'),
-            );
+            await tester.pumpWidget(const Text('Status: 🚀 Loading'));
 
             expect(tester.terminalState, containsText('🚀'));
             expect(tester.terminalState, containsText('Loading'));
 
             // Update to different emoji (triggers differential rendering)
-            await tester.pumpWidget(
-              const Text('Status: ✅ Complete'),
-            );
+            await tester.pumpWidget(const Text('Status: ✅ Complete'));
 
             // Verify the new content renders correctly
             expect(tester.terminalState, containsText('✅'));
@@ -201,22 +191,16 @@ void main() {
         await testCinder(
           'chinese differential updates',
           (tester) async {
-            await tester.pumpWidget(
-              const Text('第一次'),
-            );
+            await tester.pumpWidget(const Text('第一次'));
             expect(tester.terminalState, containsText('第一次'));
 
             // Update to different Chinese text
-            await tester.pumpWidget(
-              const Text('第二次'),
-            );
+            await tester.pumpWidget(const Text('第二次'));
             expect(tester.terminalState, containsText('第二次'));
             expect(tester.terminalState, isNot(containsText('一')));
 
             // Update again
-            await tester.pumpWidget(
-              const Text('完成！'),
-            );
+            await tester.pumpWidget(const Text('完成！'));
             expect(tester.terminalState, containsText('完成！'));
           },
           size: const Size(40, 5),
@@ -229,9 +213,7 @@ void main() {
           'wide to narrow replacement',
           (tester) async {
             // Start with emojis (wide)
-            await tester.pumpWidget(
-              const Text('🚀🎉'),
-            );
+            await tester.pumpWidget(const Text('🚀🎉'));
 
             expect(tester.terminalState.getCellAt(0, 0)?.char, '🚀');
             expect(tester.terminalState.getCellAt(1, 0)?.char, '\u200B');
@@ -239,9 +221,7 @@ void main() {
             expect(tester.terminalState.getCellAt(3, 0)?.char, '\u200B');
 
             // Replace with narrow ASCII characters
-            await tester.pumpWidget(
-              const Text('ABCD'),
-            );
+            await tester.pumpWidget(const Text('ABCD'));
 
             // All cells should now be ASCII
             expect(tester.terminalState.getCellAt(0, 0)?.char, 'A');
@@ -259,17 +239,13 @@ void main() {
           'narrow to wide replacement',
           (tester) async {
             // Start with ASCII
-            await tester.pumpWidget(
-              const Text('TEST'),
-            );
+            await tester.pumpWidget(const Text('TEST'));
 
             expect(tester.terminalState.getCellAt(0, 0)?.char, 'T');
             expect(tester.terminalState.getCellAt(1, 0)?.char, 'E');
 
             // Replace with emojis
-            await tester.pumpWidget(
-              const Text('🌟🔥'),
-            );
+            await tester.pumpWidget(const Text('🌟🔥'));
 
             expect(tester.terminalState.getCellAt(0, 0)?.char, '🌟');
             expect(tester.terminalState.getCellAt(1, 0)?.char, '\u200B');
@@ -283,16 +259,13 @@ void main() {
     });
 
     group('Focus Change with Wide Characters', () {
-      test('wide characters in Text remain correct after focus changes',
-          () async {
+      test('wide characters in Text remain correct after focus changes', () async {
         await testCinder(
           'wide char focus change',
           (tester) async {
             // This test ensures that wide characters rendered via Text widgets
             // remain correctly displayed when focus changes trigger differential rendering
-            await tester.pumpWidget(
-              _FocusableWidgetWithWideCharLabels(),
-            );
+            await tester.pumpWidget(_FocusableWidgetWithWideCharLabels());
 
             // Initially, all wide characters should be visible
             expect(tester.terminalState, containsText('🚀'));
@@ -306,10 +279,16 @@ void main() {
 
             // Wide characters should still render correctly after focus change
             // This is the key test - before the fix, this could be garbled
-            expect(tester.terminalState, containsText('🚀'),
-                reason: 'Emoji 🚀 should remain visible after focus change');
-            expect(tester.terminalState, containsText('🎉'),
-                reason: 'Emoji 🎉 should remain visible after focus change');
+            expect(
+              tester.terminalState,
+              containsText('🚀'),
+              reason: 'Emoji 🚀 should remain visible after focus change',
+            );
+            expect(
+              tester.terminalState,
+              containsText('🎉'),
+              reason: 'Emoji 🎉 should remain visible after focus change',
+            );
           },
           size: const Size(60, 10),
           debugPrintAfterPump: true,
@@ -320,9 +299,7 @@ void main() {
         await testCinder(
           'chinese focus change',
           (tester) async {
-            await tester.pumpWidget(
-              _FocusableWidgetWithChineseLabels(),
-            );
+            await tester.pumpWidget(_FocusableWidgetWithChineseLabels());
 
             expect(tester.terminalState, containsText('选项一'));
             expect(tester.terminalState, containsText('选项二'));
@@ -344,9 +321,7 @@ void main() {
         await testCinder(
           'multiple focus changes',
           (tester) async {
-            await tester.pumpWidget(
-              _FocusableWidgetWithMixedLabels(),
-            );
+            await tester.pumpWidget(_FocusableWidgetWithMixedLabels());
 
             // Initial state
             expect(tester.terminalState, containsText('🔍'));
@@ -359,12 +334,21 @@ void main() {
               await tester.pump();
 
               // Wide characters should remain correct after each focus change
-              expect(tester.terminalState, containsText('🔍'),
-                  reason: 'Emoji 🔍 should be visible after tab $i');
-              expect(tester.terminalState, containsText('搜索'),
-                  reason: 'Chinese 搜索 should be visible after tab $i');
-              expect(tester.terminalState, containsText('✨'),
-                  reason: 'Emoji ✨ should be visible after tab $i');
+              expect(
+                tester.terminalState,
+                containsText('🔍'),
+                reason: 'Emoji 🔍 should be visible after tab $i',
+              );
+              expect(
+                tester.terminalState,
+                containsText('搜索'),
+                reason: 'Chinese 搜索 should be visible after tab $i',
+              );
+              expect(
+                tester.terminalState,
+                containsText('✨'),
+                reason: 'Emoji ✨ should be visible after tab $i',
+              );
             }
           },
           size: const Size(80, 15),
@@ -373,35 +357,40 @@ void main() {
       });
 
       test(
-          'wide character state preserved when non-wide content changes nearby',
-          () async {
-        await testCinder(
-          'wide char near changes',
-          (tester) async {
-            await tester.pumpWidget(
-              _CounterWithEmojiLabel(),
-            );
+        'wide character state preserved when non-wide content changes nearby',
+        () async {
+          await testCinder(
+            'wide char near changes',
+            (tester) async {
+              await tester.pumpWidget(_CounterWithEmojiLabel());
 
-            // Initial state: count is 0
-            expect(tester.terminalState, containsText('🔢'));
-            expect(tester.terminalState, containsText('Count: 0'));
+              // Initial state: count is 0
+              expect(tester.terminalState, containsText('🔢'));
+              expect(tester.terminalState, containsText('Count: 0'));
 
-            // Increment counter multiple times (each triggers differential render)
-            for (int i = 1; i <= 5; i++) {
-              await tester.sendKey(LogicalKey.space);
-              await tester.pump();
+              // Increment counter multiple times (each triggers differential render)
+              for (int i = 1; i <= 5; i++) {
+                await tester.sendKey(LogicalKey.space);
+                await tester.pump();
 
-              // Emoji should remain correct even though nearby text changed
-              expect(tester.terminalState, containsText('🔢'),
-                  reason: 'Emoji 🔢 should remain visible after count=$i');
-              expect(tester.terminalState, containsText('Count: $i'),
-                  reason: 'Counter should show $i');
-            }
-          },
-          size: const Size(40, 5),
-          debugPrintAfterPump: true,
-        );
-      });
+                // Emoji should remain correct even though nearby text changed
+                expect(
+                  tester.terminalState,
+                  containsText('🔢'),
+                  reason: 'Emoji 🔢 should remain visible after count=$i',
+                );
+                expect(
+                  tester.terminalState,
+                  containsText('Count: $i'),
+                  reason: 'Counter should show $i',
+                );
+              }
+            },
+            size: const Size(40, 5),
+            debugPrintAfterPump: true,
+          );
+        },
+      );
     });
 
     group('Wide Characters in Lists and Scrolling', () {
@@ -440,11 +429,7 @@ void main() {
           (tester) async {
             await tester.pumpWidget(
               const Column(
-                children: [
-                  Text('第一行：你好'),
-                  Text('第二行：世界'),
-                  Text('第三行：测试'),
-                ],
+                children: [Text('第一行：你好'), Text('第二行：世界'), Text('第三行：测试')],
               ),
             );
 
@@ -464,9 +449,13 @@ void main() {
           'styled emoji',
           (tester) async {
             await tester.pumpWidget(
-              const Text('🔥 Fire!',
-                  style: TextStyle(
-                      color: Colors.red, fontWeight: FontWeight.bold)),
+              const Text(
+                '🔥 Fire!',
+                style: TextStyle(
+                  color: Colors.red,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             );
 
             expect(tester.terminalState, containsText('🔥'));
@@ -487,12 +476,14 @@ void main() {
           'styled chinese',
           (tester) async {
             await tester.pumpWidget(
-              const Text('重要',
-                  style: TextStyle(
-                    color: Colors.yellow,
-                    backgroundColor: Colors.red,
-                    fontWeight: FontWeight.bold,
-                  )),
+              const Text(
+                '重要',
+                style: TextStyle(
+                  color: Colors.yellow,
+                  backgroundColor: Colors.red,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             );
 
             expect(tester.terminalState, containsText('重要'));
@@ -510,75 +501,51 @@ void main() {
 
     group('Edge Cases', () {
       test('empty string after wide character string', () async {
-        await testCinder(
-          'empty after wide',
-          (tester) async {
-            await tester.pumpWidget(
-              const Text('🌟🌟🌟'),
-            );
-            expect(tester.terminalState, containsText('🌟'));
+        await testCinder('empty after wide', (tester) async {
+          await tester.pumpWidget(const Text('🌟🌟🌟'));
+          expect(tester.terminalState, containsText('🌟'));
 
-            await tester.pumpWidget(
-              const Text(''),
-            );
-            // Should render cleanly without artifacts
-            expect(tester.terminalState, isNot(containsText('🌟')));
-          },
-          size: const Size(40, 5),
-        );
+          await tester.pumpWidget(const Text(''));
+          // Should render cleanly without artifacts
+          expect(tester.terminalState, isNot(containsText('🌟')));
+        }, size: const Size(40, 5));
       });
 
       test('single wide character', () async {
-        await testCinder(
-          'single wide char',
-          (tester) async {
-            await tester.pumpWidget(
-              const Text('中'),
-            );
+        await testCinder('single wide char', (tester) async {
+          await tester.pumpWidget(const Text('中'));
 
-            expect(tester.terminalState.getCellAt(0, 0)?.char, '中');
-            expect(tester.terminalState.getCellAt(1, 0)?.char, '\u200B');
-          },
-          size: const Size(40, 5),
-        );
+          expect(tester.terminalState.getCellAt(0, 0)?.char, '中');
+          expect(tester.terminalState.getCellAt(1, 0)?.char, '\u200B');
+        }, size: const Size(40, 5));
       });
 
       test('wide character at end of line', () async {
-        await testCinder(
-          'wide at line end',
-          (tester) async {
-            // Use a narrow width to test edge wrapping behavior
-            await tester.pumpWidget(
-              SizedBox(
-                width: 10,
-                child: const Text('AAAAAAA中'),
-              ),
-            );
+        await testCinder('wide at line end', (tester) async {
+          // Use a narrow width to test edge wrapping behavior
+          await tester.pumpWidget(
+            SizedBox(width: 10, child: const Text('AAAAAAA中')),
+          );
 
-            // The text should be truncated or wrapped appropriately
-            // without causing rendering artifacts
-            expect(tester.terminalState, containsText('A'));
-          },
-          size: const Size(15, 5),
-        );
+          // The text should be truncated or wrapped appropriately
+          // without causing rendering artifacts
+          expect(tester.terminalState, containsText('A'));
+        }, size: const Size(15, 5));
       });
 
       test('rapid updates with wide characters', () async {
-        await testCinder(
-          'rapid wide updates',
-          (tester) async {
-            final emojis = ['🚀', '🎉', '🔥', '✨', '💻', '🎯', '⭐', '🌟'];
+        await testCinder('rapid wide updates', (tester) async {
+          final emojis = ['🚀', '🎉', '🔥', '✨', '💻', '🎯', '⭐', '🌟'];
 
-            for (final emoji in emojis) {
-              await tester.pumpWidget(
-                Text('Status: $emoji'),
-              );
-              expect(tester.terminalState, containsText(emoji),
-                  reason: 'Emoji $emoji should be visible');
-            }
-          },
-          size: const Size(40, 5),
-        );
+          for (final emoji in emojis) {
+            await tester.pumpWidget(Text('Status: $emoji'));
+            expect(
+              tester.terminalState,
+              containsText(emoji),
+              reason: 'Emoji $emoji should be visible',
+            );
+          }
+        }, size: const Size(40, 5));
       });
     });
   });
@@ -748,12 +715,7 @@ class _CounterWithEmojiLabelState extends State<_CounterWithEmojiLabel> {
         }
         return false;
       },
-      child: Row(
-        children: [
-          const Text('🔢 '),
-          Text('Count: $_count'),
-        ],
-      ),
+      child: Row(children: [const Text('🔢 '), Text('Count: $_count')]),
     );
   }
 }

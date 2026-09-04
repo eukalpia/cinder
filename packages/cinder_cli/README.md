@@ -4,7 +4,7 @@ CLI tools for cinder - A Terminal User Interface framework for Dart.
 
 ## Installation
 
-Install the CLI globall:
+Install the CLI globally from a repository checkout:
 
 ```bash
 cd packages/cinder_cli
@@ -19,12 +19,20 @@ Start a cinder shell server that cinder apps can render into. This allows runnin
 
 ### `cinder logs`
 
-Stream logs from a running cinder app via WebSocket. Logs are displayed in real-time until you press Ctrl+C or the app exits.
+Stream logs from a running Cinder app via WebSocket. Logs are displayed until you press Ctrl+C or the app exits. Use `cinder logs --mode get` to fetch buffered logs, or `--pid <pid>` to select an instance.
+
+### `cinder run dart <script.dart> [arguments]`
+
+Run a Dart script with VM service support for debugging and profiling. Arguments after `dart` are forwarded to Dart and the script.
+
+## Shell workflow
+
+The shell requires macOS or Linux. Start it from the same Dart project as the app.
 
 **How it works:**
 
-1. The shell creates a Unix domain socket at `.cinder/shell.sock`
-2. It writes the socket path to `.cinder/shell_handle`
+1. The shell creates a Unix domain socket at `~/.cinder/<project-hash>/shell.sock`
+2. It writes the socket path to `~/.cinder/<project-hash>/shell_handle`
 3. When you run a cinder app (via `dart run`), it automatically detects the shell_handle file
 4. The app connects to the shell and renders frames over the socket
 5. The shell displays the frames in its terminal
@@ -41,8 +49,8 @@ cinder shell
 Terminal 2 - Run your cinder app (or from IDE with debugger):
 
 ```bash
-cd test_shell_app
-dart run bin/test_app.dart
+# From the repository root:
+dart run example/example.dart
 ```
 
 The app will automatically render into the shell instead of its own stdout.
@@ -100,14 +108,14 @@ The app uses a `SocketTerminal` instead of the regular `Terminal`, which writes 
 
 ## Examples
 
-See `test_shell_app/` for a simple example that works in both normal and shell mode.
+Run a Dart example from the repository’s `example/` directory in either normal or shell mode.
 
 ## Troubleshooting
 
 **App doesn't connect to shell:**
 
 - Make sure the shell is running first
-- Check that `.cinder/shell_handle` exists in the current directory
+- Check for `shell_handle` beside the socket path printed by the shell; discovery uses `~/.cinder/<project-hash>/`
 - Verify the socket path in shell_handle is correct
 
 **Shell shows garbled output:**

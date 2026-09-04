@@ -23,11 +23,7 @@ class TuiTheme extends InheritedWidget {
   final TuiThemeData data;
 
   /// Creates a theme provider.
-  const TuiTheme({
-    super.key,
-    required this.data,
-    required super.child,
-  });
+  const TuiTheme({super.key, required this.data, required super.child});
 
   /// Returns the [TuiThemeData] from the closest [TuiTheme] ancestor.
   ///

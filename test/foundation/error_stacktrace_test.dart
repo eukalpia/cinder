@@ -23,9 +23,10 @@ void main() {
 
           final output = tester.terminalState.getText();
 
-          // Layout errors in ErrorThrowingWidget still show "No Error" in paint
-          // because the error is caught, a default size is set, and paint continues
-          expect(output, contains('No Error'));
+          expect(output, contains('Layout Error'));
+          expect(output, contains('Stack trace:'));
+          expect(output, contains('RenderErrorThrowing.performLayout'));
+          expect(output, isNot(contains('No Error')));
         },
         debugPrintAfterPump: true,
         size: const Size(80, 25),
@@ -80,6 +81,7 @@ void main() {
                 width: 50,
                 height: 15, // Small height to test truncation
                 child: ErrorThrowingWidget(
+                  throwInLayout: false,
                   throwInPaint: true,
                   errorMessage: 'Error with long stack',
                 ),

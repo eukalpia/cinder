@@ -192,7 +192,8 @@ void printSuiteResults(
   const deltaWidth = 10;
 
   // Header
-  var header = '${suiteName.padRight(nameWidth)}'
+  var header =
+      '${suiteName.padRight(nameWidth)}'
       '${'median'.padLeft(colWidth)}'
       '${'min'.padLeft(colWidth)}'
       '${'max'.padLeft(colWidth)}'
@@ -205,7 +206,8 @@ void printSuiteResults(
   for (final r in results) {
     final key = _baselineKey(suiteName, r.name);
     final baseMedian = baseline[key];
-    var line = '${r.name.padRight(nameWidth)}'
+    var line =
+        '${r.name.padRight(nameWidth)}'
         '${r.medianStr.padLeft(colWidth)}'
         '${r.minStr.padLeft(colWidth)}'
         '${r.maxStr.padLeft(colWidth)}'
@@ -259,7 +261,8 @@ String markdownSuiteResults(
     if (hasBaseline) {
       final delta = _deltaIcon(r.medianUs, baseMedian);
       buf.writeln(
-          '| ${r.name} | ${r.medianStr} | ${r.minStr} | ${r.maxStr} | $delta |');
+        '| ${r.name} | ${r.medianStr} | ${r.minStr} | ${r.maxStr} | $delta |',
+      );
     } else {
       buf.writeln('| ${r.name} | ${r.medianStr} | ${r.minStr} | ${r.maxStr} |');
     }
@@ -310,16 +313,13 @@ BenchmarkSuite bufferSuite() {
     // Cell width caching
     () {
       final testStrings = ['Hello World', '你好世界', '🎉🚀✨', 'Mixed 混合 🎯'];
-      return Benchmark.sync(
-        'Cell width (uncached)',
-        () {
-          for (final str in testStrings) {
-            for (final grapheme in str.characters) {
-              UnicodeWidth.graphemeWidth(grapheme);
-            }
+      return Benchmark.sync('Cell width (uncached)', () {
+        for (final str in testStrings) {
+          for (final grapheme in str.characters) {
+            UnicodeWidth.graphemeWidth(grapheme);
           }
-        },
-      );
+        }
+      });
     }(),
     () {
       final testStrings = ['Hello World', '你好世界', '🎉🚀✨', 'Mixed 混合 🎯'];
@@ -333,14 +333,11 @@ BenchmarkSuite bufferSuite() {
       for (final cell in cells) {
         cell.width;
       }
-      return Benchmark.sync(
-        'Cell width (cached)',
-        () {
-          for (final cell in cells) {
-            cell.width;
-          }
-        },
-      );
+      return Benchmark.sync('Cell width (cached)', () {
+        for (final cell in cells) {
+          cell.width;
+        }
+      });
     }(),
 
     // Buffer diff at various change rates
@@ -403,8 +400,11 @@ BenchmarkSuite canvasSuite() {
       for (int i = 0; i < 100; i++) {
         final x = (i * 7) % 80;
         final y = (i * 3) % 24;
-        canvas.drawText(Offset(x.toDouble(), y.toDouble()), 'Text$i',
-            style: style);
+        canvas.drawText(
+          Offset(x.toDouble(), y.toDouble()),
+          'Text$i',
+          style: style,
+        );
       }
     }),
 
@@ -446,36 +446,39 @@ BenchmarkSuite canvasSuite() {
         for (int i = 0; i < 100; i++) {
           final x = (i * 7) % 80;
           final y = (i * 3) % 24;
-          canvas.drawText(Offset(x.toDouble(), y.toDouble()), 'Item$i',
-              style: style);
+          canvas.drawText(
+            Offset(x.toDouble(), y.toDouble()),
+            'Item$i',
+            style: style,
+          );
         }
       }
 
-      return Benchmark.sync(
-        'Full paint + diff (100 ops, 10% changed)',
-        () {
-          final buffer = Buffer(80, 24);
-          final canvas = TerminalCanvas(buffer, screenRect);
+      return Benchmark.sync('Full paint + diff (100 ops, 10% changed)', () {
+        final buffer = Buffer(80, 24);
+        final canvas = TerminalCanvas(buffer, screenRect);
 
-          for (int i = 0; i < 100; i++) {
-            final x = (i * 7) % 80;
-            final y = (i * 3) % 24;
-            final text = i < 10 ? 'Mod$i' : 'Item$i';
-            canvas.drawText(Offset(x.toDouble(), y.toDouble()), text,
-                style: style);
-          }
+        for (int i = 0; i < 100; i++) {
+          final x = (i * 7) % 80;
+          final y = (i * 3) % 24;
+          final text = i < 10 ? 'Mod$i' : 'Item$i';
+          canvas.drawText(
+            Offset(x.toDouble(), y.toDouble()),
+            text,
+            style: style,
+          );
+        }
 
-          int count = 0;
-          for (int y = 0; y < 24; y++) {
-            for (int x = 0; x < 80; x++) {
-              if (buffer.getCell(x, y) != previousBuffer.getCell(x, y)) {
-                count++;
-              }
+        int count = 0;
+        for (int y = 0; y < 24; y++) {
+          for (int x = 0; x < 80; x++) {
+            if (buffer.getCell(x, y) != previousBuffer.getCell(x, y)) {
+              count++;
             }
           }
-          assert(count >= 0);
-        },
-      );
+        }
+        assert(count >= 0);
+      });
     }(),
   ]);
 }
@@ -515,10 +518,7 @@ BenchmarkSuite widgetPipelineSuite(String label, Size size) {
 
   return BenchmarkSuite('Widget Pipeline ($label)', [
     // Single Text widget
-    widgetBench(
-      'Text widget',
-      () => Text('Hello, benchmark world!'),
-    ),
+    widgetBench('Text widget', () => Text('Hello, benchmark world!')),
 
     // Column with 10 Text children
     widgetBench(
@@ -529,32 +529,25 @@ BenchmarkSuite widgetPipelineSuite(String label, Size size) {
     ),
 
     // Nested Containers (5 deep)
-    widgetBench(
-      'Nested Containers (5 deep)',
-      () {
-        Widget child = Text('inner');
-        for (int i = 0; i < 5; i++) {
-          child = Container(
-            padding: EdgeInsets.all(1),
-            decoration: BoxDecoration(
-              border: BoxBorder.all(style: BoxBorderStyle.solid),
-            ),
-            child: child,
-          );
-        }
-        return child;
-      },
-    ),
+    widgetBench('Nested Containers (5 deep)', () {
+      Widget child = Text('inner');
+      for (int i = 0; i < 5; i++) {
+        child = Container(
+          padding: EdgeInsets.all(1),
+          decoration: BoxDecoration(
+            border: BoxBorder.all(style: BoxBorderStyle.solid),
+          ),
+          child: child,
+        );
+      }
+      return child;
+    }),
 
     // Row with 8 children
     widgetBench(
       'Row with 8 children',
-      () => Row(
-        children: List.generate(
-          8,
-          (i) => Expanded(child: Text('C$i')),
-        ),
-      ),
+      () =>
+          Row(children: List.generate(8, (i) => Expanded(child: Text('C$i')))),
     ),
 
     // ListView with 100 items
@@ -573,11 +566,7 @@ BenchmarkSuite widgetPipelineSuite(String label, Size size) {
       () => Stack(
         children: List.generate(
           5,
-          (i) => Positioned(
-            top: i * 2,
-            left: i * 4,
-            child: Text('Layer $i'),
-          ),
+          (i) => Positioned(top: i * 2, left: i * 4, child: Text('Layer $i')),
         ),
       ),
     ),
@@ -632,10 +621,7 @@ class _RebuildCounter extends State<_RebuildCounterWidget> {
   @override
   Widget build(BuildContext context) {
     return Column(
-      children: List.generate(
-        5,
-        (i) => Text('Item $i count=$_count'),
-      ),
+      children: List.generate(5, (i) => Text('Item $i count=$_count')),
     );
   }
 }
@@ -676,14 +662,10 @@ BenchmarkSuite runtimeStabilitySuite() {
   const routedEvent = TextInputEvent('input');
 
   return BenchmarkSuite('Runtime stability', <Benchmark>[
-    Benchmark.sync(
-      'Unicode geometry 128 mixed graphemes',
-      () {
-        final width = TerminalText.measure(mixedText);
-        TerminalText.offsetForColumn(mixedText, width ~/ 2);
-      },
-      iterations: 500,
-    ),
+    Benchmark.sync('Unicode geometry 128 mixed graphemes', () {
+      final width = TerminalText.measure(mixedText);
+      TerminalText.offsetForColumn(mixedText, width ~/ 2);
+    }, iterations: 500),
     Benchmark.sync(
       'Capability profile negotiation',
       () => TerminalCapabilities.fromEnvironment(environment),
@@ -694,28 +676,20 @@ BenchmarkSuite runtimeStabilitySuite() {
       () => router.route(routedEvent),
       iterations: 2000,
     ),
-    Benchmark.sync(
-      'Enhanced input parser batch',
-      () {
-        final parser = InputParser();
-        parser.addBytes(parserPayload);
-        while (parser.parseNext() != null) {}
-      },
-      iterations: 250,
-    ),
-    Benchmark.async(
-      '100 owned task lifecycles',
-      () async {
-        final scope = CinderTaskScope(historyLimit: 8);
-        final tasks = <CinderTask<int>>[
-          for (var index = 0; index < 100; index++)
-            scope.run<int>((_) => index, label: 'task-$index'),
-        ];
-        await Future.wait<int>(tasks.map((task) => task.future));
-        await scope.dispose();
-      },
-      iterations: 25,
-    ),
+    Benchmark.sync('Enhanced input parser batch', () {
+      final parser = InputParser();
+      parser.addBytes(parserPayload);
+      while (parser.parseNext() != null) {}
+    }, iterations: 250),
+    Benchmark.async('100 owned task lifecycles', () async {
+      final scope = CinderTaskScope(historyLimit: 8);
+      final tasks = <CinderTask<int>>[
+        for (var index = 0; index < 100; index++)
+          scope.run<int>((_) => index, label: 'task-$index'),
+      ];
+      await Future.wait<int>(tasks.map((task) => task.future));
+      await scope.dispose();
+    }, iterations: 25),
   ]);
 }
 
@@ -767,22 +741,12 @@ BenchmarkSuite dataVisualizationSuite() {
     ),
     Benchmark.sync(
       'Histogram 1k samples (20 bins)',
-      () => ChartRasterizer.histogram(
-        samples,
-        bins: 20,
-        width: 80,
-        height: 20,
-      ),
+      () => ChartRasterizer.histogram(samples, bins: 20, width: 80, height: 20),
       iterations: 250,
     ),
     Benchmark.sync(
       'Network graph 50 nodes / 100 edges',
-      () => ChartRasterizer.networkGraph(
-        nodes,
-        edges,
-        width: 100,
-        height: 30,
-      ),
+      () => ChartRasterizer.networkGraph(nodes, edges, width: 100, height: 30),
       iterations: 100,
     ),
   ]);
@@ -796,8 +760,9 @@ Future<void> main(List<String> args) async {
   final mutableArgs = List<String>.from(args);
   final save = mutableArgs.remove('--save');
   final ci = mutableArgs.remove('--ci');
-  final filter =
-      mutableArgs.isNotEmpty ? mutableArgs.first.toLowerCase() : null;
+  final filter = mutableArgs.isNotEmpty
+      ? mutableArgs.first.toLowerCase()
+      : null;
 
   final suites = <BenchmarkSuite>[
     bufferSuite(),
@@ -862,7 +827,8 @@ Future<void> main(List<String> args) async {
       saveBaseline(newBaseline);
       if (!ci) {
         print(
-            'Baseline saved to $_baselinePath (${newBaseline.length} benchmarks)');
+          'Baseline saved to $_baselinePath (${newBaseline.length} benchmarks)',
+        );
       }
     }
     if (ci) {

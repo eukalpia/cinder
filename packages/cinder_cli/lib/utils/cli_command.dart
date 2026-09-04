@@ -8,9 +8,9 @@ abstract class CliCommand extends Command<int> {
 
   @override
   ArgResults get argResults => switch (super.argResults) {
-        final results? => results,
-        null => throw Exception('argResults is null'),
-      };
+    final results? => results,
+    null => throw Exception('argResults is null'),
+  };
 
   @override
   String get description;

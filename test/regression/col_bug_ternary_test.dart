@@ -43,11 +43,7 @@ class _ColumnBugDemoState extends State<ColumnBugDemo> {
   @override
   Widget build(BuildContext context) {
     print('Building with first=$first');
-    return Column(
-      children: [
-        first ? FirstWidget() : SecondWidget(),
-      ],
-    );
+    return Column(children: [first ? FirstWidget() : SecondWidget()]);
   }
 }
 
@@ -55,9 +51,7 @@ void main() {
   group('Column Bug Ternary', () {
     test('ternary column replacement', () async {
       await testCinder('debug output', (tester) async {
-        await tester.pumpWidget(
-          const ColumnBugDemo(),
-        );
+        await tester.pumpWidget(const ColumnBugDemo());
 
         print('Initial render:');
         final output = tester.renderToString(showBorders: false);

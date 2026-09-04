@@ -18,10 +18,7 @@ class NavigationDemo extends StatelessWidget {
         '/settings/appearance': (context) => const AppearancePage(),
         '/about': (context) => const AboutPage(),
       },
-      popBehavior: const PopBehavior(
-        escapeEnabled: true,
-        customPopKey: 'q',
-      ),
+      popBehavior: const PopBehavior(escapeEnabled: true, customPopKey: 'q'),
       observers: [LoggingNavigatorObserver()],
     );
   }
@@ -63,17 +60,16 @@ class HomePage extends StatelessWidget {
             onSelect: (value) async {
               if (value == 'dialog') {
                 final result = await Navigator.of(context).showDialog<bool>(
-                  builder: (context) => const ConfirmDialog(
-                    message: 'This is a modal dialog!',
-                  ),
+                  builder: (context) =>
+                      const ConfirmDialog(message: 'This is a modal dialog!'),
                   width: 50,
                   height: 12,
                 );
                 print('Dialog result: $result');
               } else if (value == 'input') {
-                final result = await Navigator.of(context).pushWidget<String>(
-                  const InputPage(),
-                );
+                final result = await Navigator.of(
+                  context,
+                ).pushWidget<String>(const InputPage());
                 print('Input result: $result');
               } else {
                 Navigator.of(context).pushNamed(value);
@@ -268,10 +264,7 @@ class _InputPageState extends State<InputPage> {
 class ConfirmDialog extends StatelessWidget {
   final String message;
 
-  const ConfirmDialog({
-    super.key,
-    required this.message,
-  });
+  const ConfirmDialog({super.key, required this.message});
 
   @override
   Widget build(BuildContext context) {
@@ -284,10 +277,7 @@ class ConfirmDialog extends StatelessWidget {
           Text(message),
           const SizedBox(height: 2),
           MenuList(
-            items: const [
-              MenuItem('Yes', true),
-              MenuItem('No', false),
-            ],
+            items: const [MenuItem('Yes', true), MenuItem('No', false)],
             onSelect: (value) {
               Navigator.of(context).pop(value);
             },
@@ -303,11 +293,7 @@ class MenuList extends StatefulWidget {
   final List<MenuItem> items;
   final Function(dynamic) onSelect;
 
-  const MenuList({
-    super.key,
-    required this.items,
-    required this.onSelect,
-  });
+  const MenuList({super.key, required this.items, required this.onSelect});
 
   @override
   State<MenuList> createState() => _MenuListState();
@@ -349,7 +335,8 @@ class _MenuListState extends State<MenuList> {
               style: i == _selectedIndex
                   ? const TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: Color.fromRGB(100, 200, 100))
+                      color: Color.fromRGB(100, 200, 100),
+                    )
                   : null,
             ),
         ],

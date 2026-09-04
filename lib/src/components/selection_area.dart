@@ -142,7 +142,7 @@ class _SelectionAreaWidget extends SingleChildRenderObjectWidget {
   final VoidCallback? onDragStarted;
   final VoidCallback? onDragEnded;
   final void Function(Object context, int minIndex, int maxIndex)?
-      onRangeUpdated;
+  onRangeUpdated;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
@@ -158,7 +158,9 @@ class _SelectionAreaWidget extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(
-      BuildContext context, covariant RenderSelectionArea renderObject) {
+    BuildContext context,
+    covariant RenderSelectionArea renderObject,
+  ) {
     renderObject
       ..selectionColor = selectionColor
       ..onSelectionChanged = onSelectionChanged
@@ -383,7 +385,11 @@ class RenderSelectionArea extends RenderMouseRegion {
       );
       if (entries != null) {
         _updateSelectionRangeForViewport(
-            entries, contextKey, _anchor!, _focus!);
+          entries,
+          contextKey,
+          _anchor!,
+          _focus!,
+        );
       }
     } else {
       _anchor = null;
@@ -450,11 +456,9 @@ class RenderSelectionArea extends RenderMouseRegion {
     if (anchorSelectable == null) {
       final reanchorEntry =
           _entryByClampedIndex(entries, _anchor!.orderIndex) ??
-              _entryForId(
-                entries,
-                _anchor!.selectableId,
-              );
-      final reanchor = reanchorEntry?.selectable ??
+          _entryForId(entries, _anchor!.selectableId);
+      final reanchor =
+          reanchorEntry?.selectable ??
           _hitTestSelectablesInContext(_pressPosition, entries) ??
           _nearestSelectableInContext(_pressPosition, entries);
       if (reanchor == null) {
@@ -493,11 +497,7 @@ class RenderSelectionArea extends RenderMouseRegion {
         orderIndex: focusEntry == null ? null : entries.indexOf(focusEntry),
       );
 
-      _updateSelectionRanges(
-        entries,
-        _anchor!,
-        _focus!,
-      );
+      _updateSelectionRanges(entries, _anchor!, _focus!);
 
       _updateSelectionRangeForViewport(entries, contextKey, _anchor!, _focus!);
     }
@@ -614,8 +614,9 @@ class RenderSelectionArea extends RenderMouseRegion {
     if (_externalDragSubscription != null) return;
     final binding = CinderBinding.instance;
     if (binding is! TerminalBinding) return;
-    _externalDragSubscription =
-        binding.mouseEvents.listen(_handleExternalMouseEvent);
+    _externalDragSubscription = binding.mouseEvents.listen(
+      _handleExternalMouseEvent,
+    );
   }
 
   void _stopExternalDragTracking() {
@@ -905,7 +906,8 @@ class RenderSelectionArea extends RenderMouseRegion {
 
   /// Builds context lists from selectables, using cache when available.
   Map<Object, List<_SelectableEntry>> _buildContextLists(
-      List<Selectable> selectables) {
+    List<Selectable> selectables,
+  ) {
     if (_selectablesCacheValid && _contextListsCache != null) {
       return _contextListsCache!;
     }
@@ -946,7 +948,9 @@ class RenderSelectionArea extends RenderMouseRegion {
   }
 
   _SelectableEntry? _entryForId(
-      List<_SelectableEntry> entries, Object selectableId) {
+    List<_SelectableEntry> entries,
+    Object selectableId,
+  ) {
     for (final entry in entries) {
       if (entry.id == selectableId) return entry;
     }
@@ -954,7 +958,9 @@ class RenderSelectionArea extends RenderMouseRegion {
   }
 
   _SelectableEntry? _entryByClampedIndex(
-      List<_SelectableEntry> entries, int? index) {
+    List<_SelectableEntry> entries,
+    int? index,
+  ) {
     if (entries.isEmpty || index == null) return null;
     final clamped = index.clamp(0, entries.length - 1);
     return entries[clamped];
@@ -1038,13 +1044,13 @@ class RenderSelectionArea extends RenderMouseRegion {
       final dy = globalPos.dy < visibleBounds.top
           ? visibleBounds.top - globalPos.dy
           : (globalPos.dy >= visibleBounds.bottom
-              ? globalPos.dy - (visibleBounds.bottom - 1)
-              : 0.0);
+                ? globalPos.dy - (visibleBounds.bottom - 1)
+                : 0.0);
       final dx = globalPos.dx < visibleBounds.left
           ? visibleBounds.left - globalPos.dx
           : (globalPos.dx >= visibleBounds.right
-              ? globalPos.dx - (visibleBounds.right - 1)
-              : 0.0);
+                ? globalPos.dx - (visibleBounds.right - 1)
+                : 0.0);
       if (dy < minDy || (dy == minDy && dx < minDx)) {
         minDy = dy;
         minDx = dx;
@@ -1126,7 +1132,8 @@ class RenderSelectionArea extends RenderMouseRegion {
     final focusIdx = entries.indexOf(focusEntry);
     if (anchorIdx < 0 || focusIdx < 0) return;
 
-    final forward = anchorIdx < focusIdx ||
+    final forward =
+        anchorIdx < focusIdx ||
         (anchorIdx == focusIdx && anchor.offset <= focus.offset);
 
     int startIdx = math.min(anchorIdx, focusIdx);

@@ -1,255 +1,228 @@
+import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:cinder/src/process/pty_controller.dart';
 import 'package:test/test.dart';
-import 'dart:async';
-import 'dart:io';
-import 'package:cinder/cinder.dart' hide isNotEmpty;
 
 void main() {
-  group('PtyController', () {
-    test('creates with default shell', () {
-      final controller = PtyController();
-      expect(controller.command, isNotEmpty);
-      expect(controller.status, equals(PtyStatus.notStarted));
-      expect(controller.isRunning, isFalse);
-      controller.dispose();
-    });
+  final fixture = File('test/process/fixtures/pty_process.dart').absolute.path;
+  const deadline = Duration(seconds: 10);
 
-    test('creates with custom command', () {
-      final controller = PtyController(
-        command: '/bin/echo',
-        arguments: ['hello', 'world'],
-      );
-      expect(controller.command, equals('/bin/echo'));
-      expect(controller.arguments, equals(['hello', 'world']));
-      controller.dispose();
-    });
+  PtyController controllerFor(
+    String mode, {
+    List<String> arguments = const [],
+    int maxBufferLines = 10000,
+    void Function(String)? onOutput,
+    void Function(int)? onExit,
+  }) {
+    final controller = PtyController(
+      command: Platform.resolvedExecutable,
+      arguments: [fixture, mode, ...arguments],
+      maxBufferLines: maxBufferLines,
+      onOutput: onOutput,
+      onExit: onExit,
+    );
+    addTearDown(controller.dispose);
+    return controller;
+  }
 
-    test('starts and runs echo command', () async {
-      final outputCompleter = Completer<String>();
-      final exitCompleter = Completer<int>();
-      final output = <String>[];
+  Future<void> startInteractive(PtyController controller) async {
+    final ready = Completer<void>();
+    var output = '';
+    void capture(String chunk) {
+      output += chunk;
+      if (output.contains('READY:') && !ready.isCompleted) ready.complete();
+    }
 
-      final controller = PtyController(
-        command: '/bin/echo',
-        arguments: ['test output'],
+    controller.addOutputCallback(capture);
+    try {
+      await controller.start(columns: 80, rows: 24);
+      await ready.future.timeout(deadline);
+    } finally {
+      controller.removeOutputCallback(capture);
+    }
+  }
+
+  test('default controller has a platform shell and no process', () async {
+    final controller = PtyController();
+    expect(controller.command, isNotEmpty);
+    expect(controller.status, PtyStatus.notStarted);
+    expect(controller.pid, isNull);
+    await controller.dispose();
+  });
+
+  test('preserves literal arguments and child exit code', () async {
+    final exited = Completer<int>();
+    var output = '';
+    final arguments = [
+      'hello world',
+      "single'quote",
+      r'$CINDER_MUST_NOT_EXPAND',
+      'x; printf injected',
+      '',
+    ];
+    final controller = controllerFor(
+      'arguments',
+      arguments: arguments,
+      onOutput: (data) => output += data,
+      onExit: exited.complete,
+    );
+
+    await controller.start(columns: 80, rows: 24);
+    expect(await exited.future.timeout(deadline), 7);
+    expect(output, contains(jsonEncode(arguments)));
+    expect(controller.exitCode, 7);
+    expect(controller.status, PtyStatus.exited);
+  });
+
+  test(
+    'writes to the process without resize injecting application input',
+    () async {
+      final received = Completer<void>();
+      var output = '';
+      final controller = controllerFor(
+        'interactive',
         onOutput: (data) {
-          output.add(data);
-          if (!outputCompleter.isCompleted) {
-            outputCompleter.complete(data);
-          }
-        },
-        onExit: (code) {
-          if (!exitCompleter.isCompleted) {
-            exitCompleter.complete(code);
+          output += data;
+          if (output.contains('INPUT:hello') && !received.isCompleted) {
+            received.complete();
           }
         },
       );
-
-      expect(controller.status, equals(PtyStatus.notStarted));
-
-      await controller.start(columns: 80, rows: 24);
-      expect(controller.status, equals(PtyStatus.running));
-      expect(controller.isRunning, isTrue);
-      expect(controller.pid, isNotNull);
-
-      // Wait for output and exit
-      await outputCompleter.future.timeout(const Duration(seconds: 5));
-      final exitCode =
-          await exitCompleter.future.timeout(const Duration(seconds: 5));
-
-      expect(output.join(), contains('test output'));
-      expect(exitCode, equals(0));
-      expect(controller.exitCode, equals(0));
-      expect(controller.status, equals(PtyStatus.exited));
-
-      await controller.dispose();
-    });
-
-    test('handles write operations', () async {
-      final outputCompleter = Completer<String>();
-      final outputs = <String>[];
-
-      final controller = PtyController(
-        command: Platform.isWindows ? 'cmd' : '/bin/cat',
-        onOutput: (data) {
-          outputs.add(data);
-          if (data.contains('hello') && !outputCompleter.isCompleted) {
-            outputCompleter.complete(data);
-          }
-        },
-      );
-
-      await controller.start(columns: 80, rows: 24);
-      expect(controller.isRunning, isTrue);
-
-      // Write to the terminal
-      controller.write('hello\n');
-
-      // Wait for echo back
-      await outputCompleter.future.timeout(const Duration(seconds: 5));
-
-      // Kill the process
-      controller.kill();
-
-      // Give it time to shut down
-      await Future.delayed(const Duration(milliseconds: 100));
-
-      await controller.dispose();
-    });
-
-    test('handles resize operations', () async {
-      final controller = PtyController(
-        command: Platform.isWindows ? 'cmd' : '/bin/sh',
-      );
-
-      await controller.start(columns: 80, rows: 24);
-      expect(controller.columns, equals(80));
-      expect(controller.rows, equals(24));
-
+      await startInteractive(controller);
       controller.resize(100, 30);
-      expect(controller.columns, equals(100));
-      expect(controller.rows, equals(30));
+      expect(controller.columns, 100);
+      expect(controller.rows, 30);
+      controller.write('hello\n');
+      await received.future.timeout(deadline);
+      expect(output, contains('INPUT:hello'));
+    },
+  );
 
-      controller.kill();
-      await controller.dispose();
-    });
+  test('buffers complete lines and applies the line limit', () async {
+    final exited = Completer<int>();
+    final controller = controllerFor(
+      'lines',
+      maxBufferLines: 2,
+      onExit: exited.complete,
+    );
+    await controller.start(columns: 80, rows: 24);
+    await exited.future.timeout(deadline);
+    expect(controller.outputBuffer, ['second', 'third']);
+    controller.clearBuffer();
+    expect(controller.outputBuffer, isEmpty);
+  });
 
-    test('manages output buffer', () async {
-      final controller = PtyController(
-        command: '/bin/echo',
-        arguments: ['line1', '&&', 'echo', 'line2', '&&', 'echo', 'line3'],
-        maxBufferLines: 2,
-      );
-
-      await controller.start(columns: 80, rows: 24);
-
-      // Wait for process to complete
-      await Future.delayed(const Duration(seconds: 1));
-
-      // Buffer should be limited to maxBufferLines
-      expect(controller.outputBuffer.length, lessThanOrEqualTo(2));
-
-      await controller.dispose();
-    });
-
-    test('clears buffer', () async {
-      final controller = PtyController(
-        command: '/bin/echo',
-        arguments: ['test'],
-      );
-
-      await controller.start(columns: 80, rows: 24);
-
-      // Wait for output
-      await Future.delayed(const Duration(milliseconds: 500));
-
-      expect(controller.outputBuffer.isNotEmpty, isTrue);
-
-      controller.clearBuffer();
-      expect(controller.outputBuffer.isEmpty, isTrue);
-
-      await controller.dispose();
-    });
-
-    test('notifies listeners on state changes', () async {
-      final controller = PtyController(
-        command: '/bin/echo',
-        arguments: ['test'],
-      );
-
-      var notificationCount = 0;
-      controller.addListener(() {
-        notificationCount++;
-      });
-
-      await controller.start(columns: 80, rows: 24);
-
-      // Wait for process to complete
-      await Future.delayed(const Duration(seconds: 1));
-
-      // Should have received notifications for start, output, and exit
-      expect(notificationCount, greaterThan(0));
-
-      await controller.dispose();
-    });
-
-    test('throws when starting already running process', () async {
-      final controller = PtyController(
-        command: Platform.isWindows ? 'cmd' : '/bin/sh',
-      );
-
-      await controller.start(columns: 80, rows: 24);
-      expect(controller.isRunning, isTrue);
-
-      // Should throw when trying to start again
-      expect(
-        () => controller.start(columns: 80, rows: 24),
-        throwsStateError,
-      );
-
-      controller.kill();
-      await controller.dispose();
-    });
-
-    test('throws when writing to non-running process', () {
-      final controller = PtyController();
-
-      expect(
-        () => controller.write('test'),
-        throwsStateError,
-      );
-
-      controller.dispose();
-    });
-
-    test('handles error callback', () async {
-      final errorCompleter = Completer<Object>();
-
-      final controller = PtyController(
-        command: '/non/existent/command/that/definitely/does/not/exist',
-        onError: (error) {
-          if (!errorCompleter.isCompleted) {
-            errorCompleter.complete(error);
-          }
+  test(
+    'combines partial output chunks into lines and preserves blank lines',
+    () async {
+      final partial = Completer<void>();
+      final exited = Completer<int>();
+      final controller = controllerFor(
+        'fragmented',
+        onOutput: (data) {
+          if (data.contains('hel') && !partial.isCompleted) partial.complete();
         },
+        onExit: exited.complete,
       );
-
-      try {
-        await controller.start(columns: 80, rows: 24);
-        // If it doesn't throw, wait a bit for the process to fail
-        await Future.delayed(const Duration(seconds: 1));
-      } catch (e) {
-        // Expected to fail
-      }
-
-      // The error status might be set either way
-      expect(
-        controller.status,
-        anyOf(equals(PtyStatus.error), equals(PtyStatus.exited)),
-      );
-
-      await controller.dispose();
-    });
-
-    test('restarts process', () async {
-      final controller = PtyController(
-        command: '/bin/echo',
-        arguments: ['test'],
-      );
-
       await controller.start(columns: 80, rows: 24);
-      final firstPid = controller.pid;
+      await partial.future.timeout(deadline);
+      controller.write('continue\n');
+      await exited.future.timeout(deadline);
+      expect(controller.outputBuffer, ['hello', 'second', '', 'third']);
+    },
+  );
 
-      // Wait for process to exit
-      await Future.delayed(const Duration(seconds: 1));
+  test(
+    'rejects overlapping starts without replacing the running process',
+    () async {
+      final controller = controllerFor('interactive');
+      final firstStart = controller.start(columns: 80, rows: 24);
+      await expectLater(
+        controller.start(columns: 90, rows: 30),
+        throwsStateError,
+      );
+      await firstStart;
+      expect(controller.columns, 80);
+      expect(controller.rows, 24);
+    },
+  );
+
+  test('rejects writes while not running', () async {
+    final controller = controllerFor('interactive');
+    expect(() => controller.write('text'), throwsStateError);
+    expect(() => controller.writeBytes([1, 2]), throwsStateError);
+  });
+
+  test(
+    'restart preserves listeners and dimensions with a new process',
+    () async {
+      final controller = controllerFor('interactive');
+      final states = <PtyStatus>[];
+      controller.addListener(() => states.add(controller.status));
+      await startInteractive(controller);
+      final firstPid = controller.pid;
+      controller.resize(100, 30);
+      states.clear();
 
       await controller.restart();
 
-      // Should have a new process
       expect(controller.isRunning, isTrue);
-      expect(controller.pid, isNot(equals(firstPid)));
+      expect(controller.pid, isNot(firstPid));
+      expect(controller.columns, 100);
+      expect(controller.rows, 30);
+      expect(
+        states,
+        containsAllInOrder([PtyStatus.starting, PtyStatus.running]),
+      );
+    },
+  );
 
-      await controller.dispose();
-    }, skip: 'Restart may not work reliably with echo command');
+  test('dispose during start never leaves a running process', () async {
+    final controller = controllerFor('interactive');
+    final starting = controller.start(columns: 80, rows: 24);
+    await controller.dispose();
+    await starting;
+    expect(controller.status, PtyStatus.disposed);
+    expect(controller.pid, isNull);
+  });
+
+  test('disposed controllers reject new starts', () async {
+    final controller = controllerFor('interactive');
+    await controller.dispose();
+    await expectLater(
+      controller.start(columns: 80, rows: 24),
+      throwsStateError,
+    );
+  });
+  test('invalid dimensions and negative buffer sizes are rejected', () async {
+    expect(() => PtyController(maxBufferLines: -1), throwsArgumentError);
+    final controller = controllerFor('interactive');
+    await expectLater(
+      controller.start(columns: 0, rows: 24),
+      throwsArgumentError,
+    );
+    expect(controller.status, PtyStatus.notStarted);
+  });
+
+  test('launch errors notify the caller and leave no process', () async {
+    final errors = <Object>[];
+    final controller = PtyController(
+      command: Platform.resolvedExecutable,
+      arguments: [fixture, 'interactive'],
+      workingDirectory: '$fixture.missing-directory',
+      onError: errors.add,
+    );
+    addTearDown(controller.dispose);
+
+    await expectLater(
+      controller.start(columns: 80, rows: 24),
+      throwsA(isA<ProcessException>()),
+    );
+
+    expect(errors, hasLength(1));
+    expect(controller.status, PtyStatus.error);
+    expect(controller.pid, isNull);
   });
 }
