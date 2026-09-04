@@ -152,8 +152,10 @@ class _ImageDemoState extends State<ImageDemo> {
               padding: const EdgeInsets.symmetric(horizontal: 2),
               child: Row(
                 children: [
-                  const Text('Protocol: ',
-                      style: TextStyle(color: Colors.grey)),
+                  const Text(
+                    'Protocol: ',
+                    style: TextStyle(color: Colors.grey),
+                  ),
                   ..._protocols.asMap().entries.map((entry) {
                     final idx = entry.key;
                     final proto = entry.value;
@@ -164,8 +166,9 @@ class _ImageDemoState extends State<ImageDemo> {
                         '[${idx + 1}] ${_protocolName(proto)}',
                         style: TextStyle(
                           color: isSelected ? Colors.cyan : Colors.grey,
-                          fontWeight:
-                              isSelected ? FontWeight.bold : FontWeight.normal,
+                          fontWeight: isSelected
+                              ? FontWeight.bold
+                              : FontWeight.normal,
                         ),
                       ),
                     );
@@ -191,12 +194,16 @@ class _ImageDemoState extends State<ImageDemo> {
                     fit: BoxFit.contain,
                     protocol: protocol,
                     placeholder: const Center(
-                      child: Text('Loading...',
-                          style: TextStyle(color: Colors.grey)),
+                      child: Text(
+                        'Loading...',
+                        style: TextStyle(color: Colors.grey),
+                      ),
                     ),
                     errorWidget: const Center(
-                      child: Text('Failed to load image',
-                          style: TextStyle(color: Colors.red)),
+                      child: Text(
+                        'Failed to load image',
+                        style: TextStyle(color: Colors.red),
+                      ),
                     ),
                   ),
                 ),
@@ -217,10 +224,7 @@ class _ImageDemoState extends State<ImageDemo> {
                     '1-4: Direct Select  ',
                     style: TextStyle(color: Colors.grey),
                   ),
-                  const Text(
-                    'Q: Quit',
-                    style: TextStyle(color: Colors.grey),
-                  ),
+                  const Text('Q: Quit', style: TextStyle(color: Colors.grey)),
                   const Spacer(),
                   Text(
                     'Current: ${_protocolName(protocol)}',

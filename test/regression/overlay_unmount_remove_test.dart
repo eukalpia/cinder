@@ -8,38 +8,26 @@ void main() {
     // The issue was that OverlayState._remove called setState() even when
     // the state was no longer mounted, causing setState to fail.
     test('removing overlay entry during unmount does not throw', () async {
-      await testCinder(
-        'overlay entry removal during unmount',
-        (tester) async {
-          final entry = OverlayEntry(
-            builder: (context) => Container(
-              width: 20,
-              height: 3,
-              child: Text('Test Entry'),
-            ),
-          );
+      await testCinder('overlay entry removal during unmount', (tester) async {
+        final entry = OverlayEntry(
+          builder: (context) =>
+              Container(width: 20, height: 3, child: Text('Test Entry')),
+        );
 
-          // Create a stateful wrapper that removes the entry on dispose
-          await tester.pumpWidget(
-            _DisposingOverlayWrapper(entry: entry),
-          );
+        // Create a stateful wrapper that removes the entry on dispose
+        await tester.pumpWidget(_DisposingOverlayWrapper(entry: entry));
 
-          expect(tester.terminalState, containsText('Test Entry'));
+        expect(tester.terminalState, containsText('Test Entry'));
 
-          // Replace with a different widget - this triggers unmount
-          // of the overlay and should not throw
-          await tester.pumpWidget(
-            Container(
-              width: 20,
-              height: 3,
-              child: Text('Replaced'),
-            ),
-          );
+        // Replace with a different widget - this triggers unmount
+        // of the overlay and should not throw
+        await tester.pumpWidget(
+          Container(width: 20, height: 3, child: Text('Replaced')),
+        );
 
-          expect(tester.terminalState, containsText('Replaced'));
-          expect(tester.terminalState, isNot(containsText('Test Entry')));
-        },
-      );
+        expect(tester.terminalState, containsText('Replaced'));
+        expect(tester.terminalState, isNot(containsText('Test Entry')));
+      });
     });
   });
 }
@@ -67,8 +55,6 @@ class _DisposingOverlayWrapperState extends State<_DisposingOverlayWrapper> {
 
   @override
   Widget build(BuildContext context) {
-    return Overlay(
-      initialEntries: [widget.entry],
-    );
+    return Overlay(initialEntries: [widget.entry]);
   }
 }

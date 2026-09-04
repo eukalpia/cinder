@@ -201,7 +201,7 @@ final class SingleActivator implements ShortcutActivator {
 /// Ordered shortcut map. More recently registered entries win.
 final class ShortcutManager {
   ShortcutManager([Map<ShortcutActivator, Intent> shortcuts = const {}])
-      : _shortcuts = Map<ShortcutActivator, Intent>.of(shortcuts);
+    : _shortcuts = Map<ShortcutActivator, Intent>.of(shortcuts);
 
   final Map<ShortcutActivator, Intent> _shortcuts;
 

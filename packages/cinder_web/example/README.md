@@ -7,10 +7,10 @@ This is a comprehensive interactive demo showcasing the capabilities of cinder r
 The demo includes 4 interactive tabs:
 
 ### 1. Dashboard Tab
-- **Live Metrics**: Real-time CPU, Memory, Network, and Request counters
-- **System Monitor**: Animated progress bars showing resource usage
-- **CPU History**: Sparkline chart displaying historical CPU usage
-- **Activity Feed**: Live feed of system events
+- **Simulated Metrics**: Generated CPU, memory, network, and request values
+- **System Monitor**: Animated progress bars using demonstration data
+- **CPU History**: Sparkline chart displaying generated CPU samples
+- **Activity Feed**: Demonstration activity entries
 
 ### 2. Widgets Tab
 - **Interactive Counter**: Clickable +/- buttons to increment/decrement
@@ -48,7 +48,7 @@ The demo includes 4 interactive tabs:
 ## Code Structure
 
 ```
-lib/example.dart
+lib/main.dart
 ├── InteractiveDemo (main app with tab navigation)
 ├── DashboardTab (live metrics and monitoring)
 ├── WidgetsTab (interactive UI components)
@@ -61,17 +61,22 @@ lib/example.dart
 To build and run this demo in the browser:
 
 ```bash
-# From the example directory
-dart compile js bin/example.dart -o out.js
-
-# Then open index.html in a browser
+# From the example directory, build the guest for the Flutter host
+dart pub get
+dart compile js lib/main.dart -O2 -o ../web/app.js
+cd ..
+flutter pub get
+flutter run -d chrome
 ```
 
-The demo will be rendered using xterm.js in the browser, showcasing how cinder can create rich terminal UIs that run in web environments.
+The Flutter host renders the guest using the Dart `xterm` widget. Its bridge must
+be initialized before the guest JavaScript loads; opening the compiled script
+alone does not create a terminal. The same source is also available through the
+documentation site's example catalogue.
 
 ## Technologies
 
 - **Dart**: Programming language
 - **cinder**: TUI framework (Flutter-like for terminals)
-- **xterm.js**: Terminal emulator for the browser
+- **xterm**: Dart terminal emulator used by the Flutter host
 - **ANSI escape codes**: Terminal formatting and colors

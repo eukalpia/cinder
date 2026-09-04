@@ -10,32 +10,36 @@ import 'package:test/test.dart';
 /// computed for the old order (the value-equality layout skip prevents
 /// the relayout that used to happen incidentally).
 void main() {
-  test('reordering keyed const children in a Row swaps their offsets',
-      () async {
-    await testCinder('row const reorder', (tester) async {
-      await tester.pumpWidget(const _SwappableRow(aFirst: true));
+  test(
+    'reordering keyed const children in a Row swaps their offsets',
+    () async {
+      await testCinder('row const reorder', (tester) async {
+        await tester.pumpWidget(const _SwappableRow(aFirst: true));
 
-      expect(tester.terminalState.findText('AAA').single.x, 0);
-      expect(tester.terminalState.findText('BB').single.x, 3);
+        expect(tester.terminalState.findText('AAA').single.x, 0);
+        expect(tester.terminalState.findText('BB').single.x, 3);
 
-      final state = tester.findState<_SwappableRowState>();
-      state.swap();
-      await tester.pump();
+        final state = tester.findState<_SwappableRowState>();
+        state.swap();
+        await tester.pump();
 
-      expect(
-        tester.terminalState.findText('BB').single.x,
-        0,
-        reason: 'after the swap BB is the first Row child and must be '
-            'laid out at x=0',
-      );
-      expect(
-        tester.terminalState.findText('AAA').single.x,
-        2,
-        reason: 'after the swap AAA follows BB and must be laid out at '
-            'x=2; stale offsets keep it at x=0',
-      );
-    }, size: const Size(20, 3));
-  });
+        expect(
+          tester.terminalState.findText('BB').single.x,
+          0,
+          reason:
+              'after the swap BB is the first Row child and must be '
+              'laid out at x=0',
+        );
+        expect(
+          tester.terminalState.findText('AAA').single.x,
+          2,
+          reason:
+              'after the swap AAA follows BB and must be laid out at '
+              'x=2; stale offsets keep it at x=0',
+        );
+      }, size: const Size(20, 3));
+    },
+  );
 }
 
 class _SwappableRow extends StatefulWidget {

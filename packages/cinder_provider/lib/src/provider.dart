@@ -12,8 +12,8 @@ import 'reassemble_handler.dart';
 part 'deferred_inherited_provider.dart';
 part 'inherited_provider.dart';
 
-typedef TransitionBuilder = Widget Function(
-    BuildContext context, Widget? child);
+typedef TransitionBuilder =
+    Widget Function(BuildContext context, Widget? child);
 
 /// Whether the runtime has null safe sound mode enabled.
 ///
@@ -123,17 +123,16 @@ class MultiProvider extends Nested {
   /// For an explanation on the `child` parameter that `builder` receives,
   /// see the "Performance optimizations" section of [AnimatedBuilder].
   MultiProvider({
-    Key? key,
+    super.key,
     required List<SingleChildWidget> providers,
     Widget? child,
     TransitionBuilder? builder,
   }) : super(
-          key: key,
-          children: _collapseProviders(providers),
-          child: builder != null
-              ? Builder(builder: (context) => builder(context, child))
-              : child,
-        );
+         children: _collapseProviders(providers),
+         child: builder != null
+             ? Builder(builder: (context) => builder(context, child))
+             : child,
+       );
 
   static List<SingleChildWidget> _collapseProviders(
     List<SingleChildWidget> providers,
@@ -149,7 +148,7 @@ class MultiProvider extends Nested {
 
         final builder = p == null
             ? (Widget? child) =>
-                provider._buildWithChild(child, key: provider.key)
+                  provider._buildWithChild(child, key: provider.key)
             : (Widget? child) {
                 return p(provider._buildWithChild(child, key: provider.key));
               };
@@ -236,22 +235,16 @@ class Provider<T> extends InheritedProvider<T> {
   /// This callback which will be called when [Provider] is unmounted from the
   /// Widget tree.
   Provider({
-    Key? key,
-    required Create<T> create,
-    Dispose<T>? dispose,
-    bool? lazy,
-    TransitionBuilder? builder,
-    Widget? child,
+    super.key,
+    required Create<T> super.create,
+    super.dispose,
+    super.lazy,
+    super.builder,
+    super.child,
   }) : super(
-          key: key,
-          lazy: lazy,
-          builder: builder,
-          create: create,
-          dispose: dispose,
-          debugCheckInvalidValueType: (T value) =>
-              Provider.debugCheckInvalidValueType?.call<T>(value),
-          child: child,
-        );
+         debugCheckInvalidValueType: (T value) =>
+             Provider.debugCheckInvalidValueType?.call<T>(value),
+       );
 
   /// Expose an existing value without disposing it.
   ///
@@ -263,22 +256,16 @@ class Provider<T> extends InheritedProvider<T> {
   /// See [InheritedWidget.updateShouldNotify] for more information.
   /// {@endtemplate}
   Provider.value({
-    Key? key,
-    required T value,
-    UpdateShouldNotify<T>? updateShouldNotify,
-    TransitionBuilder? builder,
-    Widget? child,
-  })  : assert(() {
-          Provider.debugCheckInvalidValueType?.call<T>(value);
-          return true;
-        }()),
-        super.value(
-          key: key,
-          builder: builder,
-          value: value,
-          updateShouldNotify: updateShouldNotify,
-          child: child,
-        );
+    super.key,
+    required super.value,
+    super.updateShouldNotify,
+    super.builder,
+    super.child,
+  }) : assert(() {
+         Provider.debugCheckInvalidValueType?.call<T>(value);
+         return true;
+       }()),
+       super.value();
 
   /// Obtains the nearest [Provider<T>] up its Widget tree and returns its
   /// value.
@@ -341,8 +328,12 @@ unsupported.
 If you want to expose a variable that can be anything, consider changing
 `dynamic` to `Object` instead.
 ''');
-    final inheritedElement = context.getElementForInheritedWidgetOfExactType<
-        _InheritedProviderScope<T?>>() as _InheritedProviderScopeElement<T?>?;
+    final inheritedElement =
+        context
+                .getElementForInheritedWidgetOfExactType<
+                  _InheritedProviderScope<T?>
+                >()
+            as _InheritedProviderScopeElement<T?>?;
 
     if (inheritedElement == null && null is! T) {
       throw ProviderNotFoundException(T, context.widget.runtimeType);
@@ -386,14 +377,15 @@ If you want to expose a variable that can be anything, consider changing
   /// }
   /// ```
   // ignore: prefer_function_declarations_over_variables, false positive
-  static void Function<T>(T value)? debugCheckInvalidValueType = <T>(T value) {
-    assert(() {
-      if (value is Listenable || value is Stream) {
-        throw FlutterError('''
-Tried to use Provider with a subtype of Listenable/Stream ($T).
+  static void Function<Value>(Value value)? debugCheckInvalidValueType =
+      <Value>(Value value) {
+        assert(() {
+          if (value is Listenable || value is Stream) {
+            throw FlutterError('''
+Tried to use Provider with a subtype of Listenable/Stream ($Value).
 
 This is likely a mistake, as Provider will not automatically update dependents
-when $T is updated. Instead, consider changing Provider for more specific
+when $Value is updated. Instead, consider changing Provider for more specific
 implementation that handles the update mechanism, such as:
 
 - ListenableProvider
@@ -414,27 +406,27 @@ void main() {
 }
 ```
 ''');
-      }
-      return true;
-    }());
-  };
+          }
+          return true;
+        }());
+      };
 }
 
 /// Called `Provider.of<T>` instead of `Provider.of<T?>` but the provider
 /// returned `null`.
 class ProviderNullException implements Exception {
   /// Create a ProviderNullException error with the type represented as a String.
-  ProviderNullException(this.valueType, this.WidgetType);
+  ProviderNullException(this.valueType, this.widgetType);
 
   /// The type of the value being retrieved
   final Type valueType;
 
   /// The type of the Widget requesting the value
-  final Type WidgetType;
+  final Type widgetType;
   @override
   String toString() {
     return '''
-Error: The Widget $WidgetType tried to read Provider<$valueType> but the matching
+Error: The Widget $widgetType tried to read Provider<$valueType> but the matching
 provider returned null.
 
 To fix the error, consider changing Provider<$valueType> to Provider<$valueType?>.
@@ -446,18 +438,18 @@ To fix the error, consider changing Provider<$valueType> to Provider<$valueType?
 /// as an ancestor of the [BuildContext] used.
 class ProviderNotFoundException implements Exception {
   /// Create a ProviderNotFound error with the type represented as a String.
-  ProviderNotFoundException(this.valueType, this.WidgetType);
+  ProviderNotFoundException(this.valueType, this.widgetType);
 
   /// The type of the value being retrieved
   final Type valueType;
 
   /// The type of the Widget requesting the value
-  final Type WidgetType;
+  final Type widgetType;
 
   @override
   String toString() {
     return '''
-Error: Could not find the correct Provider<$valueType> above this $WidgetType Widget
+Error: Could not find the correct Provider<$valueType> above this $widgetType Widget
 
 This happens because you used a `BuildContext` that does not include the provider
 of your choice. There are a few common scenarios:
@@ -472,7 +464,7 @@ of your choice. There are a few common scenarios:
 
 - You used a `BuildContext` that is an ancestor of the provider you are trying to read.
 
-  Make sure that $WidgetType is under your MultiProvider/Provider<$valueType>.
+  Make sure that $widgetType is under your MultiProvider/Provider<$valueType>.
   This usually happens when you are creating a provider and trying to read it immediately.
 
   For example, instead of:

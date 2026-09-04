@@ -1,0 +1,38 @@
+name: Flutter terminal wrapper
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  wrapper:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: packages/cinder_web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - run: flutter pub get
+      - run: flutter analyze --fatal-infos
+      - name: Resolve guest dependencies
+        working-directory: packages/cinder_web/example
+        run: dart pub get
+      - name: Compile the Cinder guest
+        working-directory: packages/cinder_web/example
+        run: dart compile js lib/main.dart -O2 -o ../web/app.js
+      - run: flutter build web --base-href /cinder/
+      - name: Verify the guest is included in the host export
+        run: cmp web/app.js build/web/app.js

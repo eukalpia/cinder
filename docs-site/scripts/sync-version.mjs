@@ -1,16 +1,12 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { readCinderVersion } from './version.mjs';
 
 const scriptFile = fileURLToPath(import.meta.url);
 const siteRoot = path.resolve(path.dirname(scriptFile), '..');
 const repositoryRoot = path.resolve(siteRoot, '..');
-const pubspec = await readFile(path.join(repositoryRoot, 'pubspec.yaml'), 'utf8');
-const version = pubspec.match(/^version:\s*([^\s#]+)\s*$/m)?.[1];
-
-if (!version) {
-  throw new Error('Unable to read the Cinder version from pubspec.yaml.');
-}
+const version = await readCinderVersion(repositoryRoot);
 
 const targets = [
   path.join(siteRoot, 'src', 'generated', 'examples.json'),

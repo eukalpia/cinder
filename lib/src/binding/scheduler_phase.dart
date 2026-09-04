@@ -13,7 +13,8 @@ enum SchedulerPhase {
   /// Transient frame callbacks are running.
   ///
   /// This phase is for animation tickers and other time-based updates.
-  /// Callbacks registered with [scheduleFrameCallback] execute during this phase.
+  /// Callbacks registered with `SchedulerBinding.scheduleFrameCallback` execute
+  /// during this phase.
   ///
   /// This corresponds to Flutter's handleBeginFrame().
   transientCallbacks,
@@ -27,7 +28,8 @@ enum SchedulerPhase {
   /// Persistent frame callbacks are running.
   ///
   /// This is the main rendering pipeline: build, layout, and paint.
-  /// Callbacks registered with [addPersistentFrameCallback] execute here.
+  /// Callbacks registered with `SchedulerBinding.addPersistentFrameCallback`
+  /// execute here.
   ///
   /// The build, layout, and paint phases all happen during this scheduler phase.
   persistentCallbacks,
@@ -35,6 +37,7 @@ enum SchedulerPhase {
   /// Post-frame callbacks are running.
   ///
   /// These run after the frame completes and are used for cleanup tasks.
-  /// Callbacks registered with [addPostFrameCallback] execute here.
+  /// Callbacks registered with `SchedulerBinding.addPostFrameCallback` execute
+  /// here.
   postFrameCallbacks,
 }

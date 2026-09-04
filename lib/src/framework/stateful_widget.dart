@@ -36,16 +36,27 @@ abstract class State<T extends StatefulWidget> {
 
   CinderTaskScope? _taskScope;
   CinderResourceScope? _resourceScope;
+  bool _frameworkResourcesDisposed = false;
 
   bool get mounted => _element != null;
 
   /// Structured asynchronous work owned by this State.
   @protected
-  CinderTaskScope get tasks => _taskScope ??= CinderTaskScope();
+  CinderTaskScope get tasks {
+    if (_frameworkResourcesDisposed) {
+      throw StateError('Cannot start work after $runtimeType.dispose().');
+    }
+    return _taskScope ??= CinderTaskScope();
+  }
 
   /// Timers, subscriptions, and other disposable resources owned by this State.
   @protected
-  CinderResourceScope get resources => _resourceScope ??= CinderResourceScope();
+  CinderResourceScope get resources {
+    if (_frameworkResourcesDisposed) {
+      throw StateError('Cannot own resources after $runtimeType.dispose().');
+    }
+    return _resourceScope ??= CinderResourceScope();
+  }
 
   /// Starts cancellable work that is automatically cancelled on unmount.
   @protected
@@ -69,6 +80,7 @@ abstract class State<T extends StatefulWidget> {
   }
 
   void _disposeFrameworkResources() {
+    _frameworkResourcesDisposed = true;
     final taskScope = _taskScope;
     _taskScope = null;
     taskScope?.disposeDetached('$runtimeType unmounted');
@@ -142,12 +154,17 @@ abstract class State<T extends StatefulWidget> {
   void setState(VoidCallback fn) {
     final element = _element;
     if (element == null ||
-        element._lifecycleState != _ElementLifecycle.active) {
+        element._lifecycleState == _ElementLifecycle.defunct) {
       throw StateError('setState() called after $runtimeType.dispose().');
     }
 
     fn();
-    element.markNeedsBuild();
+    // Inactive States remain mounted while moving or awaiting unmount. They
+    // may receive synchronous notifications from descendants being disposed;
+    // activation already schedules their next build if they are reinserted.
+    if (element._lifecycleState == _ElementLifecycle.active) {
+      element.markNeedsBuild();
+    }
   }
 }
 
@@ -175,12 +192,14 @@ class StatefulElement extends BuildableElement {
     final Object? debugCheckForReturnedFuture = state.initState() as dynamic;
     assert(() {
       if (debugCheckForReturnedFuture is Future) {
-        throw FlutterError([
-          '${state.runtimeType}.initState() returned a Future.',
-          'State.initState() must be a void method without an `async` keyword.',
-          'Rather than awaiting on asynchronous work directly inside of initState, '
-              'call a separate method to do this work without awaiting it.',
-        ].join('\n'));
+        throw FlutterError(
+          [
+            '${state.runtimeType}.initState() returned a Future.',
+            'State.initState() must be a void method without an `async` keyword.',
+            'Rather than awaiting on asynchronous work directly inside of initState, '
+                'call a separate method to do this work without awaiting it.',
+          ].join('\n'),
+        );
       }
       return true;
     }());
@@ -200,7 +219,8 @@ class StatefulElement extends BuildableElement {
     assert(() {
       if (debugCheckForReturnedFuture is Future) {
         throw FlutterError(
-            '${_state.runtimeType}.didUpdateWidget() returned a Future.');
+          '${_state.runtimeType}.didUpdateWidget() returned a Future.',
+        );
       }
       return true;
     }());
@@ -219,8 +239,11 @@ class StatefulElement extends BuildableElement {
 
   @override
   void deactivate() {
-    _state.deactivate();
-    super.deactivate();
+    try {
+      _state.deactivate();
+    } finally {
+      super.deactivate();
+    }
   }
 
   @override
@@ -235,16 +258,16 @@ class StatefulElement extends BuildableElement {
       firstStackTrace = stackTrace;
     }
 
+    // Stop accepting owned work before invoking user cleanup callbacks.
     try {
-      _state.dispose();
+      _state._disposeFrameworkResources();
     } catch (error, stackTrace) {
       firstError ??= error;
       firstStackTrace ??= stackTrace;
     }
 
-    // Framework-owned cleanup must run even when user dispose throws.
     try {
-      _state._disposeFrameworkResources();
+      _state.dispose();
     } catch (error, stackTrace) {
       firstError ??= error;
       firstStackTrace ??= stackTrace;

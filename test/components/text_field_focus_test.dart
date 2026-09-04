@@ -66,9 +66,7 @@ void main() {
     });
 
     test('TextField keeps onFocusChange callback', () {
-      final field = TextField(
-        onFocusChange: (_) {},
-      );
+      final field = TextField(onFocusChange: (_) {});
 
       expect(field.onFocusChange, isNotNull);
     });
@@ -83,10 +81,7 @@ void main() {
         focusNode: firstNode,
         autofocus: true,
       );
-      final second = TextField(
-        controller: controller,
-        focusNode: secondNode,
-      );
+      final second = TextField(controller: controller, focusNode: secondNode);
 
       expect(first.controller, same(controller));
       expect(second.controller, same(controller));
@@ -100,14 +95,13 @@ void main() {
     });
 
     test('multiple TextFields retain distinct FocusNodes', () {
-      final nodes =
-          List.generate(3, (index) => FocusNode(debugLabel: '$index'));
+      final nodes = List.generate(
+        3,
+        (index) => FocusNode(debugLabel: '$index'),
+      );
       final fields = List.generate(
         3,
-        (index) => TextField(
-          focusNode: nodes[index],
-          autofocus: index == 0,
-        ),
+        (index) => TextField(focusNode: nodes[index], autofocus: index == 0),
       );
 
       for (var index = 0; index < fields.length; index++) {

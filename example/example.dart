@@ -102,8 +102,9 @@ class _TodoAppState extends State<TodoApp> {
     final checkmark = todo.completed ? '[x]' : '[ ]';
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 1),
-      decoration:
-          isSelected ? BoxDecoration(color: Color.fromRGB(30, 40, 50)) : null,
+      decoration: isSelected
+          ? BoxDecoration(color: Color.fromRGB(30, 40, 50))
+          : null,
       child: Row(
         children: [
           Text(

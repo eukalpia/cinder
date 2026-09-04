@@ -22,8 +22,11 @@ void main() {
 
         var matches = tester.terminalState.findText('XX');
         expect(matches, hasLength(1));
-        expect(matches.single.x, 2,
-            reason: 'initial frame must paint XX at left: 2');
+        expect(
+          matches.single.x,
+          2,
+          reason: 'initial frame must paint XX at left: 2',
+        );
 
         state.moveTo(20);
         await tester.pump();
@@ -33,7 +36,8 @@ void main() {
         expect(
           matches.single.x,
           20,
-          reason: 'after setState the Positioned child must repaint at '
+          reason:
+              'after setState the Positioned child must repaint at '
               'left: 20 — the copy-in-place parent-data path must mark '
               'the theater for relayout',
         );
@@ -52,11 +56,8 @@ class _OverlayMover extends StatefulWidget {
 class _OverlayMoverState extends State<_OverlayMover> {
   int _left = 2;
   late final OverlayEntry _entry = OverlayEntry(
-    builder: (context) => Positioned(
-      left: _left.toDouble(),
-      top: 0,
-      child: const Text('XX'),
-    ),
+    builder: (context) =>
+        Positioned(left: _left.toDouble(), top: 0, child: const Text('XX')),
   );
 
   void moveTo(int left) {

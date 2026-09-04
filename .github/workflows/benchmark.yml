@@ -1,0 +1,33 @@
+name: Benchmark
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: 3.12.0
+      - run: dart pub get
+      - name: Enforce deterministic renderer work bounds
+        run: dart tool/check.dart benchmarks
+      - name: Record workload timings
+        run: dart run benchmark/benchmark.dart --ci
+      - uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-results
+          path: benchmark/results.md

@@ -219,11 +219,7 @@ class KittyEncoder {
     // Encode as PNG
     final pngBytes = Uint8List.fromList(img.encodePng(image));
 
-    return encodePng(
-      imageBytes: pngBytes,
-      quiet: quiet,
-      imageId: imageId,
-    );
+    return encodePng(imageBytes: pngBytes, quiet: quiet, imageId: imageId);
   }
 
   /// Encode base64 data with chunking according to Kitty protocol rules.

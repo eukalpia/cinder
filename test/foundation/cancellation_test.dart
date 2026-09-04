@@ -81,5 +81,54 @@ void main() {
 
       expect(() => scope.run<void>((_) {}), throwsStateError);
     });
+
+    test('concurrent disposal waits for task cleanup', () async {
+      final scope = CinderTaskScope();
+      final release = Completer<void>();
+      final task = scope.run<void>((token) async {
+        await token.whenCancelled;
+        await release.future;
+      });
+
+      final firstDisposal = scope.dispose();
+      var secondDisposalFinished = false;
+      final secondDisposal = scope.dispose().then((_) {
+        secondDisposalFinished = true;
+      });
+      await Future<void>.delayed(Duration.zero);
+
+      try {
+        expect(secondDisposalFinished, isFalse);
+      } finally {
+        release.complete();
+        await Future.wait([task.future, firstDisposal, secondDisposal]);
+      }
+      expect(scope.pendingTaskCount, 0);
+    });
+
+    test(
+      'disposal inside an operation cancels and waits for that task',
+      () async {
+        final scope = CinderTaskScope();
+        final release = Completer<void>();
+        late Future<void> disposal;
+        final task = scope.run<void>((token) {
+          disposal = scope.dispose();
+          return release.future;
+        });
+        var disposalFinished = false;
+        final observedDisposal = disposal.then((_) => disposalFinished = true);
+        await Future<void>.delayed(Duration.zero);
+
+        try {
+          expect(task.isCancelled, isTrue);
+          expect(disposalFinished, isFalse);
+        } finally {
+          release.complete();
+          await Future.wait([task.future, observedDisposal]);
+        }
+        expect(scope.pendingTaskCount, 0);
+      },
+    );
   });
 }

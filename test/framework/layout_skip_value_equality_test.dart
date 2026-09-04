@@ -29,7 +29,8 @@ void main() {
       expect(
         identical(distinctEqualConstraints, render.lastConstraints),
         isFalse,
-        reason: 'constructed from the same field values but must be a '
+        reason:
+            'constructed from the same field values but must be a '
             'separate instance - otherwise the test cannot distinguish '
             '== from identical()',
       );
@@ -39,7 +40,8 @@ void main() {
       expect(
         render.performLayoutCount,
         1,
-        reason: 'performLayout must not re-run when value-equal constraints '
+        reason:
+            'performLayout must not re-run when value-equal constraints '
             'arrive and the render object is not dirty',
       );
 

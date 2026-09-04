@@ -28,8 +28,11 @@ void main() {
       await tester.sendKey(LogicalKey.keyO);
       await tester.pump();
       final boxAfter = tester.terminalState.findText('[BOX]').single;
-      expect(boxAfter.x, isNot(boxBefore.x),
-          reason: 'Positioned box inside Overlay must move on [o]');
+      expect(
+        boxAfter.x,
+        isNot(boxBefore.x),
+        reason: 'Positioned box inside Overlay must move on [o]',
+      );
 
       // [p] Divider must shrink when padding grows.
       // The demo's divider uses ═ (double style) precisely so it can be
@@ -45,8 +48,11 @@ void main() {
       await tester.sendKey(LogicalKey.keyP);
       await tester.pump();
       expect(tester.terminalState.containsText('Padding all(2)'), isTrue);
-      expect(dividerWidth(), lessThan(wideDivider),
-          reason: 'Divider must shrink when padding grows on [p]');
+      expect(
+        dividerWidth(),
+        lessThan(wideDivider),
+        reason: 'Divider must shrink when padding grows on [p]',
+      );
 
       // [a] @@ must move to center.
       final xBefore = tester.terminalState.findText('@@').single;
@@ -54,8 +60,11 @@ void main() {
       await tester.pump();
       expect(tester.terminalState.containsText('Align center'), isTrue);
       final xAfter = tester.terminalState.findText('@@').single;
-      expect((xAfter.x, xAfter.y), isNot((xBefore.x, xBefore.y)),
-          reason: 'Aligned @@ must move on [a]');
+      expect(
+        (xAfter.x, xAfter.y),
+        isNot((xBefore.x, xBefore.y)),
+        reason: 'Aligned @@ must move on [a]',
+      );
 
       // [s] AAA/BB must swap offsets.
       final aBefore = tester.terminalState.findText('AAA').single.x;
@@ -65,17 +74,25 @@ void main() {
       await tester.pump();
       final aAfter = tester.terminalState.findText('AAA').single.x;
       final bAfter = tester.terminalState.findText('BB').single.x;
-      expect(bAfter, lessThan(aAfter),
-          reason: 'const keyed Row children must swap offsets on [s]');
+      expect(
+        bAfter,
+        lessThan(aAfter),
+        reason: 'const keyed Row children must swap offsets on [s]',
+      );
 
       // [h] Hoisted builders must re-render the new counter.
       await tester.sendKey(LogicalKey.keyH);
       await tester.pump();
-      expect(tester.terminalState.containsText('item 0 -> counter=1'), isTrue,
-          reason: 'hoisted ListView itemBuilder must see counter=1 on [h]');
-      expect(tester.terminalState.containsText('LayoutBuilder -> counter=1'),
-          isTrue,
-          reason: 'hoisted LayoutBuilder builder must see counter=1 on [h]');
+      expect(
+        tester.terminalState.containsText('item 0 -> counter=1'),
+        isTrue,
+        reason: 'hoisted ListView itemBuilder must see counter=1 on [h]',
+      );
+      expect(
+        tester.terminalState.containsText('LayoutBuilder -> counter=1'),
+        isTrue,
+        reason: 'hoisted LayoutBuilder builder must see counter=1 on [h]',
+      );
     }, size: const Size(80, 26));
   });
 }

@@ -61,17 +61,17 @@ class SemanticsProperties {
   final double? sortKey;
 
   Map<String, Object?> toJson() => <String, Object?>{
-        'role': role.name,
-        if (label != null) 'label': label,
-        if (value != null) 'value': value,
-        if (hint != null) 'hint': hint,
-        if (enabled != null) 'enabled': enabled,
-        if (focused != null) 'focused': focused,
-        if (selected != null) 'selected': selected,
-        if (checked != null) 'checked': checked,
-        if (expanded != null) 'expanded': expanded,
-        if (readOnly != null) 'readOnly': readOnly,
-      };
+    'role': role.name,
+    if (label != null) 'label': label,
+    if (value != null) 'value': value,
+    if (hint != null) 'hint': hint,
+    if (enabled != null) 'enabled': enabled,
+    if (focused != null) 'focused': focused,
+    if (selected != null) 'selected': selected,
+    if (checked != null) 'checked': checked,
+    if (expanded != null) 'expanded': expanded,
+    if (readOnly != null) 'readOnly': readOnly,
+  };
 }
 
 /// Annotates a widget subtree for accessibility, diagnostics, and plain output.
@@ -206,10 +206,10 @@ class SemanticsNodeData {
   final List<SemanticsNodeData> children;
 
   Map<String, Object?> toJson() => <String, Object?>{
-        ...properties.toJson(),
-        if (children.isNotEmpty)
-          'children': children.map((child) => child.toJson()).toList(),
-      };
+    ...properties.toJson(),
+    if (children.isNotEmpty)
+      'children': children.map((child) => child.toJson()).toList(),
+  };
 
   String toPlainText({int depth = 0}) {
     final lines = <String>[];
@@ -236,7 +236,7 @@ class SemanticsNodeData {
 /// Captures semantic annotations from the mounted element tree.
 class SemanticsSnapshot {
   SemanticsSnapshot(List<SemanticsNodeData> roots)
-      : roots = List<SemanticsNodeData>.unmodifiable(roots);
+    : roots = List<SemanticsNodeData>.unmodifiable(roots);
 
   final List<SemanticsNodeData> roots;
 
@@ -252,8 +252,8 @@ class SemanticsSnapshot {
       .join('\n');
 
   Map<String, Object?> toJson() => <String, Object?>{
-        'semantics': roots.map((node) => node.toJson()).toList(),
-      };
+    'semantics': roots.map((node) => node.toJson()).toList(),
+  };
 
   String toJsonString({bool pretty = false}) {
     final encoder = pretty ? const JsonEncoder.withIndent('  ') : jsonEncode;

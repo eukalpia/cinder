@@ -14,13 +14,13 @@ import 'package:test/test.dart';
 void main() {
   group('ListView parent data basics', () {
     test('items have correct parent data after initial layout', () async {
-      await testCinder(
-        'initial parent data',
-        (tester) async {
-          final scrollController = ScrollController();
+      await testCinder('initial parent data', (tester) async {
+        final scrollController = ScrollController();
 
-          await tester.pumpWidget(
-            Container(
+        await tester.pumpWidget(
+          Align(
+            alignment: Alignment.topLeft,
+            child: Container(
               width: 30,
               height: 10,
               child: ListView.builder(
@@ -32,34 +32,30 @@ void main() {
                 },
               ),
             ),
-          );
+          ),
+        );
 
-          // All 5 items should be visible or built
-          expect(tester.terminalState.containsText('Item 0'), isTrue);
-          expect(tester.terminalState.containsText('Item 1'), isTrue);
-          expect(tester.terminalState.containsText('Item 2'), isTrue);
-          expect(tester.terminalState.containsText('Item 3'), isTrue);
-          expect(tester.terminalState.containsText('Item 4'), isTrue);
+        // All 5 items should be visible or built
+        expect(tester.terminalState.containsText('Item 0'), isTrue);
+        expect(tester.terminalState.containsText('Item 1'), isTrue);
+        expect(tester.terminalState.containsText('Item 2'), isTrue);
+        expect(tester.terminalState.containsText('Item 3'), isTrue);
+        expect(tester.terminalState.containsText('Item 4'), isTrue);
 
-          // Verify scroll extent is calculated correctly
-          // 5 items of height 1 each, viewport of 10 means no scrolling needed
-          expect(scrollController.maxScrollExtent, equals(0.0));
-        },
-        size: Size(35, 15),
-      );
+        // Verify scroll extent is calculated correctly
+        // 5 items of height 1 each, viewport of 10 means no scrolling needed
+        expect(scrollController.maxScrollExtent, equals(0.0));
+      }, size: Size(35, 15));
     });
 
-    test('items have correct parent data with fixed itemExtent',
-        skip:
-            'Known bug: ListView maxScrollExtent not calculated correctly with Container',
-        () async {
-      await testCinder(
-        'fixed itemExtent parent data',
-        (tester) async {
-          final scrollController = ScrollController();
+    test('items have correct parent data with fixed itemExtent', () async {
+      await testCinder('fixed itemExtent parent data', (tester) async {
+        final scrollController = ScrollController();
 
-          await tester.pumpWidget(
-            Container(
+        await tester.pumpWidget(
+          Align(
+            alignment: Alignment.topLeft,
+            child: Container(
               width: 30,
               height: 5,
               child: ListView.builder(
@@ -72,31 +68,28 @@ void main() {
                 },
               ),
             ),
-          );
+          ),
+        );
 
-          // With 10 items of height 1 and viewport of 5
-          // maxScrollExtent should be 10 - 5 = 5
-          expect(scrollController.maxScrollExtent, equals(5.0));
+        // With 10 items of height 1 and viewport of 5
+        // maxScrollExtent should be 10 - 5 = 5
+        expect(scrollController.maxScrollExtent, equals(5.0));
 
-          // Verify initial items are visible
-          expect(tester.terminalState.containsText('Item 0'), isTrue);
-          expect(tester.terminalState.containsText('Item 4'), isTrue);
-          expect(tester.terminalState.containsText('Item 9'), isFalse);
-        },
-        size: Size(35, 10),
-      );
+        // Verify initial items are visible
+        expect(tester.terminalState.containsText('Item 0'), isTrue);
+        expect(tester.terminalState.containsText('Item 4'), isTrue);
+        expect(tester.terminalState.containsText('Item 9'), isFalse);
+      }, size: Size(35, 10));
     });
 
-    test('scrolling updates which items are visible',
-        skip: 'Known bug: ListView scrolling with Container constraint',
-        () async {
-      await testCinder(
-        'scroll updates visibility',
-        (tester) async {
-          final scrollController = ScrollController();
+    test('scrolling updates which items are visible', () async {
+      await testCinder('scroll updates visibility', (tester) async {
+        final scrollController = ScrollController();
 
-          await tester.pumpWidget(
-            Container(
+        await tester.pumpWidget(
+          Align(
+            alignment: Alignment.topLeft,
+            child: Container(
               width: 30,
               height: 5,
               child: ListView.builder(
@@ -109,35 +102,34 @@ void main() {
                 },
               ),
             ),
-          );
+          ),
+        );
 
-          // Initially items 0-4 should be visible
-          expect(tester.terminalState.containsText('Item 0'), isTrue);
-          expect(tester.terminalState.containsText('Item 10'), isFalse);
+        // Initially items 0-4 should be visible
+        expect(tester.terminalState.containsText('Item 0'), isTrue);
+        expect(tester.terminalState.containsText('Item 10'), isFalse);
 
-          // Scroll to offset 10
-          scrollController.jumpTo(10.0);
-          await tester.pump();
+        // Scroll to offset 10
+        scrollController.jumpTo(10.0);
+        await tester.pump();
 
-          // Now items 10-14 should be visible
-          expect(tester.terminalState.containsText('Item 0'), isFalse);
-          expect(tester.terminalState.containsText('Item 10'), isTrue);
-          expect(tester.terminalState.containsText('Item 14'), isTrue);
-        },
-        size: Size(35, 10),
-      );
+        // Now items 10-14 should be visible
+        expect(tester.terminalState.containsText('Item 0'), isFalse);
+        expect(tester.terminalState.containsText('Item 10'), isTrue);
+        expect(tester.terminalState.containsText('Item 14'), isTrue);
+      }, size: Size(35, 10));
     });
   });
 
   group('ListView parent data with variable height items', () {
     test('variable height items are laid out correctly', () async {
-      await testCinder(
-        'variable height layout',
-        (tester) async {
-          final scrollController = ScrollController();
+      await testCinder('variable height layout', (tester) async {
+        final scrollController = ScrollController();
 
-          await tester.pumpWidget(
-            Container(
+        await tester.pumpWidget(
+          Align(
+            alignment: Alignment.topLeft,
+            child: Container(
               width: 30,
               height: 10,
               child: ListView.builder(
@@ -160,27 +152,26 @@ void main() {
                 },
               ),
             ),
-          );
+          ),
+        );
 
-          // All content should be visible
-          expect(tester.terminalState.containsText('Item 0'), isTrue);
-          expect(tester.terminalState.containsText('Multi'), isTrue);
-          expect(tester.terminalState.containsText('Line'), isTrue);
-          expect(tester.terminalState.containsText('Item 2'), isTrue);
-          expect(tester.terminalState.containsText('Item 4'), isTrue);
-        },
-        size: Size(35, 15),
-      );
+        // All content should be visible
+        expect(tester.terminalState.containsText('Item 0'), isTrue);
+        expect(tester.terminalState.containsText('Multi'), isTrue);
+        expect(tester.terminalState.containsText('Line'), isTrue);
+        expect(tester.terminalState.containsText('Item 2'), isTrue);
+        expect(tester.terminalState.containsText('Item 4'), isTrue);
+      }, size: Size(35, 15));
     });
 
     test('scrolling works correctly with variable height items', () async {
-      await testCinder(
-        'variable height scrolling',
-        (tester) async {
-          final scrollController = ScrollController();
+      await testCinder('variable height scrolling', (tester) async {
+        final scrollController = ScrollController();
 
-          await tester.pumpWidget(
-            Container(
+        await tester.pumpWidget(
+          Align(
+            alignment: Alignment.topLeft,
+            child: Container(
               width: 30,
               height: 5,
               child: ListView.builder(
@@ -192,43 +183,39 @@ void main() {
                   if (index % 3 == 0) {
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Tall $index'),
-                        Text('Line 2'),
-                      ],
+                      children: [Text('Tall $index'), Text('Line 2')],
                     );
                   }
                   return Text('Item $index');
                 },
               ),
             ),
-          );
+          ),
+        );
 
-          // Verify scrolling works
-          expect(scrollController.maxScrollExtent, greaterThan(0));
+        // Verify scrolling works
+        expect(scrollController.maxScrollExtent, greaterThan(0));
 
-          // Scroll to end
-          scrollController.scrollToEnd();
-          await tester.pump();
+        // Scroll to end
+        scrollController.scrollToEnd();
+        await tester.pump();
 
-          // Last item should be visible (index 9 is a "Tall" item since 9 % 3 == 0)
-          expect(tester.terminalState.containsText('Tall 9'), isTrue);
-        },
-        size: Size(35, 10),
-      );
+        // Last item should be visible (index 9 is a "Tall" item since 9 % 3 == 0)
+        expect(tester.terminalState.containsText('Tall 9'), isTrue);
+      }, size: Size(35, 10));
     });
   });
 
   group('ListView lazy mode parent data', () {
     test('lazy mode only builds visible items initially', () async {
-      await testCinder(
-        'lazy initial build',
-        (tester) async {
-          final scrollController = ScrollController();
-          final builtIndices = <int>{};
+      await testCinder('lazy initial build', (tester) async {
+        final scrollController = ScrollController();
+        final builtIndices = <int>{};
 
-          await tester.pumpWidget(
-            Container(
+        await tester.pumpWidget(
+          Align(
+            alignment: Alignment.topLeft,
+            child: Container(
               width: 30,
               height: 5,
               child: ListView.builder(
@@ -242,28 +229,27 @@ void main() {
                 },
               ),
             ),
-          );
+          ),
+        );
 
-          // Only visible items (0-4) plus cache should be built
-          // With cacheExtent of 5.0, we might build a few extra
-          expect(builtIndices.length, lessThan(20));
-          expect(builtIndices.contains(0), isTrue);
-          expect(builtIndices.contains(50), isFalse);
-          expect(builtIndices.contains(99), isFalse);
-        },
-        size: Size(35, 10),
-      );
+        // Only visible items (0-4) plus cache should be built
+        // With cacheExtent of 5.0, we might build a few extra
+        expect(builtIndices.length, lessThan(20));
+        expect(builtIndices.contains(0), isTrue);
+        expect(builtIndices.contains(50), isFalse);
+        expect(builtIndices.contains(99), isFalse);
+      }, size: Size(35, 10));
     });
 
     test('lazy mode builds items as they scroll into view', () async {
-      await testCinder(
-        'lazy scroll build',
-        (tester) async {
-          final scrollController = ScrollController();
-          final builtIndices = <int>{};
+      await testCinder('lazy scroll build', (tester) async {
+        final scrollController = ScrollController();
+        final builtIndices = <int>{};
 
-          await tester.pumpWidget(
-            Container(
+        await tester.pumpWidget(
+          Align(
+            alignment: Alignment.topLeft,
+            child: Container(
               width: 30,
               height: 5,
               child: ListView.builder(
@@ -277,31 +263,30 @@ void main() {
                 },
               ),
             ),
-          );
+          ),
+        );
 
-          builtIndices.clear();
+        builtIndices.clear();
 
-          // Scroll to middle
-          scrollController.jumpTo(50.0);
-          await tester.pump();
+        // Scroll to middle
+        scrollController.jumpTo(50.0);
+        await tester.pump();
 
-          // Items around index 50 should now be built
-          expect(builtIndices.contains(50), isTrue);
-          expect(builtIndices.contains(51), isTrue);
-          expect(builtIndices.contains(0), isFalse); // Old items not rebuilt
-        },
-        size: Size(35, 10),
-      );
+        // Items around index 50 should now be built
+        expect(builtIndices.contains(50), isTrue);
+        expect(builtIndices.contains(51), isTrue);
+        expect(builtIndices.contains(0), isFalse); // Old items not rebuilt
+      }, size: Size(35, 10));
     });
 
     test('lazy mode removes items that scroll out of view', () async {
-      await testCinder(
-        'lazy remove out of view',
-        (tester) async {
-          final scrollController = ScrollController();
+      await testCinder('lazy remove out of view', (tester) async {
+        final scrollController = ScrollController();
 
-          await tester.pumpWidget(
-            Container(
+        await tester.pumpWidget(
+          Align(
+            alignment: Alignment.topLeft,
+            child: Container(
               width: 30,
               height: 5,
               child: ListView.builder(
@@ -314,31 +299,30 @@ void main() {
                 },
               ),
             ),
-          );
+          ),
+        );
 
-          // Items 0-4 visible
-          expect(tester.terminalState.containsText('Item 0'), isTrue);
+        // Items 0-4 visible
+        expect(tester.terminalState.containsText('Item 0'), isTrue);
 
-          // Jump far away
-          scrollController.jumpTo(80.0);
-          await tester.pump();
+        // Jump far away
+        scrollController.jumpTo(80.0);
+        await tester.pump();
 
-          // Items 80-84 should now be visible
-          expect(tester.terminalState.containsText('Item 80'), isTrue);
-          expect(tester.terminalState.containsText('Item 0'), isFalse);
-        },
-        size: Size(35, 10),
-      );
+        // Items 80-84 should now be visible
+        expect(tester.terminalState.containsText('Item 80'), isTrue);
+        expect(tester.terminalState.containsText('Item 0'), isFalse);
+      }, size: Size(35, 10));
     });
   });
 
   group('ListView reverse mode parent data', () {
     test('reverse mode lays out items from bottom', () async {
-      await testCinder(
-        'reverse layout',
-        (tester) async {
-          await tester.pumpWidget(
-            Container(
+      await testCinder('reverse layout', (tester) async {
+        await tester.pumpWidget(
+          Align(
+            alignment: Alignment.topLeft,
+            child: Container(
               width: 30,
               height: 10,
               child: ListView.builder(
@@ -349,25 +333,24 @@ void main() {
                 },
               ),
             ),
-          );
+          ),
+        );
 
-          // In reverse mode, Item 0 should appear at the bottom visually
-          // All items should be visible
-          expect(tester.terminalState.containsText('Item 0'), isTrue);
-          expect(tester.terminalState.containsText('Item 4'), isTrue);
-        },
-        size: Size(35, 15),
-      );
+        // In reverse mode, Item 0 should appear at the bottom visually
+        // All items should be visible
+        expect(tester.terminalState.containsText('Item 0'), isTrue);
+        expect(tester.terminalState.containsText('Item 4'), isTrue);
+      }, size: Size(35, 15));
     });
 
     test('reverse mode scrolling works correctly', () async {
-      await testCinder(
-        'reverse scroll',
-        (tester) async {
-          final scrollController = ScrollController();
+      await testCinder('reverse scroll', (tester) async {
+        final scrollController = ScrollController();
 
-          await tester.pumpWidget(
-            Container(
+        await tester.pumpWidget(
+          Align(
+            alignment: Alignment.topLeft,
+            child: Container(
               width: 30,
               height: 5,
               child: ListView.builder(
@@ -380,32 +363,31 @@ void main() {
                 },
               ),
             ),
-          );
+          ),
+        );
 
-          // Initially first items (0-4) should be visible at bottom
-          expect(tester.terminalState.containsText('Item 0'), isTrue);
+        // Initially first items (0-4) should be visible at bottom
+        expect(tester.terminalState.containsText('Item 0'), isTrue);
 
-          // Scroll to see more items
-          scrollController.jumpTo(10.0);
-          await tester.pump();
+        // Scroll to see more items
+        scrollController.jumpTo(10.0);
+        await tester.pump();
 
-          // Now items 10-14 should be visible
-          expect(tester.terminalState.containsText('Item 10'), isTrue);
-        },
-        size: Size(35, 10),
-      );
+        // Now items 10-14 should be visible
+        expect(tester.terminalState.containsText('Item 10'), isTrue);
+      }, size: Size(35, 10));
     });
   });
 
   group('ListView separated parent data', () {
     test('separators are included in layout calculations', () async {
-      await testCinder(
-        'separated layout',
-        (tester) async {
-          final scrollController = ScrollController();
+      await testCinder('separated layout', (tester) async {
+        final scrollController = ScrollController();
 
-          await tester.pumpWidget(
-            Container(
+        await tester.pumpWidget(
+          Align(
+            alignment: Alignment.topLeft,
+            child: Container(
               width: 30,
               height: 10,
               child: ListView.separated(
@@ -419,27 +401,24 @@ void main() {
                 },
               ),
             ),
-          );
+          ),
+        );
 
-          // Items and separators should be visible
-          expect(tester.terminalState.containsText('Item 0'), isTrue);
-          expect(tester.terminalState.containsText('---'), isTrue);
-          expect(tester.terminalState.containsText('Item 1'), isTrue);
-        },
-        size: Size(35, 15),
-      );
+        // Items and separators should be visible
+        expect(tester.terminalState.containsText('Item 0'), isTrue);
+        expect(tester.terminalState.containsText('---'), isTrue);
+        expect(tester.terminalState.containsText('Item 1'), isTrue);
+      }, size: Size(35, 15));
     });
 
-    test('separated mode scroll extent includes separators',
-        skip: 'Known bug: ListView maxScrollExtent not calculated correctly',
-        () async {
-      await testCinder(
-        'separated scroll extent',
-        (tester) async {
-          final scrollController = ScrollController();
+    test('separated mode scroll extent includes separators', () async {
+      await testCinder('separated scroll extent', (tester) async {
+        final scrollController = ScrollController();
 
-          await tester.pumpWidget(
-            Container(
+        await tester.pumpWidget(
+          Align(
+            alignment: Alignment.topLeft,
+            child: Container(
               width: 30,
               height: 5,
               child: ListView.separated(
@@ -454,29 +433,26 @@ void main() {
                 },
               ),
             ),
-          );
+          ),
+        );
 
-          // 10 items + 9 separators = 19 lines
-          // Viewport of 5, so maxScrollExtent = 19 - 5 = 14
-          expect(scrollController.maxScrollExtent, equals(14.0));
-        },
-        size: Size(35, 10),
-      );
+        // 10 items + 9 separators = 19 lines
+        // Viewport of 5, so maxScrollExtent = 19 - 5 = 14
+        expect(scrollController.maxScrollExtent, equals(14.0));
+      }, size: Size(35, 10));
     });
   });
 
   group('ListView dynamic updates', () {
-    test('adding items updates scroll extent',
-        skip: 'Known bug: ListView maxScrollExtent not calculated correctly',
-        () async {
-      await testCinder(
-        'add items extent',
-        (tester) async {
-          final scrollController = ScrollController();
+    test('adding items updates scroll extent', () async {
+      await testCinder('add items extent', (tester) async {
+        final scrollController = ScrollController();
 
-          // Start with 5 items
-          await tester.pumpWidget(
-            Container(
+        // Start with 5 items
+        await tester.pumpWidget(
+          Align(
+            alignment: Alignment.topLeft,
+            child: Container(
               width: 30,
               height: 5,
               child: ListView.builder(
@@ -488,14 +464,17 @@ void main() {
                 },
               ),
             ),
-          );
+          ),
+        );
 
-          // 5 items fit in viewport of 5, no scrolling
-          expect(scrollController.maxScrollExtent, equals(0.0));
+        // 5 items fit in viewport of 5, no scrolling
+        expect(scrollController.maxScrollExtent, equals(0.0));
 
-          // Add more items (10 total)
-          await tester.pumpWidget(
-            Container(
+        // Add more items (10 total)
+        await tester.pumpWidget(
+          Align(
+            alignment: Alignment.topLeft,
+            child: Container(
               width: 30,
               height: 5,
               child: ListView.builder(
@@ -507,26 +486,23 @@ void main() {
                 },
               ),
             ),
-          );
+          ),
+        );
 
-          // Now we should be able to scroll
-          expect(scrollController.maxScrollExtent, equals(5.0));
-        },
-        size: Size(35, 10),
-      );
+        // Now we should be able to scroll
+        expect(scrollController.maxScrollExtent, equals(5.0));
+      }, size: Size(35, 10));
     });
 
-    test('removing items updates scroll extent',
-        skip: 'Known bug: ListView maxScrollExtent not calculated correctly',
-        () async {
-      await testCinder(
-        'remove items extent',
-        (tester) async {
-          final scrollController = ScrollController();
+    test('removing items updates scroll extent', () async {
+      await testCinder('remove items extent', (tester) async {
+        final scrollController = ScrollController();
 
-          // Start with 10 items
-          await tester.pumpWidget(
-            Container(
+        // Start with 10 items
+        await tester.pumpWidget(
+          Align(
+            alignment: Alignment.topLeft,
+            child: Container(
               width: 30,
               height: 5,
               child: ListView.builder(
@@ -538,13 +514,16 @@ void main() {
                 },
               ),
             ),
-          );
+          ),
+        );
 
-          expect(scrollController.maxScrollExtent, equals(5.0));
+        expect(scrollController.maxScrollExtent, equals(5.0));
 
-          // Remove items (5 total)
-          await tester.pumpWidget(
-            Container(
+        // Remove items (5 total)
+        await tester.pumpWidget(
+          Align(
+            alignment: Alignment.topLeft,
+            child: Container(
               width: 30,
               height: 5,
               child: ListView.builder(
@@ -556,23 +535,22 @@ void main() {
                 },
               ),
             ),
-          );
+          ),
+        );
 
-          // No scrolling needed with 5 items
-          expect(scrollController.maxScrollExtent, equals(0.0));
-        },
-        size: Size(35, 10),
-      );
+        // No scrolling needed with 5 items
+        expect(scrollController.maxScrollExtent, equals(0.0));
+      }, size: Size(35, 10));
     });
 
     test('item content update reflects in display', () async {
-      await testCinder(
-        'content update',
-        (tester) async {
-          int version = 1;
+      await testCinder('content update', (tester) async {
+        int version = 1;
 
-          await tester.pumpWidget(
-            Container(
+        await tester.pumpWidget(
+          Align(
+            alignment: Alignment.topLeft,
+            child: Container(
               width: 30,
               height: 5,
               child: ListView.builder(
@@ -582,14 +560,17 @@ void main() {
                 },
               ),
             ),
-          );
+          ),
+        );
 
-          expect(tester.terminalState.containsText('V1 Item 0'), isTrue);
+        expect(tester.terminalState.containsText('V1 Item 0'), isTrue);
 
-          // Update content
-          version = 2;
-          await tester.pumpWidget(
-            Container(
+        // Update content
+        version = 2;
+        await tester.pumpWidget(
+          Align(
+            alignment: Alignment.topLeft,
+            child: Container(
               width: 30,
               height: 5,
               child: ListView.builder(
@@ -599,28 +580,25 @@ void main() {
                 },
               ),
             ),
-          );
+          ),
+        );
 
-          expect(tester.terminalState.containsText('V2 Item 0'), isTrue);
-          expect(tester.terminalState.containsText('V1 Item 0'), isFalse);
-        },
-        size: Size(35, 10),
-      );
+        expect(tester.terminalState.containsText('V2 Item 0'), isTrue);
+        expect(tester.terminalState.containsText('V1 Item 0'), isFalse);
+      }, size: Size(35, 10));
     });
   });
 
   group('ListView scroll position edge cases', () {
-    test('scroll position clamped when items removed',
-        skip: 'Known bug: ListView maxScrollExtent not calculated correctly',
-        () async {
-      await testCinder(
-        'clamp on remove',
-        (tester) async {
-          final scrollController = ScrollController();
+    test('scroll position clamped when items removed', () async {
+      await testCinder('clamp on remove', (tester) async {
+        final scrollController = ScrollController();
 
-          // Start with 20 items
-          await tester.pumpWidget(
-            Container(
+        // Start with 20 items
+        await tester.pumpWidget(
+          Align(
+            alignment: Alignment.topLeft,
+            child: Container(
               width: 30,
               height: 5,
               child: ListView.builder(
@@ -632,16 +610,19 @@ void main() {
                 },
               ),
             ),
-          );
+          ),
+        );
 
-          // Scroll to end
-          scrollController.jumpTo(15.0);
-          await tester.pump();
-          expect(scrollController.offset, equals(15.0));
+        // Scroll to end
+        scrollController.jumpTo(15.0);
+        await tester.pump();
+        expect(scrollController.offset, equals(15.0));
 
-          // Remove most items
-          await tester.pumpWidget(
-            Container(
+        // Remove most items
+        await tester.pumpWidget(
+          Align(
+            alignment: Alignment.topLeft,
+            child: Container(
               width: 30,
               height: 5,
               child: ListView.builder(
@@ -653,25 +634,22 @@ void main() {
                 },
               ),
             ),
-          );
+          ),
+        );
 
-          // Offset should be clamped to new maxScrollExtent (0)
-          expect(scrollController.offset, equals(0.0));
-        },
-        size: Size(35, 10),
-      );
+        // Offset should be clamped to new maxScrollExtent (0)
+        expect(scrollController.offset, equals(0.0));
+      }, size: Size(35, 10));
     });
 
-    test('jumpTo respects bounds',
-        skip: 'Known bug: ListView maxScrollExtent not calculated correctly',
-        () async {
-      await testCinder(
-        'jumpTo bounds',
-        (tester) async {
-          final scrollController = ScrollController();
+    test('jumpTo respects bounds', () async {
+      await testCinder('jumpTo bounds', (tester) async {
+        final scrollController = ScrollController();
 
-          await tester.pumpWidget(
-            Container(
+        await tester.pumpWidget(
+          Align(
+            alignment: Alignment.topLeft,
+            child: Container(
               width: 30,
               height: 5,
               child: ListView.builder(
@@ -683,36 +661,33 @@ void main() {
                 },
               ),
             ),
-          );
+          ),
+        );
 
-          // Try to jump past end
-          scrollController.jumpTo(100.0);
-          await tester.pump();
+        // Try to jump past end
+        scrollController.jumpTo(100.0);
+        await tester.pump();
 
-          // Should be clamped to maxScrollExtent
-          expect(scrollController.offset, equals(5.0));
+        // Should be clamped to maxScrollExtent
+        expect(scrollController.offset, equals(5.0));
 
-          // Try to jump before start
-          scrollController.jumpTo(-100.0);
-          await tester.pump();
+        // Try to jump before start
+        scrollController.jumpTo(-100.0);
+        await tester.pump();
 
-          // Should be clamped to 0
-          expect(scrollController.offset, equals(0.0));
-        },
-        size: Size(35, 10),
-      );
+        // Should be clamped to 0
+        expect(scrollController.offset, equals(0.0));
+      }, size: Size(35, 10));
     });
 
-    test('scrollDown respects bounds',
-        skip: 'Known bug: ListView maxScrollExtent not calculated correctly',
-        () async {
-      await testCinder(
-        'scrollDown bounds',
-        (tester) async {
-          final scrollController = ScrollController();
+    test('scrollDown respects bounds', () async {
+      await testCinder('scrollDown bounds', (tester) async {
+        final scrollController = ScrollController();
 
-          await tester.pumpWidget(
-            Container(
+        await tester.pumpWidget(
+          Align(
+            alignment: Alignment.topLeft,
+            child: Container(
               width: 30,
               height: 5,
               child: ListView.builder(
@@ -724,29 +699,28 @@ void main() {
                 },
               ),
             ),
-          );
+          ),
+        );
 
-          // Scroll down many times
-          for (int i = 0; i < 20; i++) {
-            scrollController.scrollDown(1.0);
-          }
-          await tester.pump();
+        // Scroll down many times
+        for (int i = 0; i < 20; i++) {
+          scrollController.scrollDown(1.0);
+        }
+        await tester.pump();
 
-          // Should stop at maxScrollExtent
-          expect(scrollController.offset, equals(5.0));
-        },
-        size: Size(35, 10),
-      );
+        // Should stop at maxScrollExtent
+        expect(scrollController.offset, equals(5.0));
+      }, size: Size(35, 10));
     });
 
     test('scrollUp respects bounds', () async {
-      await testCinder(
-        'scrollUp bounds',
-        (tester) async {
-          final scrollController = ScrollController();
+      await testCinder('scrollUp bounds', (tester) async {
+        final scrollController = ScrollController();
 
-          await tester.pumpWidget(
-            Container(
+        await tester.pumpWidget(
+          Align(
+            alignment: Alignment.topLeft,
+            child: Container(
               width: 30,
               height: 5,
               child: ListView.builder(
@@ -758,33 +732,32 @@ void main() {
                 },
               ),
             ),
-          );
+          ),
+        );
 
-          // Start at the end
-          scrollController.jumpTo(5.0);
-          await tester.pump();
+        // Start at the end
+        scrollController.jumpTo(5.0);
+        await tester.pump();
 
-          // Scroll up many times
-          for (int i = 0; i < 20; i++) {
-            scrollController.scrollUp(1.0);
-          }
-          await tester.pump();
+        // Scroll up many times
+        for (int i = 0; i < 20; i++) {
+          scrollController.scrollUp(1.0);
+        }
+        await tester.pump();
 
-          // Should stop at 0
-          expect(scrollController.offset, equals(0.0));
-        },
-        size: Size(35, 10),
-      );
+        // Should stop at 0
+        expect(scrollController.offset, equals(0.0));
+      }, size: Size(35, 10));
     });
   });
 
   group('ListView with complex items', () {
     test('items with Container and padding', () async {
-      await testCinder(
-        'container items',
-        (tester) async {
-          await tester.pumpWidget(
-            Container(
+      await testCinder('container items', (tester) async {
+        await tester.pumpWidget(
+          Align(
+            alignment: Alignment.topLeft,
+            child: Container(
               width: 30,
               height: 10,
               child: ListView.builder(
@@ -797,22 +770,21 @@ void main() {
                 },
               ),
             ),
-          );
+          ),
+        );
 
-          expect(tester.terminalState.containsText('Item 0'), isTrue);
-          expect(tester.terminalState.containsText('Item 1'), isTrue);
-          expect(tester.terminalState.containsText('Item 2'), isTrue);
-        },
-        size: Size(35, 15),
-      );
+        expect(tester.terminalState.containsText('Item 0'), isTrue);
+        expect(tester.terminalState.containsText('Item 1'), isTrue);
+        expect(tester.terminalState.containsText('Item 2'), isTrue);
+      }, size: Size(35, 15));
     });
 
     test('items with nested Row/Column', () async {
-      await testCinder(
-        'nested layout items',
-        (tester) async {
-          await tester.pumpWidget(
-            Container(
+      await testCinder('nested layout items', (tester) async {
+        await tester.pumpWidget(
+          Align(
+            alignment: Alignment.topLeft,
+            child: Container(
               width: 40,
               height: 10,
               child: ListView.builder(
@@ -827,22 +799,21 @@ void main() {
                 },
               ),
             ),
-          );
+          ),
+        );
 
-          expect(tester.terminalState.containsText('[0]'), isTrue);
-          expect(tester.terminalState.containsText('[1]'), isTrue);
-          expect(tester.terminalState.containsText('[2]'), isTrue);
-        },
-        size: Size(45, 15),
-      );
+        expect(tester.terminalState.containsText('[0]'), isTrue);
+        expect(tester.terminalState.containsText('[1]'), isTrue);
+        expect(tester.terminalState.containsText('[2]'), isTrue);
+      }, size: Size(45, 15));
     });
 
     test('items with GestureDetector', () async {
-      await testCinder(
-        'gesture items',
-        (tester) async {
-          await tester.pumpWidget(
-            Container(
+      await testCinder('gesture items', (tester) async {
+        await tester.pumpWidget(
+          Align(
+            alignment: Alignment.topLeft,
+            child: Container(
               width: 30,
               height: 10,
               child: ListView.builder(
@@ -855,26 +826,25 @@ void main() {
                 },
               ),
             ),
-          );
+          ),
+        );
 
-          expect(tester.terminalState.containsText('Tap me 0'), isTrue);
-          // Note: Actual tap testing would require simulating mouse events
-        },
-        size: Size(35, 15),
-      );
+        expect(tester.terminalState.containsText('Tap me 0'), isTrue);
+        // Note: Actual tap testing would require simulating mouse events
+      }, size: Size(35, 15));
     });
   });
 
   group('ListView scrollToEnd regression', () {
     test('scrollToEnd works after items are added', () async {
-      await testCinder(
-        'scrollToEnd after add',
-        (tester) async {
-          final scrollController = ScrollController();
+      await testCinder('scrollToEnd after add', (tester) async {
+        final scrollController = ScrollController();
 
-          // Start with 5 items (no scroll needed)
-          await tester.pumpWidget(
-            Container(
+        // Start with 5 items (no scroll needed)
+        await tester.pumpWidget(
+          Align(
+            alignment: Alignment.topLeft,
+            child: Container(
               width: 30,
               height: 5,
               child: ListView.builder(
@@ -886,11 +856,14 @@ void main() {
                 },
               ),
             ),
-          );
+          ),
+        );
 
-          // Add items
-          await tester.pumpWidget(
-            Container(
+        // Add items
+        await tester.pumpWidget(
+          Align(
+            alignment: Alignment.topLeft,
+            child: Container(
               width: 30,
               height: 5,
               child: ListView.builder(
@@ -902,32 +875,31 @@ void main() {
                 },
               ),
             ),
-          );
+          ),
+        );
 
-          // Scroll to end
-          scrollController.scrollToEnd();
-          await tester.pump();
+        // Scroll to end
+        scrollController.scrollToEnd();
+        await tester.pump();
 
-          // Last items should be visible
-          expect(
-            tester.terminalState.containsText('Item 19') ||
-                tester.terminalState.containsText('Item 18'),
-            isTrue,
-            reason: 'Should be able to scroll to see last items',
-          );
-        },
-        size: Size(35, 10),
-      );
+        // Last items should be visible
+        expect(
+          tester.terminalState.containsText('Item 19') ||
+              tester.terminalState.containsText('Item 18'),
+          isTrue,
+          reason: 'Should be able to scroll to see last items',
+        );
+      }, size: Size(35, 10));
     });
 
     test('scrollToEnd works with lazy mode', () async {
-      await testCinder(
-        'scrollToEnd lazy',
-        (tester) async {
-          final scrollController = ScrollController();
+      await testCinder('scrollToEnd lazy', (tester) async {
+        final scrollController = ScrollController();
 
-          await tester.pumpWidget(
-            Container(
+        await tester.pumpWidget(
+          Align(
+            alignment: Alignment.topLeft,
+            child: Container(
               width: 30,
               height: 5,
               child: ListView.builder(
@@ -940,32 +912,31 @@ void main() {
                 },
               ),
             ),
-          );
+          ),
+        );
 
-          // Scroll to end
-          scrollController.scrollToEnd();
-          await tester.pump();
+        // Scroll to end
+        scrollController.scrollToEnd();
+        await tester.pump();
 
-          // Last items should be visible
-          expect(
-            tester.terminalState.containsText('Item 49') ||
-                tester.terminalState.containsText('Item 48'),
-            isTrue,
-            reason: 'Should be able to scroll to last items in lazy mode',
-          );
-        },
-        size: Size(35, 10),
-      );
+        // Last items should be visible
+        expect(
+          tester.terminalState.containsText('Item 49') ||
+              tester.terminalState.containsText('Item 48'),
+          isTrue,
+          reason: 'Should be able to scroll to last items in lazy mode',
+        );
+      }, size: Size(35, 10));
     });
   });
 
   group('ListView horizontal mode', () {
     test('horizontal layout works correctly', () async {
-      await testCinder(
-        'horizontal layout',
-        (tester) async {
-          await tester.pumpWidget(
-            Container(
+      await testCinder('horizontal layout', (tester) async {
+        await tester.pumpWidget(
+          Align(
+            alignment: Alignment.topLeft,
+            child: Container(
               width: 30,
               height: 5,
               child: ListView(
@@ -977,25 +948,24 @@ void main() {
                 ],
               ),
             ),
-          );
+          ),
+        );
 
-          // All items should be visible horizontally
-          expect(tester.terminalState.containsText('A'), isTrue);
-          expect(tester.terminalState.containsText('B'), isTrue);
-          expect(tester.terminalState.containsText('C'), isTrue);
-        },
-        size: Size(35, 10),
-      );
+        // All items should be visible horizontally
+        expect(tester.terminalState.containsText('A'), isTrue);
+        expect(tester.terminalState.containsText('B'), isTrue);
+        expect(tester.terminalState.containsText('C'), isTrue);
+      }, size: Size(35, 10));
     });
 
     test('horizontal scrolling works', () async {
-      await testCinder(
-        'horizontal scroll',
-        (tester) async {
-          final scrollController = ScrollController();
+      await testCinder('horizontal scroll', (tester) async {
+        final scrollController = ScrollController();
 
-          await tester.pumpWidget(
-            Container(
+        await tester.pumpWidget(
+          Align(
+            alignment: Alignment.topLeft,
+            child: Container(
               width: 20,
               height: 3,
               child: ListView.builder(
@@ -1010,20 +980,19 @@ void main() {
                 },
               ),
             ),
-          );
+          ),
+        );
 
-          // Initially items 0-3 visible
-          expect(tester.terminalState.containsText('0'), isTrue);
+        // Initially items 0-3 visible
+        expect(tester.terminalState.containsText('0'), isTrue);
 
-          // Scroll right
-          scrollController.jumpTo(30.0);
-          await tester.pump();
+        // Scroll right
+        scrollController.jumpTo(30.0);
+        await tester.pump();
 
-          // Later items should be visible
-          expect(tester.terminalState.containsText('6'), isTrue);
-        },
-        size: Size(25, 10),
-      );
+        // Later items should be visible
+        expect(tester.terminalState.containsText('6'), isTrue);
+      }, size: Size(25, 10));
     });
   });
 }

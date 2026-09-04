@@ -53,7 +53,7 @@ mixin Selectable on RenderObject {
   /// Maps a local position (x, y) to a character index in [selectableText].
   ///
   /// Uses the layout result to determine which line the y coordinate falls on,
-  /// then walks grapheme clusters on that line using [UnicodeWidth] to find the
+  /// then walks grapheme clusters on that line using terminal widths to find the
   /// character at the x coordinate.
   int getCharacterIndexAtLocalPosition(Offset localPos) {
     return selection_utils.getCharacterIndexAtLocalPosition(

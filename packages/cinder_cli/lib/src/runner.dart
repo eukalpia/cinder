@@ -18,13 +18,17 @@ class Runner extends CommandRunner<int> {
         log(usage);
         return 1;
       }
+      return (await super.run(args)) ?? 0;
+    } on UsageException catch (e) {
+      log('Error: ${e.message}');
+      log('');
+      log(e.usage);
+      return 1;
     } on FormatException catch (e) {
       log('Error: ${e.message}');
       log('');
       log(usage);
       return 1;
     }
-
-    return (await super.run(args)) ?? 0;
   }
 }

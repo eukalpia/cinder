@@ -157,8 +157,7 @@ class Consumer<T> extends SingleChildStatelessWidget {
   /// {@template provider.consumer.constructor}
   /// Consumes a [Provider<T>]
   /// {@endtemplate}
-  Consumer({Key? key, required this.builder, Widget? child})
-      : super(key: key, child: child);
+  Consumer({super.key, required this.builder, super.child});
 
   /// {@template provider.consumer.builder}
   /// Build a Widget tree based on the value from a [Provider<T>].
@@ -176,16 +175,11 @@ class Consumer<T> extends SingleChildStatelessWidget {
 /// {@macro provider.consumer}
 class Consumer2<A, B> extends SingleChildStatelessWidget {
   /// {@macro provider.consumer.constructor}
-  Consumer2({Key? key, required this.builder, Widget? child})
-      : super(key: key, child: child);
+  Consumer2({super.key, required this.builder, super.child});
 
   /// {@macro provider.consumer.builder}
-  final Widget Function(
-    BuildContext context,
-    A value,
-    B value2,
-    Widget? child,
-  ) builder;
+  final Widget Function(BuildContext context, A value, B value2, Widget? child)
+  builder;
 
   @override
   Widget buildWithChild(BuildContext context, Widget? child) {
@@ -201,8 +195,7 @@ class Consumer2<A, B> extends SingleChildStatelessWidget {
 /// {@macro provider.consumer}
 class Consumer3<A, B, C> extends SingleChildStatelessWidget {
   /// {@macro provider.consumer.constructor}
-  Consumer3({Key? key, required this.builder, Widget? child})
-      : super(key: key, child: child);
+  Consumer3({super.key, required this.builder, super.child});
 
   /// {@macro provider.consumer.builder}
   final Widget Function(
@@ -211,7 +204,8 @@ class Consumer3<A, B, C> extends SingleChildStatelessWidget {
     B value2,
     C value3,
     Widget? child,
-  ) builder;
+  )
+  builder;
 
   @override
   Widget buildWithChild(BuildContext context, Widget? child) {
@@ -228,8 +222,7 @@ class Consumer3<A, B, C> extends SingleChildStatelessWidget {
 /// {@macro provider.consumer}
 class Consumer4<A, B, C, D> extends SingleChildStatelessWidget {
   /// {@macro provider.consumer.constructor}
-  Consumer4({Key? key, required this.builder, Widget? child})
-      : super(key: key, child: child);
+  Consumer4({super.key, required this.builder, super.child});
 
   /// {@macro provider.consumer.builder}
   final Widget Function(
@@ -239,7 +232,8 @@ class Consumer4<A, B, C, D> extends SingleChildStatelessWidget {
     C value3,
     D value4,
     Widget? child,
-  ) builder;
+  )
+  builder;
 
   @override
   Widget buildWithChild(BuildContext context, Widget? child) {
@@ -257,8 +251,7 @@ class Consumer4<A, B, C, D> extends SingleChildStatelessWidget {
 /// {@macro provider.consumer}
 class Consumer5<A, B, C, D, E> extends SingleChildStatelessWidget {
   /// {@macro provider.consumer.constructor}
-  Consumer5({Key? key, required this.builder, Widget? child})
-      : super(key: key, child: child);
+  Consumer5({super.key, required this.builder, super.child});
 
   /// {@macro provider.consumer.builder}
   final Widget Function(
@@ -269,7 +262,8 @@ class Consumer5<A, B, C, D, E> extends SingleChildStatelessWidget {
     D value4,
     E value5,
     Widget? child,
-  ) builder;
+  )
+  builder;
 
   @override
   Widget buildWithChild(BuildContext context, Widget? child) {
@@ -288,8 +282,7 @@ class Consumer5<A, B, C, D, E> extends SingleChildStatelessWidget {
 /// {@macro provider.consumer}
 class Consumer6<A, B, C, D, E, F> extends SingleChildStatelessWidget {
   /// {@macro provider.consumer.constructor}
-  Consumer6({Key? key, required this.builder, Widget? child})
-      : super(key: key, child: child);
+  Consumer6({super.key, required this.builder, super.child});
 
   /// {@macro provider.consumer.builder}
   final Widget Function(
@@ -301,7 +294,8 @@ class Consumer6<A, B, C, D, E, F> extends SingleChildStatelessWidget {
     E value5,
     F value6,
     Widget? child,
-  ) builder;
+  )
+  builder;
 
   @override
   Widget buildWithChild(BuildContext context, Widget? child) {

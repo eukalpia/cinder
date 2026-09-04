@@ -35,8 +35,8 @@ typedef Dispose<T> = void Function(BuildContext context, T value);
 /// - [InheritedProvider]
 /// - [DeferredStartListening], a variant of this typedef for more advanced
 ///   listening.
-typedef StartListening<T> = VoidCallback Function(
-    InheritedContext<T?> element, T value);
+typedef StartListening<T> =
+    VoidCallback Function(InheritedContext<T?> element, T value);
 
 /// A generic implementation of an [InheritedWidget].
 ///
@@ -55,7 +55,7 @@ class InheritedProvider<T> extends SingleChildStatelessWidget {
   /// The value will be disposed of when [InheritedProvider] is removed from
   /// the Widget tree.
   InheritedProvider({
-    Key? key,
+    super.key,
     Create<T>? create,
     T Function(BuildContext context, T? value)? update,
     UpdateShouldNotify<T>? updateShouldNotify,
@@ -64,44 +64,41 @@ class InheritedProvider<T> extends SingleChildStatelessWidget {
     Dispose<T>? dispose,
     this.builder,
     bool? lazy,
-    Widget? child,
-  })  : _lazy = lazy,
-        _delegate = _CreateInheritedProvider(
-          create: create,
-          update: update,
-          updateShouldNotify: updateShouldNotify,
-          debugCheckInvalidValueType: debugCheckInvalidValueType,
-          startListening: startListening,
-          dispose: dispose,
-        ),
-        super(key: key, child: child);
+    super.child,
+  }) : _lazy = lazy,
+       _delegate = _CreateInheritedProvider(
+         create: create,
+         update: update,
+         updateShouldNotify: updateShouldNotify,
+         debugCheckInvalidValueType: debugCheckInvalidValueType,
+         startListening: startListening,
+         dispose: dispose,
+       );
 
   /// Expose to its descendants an existing value,
   InheritedProvider.value({
-    Key? key,
+    super.key,
     required T value,
     UpdateShouldNotify<T>? updateShouldNotify,
     StartListening<T>? startListening,
     bool? lazy,
     this.builder,
-    Widget? child,
-  })  : _lazy = lazy,
-        _delegate = _ValueInheritedProvider(
-          value: value,
-          updateShouldNotify: updateShouldNotify,
-          startListening: startListening,
-        ),
-        super(key: key, child: child);
+    super.child,
+  }) : _lazy = lazy,
+       _delegate = _ValueInheritedProvider(
+         value: value,
+         updateShouldNotify: updateShouldNotify,
+         startListening: startListening,
+       );
 
   InheritedProvider._constructor({
-    Key? key,
+    super.key,
     required _Delegate<T> delegate,
     bool? lazy,
     this.builder,
-    Widget? child,
-  })  : _lazy = lazy,
-        _delegate = delegate,
-        super(key: key, child: child);
+    super.child,
+  }) : _lazy = lazy,
+       _delegate = delegate;
 
   final _Delegate<T> _delegate;
   final bool? _lazy;
@@ -140,7 +137,7 @@ class InheritedProvider<T> extends SingleChildStatelessWidget {
   final TransitionBuilder? builder;
 
   @override
-  _InheritedProviderElement<T> createElement() {
+  SingleChildStatelessElement createElement() {
     return _InheritedProviderElement<T>(this);
   }
 
@@ -166,7 +163,7 @@ class InheritedProvider<T> extends SingleChildStatelessWidget {
 }
 
 class _InheritedProviderElement<T> extends SingleChildStatelessElement {
-  _InheritedProviderElement(InheritedProvider<T> Widget) : super(Widget);
+  _InheritedProviderElement(InheritedProvider<T> super.widget);
 }
 
 bool _debugIsSelecting = false;
@@ -302,10 +299,9 @@ class _InheritedProviderScope<T> extends InheritedWidget {
   _InheritedProviderScope({
     required this.owner,
     required this.debugType,
-    required Widget child,
-    Key? key,
-  })  : assert(null is T),
-        super(key: key, child: child);
+    required super.child,
+    super.key,
+  }) : assert(null is T);
 
   final InheritedProvider<T> owner;
   final String debugType;
@@ -329,8 +325,7 @@ class _Dependency<T> {
 
 class _InheritedProviderScopeElement<T> extends InheritedElement
     implements InheritedContext<T> {
-  _InheritedProviderScopeElement(_InheritedProviderScope<T> Widget)
-      : super(Widget);
+  _InheritedProviderScopeElement(_InheritedProviderScope<T> super.widget);
 
   bool _shouldNotifyDependents = false;
   bool _debugInheritLocked = false;
@@ -342,7 +337,8 @@ class _InheritedProviderScopeElement<T> extends InheritedElement
 
   @override
   InheritedElement? getElementForInheritedWidgetOfExactType<
-      InheritedWidgetType extends InheritedWidget>() {
+    InheritedWidgetType extends InheritedWidget
+  >() {
     InheritedElement? inheritedElement;
 
     // An InheritedProvider<T>'s update tries to obtain a parent provider of
@@ -352,8 +348,8 @@ class _InheritedProviderScopeElement<T> extends InheritedElement
         inheritedElement = parent as InheritedElement;
         return false;
       }
-      inheritedElement =
-          parent.getElementForInheritedWidgetOfExactType<InheritedWidgetType>();
+      inheritedElement = parent
+          .getElementForInheritedWidgetOfExactType<InheritedWidgetType>();
       return false;
     });
 
@@ -468,10 +464,11 @@ If you're in this situation, consider passing a `key` unique to each individual 
     );
     super.update(newWidget);
     _updatedShouldNotify = false;
+    markNeedsBuild();
   }
 
   @override
-  void notifyClients(InheritedWidget oldWidget) {
+  void updated(InheritedWidget oldWidget) {
     if (_updatedShouldNotify) {
       super.notifyClients(oldWidget);
     }
@@ -494,7 +491,7 @@ If you're in this situation, consider passing a `key` unique to each individual 
     _isBuildFromExternalSources = false;
     if (_shouldNotifyDependents) {
       _shouldNotifyDependents = false;
-      notifyClients(widget);
+      super.notifyClients(widget);
     }
     return super.build();
   }
@@ -599,8 +596,8 @@ class _CreateInheritedProvider<T> extends _Delegate<T> {
     this.debugCheckInvalidValueType,
     this.startListening,
     this.dispose,
-  })  : assert(create != null || update != null),
-        _updateShouldNotify = updateShouldNotify;
+  }) : assert(create != null || update != null),
+       _updateShouldNotify = updateShouldNotify;
 
   final Create<T>? create;
   final T Function(BuildContext context, T? value)? update;
@@ -640,13 +637,13 @@ class _CreateInheritedProviderState<T>
         '${_initError?.toString()}',
       );
     }
-    bool? _debugPreviousIsInInheritedProviderCreate;
-    bool? _debugPreviousIsInInheritedProviderUpdate;
+    bool? debugPreviousIsInInheritedProviderCreate;
+    bool? debugPreviousIsInInheritedProviderUpdate;
 
     assert(() {
-      _debugPreviousIsInInheritedProviderCreate =
+      debugPreviousIsInInheritedProviderCreate =
           debugIsInInheritedProviderCreate;
-      _debugPreviousIsInInheritedProviderUpdate =
+      debugPreviousIsInInheritedProviderUpdate =
           debugIsInInheritedProviderUpdate;
       return true;
     }());
@@ -668,9 +665,9 @@ class _CreateInheritedProviderState<T>
         } finally {
           assert(() {
             debugIsInInheritedProviderCreate =
-                _debugPreviousIsInInheritedProviderCreate!;
+                debugPreviousIsInInheritedProviderCreate!;
             debugIsInInheritedProviderUpdate =
-                _debugPreviousIsInInheritedProviderUpdate!;
+                debugPreviousIsInInheritedProviderUpdate!;
             return true;
           }());
         }
@@ -692,9 +689,9 @@ class _CreateInheritedProviderState<T>
         } finally {
           assert(() {
             debugIsInInheritedProviderCreate =
-                _debugPreviousIsInInheritedProviderCreate!;
+                debugPreviousIsInInheritedProviderCreate!;
             debugIsInInheritedProviderUpdate =
-                _debugPreviousIsInInheritedProviderUpdate!;
+                debugPreviousIsInInheritedProviderUpdate!;
             return true;
           }());
         }
@@ -732,12 +729,12 @@ class _CreateInheritedProviderState<T>
         delegate.update != null) {
       final previousValue = _value;
 
-      bool? _debugPreviousIsInInheritedProviderCreate;
-      bool? _debugPreviousIsInInheritedProviderUpdate;
+      bool? debugPreviousIsInInheritedProviderCreate;
+      bool? debugPreviousIsInInheritedProviderUpdate;
       assert(() {
-        _debugPreviousIsInInheritedProviderCreate =
+        debugPreviousIsInInheritedProviderCreate =
             debugIsInInheritedProviderCreate;
-        _debugPreviousIsInInheritedProviderUpdate =
+        debugPreviousIsInInheritedProviderUpdate =
             debugIsInInheritedProviderUpdate;
         return true;
       }());
@@ -751,9 +748,9 @@ class _CreateInheritedProviderState<T>
       } finally {
         assert(() {
           debugIsInInheritedProviderCreate =
-              _debugPreviousIsInInheritedProviderCreate!;
+              debugPreviousIsInInheritedProviderCreate!;
           debugIsInInheritedProviderUpdate =
-              _debugPreviousIsInInheritedProviderUpdate!;
+              debugPreviousIsInInheritedProviderUpdate!;
           return true;
         }());
       }

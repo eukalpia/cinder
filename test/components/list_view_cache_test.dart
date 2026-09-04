@@ -24,91 +24,95 @@ import 'package:test/test.dart';
 void main() {
   group('ListView cache invalidation', () {
     test('renders new items when itemCount increases', () async {
-      await testCinder(
-        'itemCount increase',
-        (tester) async {
-          // Start with 3 items
-          await tester.pumpWidget(
-            SizedBox(
-              width: 30,
-              height: 10,
-              child: ListView.builder(
-                itemCount: 3,
-                itemBuilder: (context, index) => Text('Item $index'),
-              ),
+      await testCinder('itemCount increase', (tester) async {
+        // Start with 3 items
+        await tester.pumpWidget(
+          SizedBox(
+            width: 30,
+            height: 10,
+            child: ListView.builder(
+              itemCount: 3,
+              itemBuilder: (context, index) => Text('Item $index'),
             ),
-          );
+          ),
+        );
 
-          // Verify initial 3 items
-          expect(tester.terminalState.containsText('Item 0'), isTrue);
-          expect(tester.terminalState.containsText('Item 1'), isTrue);
-          expect(tester.terminalState.containsText('Item 2'), isTrue);
+        // Verify initial 3 items
+        expect(tester.terminalState.containsText('Item 0'), isTrue);
+        expect(tester.terminalState.containsText('Item 1'), isTrue);
+        expect(tester.terminalState.containsText('Item 2'), isTrue);
 
-          // Increase to 5 items
-          await tester.pumpWidget(
-            SizedBox(
-              width: 30,
-              height: 10,
-              child: ListView.builder(
-                itemCount: 5,
-                itemBuilder: (context, index) => Text('Item $index'),
-              ),
+        // Increase to 5 items
+        await tester.pumpWidget(
+          SizedBox(
+            width: 30,
+            height: 10,
+            child: ListView.builder(
+              itemCount: 5,
+              itemBuilder: (context, index) => Text('Item $index'),
             ),
-          );
+          ),
+        );
 
-          // Verify all 5 items render (visible ones at least)
-          expect(tester.terminalState.containsText('Item 0'), isTrue);
-          expect(tester.terminalState.containsText('Item 3'), isTrue,
-              reason: 'New items must render when itemCount increases');
-          expect(tester.terminalState.containsText('Item 4'), isTrue,
-              reason: 'New items must render when itemCount increases');
-        },
-        size: Size(35, 15),
-      );
+        // Verify all 5 items render (visible ones at least)
+        expect(tester.terminalState.containsText('Item 0'), isTrue);
+        expect(
+          tester.terminalState.containsText('Item 3'),
+          isTrue,
+          reason: 'New items must render when itemCount increases',
+        );
+        expect(
+          tester.terminalState.containsText('Item 4'),
+          isTrue,
+          reason: 'New items must render when itemCount increases',
+        );
+      }, size: Size(35, 15));
     });
 
     test('removes items when itemCount decreases', () async {
-      await testCinder(
-        'itemCount decrease',
-        (tester) async {
-          // Start with 5 items
-          await tester.pumpWidget(
-            SizedBox(
-              width: 30,
-              height: 10,
-              child: ListView.builder(
-                itemCount: 5,
-                itemBuilder: (context, index) => Text('Item $index'),
-              ),
+      await testCinder('itemCount decrease', (tester) async {
+        // Start with 5 items
+        await tester.pumpWidget(
+          SizedBox(
+            width: 30,
+            height: 10,
+            child: ListView.builder(
+              itemCount: 5,
+              itemBuilder: (context, index) => Text('Item $index'),
             ),
-          );
+          ),
+        );
 
-          // Verify initial 5 items
-          expect(tester.terminalState.containsText('Item 4'), isTrue);
+        // Verify initial 5 items
+        expect(tester.terminalState.containsText('Item 4'), isTrue);
 
-          // Decrease to 3 items
-          await tester.pumpWidget(
-            SizedBox(
-              width: 30,
-              height: 10,
-              child: ListView.builder(
-                itemCount: 3,
-                itemBuilder: (context, index) => Text('Item $index'),
-              ),
+        // Decrease to 3 items
+        await tester.pumpWidget(
+          SizedBox(
+            width: 30,
+            height: 10,
+            child: ListView.builder(
+              itemCount: 3,
+              itemBuilder: (context, index) => Text('Item $index'),
             ),
-          );
+          ),
+        );
 
-          // Verify only 3 items render
-          expect(tester.terminalState.containsText('Item 0'), isTrue);
-          expect(tester.terminalState.containsText('Item 1'), isTrue);
-          expect(tester.terminalState.containsText('Item 2'), isTrue);
-          expect(tester.terminalState.containsText('Item 3'), isFalse,
-              reason: 'Removed items must not render');
-          expect(tester.terminalState.containsText('Item 4'), isFalse,
-              reason: 'Removed items must not render');
-        },
-        size: Size(35, 15),
-      );
+        // Verify only 3 items render
+        expect(tester.terminalState.containsText('Item 0'), isTrue);
+        expect(tester.terminalState.containsText('Item 1'), isTrue);
+        expect(tester.terminalState.containsText('Item 2'), isTrue);
+        expect(
+          tester.terminalState.containsText('Item 3'),
+          isFalse,
+          reason: 'Removed items must not render',
+        );
+        expect(
+          tester.terminalState.containsText('Item 4'),
+          isFalse,
+          reason: 'Removed items must not render',
+        );
+      }, size: Size(35, 15));
     });
 
     test('renders new items with reverse: true', () async {
@@ -116,128 +120,119 @@ void main() {
       // With reverse: true (chat UI pattern), new items prepend at index 0
       // and all existing indices shift. The cache must be invalidated
       // so new items at index 0 are rendered.
-      await testCinder(
-        'reverse mode new items',
-        (tester) async {
-          List<String> messages = ['Message 1', 'Message 2'];
+      await testCinder('reverse mode new items', (tester) async {
+        List<String> messages = ['Message 1', 'Message 2'];
 
-          await tester.pumpWidget(
-            SizedBox(
-              width: 30,
-              height: 10,
-              child: ListView.builder(
-                reverse: true,
-                itemCount: messages.length,
-                itemBuilder: (context, index) => Text(messages[index]),
-              ),
+        await tester.pumpWidget(
+          SizedBox(
+            width: 30,
+            height: 10,
+            child: ListView.builder(
+              reverse: true,
+              itemCount: messages.length,
+              itemBuilder: (context, index) => Text(messages[index]),
             ),
-          );
+          ),
+        );
 
-          // Initial state
-          expect(tester.terminalState.containsText('Message 1'), isTrue);
-          expect(tester.terminalState.containsText('Message 2'), isTrue);
+        // Initial state
+        expect(tester.terminalState.containsText('Message 1'), isTrue);
+        expect(tester.terminalState.containsText('Message 2'), isTrue);
 
-          // Add new message (prepended, like in a chat)
-          messages = ['NEW MESSAGE', ...messages];
+        // Add new message (prepended, like in a chat)
+        messages = ['NEW MESSAGE', ...messages];
 
-          await tester.pumpWidget(
-            SizedBox(
-              width: 30,
-              height: 10,
-              child: ListView.builder(
-                reverse: true,
-                itemCount: messages.length,
-                itemBuilder: (context, index) => Text(messages[index]),
-              ),
+        await tester.pumpWidget(
+          SizedBox(
+            width: 30,
+            height: 10,
+            child: ListView.builder(
+              reverse: true,
+              itemCount: messages.length,
+              itemBuilder: (context, index) => Text(messages[index]),
             ),
-          );
+          ),
+        );
 
-          // CRITICAL: New message MUST appear
-          expect(tester.terminalState.containsText('NEW MESSAGE'), isTrue,
-              reason:
-                  'New items must render when prepended in reverse mode - this was the original bug');
-          expect(tester.terminalState.containsText('Message 1'), isTrue);
-          expect(tester.terminalState.containsText('Message 2'), isTrue);
-        },
-        size: Size(35, 15),
-      );
+        // CRITICAL: New message MUST appear
+        expect(
+          tester.terminalState.containsText('NEW MESSAGE'),
+          isTrue,
+          reason:
+              'New items must render when prepended in reverse mode - this was the original bug',
+        );
+        expect(tester.terminalState.containsText('Message 1'), isTrue);
+        expect(tester.terminalState.containsText('Message 2'), isTrue);
+      }, size: Size(35, 15));
     });
 
     test('handles rapid itemCount changes', () async {
       // Simulate chat: 3 -> 4 -> 5 -> 6 items rapidly
-      await testCinder(
-        'rapid itemCount changes',
-        (tester) async {
-          for (int count = 3; count <= 8; count++) {
-            await tester.pumpWidget(
-              SizedBox(
-                width: 30,
-                height: 15,
-                child: ListView.builder(
-                  itemCount: count,
-                  itemBuilder: (context, index) => Text('Item $index'),
-                ),
+      await testCinder('rapid itemCount changes', (tester) async {
+        for (int count = 3; count <= 8; count++) {
+          await tester.pumpWidget(
+            SizedBox(
+              width: 30,
+              height: 15,
+              child: ListView.builder(
+                itemCount: count,
+                itemBuilder: (context, index) => Text('Item $index'),
               ),
-            );
+            ),
+          );
 
-            // Verify the last item renders
-            expect(
-                tester.terminalState.containsText('Item ${count - 1}'), isTrue,
-                reason:
-                    'Item ${count - 1} must render after itemCount = $count');
-          }
-        },
-        size: Size(35, 20),
-      );
+          // Verify the last item renders
+          expect(
+            tester.terminalState.containsText('Item ${count - 1}'),
+            isTrue,
+            reason: 'Item ${count - 1} must render after itemCount = $count',
+          );
+        }
+      }, size: Size(35, 20));
     });
   });
 
   group('ListView cache preservation', () {
     test('preserves cache when itemCount unchanged', () async {
-      await testCinder(
-        'cache preserved on scroll',
-        (tester) async {
-          final scrollController = ScrollController();
-          int buildCount = 0;
+      await testCinder('cache preserved on scroll', (tester) async {
+        final scrollController = ScrollController();
+        int buildCount = 0;
 
-          await tester.pumpWidget(
-            SizedBox(
-              width: 30,
-              height: 5,
-              child: ListView.builder(
-                controller: scrollController,
-                lazy: true,
-                itemCount: 20,
-                itemBuilder: (context, index) {
-                  buildCount++;
-                  return Text('Item $index');
-                },
-              ),
+        await tester.pumpWidget(
+          SizedBox(
+            width: 30,
+            height: 5,
+            child: ListView.builder(
+              controller: scrollController,
+              lazy: true,
+              itemCount: 20,
+              itemBuilder: (context, index) {
+                buildCount++;
+                return Text('Item $index');
+              },
             ),
-          );
+          ),
+        );
 
-          final initialBuildCount = buildCount;
+        final initialBuildCount = buildCount;
 
-          // Scroll down
-          scrollController.scrollDown(2.0);
-          await tester.pump();
+        // Scroll down
+        scrollController.scrollDown(2.0);
+        await tester.pump();
 
-          // Items should still render correctly
-          expect(tester.terminalState.containsText('Item'), isTrue);
+        // Items should still render correctly
+        expect(tester.terminalState.containsText('Item'), isTrue);
 
-          // Build count should only increase for newly visible items,
-          // not for already cached items
-          expect(buildCount, greaterThan(initialBuildCount));
-        },
-        size: Size(35, 10),
-      );
+        // Build count should only increase for newly visible items,
+        // not for already cached items
+        expect(buildCount, greaterThan(initialBuildCount));
+      }, size: Size(35, 10));
     });
 
-    test('preserves cache during parent rebuild without itemCount change',
-        () async {
-      await testCinder(
-        'cache preserved on parent rebuild',
-        (tester) async {
+    test(
+      'preserves cache during parent rebuild without itemCount change',
+      () async {
+        await testCinder('cache preserved on parent rebuild', (tester) async {
           int buildCount = 0;
 
           // First render
@@ -295,47 +290,41 @@ void main() {
 
           // Items will rebuild because parent rebuilt
           expect(buildCount, greaterThan(initialBuildCount));
-        },
-        size: Size(35, 10),
-      );
-    });
+        }, size: Size(35, 10));
+      },
+    );
   });
 
   group('ListView reverse mode', () {
     test('new items appear at visual bottom with reverse: true', () async {
       // With reverse: true, index 0 is at the visual bottom
       // New items (at index 0) should appear at bottom
-      await testCinder(
-        'reverse mode visual position',
-        (tester) async {
-          await tester.pumpWidget(
-            SizedBox(
-              width: 30,
-              height: 10,
-              child: ListView.builder(
-                reverse: true,
-                itemCount: 5,
-                itemBuilder: (context, index) => Text('Item $index'),
-              ),
+      await testCinder('reverse mode visual position', (tester) async {
+        await tester.pumpWidget(
+          SizedBox(
+            width: 30,
+            height: 10,
+            child: ListView.builder(
+              reverse: true,
+              itemCount: 5,
+              itemBuilder: (context, index) => Text('Item $index'),
             ),
-          );
+          ),
+        );
 
-          // All items should be visible
-          expect(tester.terminalState.containsText('Item 0'), isTrue);
-          expect(tester.terminalState.containsText('Item 1'), isTrue);
-          expect(tester.terminalState.containsText('Item 2'), isTrue);
-          expect(tester.terminalState.containsText('Item 3'), isTrue);
-          expect(tester.terminalState.containsText('Item 4'), isTrue);
-        },
-        size: Size(35, 15),
-      );
+        // All items should be visible
+        expect(tester.terminalState.containsText('Item 0'), isTrue);
+        expect(tester.terminalState.containsText('Item 1'), isTrue);
+        expect(tester.terminalState.containsText('Item 2'), isTrue);
+        expect(tester.terminalState.containsText('Item 3'), isTrue);
+        expect(tester.terminalState.containsText('Item 4'), isTrue);
+      }, size: Size(35, 15));
     });
 
-    test('scroll position maintained when items added in reverse mode',
-        () async {
-      await testCinder(
-        'reverse mode scroll position',
-        (tester) async {
+    test(
+      'scroll position maintained when items added in reverse mode',
+      () async {
+        await testCinder('reverse mode scroll position', (tester) async {
           final scrollController = ScrollController();
           List<String> messages = ['Msg 1', 'Msg 2', 'Msg 3'];
 
@@ -369,19 +358,35 @@ void main() {
           );
 
           // New message should be visible
-          expect(tester.terminalState.containsText('New Msg'), isTrue,
-              reason: 'New message must appear when added');
-        },
-        size: Size(35, 12),
-      );
-    });
+          expect(
+            tester.terminalState.containsText('New Msg'),
+            isTrue,
+            reason: 'New message must appear when added',
+          );
+        }, size: Size(35, 12));
+      },
+    );
 
     test('multiple rapid additions in reverse mode', () async {
       // Simulate receiving multiple chat messages quickly
-      await testCinder(
-        'rapid additions reverse mode',
-        (tester) async {
-          List<String> messages = ['Initial'];
+      await testCinder('rapid additions reverse mode', (tester) async {
+        List<String> messages = ['Initial'];
+
+        await tester.pumpWidget(
+          SizedBox(
+            width: 30,
+            height: 15,
+            child: ListView.builder(
+              reverse: true,
+              itemCount: messages.length,
+              itemBuilder: (context, index) => Text(messages[index]),
+            ),
+          ),
+        );
+
+        // Rapid additions (like receiving chat messages)
+        for (int i = 1; i <= 5; i++) {
+          messages = ['Msg $i', ...messages];
 
           await tester.pumpWidget(
             SizedBox(
@@ -395,217 +400,191 @@ void main() {
             ),
           );
 
-          // Rapid additions (like receiving chat messages)
-          for (int i = 1; i <= 5; i++) {
-            messages = ['Msg $i', ...messages];
+          expect(
+            tester.terminalState.containsText('Msg $i'),
+            isTrue,
+            reason: 'Message $i must appear immediately after being added',
+          );
+        }
 
-            await tester.pumpWidget(
-              SizedBox(
-                width: 30,
-                height: 15,
-                child: ListView.builder(
-                  reverse: true,
-                  itemCount: messages.length,
-                  itemBuilder: (context, index) => Text(messages[index]),
-                ),
-              ),
-            );
-
-            expect(tester.terminalState.containsText('Msg $i'), isTrue,
-                reason: 'Message $i must appear immediately after being added');
-          }
-
-          // All messages should be visible
-          expect(tester.terminalState.containsText('Initial'), isTrue);
-          expect(tester.terminalState.containsText('Msg 5'), isTrue);
-        },
-        size: Size(35, 20),
-      );
+        // All messages should be visible
+        expect(tester.terminalState.containsText('Initial'), isTrue);
+        expect(tester.terminalState.containsText('Msg 5'), isTrue);
+      }, size: Size(35, 20));
     });
   });
 
   group('ListView edge cases', () {
     test('handles itemCount from null to number', () async {
       // Infinite list -> finite list
-      await testCinder(
-        'null to finite itemCount',
-        (tester) async {
-          // Initially infinite (null itemCount)
-          await tester.pumpWidget(
-            SizedBox(
-              width: 30,
-              height: 10,
-              child: ListView.builder(
-                itemCount: null,
-                itemBuilder: (context, index) {
-                  // For null itemCount, only render up to 10 items
-                  if (index >= 10) return null;
-                  return Text('Item $index');
-                },
-              ),
+      await testCinder('null to finite itemCount', (tester) async {
+        // Initially infinite (null itemCount)
+        await tester.pumpWidget(
+          SizedBox(
+            width: 30,
+            height: 10,
+            child: ListView.builder(
+              itemCount: null,
+              itemBuilder: (context, index) {
+                // For null itemCount, only render up to 10 items
+                if (index >= 10) return null;
+                return Text('Item $index');
+              },
             ),
-          );
+          ),
+        );
 
-          // Initially infinite (null itemCount), showing items
-          expect(tester.terminalState.containsText('Item 0'), isTrue);
+        // Initially infinite (null itemCount), showing items
+        expect(tester.terminalState.containsText('Item 0'), isTrue);
 
-          // Change to finite
-          await tester.pumpWidget(
-            SizedBox(
-              width: 30,
-              height: 10,
-              child: ListView.builder(
-                itemCount: 5,
-                itemBuilder: (context, index) {
-                  return Text('Item $index');
-                },
-              ),
+        // Change to finite
+        await tester.pumpWidget(
+          SizedBox(
+            width: 30,
+            height: 10,
+            child: ListView.builder(
+              itemCount: 5,
+              itemBuilder: (context, index) {
+                return Text('Item $index');
+              },
             ),
-          );
+          ),
+        );
 
-          // Only 5 items should render
-          expect(tester.terminalState.containsText('Item 0'), isTrue);
-          expect(tester.terminalState.containsText('Item 4'), isTrue);
-        },
-        size: Size(35, 15),
-      );
+        // Only 5 items should render
+        expect(tester.terminalState.containsText('Item 0'), isTrue);
+        expect(tester.terminalState.containsText('Item 4'), isTrue);
+      }, size: Size(35, 15));
     });
 
     test('handles itemCount from number to null', () async {
       // Finite list -> infinite list
-      await testCinder(
-        'finite to null itemCount',
-        (tester) async {
-          // Initially 5 items
-          await tester.pumpWidget(
-            SizedBox(
-              width: 30,
-              height: 10,
-              child: ListView.builder(
-                itemCount: 5,
-                itemBuilder: (context, index) => Text('Item $index'),
-              ),
+      await testCinder('finite to null itemCount', (tester) async {
+        // Initially 5 items
+        await tester.pumpWidget(
+          SizedBox(
+            width: 30,
+            height: 10,
+            child: ListView.builder(
+              itemCount: 5,
+              itemBuilder: (context, index) => Text('Item $index'),
             ),
-          );
+          ),
+        );
 
-          expect(tester.terminalState.containsText('Item 4'), isTrue);
+        expect(tester.terminalState.containsText('Item 4'), isTrue);
 
-          // Change to infinite (null)
-          await tester.pumpWidget(
-            SizedBox(
-              width: 30,
-              height: 10,
-              child: ListView.builder(
-                itemCount: null,
-                itemBuilder: (context, index) {
-                  // For null itemCount, allow more items
-                  if (index >= 15) return null;
-                  return Text('Item $index');
-                },
-              ),
+        // Change to infinite (null)
+        await tester.pumpWidget(
+          SizedBox(
+            width: 30,
+            height: 10,
+            child: ListView.builder(
+              itemCount: null,
+              itemBuilder: (context, index) {
+                // For null itemCount, allow more items
+                if (index >= 15) return null;
+                return Text('Item $index');
+              },
             ),
-          );
+          ),
+        );
 
-          // More items should be available (though may not all be visible)
-          expect(tester.terminalState.containsText('Item 0'), isTrue);
-        },
-        size: Size(35, 15),
-      );
+        // More items should be available (though may not all be visible)
+        expect(tester.terminalState.containsText('Item 0'), isTrue);
+      }, size: Size(35, 15));
     });
 
     test('handles itemCount change from 0 to n', () async {
       // Empty list -> populated list
-      await testCinder(
-        'empty to populated',
-        (tester) async {
-          // Initially empty
-          await tester.pumpWidget(
-            SizedBox(
-              width: 30,
-              height: 10,
-              child: ListView.builder(
-                itemCount: 0,
-                itemBuilder: (context, index) => Text('Item $index'),
-              ),
+      await testCinder('empty to populated', (tester) async {
+        // Initially empty
+        await tester.pumpWidget(
+          SizedBox(
+            width: 30,
+            height: 10,
+            child: ListView.builder(
+              itemCount: 0,
+              itemBuilder: (context, index) => Text('Item $index'),
             ),
-          );
+          ),
+        );
 
-          // Initially empty
-          expect(tester.terminalState.containsText('Item'), isFalse);
+        // Initially empty
+        expect(tester.terminalState.containsText('Item'), isFalse);
 
-          // Add items
-          await tester.pumpWidget(
-            SizedBox(
-              width: 30,
-              height: 10,
-              child: ListView.builder(
-                itemCount: 5,
-                itemBuilder: (context, index) => Text('Item $index'),
-              ),
+        // Add items
+        await tester.pumpWidget(
+          SizedBox(
+            width: 30,
+            height: 10,
+            child: ListView.builder(
+              itemCount: 5,
+              itemBuilder: (context, index) => Text('Item $index'),
             ),
-          );
+          ),
+        );
 
-          // Items should render
-          expect(tester.terminalState.containsText('Item 0'), isTrue,
-              reason: 'Items must render when going from empty to populated');
-          expect(tester.terminalState.containsText('Item 4'), isTrue);
-        },
-        size: Size(35, 15),
-      );
+        // Items should render
+        expect(
+          tester.terminalState.containsText('Item 0'),
+          isTrue,
+          reason: 'Items must render when going from empty to populated',
+        );
+        expect(tester.terminalState.containsText('Item 4'), isTrue);
+      }, size: Size(35, 15));
     });
 
     test('handles itemCount change from n to 0', () async {
       // Populated list -> empty list
-      await testCinder(
-        'populated to empty',
-        (tester) async {
-          // Initially 5 items
-          await tester.pumpWidget(
-            SizedBox(
-              width: 30,
-              height: 10,
-              child: ListView.builder(
-                itemCount: 5,
-                itemBuilder: (context, index) => Text('Item $index'),
-              ),
+      await testCinder('populated to empty', (tester) async {
+        // Initially 5 items
+        await tester.pumpWidget(
+          SizedBox(
+            width: 30,
+            height: 10,
+            child: ListView.builder(
+              itemCount: 5,
+              itemBuilder: (context, index) => Text('Item $index'),
             ),
-          );
+          ),
+        );
 
-          expect(tester.terminalState.containsText('Item 0'), isTrue);
-          expect(tester.terminalState.containsText('Item 4'), isTrue);
+        expect(tester.terminalState.containsText('Item 0'), isTrue);
+        expect(tester.terminalState.containsText('Item 4'), isTrue);
 
-          // Clear all items
-          await tester.pumpWidget(
-            SizedBox(
-              width: 30,
-              height: 10,
-              child: ListView.builder(
-                itemCount: 0,
-                itemBuilder: (context, index) => Text('Item $index'),
-              ),
+        // Clear all items
+        await tester.pumpWidget(
+          SizedBox(
+            width: 30,
+            height: 10,
+            child: ListView.builder(
+              itemCount: 0,
+              itemBuilder: (context, index) => Text('Item $index'),
             ),
-          );
+          ),
+        );
 
-          // No items should render
-          expect(tester.terminalState.containsText('Item 0'), isFalse,
-              reason: 'No items should render when itemCount is 0');
-          expect(tester.terminalState.containsText('Item'), isFalse);
-        },
-        size: Size(35, 15),
-      );
+        // No items should render
+        expect(
+          tester.terminalState.containsText('Item 0'),
+          isFalse,
+          reason: 'No items should render when itemCount is 0',
+        );
+        expect(tester.terminalState.containsText('Item'), isFalse);
+      }, size: Size(35, 15));
     });
   });
 
   group('CRITICAL: Original bug regression test', () {
-    test('CRITICAL: new items render after state change with reverse: true',
-        () async {
-      // This test MUST exist and would have caught the original bug.
-      // The bug was that when itemCount changed, the _itemOffsets and
-      // _itemExtents caches weren't invalidated, causing new items
-      // (especially at index 0 in reverse mode) to not render.
-      await testCinder(
-        'CRITICAL regression test',
-        (tester) async {
+    test(
+      'CRITICAL: new items render after state change with reverse: true',
+      () async {
+        // This test MUST exist and would have caught the original bug.
+        // The bug was that when itemCount changed, the _itemOffsets and
+        // _itemExtents caches weren't invalidated, causing new items
+        // (especially at index 0 in reverse mode) to not render.
+        await testCinder('CRITICAL regression test', (tester) async {
           // Simulate chat UI: messages list that grows
           List<String> messages = ['Message 1', 'Message 2'];
 
@@ -642,124 +621,121 @@ void main() {
 
           // CRITICAL: New message MUST appear
           // This is THE regression test for the bug we fixed
-          expect(tester.terminalState.containsText('NEW MESSAGE'), isTrue,
-              reason: 'New items must render when prepended in reverse mode. '
-                  'This is the CRITICAL test that would have caught the original '
-                  'bug where _itemOffsets and _itemExtents caches were not '
-                  'invalidated when itemCount changed.');
-        },
-        size: Size(45, 15),
-      );
-    });
+          expect(
+            tester.terminalState.containsText('NEW MESSAGE'),
+            isTrue,
+            reason:
+                'New items must render when prepended in reverse mode. '
+                'This is the CRITICAL test that would have caught the original '
+                'bug where _itemOffsets and _itemExtents caches were not '
+                'invalidated when itemCount changed.',
+          );
+        }, size: Size(45, 15));
+      },
+    );
 
     test('cache invalidation occurs when itemCount changes', () async {
       // Verify the fix: caches should be invalidated when itemCount changes
-      await testCinder(
-        'cache invalidation verification',
-        (tester) async {
-          final List<int> builtIndices = [];
+      await testCinder('cache invalidation verification', (tester) async {
+        final List<int> builtIndices = [];
 
-          // Start with 3 items
-          await tester.pumpWidget(
-            SizedBox(
-              width: 30,
-              height: 10,
-              child: ListView.builder(
-                lazy: true,
-                itemCount: 3,
-                itemBuilder: (context, index) {
-                  builtIndices.add(index);
-                  return Text('Item $index');
-                },
-              ),
+        // Start with 3 items
+        await tester.pumpWidget(
+          SizedBox(
+            width: 30,
+            height: 10,
+            child: ListView.builder(
+              lazy: true,
+              itemCount: 3,
+              itemBuilder: (context, index) {
+                builtIndices.add(index);
+                return Text('Item $index');
+              },
             ),
-          );
+          ),
+        );
 
-          // Clear to track new builds
-          builtIndices.clear();
+        // Clear to track new builds
+        builtIndices.clear();
 
-          // Increase itemCount - should trigger cache invalidation
-          await tester.pumpWidget(
-            SizedBox(
-              width: 30,
-              height: 10,
-              child: ListView.builder(
-                lazy: true,
-                itemCount: 6,
-                itemBuilder: (context, index) {
-                  builtIndices.add(index);
-                  return Text('Item $index');
-                },
-              ),
+        // Increase itemCount - should trigger cache invalidation
+        await tester.pumpWidget(
+          SizedBox(
+            width: 30,
+            height: 10,
+            child: ListView.builder(
+              lazy: true,
+              itemCount: 6,
+              itemBuilder: (context, index) {
+                builtIndices.add(index);
+                return Text('Item $index');
+              },
             ),
-          );
+          ),
+        );
 
-          // New items should have been built
-          // (The exact indices depend on viewport size, but new indices should appear)
-          expect(builtIndices.where((i) => i >= 3).isNotEmpty, isTrue,
-              reason:
-                  'New item indices (3, 4, 5) should be built after itemCount increase');
+        // New items should have been built
+        // (The exact indices depend on viewport size, but new indices should appear)
+        expect(
+          builtIndices.where((i) => i >= 3).isNotEmpty,
+          isTrue,
+          reason:
+              'New item indices (3, 4, 5) should be built after itemCount increase',
+        );
 
-          // Verify they render
-          expect(tester.terminalState.containsText('Item 3'), isTrue);
-          expect(tester.terminalState.containsText('Item 4'), isTrue);
-          expect(tester.terminalState.containsText('Item 5'), isTrue);
-        },
-        size: Size(35, 15),
-      );
+        // Verify they render
+        expect(tester.terminalState.containsText('Item 3'), isTrue);
+        expect(tester.terminalState.containsText('Item 4'), isTrue);
+        expect(tester.terminalState.containsText('Item 5'), isTrue);
+      }, size: Size(35, 15));
     });
   });
 
   group('ListView with StatefulWidget for state changes', () {
     test('renders new items when state changes with stateful parent', () async {
-      await testCinder(
-        'stateful parent state change',
-        (tester) async {
-          await tester.pumpWidget(_DynamicListView());
+      await testCinder('stateful parent state change', (tester) async {
+        await tester.pumpWidget(_DynamicListView());
 
-          // Initial state shows 3 items
-          expect(tester.terminalState.containsText('Item 0'), isTrue);
-          expect(tester.terminalState.containsText('Item 2'), isTrue);
-          expect(tester.terminalState.containsText('Item 3'), isFalse);
+        // Initial state shows 3 items
+        expect(tester.terminalState.containsText('Item 0'), isTrue);
+        expect(tester.terminalState.containsText('Item 2'), isTrue);
+        expect(tester.terminalState.containsText('Item 3'), isFalse);
 
-          // Trigger state change to add items
-          final state = tester.findState<_DynamicListViewState>();
-          state.addItems(3);
-          await tester.pump();
+        // Trigger state change to add items
+        final state = tester.findState<_DynamicListViewState>();
+        state.addItems(3);
+        await tester.pump();
 
-          // New items should render
-          expect(tester.terminalState.containsText('Item 3'), isTrue);
-          expect(tester.terminalState.containsText('Item 4'), isTrue);
-          expect(tester.terminalState.containsText('Item 5'), isTrue);
-        },
-        size: Size(35, 15),
-      );
+        // New items should render
+        expect(tester.terminalState.containsText('Item 3'), isTrue);
+        expect(tester.terminalState.containsText('Item 4'), isTrue);
+        expect(tester.terminalState.containsText('Item 5'), isTrue);
+      }, size: Size(35, 15));
     });
 
     test('renders new items with reverse mode using stateful parent', () async {
-      await testCinder(
-        'stateful reverse mode',
-        (tester) async {
-          await tester.pumpWidget(_DynamicChatView());
+      await testCinder('stateful reverse mode', (tester) async {
+        await tester.pumpWidget(_DynamicChatView());
 
-          // Initial state shows messages
-          expect(tester.terminalState.containsText('Message 0'), isTrue);
-          expect(tester.terminalState.containsText('Message 1'), isTrue);
+        // Initial state shows messages
+        expect(tester.terminalState.containsText('Message 0'), isTrue);
+        expect(tester.terminalState.containsText('Message 1'), isTrue);
 
-          // Add a new message (prepended)
-          final state = tester.findState<_DynamicChatViewState>();
-          state.addMessage('NEW MESSAGE');
-          await tester.pump();
+        // Add a new message (prepended)
+        final state = tester.findState<_DynamicChatViewState>();
+        state.addMessage('NEW MESSAGE');
+        await tester.pump();
 
-          // New message should render
-          expect(tester.terminalState.containsText('NEW MESSAGE'), isTrue,
-              reason:
-                  'New prepended message must render in reverse mode with stateful parent');
-          expect(tester.terminalState.containsText('Message 0'), isTrue);
-          expect(tester.terminalState.containsText('Message 1'), isTrue);
-        },
-        size: Size(35, 15),
-      );
+        // New message should render
+        expect(
+          tester.terminalState.containsText('NEW MESSAGE'),
+          isTrue,
+          reason:
+              'New prepended message must render in reverse mode with stateful parent',
+        );
+        expect(tester.terminalState.containsText('Message 0'), isTrue);
+        expect(tester.terminalState.containsText('Message 1'), isTrue);
+      }, size: Size(35, 15));
     });
   });
 }

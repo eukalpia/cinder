@@ -1,13 +1,15 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:meta/meta.dart';
 
-/// Internal PTY handler that manages a subprocess with pseudo-terminal support.
-/// This is used internally by [PtyController] and should not be used directly.
+/// Internal subprocess transport used by [PtyController].
 ///
-/// This class handles the low-level process management and terminal emulation,
-/// while [PtyController] provides the high-level API following Flutter patterns.
+/// Windows uses redirected process streams; Unix allocates a terminal through
+/// the system `script` utility. The display dimensions are provided at startup
+/// through environment variables. This transport cannot set a live PTY's
+/// window size, so resizing must never be sent as application input.
 @internal
 class PtyHandler {
   final String command;
@@ -16,9 +18,14 @@ class PtyHandler {
   final Map<String, String>? environment;
 
   Process? _process;
-  StreamController<String>? _outputController;
-  StreamSubscription? _stdoutSubscription;
-  StreamSubscription? _stderrSubscription;
+  final _outputController = StreamController<String>.broadcast(sync: true);
+  StreamSubscription<String>? _stdoutSubscription;
+  StreamSubscription<String>? _stderrSubscription;
+  final _stdoutDone = Completer<void>();
+  final _stderrDone = Completer<void>();
+  Future<void>? _startFuture;
+  Future<void>? _disposeFuture;
+  bool _disposed = false;
 
   int? get pid => _process?.pid;
 
@@ -29,38 +36,21 @@ class PtyHandler {
     this.environment,
   });
 
-  /// Start the process with pseudo-terminal support
-  Future<void> start({
-    required int columns,
-    required int rows,
-  }) async {
-    _outputController = StreamController<String>.broadcast();
+  String get _executable => command;
+  List<String> get _arguments => arguments;
 
-    // Build environment with terminal settings
-    final effectiveEnv = <String, String>{};
+  Future<void> start({required int columns, required int rows}) {
+    if (_disposed || _startFuture != null || _process != null) {
+      return Future.error(
+        StateError('Process has already been started or disposed'),
+      );
+    }
+    return _startFuture = _start(columns: columns, rows: rows);
+  }
 
-    // Set terminal environment variables
-    effectiveEnv['TERM'] = 'xterm-256color';
-    effectiveEnv['LANG'] = 'en_US.UTF-8';
-    effectiveEnv['LINES'] = rows.toString();
-    effectiveEnv['COLUMNS'] = columns.toString();
-
-    // Set our own terminal program identifier
-    effectiveEnv['TERM_PROGRAM'] = 'DartTUI';
-
-    // Copy important environment variables from parent process
-    const envValuesToCopy = {
-      'LOGNAME',
-      'USER',
-      'DISPLAY',
-      'LC_TYPE',
-      'HOME',
-      'PATH',
-      'SHELL',
-    };
-
-    // Variables to explicitly exclude (shell integrations)
-    const envVariablesToExclude = {
+  Future<void> _start({required int columns, required int rows}) async {
+    final effectiveEnv = Map<String, String>.of(Platform.environment);
+    for (final name in const [
       'WARP_TERMINAL',
       'WARP_BOOTSTRAPPED',
       'WARP_IS_LOCAL_SHELL_SESSION',
@@ -71,118 +61,115 @@ class PtyHandler {
       'VSCODE_SHELL_INTEGRATION',
       'INSIDE_EMACS',
       'STARSHIP_SHELL',
-    };
-
-    for (var entry in Platform.environment.entries) {
-      if (envValuesToCopy.contains(entry.key) &&
-          !envVariablesToExclude.contains(entry.key)) {
-        effectiveEnv[entry.key] = entry.value;
-      }
+    ]) {
+      effectiveEnv.remove(name);
     }
+    effectiveEnv.addAll({
+      'TERM': 'xterm-256color',
+      'LINES': '$rows',
+      'COLUMNS': '$columns',
+      'TERM_PROGRAM': 'Cinder',
+      ...?environment,
+    });
 
-    // Add user-provided environment variables
-    if (environment != null) {
-      effectiveEnv.addAll(environment!);
-    }
-
-    // Start the process with PTY mode
-    _process = await Process.start(
-      command,
-      arguments,
+    final process = await Process.start(
+      _executable,
+      _arguments,
       workingDirectory: workingDirectory,
       environment: effectiveEnv,
-      mode: ProcessStartMode.normal,
-      runInShell: false, // We handle shell directly
-      // Note: On Unix systems, we need to use PTY mode
-      // This is platform-specific and might need adjustment
+      includeParentEnvironment: false,
     );
-
-    // Set up output handling with UTF-8 decoding
-    _stdoutSubscription = _process!.stdout
-        .transform(const Utf8Decoder(allowMalformed: true))
-        .listen((data) {
-      _outputController?.add(data);
-    });
-
-    _stderrSubscription = _process!.stderr
-        .transform(const Utf8Decoder(allowMalformed: true))
-        .listen((data) {
-      _outputController?.add(data);
-    });
+    _process = process;
+    _stdoutSubscription = _listen(process.stdout, _stdoutDone);
+    _stderrSubscription = _listen(process.stderr, _stderrDone);
   }
 
-  /// Get the output stream from the process
-  Stream<String> get output {
-    if (_outputController == null) {
-      throw StateError('Process not started');
-    }
-    return _outputController!.stream;
+  StreamSubscription<String> _listen(
+    Stream<List<int>> stream,
+    Completer<void> done,
+  ) {
+    return stream
+        .transform(const Utf8Decoder(allowMalformed: true))
+        .listen(
+          (data) {
+            if (!_outputController.isClosed) _outputController.add(data);
+          },
+          onError: (Object error, StackTrace stack) {
+            if (!_outputController.isClosed) {
+              _outputController.addError(error, stack);
+            }
+            if (!done.isCompleted) done.complete();
+          },
+          onDone: () {
+            if (!done.isCompleted) done.complete();
+          },
+          cancelOnError: true,
+        );
   }
 
-  /// Get the exit code of the process
+  /// Subscribe before [start] to receive even the first output chunk.
+  Stream<String> get output => _outputController.stream;
+
+  /// Completes after both output streams drain, so exit callbacks see all output.
   Future<int> get exitCode async {
-    if (_process == null) {
-      throw StateError('Process not started');
-    }
-    return await _process!.exitCode;
+    final process = _process;
+    if (process == null) throw StateError('Process not started');
+    final code = await process.exitCode;
+    await Future.wait([_stdoutDone.future, _stderrDone.future]);
+    return code;
   }
 
-  /// Write data to the process stdin
   void write(String data) {
-    if (_process == null) {
-      throw StateError('Process not started');
-    }
-    _process!.stdin.write(data);
-    _process!.stdin.flush();
+    final process = _process;
+    if (_disposed || process == null) throw StateError('Process not running');
+    process.stdin.write(data);
   }
 
-  /// Write raw bytes to the process stdin
   void writeBytes(List<int> bytes) {
-    if (_process == null) {
-      throw StateError('Process not started');
-    }
-    _process!.stdin.add(bytes);
-    _process!.stdin.flush();
+    final process = _process;
+    if (_disposed || process == null) throw StateError('Process not running');
+    process.stdin.add(bytes);
   }
 
-  /// Resize the terminal (send window size change signal)
-  void resize(int rows, int columns) {
-    // On Unix systems, we would send SIGWINCH signal
-    // For now, we'll update environment variables and send escape sequence
-    if (_process != null) {
-      // Send escape sequence to notify terminal of size change
-      final resizeSequence = '\x1b[8;$rows;${columns}t';
-      write(resizeSequence);
-    }
-  }
+  /// The pipe fallback has no operating-system terminal to resize.
+  void resize(int rows, int columns) {}
 
-  /// Kill the process
   bool kill([ProcessSignal signal = ProcessSignal.sigterm]) {
-    if (_process == null) return false;
-    return _process!.kill(signal);
+    return _process?.kill(signal) ?? false;
   }
 
-  /// Dispose of resources
-  Future<void> dispose() async {
+  Future<void> dispose() {
+    _disposed = true;
+    return _disposeFuture ??= _dispose();
+  }
+
+  Future<void> _dispose() async {
+    try {
+      await _startFuture;
+    } catch (_) {
+      // A failed launch still owns its output controller.
+    }
+    final process = _process;
+    if (process != null) {
+      process.kill(ProcessSignal.sigterm);
+      await process.exitCode.timeout(
+        const Duration(seconds: 1),
+        onTimeout: () {
+          process.kill(ProcessSignal.sigkill);
+          return process.exitCode;
+        },
+      );
+    }
     await _stdoutSubscription?.cancel();
     await _stderrSubscription?.cancel();
-    await _outputController?.close();
-
-    // Try to gracefully terminate the process
-    if (_process != null) {
-      _process!.kill(ProcessSignal.sigterm);
-
-      // Wait a bit for graceful shutdown
-      await Future.delayed(const Duration(milliseconds: 100));
-
-      // Force kill if still running
-      _process!.kill(ProcessSignal.sigkill);
-    }
+    if (!_stdoutDone.isCompleted) _stdoutDone.complete();
+    if (!_stderrDone.isCompleted) _stderrDone.complete();
+    await _outputController.close();
+    _process = null;
   }
 }
 
-/// Platform-specific PTY handler that uses actual PTY on Unix systems.
-/// Internal implementation detail of the PTY system.
+/// Allocates a Unix PTY with the platform's `script` utility.
 @internal
 class UnixPtyHandler extends PtyHandler {
   UnixPtyHandler({
@@ -193,100 +180,26 @@ class UnixPtyHandler extends PtyHandler {
   });
 
   @override
-  Future<void> start({
-    required int columns,
-    required int rows,
-  }) async {
-    _outputController = StreamController<String>.broadcast();
+  String get _executable => 'script';
 
-    // Build environment with terminal settings
-    final effectiveEnv = <String, String>{};
-
-    // Set terminal environment variables
-    effectiveEnv['TERM'] = 'xterm-256color';
-    effectiveEnv['LANG'] = 'en_US.UTF-8';
-    effectiveEnv['LINES'] = rows.toString();
-    effectiveEnv['COLUMNS'] = columns.toString();
-
-    // Set our own terminal program identifier
-    effectiveEnv['TERM_PROGRAM'] = 'DartTUI';
-
-    // Copy important environment variables
-    const envValuesToCopy = {
-      'LOGNAME',
-      'USER',
-      'DISPLAY',
-      'LC_TYPE',
-      'HOME',
-      'PATH',
-      'SHELL',
-    };
-
-    for (var entry in Platform.environment.entries) {
-      if (envValuesToCopy.contains(entry.key)) {
-        effectiveEnv[entry.key] = entry.value;
-      }
-    }
-
-    // Add user-provided environment variables
-    if (environment != null) {
-      effectiveEnv.addAll(environment!);
-    }
-
-    // On Unix systems (macOS, Linux), we can use 'script' command to allocate a PTY
-    // This is a workaround since Dart doesn't directly support PTY allocation
-    final scriptCommand = Platform.isMacOS ? 'script' : 'script';
-    final scriptArgs = <String>[];
-
-    if (Platform.isMacOS) {
-      // macOS script command syntax
-      scriptArgs.addAll(['-q', '/dev/null', command, ...arguments]);
-    } else {
-      // Linux script command syntax
-      scriptArgs
-          .addAll(['-q', '-c', '$command ${arguments.join(' ')}', '/dev/null']);
-    }
-
-    // Start the process wrapped in 'script' to get PTY
-    _process = await Process.start(
-      scriptCommand,
-      scriptArgs,
-      workingDirectory: workingDirectory,
-      environment: effectiveEnv,
-      mode: ProcessStartMode.normal,
-      runInShell: false,
-    );
-
-    // Set up output handling
-    _stdoutSubscription = _process!.stdout
-        .transform(const Utf8Decoder(allowMalformed: true))
-        .listen((data) {
-      _outputController?.add(data);
-    });
-
-    _stderrSubscription = _process!.stderr
-        .transform(const Utf8Decoder(allowMalformed: true))
-        .listen((data) {
-      _outputController?.add(data);
-    });
+  @override
+  List<String> get _arguments {
+    if (Platform.isMacOS) return ['-q', '/dev/null', command, ...arguments];
+    // util-linux script passes -c through a shell. Quote each argument and use
+    // -e to propagate the child's status instead of script's own success code.
+    String quote(String value) => "'${value.replaceAll("'", "'\"'\"'")}'";
+    final commandLine = [command, ...arguments].map(quote).join(' ');
+    return ['-q', '-e', '-c', commandLine, '/dev/null'];
   }
 
   @override
   void resize(int rows, int columns) {
-    if (_process != null && Platform.isLinux || Platform.isMacOS) {
-      // Send SIGWINCH signal to notify of window size change
-      // This requires sending the signal to the process group
-      Process.runSync('kill', ['-WINCH', '-${_process!.pid}']);
-
-      // Also send the escape sequence
-      final resizeSequence = '\x1b[8;$rows;${columns}t';
-      write(resizeSequence);
-    }
+    // Notify the wrapper without injecting an escape sequence into stdin.
+    // Actual PTY window-size changes require a native ioctl backend.
+    _process?.kill(ProcessSignal.sigwinch);
   }
 }
 
-/// Factory to create the appropriate PTY handler for the platform.
-/// Used internally by [PtyController].
 @internal
 class PtyHandlerFactory {
   static PtyHandler create({
@@ -295,22 +208,18 @@ class PtyHandlerFactory {
     String? workingDirectory,
     Map<String, String>? environment,
   }) {
-    if (Platform.isWindows) {
-      // On Windows, use the basic handler (no true PTY support)
-      return PtyHandler(
-        command: command,
-        arguments: arguments,
-        workingDirectory: workingDirectory,
-        environment: environment,
-      );
-    } else {
-      // On Unix systems, use the Unix PTY handler
-      return UnixPtyHandler(
-        command: command,
-        arguments: arguments,
-        workingDirectory: workingDirectory,
-        environment: environment,
-      );
-    }
+    return Platform.isWindows
+        ? PtyHandler(
+            command: command,
+            arguments: arguments,
+            workingDirectory: workingDirectory,
+            environment: environment,
+          )
+        : UnixPtyHandler(
+            command: command,
+            arguments: arguments,
+            workingDirectory: workingDirectory,
+            environment: environment,
+          );
   }
 }

@@ -44,8 +44,8 @@ class ProviderScope extends StatefulWidget {
     _InheritedProviderScope? scope;
 
     if (listen) {
-      scope =
-          context.dependOnInheritedWidgetOfExactType<_InheritedProviderScope>();
+      scope = context
+          .dependOnInheritedWidgetOfExactType<_InheritedProviderScope>();
     } else {
       scope =
           context
@@ -75,9 +75,8 @@ class ProviderScope extends StatefulWidget {
       context.dependOnInheritedWidgetOfExactType<_InheritedProviderScope>();
     }
 
-    final element =
-        context
-            .getElementForInheritedWidgetOfExactType<_InheritedProviderScope>();
+    final element = context
+        .getElementForInheritedWidgetOfExactType<_InheritedProviderScope>();
 
     if (element is! ProviderScopeElement) {
       throw StateError(
@@ -277,13 +276,19 @@ class ProviderScopeElement extends InheritedElement {
   }
 
   @override
-  void notifyDependent(InheritedWidget oldWidget, Element dependent) {
-    _dependents[dependent]?.didRebuildDependent();
-    super.notifyDependent(oldWidget, dependent);
+  void willBuildDependent(Element dependent) {
+    _dependents[dependent]?.willBuildDependent();
   }
 
-  void removeDependencies(Element dependent) {
+  @override
+  void didBuildDependent(Element dependent) {
+    _dependents[dependent]?.didBuildDependent();
+  }
+
+  @override
+  void removeDependent(Element dependent) {
     _dependents.remove(dependent)?.deactivateDependent();
+    super.removeDependent(dependent);
   }
 
   @override

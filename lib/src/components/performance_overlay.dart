@@ -34,12 +34,7 @@ class PerformanceOverlay extends StatefulWidget {
   State<PerformanceOverlay> createState() => _PerformanceOverlayState();
 }
 
-enum OverlayPosition {
-  topLeft,
-  topRight,
-  bottomLeft,
-  bottomRight,
-}
+enum OverlayPosition { topLeft, topRight, bottomLeft, bottomRight }
 
 class _PerformanceOverlayState extends State<PerformanceOverlay> {
   final Queue<FrameTiming> _recentFrames = Queue<FrameTiming>();
@@ -102,34 +97,33 @@ class _PerformanceOverlayState extends State<PerformanceOverlay> {
     final totalHeight = lines.length + 2;
 
     return Positioned(
-      top: widget.position == OverlayPosition.topLeft ||
+      top:
+          widget.position == OverlayPosition.topLeft ||
               widget.position == OverlayPosition.topRight
           ? 0.0
           : null,
-      bottom: widget.position == OverlayPosition.bottomLeft ||
+      bottom:
+          widget.position == OverlayPosition.bottomLeft ||
               widget.position == OverlayPosition.bottomRight
           ? 0.0
           : null,
-      left: widget.position == OverlayPosition.topLeft ||
+      left:
+          widget.position == OverlayPosition.topLeft ||
               widget.position == OverlayPosition.bottomLeft
           ? 0.0
           : null,
-      right: widget.position == OverlayPosition.topRight ||
+      right:
+          widget.position == OverlayPosition.topRight ||
               widget.position == OverlayPosition.bottomRight
           ? 0.0
           : null,
       child: Container(
         width: maxWidth.toDouble(),
         height: totalHeight.toDouble(),
-        decoration: const BoxDecoration(
-          color: Color(0xFF000000),
-        ),
+        decoration: const BoxDecoration(color: Color(0xFF000000)),
         child: Padding(
           padding: const EdgeInsets.all(1),
-          child: Text(
-            stats,
-            style: const TextStyle(color: Color(0xFFFFFFFF)),
-          ),
+          child: Text(stats, style: const TextStyle(color: Color(0xFFFFFFFF))),
         ),
       ),
     );
@@ -142,11 +136,13 @@ class _PerformanceOverlayState extends State<PerformanceOverlay> {
     final lastFrameMs = _lastFrame!.totalDuration.inMicroseconds / 1000.0;
     final frameColor = _lastFrame!.isSlowFrame ? '🔴' : '🟢';
     buffer.writeln(
-        '$frameColor Frame #${_lastFrame!.frameNumber}: ${lastFrameMs.toStringAsFixed(2)}ms');
+      '$frameColor Frame #${_lastFrame!.frameNumber}: ${lastFrameMs.toStringAsFixed(2)}ms',
+    );
 
     // FPS and average
     buffer.writeln(
-        'FPS: ${_fps.toStringAsFixed(1)} (avg: ${_averageFrameTime.toStringAsFixed(2)}ms)');
+      'FPS: ${_fps.toStringAsFixed(1)} (avg: ${_averageFrameTime.toStringAsFixed(2)}ms)',
+    );
 
     // Slow frame count
     if (_slowFrameCount > 0) {

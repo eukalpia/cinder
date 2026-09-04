@@ -24,11 +24,7 @@ class _ColumnBugDemoState extends State<ColumnBugDemo> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        first ? FirstWidget() : SecondWidget(),
-      ],
-    );
+    return Column(children: [first ? FirstWidget() : SecondWidget()]);
   }
 }
 
@@ -54,9 +50,7 @@ void main() {
   group('TUI Testing Framework', () {
     test('can debug render output', () async {
       await testCinder('debug output', (tester) async {
-        await tester.pumpWidget(
-          const ColumnBugDemo(),
-        );
+        await tester.pumpWidget(const ColumnBugDemo());
 
         // Get debug output
         final output = tester.renderToString(showBorders: true);

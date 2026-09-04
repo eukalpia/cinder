@@ -15,8 +15,15 @@ void main() {
       test('Shift+Enter: \\x1b[13;2u', () {
         parser.clear();
         // ESC [ 1 3 ; 2 u
-        final event =
-            parser.parseBytes([0x1B, 0x5B, 0x31, 0x33, 0x3B, 0x32, 0x75]);
+        final event = parser.parseBytes([
+          0x1B,
+          0x5B,
+          0x31,
+          0x33,
+          0x3B,
+          0x32,
+          0x75,
+        ]);
         expect(event, isNotNull);
         expect(event!.logicalKey, equals(LogicalKey.enter));
         expect(event.modifiers.shift, isTrue);
@@ -27,8 +34,15 @@ void main() {
       test('Ctrl+Enter: \\x1b[13;5u', () {
         parser.clear();
         // ESC [ 1 3 ; 5 u
-        final event =
-            parser.parseBytes([0x1B, 0x5B, 0x31, 0x33, 0x3B, 0x35, 0x75]);
+        final event = parser.parseBytes([
+          0x1B,
+          0x5B,
+          0x31,
+          0x33,
+          0x3B,
+          0x35,
+          0x75,
+        ]);
         expect(event, isNotNull);
         expect(event!.logicalKey, equals(LogicalKey.enter));
         expect(event.modifiers.ctrl, isTrue);
@@ -38,8 +52,15 @@ void main() {
       test('Alt+Enter: \\x1b[13;3u', () {
         parser.clear();
         // ESC [ 1 3 ; 3 u
-        final event =
-            parser.parseBytes([0x1B, 0x5B, 0x31, 0x33, 0x3B, 0x33, 0x75]);
+        final event = parser.parseBytes([
+          0x1B,
+          0x5B,
+          0x31,
+          0x33,
+          0x3B,
+          0x33,
+          0x75,
+        ]);
         expect(event, isNotNull);
         expect(event!.logicalKey, equals(LogicalKey.enter));
         expect(event.modifiers.alt, isTrue);
@@ -50,8 +71,15 @@ void main() {
       test('Ctrl+Shift+Enter: \\x1b[13;6u', () {
         parser.clear();
         // modifier 6 = 1 + 5 (shift=1, ctrl=4, bitmask=5)
-        final event =
-            parser.parseBytes([0x1B, 0x5B, 0x31, 0x33, 0x3B, 0x36, 0x75]);
+        final event = parser.parseBytes([
+          0x1B,
+          0x5B,
+          0x31,
+          0x33,
+          0x3B,
+          0x36,
+          0x75,
+        ]);
         expect(event, isNotNull);
         expect(event!.logicalKey, equals(LogicalKey.enter));
         expect(event.modifiers.shift, isTrue);
@@ -456,12 +484,14 @@ void main() {
       // With kitty protocol active, Ctrl+J arrives as \x1b[106;5u instead.
     });
 
-    test('F5 (ESC[15~) still works and is not confused with modifyOtherKeys',
-        () {
-      parser.clear();
-      final event = parser.parseBytes([0x1B, 0x5B, 0x31, 0x35, 0x7E]);
-      expect(event!.logicalKey, equals(LogicalKey.f5));
-      expect(event.modifiers.hasAnyModifier, isFalse);
-    });
+    test(
+      'F5 (ESC[15~) still works and is not confused with modifyOtherKeys',
+      () {
+        parser.clear();
+        final event = parser.parseBytes([0x1B, 0x5B, 0x31, 0x35, 0x7E]);
+        expect(event!.logicalKey, equals(LogicalKey.f5));
+        expect(event.modifiers.hasAnyModifier, isFalse);
+      },
+    );
   });
 }

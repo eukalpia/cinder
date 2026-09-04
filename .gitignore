@@ -24,3 +24,9 @@ pubspec_overrides.yaml
 # Benchmark baseline (machine-specific) and CI output
 benchmark/baseline.json
 benchmark/results.md
+
+# Browser compiler scratch packages
+.cinder-web/
+
+# Local release and validation artifacts
+artifacts/

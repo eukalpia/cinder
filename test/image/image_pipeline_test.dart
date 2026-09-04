@@ -25,8 +25,9 @@ void main() {
       ImageProtocol.sixel,
     );
     expect(
-      TerminalCapabilities.fromEnvironment(const <String, String>{})
-          .preferredImageProtocol,
+      TerminalCapabilities.fromEnvironment(
+        const <String, String>{},
+      ).preferredImageProtocol,
       ImageProtocol.unicodeBlocks,
     );
   });

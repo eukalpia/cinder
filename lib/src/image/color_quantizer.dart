@@ -85,11 +85,13 @@ class ColorQuantizer {
     for (final box in boxes) {
       final avgColor = _averageColor(box);
       final paletteIndex = palette.length;
-      palette.add(Color.fromRGB(
-        _unpackR(avgColor),
-        _unpackG(avgColor),
-        _unpackB(avgColor),
-      ));
+      palette.add(
+        Color.fromRGB(
+          _unpackR(avgColor),
+          _unpackG(avgColor),
+          _unpackB(avgColor),
+        ),
+      );
 
       // Map all colors in this box to this palette index
       for (final color in box.keys) {
@@ -123,12 +125,7 @@ class ColorQuantizer {
   /// Finds the closest color in the palette to the given RGB values.
   ///
   /// Uses Euclidean distance in RGB space.
-  static int findClosestPaletteIndex(
-    int r,
-    int g,
-    int b,
-    List<Color> palette,
-  ) {
+  static int findClosestPaletteIndex(int r, int g, int b, List<Color> palette) {
     int bestIndex = 0;
     int bestDistance = 0x7FFFFFFF; // Max int
 
@@ -177,11 +174,9 @@ class ColorQuantizer {
       final packed = entry.key;
       final paletteIndex = palette.length;
 
-      palette.add(Color.fromRGB(
-        _unpackR(packed),
-        _unpackG(packed),
-        _unpackB(packed),
-      ));
+      palette.add(
+        Color.fromRGB(_unpackR(packed), _unpackG(packed), _unpackB(packed)),
+      );
 
       colorToIndex[packed] = paletteIndex;
 
@@ -212,8 +207,10 @@ class ColorQuantizer {
         if (box.length < 2) continue; // Can't split a box with < 2 colors
 
         final range = _getColorRange(box);
-        final pixelCount =
-            box.values.fold<int>(0, (sum, list) => sum + list.length);
+        final pixelCount = box.values.fold<int>(
+          0,
+          (sum, list) => sum + list.length,
+        );
         final score = range * pixelCount;
 
         if (score > bestScore) {

@@ -8,11 +8,7 @@ void main() {
   group('ImageData', () {
     test('creates from pixels', () {
       final pixels = Uint8List(4 * 4 * 4); // 4x4 RGBA
-      final imageData = img.ImageData(
-        pixels: pixels,
-        width: 4,
-        height: 4,
-      );
+      final imageData = img.ImageData(pixels: pixels, width: 4, height: 4);
 
       expect(imageData.width, equals(4));
       expect(imageData.height, equals(4));
@@ -127,60 +123,51 @@ void main() {
 
     test('creates with memory constructor', () {
       final bytes = Uint8List(100);
-      final widget = img.Image.memory(
-        bytes,
-        fit: img.BoxFit.cover,
-      );
+      final widget = img.Image.memory(bytes, fit: img.BoxFit.cover);
 
       expect(widget.image, isA<img.MemoryImage>());
       expect(widget.fit, equals(img.BoxFit.cover));
     });
 
     test('renders placeholder while loading', () async {
-      await testCinder(
-        'image placeholder',
-        (tester) async {
-          await tester.pumpWidget(
-            Center(
-              child: img.Image.file(
-                '/nonexistent/path.png',
-                width: 10,
-                height: 5,
-                placeholder: const Text('Loading...'),
-              ),
+      await testCinder('image placeholder', (tester) async {
+        await tester.pumpWidget(
+          Center(
+            child: img.Image.file(
+              '/nonexistent/path.png',
+              width: 10,
+              height: 5,
+              placeholder: const Text('Loading...'),
             ),
-          );
+          ),
+        );
 
-          // Should show placeholder text
-          final snapshot = tester.toSnapshot();
-          expect(snapshot, contains('Loading'));
-        },
-      );
+        // Should show placeholder text
+        final snapshot = tester.toSnapshot();
+        expect(snapshot, contains('Loading'));
+      });
     });
 
     test('renders error widget on failure', () async {
-      await testCinder(
-        'image error',
-        (tester) async {
-          await tester.pumpWidget(
-            Center(
-              child: img.Image.file(
-                '/definitely/not/a/real/file.png',
-                width: 10,
-                height: 5,
-                errorWidget: const Text('Error!'),
-              ),
+      await testCinder('image error', (tester) async {
+        await tester.pumpWidget(
+          Center(
+            child: img.Image.file(
+              '/definitely/not/a/real/file.png',
+              width: 10,
+              height: 5,
+              errorWidget: const Text('Error!'),
             ),
-          );
+          ),
+        );
 
-          // Wait for async load to fail
-          await Future.delayed(const Duration(milliseconds: 100));
-          await tester.pump();
+        // Wait for async load to fail
+        await Future.delayed(const Duration(milliseconds: 100));
+        await tester.pump();
 
-          final snapshot = tester.toSnapshot();
-          expect(snapshot, contains('Error'));
-        },
-      );
+        final snapshot = tester.toSnapshot();
+        expect(snapshot, contains('Error'));
+      });
     });
 
     test('renders with memory image data', () async {
@@ -188,67 +175,58 @@ void main() {
       // For this test, we'll create raw RGBA and use MemoryImage
       // The actual sixel output would require a real terminal
 
-      await testCinder(
-        'memory image render',
-        (tester) async {
-          // Create a simple 8x16 solid color image (1 cell worth)
-          final width = 8;
-          final height = 16;
-          final pixels = Uint8List(width * height * 4);
+      await testCinder('memory image render', (tester) async {
+        // Create a simple 8x16 solid color image (1 cell worth)
+        final width = 8;
+        final height = 16;
+        final pixels = Uint8List(width * height * 4);
 
-          // Fill with blue
-          for (int i = 0; i < width * height; i++) {
-            pixels[i * 4] = 0; // R
-            pixels[i * 4 + 1] = 0; // G
-            pixels[i * 4 + 2] = 255; // B
-            pixels[i * 4 + 3] = 255; // A
-          }
+        // Fill with blue
+        for (int i = 0; i < width * height; i++) {
+          pixels[i * 4] = 0; // R
+          pixels[i * 4 + 1] = 0; // G
+          pixels[i * 4 + 2] = 255; // B
+          pixels[i * 4 + 3] = 255; // A
+        }
 
-          // Note: MemoryImage expects encoded image bytes (PNG/JPEG),
-          // not raw pixels. This test demonstrates the widget structure.
-          // For actual sixel rendering, you'd need a terminal that supports it.
+        // Note: MemoryImage expects encoded image bytes (PNG/JPEG),
+        // not raw pixels. This test demonstrates the widget structure.
+        // For actual sixel rendering, you'd need a terminal that supports it.
 
-          await tester.pumpWidget(
-            Center(
-              child: SizedBox(
-                width: 20,
-                height: 10,
-                child: const Text('Image area'),
-              ),
+        await tester.pumpWidget(
+          Center(
+            child: SizedBox(
+              width: 20,
+              height: 10,
+              child: const Text('Image area'),
             ),
-          );
+          ),
+        );
 
-          final snapshot = tester.toSnapshot();
-          expect(snapshot, isNotEmpty);
-        },
-      );
+        final snapshot = tester.toSnapshot();
+        expect(snapshot, isNotEmpty);
+      });
     });
   });
 
   group('RenderImage', () {
     test('calculates size from image dimensions', () async {
-      await testCinder(
-        'render image size',
-        (tester) async {
-          // Test that Image widget respects size constraints
-          await tester.pumpWidget(
-            Center(
-              child: SizedBox(
-                width: 20,
-                height: 10,
-                child: img.Image.file(
-                  '/test.png',
-                  fit: img.BoxFit.contain,
-                ),
-              ),
+      await testCinder('render image size', (tester) async {
+        // Test that Image widget respects size constraints
+        await tester.pumpWidget(
+          Center(
+            child: SizedBox(
+              width: 20,
+              height: 10,
+              child: img.Image.file('/test.png', fit: img.BoxFit.contain),
             ),
-          );
+          ),
+        );
 
-          // Widget should render within constraints
-          final snapshot = tester.toSnapshot();
-          expect(snapshot, isNotEmpty);
-        },
-      );
+        // Widget should render within constraints
+        final snapshot = tester.toSnapshot();
+        expect(snapshot, isNotEmpty);
+      });
     });
   });
 }

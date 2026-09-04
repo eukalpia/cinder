@@ -69,8 +69,11 @@ void main() {
       expect(map[b], 'B2');
       expect(map[c], 'C');
 
-      expect(map[const _Colliding('d')], isNull,
-          reason: 'same hash but unequal key must miss');
+      expect(
+        map[const _Colliding('d')],
+        isNull,
+        reason: 'same hash but unequal key must miss',
+      );
     });
 
     test('from(map) copies all entries', () {

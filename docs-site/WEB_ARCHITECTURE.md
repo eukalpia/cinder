@@ -143,9 +143,11 @@ Counts displayed by the site come from this generated manifest.
 
 The first production target is `dart compile js -O2 --no-source-maps`.
 
-Examples are grouped by inferred category into registry bundles. The generated launcher selects an example from the final URL slug. Grouped bundles reduce total output files while still allowing the build script to remove an individual source that the web compiler rejects and retry the remaining group.
+Root examples are grouped by inferred category into registry bundles. The generated launcher selects an example from the final URL slug. Grouped bundles reduce total output files while still allowing the build script to remove an individual source that the web compiler rejects and retry the remaining group. Nested package examples compile separately using their nearest `pubspec.yaml`.
 
-Compiler stderr is preserved as a generated build-error artifact when shared code prevents the whole group from compiling.
+Compiler stdout and stderr are preserved as generated build-error artifacts when
+compilation fails. An example that still fails the isolated compilation pass
+causes the build to exit unsuccessfully.
 
 A future WASM target can be added behind the same manifest fields without changing public routes.
 
@@ -153,7 +155,7 @@ A future WASM target can be added behind the same manifest fields without changi
 
 ### Direct web
 
-The original example compiles without native APIs. The published runner executes the repository source.
+The original example compiles without native APIs. The published runner executes the repository source. Dart `print` output is forwarded to the terminal alongside Cinder's rendering stream, so diagnostic examples also display their results.
 
 ### Adapter-backed
 
@@ -171,7 +173,9 @@ Long-form guides remain curated in `docs-site/content/docs/`, but code snippets 
 
 ## API reference
 
-The Pages build should run `dart doc` and copy the output below `/api/`. Deep links must remain static-export compatible. The navigation links to `/api/` only after the generated output is present.
+The production build regenerates `dart doc` output below `/api/` before exporting
+the site. Deep links remain static-export compatible, and route verification
+requires the API index to exist.
 
 ## Static hosting and base path
 

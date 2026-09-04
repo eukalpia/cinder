@@ -15,6 +15,7 @@ type CinderBridge = {
 declare global {
   interface Window {
     cinderBridge?: CinderBridge;
+    dartPrint?: (message: string) => void;
   }
 }
 
@@ -55,6 +56,7 @@ export function WebTerminal({
     let lastColumns = -1;
     let lastRows = -1;
     let bridge: CinderBridge | null = null;
+    const previousDartPrint = window.dartPrint;
     const subscriptions: IDisposable[] = [];
 
     host.dataset.outputWrites = '0';
@@ -177,6 +179,9 @@ export function WebTerminal({
           onShutdown: null,
         };
         window.cinderBridge = bridge;
+        window.dartPrint = (message) => {
+          bridge?.onOutput?.(`${message.replace(/\r?\n/g, '\r\n')}\r\n`);
+        };
         updateGeometry(host, terminal.cols, terminal.rows);
 
         const forwardInput = (data: string) => {
@@ -267,6 +272,8 @@ export function WebTerminal({
       terminalRef.current?.dispose();
       terminalRef.current = null;
       delete window.cinderBridge;
+      if (previousDartPrint) window.dartPrint = previousDartPrint;
+      else delete window.dartPrint;
     };
   }, [bundle, cinematic, embedded, runnable, title]);
 

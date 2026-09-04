@@ -1,11 +1,5 @@
 /// Mouse button types
-enum MouseButton {
-  left,
-  middle,
-  right,
-  wheelUp,
-  wheelDown,
-}
+enum MouseButton { left, middle, right, wheelUp, wheelDown }
 
 /// Mouse event for terminal interactions
 class MouseEvent {
@@ -15,7 +9,7 @@ class MouseEvent {
   final bool pressed; // true for press, false for release
   final bool isMotion; // true for motion events (drag), false for press/release
 
-  /// The set of mouse buttons currently held down (enriched by [MouseTracker]).
+  /// The set of mouse buttons currently held down, enriched by mouse tracking.
   final Set<MouseButton> buttons;
 
   const MouseEvent({

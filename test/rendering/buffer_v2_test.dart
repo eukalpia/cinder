@@ -3,6 +3,17 @@ import 'package:test/test.dart';
 
 void main() {
   group('Buffer V2', () {
+    test('direct cell character updates invalidate the cached width', () {
+      final cell = Cell(char: '界');
+      expect(cell.width, 2);
+
+      cell.char = 'A';
+      expect(cell.width, 1);
+
+      cell.char = '界';
+      expect(cell.width, 2);
+    });
+
     test('reuses cell identity across writes and clears', () {
       final buffer = Buffer(8, 3);
       final original = buffer.getCell(2, 1);
@@ -49,5 +60,31 @@ void main() {
       expect(buffer.dirtyEndForRow(2), 9);
       expect(buffer.isRowDirty(0), isFalse);
     });
+
+    test('clipped layer blits leave no partial wide graphemes', () {
+      final source = Buffer(4, 1)..setString(0, 0, '界界');
+      final destination = Buffer(2, 1)..setString(0, 0, 'AB');
+
+      destination.blit(source, destinationX: -1, destinationY: 0);
+
+      expect(destination.getCell(0, 0).char, ' ');
+      expect(destination.getCell(1, 0).char, ' ');
+    });
+
+    test(
+      'layer blits clear a covered wide glyph outside the copied region',
+      () {
+        final source = Buffer(1, 1)..setString(0, 0, 'B');
+        final destination = Buffer(4, 1)..setString(0, 0, '界A');
+        destination.resetDirtyTracking();
+
+        destination.blit(source, destinationX: 1, destinationY: 0);
+
+        expect(destination.getCell(0, 0).char, ' ');
+        expect(destination.getCell(1, 0).char, 'B');
+        expect(destination.getCell(2, 0).char, 'A');
+        expect(destination.dirtyStartForRow(0), 0);
+      },
+    );
   });
 }

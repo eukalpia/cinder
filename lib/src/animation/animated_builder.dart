@@ -5,7 +5,7 @@ import 'package:cinder/src/framework/listenable.dart';
 ///
 /// [AnimatedWidget] is most commonly used with [Animation] objects, which are
 /// [Listenable]s, but it can be used with any [Listenable], including
-/// [ChangeNotifier] and [ValueNotifier].
+/// [ChangeNotifier].
 ///
 /// This is an abstract class, you should create your own subclass that overrides
 /// [build] to return the widget tree you want to build.
@@ -30,10 +30,7 @@ import 'package:cinder/src/framework/listenable.dart';
 /// ```
 abstract class AnimatedWidget extends StatefulWidget {
   /// Creates a widget that rebuilds when [listenable] changes value.
-  const AnimatedWidget({
-    super.key,
-    required this.listenable,
-  });
+  const AnimatedWidget({super.key, required this.listenable});
 
   /// The [Listenable] to which this widget is listening.
   ///
@@ -84,10 +81,8 @@ class _AnimatedWidgetState extends State<AnimatedWidget> {
 }
 
 /// Signature for the builder callback used by [AnimatedBuilder].
-typedef AnimatedWidgetBuilder = Widget Function(
-  BuildContext context,
-  Widget? child,
-);
+typedef AnimatedWidgetBuilder =
+    Widget Function(BuildContext context, Widget? child);
 
 /// A general-purpose widget for building animations.
 ///

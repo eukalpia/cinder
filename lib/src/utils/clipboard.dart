@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 import '../binding/terminal_binding.dart';
+import '../framework/framework.dart';
+import '../image/terminal_capabilities.dart';
 
 /// Clipboard utility for terminal applications using OSC 52 control sequences.
 ///
@@ -46,8 +48,11 @@ class Clipboard {
   ///
   /// Returns true if the sequence was written successfully.
   static bool copy(String text, {bool useStringTerminator = true}) {
-    return _copyToTarget(text, _clipboardTarget,
-        useStringTerminator: useStringTerminator);
+    return _copyToTarget(
+      text,
+      _clipboardTarget,
+      useStringTerminator: useStringTerminator,
+    );
   }
 
   /// Copy text to the primary selection (X11 systems).
@@ -62,13 +67,19 @@ class Clipboard {
   ///
   /// Returns true if the sequence was written successfully.
   static bool copyToPrimary(String text, {bool useStringTerminator = true}) {
-    return _copyToTarget(text, _primaryTarget,
-        useStringTerminator: useStringTerminator);
+    return _copyToTarget(
+      text,
+      _primaryTarget,
+      useStringTerminator: useStringTerminator,
+    );
   }
 
   /// Internal method to copy text to a specific target (clipboard or primary).
-  static bool _copyToTarget(String text, String target,
-      {required bool useStringTerminator}) {
+  static bool _copyToTarget(
+    String text,
+    String target, {
+    required bool useStringTerminator,
+  }) {
     try {
       // Encode the text in base64
       final base64Text = base64Encode(utf8.encode(text));
@@ -76,12 +87,17 @@ class Clipboard {
       // Build the OSC 52 sequence
       // Format: ESC ] 52 ; <target> ; <base64-data> ST
       final terminator = useStringTerminator ? _st : _bel;
-      final sequence = '$_osc 52;$target;$base64Text$terminator';
+      final sequence = '${_osc}52;$target;$base64Text$terminator';
 
-      // Write directly to stdout
-      stdout.write(sequence);
-      stdout.flush();
-
+      if (!isSupported()) return false;
+      if (CinderBinding.hasInstance) {
+        final binding = CinderBinding.instance as TerminalBinding;
+        binding.terminal
+          ..write(sequence)
+          ..flush();
+      } else {
+        stdout.write(sequence);
+      }
       return true;
     } catch (e) {
       // If stdout is not available or writing fails, return false
@@ -96,17 +112,11 @@ class Clipboard {
   ///
   /// Returns true if the sequence was written successfully.
   static bool clear({bool useStringTerminator = true}) {
-    try {
-      final terminator = useStringTerminator ? _st : _bel;
-      final sequence = '$_osc 52;$_clipboardTarget;$terminator';
-
-      stdout.write(sequence);
-      stdout.flush();
-
-      return true;
-    } catch (e) {
-      return false;
-    }
+    return _copyToTarget(
+      '',
+      _clipboardTarget,
+      useStringTerminator: useStringTerminator,
+    );
   }
 
   /// Check if OSC 52 clipboard support is likely available.
@@ -117,44 +127,17 @@ class Clipboard {
   ///
   /// Returns true if OSC 52 is likely supported.
   static bool isSupported() {
-    // Check if we have a terminal
-    if (!stdout.hasTerminal) {
-      return false;
+    if (CinderBinding.hasInstance) {
+      final binding = CinderBinding.instance;
+      return binding is TerminalBinding &&
+          binding.capabilities.isInteractive &&
+          binding.capabilities.supportsOsc52Clipboard;
     }
-
-    // Check common environment variables
-    final term = Platform.environment['TERM'] ?? '';
-    final termProgram = Platform.environment['TERM_PROGRAM'] ?? '';
-    final tmux = Platform.environment['TMUX'];
-    final sshConnection = Platform.environment['SSH_CONNECTION'];
-
-    // Known terminals with good OSC 52 support
-    if (termProgram == 'iTerm.app' ||
-        termProgram == 'Apple_Terminal' ||
-        termProgram == 'WezTerm' ||
-        termProgram == 'Alacritty') {
-      return true;
-    }
-
-    // tmux and screen support OSC 52 (with proper configuration)
-    if (tmux != null || term.contains('tmux') || term.contains('screen')) {
-      return true;
-    }
-
-    // xterm-like terminals usually support it
-    if (term.contains('xterm') || term.contains('256color')) {
-      return true;
-    }
-
-    // If we're in an SSH session, OSC 52 might work
-    // depending on the local terminal
-    if (sshConnection != null) {
-      return true;
-    }
-
-    // Default to true for modern terminals
-    // It's better to try and fail gracefully than not try at all
-    return true;
+    return TerminalCapabilities.fromEnvironment(
+      Platform.environment,
+      stdinHasTerminal: stdin.hasTerminal,
+      stdoutHasTerminal: stdout.hasTerminal,
+    ).supportsOsc52Clipboard;
   }
 
   /// Get a diagnostic string about the current terminal environment.
@@ -166,11 +149,14 @@ class Clipboard {
     buffer.writeln('  Has Terminal: ${stdout.hasTerminal}');
     buffer.writeln('  TERM: ${Platform.environment['TERM'] ?? 'not set'}');
     buffer.writeln(
-        '  TERM_PROGRAM: ${Platform.environment['TERM_PROGRAM'] ?? 'not set'}');
+      '  TERM_PROGRAM: ${Platform.environment['TERM_PROGRAM'] ?? 'not set'}',
+    );
     buffer.writeln(
-        '  TMUX: ${Platform.environment['TMUX'] != null ? 'yes' : 'no'}');
+      '  TMUX: ${Platform.environment['TMUX'] != null ? 'yes' : 'no'}',
+    );
     buffer.writeln(
-        '  SSH: ${Platform.environment['SSH_CONNECTION'] != null ? 'yes' : 'no'}');
+      '  SSH: ${Platform.environment['SSH_CONNECTION'] != null ? 'yes' : 'no'}',
+    );
     buffer.writeln('  OSC 52 Likely Supported: ${isSupported()}');
     return buffer.toString();
   }
@@ -191,15 +177,7 @@ class ClipboardManager {
   static bool copy(String text, {bool useStringTerminator = true}) {
     _buffer = text;
 
-    // Try to also copy to system clipboard via OSC 52
-    // Use the Terminal's write buffer to avoid corrupting output
-    // In test environments, TerminalBinding may not be initialized
-    try {
-      final binding = TerminalBinding.instance;
-      binding.terminal.writeClipboardCopy(text);
-    } catch (_) {
-      // Silently fail - internal buffer is already set
-    }
+    Clipboard.copy(text, useStringTerminator: useStringTerminator);
 
     return true;
   }
@@ -238,6 +216,7 @@ class ClipboardManager {
 
     try {
       Clipboard.clear();
+      Clipboard.copyToPrimary('');
     } catch (_) {
       // Silently fail
     }

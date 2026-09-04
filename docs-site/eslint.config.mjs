@@ -10,6 +10,10 @@ const eslintConfig = defineConfig([
     '.source/**',
     'out/**',
     'build/**',
+    'public/generated/**',
+    'public/api/**',
+    'test-results/**',
+    'playwright-report/**',
     'next-env.d.ts',
   ]),
 ]);

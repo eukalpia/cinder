@@ -29,8 +29,9 @@ void main() {
   test('KeyboardListener can opt out of automatic focus', () async {
     var received = false;
 
-    await testCinder('keyboard listener explicit focus opt-out',
-        (tester) async {
+    await testCinder('keyboard listener explicit focus opt-out', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         KeyboardListener(
           autofocus: false,

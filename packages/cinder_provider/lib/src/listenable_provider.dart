@@ -20,37 +20,22 @@ class ListenableProvider<T extends Listenable?> extends InheritedProvider<T> {
   ///
   /// [create] must not be `null`.
   ListenableProvider({
-    Key? key,
-    required Create<T> create,
-    Dispose<T>? dispose,
-    bool? lazy,
-    TransitionBuilder? builder,
-    Widget? child,
-  }) : super(
-          key: key,
-          startListening: _startListening,
-          create: create,
-          dispose: dispose,
-          lazy: lazy,
-          builder: builder,
-          child: child,
-        );
+    super.key,
+    required Create<T> super.create,
+    super.dispose,
+    super.lazy,
+    super.builder,
+    super.child,
+  }) : super(startListening: _startListening);
 
   /// Provides an existing [Listenable].
   ListenableProvider.value({
-    Key? key,
-    required T value,
-    UpdateShouldNotify<T>? updateShouldNotify,
-    TransitionBuilder? builder,
-    Widget? child,
-  }) : super.value(
-          key: key,
-          builder: builder,
-          value: value,
-          updateShouldNotify: updateShouldNotify,
-          startListening: _startListening,
-          child: child,
-        );
+    super.key,
+    required super.value,
+    super.updateShouldNotify,
+    super.builder,
+    super.child,
+  }) : super.value(startListening: _startListening);
 
   static VoidCallback _startListening(
     InheritedContext<Listenable?> e,
@@ -66,25 +51,15 @@ class ListenableProxyProvider0<R extends Listenable?>
     extends InheritedProvider<R> {
   /// Initializes [key] for subclasses.
   ListenableProxyProvider0({
-    Key? key,
-    Create<R>? create,
-    required R Function(BuildContext, R? previous) update,
-    Dispose<R>? dispose,
-    UpdateShouldNotify<R>? updateShouldNotify,
-    bool? lazy,
-    TransitionBuilder? builder,
-    Widget? child,
-  }) : super(
-          key: key,
-          create: create,
-          update: update,
-          lazy: lazy,
-          builder: builder,
-          dispose: dispose,
-          updateShouldNotify: updateShouldNotify,
-          startListening: ListenableProvider._startListening,
-          child: child,
-        );
+    super.key,
+    super.create,
+    required R Function(BuildContext, R? previous) super.update,
+    super.dispose,
+    super.updateShouldNotify,
+    super.lazy,
+    super.builder,
+    super.child,
+  }) : super(startListening: ListenableProvider._startListening);
 }
 
 /// {@template provider.listenableproxyprovider}
@@ -105,23 +80,17 @@ class ListenableProxyProvider<T, R extends Listenable?>
     extends ListenableProxyProvider0<R> {
   /// Initializes [key] for subclasses.
   ListenableProxyProvider({
-    Key? key,
-    Create<R>? create,
+    super.key,
+    super.create,
     required ProxyProviderBuilder<T, R> update,
-    Dispose<R>? dispose,
-    bool? lazy,
-    TransitionBuilder? builder,
-    Widget? child,
+    super.dispose,
+    super.lazy,
+    super.builder,
+    super.child,
   }) : super(
-          key: key,
-          create: create,
-          lazy: lazy,
-          builder: builder,
-          update: (context, previous) =>
-              update(context, Provider.of(context), previous),
-          dispose: dispose,
-          child: child,
-        );
+         update: (context, previous) =>
+             update(context, Provider.of(context), previous),
+       );
 }
 
 /// {@macro provider.listenableproxyprovider}
@@ -129,27 +98,21 @@ class ListenableProxyProvider2<T, T2, R extends Listenable?>
     extends ListenableProxyProvider0<R> {
   /// Initializes [key] for subclasses.
   ListenableProxyProvider2({
-    Key? key,
-    Create<R>? create,
+    super.key,
+    super.create,
     required ProxyProviderBuilder2<T, T2, R> update,
-    Dispose<R>? dispose,
-    bool? lazy,
-    TransitionBuilder? builder,
-    Widget? child,
+    super.dispose,
+    super.lazy,
+    super.builder,
+    super.child,
   }) : super(
-          key: key,
-          create: create,
-          lazy: lazy,
-          builder: builder,
-          update: (context, previous) => update(
-            context,
-            Provider.of(context),
-            Provider.of(context),
-            previous,
-          ),
-          dispose: dispose,
-          child: child,
-        );
+         update: (context, previous) => update(
+           context,
+           Provider.of(context),
+           Provider.of(context),
+           previous,
+         ),
+       );
 }
 
 /// {@macro provider.listenableproxyprovider}
@@ -157,28 +120,22 @@ class ListenableProxyProvider3<T, T2, T3, R extends Listenable?>
     extends ListenableProxyProvider0<R> {
   /// Initializes [key] for subclasses.
   ListenableProxyProvider3({
-    Key? key,
-    Create<R>? create,
+    super.key,
+    super.create,
     required ProxyProviderBuilder3<T, T2, T3, R> update,
-    Dispose<R>? dispose,
-    bool? lazy,
-    TransitionBuilder? builder,
-    Widget? child,
+    super.dispose,
+    super.lazy,
+    super.builder,
+    super.child,
   }) : super(
-          key: key,
-          create: create,
-          lazy: lazy,
-          builder: builder,
-          update: (context, previous) => update(
-            context,
-            Provider.of(context),
-            Provider.of(context),
-            Provider.of(context),
-            previous,
-          ),
-          dispose: dispose,
-          child: child,
-        );
+         update: (context, previous) => update(
+           context,
+           Provider.of(context),
+           Provider.of(context),
+           Provider.of(context),
+           previous,
+         ),
+       );
 }
 
 /// {@macro provider.listenableproxyprovider}
@@ -186,29 +143,23 @@ class ListenableProxyProvider4<T, T2, T3, T4, R extends Listenable?>
     extends ListenableProxyProvider0<R> {
   /// Initializes [key] for subclasses.
   ListenableProxyProvider4({
-    Key? key,
-    Create<R>? create,
+    super.key,
+    super.create,
     required ProxyProviderBuilder4<T, T2, T3, T4, R> update,
-    Dispose<R>? dispose,
-    bool? lazy,
-    TransitionBuilder? builder,
-    Widget? child,
+    super.dispose,
+    super.lazy,
+    super.builder,
+    super.child,
   }) : super(
-          key: key,
-          create: create,
-          lazy: lazy,
-          builder: builder,
-          update: (context, previous) => update(
-            context,
-            Provider.of(context),
-            Provider.of(context),
-            Provider.of(context),
-            Provider.of(context),
-            previous,
-          ),
-          dispose: dispose,
-          child: child,
-        );
+         update: (context, previous) => update(
+           context,
+           Provider.of(context),
+           Provider.of(context),
+           Provider.of(context),
+           Provider.of(context),
+           previous,
+         ),
+       );
 }
 
 /// {@macro provider.listenableproxyprovider}
@@ -216,30 +167,24 @@ class ListenableProxyProvider5<T, T2, T3, T4, T5, R extends Listenable?>
     extends ListenableProxyProvider0<R> {
   /// Initializes [key] for subclasses.
   ListenableProxyProvider5({
-    Key? key,
-    Create<R>? create,
+    super.key,
+    super.create,
     required ProxyProviderBuilder5<T, T2, T3, T4, T5, R> update,
-    Dispose<R>? dispose,
-    bool? lazy,
-    TransitionBuilder? builder,
-    Widget? child,
+    super.dispose,
+    super.lazy,
+    super.builder,
+    super.child,
   }) : super(
-          key: key,
-          create: create,
-          lazy: lazy,
-          builder: builder,
-          update: (context, previous) => update(
-            context,
-            Provider.of(context),
-            Provider.of(context),
-            Provider.of(context),
-            Provider.of(context),
-            Provider.of(context),
-            previous,
-          ),
-          dispose: dispose,
-          child: child,
-        );
+         update: (context, previous) => update(
+           context,
+           Provider.of(context),
+           Provider.of(context),
+           Provider.of(context),
+           Provider.of(context),
+           Provider.of(context),
+           previous,
+         ),
+       );
 }
 
 /// {@macro provider.listenableproxyprovider}
@@ -247,29 +192,23 @@ class ListenableProxyProvider6<T, T2, T3, T4, T5, T6, R extends Listenable?>
     extends ListenableProxyProvider0<R> {
   /// Initializes [key] for subclasses.
   ListenableProxyProvider6({
-    Key? key,
-    Create<R>? create,
+    super.key,
+    super.create,
     required ProxyProviderBuilder6<T, T2, T3, T4, T5, T6, R> update,
-    Dispose<R>? dispose,
-    bool? lazy,
-    TransitionBuilder? builder,
-    Widget? child,
+    super.dispose,
+    super.lazy,
+    super.builder,
+    super.child,
   }) : super(
-          key: key,
-          create: create,
-          lazy: lazy,
-          builder: builder,
-          update: (context, previous) => update(
-            context,
-            Provider.of(context),
-            Provider.of(context),
-            Provider.of(context),
-            Provider.of(context),
-            Provider.of(context),
-            Provider.of(context),
-            previous,
-          ),
-          dispose: dispose,
-          child: child,
-        );
+         update: (context, previous) => update(
+           context,
+           Provider.of(context),
+           Provider.of(context),
+           Provider.of(context),
+           Provider.of(context),
+           Provider.of(context),
+           Provider.of(context),
+           previous,
+         ),
+       );
 }

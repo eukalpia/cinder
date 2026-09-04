@@ -92,8 +92,10 @@ class BuildOwner {
 
     assert(() {
       for (final element in _dirtyElements) {
-        assert(!element.dirty,
-            'Element ${element.runtimeType} is still dirty after building');
+        assert(
+          !element.dirty,
+          'Element ${element.runtimeType} is still dirty after building',
+        );
       }
       return true;
     }());
@@ -113,20 +115,36 @@ class _InactiveElements {
   final Set<Element> _elements = HashSet<Element>();
 
   void add(Element element) {
+    _elements.add(element);
     // Handle both active and inactive elements like Flutter does
     if (element._lifecycleState == _ElementLifecycle.active) {
       _deactivateRecursively(element);
     } else {
       assert(element._lifecycleState == _ElementLifecycle.inactive);
     }
-
-    _elements.add(element);
   }
 
   static void _deactivateRecursively(Element element) {
     assert(element._lifecycleState == _ElementLifecycle.active);
-    element.deactivate();
-    element.visitChildren(_deactivateRecursively);
+    Object? firstError;
+    StackTrace? firstStackTrace;
+    try {
+      element.deactivate();
+    } catch (error, stackTrace) {
+      firstError = error;
+      firstStackTrace = stackTrace;
+    }
+    element.visitChildren((child) {
+      try {
+        _deactivateRecursively(child);
+      } catch (error, stackTrace) {
+        firstError ??= error;
+        firstStackTrace ??= stackTrace;
+      }
+    });
+    if (firstError != null) {
+      Error.throwWithStackTrace(firstError!, firstStackTrace!);
+    }
   }
 
   void remove(Element element) {
@@ -137,18 +155,38 @@ class _InactiveElements {
 
   static void _unmount(Element element) {
     assert(element._lifecycleState == _ElementLifecycle.inactive);
+    Object? firstError;
+    StackTrace? firstStackTrace;
+
+    void cleanup(VoidCallback callback) {
+      try {
+        callback();
+      } catch (error, stackTrace) {
+        firstError ??= error;
+        firstStackTrace ??= stackTrace;
+      }
+    }
+
+    // Stop queued rendering work before disposing this render subtree.
+    if (element is RenderObjectElement && element.renderObject.owner != null) {
+      cleanup(element.renderObject.detach);
+    }
+
     // Recursively unmount all children first (depth-first)
     element.visitChildren((Element child) {
       assert(child._parent == element);
-      _unmount(child);
+      cleanup(() => _unmount(child));
     });
     // Dispose the render object if this is a RenderObjectElement
     if (element is RenderObjectElement) {
-      element.renderObject.dispose();
+      cleanup(element.renderObject.dispose);
     }
     // Then unmount this element
-    element.unmount();
+    cleanup(element.unmount);
     assert(element._lifecycleState == _ElementLifecycle.defunct);
+    if (firstError != null) {
+      Error.throwWithStackTrace(firstError!, firstStackTrace!);
+    }
   }
 
   void _unmountAll() {
@@ -156,9 +194,19 @@ class _InactiveElements {
       ..sort((a, b) => b.depth - a.depth);
     _elements.clear();
 
+    Object? firstError;
+    StackTrace? firstStackTrace;
     for (final element in elements) {
       assert(element._lifecycleState == _ElementLifecycle.inactive);
-      _unmount(element);
+      try {
+        _unmount(element);
+      } catch (error, stackTrace) {
+        firstError ??= error;
+        firstStackTrace ??= stackTrace;
+      }
+    }
+    if (firstError != null) {
+      Error.throwWithStackTrace(firstError, firstStackTrace!);
     }
   }
 }

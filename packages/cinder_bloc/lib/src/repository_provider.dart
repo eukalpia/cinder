@@ -10,18 +10,15 @@ class RepositoryProvider<T> extends SingleChildStatelessWidget {
     super.child,
     this.lazy = true,
     void Function(T value)? dispose,
-  })  : _create = create,
-        _value = null,
-        _dispose = dispose;
+  }) : _create = create,
+       _value = null,
+       _dispose = dispose;
 
-  RepositoryProvider.value({
-    required T value,
-    super.key,
-    super.child,
-  })  : _value = value,
-        _create = null,
-        _dispose = null,
-        lazy = true;
+  RepositoryProvider.value({required T value, super.key, super.child})
+    : _value = value,
+      _create = null,
+      _dispose = null,
+      lazy = true;
 
   final T Function(BuildContext context)? _create;
   final T? _value;

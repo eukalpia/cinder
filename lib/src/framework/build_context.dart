@@ -31,15 +31,18 @@ abstract class BuildContext {
 
   /// Obtains the nearest [InheritedWidget] of the given type T and
   /// registers this context to be rebuilt when that widget changes.
-  T? dependOnInheritedWidgetOfExactType<T extends InheritedWidget>(
-      {Object? aspect});
+  T? dependOnInheritedWidgetOfExactType<T extends InheritedWidget>({
+    Object? aspect,
+  });
 
   /// Registers this context with an [InheritedElement].
-  InheritedWidget dependOnInheritedElement(InheritedElement ancestor,
-      {Object? aspect});
+  InheritedWidget dependOnInheritedElement(
+    InheritedElement ancestor, {
+    Object? aspect,
+  });
 
   InheritedElement?
-      getElementForInheritedWidgetOfExactType<T extends InheritedWidget>();
+  getElementForInheritedWidgetOfExactType<T extends InheritedWidget>();
 
   /// Visit all the children elements.
   void visitChildElements(ElementVisitor visitor);

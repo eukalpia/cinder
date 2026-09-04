@@ -77,49 +77,37 @@ class StreamProvider<T> extends DeferredInheritedProvider<Stream<T>?, T> {
   ///
   /// The parameter `create` must not be `null`.
   StreamProvider({
-    Key? key,
-    required Create<Stream<T>?> create,
+    super.key,
+    required super.create,
     required T initialData,
     ErrorBuilder<T>? catchError,
-    UpdateShouldNotify<T>? updateShouldNotify,
-    bool? lazy,
-    TransitionBuilder? builder,
-    Widget? child,
+    super.updateShouldNotify,
+    super.lazy,
+    super.builder,
+    super.child,
   }) : super(
-          key: key,
-          lazy: lazy,
-          builder: builder,
-          create: create,
-          updateShouldNotify: updateShouldNotify,
-          startListening: _streamStartListening(
-            catchError: catchError,
-            initialData: initialData,
-          ),
-          child: child,
-        );
+         startListening: _streamStartListening(
+           catchError: catchError,
+           initialData: initialData,
+         ),
+       );
 
   /// Listens to `value` and expose it to all of [StreamProvider] descendants.
   StreamProvider.value({
-    Key? key,
-    required Stream<T>? value,
+    super.key,
+    required super.value,
     required T initialData,
     ErrorBuilder<T>? catchError,
-    UpdateShouldNotify<T>? updateShouldNotify,
-    bool? lazy,
-    TransitionBuilder? builder,
-    Widget? child,
+    super.updateShouldNotify,
+    super.lazy,
+    super.builder,
+    super.child,
   }) : super.value(
-          key: key,
-          lazy: lazy,
-          builder: builder,
-          value: value,
-          updateShouldNotify: updateShouldNotify,
-          startListening: _streamStartListening(
-            catchError: catchError,
-            initialData: initialData,
-          ),
-          child: child,
-        );
+         startListening: _streamStartListening(
+           catchError: catchError,
+           initialData: initialData,
+         ),
+       );
 }
 
 DeferredStartListening<Future<T>?, T> _futureStartListening<T>({
@@ -182,46 +170,35 @@ class FutureProvider<T> extends DeferredInheritedProvider<Future<T>?, T> {
   ///
   /// `create` must not be `null`.
   FutureProvider({
-    Key? key,
-    required Create<Future<T>?> create,
+    super.key,
+    required super.create,
     required T initialData,
     ErrorBuilder<T>? catchError,
-    UpdateShouldNotify<T>? updateShouldNotify,
-    bool? lazy,
-    TransitionBuilder? builder,
-    Widget? child,
+    super.updateShouldNotify,
+    super.lazy,
+    super.builder,
+    super.child,
   }) : super(
-          key: key,
-          lazy: lazy,
-          builder: builder,
-          create: create,
-          updateShouldNotify: updateShouldNotify,
-          startListening: _futureStartListening(
-            catchError: catchError,
-            initialData: initialData,
-          ),
-          child: child,
-        );
+         startListening: _futureStartListening(
+           catchError: catchError,
+           initialData: initialData,
+         ),
+       );
 
   /// Listens to `value` and expose it to all of [FutureProvider] descendants.
   FutureProvider.value({
-    Key? key,
-    required Future<T>? value,
+    super.key,
+    required super.value,
     required T initialData,
     ErrorBuilder<T>? catchError,
-    UpdateShouldNotify<T>? updateShouldNotify,
-    TransitionBuilder? builder,
-    Widget? child,
+    super.updateShouldNotify,
+    super.builder,
+    super.child,
   }) : super.value(
-          key: key,
-          builder: builder,
-          lazy: false,
-          value: value,
-          updateShouldNotify: updateShouldNotify,
-          startListening: _futureStartListening(
-            catchError: catchError,
-            initialData: initialData,
-          ),
-          child: child,
-        );
+         lazy: false,
+         startListening: _futureStartListening(
+           catchError: catchError,
+           initialData: initialData,
+         ),
+       );
 }

@@ -58,7 +58,7 @@ class _DataObservatoryState extends State<DataObservatory> {
                         1340,
                         1290,
                         1510,
-                        1640
+                        1640,
                       ],
                     ),
                   ],
@@ -69,11 +69,7 @@ class _DataObservatoryState extends State<DataObservatory> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: <Widget>[
-                    GaugeChart(
-                      title: 'CPU',
-                      value: 63,
-                      width: 28,
-                    ),
+                    GaugeChart(title: 'CPU', value: 63, width: 28),
                     SizedBox(height: 1),
                     BarChart(
                       title: 'Traffic by service',

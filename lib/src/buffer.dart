@@ -14,10 +14,19 @@ import 'utils/unicode_width.dart';
 /// Cinder deliberately mutates existing cells instead of allocating a new
 /// object for every painted terminal position on every frame.
 class Cell {
-  Cell({this.char = ' ', TextStyle? style, this.isImagePlaceholder = false})
-      : style = style ?? const TextStyle();
+  Cell({String char = ' ', TextStyle? style, this.isImagePlaceholder = false})
+    : _char = char,
+      style = style ?? const TextStyle();
 
-  String char;
+  String _char;
+
+  String get char => _char;
+  set char(String value) {
+    if (_char == value) return;
+    _char = value;
+    _cachedWidth = null;
+  }
+
   TextStyle style;
   bool isImagePlaceholder;
 
@@ -36,10 +45,7 @@ class Cell {
     required TextStyle style,
     bool isImagePlaceholder = false,
   }) {
-    if (this.char != char) {
-      this.char = char;
-      _cachedWidth = null;
-    }
+    this.char = char;
     this.style = style;
     this.isImagePlaceholder = isImagePlaceholder;
   }
@@ -135,13 +141,13 @@ class PendingImage {
 /// once, reuses cells, and records only the horizontal span touched on each row.
 class Buffer {
   Buffer(this.width, this.height)
-      : _flatCells = List<Cell>.generate(
-          width * height,
-          (_) => Cell(),
-          growable: false,
-        ),
-        _dirtyStart = Int32List(height),
-        _dirtyEnd = Int32List(height) {
+    : _flatCells = List<Cell>.generate(
+        width * height,
+        (_) => Cell(),
+        growable: false,
+      ),
+      _dirtyStart = Int32List(height),
+      _dirtyEnd = Int32List(height) {
     for (var y = 0; y < height; y++) {
       _dirtyStart[y] = width;
       _dirtyEnd[y] = -1;
@@ -176,10 +182,13 @@ class Buffer {
   }
 
   void setCell(int x, int y, Cell cell) {
-    if (!contains(x, y)) return;
-    final target = _flatCells[_index(x, y)];
-    target.copyFrom(cell);
-    markDirtyCell(x, y);
+    writeCell(
+      x,
+      y,
+      char: cell.char,
+      style: cell.style,
+      isImagePlaceholder: cell.isImagePlaceholder,
+    );
   }
 
   /// Writes directly into a reusable cell without allocating a temporary Cell.
@@ -190,13 +199,49 @@ class Buffer {
     TextStyle style = const TextStyle(),
     bool isImagePlaceholder = false,
   }) {
+    _writeCell(
+      x,
+      y,
+      char: char,
+      style: style,
+      isImagePlaceholder: isImagePlaceholder,
+      markDirty: true,
+    );
+  }
+
+  void _writeCell(
+    int x,
+    int y, {
+    required String char,
+    required TextStyle style,
+    required bool isImagePlaceholder,
+    required bool markDirty,
+  }) {
     if (!contains(x, y)) return;
-    _flatCells[_index(x, y)].set(
+    final target = _flatCells[_index(x, y)];
+    if (target.char != char) {
+      // A wide glyph is one visual unit. Overwriting either half must also
+      // clear its partner so later composition cannot resurrect or skip it.
+      if (target.char == '\u200B' && char != '\u200B' && x > 0) {
+        final leading = _flatCells[_index(x - 1, y)];
+        if (leading.width == 2) {
+          leading.set(char: ' ', style: leading.style);
+          if (markDirty) markDirtyCell(x - 1, y);
+        }
+      } else if (target.char != '\u200B' && x + 1 < width) {
+        final trailing = _flatCells[_index(x + 1, y)];
+        if (trailing.char == '\u200B') {
+          trailing.set(char: ' ', style: trailing.style);
+          if (markDirty) markDirtyCell(x + 1, y);
+        }
+      }
+    }
+    target.set(
       char: char,
       style: style,
       isImagePlaceholder: isImagePlaceholder,
     );
-    markDirtyCell(x, y);
+    if (markDirty) markDirtyCell(x, y);
   }
 
   void markDirtyCell(int x, int y) {
@@ -405,8 +450,20 @@ class Buffer {
         final sx = sourceX + x;
         final dx = destinationX + x;
         if (sx < 0 || sx >= source.width || dx < 0 || dx >= width) continue;
-        _flatCells[_index(dx, dy)].copyFrom(source.getCell(sx, sy));
-        if (markDirty) markDirtyCell(dx, dy);
+        final cell = source.getCell(sx, sy);
+        final clippedContinuation =
+            cell.char == '\u200B' && (x == 0 || sx == 0 || dx == 0);
+        final clippedLeading =
+            cell.width == 2 &&
+            (x + 1 >= w || sx + 1 >= source.width || dx + 1 >= width);
+        _writeCell(
+          dx,
+          dy,
+          char: clippedContinuation || clippedLeading ? ' ' : cell.char,
+          style: cell.style,
+          isImagePlaceholder: cell.isImagePlaceholder,
+          markDirty: markDirty,
+        );
       }
     }
 

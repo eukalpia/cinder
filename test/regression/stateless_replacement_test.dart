@@ -23,21 +23,13 @@ void main() {
   test('Column properly replaces StatelessWidget children', () async {
     await testCinder('stateless replacement', (tester) async {
       // Start with WidgetA
-      await tester.pumpWidget(
-        Column(children: [
-          WidgetA(),
-        ]),
-      );
+      await tester.pumpWidget(Column(children: [WidgetA()]));
 
       expect(tester.terminalState, containsText('A'));
       expect(tester.terminalState, isNot(containsText('B')));
 
       // Replace with WidgetB
-      await tester.pumpWidget(
-        Column(children: [
-          WidgetB(),
-        ]),
-      );
+      await tester.pumpWidget(Column(children: [WidgetB()]));
 
       // Should only show B, not A
       expect(tester.terminalState, containsText('B'));

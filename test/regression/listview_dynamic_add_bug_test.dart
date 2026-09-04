@@ -3,10 +3,7 @@ import 'package:test/test.dart';
 
 void main() {
   group('ListView dynamic item addition bug', () {
-    test('items added after screen is full should be scrollable',
-        skip:
-            'Known bug: ListView maxScrollExtent not updating when items added',
-        () async {
+    test('items added after screen is full should be scrollable', () async {
       await testCinder(
         'ListView dynamic add bug reproduction',
         (tester) async {
@@ -16,17 +13,15 @@ void main() {
 
           // Build the ListView as a simple stateful widget
           await tester.pumpWidget(
-            _TestListView(
-              items: items,
-              scrollController: scrollController,
-            ),
+            _TestListView(items: items, scrollController: scrollController),
           );
 
           // Check initial state
           print('=== Initial state (3 items) ===');
           print('ScrollController offset: ${scrollController.offset}');
           print(
-              'ScrollController maxScrollExtent: ${scrollController.maxScrollExtent}');
+            'ScrollController maxScrollExtent: ${scrollController.maxScrollExtent}',
+          );
           expect(tester.terminalState, containsText('Item 1'));
           expect(tester.terminalState, containsText('Item 2'));
           expect(tester.terminalState, containsText('Item 3'));
@@ -37,17 +32,15 @@ void main() {
           }
 
           await tester.pumpWidget(
-            _TestListView(
-              items: items,
-              scrollController: scrollController,
-            ),
+            _TestListView(items: items, scrollController: scrollController),
           );
 
           print('\n=== After adding items 4-10 ===');
           print('Total items: ${items.length}');
           print('ScrollController offset: ${scrollController.offset}');
           print(
-              'ScrollController maxScrollExtent: ${scrollController.maxScrollExtent}');
+            'ScrollController maxScrollExtent: ${scrollController.maxScrollExtent}',
+          );
 
           // Try to scroll to the end
           print('\n=== Attempting to scroll to end ===');
@@ -57,7 +50,8 @@ void main() {
           print('After scrollToEnd:');
           print('ScrollController offset: ${scrollController.offset}');
           print(
-              'ScrollController maxScrollExtent: ${scrollController.maxScrollExtent}');
+            'ScrollController maxScrollExtent: ${scrollController.maxScrollExtent}',
+          );
 
           // Check if we can see the last items
           final hasItem10 = tester.terminalState.containsText('Item 10');
@@ -69,12 +63,10 @@ void main() {
           print('Item 9 visible: $hasItem9');
           print('Item 8 visible: $hasItem8');
 
-          // THIS SHOULD PASS BUT WILL FAIL DUE TO THE BUG
           expect(
-            hasItem10 || hasItem9 || hasItem8,
+            hasItem10,
             isTrue,
-            reason:
-                'After scrolling to end, at least one of the last items should be visible',
+            reason: 'After scrolling to end, the last item should be visible',
           );
         },
         debugPrintAfterPump: true,
@@ -105,8 +97,10 @@ void main() {
                           items.length, // Key difference: itemCount is known
                       itemBuilder: (context, index) {
                         return Container(
-                          padding:
-                              EdgeInsets.symmetric(vertical: 0, horizontal: 1),
+                          padding: EdgeInsets.symmetric(
+                            vertical: 0,
+                            horizontal: 1,
+                          ),
                           child: Text(items[index]),
                         );
                       },
@@ -149,10 +143,7 @@ class _TestListView extends StatelessWidget {
   final List<String> items;
   final ScrollController scrollController;
 
-  const _TestListView({
-    required this.items,
-    required this.scrollController,
-  });
+  const _TestListView({required this.items, required this.scrollController});
 
   @override
   Widget build(BuildContext context) {
@@ -169,7 +160,7 @@ class _TestListView extends StatelessWidget {
               itemCount: items.length,
               itemBuilder: (context, index) {
                 return Container(
-                  padding: EdgeInsets.all(1),
+                  padding: EdgeInsets.symmetric(horizontal: 1),
                   child: Text(items[index]),
                 );
               },

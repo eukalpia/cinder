@@ -30,69 +30,67 @@ void main() {
 
       // No zero-width markers were inserted anywhere in the run.
       for (int x = 0; x <= 6; x++) {
-        expect(buffer.getCell(x, 0).char, isNot('\u200B'),
-            reason: 'unexpected wide-char marker at column $x');
+        expect(
+          buffer.getCell(x, 0).char,
+          isNot('\u200B'),
+          reason: 'unexpected wide-char marker at column $x',
+        );
       }
     });
 
     test('rendered text advances one column per punctuation glyph', () async {
-      await testCinder(
-        'punctuation column advance',
-        (tester) async {
-          await tester.pumpWidget(
-            const Align(
-              alignment: Alignment.topLeft,
-              child: Text('“A”—B…C'),
-            ),
-          );
+      await testCinder('punctuation column advance', (tester) async {
+        await tester.pumpWidget(
+          const Align(alignment: Alignment.topLeft, child: Text('“A”—B…C')),
+        );
 
-          final state = tester.terminalState;
-          expect(state.getCellAt(0, 0)?.char, '“'); // left double quote
-          expect(state.getCellAt(1, 0)?.char, 'A');
-          expect(state.getCellAt(2, 0)?.char, '”'); // right double quote
-          expect(state.getCellAt(3, 0)?.char, '—'); // em dash
-          expect(state.getCellAt(4, 0)?.char, 'B');
-          expect(state.getCellAt(5, 0)?.char, '…'); // ellipsis
-          expect(state.getCellAt(6, 0)?.char, 'C');
-        },
-      );
+        final state = tester.terminalState;
+        expect(state.getCellAt(0, 0)?.char, '“'); // left double quote
+        expect(state.getCellAt(1, 0)?.char, 'A');
+        expect(state.getCellAt(2, 0)?.char, '”'); // right double quote
+        expect(state.getCellAt(3, 0)?.char, '—'); // em dash
+        expect(state.getCellAt(4, 0)?.char, 'B');
+        expect(state.getCellAt(5, 0)?.char, '…'); // ellipsis
+        expect(state.getCellAt(6, 0)?.char, 'C');
+      });
     });
 
     test('content-sized bordered box hugs punctuation text', () async {
       // A min-sized box wraps Text('A—B') (display width 3). The right
       // border must sit at column left+4 (1 border + 3 content). If the
       // em dash measured as width 2 the box would be one column wider.
-      await testCinder(
-        'border hugs punctuation',
-        (tester) async {
-          await tester.pumpWidget(
-            Align(
-              alignment: Alignment.topLeft,
-              child: Container(
-                decoration: BoxDecoration(
-                  border: BoxBorder.all(color: Colors.cyan),
-                ),
-                child: const Text('A—B'),
+      await testCinder('border hugs punctuation', (tester) async {
+        await tester.pumpWidget(
+          Align(
+            alignment: Alignment.topLeft,
+            child: Container(
+              decoration: BoxDecoration(
+                border: BoxBorder.all(color: Colors.cyan),
               ),
+              child: const Text('A—B'),
             ),
-          );
+          ),
+        );
 
-          // Top border row: find the box-drawing corners.
-          int? leftCol;
-          int? rightCol;
-          for (int x = 0; x < 80; x++) {
-            final ch = tester.terminalState.getCellAt(x, 0)?.char;
-            if (ch == '┌') leftCol = x;
-            if (ch == '┐') rightCol = x;
-          }
-          expect(leftCol, isNotNull, reason: 'no top-left corner rendered');
-          expect(rightCol, isNotNull, reason: 'no top-right corner rendered');
-          // border + 3 content cells + border => width 5, corners 4 apart.
-          expect(rightCol! - leftCol!, equals(4),
-              reason: 'box width should hug 3-cell content, '
-                  'got inner width ${rightCol - leftCol - 1}');
-        },
-      );
+        // Top border row: find the box-drawing corners.
+        int? leftCol;
+        int? rightCol;
+        for (int x = 0; x < 80; x++) {
+          final ch = tester.terminalState.getCellAt(x, 0)?.char;
+          if (ch == '┌') leftCol = x;
+          if (ch == '┐') rightCol = x;
+        }
+        expect(leftCol, isNotNull, reason: 'no top-left corner rendered');
+        expect(rightCol, isNotNull, reason: 'no top-right corner rendered');
+        // border + 3 content cells + border => width 5, corners 4 apart.
+        expect(
+          rightCol! - leftCol!,
+          equals(4),
+          reason:
+              'box width should hug 3-cell content, '
+              'got inner width ${rightCol - leftCol - 1}',
+        );
+      });
     });
   });
 }

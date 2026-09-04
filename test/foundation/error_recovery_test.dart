@@ -5,19 +5,46 @@ import 'package:test/test.dart';
 
 void main() {
   group('Error Recovery', () {
-    test('error box takes only the space of failed widget',
-        skip: 'Error recovery system needs refactoring', () async {
+    test(
+      'cached layout retains the previous failure until layout succeeds',
+      () {
+        final renderObject = _RenderRecoverable(
+          shouldThrow: true,
+          throwInPaint: false,
+        );
+        const size = Size(40, 6);
+        final constraints = BoxConstraints.tight(size);
+        String paint() {
+          final buffer = Buffer(40, 6);
+          renderObject.paintWithContext(
+            TerminalCanvas(buffer, const Rect.fromLTWH(0, 0, 40, 6)),
+            Offset.zero,
+          );
+          return PlainOutputResult(buffer: buffer, size: size).text;
+        }
+
+        renderObject.layout(constraints);
+        expect(paint(), contains('Layout Error'));
+
+        renderObject.layout(constraints);
+        expect(paint(), contains('Layout Error'));
+        expect(paint(), isNot(contains('Recovered')));
+
+        renderObject.shouldThrow = false;
+        renderObject.layout(constraints);
+        expect(paint(), contains('Recovered'));
+        expect(paint(), isNot(contains('Layout Error')));
+      },
+    );
+
+    test('error box takes only the space of failed widget', () async {
       await testCinder(
         'error box size constraint',
         (tester) async {
           await tester.pumpWidget(
             Row(
               children: [
-                const SizedBox(
-                  width: 10,
-                  height: 5,
-                  child: Text('Left'),
-                ),
+                const SizedBox(width: 10, height: 5, child: Text('Left')),
                 const SizedBox(
                   width: 20,
                   height: 5,
@@ -26,11 +53,7 @@ void main() {
                     errorMessage: 'Error in middle',
                   ),
                 ),
-                const SizedBox(
-                  width: 10,
-                  height: 5,
-                  child: Text('Right'),
-                ),
+                const SizedBox(width: 10, height: 5, child: Text('Right')),
               ],
             ),
           );
@@ -46,6 +69,7 @@ void main() {
           // and not overflow to other widgets
           expect(output, contains('Left'));
           expect(output, contains('Right'));
+          expect(output, contains('Layout Error'));
 
           // Check that the error box appears between Left and Right
           // and doesn't take the full width
@@ -65,107 +89,118 @@ void main() {
       );
     });
 
-    test('errors clear when performLayout succeeds on retry',
-        skip: 'Error recovery system needs refactoring', () async {
-      await testCinder(
-        'error recovery on successful layout',
-        (tester) async {
-          // Create a widget that fails initially but succeeds on rebuild
-          final widget = _TestRecoverableWidget();
+    test('errors clear when performLayout succeeds on retry', () async {
+      await testCinder('error recovery on successful layout', (tester) async {
+        // Create a widget that fails initially but succeeds on rebuild
+        final widget = _TestRecoverableWidget();
 
-          await tester.pumpWidget(
-            Column(
-              children: [
-                const Text('Before'),
-                widget,
-                const Text('After'),
-              ],
-            ),
-          );
+        await tester.pumpWidget(
+          Column(
+            children: [
+              const Text('Before'),
+              SizedBox(width: 40, height: 5, child: widget),
+              const Text('After'),
+            ],
+          ),
+        );
 
-          // First pump - should show error
-          var output = tester.terminalState.getText();
-          expect(output, contains('Before'));
-          expect(output, contains('After'));
-          // Should show error box
-          expect(output, contains('Layout Error'));
+        // First pump - should show error
+        var output = tester.terminalState.getText();
+        expect(output, contains('Before'));
+        expect(output, contains('After'));
+        // Should show error box
+        expect(output, contains('Layout Error'));
 
-          // Change state to stop throwing
-          widget.stopThrowing();
+        // Change state to stop throwing
+        tester.findState<_RecoverableState>().stopThrowing();
 
-          // Force a rebuild by pumping again
-          await tester.pump();
+        // Force a rebuild by pumping again
+        await tester.pump();
 
-          output = tester.terminalState.getText();
-          expect(output, contains('Before'));
-          expect(output, contains('After'));
-          expect(output, contains('Recovered'));
-          // Error should be gone
-          expect(output, isNot(contains('Layout Error')));
-        },
-        debugPrintAfterPump: true,
-      );
+        output = tester.terminalState.getText();
+        expect(output, contains('Before'));
+        expect(output, contains('After'));
+        expect(output, contains('Recovered'));
+        // Error should be gone
+        expect(output, isNot(contains('Layout Error')));
+      }, debugPrintAfterPump: true);
     });
 
-    test('paint errors clear on successful repaint',
-        skip: 'Error recovery system needs refactoring', () async {
-      await testCinder(
-        'paint error recovery',
-        (tester) async {
-          final widget = _TestRecoverableWidget(throwInPaint: true);
+    test('paint errors clear on successful repaint', () async {
+      await testCinder('paint error recovery', (tester) async {
+        final widget = _TestRecoverableWidget(throwInPaint: true);
 
-          await tester.pumpWidget(widget);
+        await tester.pumpWidget(widget);
 
-          // First pump - should show paint error
-          var output = tester.terminalState.getText();
-          expect(output, contains('Paint Error'));
+        // First pump - should show paint error
+        var output = tester.terminalState.getText();
+        expect(output, contains('Paint Error'));
 
-          // Stop throwing
-          widget.stopThrowing();
-          await tester.pump();
+        // Stop throwing
+        tester.findState<_RecoverableState>().stopThrowing();
+        await tester.pump();
 
-          output = tester.terminalState.getText();
-          expect(output, contains('Recovered'));
-          expect(output, isNot(contains('Paint Error')));
-        },
-        debugPrintAfterPump: true,
-      );
+        output = tester.terminalState.getText();
+        expect(output, contains('Recovered'));
+        expect(output, isNot(contains('Paint Error')));
+      }, debugPrintAfterPump: true);
     });
   });
 }
 
 /// A test widget that can recover from errors
-// ignore: must_be_immutable
-class _TestRecoverableWidget extends SingleChildRenderObjectWidget {
-  _TestRecoverableWidget({this.throwInPaint = false});
+class _TestRecoverableWidget extends StatefulWidget {
+  const _TestRecoverableWidget({this.throwInPaint = false});
 
   final bool throwInPaint;
+
+  @override
+  State createState() => _RecoverableState();
+}
+
+class _RecoverableState extends State<_TestRecoverableWidget> {
   bool _shouldThrow = true;
 
   void stopThrowing() {
-    _shouldThrow = false;
+    setState(() => _shouldThrow = false);
   }
+
+  @override
+  Widget build(BuildContext context) => _RecoverableRenderWidget(
+    shouldThrow: _shouldThrow,
+    throwInPaint: widget.throwInPaint,
+  );
+}
+
+class _RecoverableRenderWidget extends SingleChildRenderObjectWidget {
+  const _RecoverableRenderWidget({
+    required this.shouldThrow,
+    required this.throwInPaint,
+  });
+
+  final bool shouldThrow;
+  final bool throwInPaint;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
     return _RenderRecoverable(
-      shouldThrow: _shouldThrow,
+      shouldThrow: shouldThrow,
       throwInPaint: throwInPaint,
     );
   }
 
   @override
   void updateRenderObject(
-      BuildContext context, _RenderRecoverable renderObject) {
-    renderObject.shouldThrow = _shouldThrow;
+    BuildContext context,
+    _RenderRecoverable renderObject,
+  ) {
+    renderObject.shouldThrow = shouldThrow;
   }
 }
 
 class _RenderRecoverable extends RenderObject {
-  _RenderRecoverable({
-    required bool shouldThrow,
-    required this.throwInPaint,
-  }) : _shouldThrow = shouldThrow;
+  _RenderRecoverable({required bool shouldThrow, required this.throwInPaint})
+    : _shouldThrow = shouldThrow;
 
   bool _shouldThrow;
   final bool throwInPaint;

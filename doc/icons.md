@@ -21,6 +21,12 @@ dependencies:
       url: https://github.com/eukalpia/cinder.git
       path: packages/cinder_lucide
       ref: main
+
+dependency_overrides:
+  cinder:
+    git:
+      url: https://github.com/eukalpia/cinder.git
+      ref: main
 ```
 
 ## API
@@ -65,8 +71,9 @@ portable defaults.
 
 `tool/generate_icon_packs.py` reads Flutter's stable Material icon declarations
 and the official Lucide SVG tree. It generates pure Dart catalogs and preserves
-Flutter/Lucide identifier naming. CI rejects unexpectedly small catalogs and
-runs analyzer and package tests after generation.
+Flutter/Lucide identifier naming. Package tests check catalog size and representative icon mappings; CI runs
+those tests and the analyzer. Regenerate catalogs explicitly when updating
+upstream versions.
 
 ## Width and RTL
 

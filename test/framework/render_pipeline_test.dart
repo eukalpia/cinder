@@ -22,141 +22,129 @@ void main() {
   // ============================================================================
   group('markNeedsLayout propagation', () {
     test('markNeedsLayout sets _needsLayout flag on the object', () async {
-      await testCinder(
-        'sets needsLayout flag',
-        (tester) async {
-          await tester.pumpWidget(
-            _LayoutTracker(
-              onLayoutTrackerCreated: (tracker) {
-                // Initially the layout flag is cleared after first frame
-                expect(tracker.needsLayout, isFalse);
+      await testCinder('sets needsLayout flag', (tester) async {
+        await tester.pumpWidget(
+          _LayoutTracker(
+            onLayoutTrackerCreated: (tracker) {
+              // Initially the layout flag is cleared after first frame
+              expect(tracker.needsLayout, isFalse);
 
-                // Mark needs layout
-                tracker.markNeedsLayout();
+              // Mark needs layout
+              tracker.markNeedsLayout();
 
-                // Flag should be set
-                expect(tracker.needsLayout, isTrue);
-              },
-            ),
-          );
-        },
-      );
+              // Flag should be set
+              expect(tracker.needsLayout, isTrue);
+            },
+          ),
+        );
+      });
     });
 
     test('markNeedsLayout calls markNeedsPaint', () async {
-      await testCinder(
-        'calls markNeedsPaint',
-        (tester) async {
-          bool paintMarkCalled = false;
+      await testCinder('calls markNeedsPaint', (tester) async {
+        bool paintMarkCalled = false;
 
-          await tester.pumpWidget(
-            _LayoutTracker(
-              onLayoutTrackerCreated: (tracker) {
-                // Override to track paint marking
-                tracker.onMarkNeedsPaint = () {
-                  paintMarkCalled = true;
-                };
+        await tester.pumpWidget(
+          _LayoutTracker(
+            onLayoutTrackerCreated: (tracker) {
+              // Override to track paint marking
+              tracker.onMarkNeedsPaint = () {
+                paintMarkCalled = true;
+              };
 
-                tracker.markNeedsLayout();
+              tracker.markNeedsLayout();
 
-                // markNeedsPaint should have been called
-                expect(paintMarkCalled, isTrue);
-              },
-            ),
-          );
-        },
-      );
+              // markNeedsPaint should have been called
+              expect(paintMarkCalled, isTrue);
+            },
+          ),
+        );
+      });
     });
 
     test('markNeedsLayout works when called multiple times', () async {
-      await testCinder(
-        'multiple markNeedsLayout calls',
-        (tester) async {
-          int layoutCount = 0;
-          late _TrackingRenderBox tracker;
+      await testCinder('multiple markNeedsLayout calls', (tester) async {
+        int layoutCount = 0;
+        late _TrackingRenderBox tracker;
 
-          await tester.pumpWidget(
-            _LayoutCounterWidget(
-              onLayoutCounted: () => layoutCount++,
-              onRenderBoxCreated: (rb) => tracker = rb,
-            ),
-          );
+        await tester.pumpWidget(
+          _LayoutCounterWidget(
+            onLayoutCounted: () => layoutCount++,
+            onRenderBoxCreated: (rb) => tracker = rb,
+          ),
+        );
 
-          expect(layoutCount, equals(1)); // Initial layout
+        expect(layoutCount, equals(1)); // Initial layout
 
-          // Mark needs layout multiple times before pump
-          tracker.markNeedsLayout();
-          tracker.markNeedsLayout();
-          tracker.markNeedsLayout();
+        // Mark needs layout multiple times before pump
+        tracker.markNeedsLayout();
+        tracker.markNeedsLayout();
+        tracker.markNeedsLayout();
 
-          // Frame should be scheduled
-          expect(SchedulerBinding.instance.hasScheduledFrame, isTrue);
+        // Frame should be scheduled
+        expect(SchedulerBinding.instance.hasScheduledFrame, isTrue);
 
-          await tester.pump();
+        await tester.pump();
 
-          // Should layout again (only once due to batching)
-          expect(layoutCount, equals(2));
-        },
-      );
+        // Should layout again (only once due to batching)
+        expect(layoutCount, equals(2));
+      });
     });
 
     test('markNeedsLayout propagates to parent', () async {
-      await testCinder(
-        'propagates to parent',
-        (tester) async {
-          late _TrackingRenderBox parentTracker;
-          late _TrackingRenderBox childTracker;
+      await testCinder('propagates to parent', (tester) async {
+        late _TrackingRenderBox parentTracker;
+        late _TrackingRenderBox childTracker;
 
-          await tester.pumpWidget(
-            _NestedLayoutTrackers(
-              onParentCreated: (rb) => parentTracker = rb,
-              onChildCreated: (rb) => childTracker = rb,
-            ),
-          );
+        await tester.pumpWidget(
+          _NestedLayoutTrackers(
+            onParentCreated: (rb) => parentTracker = rb,
+            onChildCreated: (rb) => childTracker = rb,
+          ),
+        );
 
-          // Clear flags after initial layout
-          await tester.pump();
+        // Clear flags after initial layout
+        await tester.pump();
 
-          // Mark child needs layout
-          childTracker.markNeedsLayout();
+        // Mark child needs layout
+        childTracker.markNeedsLayout();
 
-          // Parent should also be marked
-          expect(parentTracker.needsLayout, isTrue);
-          expect(childTracker.needsLayout, isTrue);
-        },
-      );
+        // Parent should also be marked
+        expect(parentTracker.needsLayout, isTrue);
+        expect(childTracker.needsLayout, isTrue);
+      });
     });
 
     test('markNeedsLayout works on deeply nested render objects', () async {
-      await testCinder(
-        'deeply nested layout',
-        (tester) async {
-          final trackers = <_TrackingRenderBox>[];
+      await testCinder('deeply nested layout', (tester) async {
+        final trackers = <_TrackingRenderBox>[];
 
-          await tester.pumpWidget(
-            _DeeplyNestedTrackers(
-              depth: 5,
-              onTrackerCreated: (rb) => trackers.add(rb),
-            ),
+        await tester.pumpWidget(
+          _DeeplyNestedTrackers(
+            depth: 5,
+            onTrackerCreated: (rb) => trackers.add(rb),
+          ),
+        );
+
+        // All 5 trackers should be created
+        expect(trackers.length, equals(5));
+
+        // Clear any pending operations
+        await tester.pump();
+
+        // Mark the deepest child needs layout
+        trackers.last.markNeedsLayout();
+
+        // All ancestors should be marked dirty
+        for (final tracker in trackers) {
+          expect(
+            tracker.needsLayout,
+            isTrue,
+            reason:
+                'Tracker at depth ${trackers.indexOf(tracker)} should need layout',
           );
-
-          // All 5 trackers should be created
-          expect(trackers.length, equals(5));
-
-          // Clear any pending operations
-          await tester.pump();
-
-          // Mark the deepest child needs layout
-          trackers.last.markNeedsLayout();
-
-          // All ancestors should be marked dirty
-          for (final tracker in trackers) {
-            expect(tracker.needsLayout, isTrue,
-                reason:
-                    'Tracker at depth ${trackers.indexOf(tracker)} should need layout');
-          }
-        },
-      );
+        }
+      });
     });
   });
 
@@ -165,93 +153,82 @@ void main() {
   // ============================================================================
   group('markNeedsPaint propagation', () {
     test('markNeedsPaint sets _needsPaint flag on the object', () async {
-      await testCinder(
-        'sets needsPaint flag',
-        (tester) async {
-          await tester.pumpWidget(
-            _LayoutTracker(
-              onLayoutTrackerCreated: (tracker) {
-                // After first frame, flag should be cleared
-                expect(tracker.needsPaint, isFalse);
+      await testCinder('sets needsPaint flag', (tester) async {
+        await tester.pumpWidget(
+          _LayoutTracker(
+            onLayoutTrackerCreated: (tracker) {
+              // After first frame, flag should be cleared
+              expect(tracker.needsPaint, isFalse);
 
-                // Mark needs paint
-                tracker.markNeedsPaint();
+              // Mark needs paint
+              tracker.markNeedsPaint();
 
-                // Flag should be set
-                expect(tracker.needsPaint, isTrue);
-              },
-            ),
-          );
-        },
-      );
+              // Flag should be set
+              expect(tracker.needsPaint, isTrue);
+            },
+          ),
+        );
+      });
     });
 
     test('markNeedsPaint propagates up to root', () async {
-      await testCinder(
-        'propagates to root',
-        (tester) async {
-          late _TrackingRenderBox parentTracker;
-          late _TrackingRenderBox childTracker;
+      await testCinder('propagates to root', (tester) async {
+        late _TrackingRenderBox parentTracker;
+        late _TrackingRenderBox childTracker;
 
-          await tester.pumpWidget(
-            _NestedLayoutTrackers(
-              onParentCreated: (rb) => parentTracker = rb,
-              onChildCreated: (rb) => childTracker = rb,
-            ),
-          );
+        await tester.pumpWidget(
+          _NestedLayoutTrackers(
+            onParentCreated: (rb) => parentTracker = rb,
+            onChildCreated: (rb) => childTracker = rb,
+          ),
+        );
 
-          await tester.pump(); // Clear initial dirty flags
+        await tester.pump(); // Clear initial dirty flags
 
-          // Mark child needs paint
-          childTracker.markNeedsPaint();
+        // Mark child needs paint
+        childTracker.markNeedsPaint();
 
-          // Parent should also be marked for paint
-          expect(parentTracker.needsPaint, isTrue);
-          expect(childTracker.needsPaint, isTrue);
-        },
-      );
+        // Parent should also be marked for paint
+        expect(parentTracker.needsPaint, isTrue);
+        expect(childTracker.needsPaint, isTrue);
+      });
     });
 
     test('markNeedsPaint schedules frame via requestVisualUpdate', () async {
-      await testCinder(
-        'schedules frame',
-        (tester) async {
-          late _TrackingRenderBox tracker;
+      await testCinder('schedules frame', (tester) async {
+        late _TrackingRenderBox tracker;
 
-          await tester.pumpWidget(
-            _LayoutCounterWidget(
-              onLayoutCounted: () {},
-              onRenderBoxCreated: (rb) => tracker = rb,
-            ),
-          );
+        await tester.pumpWidget(
+          _LayoutCounterWidget(
+            onLayoutCounted: () {},
+            onRenderBoxCreated: (rb) => tracker = rb,
+          ),
+        );
 
-          await tester.pump(); // Clear initial state
+        await tester.pump(); // Clear initial state
 
-          // Manually clear the scheduled frame flag if any
-          // (by calling handleBeginFrame which resets it)
-          if (SchedulerBinding.instance.hasScheduledFrame) {
-            await tester.pump();
-          }
+        // Manually clear the scheduled frame flag if any
+        // (by calling handleBeginFrame which resets it)
+        if (SchedulerBinding.instance.hasScheduledFrame) {
+          await tester.pump();
+        }
 
-          // Now mark needs paint
-          tracker.markNeedsPaint();
+        // Now mark needs paint
+        tracker.markNeedsPaint();
 
-          // A frame should be scheduled
-          expect(SchedulerBinding.instance.hasScheduledFrame, isTrue);
-        },
-      );
+        // A frame should be scheduled
+        expect(SchedulerBinding.instance.hasScheduledFrame, isTrue);
+      });
     });
 
     test(
-        'markNeedsPaint works when called multiple times - CRITICAL REGRESSION TEST',
-        () async {
-      // THIS IS THE CRITICAL TEST
-      // The bug was: calling markNeedsPaint when flag was already set
-      // would early-return and NOT call requestVisualUpdate, causing
-      // rendering to permanently stop.
-      await testCinder(
-        'multiple markNeedsPaint calls',
-        (tester) async {
+      'markNeedsPaint works when called multiple times - CRITICAL REGRESSION TEST',
+      () async {
+        // THIS IS THE CRITICAL TEST
+        // The bug was: calling markNeedsPaint when flag was already set
+        // would early-return and NOT call requestVisualUpdate, causing
+        // rendering to permanently stop.
+        await testCinder('multiple markNeedsPaint calls', (tester) async {
           late _TrackingRenderBox tracker;
           int paintCount = 0;
 
@@ -273,47 +250,51 @@ void main() {
           tracker.markNeedsPaint();
 
           // Frame MUST be scheduled
-          expect(SchedulerBinding.instance.hasScheduledFrame, isTrue,
-              reason: 'Frame must be scheduled even when needsPaint was '
-                  'already true - this was the critical bug');
+          expect(
+            SchedulerBinding.instance.hasScheduledFrame,
+            isTrue,
+            reason:
+                'Frame must be scheduled even when needsPaint was '
+                'already true - this was the critical bug',
+          );
 
           await tester.pump();
 
           // Should have painted again
           expect(paintCount, equals(2));
-        },
-      );
-    });
+        });
+      },
+    );
 
     test('markNeedsPaint works on deeply nested render objects', () async {
-      await testCinder(
-        'deeply nested paint',
-        (tester) async {
-          final trackers = <_TrackingRenderBox>[];
+      await testCinder('deeply nested paint', (tester) async {
+        final trackers = <_TrackingRenderBox>[];
 
-          await tester.pumpWidget(
-            _DeeplyNestedTrackers(
-              depth: 5,
-              onTrackerCreated: (rb) => trackers.add(rb),
-            ),
+        await tester.pumpWidget(
+          _DeeplyNestedTrackers(
+            depth: 5,
+            onTrackerCreated: (rb) => trackers.add(rb),
+          ),
+        );
+
+        await tester.pump(); // Clear initial state
+
+        // Mark the deepest child needs paint
+        trackers.last.markNeedsPaint();
+
+        // All ancestors should be marked for paint
+        for (final tracker in trackers) {
+          expect(
+            tracker.needsPaint,
+            isTrue,
+            reason:
+                'Tracker at depth ${trackers.indexOf(tracker)} should need paint',
           );
+        }
 
-          await tester.pump(); // Clear initial state
-
-          // Mark the deepest child needs paint
-          trackers.last.markNeedsPaint();
-
-          // All ancestors should be marked for paint
-          for (final tracker in trackers) {
-            expect(tracker.needsPaint, isTrue,
-                reason:
-                    'Tracker at depth ${trackers.indexOf(tracker)} should need paint');
-          }
-
-          // And frame should be scheduled
-          expect(SchedulerBinding.instance.hasScheduledFrame, isTrue);
-        },
-      );
+        // And frame should be scheduled
+        expect(SchedulerBinding.instance.hasScheduledFrame, isTrue);
+      });
     });
   });
 
@@ -322,163 +303,145 @@ void main() {
   // ============================================================================
   group('PipelineOwner', () {
     test('requestLayout adds to dirty list', () async {
-      await testCinder(
-        'requestLayout adds to dirty',
-        (tester) async {
-          await tester.pumpWidget(
-            _LayoutTracker(
-              onLayoutTrackerCreated: (tracker) {
-                final pipelineOwner = CinderTestBinding.instance.pipelineOwner;
+      await testCinder('requestLayout adds to dirty', (tester) async {
+        await tester.pumpWidget(
+          _LayoutTracker(
+            onLayoutTrackerCreated: (tracker) {
+              final pipelineOwner = CinderTestBinding.instance.pipelineOwner;
 
-                // Clear the list by flushing
-                pipelineOwner.flushLayout();
-                expect(pipelineOwner.hasNodesToLayout, isFalse);
+              // Clear the list by flushing
+              pipelineOwner.flushLayout();
+              expect(pipelineOwner.hasNodesToLayout, isFalse);
 
-                // Request layout
-                pipelineOwner.requestLayout(tracker);
+              // Request layout
+              pipelineOwner.requestLayout(tracker);
 
-                // Should now have nodes
-                expect(pipelineOwner.hasNodesToLayout, isTrue);
-              },
-            ),
-          );
-        },
-      );
+              // Should now have nodes
+              expect(pipelineOwner.hasNodesToLayout, isTrue);
+            },
+          ),
+        );
+      });
     });
 
     test('requestPaint adds to dirty list with deduplication', () async {
-      await testCinder(
-        'requestPaint with deduplication',
-        (tester) async {
-          await tester.pumpWidget(
-            _LayoutTracker(
-              onLayoutTrackerCreated: (tracker) {
-                final pipelineOwner = CinderTestBinding.instance.pipelineOwner;
+      await testCinder('requestPaint with deduplication', (tester) async {
+        await tester.pumpWidget(
+          _LayoutTracker(
+            onLayoutTrackerCreated: (tracker) {
+              final pipelineOwner = CinderTestBinding.instance.pipelineOwner;
 
-                // Clear paint list
-                pipelineOwner.flushPaint();
-                expect(pipelineOwner.hasNodesToPaint, isFalse);
+              // Clear paint list
+              pipelineOwner.flushPaint();
+              expect(pipelineOwner.hasNodesToPaint, isFalse);
 
-                // Request paint multiple times
-                pipelineOwner.requestPaint(tracker);
-                pipelineOwner.requestPaint(tracker);
-                pipelineOwner.requestPaint(tracker);
+              // Request paint multiple times
+              pipelineOwner.requestPaint(tracker);
+              pipelineOwner.requestPaint(tracker);
+              pipelineOwner.requestPaint(tracker);
 
-                // Should have nodes (only one due to deduplication)
-                expect(pipelineOwner.hasNodesToPaint, isTrue);
-              },
-            ),
-          );
-        },
-      );
+              // Should have nodes (only one due to deduplication)
+              expect(pipelineOwner.hasNodesToPaint, isTrue);
+            },
+          ),
+        );
+      });
     });
 
     test('hasNodesToLayout reflects list state', () async {
-      await testCinder(
-        'hasNodesToLayout state',
-        (tester) async {
-          final pipelineOwner = CinderTestBinding.instance.pipelineOwner;
+      await testCinder('hasNodesToLayout state', (tester) async {
+        final pipelineOwner = CinderTestBinding.instance.pipelineOwner;
 
-          // Initially might have nodes from setup
-          pipelineOwner.flushLayout();
+        // Initially might have nodes from setup
+        pipelineOwner.flushLayout();
 
-          // After flush, should be empty
-          expect(pipelineOwner.hasNodesToLayout, isFalse);
+        // After flush, should be empty
+        expect(pipelineOwner.hasNodesToLayout, isFalse);
 
-          // Pump a widget that marks dirty
-          await tester.pumpWidget(const _SimpleLayoutWidget());
+        // Pump a widget that marks dirty
+        await tester.pumpWidget(const _SimpleLayoutWidget());
 
-          // After pump, layout is done, so should be empty again
-          expect(pipelineOwner.hasNodesToLayout, isFalse);
-        },
-      );
+        // After pump, layout is done, so should be empty again
+        expect(pipelineOwner.hasNodesToLayout, isFalse);
+      });
     });
 
     test('hasNodesToPaint reflects list state', () async {
-      await testCinder(
-        'hasNodesToPaint state',
-        (tester) async {
-          final pipelineOwner = CinderTestBinding.instance.pipelineOwner;
+      await testCinder('hasNodesToPaint state', (tester) async {
+        final pipelineOwner = CinderTestBinding.instance.pipelineOwner;
 
-          // Flush paint
-          pipelineOwner.flushPaint();
+        // Flush paint
+        pipelineOwner.flushPaint();
 
-          // After flush, should be empty
-          expect(pipelineOwner.hasNodesToPaint, isFalse);
-        },
-      );
+        // After flush, should be empty
+        expect(pipelineOwner.hasNodesToPaint, isFalse);
+      });
     });
 
     test('flushLayout processes nodes and clears flags', () async {
-      await testCinder(
-        'flushLayout clears flags',
-        (tester) async {
-          int layoutCount = 0;
-          late _TrackingRenderBox tracker;
+      await testCinder('flushLayout clears flags', (tester) async {
+        int layoutCount = 0;
+        late _TrackingRenderBox tracker;
 
-          await tester.pumpWidget(
-            _LayoutCounterWidget(
-              onLayoutCounted: () => layoutCount++,
-              onRenderBoxCreated: (rb) => tracker = rb,
-            ),
-          );
+        await tester.pumpWidget(
+          _LayoutCounterWidget(
+            onLayoutCounted: () => layoutCount++,
+            onRenderBoxCreated: (rb) => tracker = rb,
+          ),
+        );
 
-          expect(layoutCount, equals(1));
+        expect(layoutCount, equals(1));
 
-          // Mark needs layout
-          tracker.markNeedsLayout();
-          expect(tracker.needsLayout, isTrue);
+        // Mark needs layout
+        tracker.markNeedsLayout();
+        expect(tracker.needsLayout, isTrue);
 
-          // Pump should flush layout
-          await tester.pump();
+        // Pump should flush layout
+        await tester.pump();
 
-          // Layout should have been performed
-          expect(layoutCount, equals(2));
+        // Layout should have been performed
+        expect(layoutCount, equals(2));
 
-          // Flag should be cleared
-          expect(tracker.needsLayout, isFalse);
-        },
-      );
+        // Flag should be cleared
+        expect(tracker.needsLayout, isFalse);
+      });
     });
 
     test('flushLayout processes nodes in depth order', () async {
       // Note: The actual order depends on the implementation.
       // The key requirement is that layout happens correctly, not a specific order.
-      await testCinder(
-        'depth ordering',
-        (tester) async {
-          final layoutOrder = <int>[];
-          final trackers = <_TrackingRenderBox>[];
+      await testCinder('depth ordering', (tester) async {
+        final layoutOrder = <int>[];
+        final trackers = <_TrackingRenderBox>[];
 
-          await tester.pumpWidget(
-            _DeeplyNestedTrackers(
-              depth: 3,
-              onTrackerCreated: (rb) {
-                trackers.add(rb);
-                rb.onPerformLayout = () {
-                  layoutOrder.add(trackers.indexOf(rb));
-                };
-              },
-            ),
-          );
+        await tester.pumpWidget(
+          _DeeplyNestedTrackers(
+            depth: 3,
+            onTrackerCreated: (rb) {
+              trackers.add(rb);
+              rb.onPerformLayout = () {
+                layoutOrder.add(trackers.indexOf(rb));
+              };
+            },
+          ),
+        );
 
-          // Initial layout should have happened for all trackers
-          expect(layoutOrder.length, equals(3));
-          expect(layoutOrder.toSet(), equals({0, 1, 2}));
+        // Initial layout should have happened for all trackers
+        expect(layoutOrder.length, equals(3));
+        expect(layoutOrder.toSet(), equals({0, 1, 2}));
 
-          layoutOrder.clear();
+        layoutOrder.clear();
 
-          // Mark all dirty
-          for (final tracker in trackers) {
-            tracker.markNeedsLayout();
-          }
+        // Mark all dirty
+        for (final tracker in trackers) {
+          tracker.markNeedsLayout();
+        }
 
-          await tester.pump();
+        await tester.pump();
 
-          // All should be laid out again
-          expect(layoutOrder.toSet(), equals({0, 1, 2}));
-        },
-      );
+        // All should be laid out again
+        expect(layoutOrder.toSet(), equals({0, 1, 2}));
+      });
     });
   });
 
@@ -487,105 +450,93 @@ void main() {
   // ============================================================================
   group('frame scheduling', () {
     test('requestVisualUpdate triggers frame scheduling', () async {
-      await testCinder(
-        'requestVisualUpdate schedules frame',
-        (tester) async {
-          await tester.pumpWidget(const Text('test'));
+      await testCinder('requestVisualUpdate schedules frame', (tester) async {
+        await tester.pumpWidget(const Text('test'));
 
-          // Clear any pending frames
-          await tester.pump();
+        // Clear any pending frames
+        await tester.pump();
 
-          final pipelineOwner = CinderTestBinding.instance.pipelineOwner;
+        final pipelineOwner = CinderTestBinding.instance.pipelineOwner;
 
-          // Manually request visual update
-          pipelineOwner.requestVisualUpdate();
+        // Manually request visual update
+        pipelineOwner.requestVisualUpdate();
 
-          // Frame should be scheduled
-          expect(SchedulerBinding.instance.hasScheduledFrame, isTrue);
-        },
-      );
+        // Frame should be scheduled
+        expect(SchedulerBinding.instance.hasScheduledFrame, isTrue);
+      });
     });
 
     test('multiple requestVisualUpdate calls result in single frame', () async {
-      await testCinder(
-        'single frame for multiple requests',
-        (tester) async {
-          await tester.pumpWidget(const Text('test'));
+      await testCinder('single frame for multiple requests', (tester) async {
+        await tester.pumpWidget(const Text('test'));
 
-          final initialFrameCount = tester.frameCount;
-          await tester.pump();
+        final initialFrameCount = tester.frameCount;
+        await tester.pump();
 
-          final pipelineOwner = CinderTestBinding.instance.pipelineOwner;
+        final pipelineOwner = CinderTestBinding.instance.pipelineOwner;
 
-          // Request visual update multiple times
-          pipelineOwner.requestVisualUpdate();
-          pipelineOwner.requestVisualUpdate();
-          pipelineOwner.requestVisualUpdate();
+        // Request visual update multiple times
+        pipelineOwner.requestVisualUpdate();
+        pipelineOwner.requestVisualUpdate();
+        pipelineOwner.requestVisualUpdate();
 
-          // Pump once
-          await tester.pump();
+        // Pump once
+        await tester.pump();
 
-          // Should only have processed one additional frame
-          expect(tester.frameCount, equals(initialFrameCount + 2));
-        },
-      );
+        // Should only have processed one additional frame
+        expect(tester.frameCount, equals(initialFrameCount + 2));
+      });
     });
 
     test('frame is scheduled when markNeedsLayout called', () async {
-      await testCinder(
-        'markNeedsLayout schedules frame',
-        (tester) async {
-          late _TrackingRenderBox tracker;
+      await testCinder('markNeedsLayout schedules frame', (tester) async {
+        late _TrackingRenderBox tracker;
 
-          await tester.pumpWidget(
-            _LayoutCounterWidget(
-              onLayoutCounted: () {},
-              onRenderBoxCreated: (rb) => tracker = rb,
-            ),
-          );
+        await tester.pumpWidget(
+          _LayoutCounterWidget(
+            onLayoutCounted: () {},
+            onRenderBoxCreated: (rb) => tracker = rb,
+          ),
+        );
 
-          await tester.pump(); // Clear initial state
+        await tester.pump(); // Clear initial state
 
-          // Mark needs layout
-          tracker.markNeedsLayout();
+        // Mark needs layout
+        tracker.markNeedsLayout();
 
-          // Frame should be scheduled
-          expect(SchedulerBinding.instance.hasScheduledFrame, isTrue);
-        },
-      );
+        // Frame should be scheduled
+        expect(SchedulerBinding.instance.hasScheduledFrame, isTrue);
+      });
     });
 
     test('frame is scheduled when markNeedsPaint called', () async {
-      await testCinder(
-        'markNeedsPaint schedules frame',
-        (tester) async {
-          late _TrackingRenderBox tracker;
+      await testCinder('markNeedsPaint schedules frame', (tester) async {
+        late _TrackingRenderBox tracker;
 
-          await tester.pumpWidget(
-            _LayoutCounterWidget(
-              onLayoutCounted: () {},
-              onRenderBoxCreated: (rb) => tracker = rb,
-            ),
-          );
+        await tester.pumpWidget(
+          _LayoutCounterWidget(
+            onLayoutCounted: () {},
+            onRenderBoxCreated: (rb) => tracker = rb,
+          ),
+        );
 
-          await tester.pump(); // Clear initial state
+        await tester.pump(); // Clear initial state
 
-          // Mark needs paint
-          tracker.markNeedsPaint();
+        // Mark needs paint
+        tracker.markNeedsPaint();
 
-          // Frame should be scheduled
-          expect(SchedulerBinding.instance.hasScheduledFrame, isTrue);
-        },
-      );
+        // Frame should be scheduled
+        expect(SchedulerBinding.instance.hasScheduledFrame, isTrue);
+      });
     });
 
     test(
-        'frame is scheduled even when flags already dirty - CRITICAL REGRESSION TEST',
-        () async {
-      // THIS IS THE CRITICAL TEST THAT WOULD HAVE CAUGHT THE BUG
-      await testCinder(
-        'frame scheduled when flags already dirty',
-        (tester) async {
+      'frame is scheduled even when flags already dirty - CRITICAL REGRESSION TEST',
+      () async {
+        // THIS IS THE CRITICAL TEST THAT WOULD HAVE CAUGHT THE BUG
+        await testCinder('frame scheduled when flags already dirty', (
+          tester,
+        ) async {
           late _TrackingRenderBox tracker;
 
           await tester.pumpWidget(
@@ -607,13 +558,17 @@ void main() {
           tracker.markNeedsPaint(); // Called when already dirty
 
           // Frame MUST still be scheduled
-          expect(SchedulerBinding.instance.hasScheduledFrame, isTrue,
-              reason: 'This is the critical bug: when needsPaint was already '
-                  'true, the early return prevented requestVisualUpdate from '
-                  'being called, causing rendering to stop permanently');
-        },
-      );
-    });
+          expect(
+            SchedulerBinding.instance.hasScheduledFrame,
+            isTrue,
+            reason:
+                'This is the critical bug: when needsPaint was already '
+                'true, the early return prevented requestVisualUpdate from '
+                'being called, causing rendering to stop permanently',
+          );
+        });
+      },
+    );
   });
 
   // ============================================================================
@@ -621,95 +576,91 @@ void main() {
   // ============================================================================
   group('frame-skip optimization', () {
     test('frame is NOT skipped when needsBuild is true', () async {
-      await testCinder(
-        'no skip when needsBuild',
-        (tester) async {
-          int buildCount = 0;
-          late _SimpleBuildCounterState state;
+      await testCinder('no skip when needsBuild', (tester) async {
+        int buildCount = 0;
+        late _SimpleBuildCounterState state;
 
-          await tester.pumpWidget(
-            _SimpleBuildCounter(
-              onBuild: () => buildCount++,
-              onStateCreated: (s) => state = s,
-            ),
-          );
+        await tester.pumpWidget(
+          _SimpleBuildCounter(
+            onBuild: () => buildCount++,
+            onStateCreated: (s) => state = s,
+          ),
+        );
 
-          expect(buildCount, equals(1));
+        expect(buildCount, equals(1));
 
-          // Trigger rebuild
-          state.triggerRebuild();
+        // Trigger rebuild
+        state.triggerRebuild();
 
-          // Frame should render (not skip)
-          await tester.pump();
+        // Frame should render (not skip)
+        await tester.pump();
 
-          expect(buildCount, equals(2),
-              reason:
-                  'Build should have happened, frame should not be skipped');
-        },
-      );
+        expect(
+          buildCount,
+          equals(2),
+          reason: 'Build should have happened, frame should not be skipped',
+        );
+      });
     });
 
     test('frame is NOT skipped when needsLayout is true', () async {
-      await testCinder(
-        'no skip when needsLayout',
-        (tester) async {
-          int layoutCount = 0;
-          late _TrackingRenderBox tracker;
+      await testCinder('no skip when needsLayout', (tester) async {
+        int layoutCount = 0;
+        late _TrackingRenderBox tracker;
 
-          await tester.pumpWidget(
-            _LayoutCounterWidget(
-              onLayoutCounted: () => layoutCount++,
-              onRenderBoxCreated: (rb) => tracker = rb,
-            ),
-          );
+        await tester.pumpWidget(
+          _LayoutCounterWidget(
+            onLayoutCounted: () => layoutCount++,
+            onRenderBoxCreated: (rb) => tracker = rb,
+          ),
+        );
 
-          expect(layoutCount, equals(1));
+        expect(layoutCount, equals(1));
 
-          // Mark needs layout
-          tracker.markNeedsLayout();
+        // Mark needs layout
+        tracker.markNeedsLayout();
 
-          await tester.pump();
+        await tester.pump();
 
-          expect(layoutCount, equals(2),
-              reason:
-                  'Layout should have happened, frame should not be skipped');
-        },
-      );
+        expect(
+          layoutCount,
+          equals(2),
+          reason: 'Layout should have happened, frame should not be skipped',
+        );
+      });
     });
 
     test('frame is NOT skipped when needsPaint is true', () async {
-      await testCinder(
-        'no skip when needsPaint',
-        (tester) async {
-          int paintCount = 0;
-          late _TrackingRenderBox tracker;
+      await testCinder('no skip when needsPaint', (tester) async {
+        int paintCount = 0;
+        late _TrackingRenderBox tracker;
 
-          await tester.pumpWidget(
-            _PaintCounterWidget(
-              onPaintCounted: () => paintCount++,
-              onRenderBoxCreated: (rb) => tracker = rb,
-            ),
-          );
+        await tester.pumpWidget(
+          _PaintCounterWidget(
+            onPaintCounted: () => paintCount++,
+            onRenderBoxCreated: (rb) => tracker = rb,
+          ),
+        );
 
-          expect(paintCount, equals(1));
+        expect(paintCount, equals(1));
 
-          // Mark needs paint
-          tracker.markNeedsPaint();
+        // Mark needs paint
+        tracker.markNeedsPaint();
 
-          await tester.pump();
+        await tester.pump();
 
-          expect(paintCount, equals(2),
-              reason:
-                  'Paint should have happened, frame should not be skipped');
-        },
-      );
+        expect(
+          paintCount,
+          equals(2),
+          reason: 'Paint should have happened, frame should not be skipped',
+        );
+      });
     });
 
-    test('skipping frame does not prevent future frames from rendering',
-        () async {
-      await testCinder(
-        'future frames render',
-        (tester) async {
+    test(
+      'skipping frame does not prevent future frames from rendering',
+      () async {
+        await testCinder('future frames render', (tester) async {
           int buildCount = 0;
           late _SimpleBuildCounterState state;
 
@@ -726,49 +677,55 @@ void main() {
           await tester.pump();
           await tester.pump();
 
-          expect(buildCount, equals(1),
-              reason: 'No rebuild needed, count should stay at 1');
+          expect(
+            buildCount,
+            equals(1),
+            reason: 'No rebuild needed, count should stay at 1',
+          );
 
           // Now trigger rebuild
           state.triggerRebuild();
           await tester.pump();
 
-          expect(buildCount, equals(2),
-              reason: 'After frame skip, new rebuild should still work');
-        },
-      );
-    });
+          expect(
+            buildCount,
+            equals(2),
+            reason: 'After frame skip, new rebuild should still work',
+          );
+        });
+      },
+    );
 
     test('deeply nested dirty child still triggers frame', () async {
-      await testCinder(
-        'deeply nested triggers frame',
-        (tester) async {
-          int deepestPaintCount = 0;
-          final trackers = <_TrackingRenderBox>[];
+      await testCinder('deeply nested triggers frame', (tester) async {
+        int deepestPaintCount = 0;
+        final trackers = <_TrackingRenderBox>[];
 
-          await tester.pumpWidget(
-            _DeeplyNestedTrackers(
-              depth: 5,
-              onTrackerCreated: (rb) {
-                trackers.add(rb);
-                if (trackers.length == 5) {
-                  rb.onPaint = () => deepestPaintCount++;
-                }
-              },
-            ),
-          );
+        await tester.pumpWidget(
+          _DeeplyNestedTrackers(
+            depth: 5,
+            onTrackerCreated: (rb) {
+              trackers.add(rb);
+              if (trackers.length == 5) {
+                rb.onPaint = () => deepestPaintCount++;
+              }
+            },
+          ),
+        );
 
-          expect(deepestPaintCount, equals(1));
+        expect(deepestPaintCount, equals(1));
 
-          // Mark only the deepest child dirty
-          trackers.last.markNeedsPaint();
+        // Mark only the deepest child dirty
+        trackers.last.markNeedsPaint();
 
-          await tester.pump();
+        await tester.pump();
 
-          expect(deepestPaintCount, equals(2),
-              reason: 'Deeply nested dirty child should trigger repaint');
-        },
-      );
+        expect(
+          deepestPaintCount,
+          equals(2),
+          reason: 'Deeply nested dirty child should trigger repaint',
+        );
+      });
     });
   });
 
@@ -777,135 +734,123 @@ void main() {
   // ============================================================================
   group('dirty flag clearing', () {
     test('_needsLayout cleared after layout() called', () async {
-      await testCinder(
-        'needsLayout cleared after layout',
-        (tester) async {
-          late _TrackingRenderBox tracker;
+      await testCinder('needsLayout cleared after layout', (tester) async {
+        late _TrackingRenderBox tracker;
 
-          await tester.pumpWidget(
-            _LayoutCounterWidget(
-              onLayoutCounted: () {},
-              onRenderBoxCreated: (rb) => tracker = rb,
-            ),
-          );
+        await tester.pumpWidget(
+          _LayoutCounterWidget(
+            onLayoutCounted: () {},
+            onRenderBoxCreated: (rb) => tracker = rb,
+          ),
+        );
 
-          // After initial pump, flag should be clear
-          expect(tracker.needsLayout, isFalse);
+        // After initial pump, flag should be clear
+        expect(tracker.needsLayout, isFalse);
 
-          // Mark dirty
-          tracker.markNeedsLayout();
-          expect(tracker.needsLayout, isTrue);
+        // Mark dirty
+        tracker.markNeedsLayout();
+        expect(tracker.needsLayout, isTrue);
 
-          // Pump to trigger layout
-          await tester.pump();
+        // Pump to trigger layout
+        await tester.pump();
 
-          // Flag should be cleared
-          expect(tracker.needsLayout, isFalse);
-        },
-      );
+        // Flag should be cleared
+        expect(tracker.needsLayout, isFalse);
+      });
     });
 
     test('_needsPaint cleared after paint pass', () async {
-      await testCinder(
-        'needsPaint cleared after paint',
-        (tester) async {
-          late _TrackingRenderBox tracker;
+      await testCinder('needsPaint cleared after paint', (tester) async {
+        late _TrackingRenderBox tracker;
 
-          await tester.pumpWidget(
-            _PaintCounterWidget(
-              onPaintCounted: () {},
-              onRenderBoxCreated: (rb) => tracker = rb,
-            ),
-          );
+        await tester.pumpWidget(
+          _PaintCounterWidget(
+            onPaintCounted: () {},
+            onRenderBoxCreated: (rb) => tracker = rb,
+          ),
+        );
 
-          // After initial pump, flag should be clear
-          expect(tracker.needsPaint, isFalse);
+        // After initial pump, flag should be clear
+        expect(tracker.needsPaint, isFalse);
 
-          // Mark dirty
-          tracker.markNeedsPaint();
-          expect(tracker.needsPaint, isTrue);
+        // Mark dirty
+        tracker.markNeedsPaint();
+        expect(tracker.needsPaint, isTrue);
 
-          // Pump to trigger paint
-          await tester.pump();
+        // Pump to trigger paint
+        await tester.pump();
 
-          // Flag should be cleared
-          expect(tracker.needsPaint, isFalse);
-        },
-      );
+        // Flag should be cleared
+        expect(tracker.needsPaint, isFalse);
+      });
     });
 
     test('flags cleared even for deeply nested objects', () async {
-      await testCinder(
-        'deeply nested flags cleared',
-        (tester) async {
-          final trackers = <_TrackingRenderBox>[];
+      await testCinder('deeply nested flags cleared', (tester) async {
+        final trackers = <_TrackingRenderBox>[];
 
-          await tester.pumpWidget(
-            _DeeplyNestedTrackers(
-              depth: 5,
-              onTrackerCreated: (rb) => trackers.add(rb),
-            ),
-          );
+        await tester.pumpWidget(
+          _DeeplyNestedTrackers(
+            depth: 5,
+            onTrackerCreated: (rb) => trackers.add(rb),
+          ),
+        );
 
-          // Mark all dirty
-          for (final tracker in trackers) {
-            tracker.markNeedsLayout();
-            tracker.markNeedsPaint();
-          }
+        // Mark all dirty
+        for (final tracker in trackers) {
+          tracker.markNeedsLayout();
+          tracker.markNeedsPaint();
+        }
 
-          // All should be dirty
-          for (final tracker in trackers) {
-            expect(tracker.needsLayout, isTrue);
-            expect(tracker.needsPaint, isTrue);
-          }
+        // All should be dirty
+        for (final tracker in trackers) {
+          expect(tracker.needsLayout, isTrue);
+          expect(tracker.needsPaint, isTrue);
+        }
 
-          // Pump
-          await tester.pump();
+        // Pump
+        await tester.pump();
 
-          // All should be clean
-          for (final tracker in trackers) {
-            expect(tracker.needsLayout, isFalse);
-            expect(tracker.needsPaint, isFalse);
-          }
-        },
-      );
+        // All should be clean
+        for (final tracker in trackers) {
+          expect(tracker.needsLayout, isFalse);
+          expect(tracker.needsPaint, isFalse);
+        }
+      });
     });
 
     test('new dirty marks during layout are handled', () async {
-      await testCinder(
-        'dirty during layout handled',
-        (tester) async {
-          late _TrackingRenderBox tracker;
-          int layoutCount = 0;
-          bool shouldMarkDirtyDuringLayout = false;
+      await testCinder('dirty during layout handled', (tester) async {
+        late _TrackingRenderBox tracker;
+        int layoutCount = 0;
+        bool shouldMarkDirtyDuringLayout = false;
 
-          await tester.pumpWidget(
-            _LayoutCounterWidget(
-              onLayoutCounted: () {
-                layoutCount++;
-                if (shouldMarkDirtyDuringLayout && layoutCount < 3) {
-                  // This simulates LayoutBuilder marking children dirty
-                  // during its own layout
-                  tracker.markNeedsLayout();
-                }
-              },
-              onRenderBoxCreated: (rb) => tracker = rb,
-            ),
-          );
+        await tester.pumpWidget(
+          _LayoutCounterWidget(
+            onLayoutCounted: () {
+              layoutCount++;
+              if (shouldMarkDirtyDuringLayout && layoutCount < 3) {
+                // This simulates LayoutBuilder marking children dirty
+                // during its own layout
+                tracker.markNeedsLayout();
+              }
+            },
+            onRenderBoxCreated: (rb) => tracker = rb,
+          ),
+        );
 
-          expect(layoutCount, equals(1));
+        expect(layoutCount, equals(1));
 
-          // Enable marking dirty during layout
-          shouldMarkDirtyDuringLayout = true;
-          tracker.markNeedsLayout();
+        // Enable marking dirty during layout
+        shouldMarkDirtyDuringLayout = true;
+        tracker.markNeedsLayout();
 
-          // This should not cause infinite loop
-          await tester.pump();
+        // This should not cause infinite loop
+        await tester.pump();
 
-          // Should have laid out more than once due to re-marking
-          expect(layoutCount, greaterThanOrEqualTo(2));
-        },
-      );
+        // Should have laid out more than once due to re-marking
+        expect(layoutCount, greaterThanOrEqualTo(2));
+      });
     });
   });
 
@@ -914,11 +859,11 @@ void main() {
   // ============================================================================
   group('rendering continuation regression tests', () {
     test(
-        'calling markNeedsLayout when already dirty still schedules frame - CRITICAL',
-        () async {
-      await testCinder(
-        'already dirty layout schedules frame',
-        (tester) async {
+      'calling markNeedsLayout when already dirty still schedules frame - CRITICAL',
+      () async {
+        await testCinder('already dirty layout schedules frame', (
+          tester,
+        ) async {
           late _TrackingRenderBox tracker;
           int layoutCount = 0;
 
@@ -945,16 +890,14 @@ void main() {
 
           // Layout should have happened
           expect(layoutCount, equals(2));
-        },
-      );
-    });
+        });
+      },
+    );
 
     test(
-        'calling markNeedsPaint when already dirty still schedules frame - CRITICAL',
-        () async {
-      await testCinder(
-        'already dirty paint schedules frame',
-        (tester) async {
+      'calling markNeedsPaint when already dirty still schedules frame - CRITICAL',
+      () async {
+        await testCinder('already dirty paint schedules frame', (tester) async {
           late _TrackingRenderBox tracker;
           int paintCount = 0;
 
@@ -981,125 +924,121 @@ void main() {
 
           // Paint should have happened
           expect(paintCount, equals(2));
-        },
-      );
-    });
+        });
+      },
+    );
 
     test('after frame skip, subsequent markNeedsLayout still works', () async {
-      await testCinder(
-        'post-skip markNeedsLayout works',
-        (tester) async {
-          late _TrackingRenderBox tracker;
-          int layoutCount = 0;
+      await testCinder('post-skip markNeedsLayout works', (tester) async {
+        late _TrackingRenderBox tracker;
+        int layoutCount = 0;
 
-          await tester.pumpWidget(
-            _LayoutCounterWidget(
-              onLayoutCounted: () => layoutCount++,
-              onRenderBoxCreated: (rb) => tracker = rb,
-            ),
-          );
+        await tester.pumpWidget(
+          _LayoutCounterWidget(
+            onLayoutCounted: () => layoutCount++,
+            onRenderBoxCreated: (rb) => tracker = rb,
+          ),
+        );
 
-          expect(layoutCount, equals(1));
+        expect(layoutCount, equals(1));
 
-          // Pump without marking dirty - layout may or may not run
-          // depending on test binding implementation
-          await tester.pump();
-          await tester.pump();
+        // Pump without marking dirty - layout may or may not run
+        // depending on test binding implementation
+        await tester.pump();
+        await tester.pump();
 
-          final countBeforeMark = layoutCount;
+        final countBeforeMark = layoutCount;
 
-          // Now mark dirty
-          tracker.markNeedsLayout();
+        // Now mark dirty
+        tracker.markNeedsLayout();
 
-          await tester.pump();
+        await tester.pump();
 
-          // Layout must have happened at least once more after marking dirty
-          expect(layoutCount, greaterThan(countBeforeMark),
-              reason: 'Layout must work after marking dirty');
-        },
-      );
+        // Layout must have happened at least once more after marking dirty
+        expect(
+          layoutCount,
+          greaterThan(countBeforeMark),
+          reason: 'Layout must work after marking dirty',
+        );
+      });
     });
 
     test('after frame skip, subsequent markNeedsPaint still works', () async {
-      await testCinder(
-        'post-skip markNeedsPaint works',
-        (tester) async {
-          late _TrackingRenderBox tracker;
-          int paintCount = 0;
+      await testCinder('post-skip markNeedsPaint works', (tester) async {
+        late _TrackingRenderBox tracker;
+        int paintCount = 0;
 
-          await tester.pumpWidget(
-            _PaintCounterWidget(
-              onPaintCounted: () => paintCount++,
-              onRenderBoxCreated: (rb) => tracker = rb,
-            ),
-          );
+        await tester.pumpWidget(
+          _PaintCounterWidget(
+            onPaintCounted: () => paintCount++,
+            onRenderBoxCreated: (rb) => tracker = rb,
+          ),
+        );
 
-          expect(paintCount, equals(1));
+        expect(paintCount, equals(1));
 
-          // Pump without marking dirty - paint may or may not run
-          // depending on test binding implementation
-          await tester.pump();
-          await tester.pump();
+        // Pump without marking dirty - paint may or may not run
+        // depending on test binding implementation
+        await tester.pump();
+        await tester.pump();
 
-          final countBeforeMark = paintCount;
+        final countBeforeMark = paintCount;
 
-          // Now mark dirty
-          tracker.markNeedsPaint();
+        // Now mark dirty
+        tracker.markNeedsPaint();
 
-          await tester.pump();
+        await tester.pump();
 
-          // Paint must have happened at least once more after marking dirty
-          expect(paintCount, greaterThan(countBeforeMark),
-              reason: 'Paint must work after marking dirty');
-        },
-      );
+        // Paint must have happened at least once more after marking dirty
+        expect(
+          paintCount,
+          greaterThan(countBeforeMark),
+          reason: 'Paint must work after marking dirty',
+        );
+      });
     });
 
     test('rapid setState calls do not stop rendering', () async {
-      await testCinder(
-        'rapid setState continues rendering',
-        (tester) async {
-          int buildCount = 0;
-          late _SimpleBuildCounterState state;
+      await testCinder('rapid setState continues rendering', (tester) async {
+        int buildCount = 0;
+        late _SimpleBuildCounterState state;
 
-          await tester.pumpWidget(
-            _SimpleBuildCounter(
-              onBuild: () => buildCount++,
-              onStateCreated: (s) => state = s,
-            ),
-          );
+        await tester.pumpWidget(
+          _SimpleBuildCounter(
+            onBuild: () => buildCount++,
+            onStateCreated: (s) => state = s,
+          ),
+        );
 
-          expect(buildCount, equals(1));
+        expect(buildCount, equals(1));
 
-          // Rapid setState calls
-          for (int i = 0; i < 100; i++) {
-            state.triggerRebuild();
-          }
+        // Rapid setState calls
+        for (int i = 0; i < 100; i++) {
+          state.triggerRebuild();
+        }
 
-          // Pump
-          await tester.pump();
+        // Pump
+        await tester.pump();
 
-          // Should have rebuilt (batched into one)
-          expect(buildCount, equals(2));
+        // Should have rebuilt (batched into one)
+        expect(buildCount, equals(2));
 
-          // Do it again
-          for (int i = 0; i < 100; i++) {
-            state.triggerRebuild();
-          }
+        // Do it again
+        for (int i = 0; i < 100; i++) {
+          state.triggerRebuild();
+        }
 
-          await tester.pump();
+        await tester.pump();
 
-          // Should continue working
-          expect(buildCount, equals(3));
-        },
-      );
+        // Should continue working
+        expect(buildCount, equals(3));
+      });
     });
 
-    test('interrupt-like pattern (skip frame, then new update) still renders',
-        () async {
-      await testCinder(
-        'interrupt pattern renders',
-        (tester) async {
+    test(
+      'interrupt-like pattern (skip frame, then new update) still renders',
+      () async {
+        await testCinder('interrupt pattern renders', (tester) async {
           int paintCount = 0;
           late _TrackingRenderBox tracker;
 
@@ -1133,11 +1072,14 @@ void main() {
             await tester.pump();
           }
 
-          expect(paintCount, equals(8),
-              reason: 'Rendering must continue through interrupt-like pattern');
-        },
-      );
-    });
+          expect(
+            paintCount,
+            equals(8),
+            reason: 'Rendering must continue through interrupt-like pattern',
+          );
+        });
+      },
+    );
   });
 
   // ============================================================================
@@ -1145,188 +1087,180 @@ void main() {
   // ============================================================================
   group('nested render tree', () {
     test('3-level deep tree propagation', () async {
-      await testCinder(
-        '3-level propagation',
-        (tester) async {
-          final trackers = <_TrackingRenderBox>[];
+      await testCinder('3-level propagation', (tester) async {
+        final trackers = <_TrackingRenderBox>[];
 
-          await tester.pumpWidget(
-            _DeeplyNestedTrackers(
-              depth: 3,
-              onTrackerCreated: (rb) => trackers.add(rb),
-            ),
-          );
+        await tester.pumpWidget(
+          _DeeplyNestedTrackers(
+            depth: 3,
+            onTrackerCreated: (rb) => trackers.add(rb),
+          ),
+        );
 
-          expect(trackers.length, equals(3));
+        expect(trackers.length, equals(3));
 
-          await tester.pump();
+        await tester.pump();
 
-          // Mark deepest dirty
-          trackers[2].markNeedsLayout();
+        // Mark deepest dirty
+        trackers[2].markNeedsLayout();
 
-          // All should be dirty
-          expect(trackers[0].needsLayout, isTrue);
-          expect(trackers[1].needsLayout, isTrue);
-          expect(trackers[2].needsLayout, isTrue);
+        // All should be dirty
+        expect(trackers[0].needsLayout, isTrue);
+        expect(trackers[1].needsLayout, isTrue);
+        expect(trackers[2].needsLayout, isTrue);
 
-          await tester.pump();
+        await tester.pump();
 
-          // All should be clean
-          for (final tracker in trackers) {
-            expect(tracker.needsLayout, isFalse);
-            expect(tracker.needsPaint, isFalse);
-          }
-        },
-      );
+        // All should be clean
+        for (final tracker in trackers) {
+          expect(tracker.needsLayout, isFalse);
+          expect(tracker.needsPaint, isFalse);
+        }
+      });
     });
 
     test('5-level deep tree propagation', () async {
-      await testCinder(
-        '5-level propagation',
-        (tester) async {
-          final trackers = <_TrackingRenderBox>[];
+      await testCinder('5-level propagation', (tester) async {
+        final trackers = <_TrackingRenderBox>[];
 
-          await tester.pumpWidget(
-            _DeeplyNestedTrackers(
-              depth: 5,
-              onTrackerCreated: (rb) => trackers.add(rb),
-            ),
+        await tester.pumpWidget(
+          _DeeplyNestedTrackers(
+            depth: 5,
+            onTrackerCreated: (rb) => trackers.add(rb),
+          ),
+        );
+
+        expect(trackers.length, equals(5));
+
+        await tester.pump();
+
+        // Mark deepest dirty
+        trackers[4].markNeedsPaint();
+
+        // All ancestors should be dirty
+        for (int i = 0; i < 5; i++) {
+          expect(
+            trackers[i].needsPaint,
+            isTrue,
+            reason: 'Level $i should need paint',
           );
+        }
 
-          expect(trackers.length, equals(5));
+        await tester.pump();
 
-          await tester.pump();
-
-          // Mark deepest dirty
-          trackers[4].markNeedsPaint();
-
-          // All ancestors should be dirty
-          for (int i = 0; i < 5; i++) {
-            expect(trackers[i].needsPaint, isTrue,
-                reason: 'Level $i should need paint');
-          }
-
-          await tester.pump();
-
-          // All should be clean
-          for (final tracker in trackers) {
-            expect(tracker.needsPaint, isFalse);
-          }
-        },
-      );
+        // All should be clean
+        for (final tracker in trackers) {
+          expect(tracker.needsPaint, isFalse);
+        }
+      });
     });
 
     test('mixed dirty states in tree', () async {
-      await testCinder(
-        'mixed dirty states',
-        (tester) async {
-          final trackers = <_TrackingRenderBox>[];
+      await testCinder('mixed dirty states', (tester) async {
+        final trackers = <_TrackingRenderBox>[];
 
-          await tester.pumpWidget(
-            _DeeplyNestedTrackers(
-              depth: 4,
-              onTrackerCreated: (rb) => trackers.add(rb),
-            ),
-          );
+        await tester.pumpWidget(
+          _DeeplyNestedTrackers(
+            depth: 4,
+            onTrackerCreated: (rb) => trackers.add(rb),
+          ),
+        );
 
-          await tester.pump();
+        await tester.pump();
 
-          // Mark only middle nodes dirty
-          // trackers[0] is root, trackers[3] is deepest
-          trackers[1]
-              .markNeedsLayout(); // Marks 1 and propagates layout up to 0
-          trackers[2]
-              .markNeedsPaint(); // Marks 2 and propagates paint up to 1, 0
+        // Mark only middle nodes dirty
+        // trackers[0] is root, trackers[3] is deepest
+        trackers[1].markNeedsLayout(); // Marks 1 and propagates layout up to 0
+        trackers[2].markNeedsPaint(); // Marks 2 and propagates paint up to 1, 0
 
-          // Layout flags - markNeedsLayout propagates UP only
-          expect(trackers[0].needsLayout,
-              isTrue); // Propagated up from trackers[1]
-          expect(trackers[1].needsLayout, isTrue); // Directly marked
-          expect(trackers[2].needsLayout,
-              isFalse); // markNeedsPaint does NOT set needsLayout
-          expect(trackers[3].needsLayout, isFalse); // Not propagated down
+        // Layout flags - markNeedsLayout propagates UP only
+        expect(
+          trackers[0].needsLayout,
+          isTrue,
+        ); // Propagated up from trackers[1]
+        expect(trackers[1].needsLayout, isTrue); // Directly marked
+        expect(
+          trackers[2].needsLayout,
+          isFalse,
+        ); // markNeedsPaint does NOT set needsLayout
+        expect(trackers[3].needsLayout, isFalse); // Not propagated down
 
-          // Paint flags - both markNeedsLayout and markNeedsPaint propagate up
-          expect(trackers[0].needsPaint, isTrue); // Propagated up
-          expect(trackers[1].needsPaint,
-              isTrue); // markNeedsLayout calls markNeedsPaint
-          expect(trackers[2].needsPaint, isTrue); // Directly marked
+        // Paint flags - both markNeedsLayout and markNeedsPaint propagate up
+        expect(trackers[0].needsPaint, isTrue); // Propagated up
+        expect(
+          trackers[1].needsPaint,
+          isTrue,
+        ); // markNeedsLayout calls markNeedsPaint
+        expect(trackers[2].needsPaint, isTrue); // Directly marked
 
-          await tester.pump();
+        await tester.pump();
 
-          // All should be clean after pump
-          for (final tracker in trackers) {
-            expect(tracker.needsLayout, isFalse);
-            expect(tracker.needsPaint, isFalse);
-          }
-        },
-      );
+        // All should be clean after pump
+        for (final tracker in trackers) {
+          expect(tracker.needsLayout, isFalse);
+          expect(tracker.needsPaint, isFalse);
+        }
+      });
     });
 
     test('child dirty but parent not dirty scenario', () async {
-      await testCinder(
-        'child dirty parent clean',
-        (tester) async {
-          // Note: In the current implementation, marking a child dirty
-          // always propagates to parent. This test verifies that behavior.
-          final trackers = <_TrackingRenderBox>[];
+      await testCinder('child dirty parent clean', (tester) async {
+        // Note: In the current implementation, marking a child dirty
+        // always propagates to parent. This test verifies that behavior.
+        final trackers = <_TrackingRenderBox>[];
 
-          await tester.pumpWidget(
-            _DeeplyNestedTrackers(
-              depth: 3,
-              onTrackerCreated: (rb) => trackers.add(rb),
-            ),
-          );
+        await tester.pumpWidget(
+          _DeeplyNestedTrackers(
+            depth: 3,
+            onTrackerCreated: (rb) => trackers.add(rb),
+          ),
+        );
 
-          await tester.pump();
+        await tester.pump();
 
-          // Mark child dirty
-          trackers[2].markNeedsPaint();
+        // Mark child dirty
+        trackers[2].markNeedsPaint();
 
-          // Parent should also be dirty due to propagation
-          expect(trackers[0].needsPaint, isTrue);
-          expect(trackers[1].needsPaint, isTrue);
-          expect(trackers[2].needsPaint, isTrue);
-        },
-      );
+        // Parent should also be dirty due to propagation
+        expect(trackers[0].needsPaint, isTrue);
+        expect(trackers[1].needsPaint, isTrue);
+        expect(trackers[2].needsPaint, isTrue);
+      });
     });
 
     test('parent dirty but child clean scenario', () async {
-      await testCinder(
-        'parent dirty child clean',
-        (tester) async {
-          // This scenario: parent is dirty, child is clean
-          // The parent should still layout/paint, and child should too
-          final trackers = <_TrackingRenderBox>[];
-          final layoutOrder = <int>[];
+      await testCinder('parent dirty child clean', (tester) async {
+        // This scenario: parent is dirty, child is clean
+        // The parent should still layout/paint, and child should too
+        final trackers = <_TrackingRenderBox>[];
+        final layoutOrder = <int>[];
 
-          await tester.pumpWidget(
-            _DeeplyNestedTrackers(
-              depth: 3,
-              onTrackerCreated: (rb) {
-                trackers.add(rb);
-                rb.onPerformLayout = () {
-                  layoutOrder.add(trackers.indexOf(rb));
-                };
-              },
-            ),
-          );
+        await tester.pumpWidget(
+          _DeeplyNestedTrackers(
+            depth: 3,
+            onTrackerCreated: (rb) {
+              trackers.add(rb);
+              rb.onPerformLayout = () {
+                layoutOrder.add(trackers.indexOf(rb));
+              };
+            },
+          ),
+        );
 
-          layoutOrder.clear();
+        layoutOrder.clear();
 
-          // Mark only parent dirty (note: this is hard to achieve in practice
-          // because markNeedsLayout propagates up, not down)
-          // We simulate by calling the pipelineOwner directly
-          final pipelineOwner = CinderTestBinding.instance.pipelineOwner;
-          trackers[0]._needsLayout = true;
-          pipelineOwner.requestLayout(trackers[0]);
+        // Mark only parent dirty (note: this is hard to achieve in practice
+        // because markNeedsLayout propagates up, not down)
+        // We simulate by calling the pipelineOwner directly
+        final pipelineOwner = CinderTestBinding.instance.pipelineOwner;
+        trackers[0]._needsLayout = true;
+        pipelineOwner.requestLayout(trackers[0]);
 
-          await tester.pump();
+        await tester.pump();
 
-          // Parent should have been laid out
-          expect(layoutOrder.contains(0), isTrue);
-        },
-      );
+        // Parent should have been laid out
+        expect(layoutOrder.contains(0), isTrue);
+      });
     });
   });
 }
@@ -1381,9 +1315,7 @@ class _TrackingRenderBox extends RenderObject
 
 /// Widget that provides a tracking render object for layout tests
 class _LayoutTracker extends SingleChildRenderObjectWidget {
-  const _LayoutTracker({
-    required this.onLayoutTrackerCreated,
-  });
+  const _LayoutTracker({required this.onLayoutTrackerCreated});
 
   final void Function(_TrackingRenderBox) onLayoutTrackerCreated;
 

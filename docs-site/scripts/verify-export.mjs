@@ -27,6 +27,7 @@ const required = [
   'docs/index.html',
   'docs/web-runtime/index.html',
   'examples/index.html',
+  'generated/examples/manifest.json',
   'api/index.html',
   'robots.txt',
   'sitemap.xml',
@@ -37,6 +38,17 @@ const required = [
 
 for (const route of required) {
   await requireFile(route);
+}
+
+try {
+  const exportedManifest = JSON.parse(
+    await readFile(path.join(outRoot, 'generated/examples/manifest.json'), 'utf8'),
+  );
+  if (JSON.stringify(exportedManifest) !== JSON.stringify(manifest)) {
+    failures.push('The exported example manifest differs from the build metadata. Rebuild the site.');
+  }
+} catch {
+  failures.push('Unable to read the exported example manifest.');
 }
 
 const slugs = new Set();
@@ -52,6 +64,10 @@ for (const example of manifest.examples) {
     failures.push(
       `Example ${example.slug} has invalid runtime mode: ${example.runtimeMode ?? '(missing)'}`,
     );
+  }
+
+  if (example.runtimeMode === 'build-failed') {
+    failures.push(`Example ${example.slug} failed browser compilation: ${example.reason}`);
   }
 
   if (!example.runtimeNote) {

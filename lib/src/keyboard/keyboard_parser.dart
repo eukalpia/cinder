@@ -124,13 +124,16 @@ class KeyboardParser {
     if (decodedChar != null && bytesConsumed > 0) {
       // Remove consumed bytes from buffer
       _buffer.removeRange(
-          0, bytesConsumed - 1); // Keep one byte for the main parser to clear
+        0,
+        bytesConsumed - 1,
+      ); // Keep one byte for the main parser to clear
 
       // Regular character
       final key = LogicalKey.fromCharacter(decodedChar);
       // Check if it's uppercase to infer shift was pressed
       final code = decodedChar.codeUnitAt(0);
-      final isUpperCase = (code >= 0x41 && code <= 0x5A) || // A-Z
+      final isUpperCase =
+          (code >= 0x41 && code <= 0x5A) || // A-Z
           (decodedChar != decodedChar.toLowerCase()); // Other uppercase chars
       return KeyboardEvent(
         logicalKey: key ?? LogicalKey(code, 'unknown'),
@@ -466,7 +469,8 @@ class KeyboardParser {
       // Convert to the base letter (A=0x41, B=0x42, etc.)
       final letterCode = code + 0x40; // 0x01 + 0x40 = 0x41 ('A')
       final letter = String.fromCharCode(letterCode).toLowerCase();
-      final baseKey = LogicalKey.fromCharacter(letter) ??
+      final baseKey =
+          LogicalKey.fromCharacter(letter) ??
           LogicalKey(letterCode, 'ctrl+$letter');
 
       return KeyboardEvent(
@@ -512,8 +516,9 @@ class KeyboardParser {
     // The modifier field may also contain `:` sub-parameters (e.g. "2:1").
     // The first value is the modifier bitmask.
     final modifierStr = parts.length >= 2 ? parts[1].split(':').first : null;
-    final modifierValue =
-        modifierStr != null ? int.tryParse(modifierStr) : null;
+    final modifierValue = modifierStr != null
+        ? int.tryParse(modifierStr)
+        : null;
     final modifiers = modifierValue != null
         ? _decodeModifiers(modifierValue)
         : const ModifierKeys();
@@ -591,7 +596,8 @@ class KeyboardParser {
         );
       default:
         final char = String.fromCharCode(codepoint);
-        final key = LogicalKey.fromCharacter(char) ??
+        final key =
+            LogicalKey.fromCharacter(char) ??
             LogicalKey(codepoint, 'codepoint($codepoint)');
         return KeyboardEvent(
           logicalKey: key,

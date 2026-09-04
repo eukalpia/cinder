@@ -45,10 +45,10 @@ class IconData {
     this.name,
     this.asciiFallback = '?',
     this.matchTextDirection = false,
-  })  : codePoint = null,
-        fontFamily = null,
-        fontPackage = null,
-        unicodeFallback = glyph;
+  }) : codePoint = null,
+       fontFamily = null,
+       fontPackage = null,
+       unicodeFallback = glyph;
 
   final int? codePoint;
   final String? fontFamily;
@@ -65,8 +65,9 @@ class IconData {
     TextDirection textDirection = TextDirection.ltr,
   }) {
     final unicode = _resolveDirection(unicodeFallback, textDirection);
-    final fontGlyph =
-        codePoint == null ? null : String.fromCharCode(codePoint!);
+    final fontGlyph = codePoint == null
+        ? null
+        : String.fromCharCode(codePoint!);
 
     switch (mode) {
       case IconRenderMode.font:
@@ -120,14 +121,14 @@ class IconData {
 
   @override
   int get hashCode => Object.hash(
-        codePoint,
-        fontFamily,
-        fontPackage,
-        matchTextDirection,
-        name,
-        unicodeFallback,
-        asciiFallback,
-      );
+    codePoint,
+    fontFamily,
+    fontPackage,
+    matchTextDirection,
+    name,
+    unicodeFallback,
+    asciiFallback,
+  );
 
   @override
   String toString() => 'IconData(${name ?? codePoint ?? unicodeFallback})';
@@ -188,22 +189,13 @@ class IconThemeData {
   }
 
   @override
-  int get hashCode => Object.hash(
-        color,
-        size,
-        renderMode,
-        usePrivateUseGlyphs,
-        fallbackGlyph,
-      );
+  int get hashCode =>
+      Object.hash(color, size, renderMode, usePrivateUseGlyphs, fallbackGlyph);
 }
 
 /// Applies icon defaults to a subtree.
 class IconTheme extends InheritedWidget {
-  const IconTheme({
-    super.key,
-    required this.data,
-    required super.child,
-  });
+  const IconTheme({super.key, required this.data, required super.child});
 
   final IconThemeData data;
 
@@ -225,8 +217,8 @@ class IconTheme extends InheritedWidget {
   }
 
   static IconThemeData? maybeOf(BuildContext context) {
-    final element =
-        context.getElementForInheritedWidgetOfExactType<IconTheme>();
+    final element = context
+        .getElementForInheritedWidgetOfExactType<IconTheme>();
     return (element?.widget as IconTheme?)?.data;
   }
 
@@ -276,7 +268,8 @@ class Icon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final inherited = IconTheme.of(context);
-    final glyph = icon?.resolveGlyph(
+    final glyph =
+        icon?.resolveGlyph(
           mode: renderMode ?? inherited.renderMode ?? IconRenderMode.auto,
           usePrivateUseGlyphs: inherited.usePrivateUseGlyphs ?? false,
           fallbackGlyph: inherited.fallbackGlyph ?? '?',
@@ -345,40 +338,96 @@ class IconButton extends StatelessWidget {
 
 /// Terminal-native icons that do not require an icon font.
 abstract final class TerminalIcons {
-  static const IconData home =
-      IconData.terminal('⌂', name: 'home', asciiFallback: 'H');
-  static const IconData search =
-      IconData.terminal('⌕', name: 'search', asciiFallback: '?');
-  static const IconData menu =
-      IconData.terminal('☰', name: 'menu', asciiFallback: '=');
-  static const IconData close =
-      IconData.terminal('×', name: 'close', asciiFallback: 'x');
-  static const IconData check =
-      IconData.terminal('✓', name: 'check', asciiFallback: 'v');
-  static const IconData add =
-      IconData.terminal('+', name: 'add', asciiFallback: '+');
-  static const IconData remove =
-      IconData.terminal('−', name: 'remove', asciiFallback: '-');
-  static const IconData arrowLeft = IconData.terminal('←',
-      name: 'arrowLeft', asciiFallback: '<', matchTextDirection: true);
-  static const IconData arrowRight = IconData.terminal('→',
-      name: 'arrowRight', asciiFallback: '>', matchTextDirection: true);
-  static const IconData arrowUp =
-      IconData.terminal('↑', name: 'arrowUp', asciiFallback: '^');
-  static const IconData arrowDown =
-      IconData.terminal('↓', name: 'arrowDown', asciiFallback: 'v');
-  static const IconData warning =
-      IconData.terminal('⚠', name: 'warning', asciiFallback: '!');
-  static const IconData info =
-      IconData.terminal('ⓘ', name: 'info', asciiFallback: 'i');
-  static const IconData star =
-      IconData.terminal('★', name: 'star', asciiFallback: '*');
-  static const IconData heart =
-      IconData.terminal('♥', name: 'heart', asciiFallback: '<3');
-  static const IconData play =
-      IconData.terminal('▶', name: 'play', asciiFallback: '>');
-  static const IconData pause =
-      IconData.terminal('Ⅱ', name: 'pause', asciiFallback: '||');
-  static const IconData stop =
-      IconData.terminal('■', name: 'stop', asciiFallback: '#');
+  static const IconData home = IconData.terminal(
+    '⌂',
+    name: 'home',
+    asciiFallback: 'H',
+  );
+  static const IconData search = IconData.terminal(
+    '⌕',
+    name: 'search',
+    asciiFallback: '?',
+  );
+  static const IconData menu = IconData.terminal(
+    '☰',
+    name: 'menu',
+    asciiFallback: '=',
+  );
+  static const IconData close = IconData.terminal(
+    '×',
+    name: 'close',
+    asciiFallback: 'x',
+  );
+  static const IconData check = IconData.terminal(
+    '✓',
+    name: 'check',
+    asciiFallback: 'v',
+  );
+  static const IconData add = IconData.terminal(
+    '+',
+    name: 'add',
+    asciiFallback: '+',
+  );
+  static const IconData remove = IconData.terminal(
+    '−',
+    name: 'remove',
+    asciiFallback: '-',
+  );
+  static const IconData arrowLeft = IconData.terminal(
+    '←',
+    name: 'arrowLeft',
+    asciiFallback: '<',
+    matchTextDirection: true,
+  );
+  static const IconData arrowRight = IconData.terminal(
+    '→',
+    name: 'arrowRight',
+    asciiFallback: '>',
+    matchTextDirection: true,
+  );
+  static const IconData arrowUp = IconData.terminal(
+    '↑',
+    name: 'arrowUp',
+    asciiFallback: '^',
+  );
+  static const IconData arrowDown = IconData.terminal(
+    '↓',
+    name: 'arrowDown',
+    asciiFallback: 'v',
+  );
+  static const IconData warning = IconData.terminal(
+    '⚠',
+    name: 'warning',
+    asciiFallback: '!',
+  );
+  static const IconData info = IconData.terminal(
+    'ⓘ',
+    name: 'info',
+    asciiFallback: 'i',
+  );
+  static const IconData star = IconData.terminal(
+    '★',
+    name: 'star',
+    asciiFallback: '*',
+  );
+  static const IconData heart = IconData.terminal(
+    '♥',
+    name: 'heart',
+    asciiFallback: '<3',
+  );
+  static const IconData play = IconData.terminal(
+    '▶',
+    name: 'play',
+    asciiFallback: '>',
+  );
+  static const IconData pause = IconData.terminal(
+    'Ⅱ',
+    name: 'pause',
+    asciiFallback: '||',
+  );
+  static const IconData stop = IconData.terminal(
+    '■',
+    name: 'stop',
+    asciiFallback: '#',
+  );
 }

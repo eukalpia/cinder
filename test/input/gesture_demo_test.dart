@@ -4,10 +4,7 @@ import 'package:test/test.dart';
 import '../../example/gesture_demo.dart';
 
 void main() {
-  group('Gesture Demo',
-      skip:
-          'Known issue: GestureDemo uses nested constraints that need refactoring',
-      () {
+  group('Gesture Demo', () {
     test('visual development - initial render', () async {
       await testCinder(
         'gesture demo renders correctly',
@@ -20,174 +17,147 @@ void main() {
     });
 
     test('renders all zones and labels', () async {
-      await testCinder(
-        'all zones visible',
-        (tester) async {
-          await tester.pumpWidget(const GestureDemoApp());
+      await testCinder('all zones visible', (tester) async {
+        await tester.pumpWidget(const GestureDemoApp());
 
-          // Verify all zone labels are present
-          expect(tester.terminalState, containsText('TAP ME'));
-          expect(tester.terminalState, containsText('DOUBLE TAP'));
-          expect(tester.terminalState, containsText('LONG PRESS'));
-          expect(tester.terminalState, containsText('HOVER ME'));
-          expect(tester.terminalState, containsText('COMBINED'));
-          expect(tester.terminalState, containsText('Event Log'));
-        },
-        size: const Size(100, 50),
-      );
+        // Verify all zone labels are present
+        expect(tester.terminalState, containsText('TAP ME'));
+        expect(tester.terminalState, containsText('DOUBLE TAP'));
+        expect(tester.terminalState, containsText('LONG PRESS'));
+        expect(tester.terminalState, containsText('HOVER ME'));
+        expect(tester.terminalState, containsText('COMBINED'));
+        expect(tester.terminalState, containsText('Event Log'));
+      }, size: const Size(100, 50));
     });
 
     test('tap zone interaction', () async {
-      await testCinder(
-        'tap updates state',
-        (tester) async {
-          bool tapped = false;
+      await testCinder('tap updates state', (tester) async {
+        bool tapped = false;
 
-          await tester.pumpWidget(
-            _TestTapWidget(onTapCallback: () => tapped = true),
-          );
+        await tester.pumpWidget(
+          _TestTapWidget(onTapCallback: () => tapped = true),
+        );
 
-          // Tap
-          await tester.tap(10, 5);
+        // Tap
+        await tester.tap(10, 5);
 
-          // Verify tap was registered
-          expect(tapped, true);
-        },
-      );
+        // Verify tap was registered
+        expect(tapped, true);
+      });
     });
 
     test('double-tap detection', () async {
-      await testCinder(
-        'double tap increments counter',
-        (tester) async {
-          int doubleTapCount = 0;
+      await testCinder('double tap increments counter', (tester) async {
+        int doubleTapCount = 0;
 
-          await tester.pumpWidget(
-            _TestDoubleTapWidget(
-              onDoubleTapCallback: () => doubleTapCount++,
-            ),
-          );
+        await tester.pumpWidget(
+          _TestDoubleTapWidget(onDoubleTapCallback: () => doubleTapCount++),
+        );
 
-          // Double tap
-          await tester.tap(10, 5);
-          await tester.pump(const Duration(milliseconds: 100));
-          await tester.tap(10, 5);
+        // Double tap
+        await tester.tap(10, 5);
+        await tester.pump(const Duration(milliseconds: 100));
+        await tester.tap(10, 5);
 
-          // Verify double-tap was registered
-          expect(doubleTapCount, 1);
-        },
-      );
+        // Verify double-tap was registered
+        expect(doubleTapCount, 1);
+      });
     });
 
     test('long press detection', () async {
-      await testCinder(
-        'long press triggers callback',
-        (tester) async {
-          bool longPressStarted = false;
-          bool longPressCompleted = false;
+      await testCinder('long press triggers callback', (tester) async {
+        bool longPressStarted = false;
+        bool longPressCompleted = false;
 
-          await tester.pumpWidget(
-            _TestLongPressWidget(
-              onLongPressStartCallback: () => longPressStarted = true,
-              onLongPressCallback: () => longPressCompleted = true,
-            ),
-          );
+        await tester.pumpWidget(
+          _TestLongPressWidget(
+            onLongPressStartCallback: () => longPressStarted = true,
+            onLongPressCallback: () => longPressCompleted = true,
+          ),
+        );
 
-          // Long press
-          await tester.press(10, 5);
-          await tester.pump(const Duration(milliseconds: 600));
-          await tester.release(10, 5);
+        // Long press
+        await tester.press(10, 5);
+        await tester.pump(const Duration(milliseconds: 600));
+        await tester.release(10, 5);
 
-          // Verify long press was registered
-          expect(longPressStarted, true);
-          expect(longPressCompleted, true);
-        },
-      );
+        // Verify long press was registered
+        expect(longPressStarted, true);
+        expect(longPressCompleted, true);
+      });
     });
 
     test('hover region detection', () async {
-      await testCinder(
-        'hover changes state',
-        (tester) async {
-          bool isHovering = false;
+      await testCinder('hover changes state', (tester) async {
+        bool isHovering = false;
 
-          await tester.pumpWidget(
-            _TestHoverWidget(
-              onEnterCallback: () => isHovering = true,
-              onExitCallback: () => isHovering = false,
-            ),
-          );
+        await tester.pumpWidget(
+          _TestHoverWidget(
+            onEnterCallback: () => isHovering = true,
+            onExitCallback: () => isHovering = false,
+          ),
+        );
 
-          // Hover
-          await tester.hover(10, 5);
+        // Hover
+        await tester.hover(10, 5);
 
-          // Verify hover was registered
-          expect(isHovering, true);
-        },
-      );
+        // Verify hover was registered
+        expect(isHovering, true);
+      });
     });
 
     test('combined zone - tap and hover', () async {
-      await testCinder(
-        'combined zone handles multiple gestures',
-        (tester) async {
-          bool isHovering = false;
-          int tapCount = 0;
+      await testCinder('combined zone handles multiple gestures', (
+        tester,
+      ) async {
+        bool isHovering = false;
+        int tapCount = 0;
 
-          await tester.pumpWidget(
-            _TestCombinedWidget(
-              onEnterCallback: () => isHovering = true,
-              onTapCallback: () => tapCount++,
-            ),
-          );
+        await tester.pumpWidget(
+          _TestCombinedWidget(
+            onEnterCallback: () => isHovering = true,
+            onTapCallback: () => tapCount++,
+          ),
+        );
 
-          // Hover first
-          await tester.hover(15, 5);
-          expect(isHovering, true);
+        // Hover first
+        await tester.hover(15, 5);
+        expect(isHovering, true);
 
-          // Tap while hovering
-          await tester.tap(15, 5);
-          expect(tapCount, 1);
-        },
-      );
+        // Tap while hovering
+        await tester.tap(15, 5);
+        expect(tapCount, 1);
+      });
     });
 
     test('visual test - demo app renders', () async {
-      await testCinder(
-        'gesture demo at default size',
-        (tester) async {
-          await tester.pumpWidget(const GestureDemoApp());
+      await testCinder('gesture demo at default size', (tester) async {
+        await tester.pumpWidget(const GestureDemoApp());
 
-          // Should render without overflow at proper size
-          expect(tester.terminalState, containsText('GESTURE DETECTOR DEMO'));
-          expect(tester.terminalState, containsText('Count: 0'));
-        },
-        size: const Size(100, 50),
-      );
+        // Should render without overflow at proper size
+        expect(tester.terminalState, containsText('GESTURE DETECTOR DEMO'));
+        expect(tester.terminalState, containsText('Count: 0'));
+      }, size: const Size(100, 50));
     });
 
     test('position tracking in callbacks', () async {
-      await testCinder(
-        'tap provides position details',
-        (tester) async {
-          Offset? tapPosition;
+      await testCinder('tap provides position details', (tester) async {
+        Offset? tapPosition;
 
-          await tester.pumpWidget(
-            _TestPositionWidget(
-              onTapDownCallback: (details) =>
-                  tapPosition = details.localPosition,
-            ),
-          );
+        await tester.pumpWidget(
+          _TestPositionWidget(
+            onTapDownCallback: (details) => tapPosition = details.localPosition,
+          ),
+        );
 
-          // Tap at specific position
-          await tester.tap(15, 8);
+        // Tap at specific position
+        await tester.tap(15, 8);
 
-          // Verify position was captured
-          expect(tapPosition, isNotNull);
-          expect(tapPosition!.dx, 15.0);
-          expect(tapPosition!.dy, 8.0);
-        },
-      );
+        // Verify position was captured
+        expect(tapPosition, isNotNull);
+        expect(tapPosition!.dx, 15.0);
+        expect(tapPosition!.dy, 8.0);
+      });
     });
   });
 }
@@ -221,9 +191,7 @@ class _TestTapWidgetState extends State<_TestTapWidget> {
           width: 30,
           height: 10,
           decoration: BoxDecoration(border: BoxBorder.all()),
-          child: Center(
-            child: Text('Tap count: $tapCount'),
-          ),
+          child: Center(child: Text('Tap count: $tapCount')),
         ),
       ),
     );
@@ -258,9 +226,7 @@ class _TestDoubleTapWidgetState extends State<_TestDoubleTapWidget> {
           width: 30,
           height: 10,
           decoration: BoxDecoration(border: BoxBorder.all()),
-          child: Center(
-            child: Text('Double taps: $doubleTapCount'),
-          ),
+          child: Center(child: Text('Double taps: $doubleTapCount')),
         ),
       ),
     );

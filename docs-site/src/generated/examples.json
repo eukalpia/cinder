@@ -1,6 +1,1953 @@
 {
-  "generatedAt": "1970-01-01T00:00:00.000Z",
-  "version": "1.0.0-dev.2",
-  "documentationCount": 0,
-  "examples": []
+  "generatedAt": "2026-09-04T21:35:59.896Z",
+  "version": "1.0.0-rc.1",
+  "documentationCount": 11,
+  "examples": [
+    {
+      "slug": "alpha-demo",
+      "title": "Alpha Demo",
+      "category": "Navigation",
+      "repositoryPath": "example/alpha_demo.dart",
+      "sourcePath": "/cinder/generated/examples/alpha-demo/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/alpha_demo.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/navigation.js",
+      "reason": null,
+      "description": "Demonstrates alpha/transparency support in cinder.",
+      "controls": [],
+      "tags": [
+        "navigation"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "ascii-text-demo",
+      "title": "Ascii Text Demo",
+      "category": "Layout",
+      "repositoryPath": "example/ascii_text_demo.dart",
+      "sourcePath": "/cinder/generated/examples/ascii-text-demo/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/ascii_text_demo.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/layout.js",
+      "reason": null,
+      "description": "Demo showcasing the AsciiText widget with various fonts and styles.",
+      "controls": [],
+      "tags": [
+        "layout"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "auto-theme-demo",
+      "title": "Auto Theme Demo",
+      "category": "Layout",
+      "repositoryPath": "example/auto_theme_demo.dart",
+      "sourcePath": "/cinder/generated/examples/auto-theme-demo/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/auto_theme_demo.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/layout.js",
+      "reason": null,
+      "description": "Auto Theme Detection Demo",
+      "controls": [
+        "Escape"
+      ],
+      "tags": [
+        "images",
+        "keyboard",
+        "layout",
+        "terminal"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "border-title-demo",
+      "title": "Border Title Demo",
+      "category": "Layout",
+      "repositoryPath": "example/border_title_demo.dart",
+      "sourcePath": "/cinder/generated/examples/border-title-demo/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/border_title_demo.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/layout.js",
+      "reason": null,
+      "description": "Border Title Demo demonstrates Cinder's layout APIs in a terminal application.",
+      "controls": [
+        "Scroll"
+      ],
+      "tags": [
+        "forms",
+        "layout",
+        "scrolling",
+        "state"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "center-in-column",
+      "title": "Center In Column",
+      "category": "Layout",
+      "repositoryPath": "example/center_in_column.dart",
+      "sourcePath": "/cinder/generated/examples/center-in-column/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/center_in_column.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/layout.js",
+      "reason": null,
+      "description": "Center In Column demonstrates Cinder's layout APIs in a terminal application.",
+      "controls": [],
+      "tags": [
+        "layout"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "chat-demo-reverse",
+      "title": "Chat Demo Reverse",
+      "category": "Layout",
+      "repositoryPath": "example/chat_demo_reverse.dart",
+      "sourcePath": "/cinder/generated/examples/chat-demo-reverse/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/chat_demo_reverse.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/layout.js",
+      "reason": null,
+      "description": "Demo showing AutoScrollController working correctly with reverse ListView",
+      "controls": [
+        "Enter",
+        "Escape",
+        "Scroll",
+        "Text input"
+      ],
+      "tags": [
+        "forms",
+        "keyboard",
+        "layout",
+        "scrolling",
+        "state",
+        "terminal"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "chat-demo",
+      "title": "Chat Demo",
+      "category": "Data",
+      "repositoryPath": "example/chat_demo.dart",
+      "sourcePath": "/cinder/generated/examples/chat-demo/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/chat_demo.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/data.js",
+      "reason": null,
+      "description": "Chat Demo demonstrates Cinder's data APIs in a terminal application.",
+      "controls": [
+        "Enter",
+        "Escape",
+        "Scroll",
+        "Text input"
+      ],
+      "tags": [
+        "animation",
+        "data",
+        "forms",
+        "keyboard",
+        "scrolling",
+        "state",
+        "terminal"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "cinder-app-demo",
+      "title": "Cinder App Demo",
+      "category": "Layout",
+      "repositoryPath": "example/cinder_app_demo.dart",
+      "sourcePath": "/cinder/generated/examples/cinder-app-demo/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/cinder_app_demo.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/layout.js",
+      "reason": null,
+      "description": "Demo showcasing the CinderApp widget and its ability to set terminal window titles",
+      "controls": [],
+      "tags": [
+        "keyboard",
+        "layout",
+        "state",
+        "terminal"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "cinder-app-navigation-demo",
+      "title": "Cinder App Navigation Demo",
+      "category": "Data",
+      "repositoryPath": "example/cinder_app_navigation_demo.dart",
+      "sourcePath": "/cinder/generated/examples/cinder-app-navigation-demo/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/cinder_app_navigation_demo.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/data.js",
+      "reason": null,
+      "description": "Demo showcasing CinderApp with Navigator support",
+      "controls": [
+        "Escape"
+      ],
+      "tags": [
+        "data",
+        "keyboard",
+        "state",
+        "terminal"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "clipboard-debug",
+      "title": "Clipboard Debug",
+      "category": "Terminal",
+      "repositoryPath": "example/clipboard_debug.dart",
+      "sourcePath": "/cinder/generated/examples/clipboard-debug/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/clipboard_debug.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/example-clipboard-debug.js",
+      "reason": null,
+      "description": "Debug clipboard behavior",
+      "controls": [
+        "Scroll"
+      ],
+      "tags": [
+        "forms",
+        "keyboard",
+        "scrolling",
+        "state",
+        "terminal"
+      ],
+      "adapterSourceUrl": "https://github.com/eukalpia/cinder/blob/main/docs-site/browser-adapters/clipboard-debug.dart",
+      "runtimeMode": "browser-sandbox",
+      "runtimeNote": "Runs in a deterministic browser sandbox. Native operating-system access is not presented as real access."
+    },
+    {
+      "slug": "clipboard-demo",
+      "title": "Clipboard Demo",
+      "category": "Layout",
+      "repositoryPath": "example/clipboard_demo.dart",
+      "sourcePath": "/cinder/generated/examples/clipboard-demo/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/clipboard_demo.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/layout.js",
+      "reason": null,
+      "description": "Clipboard Demo demonstrates Cinder's layout APIs in a terminal application.",
+      "controls": [
+        "Tab / Shift+Tab",
+        "Escape",
+        "Text input"
+      ],
+      "tags": [
+        "forms",
+        "keyboard",
+        "layout",
+        "state",
+        "terminal"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "cpu-usage-test",
+      "title": "Cpu Usage Test",
+      "category": "Layout",
+      "repositoryPath": "example/cpu_usage_test.dart",
+      "sourcePath": "/cinder/generated/examples/cpu-usage-test/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/cpu_usage_test.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/layout.js",
+      "reason": null,
+      "description": "Test app to measure CPU usage from different sources:",
+      "controls": [
+        "Scroll"
+      ],
+      "tags": [
+        "animation",
+        "keyboard",
+        "layout",
+        "mouse",
+        "scrolling",
+        "state",
+        "terminal"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "data-observatory",
+      "title": "Data Observatory",
+      "category": "Data",
+      "repositoryPath": "example/data_observatory.dart",
+      "sourcePath": "/cinder/generated/examples/data-observatory/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/data_observatory.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/data.js",
+      "reason": null,
+      "description": "Data Observatory demonstrates Cinder's data APIs in a terminal application.",
+      "controls": [],
+      "tags": [
+        "data",
+        "state"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "debug-overlay-demo",
+      "title": "Debug Overlay Demo",
+      "category": "Navigation",
+      "repositoryPath": "example/debug_overlay_demo.dart",
+      "sourcePath": "/cinder/generated/examples/debug-overlay-demo/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/debug_overlay_demo.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/navigation.js",
+      "reason": null,
+      "description": "Demonstrates the debug overlay feature in cinder.",
+      "controls": [],
+      "tags": [
+        "forms",
+        "keyboard",
+        "navigation",
+        "state",
+        "terminal"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "deep-route-text-field",
+      "title": "Deep Route Text Field",
+      "category": "Input",
+      "repositoryPath": "example/deep_route_text_field.dart",
+      "sourcePath": "/cinder/generated/examples/deep-route-text-field/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/deep_route_text_field.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/input.js",
+      "reason": null,
+      "description": "Deep Route Text Field demonstrates Cinder's input APIs in a terminal application.",
+      "controls": [
+        "Tab / Shift+Tab",
+        "Text input"
+      ],
+      "tags": [
+        "forms",
+        "input",
+        "keyboard",
+        "state"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "dialog-textfield-test",
+      "title": "Dialog Textfield Test",
+      "category": "Input",
+      "repositoryPath": "example/dialog_textfield_test.dart",
+      "sourcePath": "/cinder/generated/examples/dialog-textfield-test/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/dialog_textfield_test.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/input.js",
+      "reason": null,
+      "description": "Dialog Textfield Test demonstrates Cinder's input APIs in a terminal application.",
+      "controls": [
+        "Text input"
+      ],
+      "tags": [
+        "forms",
+        "input",
+        "keyboard",
+        "state"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "ensure-visible-demo",
+      "title": "Ensure Visible Demo",
+      "category": "Input",
+      "repositoryPath": "example/ensure_visible_demo.dart",
+      "sourcePath": "/cinder/generated/examples/ensure-visible-demo/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/ensure_visible_demo.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/input.js",
+      "reason": null,
+      "description": "Demonstrates using ScrollController.ensureVisible for keyboard navigation.",
+      "controls": [
+        "Arrow keys",
+        "Scroll"
+      ],
+      "tags": [
+        "forms",
+        "input",
+        "keyboard",
+        "scrolling",
+        "state"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "ensure-visible-variable-height",
+      "title": "Ensure Visible Variable Height",
+      "category": "Layout",
+      "repositoryPath": "example/ensure_visible_variable_height.dart",
+      "sourcePath": "/cinder/generated/examples/ensure-visible-variable-height/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/ensure_visible_variable_height.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/layout.js",
+      "reason": null,
+      "description": "Demonstrates ensureVisible with variable-height items.",
+      "controls": [
+        "Arrow keys",
+        "Scroll"
+      ],
+      "tags": [
+        "forms",
+        "keyboard",
+        "layout",
+        "scrolling",
+        "state"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "error-handling-demo",
+      "title": "Error Handling Demo",
+      "category": "Layout",
+      "repositoryPath": "example/error_handling_demo.dart",
+      "sourcePath": "/cinder/generated/examples/error-handling-demo/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/error_handling_demo.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/layout.js",
+      "reason": null,
+      "description": "Error Handling Demo demonstrates Cinder's layout APIs in a terminal application.",
+      "controls": [],
+      "tags": [
+        "forms",
+        "keyboard",
+        "layout",
+        "state",
+        "terminal"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "example",
+      "title": "Example",
+      "category": "Input",
+      "repositoryPath": "example/example.dart",
+      "sourcePath": "/cinder/generated/examples/example/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/example.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/input.js",
+      "reason": null,
+      "description": "Example demonstrates Cinder's input APIs in a terminal application.",
+      "controls": [
+        "Arrow keys",
+        "Space"
+      ],
+      "tags": [
+        "input",
+        "keyboard",
+        "state",
+        "terminal"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "focus-demo",
+      "title": "Focus Demo",
+      "category": "Input",
+      "repositoryPath": "example/focus_demo.dart",
+      "sourcePath": "/cinder/generated/examples/focus-demo/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/focus_demo.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/input.js",
+      "reason": null,
+      "description": "Demo application showing focus handling with nested components",
+      "controls": [
+        "Tab / Shift+Tab",
+        "Arrow keys"
+      ],
+      "tags": [
+        "input",
+        "keyboard",
+        "state"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "gesture-demo",
+      "title": "Gesture Demo",
+      "category": "Input",
+      "repositoryPath": "example/gesture_demo.dart",
+      "sourcePath": "/cinder/generated/examples/gesture-demo/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/gesture_demo.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/example-gesture-demo.js",
+      "reason": null,
+      "description": "Gesture Demo demonstrates Cinder's input APIs in a terminal application.",
+      "controls": [
+        "Mouse",
+        "Scroll"
+      ],
+      "tags": [
+        "input",
+        "mouse",
+        "scrolling",
+        "state",
+        "terminal"
+      ],
+      "adapterSourceUrl": "https://github.com/eukalpia/cinder/blob/main/docs-site/browser-adapters/gesture-demo.dart",
+      "runtimeMode": "browser-adapter",
+      "runtimeNote": "Runs through an official browser adapter while preserving the example intent and Cinder widget model."
+    },
+    {
+      "slug": "home-automation-demo",
+      "title": "Home Automation Demo",
+      "category": "Data",
+      "repositoryPath": "example/home_automation_demo.dart",
+      "sourcePath": "/cinder/generated/examples/home-automation-demo/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/home_automation_demo.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/data.js",
+      "reason": null,
+      "description": "Home Automation Demo demonstrates Cinder's data APIs in a terminal application.",
+      "controls": [
+        "Arrow keys",
+        "Space"
+      ],
+      "tags": [
+        "animation",
+        "data",
+        "keyboard",
+        "state",
+        "terminal"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "hot-reload-simple",
+      "title": "Hot Reload Simple",
+      "category": "Layout",
+      "repositoryPath": "example/hot_reload_simple.dart",
+      "sourcePath": "/cinder/generated/examples/hot-reload-simple/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/hot_reload_simple.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/layout.js",
+      "reason": null,
+      "description": "Hot Reload Simple demonstrates Cinder's layout APIs in a terminal application.",
+      "controls": [],
+      "tags": [
+        "layout",
+        "state"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "hoverable-widgets-demo",
+      "title": "Hoverable Widgets Demo",
+      "category": "Data",
+      "repositoryPath": "example/hoverable_widgets_demo.dart",
+      "sourcePath": "/cinder/generated/examples/hoverable-widgets-demo/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/hoverable_widgets_demo.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/example-hoverable-widgets-demo.js",
+      "reason": null,
+      "description": "Hoverable Widgets Demo demonstrates Cinder's data APIs in a terminal application.",
+      "controls": [
+        "Mouse"
+      ],
+      "tags": [
+        "data",
+        "mouse",
+        "state"
+      ],
+      "adapterSourceUrl": "https://github.com/eukalpia/cinder/blob/main/docs-site/browser-adapters/hoverable-widgets-demo.dart",
+      "runtimeMode": "browser-adapter",
+      "runtimeNote": "Runs through an official browser adapter while preserving the example intent and Cinder widget model."
+    },
+    {
+      "slug": "icons-demo",
+      "title": "Icons Demo",
+      "category": "Data",
+      "repositoryPath": "example/icons_demo.dart",
+      "sourcePath": "/cinder/generated/examples/icons-demo/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/icons_demo.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/data.js",
+      "reason": null,
+      "description": "Icons Demo demonstrates Cinder's data APIs in a terminal application.",
+      "controls": [],
+      "tags": [
+        "data",
+        "terminal",
+        "unicode"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "image-demo",
+      "title": "Image Demo",
+      "category": "Media",
+      "repositoryPath": "example/image_demo.dart",
+      "sourcePath": "/cinder/generated/examples/image-demo/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/image_demo.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/example-image-demo.js",
+      "reason": null,
+      "description": "Interactive TUI demo for displaying images with different protocols.",
+      "controls": [
+        "Tab / Shift+Tab",
+        "Arrow keys",
+        "Escape"
+      ],
+      "tags": [
+        "images",
+        "keyboard",
+        "media",
+        "state",
+        "terminal",
+        "unicode"
+      ],
+      "adapterSourceUrl": "https://github.com/eukalpia/cinder/blob/main/docs-site/browser-adapters/image-demo.dart",
+      "runtimeMode": "browser-adapter",
+      "runtimeNote": "Runs through an official browser adapter while preserving the example intent and Cinder widget model."
+    },
+    {
+      "slug": "image-listview-demo",
+      "title": "Image Listview Demo",
+      "category": "Media",
+      "repositoryPath": "example/image_listview_demo.dart",
+      "sourcePath": "/cinder/generated/examples/image-listview-demo/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/image_listview_demo.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/example-image-listview-demo.js",
+      "reason": null,
+      "description": "Interactive TUI demo for displaying images in a scrollable ListView.",
+      "controls": [
+        "Tab / Shift+Tab",
+        "Arrow keys",
+        "Escape",
+        "Scroll"
+      ],
+      "tags": [
+        "forms",
+        "images",
+        "keyboard",
+        "media",
+        "scrolling",
+        "state",
+        "terminal",
+        "unicode"
+      ],
+      "adapterSourceUrl": "https://github.com/eukalpia/cinder/blob/main/docs-site/browser-adapters/image-listview-demo.dart",
+      "runtimeMode": "browser-adapter",
+      "runtimeNote": "Runs through an official browser adapter while preserving the example intent and Cinder widget model."
+    },
+    {
+      "slug": "infinite-hoverable-list-demo",
+      "title": "Infinite Hoverable List Demo",
+      "category": "Data",
+      "repositoryPath": "example/infinite_hoverable_list_demo.dart",
+      "sourcePath": "/cinder/generated/examples/infinite-hoverable-list-demo/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/infinite_hoverable_list_demo.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/example-infinite-hoverable-list-demo.js",
+      "reason": null,
+      "description": "Infinite Hoverable List Demo demonstrates Cinder's data APIs in a terminal application.",
+      "controls": [
+        "Arrow keys",
+        "Mouse",
+        "Scroll"
+      ],
+      "tags": [
+        "data",
+        "forms",
+        "images",
+        "keyboard",
+        "mouse",
+        "scrolling",
+        "state"
+      ],
+      "adapterSourceUrl": "https://github.com/eukalpia/cinder/blob/main/docs-site/browser-adapters/infinite-hoverable-list-demo.dart",
+      "runtimeMode": "browser-adapter",
+      "runtimeNote": "Runs through an official browser adapter while preserving the example intent and Cinder widget model."
+    },
+    {
+      "slug": "keyboard-modifiers-demo",
+      "title": "Keyboard Modifiers Demo",
+      "category": "Input",
+      "repositoryPath": "example/keyboard_modifiers_demo.dart",
+      "sourcePath": "/cinder/generated/examples/keyboard-modifiers-demo/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/keyboard_modifiers_demo.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/input.js",
+      "reason": null,
+      "description": "Demo application showing the new keyboard modifier handling",
+      "controls": [
+        "Tab / Shift+Tab",
+        "Escape"
+      ],
+      "tags": [
+        "input",
+        "keyboard",
+        "state"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "keyboard-test-comprehensive",
+      "title": "Keyboard Test Comprehensive",
+      "category": "Input",
+      "repositoryPath": "example/keyboard_test_comprehensive.dart",
+      "sourcePath": "/cinder/generated/examples/keyboard-test-comprehensive/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/keyboard_test_comprehensive.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/input.js",
+      "reason": null,
+      "description": "Comprehensive keyboard test application",
+      "controls": [
+        "Tab / Shift+Tab",
+        "Arrow keys",
+        "Escape",
+        "Text input"
+      ],
+      "tags": [
+        "forms",
+        "input",
+        "keyboard",
+        "mouse",
+        "state",
+        "terminal"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "listview-performance-test",
+      "title": "Listview Performance Test",
+      "category": "Data",
+      "repositoryPath": "example/listview_performance_test.dart",
+      "sourcePath": "/cinder/generated/examples/listview-performance-test/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/listview_performance_test.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/data.js",
+      "reason": null,
+      "description": "Performance test for lazy ListView with very large item counts",
+      "controls": [
+        "Arrow keys",
+        "Scroll"
+      ],
+      "tags": [
+        "data",
+        "forms",
+        "keyboard",
+        "mouse",
+        "scrolling",
+        "state"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "listview-rebuild-test",
+      "title": "Listview Rebuild Test",
+      "category": "Layout",
+      "repositoryPath": "example/listview_rebuild_test.dart",
+      "sourcePath": "/cinder/generated/examples/listview-rebuild-test/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/listview_rebuild_test.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/layout.js",
+      "reason": null,
+      "description": "Test to verify ListView items rebuild when state changes (e.g., selection)",
+      "controls": [
+        "Arrow keys",
+        "Scroll"
+      ],
+      "tags": [
+        "forms",
+        "keyboard",
+        "layout",
+        "scrolling",
+        "state"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "logger-demo",
+      "title": "Logger Demo",
+      "category": "Data",
+      "repositoryPath": "example/logger_demo.dart",
+      "sourcePath": "/cinder/generated/examples/logger-demo/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/logger_demo.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/example-logger-demo.js",
+      "reason": null,
+      "description": "Logger Demo demonstrates Cinder's data APIs in a terminal application.",
+      "controls": [],
+      "tags": [
+        "data",
+        "state",
+        "terminal"
+      ],
+      "adapterSourceUrl": "https://github.com/eukalpia/cinder/blob/main/docs-site/browser-adapters/logger-demo.dart",
+      "runtimeMode": "browser-adapter",
+      "runtimeNote": "Runs through an official browser adapter while preserving the example intent and Cinder widget model."
+    },
+    {
+      "slug": "markdown-demo",
+      "title": "Markdown Demo",
+      "category": "Media",
+      "repositoryPath": "example/markdown_demo.dart",
+      "sourcePath": "/cinder/generated/examples/markdown-demo/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/markdown_demo.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/media.js",
+      "reason": null,
+      "description": "Markdown Demo demonstrates Cinder's media APIs in a terminal application.",
+      "controls": [
+        "Tab / Shift+Tab",
+        "Scroll"
+      ],
+      "tags": [
+        "forms",
+        "images",
+        "keyboard",
+        "media",
+        "state",
+        "terminal"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "markdown-emoji-demo",
+      "title": "Markdown Emoji Demo",
+      "category": "Layout",
+      "repositoryPath": "example/markdown_emoji_demo.dart",
+      "sourcePath": "/cinder/generated/examples/markdown-emoji-demo/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/markdown_emoji_demo.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/layout.js",
+      "reason": null,
+      "description": "Markdown Emoji Demo demonstrates Cinder's layout APIs in a terminal application.",
+      "controls": [],
+      "tags": [
+        "layout",
+        "unicode"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "markdown-simple",
+      "title": "Markdown Simple",
+      "category": "Layout",
+      "repositoryPath": "example/markdown_simple.dart",
+      "sourcePath": "/cinder/generated/examples/markdown-simple/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/markdown_simple.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/layout.js",
+      "reason": null,
+      "description": "Markdown Simple demonstrates Cinder's layout APIs in a terminal application.",
+      "controls": [
+        "Scroll"
+      ],
+      "tags": [
+        "forms",
+        "layout"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "mouse-demo",
+      "title": "Mouse Demo",
+      "category": "Input",
+      "repositoryPath": "example/mouse_demo.dart",
+      "sourcePath": "/cinder/generated/examples/mouse-demo/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/mouse_demo.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/example-mouse-demo.js",
+      "reason": null,
+      "description": "Mouse Demo demonstrates Cinder's input APIs in a terminal application.",
+      "controls": [
+        "Mouse",
+        "Scroll"
+      ],
+      "tags": [
+        "input",
+        "mouse",
+        "scrolling",
+        "state"
+      ],
+      "adapterSourceUrl": "https://github.com/eukalpia/cinder/blob/main/docs-site/browser-adapters/mouse-demo.dart",
+      "runtimeMode": "browser-adapter",
+      "runtimeNote": "Runs through an official browser adapter while preserving the example intent and Cinder widget model."
+    },
+    {
+      "slug": "mouse-scroll-test",
+      "title": "Mouse Scroll Test",
+      "category": "Input",
+      "repositoryPath": "example/mouse_scroll_test.dart",
+      "sourcePath": "/cinder/generated/examples/mouse-scroll-test/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/mouse_scroll_test.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/input.js",
+      "reason": null,
+      "description": "Mouse Scroll Test demonstrates Cinder's input APIs in a terminal application.",
+      "controls": [
+        "Scroll"
+      ],
+      "tags": [
+        "input",
+        "mouse"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "multiple-scrollables",
+      "title": "Multiple Scrollables",
+      "category": "Data",
+      "repositoryPath": "example/multiple_scrollables.dart",
+      "sourcePath": "/cinder/generated/examples/multiple-scrollables/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/multiple_scrollables.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/data.js",
+      "reason": null,
+      "description": "Multiple Scrollables demonstrates Cinder's data APIs in a terminal application.",
+      "controls": [
+        "Scroll"
+      ],
+      "tags": [
+        "data",
+        "mouse"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "navigation-demo-simple",
+      "title": "Navigation Demo Simple",
+      "category": "Navigation",
+      "repositoryPath": "example/navigation_demo_simple.dart",
+      "sourcePath": "/cinder/generated/examples/navigation-demo-simple/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/navigation_demo_simple.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/navigation.js",
+      "reason": null,
+      "description": "Navigation Demo Simple demonstrates Cinder's navigation APIs in a terminal application.",
+      "controls": [
+        "Arrow keys",
+        "Enter"
+      ],
+      "tags": [
+        "keyboard",
+        "navigation",
+        "state"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "navigation-demo",
+      "title": "Navigation Demo",
+      "category": "Input",
+      "repositoryPath": "example/navigation_demo.dart",
+      "sourcePath": "/cinder/generated/examples/navigation-demo/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/navigation_demo.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/input.js",
+      "reason": null,
+      "description": "Navigation Demo demonstrates Cinder's input APIs in a terminal application.",
+      "controls": [
+        "Arrow keys",
+        "Enter",
+        "Text input"
+      ],
+      "tags": [
+        "forms",
+        "input",
+        "keyboard",
+        "state"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "overlay-demo",
+      "title": "Overlay Demo",
+      "category": "Navigation",
+      "repositoryPath": "example/overlay_demo.dart",
+      "sourcePath": "/cinder/generated/examples/overlay-demo/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/overlay_demo.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/navigation.js",
+      "reason": null,
+      "description": "Overlay Demo demonstrates Cinder's navigation APIs in a terminal application.",
+      "controls": [
+        "Escape"
+      ],
+      "tags": [
+        "keyboard",
+        "navigation",
+        "state",
+        "terminal"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "paste-test",
+      "title": "Paste Test",
+      "category": "Input",
+      "repositoryPath": "example/paste_test.dart",
+      "sourcePath": "/cinder/generated/examples/paste-test/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/paste_test.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/input.js",
+      "reason": null,
+      "description": "Paste Test demonstrates Cinder's input APIs in a terminal application.",
+      "controls": [
+        "Escape",
+        "Text input"
+      ],
+      "tags": [
+        "forms",
+        "input",
+        "keyboard",
+        "mouse",
+        "state",
+        "terminal"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "paste-verification",
+      "title": "Paste Verification",
+      "category": "Input",
+      "repositoryPath": "example/paste_verification.dart",
+      "sourcePath": "/cinder/generated/examples/paste-verification/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/paste_verification.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/input.js",
+      "reason": null,
+      "description": "This test verifies that terminal paste (Cmd+V) works correctly",
+      "controls": [
+        "Text input"
+      ],
+      "tags": [
+        "forms",
+        "input",
+        "terminal"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "profile-rendering",
+      "title": "Profile Rendering",
+      "category": "Data",
+      "repositoryPath": "example/profile_rendering.dart",
+      "sourcePath": "/cinder/generated/examples/profile-rendering/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/profile_rendering.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/data.js",
+      "reason": null,
+      "description": "Profiling app to measure where CPU time goes during active rendering.",
+      "controls": [
+        "Scroll"
+      ],
+      "tags": [
+        "animation",
+        "data",
+        "keyboard",
+        "scrolling",
+        "state",
+        "terminal"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "progress-bar-demo",
+      "title": "Progress Bar Demo",
+      "category": "Motion",
+      "repositoryPath": "example/progress_bar_demo.dart",
+      "sourcePath": "/cinder/generated/examples/progress-bar-demo/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/progress_bar_demo.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/motion.js",
+      "reason": null,
+      "description": "Progress Bar Demo demonstrates Cinder's motion APIs in a terminal application.",
+      "controls": [
+        "Scroll"
+      ],
+      "tags": [
+        "animation",
+        "forms",
+        "motion",
+        "scrolling",
+        "state",
+        "terminal"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "pty-controller-demo",
+      "title": "Pty Controller Demo",
+      "category": "Data",
+      "repositoryPath": "example/pty_controller_demo.dart",
+      "sourcePath": "/cinder/generated/examples/pty-controller-demo/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/pty_controller_demo.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/example-pty-controller-demo.js",
+      "reason": null,
+      "description": "Example demonstrating the PTY controller/widget pattern.",
+      "controls": [
+        "Enter",
+        "Scroll",
+        "Text input"
+      ],
+      "tags": [
+        "data",
+        "forms",
+        "keyboard",
+        "scrolling",
+        "state",
+        "terminal"
+      ],
+      "adapterSourceUrl": "https://github.com/eukalpia/cinder/blob/main/docs-site/browser-adapters/pty-controller-demo.dart",
+      "runtimeMode": "browser-sandbox",
+      "runtimeNote": "Runs in a deterministic browser sandbox. Native operating-system access is not presented as real access."
+    },
+    {
+      "slug": "readme-bento-full",
+      "title": "Readme Bento Full",
+      "category": "Data",
+      "repositoryPath": "example/readme_bento_full.dart",
+      "sourcePath": "/cinder/generated/examples/readme-bento-full/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/readme_bento_full.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/data.js",
+      "reason": null,
+      "description": "Full-screen bento grid with shader effects",
+      "controls": [],
+      "tags": [
+        "animation",
+        "data",
+        "keyboard",
+        "state",
+        "terminal"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "readme-demo",
+      "title": "Readme Demo",
+      "category": "Input",
+      "repositoryPath": "example/readme_demo.dart",
+      "sourcePath": "/cinder/generated/examples/readme-demo/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/readme_demo.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/input.js",
+      "reason": null,
+      "description": "Readme Demo demonstrates Cinder's input APIs in a terminal application.",
+      "controls": [
+        "Arrow keys",
+        "Enter",
+        "Space",
+        "Escape",
+        "Text input"
+      ],
+      "tags": [
+        "forms",
+        "input",
+        "keyboard",
+        "state",
+        "terminal"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "relayout-fixes-demo",
+      "title": "Relayout Fixes Demo",
+      "category": "Data",
+      "repositoryPath": "example/relayout_fixes_demo.dart",
+      "sourcePath": "/cinder/generated/examples/relayout-fixes-demo/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/relayout_fixes_demo.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/data.js",
+      "reason": null,
+      "description": "Interactive demo for the relayout fixes (post-0.6.0 layout-skip contract).",
+      "controls": [
+        "Scroll"
+      ],
+      "tags": [
+        "data",
+        "keyboard",
+        "scrolling",
+        "state"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "scroll-demo",
+      "title": "Scroll Demo",
+      "category": "Navigation",
+      "repositoryPath": "example/scroll_demo.dart",
+      "sourcePath": "/cinder/generated/examples/scroll-demo/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/scroll_demo.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/navigation.js",
+      "reason": null,
+      "description": "Scroll Demo demonstrates Cinder's navigation APIs in a terminal application.",
+      "controls": [
+        "Tab / Shift+Tab",
+        "Scroll"
+      ],
+      "tags": [
+        "forms",
+        "keyboard",
+        "navigation",
+        "scrolling",
+        "state"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "scroll-selection-demo",
+      "title": "Scroll Selection Demo",
+      "category": "Input",
+      "repositoryPath": "example/scroll_selection_demo.dart",
+      "sourcePath": "/cinder/generated/examples/scroll-selection-demo/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/scroll_selection_demo.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/input.js",
+      "reason": null,
+      "description": "Scroll Selection Demo demonstrates Cinder's input APIs in a terminal application.",
+      "controls": [
+        "Scroll"
+      ],
+      "tags": [
+        "forms",
+        "input",
+        "mouse",
+        "scrolling",
+        "state"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "sigint-demo",
+      "title": "Sigint Demo",
+      "category": "Framework",
+      "repositoryPath": "example/sigint_demo.dart",
+      "sourcePath": "/cinder/generated/examples/sigint-demo/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/sigint_demo.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/framework.js",
+      "reason": null,
+      "description": "Demo application showing custom Ctrl+C handling with \"press twice to quit\" pattern.",
+      "controls": [],
+      "tags": [
+        "animation",
+        "framework",
+        "keyboard",
+        "state"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "simple-scroll-test",
+      "title": "Simple Scroll Test",
+      "category": "Layout",
+      "repositoryPath": "example/simple_scroll_test.dart",
+      "sourcePath": "/cinder/generated/examples/simple-scroll-test/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/simple_scroll_test.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/layout.js",
+      "reason": null,
+      "description": "Simple Scroll Test demonstrates Cinder's layout APIs in a terminal application.",
+      "controls": [
+        "Scroll"
+      ],
+      "tags": [
+        "forms",
+        "layout",
+        "scrolling",
+        "state"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "stack-demo",
+      "title": "Stack Demo",
+      "category": "Layout",
+      "repositoryPath": "example/stack_demo.dart",
+      "sourcePath": "/cinder/generated/examples/stack-demo/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/stack_demo.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/layout.js",
+      "reason": null,
+      "description": "Stack Demo demonstrates Cinder's layout APIs in a terminal application.",
+      "controls": [],
+      "tags": [
+        "layout"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "stack-interactive-demo",
+      "title": "Stack Interactive Demo",
+      "category": "Data",
+      "repositoryPath": "example/stack_interactive_demo.dart",
+      "sourcePath": "/cinder/generated/examples/stack-interactive-demo/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/stack_interactive_demo.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/data.js",
+      "reason": null,
+      "description": "Stack Interactive Demo demonstrates Cinder's data APIs in a terminal application.",
+      "controls": [
+        "Arrow keys"
+      ],
+      "tags": [
+        "data",
+        "keyboard",
+        "state"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "stack-simple-stateful-demo",
+      "title": "Stack Simple Stateful Demo",
+      "category": "Layout",
+      "repositoryPath": "example/stack_simple_stateful_demo.dart",
+      "sourcePath": "/cinder/generated/examples/stack-simple-stateful-demo/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/stack_simple_stateful_demo.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/layout.js",
+      "reason": null,
+      "description": "Stack Simple Stateful Demo demonstrates Cinder's layout APIs in a terminal application.",
+      "controls": [],
+      "tags": [
+        "layout",
+        "state"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "task-manager-demo",
+      "title": "Task Manager Demo",
+      "category": "Data",
+      "repositoryPath": "example/task_manager_demo.dart",
+      "sourcePath": "/cinder/generated/examples/task-manager-demo/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/task_manager_demo.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/example-task-manager-demo.js",
+      "reason": null,
+      "description": "Task Manager Demo demonstrates Cinder's data APIs in a terminal application.",
+      "controls": [
+        "Tab / Shift+Tab"
+      ],
+      "tags": [
+        "animation",
+        "data",
+        "forms",
+        "keyboard",
+        "state",
+        "terminal"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "test-resize-demo",
+      "title": "Test Resize Demo",
+      "category": "Data",
+      "repositoryPath": "example/test_resize_demo.dart",
+      "sourcePath": "/cinder/generated/examples/test-resize-demo/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/test_resize_demo.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/example-test-resize-demo.js",
+      "reason": null,
+      "description": "Terminal Resize Event Demo",
+      "controls": [],
+      "tags": [
+        "data",
+        "terminal"
+      ],
+      "adapterSourceUrl": "https://github.com/eukalpia/cinder/blob/main/docs-site/browser-adapters/test-resize-demo.dart",
+      "runtimeMode": "browser-adapter",
+      "runtimeNote": "Runs through an official browser adapter while preserving the example intent and Cinder widget model."
+    },
+    {
+      "slug": "test-resize-improved",
+      "title": "Test Resize Improved",
+      "category": "Data",
+      "repositoryPath": "example/test_resize_improved.dart",
+      "sourcePath": "/cinder/generated/examples/test-resize-improved/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/test_resize_improved.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/example-test-resize-improved.js",
+      "reason": null,
+      "description": "Test Resize Improved demonstrates Cinder's data APIs in a terminal application.",
+      "controls": [],
+      "tags": [
+        "animation",
+        "data",
+        "mouse",
+        "state",
+        "terminal"
+      ],
+      "adapterSourceUrl": "https://github.com/eukalpia/cinder/blob/main/docs-site/browser-adapters/test-resize-improved.dart",
+      "runtimeMode": "browser-adapter",
+      "runtimeNote": "Runs through an official browser adapter while preserving the example intent and Cinder widget model."
+    },
+    {
+      "slug": "test-resize",
+      "title": "Test Resize",
+      "category": "Data",
+      "repositoryPath": "example/test_resize.dart",
+      "sourcePath": "/cinder/generated/examples/test-resize/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/test_resize.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/example-test-resize.js",
+      "reason": null,
+      "description": "Test Resize demonstrates Cinder's data APIs in a terminal application.",
+      "controls": [],
+      "tags": [
+        "animation",
+        "data",
+        "mouse",
+        "state",
+        "terminal"
+      ],
+      "adapterSourceUrl": "https://github.com/eukalpia/cinder/blob/main/docs-site/browser-adapters/test-resize.dart",
+      "runtimeMode": "browser-adapter",
+      "runtimeNote": "Runs through an official browser adapter while preserving the example intent and Cinder widget model."
+    },
+    {
+      "slug": "test-simple-scroll",
+      "title": "Test Simple Scroll",
+      "category": "Layout",
+      "repositoryPath": "example/test_simple_scroll.dart",
+      "sourcePath": "/cinder/generated/examples/test-simple-scroll/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/test_simple_scroll.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/layout.js",
+      "reason": null,
+      "description": "Test Simple Scroll demonstrates Cinder's layout APIs in a terminal application.",
+      "controls": [
+        "Scroll"
+      ],
+      "tags": [
+        "layout"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "test-sparkles-width",
+      "title": "Test Sparkles Width",
+      "category": "Framework",
+      "repositoryPath": "example/test_sparkles_width.dart",
+      "sourcePath": "/cinder/generated/examples/test-sparkles-width/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/test_sparkles_width.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/framework.js",
+      "reason": null,
+      "description": "Test Sparkles Width demonstrates Cinder's framework APIs in a terminal application.",
+      "controls": [],
+      "tags": [
+        "framework",
+        "unicode"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "test-tui-colors",
+      "title": "Test Tui Colors",
+      "category": "Layout",
+      "repositoryPath": "example/test_tui_colors.dart",
+      "sourcePath": "/cinder/generated/examples/test-tui-colors/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/test_tui_colors.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/layout.js",
+      "reason": null,
+      "description": "Test Tui Colors demonstrates Cinder's layout APIs in a terminal application.",
+      "controls": [],
+      "tags": [
+        "layout"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "test-visual-centering",
+      "title": "Test Visual Centering",
+      "category": "Layout",
+      "repositoryPath": "example/test_visual_centering.dart",
+      "sourcePath": "/cinder/generated/examples/test-visual-centering/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/test_visual_centering.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/layout.js",
+      "reason": null,
+      "description": "Test Visual Centering demonstrates Cinder's layout APIs in a terminal application.",
+      "controls": [],
+      "tags": [
+        "layout",
+        "unicode"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "test-widget-replacement",
+      "title": "Test Widget Replacement",
+      "category": "Layout",
+      "repositoryPath": "example/test_widget_replacement.dart",
+      "sourcePath": "/cinder/generated/examples/test-widget-replacement/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/test_widget_replacement.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/layout.js",
+      "reason": null,
+      "description": "Test Widget Replacement demonstrates Cinder's layout APIs in a terminal application.",
+      "controls": [],
+      "tags": [
+        "layout",
+        "state"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "text-field-cursor-styles-demo",
+      "title": "Cursor Styles Demo",
+      "category": "Input",
+      "repositoryPath": "example/text_field/cursor_styles_demo.dart",
+      "sourcePath": "/cinder/generated/examples/text-field-cursor-styles-demo/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/text_field/cursor_styles_demo.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/input.js",
+      "reason": null,
+      "description": "Cursor Styles Demo demonstrates Cinder's input APIs in a terminal application.",
+      "controls": [
+        "Tab / Shift+Tab",
+        "Text input"
+      ],
+      "tags": [
+        "forms",
+        "input",
+        "keyboard",
+        "state",
+        "terminal"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "text-field-submit-demo",
+      "title": "Submit Demo",
+      "category": "Input",
+      "repositoryPath": "example/text_field/submit_demo.dart",
+      "sourcePath": "/cinder/generated/examples/text-field-submit-demo/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/text_field/submit_demo.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/input.js",
+      "reason": null,
+      "description": "Submit Demo demonstrates Cinder's input APIs in a terminal application.",
+      "controls": [
+        "Enter",
+        "Text input"
+      ],
+      "tags": [
+        "forms",
+        "input",
+        "state",
+        "terminal"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "text-field-text-field-simple-refactored",
+      "title": "Text Field Simple Refactored",
+      "category": "Input",
+      "repositoryPath": "example/text_field/text_field_simple_refactored.dart",
+      "sourcePath": "/cinder/generated/examples/text-field-text-field-simple-refactored/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/text_field/text_field_simple_refactored.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/input.js",
+      "reason": null,
+      "description": "Text Field Simple Refactored demonstrates Cinder's input APIs in a terminal application.",
+      "controls": [
+        "Tab / Shift+Tab",
+        "Enter",
+        "Text input"
+      ],
+      "tags": [
+        "forms",
+        "input",
+        "keyboard",
+        "state"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "text-tabs-demo",
+      "title": "Text Tabs Demo",
+      "category": "Navigation",
+      "repositoryPath": "example/text_tabs_demo.dart",
+      "sourcePath": "/cinder/generated/examples/text-tabs-demo/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/text_tabs_demo.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/navigation.js",
+      "reason": null,
+      "description": "Text Tabs Demo demonstrates Cinder's navigation APIs in a terminal application.",
+      "controls": [
+        "Tab / Shift+Tab"
+      ],
+      "tags": [
+        "keyboard",
+        "navigation",
+        "state"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "text-wrapping-demo",
+      "title": "Text Wrapping Demo",
+      "category": "Layout",
+      "repositoryPath": "example/text_wrapping_demo.dart",
+      "sourcePath": "/cinder/generated/examples/text-wrapping-demo/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/text_wrapping_demo.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/layout.js",
+      "reason": null,
+      "description": "Text Wrapping Demo demonstrates Cinder's layout APIs in a terminal application.",
+      "controls": [
+        "Scroll"
+      ],
+      "tags": [
+        "layout"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "textfield-demo",
+      "title": "Textfield Demo",
+      "category": "Input",
+      "repositoryPath": "example/textfield_demo.dart",
+      "sourcePath": "/cinder/generated/examples/textfield-demo/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/textfield_demo.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/example-textfield-demo.js",
+      "reason": null,
+      "description": "Textfield Demo demonstrates Cinder's input APIs in a terminal application.",
+      "controls": [
+        "Tab / Shift+Tab",
+        "Enter",
+        "Escape",
+        "Scroll",
+        "Text input"
+      ],
+      "tags": [
+        "forms",
+        "input",
+        "keyboard",
+        "scrolling",
+        "state",
+        "terminal",
+        "unicode"
+      ],
+      "adapterSourceUrl": "https://github.com/eukalpia/cinder/blob/main/docs-site/browser-adapters/textfield-demo.dart",
+      "runtimeMode": "browser-adapter",
+      "runtimeNote": "Runs through an official browser adapter while preserving the example intent and Cinder widget model."
+    },
+    {
+      "slug": "theme-showcase",
+      "title": "Theme Showcase",
+      "category": "Data",
+      "repositoryPath": "example/theme_showcase.dart",
+      "sourcePath": "/cinder/generated/examples/theme-showcase/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/theme_showcase.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/data.js",
+      "reason": null,
+      "description": "Theme showcase example demonstrating all built-in themes.",
+      "controls": [
+        "Arrow keys",
+        "Escape"
+      ],
+      "tags": [
+        "animation",
+        "data",
+        "keyboard",
+        "state"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "web-showcase",
+      "title": "Web Showcase",
+      "category": "Framework",
+      "repositoryPath": "example/web_showcase.dart",
+      "sourcePath": "/cinder/generated/examples/web-showcase/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/example/web_showcase.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/framework.js",
+      "reason": null,
+      "description": "Web Showcase demonstrates Cinder's framework APIs in a terminal application.",
+      "controls": [],
+      "tags": [
+        "framework"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "counter-demo",
+      "title": "Counter Demo",
+      "category": "Motion",
+      "repositoryPath": "landing/demos/counter_demo.dart",
+      "sourcePath": "/cinder/generated/examples/counter-demo/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/landing/demos/counter_demo.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/motion.js",
+      "reason": null,
+      "description": "Counter Demo demonstrates Cinder's motion APIs in a terminal application.",
+      "controls": [
+        "Arrow keys",
+        "Enter",
+        "Space"
+      ],
+      "tags": [
+        "animation",
+        "keyboard",
+        "motion",
+        "state"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "layout-demo",
+      "title": "Layout Demo",
+      "category": "Layout",
+      "repositoryPath": "landing/demos/layout_demo.dart",
+      "sourcePath": "/cinder/generated/examples/layout-demo/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/landing/demos/layout_demo.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/layout.js",
+      "reason": null,
+      "description": "Layout Demo demonstrates Cinder's layout APIs in a terminal application.",
+      "controls": [],
+      "tags": [
+        "layout"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "list-view-demo",
+      "title": "List View Demo",
+      "category": "Input",
+      "repositoryPath": "landing/demos/list_view_demo.dart",
+      "sourcePath": "/cinder/generated/examples/list-view-demo/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/landing/demos/list_view_demo.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/input.js",
+      "reason": null,
+      "description": "List View Demo demonstrates Cinder's input APIs in a terminal application.",
+      "controls": [
+        "Arrow keys",
+        "Scroll",
+        "Text input"
+      ],
+      "tags": [
+        "forms",
+        "input",
+        "keyboard",
+        "scrolling",
+        "state"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "text-field-demo",
+      "title": "Text Field Demo",
+      "category": "Input",
+      "repositoryPath": "landing/demos/text_field_demo.dart",
+      "sourcePath": "/cinder/generated/examples/text-field-demo/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/landing/demos/text_field_demo.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/input.js",
+      "reason": null,
+      "description": "Text Field Demo demonstrates Cinder's input APIs in a terminal application.",
+      "controls": [
+        "Enter",
+        "Text input"
+      ],
+      "tags": [
+        "forms",
+        "input",
+        "state",
+        "terminal"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "cinder-riverpod-counter-watch-demo",
+      "title": "Counter Watch Demo",
+      "category": "Motion",
+      "repositoryPath": "packages/cinder_riverpod/example/counter_watch_demo.dart",
+      "sourcePath": "/cinder/generated/examples/cinder-riverpod-counter-watch-demo/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/packages/cinder_riverpod/example/counter_watch_demo.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/example-cinder-riverpod-counter-watch-demo.js",
+      "reason": null,
+      "description": "Displays the current counter value using context.watch",
+      "controls": [],
+      "tags": [
+        "animation",
+        "keyboard",
+        "motion"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    },
+    {
+      "slug": "cinder-web-lib-main",
+      "title": "Main",
+      "category": "Data",
+      "repositoryPath": "packages/cinder_web/example/lib/main.dart",
+      "sourcePath": "/cinder/generated/examples/cinder-web-lib-main/source.dart",
+      "sourceUrl": "https://github.com/eukalpia/cinder/blob/main/packages/cinder_web/example/lib/main.dart",
+      "runnable": true,
+      "bundle": "/cinder/generated/examples/example-cinder-web-lib-main.js",
+      "reason": null,
+      "description": "Main demonstrates Cinder's data APIs in a terminal application.",
+      "controls": [
+        "Arrow keys",
+        "Mouse"
+      ],
+      "tags": [
+        "animation",
+        "data",
+        "keyboard",
+        "mouse",
+        "state",
+        "terminal"
+      ],
+      "adapterSourceUrl": null,
+      "runtimeMode": "direct-web",
+      "runtimeNote": "Runs original repository Dart source in the browser, with Cinder rendering and Dart print output forwarded to the terminal."
+    }
+  ]
 }

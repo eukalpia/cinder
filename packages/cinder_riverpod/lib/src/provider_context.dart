@@ -37,6 +37,7 @@ extension ProviderContext on BuildContext {
   }) {
     final element = this as Element;
     final scopeElement = ProviderScope.scopeElementOf(this, listen: false);
+    dependOnInheritedElement(scopeElement);
     final dependencies = scopeElement.getDependencies(element);
 
     dependencies.listen(

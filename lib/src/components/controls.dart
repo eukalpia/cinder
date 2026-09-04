@@ -135,16 +135,16 @@ class _ButtonState extends State<Button> {
   }
 
   EdgeInsets get _defaultPadding => switch (widget.density) {
-        ControlDensity.compact => const EdgeInsets.symmetric(horizontal: 1),
-        ControlDensity.standard => const EdgeInsets.symmetric(
-            horizontal: 2,
-            vertical: 0,
-          ),
-        ControlDensity.comfortable => const EdgeInsets.symmetric(
-            horizontal: 2,
-            vertical: 1,
-          ),
-      };
+    ControlDensity.compact => const EdgeInsets.symmetric(horizontal: 1),
+    ControlDensity.standard => const EdgeInsets.symmetric(
+      horizontal: 2,
+      vertical: 0,
+    ),
+    ControlDensity.comfortable => const EdgeInsets.symmetric(
+      horizontal: 2,
+      vertical: 1,
+    ),
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -153,29 +153,32 @@ class _ButtonState extends State<Button> {
     final states = _states.value;
     final style = widget.style;
 
-    final background = style?.resolveBackground(states) ??
+    final background =
+        style?.resolveBackground(states) ??
         (states.contains(WidgetState.disabled)
             ? theme.surface
             : states.contains(WidgetState.pressed)
-                ? theme.secondary
-                : states.contains(WidgetState.focused) ||
-                        states.contains(WidgetState.hovered)
-                    ? theme.primary
-                    : theme.surface);
-    final foreground = style?.resolveForeground(states) ??
+            ? theme.secondary
+            : states.contains(WidgetState.focused) ||
+                  states.contains(WidgetState.hovered)
+            ? theme.primary
+            : theme.surface);
+    final foreground =
+        style?.resolveForeground(states) ??
         (states.contains(WidgetState.disabled)
             ? theme.outline
             : background == theme.primary
-                ? theme.onPrimary
-                : background == theme.secondary
-                    ? theme.onSecondary
-                    : theme.onSurface);
-    final borderColor = style?.resolveBorder(states) ??
+            ? theme.onPrimary
+            : background == theme.secondary
+            ? theme.onSecondary
+            : theme.onSurface);
+    final borderColor =
+        style?.resolveBorder(states) ??
         (states.contains(WidgetState.focused)
             ? theme.primary
             : states.contains(WidgetState.error)
-                ? theme.error
-                : theme.outline);
+            ? theme.error
+            : theme.outline);
     final textStyle = (style?.resolveTextStyle(states) ?? const TextStyle())
         .copyWith(color: foreground);
 
@@ -215,12 +218,15 @@ class _ButtonState extends State<Button> {
             _setState(WidgetState.pressed, false);
           },
           child: GestureDetector(
-            onTapDown:
-                _enabled ? (_) => _setState(WidgetState.pressed, true) : null,
-            onTapUp:
-                _enabled ? (_) => _setState(WidgetState.pressed, false) : null,
-            onTapCancel:
-                _enabled ? () => _setState(WidgetState.pressed, false) : null,
+            onTapDown: _enabled
+                ? (_) => _setState(WidgetState.pressed, true)
+                : null,
+            onTapUp: _enabled
+                ? (_) => _setState(WidgetState.pressed, false)
+                : null,
+            onTapCancel: _enabled
+                ? () => _setState(WidgetState.pressed, false)
+                : null,
             onTap: widget.onPressed,
             child: content,
           ),
@@ -293,8 +299,8 @@ class _CheckboxState extends State<Checkbox> {
     final color = !_enabled
         ? theme.outline
         : _focused || _hovered
-            ? theme.primary
-            : theme.onSurface;
+        ? theme.primary
+        : theme.onSurface;
     final mark = Text(glyph, style: TextStyle(color: color));
     final child = widget.label == null
         ? mark
@@ -320,8 +326,10 @@ class _CheckboxState extends State<Checkbox> {
         child: MouseRegion(
           onEnter: (_) => setState(() => _hovered = true),
           onExit: (_) => setState(() => _hovered = false),
-          child:
-              GestureDetector(onTap: _enabled ? _toggle : null, child: child),
+          child: GestureDetector(
+            onTap: _enabled ? _toggle : null,
+            child: child,
+          ),
         ),
       ),
     );
@@ -374,8 +382,8 @@ class _SwitchState extends State<Switch> {
     final trackColor = !_enabled
         ? theme.outlineVariant
         : widget.value
-            ? theme.primary
-            : theme.surface;
+        ? theme.primary
+        : theme.surface;
     final borderColor = _focused || _hovered ? theme.primary : theme.outline;
     final track = Container(
       padding: const EdgeInsets.symmetric(horizontal: 1),
@@ -417,8 +425,10 @@ class _SwitchState extends State<Switch> {
         child: MouseRegion(
           onEnter: (_) => setState(() => _hovered = true),
           onExit: (_) => setState(() => _hovered = false),
-          child:
-              GestureDetector(onTap: _enabled ? _toggle : null, child: child),
+          child: GestureDetector(
+            onTap: _enabled ? _toggle : null,
+            child: child,
+          ),
         ),
       ),
     );
@@ -461,8 +471,8 @@ class TabBar extends StatelessWidget {
                   (states) => index == selectedIndex
                       ? TuiTheme.of(context).primary
                       : states.contains(WidgetState.hovered)
-                          ? TuiTheme.of(context).surface
-                          : null,
+                      ? TuiTheme.of(context).surface
+                      : null,
                 ),
                 borderColor: WidgetStateProperty.all<Color?>(
                   index == selectedIndex

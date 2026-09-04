@@ -15,31 +15,38 @@ void main() {
     test('fails when the text is absent', () async {
       await testCinder('absent', (tester) async {
         await tester.pumpWidget(const Text('something'));
-        expect(containsTextOnce('MISSING').matches(tester.terminalState, {}),
-            isFalse);
+        expect(
+          containsTextOnce('MISSING').matches(tester.terminalState, {}),
+          isFalse,
+        );
       }, size: const Size(20, 3));
     });
 
-    test('fails on duplicates - the stale-ghost symptom containsText misses',
-        () async {
-      await testCinder('duplicates', (tester) async {
-        await tester.pumpWidget(
-          const Column(children: [Text('GHOST'), Text('GHOST')]),
-        );
-        // containsText is satisfied by either copy...
-        expect(tester.terminalState, containsText('GHOST'));
-        // ...containsTextOnce is not.
-        expect(containsTextOnce('GHOST').matches(tester.terminalState, {}),
-            isFalse);
-        // The mismatch description lists every position.
-        final mismatch = StringDescription();
-        final state = <dynamic, dynamic>{};
-        containsTextOnce('GHOST').matches(tester.terminalState, state);
-        containsTextOnce('GHOST')
-            .describeMismatch(tester.terminalState, mismatch, state, false);
-        expect(mismatch.toString(), contains('2 occurrences'));
-      }, size: const Size(20, 4));
-    });
+    test(
+      'fails on duplicates - the stale-ghost symptom containsText misses',
+      () async {
+        await testCinder('duplicates', (tester) async {
+          await tester.pumpWidget(
+            const Column(children: [Text('GHOST'), Text('GHOST')]),
+          );
+          // containsText is satisfied by either copy...
+          expect(tester.terminalState, containsText('GHOST'));
+          // ...containsTextOnce is not.
+          expect(
+            containsTextOnce('GHOST').matches(tester.terminalState, {}),
+            isFalse,
+          );
+          // The mismatch description lists every position.
+          final mismatch = StringDescription();
+          final state = <dynamic, dynamic>{};
+          containsTextOnce('GHOST').matches(tester.terminalState, state);
+          containsTextOnce(
+            'GHOST',
+          ).describeMismatch(tester.terminalState, mismatch, state, false);
+          expect(mismatch.toString(), contains('2 occurrences'));
+        }, size: const Size(20, 4));
+      },
+    );
   });
 
   group('hasTextAt', () {
@@ -50,9 +57,13 @@ void main() {
         );
         expect(tester.terminalState, hasTextAt(0, 0, 'AB'));
         expect(
-            hasTextAt(1, 0, 'AB').matches(tester.terminalState, {}), isFalse);
+          hasTextAt(1, 0, 'AB').matches(tester.terminalState, {}),
+          isFalse,
+        );
         expect(
-            hasTextAt(0, 1, 'AB').matches(tester.terminalState, {}), isFalse);
+          hasTextAt(0, 1, 'AB').matches(tester.terminalState, {}),
+          isFalse,
+        );
       }, size: const Size(10, 3));
     });
   });

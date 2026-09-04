@@ -206,13 +206,13 @@ final class CinderTask<T> {
   }
 
   CinderTaskSnapshot _snapshot() => CinderTaskSnapshot(
-        id: id,
-        label: label,
-        state: state,
-        startedAt: startedAt,
-        completedAt: completedAt ?? DateTime.now(),
-        error: error,
-      );
+    id: id,
+    label: label,
+    state: state,
+    startedAt: startedAt,
+    completedAt: completedAt ?? DateTime.now(),
+    error: error,
+  );
 }
 
 /// Owns cancellable work for a widget, controller, session, or application.
@@ -222,7 +222,7 @@ final class CinderTask<T> {
 /// from accumulating every operation they have ever started.
 final class CinderTaskScope {
   CinderTaskScope({this.historyLimit = 64})
-      : assert(historyLimit >= 0, 'historyLimit must be non-negative');
+    : assert(historyLimit >= 0, 'historyLimit must be non-negative');
 
   final int historyLimit;
   final Map<int, CinderTask<dynamic>> _active = <int, CinderTask<dynamic>>{};
@@ -230,6 +230,7 @@ final class CinderTaskScope {
   final Queue<CinderTaskSnapshot> _history = Queue<CinderTaskSnapshot>();
 
   bool _disposed = false;
+  Future<void>? _disposal;
   int _nextTaskId = 1;
   int _startedTaskCount = 0;
   int _completedTaskCount = 0;
@@ -260,7 +261,8 @@ final class CinderTaskScope {
 
     final id = _nextTaskId++;
     final source = CancellationTokenSource();
-    final future = Future<T>.sync(() => operation(source.token));
+    final result = Completer<T>();
+    final future = result.future;
     final task = CinderTask<T>._(
       id: id,
       label: label ?? 'task-$id',
@@ -273,29 +275,33 @@ final class CinderTaskScope {
     _active[id] = task;
 
     late final Future<void> completion;
-    completion = future.then<void>(
-      (_) => task._complete(
-        task.token.isCancelled
-            ? CinderTaskState.cancelled
-            : CinderTaskState.succeeded,
-        task.token.reason,
-      ),
-      onError: (Object error, StackTrace _) {
-        task._complete(
-          task.token.isCancelled || error is CancellationException
-              ? CinderTaskState.cancelled
-              : CinderTaskState.failed,
-          error,
-        );
-      },
-    ).whenComplete(() {
-      _active.remove(id);
-      _pending.remove(completion);
-      _completedTaskCount++;
-      _remember(task._snapshot());
-    });
+    completion = future
+        .then<void>(
+          (_) => task._complete(
+            task.token.isCancelled
+                ? CinderTaskState.cancelled
+                : CinderTaskState.succeeded,
+            task.token.reason,
+          ),
+          onError: (Object error, StackTrace _) {
+            task._complete(
+              task.token.isCancelled || error is CancellationException
+                  ? CinderTaskState.cancelled
+                  : CinderTaskState.failed,
+              error,
+            );
+          },
+        )
+        .whenComplete(() {
+          _active.remove(id);
+          _pending.remove(completion);
+          _completedTaskCount++;
+          _remember(task._snapshot());
+        });
     _pending.add(completion);
 
+    // Register ownership before user code can synchronously dispose the scope.
+    result.complete(Future<T>.sync(() => operation(source.token)));
     return task;
   }
 
@@ -315,9 +321,17 @@ final class CinderTaskScope {
   }
 
   /// Cancels all work and waits for owned operations to finish unwinding.
-  Future<void> dispose([Object? reason]) async {
-    if (_disposed) return;
+  /// Repeated calls wait for the same cooperative cleanup.
+  Future<void> dispose([Object? reason]) {
+    if (_disposal != null) return _disposal!;
     _disposed = true;
+    final completion = Completer<void>();
+    _disposal = completion.future;
+    completion.complete(_disposeTasks(reason));
+    return completion.future;
+  }
+
+  Future<void> _disposeTasks(Object? reason) async {
     cancelAll(reason ?? 'task scope disposed');
 
     final pending = List<Future<void>>.of(_pending);
@@ -333,8 +347,10 @@ final class CinderTaskScope {
   /// unhandled asynchronous errors.
   void disposeDetached([Object? reason]) {
     final zone = Zone.current;
-    unawaited(dispose(reason).catchError((Object error, StackTrace stackTrace) {
-      zone.handleUncaughtError(error, stackTrace);
-    }));
+    unawaited(
+      dispose(reason).catchError((Object error, StackTrace stackTrace) {
+        zone.handleUncaughtError(error, stackTrace);
+      }),
+    );
   }
 }

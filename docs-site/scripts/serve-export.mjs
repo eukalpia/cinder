@@ -8,7 +8,7 @@ const scriptFile = fileURLToPath(import.meta.url);
 const siteRoot = path.resolve(path.dirname(scriptFile), '..');
 const outRoot = path.join(siteRoot, 'out');
 const port = Number.parseInt(process.env.PORT ?? '4173', 10);
-const basePath = normalizeBasePath(process.env.NEXT_PUBLIC_BASE_PATH ?? '/cinder');
+const basePath = normalizeBasePath(process.env.NEXT_PUBLIC_BASE_PATH ?? '');
 
 const mimeTypes = new Map([
   ['.css', 'text/css; charset=utf-8'],
@@ -28,7 +28,7 @@ const server = createServer(async (request, response) => {
     const requestUrl = new URL(request.url ?? '/', `http://${request.headers.host}`);
     const pathname = decodeURIComponent(requestUrl.pathname);
 
-    if (pathname === '/') {
+    if (basePath && pathname === '/') {
       response.writeHead(302, { Location: `${basePath}/` });
       response.end();
       return;

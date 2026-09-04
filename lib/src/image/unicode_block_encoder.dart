@@ -35,10 +35,7 @@ class UnicodeBlockEncoder {
   /// the terminal's default background color.
   /// [alphaThreshold] - Alpha value below which pixels are treated as transparent.
   /// Default is 128.
-  const UnicodeBlockEncoder({
-    this.transparentColor,
-    this.alphaThreshold = 128,
-  });
+  const UnicodeBlockEncoder({this.transparentColor, this.alphaThreshold = 128});
 
   /// Encode an RGBA image to a list of rows, where each row contains
   /// cells with character + foreground + background colors.
@@ -249,10 +246,10 @@ class UnicodeBlockEncoder {
     for (int y = 0; y < height; y++) {
       final t = height > 1 ? y / (height - 1) : 0.0;
       final r = (topColor.red + (bottomColor.red - topColor.red) * t).round();
-      final g =
-          (topColor.green + (bottomColor.green - topColor.green) * t).round();
-      final b =
-          (topColor.blue + (bottomColor.blue - topColor.blue) * t).round();
+      final g = (topColor.green + (bottomColor.green - topColor.green) * t)
+          .round();
+      final b = (topColor.blue + (bottomColor.blue - topColor.blue) * t)
+          .round();
 
       for (int x = 0; x < width; x++) {
         final offset = (y * width + x) * 4;

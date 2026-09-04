@@ -19,10 +19,7 @@ void main() {
                 ),
                 child: SingleChildScrollView(
                   child: Column(
-                    children: List.generate(
-                      20,
-                      (index) => Text('Item $index'),
-                    ),
+                    children: List.generate(20, (index) => Text('Item $index')),
                   ),
                 ),
               ),
@@ -64,7 +61,8 @@ void main() {
                   child: Row(
                     children: [
                       Text(
-                          'This is a very long text that needs scrolling to see completely'),
+                        'This is a very long text that needs scrolling to see completely',
+                      ),
                     ],
                   ),
                 ),
@@ -115,48 +113,41 @@ void main() {
     });
 
     test('controlled scrolling', () async {
-      await testCinder(
-        'programmatic scroll',
-        (tester) async {
-          final controller = ScrollController();
+      await testCinder('programmatic scroll', (tester) async {
+        final controller = ScrollController();
 
-          await tester.pumpWidget(
-            Container(
-              width: 30,
-              height: 10,
-              decoration: BoxDecoration(
-                border: BoxBorder.all(color: Colors.yellow),
-              ),
-              child: SingleChildScrollView(
-                controller: controller,
-                child: Column(
-                  children: List.generate(
-                    30,
-                    (index) => Text('Line $index'),
-                  ),
-                ),
+        await tester.pumpWidget(
+          Container(
+            width: 30,
+            height: 10,
+            decoration: BoxDecoration(
+              border: BoxBorder.all(color: Colors.yellow),
+            ),
+            child: SingleChildScrollView(
+              controller: controller,
+              child: Column(
+                children: List.generate(30, (index) => Text('Line $index')),
               ),
             ),
-          );
+          ),
+        );
 
-          // Initial state
-          expect(tester.terminalState, containsText('Line 0'));
+        // Initial state
+        expect(tester.terminalState, containsText('Line 0'));
 
-          // Programmatically scroll down
-          controller.scrollDown(5);
-          await tester.pump();
+        // Programmatically scroll down
+        controller.scrollDown(5);
+        await tester.pump();
 
-          // Scroll to end
-          controller.scrollToEnd();
-          await tester.pump();
+        // Scroll to end
+        controller.scrollToEnd();
+        await tester.pump();
 
-          // Scroll to start
-          controller.scrollToStart();
-          await tester.pump();
-          expect(tester.terminalState, containsText('Line 0'));
-        },
-        debugPrintAfterPump: false,
-      );
+        // Scroll to start
+        controller.scrollToStart();
+        await tester.pump();
+        expect(tester.terminalState, containsText('Line 0'));
+      }, debugPrintAfterPump: false);
     });
   });
 
@@ -178,10 +169,8 @@ void main() {
                 child: ListView(
                   children: List.generate(
                     20,
-                    (index) => Container(
-                      height: 1,
-                      child: Text('List item $index'),
-                    ),
+                    (index) =>
+                        Container(height: 1, child: Text('List item $index')),
                   ),
                 ),
               ),
@@ -307,8 +296,7 @@ void main() {
   });
 
   group('Scrollbar', () {
-    test('visual development - with scrollbar',
-        skip: 'Known issue: Scrollbar arrow rendering', () async {
+    test('visual development - with scrollbar', () async {
       await testCinder(
         'scrollbar display',
         (tester) async {
@@ -440,45 +428,39 @@ void main() {
     });
 
     test('scroll physics boundaries', () async {
-      await testCinder(
-        'boundary testing',
-        (tester) async {
-          final controller = ScrollController();
+      await testCinder('boundary testing', (tester) async {
+        final controller = ScrollController();
 
-          await tester.pumpWidget(
-            Container(
-              width: 30,
-              height: 8,
-              decoration: BoxDecoration(
-                border: BoxBorder.all(color: Colors.red),
-              ),
-              child: SingleChildScrollView(
-                controller: controller,
-                child: Column(
-                  children: List.generate(
-                    5,
-                    (index) => Text('Short content $index'),
-                  ),
+        await tester.pumpWidget(
+          Container(
+            width: 30,
+            height: 8,
+            decoration: BoxDecoration(border: BoxBorder.all(color: Colors.red)),
+            child: SingleChildScrollView(
+              controller: controller,
+              child: Column(
+                children: List.generate(
+                  5,
+                  (index) => Text('Short content $index'),
                 ),
               ),
             ),
-          );
+          ),
+        );
 
-          // Try to scroll beyond boundaries
-          controller.scrollDown(100);
-          await tester.pump();
+        // Try to scroll beyond boundaries
+        controller.scrollDown(100);
+        await tester.pump();
 
-          // Should be clamped to max extent
-          expect(controller.atEnd, isTrue);
+        // Should be clamped to max extent
+        expect(controller.atEnd, isTrue);
 
-          controller.scrollUp(100);
-          await tester.pump();
+        controller.scrollUp(100);
+        await tester.pump();
 
-          // Should be clamped to min extent
-          expect(controller.atStart, isTrue);
-        },
-        debugPrintAfterPump: false,
-      );
+        // Should be clamped to min extent
+        expect(controller.atStart, isTrue);
+      }, debugPrintAfterPump: false);
     });
   });
 }

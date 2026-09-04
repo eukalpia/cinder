@@ -5,10 +5,7 @@ void main() {
   group('TerminalCapabilities safety profiles', () {
     test('CI disables terminal control even with an xterm TERM', () {
       final capabilities = TerminalCapabilities.fromEnvironment(
-        const <String, String>{
-          'TERM': 'xterm-256color',
-          'CI': 'true',
-        },
+        const <String, String>{'TERM': 'xterm-256color', 'CI': 'true'},
       );
 
       expect(capabilities.isCi, isTrue);
@@ -32,10 +29,7 @@ void main() {
 
     test('NO_COLOR disables color without disabling keyboard input', () {
       final capabilities = TerminalCapabilities.fromEnvironment(
-        const <String, String>{
-          'TERM': 'xterm-256color',
-          'NO_COLOR': '1',
-        },
+        const <String, String>{'TERM': 'xterm-256color', 'NO_COLOR': '1'},
       );
 
       expect(capabilities.isInteractive, isTrue);

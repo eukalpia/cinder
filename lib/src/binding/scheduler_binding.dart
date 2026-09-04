@@ -70,8 +70,11 @@ abstract final class FrameRate {
 
 /// Entry for a transient frame callback that can be cancelled.
 class _FrameCallbackEntry {
-  _FrameCallbackEntry(this.callback,
-      {this.debugLabel, bool rescheduling = false}) {
+  _FrameCallbackEntry(
+    this.callback, {
+    this.debugLabel,
+    bool rescheduling = false,
+  }) {
     // In debug mode, capture the stack trace where the callback was registered.
     // When rescheduling (animations), keep the original stack trace.
     assert(() {
@@ -238,12 +241,14 @@ mixin SchedulerBinding on CinderBinding {
       try {
         callback(timing);
       } catch (e, stack) {
-        CinderError.reportError(CinderErrorDetails(
-          exception: e,
-          stack: stack,
-          library: 'cinder scheduler',
-          context: 'during frame timing callback',
-        ));
+        CinderError.reportError(
+          CinderErrorDetails(
+            exception: e,
+            stack: stack,
+            library: 'cinder scheduler',
+            context: 'during frame timing callback',
+          ),
+        );
       }
     }
   }
@@ -521,8 +526,9 @@ mixin SchedulerBinding on CinderBinding {
   @protected
   void executeFrame() {
     _lastFrameTime = DateTime.now();
-    final timeStamp =
-        Duration(microseconds: _lastFrameTime!.microsecondsSinceEpoch);
+    final timeStamp = Duration(
+      microseconds: _lastFrameTime!.microsecondsSinceEpoch,
+    );
     handleBeginFrame(timeStamp);
   }
 
@@ -579,8 +585,9 @@ mixin SchedulerBinding on CinderBinding {
       // Phase 1: Transient callbacks (animations)
       CinderTimeline.startSync('Animate');
       _schedulerPhase = SchedulerPhase.transientCallbacks;
-      final localTransientCallbacks =
-          Map<int, _FrameCallbackEntry>.of(_transientCallbacks);
+      final localTransientCallbacks = Map<int, _FrameCallbackEntry>.of(
+        _transientCallbacks,
+      );
       // Remove only the callbacks we're about to process, not any new ones
       // that might be added during callback execution
       for (final id in localTransientCallbacks.keys) {
@@ -651,8 +658,9 @@ mixin SchedulerBinding on CinderBinding {
 
       // Phase 4: Post-frame callbacks
       _schedulerPhase = SchedulerPhase.postFrameCallbacks;
-      final localPostFrameCallbacks =
-          Queue<FrameCallback>.of(_postFrameCallbacks);
+      final localPostFrameCallbacks = Queue<FrameCallback>.of(
+        _postFrameCallbacks,
+      );
       _postFrameCallbacks.clear();
       for (final callback in localPostFrameCallbacks) {
         _invokeFrameCallback(callback, _currentFrameTimeStamp!);
@@ -711,15 +719,18 @@ mixin SchedulerBinding on CinderBinding {
       }
       if (callbackStack != null) {
         contextMessage.write('\n\nCallback was originally registered at:\n');
-        contextMessage
-            .write(callbackStack.toString().split('\n').take(15).join('\n'));
+        contextMessage.write(
+          callbackStack.toString().split('\n').take(15).join('\n'),
+        );
       }
-      CinderError.reportError(CinderErrorDetails(
-        exception: exception,
-        stack: stack,
-        library: 'cinder scheduler',
-        context: contextMessage.toString(),
-      ));
+      CinderError.reportError(
+        CinderErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'cinder scheduler',
+          context: contextMessage.toString(),
+        ),
+      );
     } finally {
       assert(() {
         _FrameCallbackEntry.debugCurrentCallbackStack = null;

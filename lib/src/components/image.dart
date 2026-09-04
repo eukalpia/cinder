@@ -61,11 +61,7 @@ class ImageData {
       }
     }
 
-    return ImageData(
-      pixels: scaledPixels,
-      width: newWidth,
-      height: newHeight,
-    );
+    return ImageData(pixels: scaledPixels, width: newWidth, height: newHeight);
   }
 }
 
@@ -405,12 +401,12 @@ class Image extends StatefulWidget {
     this.placeholder,
     this.errorWidget,
     this.protocol,
-  })  : assert(pixelWidth > 0),
-        assert(pixelHeight > 0),
-        assert(pixels.length == pixelWidth * pixelHeight * 4),
-        image = ImageDataProvider(
-          ImageData(pixels: pixels, width: pixelWidth, height: pixelHeight),
-        );
+  }) : assert(pixelWidth > 0),
+       assert(pixelHeight > 0),
+       assert(pixels.length == pixelWidth * pixelHeight * 4),
+       image = ImageDataProvider(
+         ImageData(pixels: pixels, width: pixelWidth, height: pixelHeight),
+       );
 
   /// The image to display.
   final ImageProvider image;
@@ -569,11 +565,11 @@ class RenderImage extends RenderObject {
     int? requestedHeight,
     BoxFit fit = BoxFit.contain,
     ImageProtocol? protocol,
-  })  : _imageData = imageData,
-        _requestedWidth = requestedWidth,
-        _requestedHeight = requestedHeight,
-        _fit = fit,
-        _protocol = protocol;
+  }) : _imageData = imageData,
+       _requestedWidth = requestedWidth,
+       _requestedHeight = requestedHeight,
+       _fit = fit,
+       _protocol = protocol;
 
   /// Assumed pixels per cell (width x height).
   /// Common terminal defaults are 8x16 or 10x20.
@@ -820,7 +816,8 @@ class RenderImage extends RenderObject {
 
     // Register/update image for cleanup tracking
     // Re-register if position changed, no registration exists, or kittyImageId changed
-    final needsReregistration = _lastPaintX != x ||
+    final needsReregistration =
+        _lastPaintX != x ||
         _lastPaintY != y ||
         _imageRegistration == null ||
         _lastRegisteredKittyId != _kittyImageId;
@@ -877,13 +874,17 @@ class RenderImage extends RenderObject {
     final blockCells = _cachedBlockCells!;
 
     // Draw each cell individually using canvas.drawText
-    for (int row = 0;
-        row < blockCells.length && row < size.height.toInt();
-        row++) {
+    for (
+      int row = 0;
+      row < blockCells.length && row < size.height.toInt();
+      row++
+    ) {
       final rowCells = blockCells[row];
-      for (int col = 0;
-          col < rowCells.length && col < size.width.toInt();
-          col++) {
+      for (
+        int col = 0;
+        col < rowCells.length && col < size.width.toInt();
+        col++
+      ) {
         final cell = rowCells[col];
 
         // Create style from block cell colors

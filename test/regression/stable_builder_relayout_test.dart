@@ -11,54 +11,60 @@ import 'package:test/test.dart';
 /// stale child content stayed on screen.
 void main() {
   group('stable builders must not pin stale content', () {
-    test('ListView with a hoisted itemBuilder re-renders mutated state',
-        () async {
-      await testCinder('hoisted itemBuilder', (tester) async {
-        await tester.pumpWidget(_HoistedList());
-        // Settle the transient dirtiness left by the first layout pass
-        // (adoptChild re-marks the viewport while building children), so
-        // the next frame genuinely starts from a clean render object.
-        await tester.pump();
+    test(
+      'ListView with a hoisted itemBuilder re-renders mutated state',
+      () async {
+        await testCinder('hoisted itemBuilder', (tester) async {
+          await tester.pumpWidget(_HoistedList());
+          // Settle the transient dirtiness left by the first layout pass
+          // (adoptChild re-marks the viewport while building children), so
+          // the next frame genuinely starts from a clean render object.
+          await tester.pump();
 
-        expect(tester.terminalState.containsText('OLD-0'), isTrue);
+          expect(tester.terminalState.containsText('OLD-0'), isTrue);
 
-        tester.findState<_HoistedListState>().rename('NEW');
-        await tester.pump();
+          tester.findState<_HoistedListState>().rename('NEW');
+          await tester.pump();
 
-        expect(
-          tester.terminalState.containsText('NEW-0'),
-          isTrue,
-          reason: 'the itemBuilder closure is identical across rebuilds, '
-              'but the state it reads changed - the list must re-layout '
-              'and rebuild its children',
-        );
-        expect(tester.terminalState.containsText('OLD-0'), isFalse);
-      }, size: const Size(20, 6));
-    });
+          expect(
+            tester.terminalState.containsText('NEW-0'),
+            isTrue,
+            reason:
+                'the itemBuilder closure is identical across rebuilds, '
+                'but the state it reads changed - the list must re-layout '
+                'and rebuild its children',
+          );
+          expect(tester.terminalState.containsText('OLD-0'), isFalse);
+        }, size: const Size(20, 6));
+      },
+    );
 
-    test('LayoutBuilder with a hoisted builder re-renders mutated state',
-        () async {
-      await testCinder('hoisted LayoutBuilder builder', (tester) async {
-        await tester.pumpWidget(_HoistedLayoutBuilder());
-        // Settle the transient dirtiness left by the first layout pass
-        // (adoptChild re-marks the render object while inserting the built
-        // child), so the next frame genuinely starts from a clean state.
-        await tester.pump();
+    test(
+      'LayoutBuilder with a hoisted builder re-renders mutated state',
+      () async {
+        await testCinder('hoisted LayoutBuilder builder', (tester) async {
+          await tester.pumpWidget(_HoistedLayoutBuilder());
+          // Settle the transient dirtiness left by the first layout pass
+          // (adoptChild re-marks the render object while inserting the built
+          // child), so the next frame genuinely starts from a clean state.
+          await tester.pump();
 
-        expect(tester.terminalState.containsText('value=0'), isTrue);
+          expect(tester.terminalState.containsText('value=0'), isTrue);
 
-        tester.findState<_HoistedLayoutBuilderState>().increment();
-        await tester.pump();
+          tester.findState<_HoistedLayoutBuilderState>().increment();
+          await tester.pump();
 
-        expect(
-          tester.terminalState.containsText('value=1'),
-          isTrue,
-          reason: 'the builder closure is identical across rebuilds, but '
-              'the state it reads changed - the LayoutBuilder must re-run '
-              'its builder at the next layout',
-        );
-      }, size: const Size(20, 6));
-    });
+          expect(
+            tester.terminalState.containsText('value=1'),
+            isTrue,
+            reason:
+                'the builder closure is identical across rebuilds, but '
+                'the state it reads changed - the LayoutBuilder must re-run '
+                'its builder at the next layout',
+          );
+        }, size: const Size(20, 6));
+      },
+    );
   });
 }
 
@@ -74,8 +80,8 @@ class _HoistedListState extends State<_HoistedList> {
   // ListView the build method creates. A function declaration would not
   // guarantee a stable identity, which is what this test depends on.
   // ignore: prefer_function_declarations_over_variables
-  late final Widget Function(BuildContext, int) _builder =
-      (context, index) => Text('$_label-$index');
+  late final Widget Function(BuildContext, int) _builder = (context, index) =>
+      Text('$_label-$index');
 
   void rename(String label) {
     setState(() => _label = label);
@@ -83,11 +89,7 @@ class _HoistedListState extends State<_HoistedList> {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: 2,
-      itemExtent: 1,
-      itemBuilder: _builder,
-    );
+    return ListView.builder(itemCount: 2, itemExtent: 1, itemBuilder: _builder);
   }
 }
 
@@ -101,8 +103,8 @@ class _HoistedLayoutBuilderState extends State<_HoistedLayoutBuilder> {
 
   // Deliberately hoisted: identical builder instance across rebuilds.
   // ignore: prefer_function_declarations_over_variables
-  late final LayoutBuilderCallback _builder =
-      (context, constraints) => Text('value=$_value');
+  late final LayoutBuilderCallback _builder = (context, constraints) =>
+      Text('value=$_value');
 
   void increment() {
     setState(() => _value++);

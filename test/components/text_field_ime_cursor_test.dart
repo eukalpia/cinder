@@ -29,53 +29,59 @@ void main() {
     }
 
     test('tracks the cursor row across consecutive newlines', () async {
-      await testCinder(
-        'ime cursor consecutive newlines',
-        (tester) async {
-          // Lines: ['a', '', 'b', 'c'] — an empty line between 'a' and 'b'.
-          final controller = TextEditingController(text: 'a\n\nb\nc');
+      await testCinder('ime cursor consecutive newlines', (tester) async {
+        // Lines: ['a', '', 'b', 'c'] — an empty line between 'a' and 'b'.
+        final controller = TextEditingController(text: 'a\n\nb\nc');
 
-          await tester.pumpWidget(
-            TextField(
-              controller: controller,
-              width: 20,
-              maxLines: 6,
-              autofocus: true,
-            ),
-          );
+        await tester.pumpWidget(
+          TextField(
+            controller: controller,
+            width: 20,
+            maxLines: 6,
+            autofocus: true,
+          ),
+        );
 
-          final field = findTextField();
-          expect(field, isNotNull, reason: 'no RenderTextField found');
+        final field = findTextField();
+        expect(field, isNotNull, reason: 'no RenderTextField found');
 
-          // offset 0 -> 'a' on line 0
-          controller.selection = const TextSelection.collapsed(offset: 0);
-          await tester.pump();
-          final pos0 = field!.getImeCursorPosition();
-          expect(pos0, isNotNull);
+        // offset 0 -> 'a' on line 0
+        controller.selection = const TextSelection.collapsed(offset: 0);
+        await tester.pump();
+        final pos0 = field!.getImeCursorPosition();
+        expect(pos0, isNotNull);
 
-          // offset 3 -> 'b' on line 2 (one empty line sits between)
-          controller.selection = const TextSelection.collapsed(offset: 3);
-          await tester.pump();
-          final pos3 = field.getImeCursorPosition();
-          expect(pos3, isNotNull);
+        // offset 3 -> 'b' on line 2 (one empty line sits between)
+        controller.selection = const TextSelection.collapsed(offset: 3);
+        await tester.pump();
+        final pos3 = field.getImeCursorPosition();
+        expect(pos3, isNotNull);
 
-          // offset 5 -> 'c' on line 3
-          controller.selection = const TextSelection.collapsed(offset: 5);
-          await tester.pump();
-          final pos5 = field.getImeCursorPosition();
-          expect(pos5, isNotNull);
+        // offset 5 -> 'c' on line 3
+        controller.selection = const TextSelection.collapsed(offset: 5);
+        await tester.pump();
+        final pos5 = field.getImeCursorPosition();
+        expect(pos5, isNotNull);
 
-          // 'b' is two rows below 'a', not three: the empty line counts once.
-          expect(pos3!.dy - pos0!.dy, equals(2),
-              reason: "'b' should be two rows below 'a' (line index 2)");
-          // 'c' is three rows below 'a'.
-          expect(pos5!.dy - pos0.dy, equals(3),
-              reason: "'c' should be three rows below 'a' (line index 3)");
-          // Both 'a' and 'b' sit at the start of their line (column 0).
-          expect(pos3.dx, equals(pos0.dx),
-              reason: "'b' starts its line, same column as 'a'");
-        },
-      );
+        // 'b' is two rows below 'a', not three: the empty line counts once.
+        expect(
+          pos3!.dy - pos0!.dy,
+          equals(2),
+          reason: "'b' should be two rows below 'a' (line index 2)",
+        );
+        // 'c' is three rows below 'a'.
+        expect(
+          pos5!.dy - pos0.dy,
+          equals(3),
+          reason: "'c' should be three rows below 'a' (line index 3)",
+        );
+        // Both 'a' and 'b' sit at the start of their line (column 0).
+        expect(
+          pos3.dx,
+          equals(pos0.dx),
+          reason: "'b' starts its line, same column as 'a'",
+        );
+      });
     });
   });
 }

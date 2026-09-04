@@ -16,9 +16,11 @@ void main() {
       // Directory.current.path, which the OS canonicalizes. Without this the
       // expected paths keep the symlink prefix and the actual paths don't,
       // so every assertion fails on macOS (Linux CI has no such symlink).
-      tempRoot = Directory(Directory.systemTemp
-          .createTempSync('cinder_paths_test_')
-          .resolveSymbolicLinksSync());
+      tempRoot = Directory(
+        Directory.systemTemp
+            .createTempSync('cinder_paths_test_')
+            .resolveSymbolicLinksSync(),
+      );
     });
 
     tearDown(() {

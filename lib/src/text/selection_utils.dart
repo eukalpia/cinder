@@ -76,8 +76,8 @@ void paintTextWithSelection({
 
   final lineStartOffset =
       (lines.isNotEmpty && lineIndex > 0 && lineIndex < lines.length)
-          ? lineStartOffsets(text, lines)[lineIndex]
-          : 0;
+      ? lineStartOffsets(text, lines)[lineIndex]
+      : 0;
   final lineEndOffset = lineStartOffset + line.length;
 
   final selStart = math.min(selectionStart, selectionEnd);
@@ -97,8 +97,9 @@ void paintTextWithSelection({
       final beforeWidth = localSelStart > 0
           ? UnicodeWidth.stringWidth(line.substring(0, localSelStart))
           : 0;
-      final selectionStyle = (style ?? const TextStyle())
-          .copyWith(backgroundColor: selectionColor);
+      final selectionStyle = (style ?? const TextStyle()).copyWith(
+        backgroundColor: selectionColor,
+      );
       canvas.drawText(
         offset + Offset(beforeWidth.toDouble(), 0),
         selectedText,
@@ -107,8 +108,9 @@ void paintTextWithSelection({
 
       if (localSelEnd < line.length) {
         final afterText = line.substring(localSelEnd);
-        final beforeSelectedWidth =
-            UnicodeWidth.stringWidth(line.substring(0, localSelEnd));
+        final beforeSelectedWidth = UnicodeWidth.stringWidth(
+          line.substring(0, localSelEnd),
+        );
         canvas.drawText(
           offset + Offset(beforeSelectedWidth.toDouble(), 0),
           afterText,

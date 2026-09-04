@@ -9,7 +9,7 @@ import 'package:cinder/cinder.dart';
 /// When debug mode is enabled, the [DebugOverlay] will display performance
 /// metrics and the framework will enable extended logging.
 ///
-/// Debug mode can be toggled at runtime using [Ctrl+G].
+/// Debug mode can be toggled at runtime using `Ctrl+G`.
 ///
 /// Example:
 /// ```dart
@@ -83,12 +83,12 @@ void toggleDebugMode() {
 /// ## Automatic Integration
 ///
 /// **Every cinder app automatically has debug overlay support!**
-/// Just press [Ctrl+G] at any time to toggle the debug overlay.
+/// Just press `Ctrl+G` at any time to toggle the debug overlay.
 /// No manual wrapping required - it's built into [runApp].
 ///
 /// ## Debug Key
 ///
-/// The debug key is [Ctrl+G]. This sends a unique control character (0x07)
+/// The debug key is `Ctrl+G`. This sends a unique control character (0x07)
 /// that is rarely used by applications.
 ///
 /// ## Extended Logging
@@ -247,12 +247,7 @@ class _DebugOverlayState extends State<DebugOverlay> {
       fit: StackFit.expand,
       children: [
         widget.child,
-        if (showOverlay)
-          Positioned(
-            top: 0,
-            right: 0,
-            child: _buildOverlay(),
-          ),
+        if (showOverlay) Positioned(top: 0, right: 0, child: _buildOverlay()),
       ],
     );
   }
@@ -276,10 +271,7 @@ class _DebugOverlayState extends State<DebugOverlay> {
       ),
       child: Padding(
         padding: const EdgeInsets.all(1),
-        child: Text(
-          stats,
-          style: const TextStyle(color: Color(0xFFFFFFFF)),
-        ),
+        child: Text(stats, style: const TextStyle(color: Color(0xFFFFFFFF))),
       ),
     );
   }
@@ -308,19 +300,21 @@ class _DebugOverlayState extends State<DebugOverlay> {
     final lastFrameMs = _lastFrame!.totalDuration.inMicroseconds / 1000.0;
     final frameStatus = _lastFrame!.isSlowFrame ? '🔴 SLOW' : '🟢 OK';
     buffer.writeln(
-        'Frame #${_lastFrame!.frameNumber}: ${lastFrameMs.toStringAsFixed(2)}ms $frameStatus');
+      'Frame #${_lastFrame!.frameNumber}: ${lastFrameMs.toStringAsFixed(2)}ms $frameStatus',
+    );
 
     // FPS info - show actual measured FPS
     final targetFps = SchedulerBinding.instance.targetFps.toStringAsFixed(0);
     final limiting = SchedulerBinding.instance.enableFrameRateLimiting;
     buffer.writeln(
-        'FPS: ${_actualFps.toStringAsFixed(0)} / ${limiting ? targetFps : "∞"} target');
+      'FPS: ${_actualFps.toStringAsFixed(0)} / ${limiting ? targetFps : "∞"} target',
+    );
     buffer.writeln('Avg frame: ${_averageFrameTime.toStringAsFixed(2)}ms');
 
     // Slow frame count
     if (_slowFrameCount > 0) {
-      final slowPct =
-          (_slowFrameCount / _recentFrames.length * 100).toStringAsFixed(1);
+      final slowPct = (_slowFrameCount / _recentFrames.length * 100)
+          .toStringAsFixed(1);
       buffer.writeln('⚠️  Slow frames: $_slowFrameCount ($slowPct%)');
     }
 
@@ -338,8 +332,9 @@ class _DebugOverlayState extends State<DebugOverlay> {
 
     // CPU usage (frame processing time as % of wall time)
     final cpuStr = _cpuUsagePercent.toStringAsFixed(1);
-    final cpuIndicator =
-        _cpuUsagePercent > 50 ? '🔴' : (_cpuUsagePercent > 20 ? '🟡' : '🟢');
+    final cpuIndicator = _cpuUsagePercent > 50
+        ? '🔴'
+        : (_cpuUsagePercent > 20 ? '🟡' : '🟢');
     buffer.writeln('CPU: $cpuStr% $cpuIndicator (frame time)');
 
     // Memory usage
@@ -352,7 +347,8 @@ class _DebugOverlayState extends State<DebugOverlay> {
 
     // Debug features status
     buffer.writeln(
-        'Repaint rainbow: ${debugRepaintRainbowEnabled ? "ON 🌈" : "OFF"}');
+      'Repaint rainbow: ${debugRepaintRainbowEnabled ? "ON 🌈" : "OFF"}',
+    );
     buffer.write('Samples: ${_recentFrames.length}/${widget.maxSamples}');
 
     return buffer.toString();

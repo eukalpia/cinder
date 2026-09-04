@@ -20,6 +20,8 @@ class StdioBackend implements TerminalBackend {
   Size? _lastKnownSize;
   bool _disposed = false;
   Win32AnsiStdin? _win32Stdin;
+  bool? _originalEchoMode;
+  bool? _originalLineMode;
 
   StdioBackend() {
     _initializeSignalHandling();
@@ -35,8 +37,9 @@ class StdioBackend implements TerminalBackend {
 
       // Windows: Use polling for resize detection since SIGWINCH is not available
       _lastKnownSize = getSize();
-      _windowsResizeTimer =
-          Timer.periodic(const Duration(milliseconds: 250), (_) {
+      _windowsResizeTimer = Timer.periodic(const Duration(milliseconds: 250), (
+        _,
+      ) {
         if (!_disposed && stdout.hasTerminal) {
           final currentSize = getSize();
           if (_lastKnownSize != currentSize) {
@@ -118,7 +121,9 @@ class StdioBackend implements TerminalBackend {
   @override
   void enableRawMode() {
     try {
-      if (stdin.hasTerminal) {
+      if (_originalEchoMode == null && stdin.hasTerminal) {
+        _originalEchoMode = stdin.echoMode;
+        _originalLineMode = stdin.lineMode;
         stdin.echoMode = false;
         stdin.lineMode = false;
       }
@@ -129,13 +134,21 @@ class StdioBackend implements TerminalBackend {
 
   @override
   void disableRawMode() {
+    // Restore the caller's original modes, including terminals that already
+    // had echo or line buffering disabled before Cinder started.
+    final echoMode = _originalEchoMode;
+    final lineMode = _originalLineMode;
+    _originalEchoMode = null;
+    _originalLineMode = null;
     try {
-      if (stdin.hasTerminal) {
-        stdin.echoMode = true;
-        stdin.lineMode = true;
-      }
+      if (echoMode != null) stdin.echoMode = echoMode;
     } catch (e) {
-      // Ignore errors
+      // Continue restoring line mode if echo restoration fails.
+    }
+    try {
+      if (lineMode != null) stdin.lineMode = lineMode;
+    } catch (e) {
+      // The terminal may have been disconnected during shutdown.
     }
   }
 
@@ -154,10 +167,10 @@ class StdioBackend implements TerminalBackend {
     // sequences (disable mouse tracking, leave alternate screen, show cursor,
     // etc.) are actually written to the terminal. Without this, macOS terminals
     // can be left in a bad state (e.g., echo mode off, stuck in alt screen).
-    // See: https://github.com/eukalpia/cinder/issues/57
-    Future.wait<void>([stdout.flush(), stderr.flush()])
-        .then((_) => exit(exitCode))
-        .catchError((_) => exit(exitCode));
+    Future.wait<void>([
+      stdout.flush(),
+      stderr.flush(),
+    ]).then((_) => exit(exitCode)).catchError((_) => exit(exitCode));
   }
 
   @override

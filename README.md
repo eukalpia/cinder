@@ -12,7 +12,7 @@ integrations — without bringing Flutter or Node.js into your CLI runtime.
 
 [![CI](https://github.com/eukalpia/cinder/actions/workflows/ci.yml/badge.svg)](https://github.com/eukalpia/cinder/actions/workflows/ci.yml)
 [![Benchmark](https://github.com/eukalpia/cinder/actions/workflows/benchmark.yml/badge.svg)](https://github.com/eukalpia/cinder/actions/workflows/benchmark.yml)
-[![Dart](https://img.shields.io/badge/Dart-%3E%3D3.5-0175C2?logo=dart)](https://dart.dev)
+[![Dart](https://img.shields.io/badge/Dart-%3E%3D3.9-0175C2?logo=dart)](https://dart.dev)
 [![License](https://img.shields.io/badge/license-APACHE2-blue.svg)](LICENSE)
 
 [Quick start](#quick-start) · [Icons](#material-and-lucide-icons) · [Images](#terminal-images) · [Data](#data-visualization) · [Focus](#focus-and-keyboard-input) · [State management](#state-management) · [Testing](#testing) · [Architecture](#architecture)
@@ -20,7 +20,7 @@ integrations — without bringing Flutter or Node.js into your CLI runtime.
 </div>
 
 > [!IMPORTANT]
-> Cinder `1.0.0-dev.2` uses the Widget, Element, and RenderObject architecture
+> Cinder `1.0.0-rc.1` uses the Widget, Element, and RenderObject architecture
 > throughout. Earlier experimental APIs are not supported.
 
 ## Why Cinder?
@@ -379,7 +379,9 @@ The monorepo contains first-party integrations:
 | `cinder_riverpod` | Riverpod containers, watches, listeners, overrides, refresh, and invalidation | Riverpod `3.3.2` |
 | `cinder_bloc` | BLoC-style providers, builders, listeners, consumers, selectors, and context extensions | BLoC `9.2.1` |
 
-During monorepo development, reference packages by path:
+Until the matching versions are published to pub.dev, applications using the
+integration packages must override their transitive Cinder dependencies too.
+For a local checkout named `cinder`, a BLoC application uses:
 
 ```yaml
 dependencies:
@@ -387,7 +389,19 @@ dependencies:
     path: ../cinder
   cinder_bloc:
     path: ../cinder/packages/cinder_bloc
+
+dependency_overrides:
+  cinder:
+    path: ../cinder
+  cinder_nested:
+    path: ../cinder/packages/cinder_nested
+  cinder_provider:
+    path: ../cinder/packages/cinder_provider
 ```
+
+For pinned Git installation, including all integrations, see
+[`doc/installation.md`](doc/installation.md). Dependency overrides inside a
+library's own pubspec are not inherited by consuming applications.
 
 ### BLoC
 
@@ -532,21 +546,9 @@ cinder/
 
 ## Branch model
 
-Cinder uses three long-lived branches:
-
-| Branch | Role |
-| --- | --- |
-| `dev` | Active development and feature integration |
-| `test` | Release-candidate validation and stabilization |
-| `main` | Reviewed, tested, publishable project state |
-
-Promotion flow:
-
-```text
-feature/* → dev → test → main
-```
-
-Direct feature work should not target `main`.
+Create feature and fix branches from `main` and submit pull requests to `main`.
+All required checks must pass before integration. Release preparation and the
+remaining manual terminal checks are documented in [`doc/release.md`](doc/release.md).
 
 ## Performance
 
@@ -572,37 +574,37 @@ sizes, terminals, and benchmark configurations.
 
 ## Roadmap
 
-- [x] Flutter-style widget vocabulary
-- [x] remove the parallel legacy runtime
-- [x] Provider integration
-- [x] Riverpod 3 integration
-- [x] BLoC integration
-- [x] `FocusManager`, `FocusNode`, and traversal
-- [x] migrate `TextField` to focus nodes
-- [x] Renderer V2 reusable dirty-span foundation
-- [x] cached repaint layers and damage-only partial paint
-- [x] terminal scroll-region acceleration with fallback
-- [x] Material and Lucide icon packs
-- [x] Kitty, iTerm2, Sixel, and Unicode image rendering
-- [x] actions, shortcuts, commands, and command palette
-- [x] terminal-native charts and network graph rendering
-- [x] virtualized typed data table and tree view
-- [x] semantics snapshots, plain-text/JSON export, and diagnostics capture
-- [x] in-memory non-interactive widget rendering
-- [x] structured task/resource lifetime and failure-resilient shutdown
-- [x] normalized input routing, paste, IME, and enhanced keyboard lifecycle
-- [x] Unicode grapheme/column mapping and conservative capability profiles
-- [ ] broader production widget kit
-- [ ] automatic CLI flag integration for process startup
-- [ ] stable `1.0.0` release
+- Flutter-style widget vocabulary
+- remove the parallel legacy runtime
+- Provider integration
+- Riverpod 3 integration
+- BLoC integration
+- `FocusManager`, `FocusNode`, and traversal
+- migrate `TextField` to focus nodes
+- Renderer V2 reusable dirty-span foundation
+- cached repaint layers and damage-only partial paint
+- terminal scroll-region acceleration with fallback
+- Material and Lucide icon packs
+- Kitty, iTerm2, Sixel, and Unicode image rendering
+- actions, shortcuts, commands, and command palette
+- terminal-native charts and network graph rendering
+- virtualized typed data table and tree view
+- semantics snapshots, plain-text/JSON export, and diagnostics capture
+- in-memory non-interactive widget rendering
+- structured task/resource lifetime and failure-resilient shutdown
+- normalized input routing, paste, IME, and enhanced keyboard lifecycle
+- Unicode grapheme/column mapping and conservative capability profiles
+- Planned: broader production widget kit
+- Planned: automatic CLI flag integration for process startup
+- Planned: stable `1.0.0` release
 
 ## Contributing
 
-1. Create a feature or fix branch from `dev`.
+1. Create a feature or fix branch from `main`.
 2. Add or update tests for behavioral changes.
 3. Run formatting, analyzer, tests, and relevant benchmarks.
-4. Open a pull request into `dev`.
-5. Promote validated changes through `test` before `main`.
+4. Open a pull request into `main`.
+5. Verify CI before merging and tagging a release.
 
 Install repository-managed Git hooks with:
 
@@ -615,7 +617,7 @@ document deliberate differences.
 
 ## License and attribution
 
-Cinder is distributed under the [MIT License](LICENSE).
+Cinder is distributed under the [Apache License 2.0](LICENSE).
 
 Required upstream attribution is preserved in [`NOTICE.md`](NOTICE.md), the
 license files, and repository history.

@@ -8,8 +8,12 @@ void main() {
   group('ITerm2Encoder', () {
     group('encode', () {
       test('produces valid escape sequence format with BEL terminator', () {
-        final imageBytes =
-            Uint8List.fromList([0x89, 0x50, 0x4E, 0x47]); // PNG header bytes
+        final imageBytes = Uint8List.fromList([
+          0x89,
+          0x50,
+          0x4E,
+          0x47,
+        ]); // PNG header bytes
 
         final result = ITerm2Encoder.encode(imageBytes: imageBytes);
 
@@ -26,8 +30,10 @@ void main() {
       test('produces valid escape sequence format with ST terminator', () {
         final imageBytes = Uint8List.fromList([0x89, 0x50, 0x4E, 0x47]);
 
-        final result =
-            ITerm2Encoder.encode(imageBytes: imageBytes, useST: true);
+        final result = ITerm2Encoder.encode(
+          imageBytes: imageBytes,
+          useST: true,
+        );
 
         // Should end with ST (ESC \)
         expect(result, endsWith('\x1b\\'));
@@ -57,8 +63,13 @@ void main() {
       });
 
       test('base64 data is valid', () {
-        final imageBytes =
-            Uint8List.fromList([0x48, 0x65, 0x6C, 0x6C, 0x6F]); // "Hello"
+        final imageBytes = Uint8List.fromList([
+          0x48,
+          0x65,
+          0x6C,
+          0x6C,
+          0x6F,
+        ]); // "Hello"
 
         final result = ITerm2Encoder.encode(imageBytes: imageBytes);
 

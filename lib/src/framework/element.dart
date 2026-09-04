@@ -2,12 +2,7 @@ part of 'framework.dart';
 
 typedef ConditionalElementVisitor = bool Function(Element element);
 
-enum _ElementLifecycle {
-  initial,
-  active,
-  inactive,
-  defunct,
-}
+enum _ElementLifecycle { initial, active, inactive, defunct }
 
 /// Represents a node in the widget tree
 abstract class Element implements BuildContext {
@@ -48,7 +43,8 @@ abstract class Element implements BuildContext {
   void mount(Element? parent, dynamic newSlot) {
     assert(_lifecycleState == _ElementLifecycle.initial);
     assert(
-        parent == null || parent._lifecycleState == _ElementLifecycle.active);
+      parent == null || parent._lifecycleState == _ElementLifecycle.active,
+    );
     _parent = parent;
     _slot = newSlot;
     _depth = parent != null ? parent.depth + 1 : 1;
@@ -121,7 +117,7 @@ abstract class Element implements BuildContext {
   }
 
   /// Propagates a slot change down the element tree until it reaches a
-  /// [RenderObjectElement], which will call [moveRenderObjectChild] on its
+  /// [RenderObjectElement], which calls [RenderObjectElement.moveRenderObjectChild] on its
   /// ancestor to reorder the render object in the parent's child list.
   void updateSlotForChild(Element child, dynamic newSlot) {
     void visit(Element element) {
@@ -247,7 +243,9 @@ abstract class Element implements BuildContext {
 
   @protected
   List<Element> updateChildren(
-      List<Element> oldChildren, List<Widget> newWidgets) {
+    List<Element> oldChildren,
+    List<Widget> newWidgets,
+  ) {
     Element? replaceWithNullIfForgotten(Element child) {
       return _owner!._forgottenChildren.contains(child) ? null : child;
     }
@@ -267,24 +265,32 @@ abstract class Element implements BuildContext {
     int newChildrenBottom = newWidgets.length - 1;
     int oldChildrenBottom = oldChildren.length - 1;
 
-    final List<Element?> newChildren =
-        List<Element?>.filled(newWidgets.length, null);
+    final List<Element?> newChildren = List<Element?>.filled(
+      newWidgets.length,
+      null,
+    );
 
     Element? previousChild;
 
     // Update the top of the list.
     while ((oldChildrenTop <= oldChildrenBottom) &&
         (newChildrenTop <= newChildrenBottom)) {
-      final Element? oldChild =
-          replaceWithNullIfForgotten(oldChildren[oldChildrenTop]);
+      final Element? oldChild = replaceWithNullIfForgotten(
+        oldChildren[oldChildrenTop],
+      );
       final Widget newWidget = newWidgets[newChildrenTop];
-      assert(oldChild == null ||
-          oldChild._lifecycleState == _ElementLifecycle.active);
+      assert(
+        oldChild == null ||
+            oldChild._lifecycleState == _ElementLifecycle.active,
+      );
       if (oldChild == null || !Widget.canUpdate(oldChild.widget, newWidget)) {
         break;
       }
       final Element newChild = updateChild(
-          oldChild, newWidget, slotFor(newChildrenTop, previousChild))!;
+        oldChild,
+        newWidget,
+        slotFor(newChildrenTop, previousChild),
+      )!;
       assert(newChild._lifecycleState == _ElementLifecycle.active);
       newChildren[newChildrenTop] = newChild;
       previousChild = newChild;
@@ -295,11 +301,14 @@ abstract class Element implements BuildContext {
     // Scan the bottom of the list.
     while ((oldChildrenTop <= oldChildrenBottom) &&
         (newChildrenTop <= newChildrenBottom)) {
-      final Element? oldChild =
-          replaceWithNullIfForgotten(oldChildren[oldChildrenBottom]);
+      final Element? oldChild = replaceWithNullIfForgotten(
+        oldChildren[oldChildrenBottom],
+      );
       final Widget newWidget = newWidgets[newChildrenBottom];
-      assert(oldChild == null ||
-          oldChild._lifecycleState == _ElementLifecycle.active);
+      assert(
+        oldChild == null ||
+            oldChild._lifecycleState == _ElementLifecycle.active,
+      );
       if (oldChild == null || !Widget.canUpdate(oldChild.widget, newWidget)) {
         break;
       }
@@ -313,10 +322,13 @@ abstract class Element implements BuildContext {
     if (haveOldChildren) {
       oldKeyedChildren = <Key, Element>{};
       while (oldChildrenTop <= oldChildrenBottom) {
-        final Element? oldChild =
-            replaceWithNullIfForgotten(oldChildren[oldChildrenTop]);
-        assert(oldChild == null ||
-            oldChild._lifecycleState == _ElementLifecycle.active);
+        final Element? oldChild = replaceWithNullIfForgotten(
+          oldChildren[oldChildrenTop],
+        );
+        assert(
+          oldChild == null ||
+              oldChild._lifecycleState == _ElementLifecycle.active,
+        );
         if (oldChild != null) {
           if (oldChild.widget.key != null) {
             oldKeyedChildren[oldChild.widget.key!] = oldChild;
@@ -347,7 +359,10 @@ abstract class Element implements BuildContext {
       }
       assert(oldChild == null || Widget.canUpdate(oldChild.widget, newWidget));
       final Element newChild = updateChild(
-          oldChild, newWidget, slotFor(newChildrenTop, previousChild))!;
+        oldChild,
+        newWidget,
+        slotFor(newChildrenTop, previousChild),
+      )!;
       assert(newChild._lifecycleState == _ElementLifecycle.active);
       newChildren[newChildrenTop] = newChild;
       previousChild = newChild;
@@ -357,8 +372,9 @@ abstract class Element implements BuildContext {
     // We've scanned the whole list.
     assert(oldChildrenTop == oldChildrenBottom + 1);
     assert(newChildrenTop == newChildrenBottom + 1);
-    assert(newWidgets.length - newChildrenTop ==
-        oldChildren.length - oldChildrenTop);
+    assert(
+      newWidgets.length - newChildrenTop == oldChildren.length - oldChildrenTop,
+    );
     newChildrenBottom = newWidgets.length - 1;
     oldChildrenBottom = oldChildren.length - 1;
 
@@ -371,7 +387,10 @@ abstract class Element implements BuildContext {
       final Widget newWidget = newWidgets[newChildrenTop];
       assert(Widget.canUpdate(oldChild.widget, newWidget));
       final Element newChild = updateChild(
-          oldChild, newWidget, slotFor(newChildrenTop, previousChild))!;
+        oldChild,
+        newWidget,
+        slotFor(newChildrenTop, previousChild),
+      )!;
       assert(newChild._lifecycleState == _ElementLifecycle.active);
       newChildren[newChildrenTop] = newChild;
       previousChild = newChild;
@@ -398,8 +417,9 @@ abstract class Element implements BuildContext {
   }
 
   @override
-  T? dependOnInheritedWidgetOfExactType<T extends InheritedWidget>(
-      {Object? aspect}) {
+  T? dependOnInheritedWidgetOfExactType<T extends InheritedWidget>({
+    Object? aspect,
+  }) {
     if (_inheritedElements?[T] case final InheritedElement ancestor) {
       if (dependOnInheritedElement(ancestor, aspect: aspect)
           case final T widget) {
@@ -407,14 +427,17 @@ abstract class Element implements BuildContext {
       }
 
       throw Exception(
-          'dependOnInheritedWidgetOfExactType: $T is not an $InheritedWidget');
+        'dependOnInheritedWidgetOfExactType: $T is not an $InheritedWidget',
+      );
     }
     return null;
   }
 
   @override
-  InheritedWidget dependOnInheritedElement(InheritedElement ancestor,
-      {Object? aspect}) {
+  InheritedWidget dependOnInheritedElement(
+    InheritedElement ancestor, {
+    Object? aspect,
+  }) {
     (_dependencies ??= HashSet<InheritedElement>()).add(ancestor);
     ancestor.updateDependencies(this, aspect);
     return ancestor.widget;
@@ -422,12 +445,26 @@ abstract class Element implements BuildContext {
 
   @override
   InheritedElement?
-      getElementForInheritedWidgetOfExactType<T extends InheritedWidget>() {
+  getElementForInheritedWidgetOfExactType<T extends InheritedWidget>() {
     return _inheritedElements?[T];
   }
 
   PersistentHashMap<Type, InheritedElement>? _inheritedElements;
   Set<InheritedElement>? _dependencies;
+
+  void _willBuildDependencies() {
+    for (final dependency
+        in _dependencies?.toList() ?? const <InheritedElement>[]) {
+      dependency.willBuildDependent(this);
+    }
+  }
+
+  void _didBuildDependencies() {
+    for (final dependency
+        in _dependencies?.toList() ?? const <InheritedElement>[]) {
+      dependency.didBuildDependent(this);
+    }
+  }
 
   void didChangeDependencies() {
     markNeedsBuild();

@@ -80,20 +80,26 @@ class TickerFuture implements Future<void> {
   Stream<void> asStream() => _primaryCompleter.future.asStream();
 
   @override
-  Future<void> catchError(Function onError,
-      {bool Function(Object error)? test}) {
+  Future<void> catchError(
+    Function onError, {
+    bool Function(Object error)? test,
+  }) {
     return _primaryCompleter.future.catchError(onError, test: test);
   }
 
   @override
-  Future<R> then<R>(FutureOr<R> Function(void value) onValue,
-      {Function? onError}) {
+  Future<R> then<R>(
+    FutureOr<R> Function(void value) onValue, {
+    Function? onError,
+  }) {
     return _primaryCompleter.future.then(onValue, onError: onError);
   }
 
   @override
-  Future<void> timeout(Duration timeLimit,
-      {FutureOr<void> Function()? onTimeout}) {
+  Future<void> timeout(
+    Duration timeLimit, {
+    FutureOr<void> Function()? onTimeout,
+  }) {
     return _primaryCompleter.future.timeout(timeLimit, onTimeout: onTimeout);
   }
 
@@ -124,14 +130,14 @@ class TickerCanceled implements Exception {
 /// Calls its callback once per animation frame.
 ///
 /// When created, a [Ticker] is initially idle. Call [start] to begin calling
-/// the [onTick] callback once per animation frame.
+/// its callback once per animation frame.
 ///
 /// A [Ticker] can be silenced by setting [muted] to true. While muted, the
-/// ticker remains "active" but the [onTick] callback is not called.
+/// ticker remains "active" but its callback is not called.
 class Ticker {
   /// Creates a [Ticker].
   ///
-  /// The [onTick] callback will be called once per animation frame while the
+  /// The supplied callback will be called once per animation frame while the
   /// ticker is active.
   Ticker(this._onTick, {this.debugLabel});
 
@@ -148,7 +154,7 @@ class Ticker {
 
   /// Whether this ticker is muted.
   ///
-  /// When muted, the ticker remains "active" but the [onTick] callback is not
+  /// When muted, the ticker remains "active" but its callback is not
   /// called. This is useful for pausing animations while keeping them logically
   /// active.
   bool get muted => _muted;
@@ -274,7 +280,8 @@ class Ticker {
   void absorbTicker(Ticker originalTicker) {
     assert(!isActive);
     assert(
-        originalTicker._future == null || !originalTicker._future!._completed);
+      originalTicker._future == null || !originalTicker._future!._completed,
+    );
 
     if (originalTicker._future != null) {
       _future = originalTicker._future;

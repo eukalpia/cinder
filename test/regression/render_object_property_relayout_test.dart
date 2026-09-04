@@ -20,8 +20,11 @@ void main() {
         // stale constraints/size are the observable failure.
         await tester.pumpWidget(const _PaddedDivider(padding: 1));
 
-        expect(_dividerWidth(tester), 18,
-            reason: 'padding 1 in a 20-wide box leaves 18 columns');
+        expect(
+          _dividerWidth(tester),
+          18,
+          reason: 'padding 1 in a 20-wide box leaves 18 columns',
+        );
 
         final state = tester.findState<_PaddedDividerState>();
         state.setPadding(5);
@@ -30,7 +33,8 @@ void main() {
         expect(
           _dividerWidth(tester),
           10,
-          reason: 'after padding 1 -> 5 the child must re-layout to '
+          reason:
+              'after padding 1 -> 5 the child must re-layout to '
               '10 columns; a stale layout keeps 18',
         );
       }, size: const Size(20, 7));
@@ -51,7 +55,8 @@ void main() {
         expect(
           (match.x, match.y),
           (18, 9),
-          reason: 'after alignment topLeft -> bottomRight the child must '
+          reason:
+              'after alignment topLeft -> bottomRight the child must '
               'move to the bottom-right corner; the offset is computed in '
               'performLayout, so a skipped layout freezes it at (0, 0)',
         );
@@ -85,10 +90,7 @@ class _PaddedDividerState extends State<_PaddedDivider> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.all(_padding),
-      child: const Divider(),
-    );
+    return Padding(padding: EdgeInsets.all(_padding), child: const Divider());
   }
 }
 

@@ -14,33 +14,40 @@ void main() {
   MouseEvent up(int x, int y) =>
       MouseEvent(button: MouseButton.left, x: x, y: y, pressed: false);
   MouseEvent move(int x, int y) => MouseEvent(
-      button: MouseButton.left, x: x, y: y, pressed: true, isMotion: true);
+    button: MouseButton.left,
+    x: x,
+    y: y,
+    pressed: true,
+    isMotion: true,
+  );
 
   group('LongPressGestureRecognizer', () {
-    test('fires start, callback, and end after holding past the duration',
-        () async {
-      LongPressStartDetails? startDetails;
-      LongPressEndDetails? endDetails;
-      var pressed = 0;
-      final recognizer = LongPressGestureRecognizer(
-        duration: shortDuration,
-        onLongPress: () => pressed++,
-        onLongPressStart: (d) => startDetails = d,
-        onLongPressEnd: (d) => endDetails = d,
-      );
+    test(
+      'fires start, callback, and end after holding past the duration',
+      () async {
+        LongPressStartDetails? startDetails;
+        LongPressEndDetails? endDetails;
+        var pressed = 0;
+        final recognizer = LongPressGestureRecognizer(
+          duration: shortDuration,
+          onLongPress: () => pressed++,
+          onLongPressStart: (d) => startDetails = d,
+          onLongPressEnd: (d) => endDetails = d,
+        );
 
-      recognizer.addPointer(down(5, 3), const Offset(5, 3));
-      expect(pressed, 0, reason: 'must not fire before the duration');
+        recognizer.addPointer(down(5, 3), const Offset(5, 3));
+        expect(pressed, 0, reason: 'must not fire before the duration');
 
-      await Future.delayed(shortDuration * 2);
-      expect(pressed, 1);
-      expect(startDetails?.localPosition, const Offset(5, 3));
-      expect(endDetails, isNull, reason: 'end fires on release, not accept');
+        await Future.delayed(shortDuration * 2);
+        expect(pressed, 1);
+        expect(startDetails?.localPosition, const Offset(5, 3));
+        expect(endDetails, isNull, reason: 'end fires on release, not accept');
 
-      recognizer.handlePointerUp(up(5, 3), const Offset(5, 3));
-      expect(endDetails?.localPosition, const Offset(5, 3));
-      expect(pressed, 1, reason: 'release must not re-fire the callback');
-    });
+        recognizer.handlePointerUp(up(5, 3), const Offset(5, 3));
+        expect(endDetails?.localPosition, const Offset(5, 3));
+        expect(pressed, 1, reason: 'release must not re-fire the callback');
+      },
+    );
 
     test('release before the duration fires nothing', () async {
       var pressed = 0;
@@ -57,8 +64,11 @@ void main() {
       // Wait past the original deadline: the cancelled timer must not fire.
       await Future.delayed(shortDuration * 2);
       expect(pressed, 0);
-      expect(endDetails, isNull,
-          reason: 'end must not fire for a never-accepted long press');
+      expect(
+        endDetails,
+        isNull,
+        reason: 'end must not fire for a never-accepted long press',
+      );
     });
 
     test('moving beyond the touch slop cancels the long press', () async {

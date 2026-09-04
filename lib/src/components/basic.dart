@@ -72,46 +72,39 @@ class Text extends SingleChildRenderObjectWidget {
 
 /// A box with a specified size
 class SizedBox extends SingleChildRenderObjectWidget {
-  const SizedBox({
-    super.key,
-    this.width,
-    this.height,
-    super.child,
-  });
+  const SizedBox({super.key, this.width, this.height, super.child});
 
   /// Creates a box that will become as large as its parent allows.
   const SizedBox.expand({super.key, super.child})
-      : width = double.infinity,
-        height = double.infinity;
+    : width = double.infinity,
+      height = double.infinity;
 
   /// Creates a box with zero width and height.
-  const SizedBox.shrink({super.key, super.child})
-      : width = 0,
-        height = 0;
+  const SizedBox.shrink({super.key, super.child}) : width = 0, height = 0;
 
   /// Creates a box with the specified size.
   SizedBox.fromSize({super.key, super.child, Size? size})
-      : width = size?.width,
-        height = size?.height;
+    : width = size?.width,
+      height = size?.height;
 
   /// Creates a square box with the specified dimension.
   const SizedBox.square({super.key, super.child, double? dimension})
-      : width = dimension,
-        height = dimension;
+    : width = dimension,
+      height = dimension;
 
   final double? width;
   final double? height;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return RenderConstrainedBox(
-      additionalConstraints: _createConstraints(),
-    );
+    return RenderConstrainedBox(additionalConstraints: _createConstraints());
   }
 
   @override
   void updateRenderObject(
-      BuildContext context, RenderConstrainedBox renderObject) {
+    BuildContext context,
+    RenderConstrainedBox renderObject,
+  ) {
     renderObject.additionalConstraints = _createConstraints();
   }
 
@@ -127,11 +120,7 @@ class SizedBox extends SingleChildRenderObjectWidget {
 
 /// Apply padding around a child
 class Padding extends SingleChildRenderObjectWidget {
-  const Padding({
-    super.key,
-    required this.padding,
-    super.child,
-  });
+  const Padding({super.key, required this.padding, super.child});
 
   final EdgeInsets padding;
 
@@ -171,7 +160,9 @@ class Align extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(
-      BuildContext context, RenderPositionedBox renderObject) {
+    BuildContext context,
+    RenderPositionedBox renderObject,
+  ) {
     renderObject
       ..alignment = alignment
       ..widthFactor = widthFactor
@@ -262,11 +253,10 @@ class Flex extends RenderObjectWidget {
 
 /// Take up remaining space in a flex container
 class Expanded extends ParentDataWidget<FlexParentData> {
-  Expanded({
-    super.key,
-    int flex = 1,
-    required super.child,
-  }) : super(data: FlexParentData(flex: flex, fit: FlexFit.tight));
+  Expanded({super.key, int flex = 1, required super.child})
+    : super(
+        data: FlexParentData(flex: flex, fit: FlexFit.tight),
+      );
 }
 
 /// Flexible widget for flex containers
@@ -276,7 +266,9 @@ class Flexible extends ParentDataWidget<FlexParentData> {
     int flex = 1,
     FlexFit fit = FlexFit.loose,
     required super.child,
-  }) : super(data: FlexParentData(flex: flex, fit: fit));
+  }) : super(
+         data: FlexParentData(flex: flex, fit: fit),
+       );
 }
 
 /// Proxy widget that wraps a single child
@@ -288,11 +280,7 @@ abstract class ProxyWidget extends Widget {
 
 /// Widget that applies parent data to its child
 class ParentDataWidget<T extends ParentData> extends ProxyWidget {
-  const ParentDataWidget({
-    super.key,
-    required super.child,
-    required this.data,
-  });
+  const ParentDataWidget({super.key, required super.child, required this.data});
 
   final T data;
 
@@ -332,11 +320,7 @@ class LimitedBox extends StatelessWidget {
 /// respect both the additional constraints and the parent's constraints.
 class ConstrainedBox extends SingleChildRenderObjectWidget {
   /// Creates a widget that imposes additional constraints on its child.
-  const ConstrainedBox({
-    super.key,
-    required this.constraints,
-    super.child,
-  });
+  const ConstrainedBox({super.key, required this.constraints, super.child});
 
   /// The additional constraints to impose on the child.
   final BoxConstraints constraints;
@@ -348,17 +332,15 @@ class ConstrainedBox extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(
-      BuildContext context, RenderConstrainedBox renderObject) {
+    BuildContext context,
+    RenderConstrainedBox renderObject,
+  ) {
     renderObject.additionalConstraints = constraints;
   }
 }
 
 class Transform extends StatelessWidget {
-  const Transform({
-    super.key,
-    required this.transform,
-    this.child,
-  });
+  const Transform({super.key, required this.transform, this.child});
 
   final Matrix4 transform;
   final Widget? child;
@@ -386,7 +368,7 @@ enum MainAxisAlignment {
   center,
   spaceBetween,
   spaceAround,
-  spaceEvenly
+  spaceEvenly,
 }
 
 enum MainAxisSize { min, max }
@@ -400,10 +382,7 @@ enum TextBaseline { alphabetic, ideographic }
 enum FlexFit { tight, loose }
 
 class FlexParentData extends BoxParentData {
-  FlexParentData({
-    this.flex,
-    this.fit,
-  });
+  FlexParentData({this.flex, this.fit});
   final int? flex;
   final FlexFit? fit;
 
@@ -415,7 +394,7 @@ class FlexParentData extends BoxParentData {
 class RenderConstrainedBox extends RenderObject
     with RenderObjectWithChildMixin<RenderObject> {
   RenderConstrainedBox({required BoxConstraints additionalConstraints})
-      : _additionalConstraints = additionalConstraints;
+    : _additionalConstraints = additionalConstraints;
 
   BoxConstraints get additionalConstraints => _additionalConstraints;
   BoxConstraints _additionalConstraints;
@@ -438,8 +417,10 @@ class RenderConstrainedBox extends RenderObject
   void performLayout() {
     if (child != null) {
       // Apply additional constraints using enforce method
-      child!.layout(_additionalConstraints.enforce(constraints),
-          parentUsesSize: true);
+      child!.layout(
+        _additionalConstraints.enforce(constraints),
+        parentUsesSize: true,
+      );
 
       // Position child at origin
       final BoxParentData childParentData = child!.parentData as BoxParentData;
@@ -458,7 +439,7 @@ class RenderConstrainedBox extends RenderObject
     super.paint(canvas, offset);
     if (child != null) {
       final BoxParentData childParentData = child!.parentData as BoxParentData;
-      child!.paint(canvas, offset + childParentData.offset);
+      child!.paintWithContext(canvas, offset + childParentData.offset);
     }
   }
 
@@ -501,10 +482,12 @@ class RenderPadding extends RenderObject
 
     // Set our size
     final childSize = child?.size ?? Size.zero;
-    size = constraints.constrain(Size(
-      childSize.width + padding.left + padding.right,
-      childSize.height + padding.top + padding.bottom,
-    ));
+    size = constraints.constrain(
+      Size(
+        childSize.width + padding.left + padding.right,
+        childSize.height + padding.top + padding.bottom,
+      ),
+    );
   }
 
   @override
@@ -513,7 +496,7 @@ class RenderPadding extends RenderObject
     if (child != null) {
       final BoxParentData childParentData = child!.parentData as BoxParentData;
       childParentData.offset = Offset(padding.left, padding.top);
-      child!.paint(canvas, offset + childParentData.offset);
+      child!.paintWithContext(canvas, offset + childParentData.offset);
     }
   }
 
@@ -534,9 +517,9 @@ class RenderPositionedBox extends RenderObject
     required AlignmentGeometry alignment,
     double? widthFactor,
     double? heightFactor,
-  })  : _alignment = alignment,
-        _widthFactor = widthFactor,
-        _heightFactor = heightFactor;
+  }) : _alignment = alignment,
+       _widthFactor = widthFactor,
+       _heightFactor = heightFactor;
 
   AlignmentGeometry get alignment => _alignment;
   AlignmentGeometry _alignment;
@@ -613,11 +596,16 @@ class RenderPositionedBox extends RenderObject
 
     // Calculate and store the child's position in parent data
     if (child != null) {
-      final Alignment align =
-          alignment is Alignment ? alignment as Alignment : Alignment.center;
+      final Alignment align = alignment is Alignment
+          ? alignment as Alignment
+          : Alignment.center;
       final BoxParentData childParentData = child!.parentData as BoxParentData;
-      childParentData.offset = align.alongOffset(Offset(
-          size.width - child!.size.width, size.height - child!.size.height));
+      childParentData.offset = align.alongOffset(
+        Offset(
+          size.width - child!.size.width,
+          size.height - child!.size.height,
+        ),
+      );
     }
   }
 
@@ -626,7 +614,7 @@ class RenderPositionedBox extends RenderObject
     super.paint(canvas, offset);
     if (child != null) {
       final BoxParentData childParentData = child!.parentData as BoxParentData;
-      child!.paint(canvas, offset + childParentData.offset);
+      child!.paintWithContext(canvas, offset + childParentData.offset);
     }
   }
 

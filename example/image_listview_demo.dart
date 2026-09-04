@@ -21,7 +21,8 @@ void main(List<String> args) async {
     print('Usage: dart run example/image_listview_demo.dart <image_path>');
     print('');
     print(
-        'Example: dart run example/image_listview_demo.dart ~/Pictures/photo.png');
+      'Example: dart run example/image_listview_demo.dart ~/Pictures/photo.png',
+    );
     exit(1);
   }
 
@@ -168,8 +169,10 @@ class _ImageListViewDemoState extends State<ImageListViewDemo> {
               padding: const EdgeInsets.symmetric(horizontal: 2),
               child: Row(
                 children: [
-                  const Text('Protocol: ',
-                      style: TextStyle(color: Colors.grey)),
+                  const Text(
+                    'Protocol: ',
+                    style: TextStyle(color: Colors.grey),
+                  ),
                   ..._protocols.asMap().entries.map((entry) {
                     final idx = entry.key;
                     final proto = entry.value;
@@ -180,8 +183,9 @@ class _ImageListViewDemoState extends State<ImageListViewDemo> {
                         '[${idx + 1}] ${_protocolName(proto)}',
                         style: TextStyle(
                           color: isSelected ? Colors.cyan : Colors.grey,
-                          fontWeight:
-                              isSelected ? FontWeight.bold : FontWeight.normal,
+                          fontWeight: isSelected
+                              ? FontWeight.bold
+                              : FontWeight.normal,
                         ),
                       ),
                     );
@@ -232,10 +236,7 @@ class _ImageListViewDemoState extends State<ImageListViewDemo> {
                     '↑↓: Scroll  ',
                     style: TextStyle(color: Colors.grey),
                   ),
-                  const Text(
-                    'Q: Quit',
-                    style: TextStyle(color: Colors.grey),
-                  ),
+                  const Text('Q: Quit', style: TextStyle(color: Colors.grey)),
                   const Spacer(),
                   Text(
                     'Current: ${_protocolName(protocol)}',

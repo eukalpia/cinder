@@ -67,7 +67,9 @@ class _OverlayDemoState extends State<OverlayDemo> {
                       Text(
                         'Press ESC to close',
                         style: TextStyle(
-                            color: Colors.yellow, fontStyle: FontStyle.italic),
+                          color: Colors.yellow,
+                          fontStyle: FontStyle.italic,
+                        ),
                       ),
                     ],
                   ),
@@ -130,7 +132,8 @@ class _OverlayDemoState extends State<OverlayDemo> {
                       ),
                       const SizedBox(height: 2),
                       const Text(
-                          'This demo shows overlays with animated dimming background'),
+                        'This demo shows overlays with animated dimming background',
+                      ),
                       const SizedBox(height: 1),
                       Text(
                         'The background fades to dark when the overlay appears!',
@@ -144,10 +147,14 @@ class _OverlayDemoState extends State<OverlayDemo> {
                         ),
                         child: Column(
                           children: [
-                            Text('Press "O" to show overlay',
-                                style: TextStyle(color: Colors.yellow)),
-                            Text('Press ESC to close overlay/exit',
-                                style: TextStyle(color: Colors.red)),
+                            Text(
+                              'Press "O" to show overlay',
+                              style: TextStyle(color: Colors.yellow),
+                            ),
+                            Text(
+                              'Press ESC to close overlay/exit',
+                              style: TextStyle(color: Colors.red),
+                            ),
                           ],
                         ),
                       ),

@@ -12,6 +12,7 @@ final class CinderResourceScope {
   final List<ResourceDisposer> _disposers = <ResourceDisposer>[];
 
   bool _disposed = false;
+  Future<void>? _disposal;
 
   /// Whether [dispose] has already been called.
   bool get isDisposed => _disposed;
@@ -46,10 +47,17 @@ final class CinderResourceScope {
   }
 
   /// Releases all resources in reverse registration order.
-  Future<void> dispose() async {
-    if (_disposed) return;
+  /// Repeated calls wait for the same cleanup and report the same failure.
+  Future<void> dispose() {
+    if (_disposal != null) return _disposal!;
     _disposed = true;
+    final completion = Completer<void>();
+    _disposal = completion.future;
+    completion.complete(_disposeResources());
+    return completion.future;
+  }
 
+  Future<void> _disposeResources() async {
     Object? firstError;
     StackTrace? firstStackTrace;
 
@@ -71,8 +79,10 @@ final class CinderResourceScope {
   /// Begins disposal without blocking a synchronous owner lifecycle.
   void disposeDetached() {
     final zone = Zone.current;
-    unawaited(dispose().catchError((Object error, StackTrace stackTrace) {
-      zone.handleUncaughtError(error, stackTrace);
-    }));
+    unawaited(
+      dispose().catchError((Object error, StackTrace stackTrace) {
+        zone.handleUncaughtError(error, stackTrace);
+      }),
+    );
   }
 }

@@ -8,8 +8,12 @@ void main() {
   group('KittyEncoder', () {
     group('encodePng', () {
       test('produces valid escape sequence format', () {
-        final imageBytes =
-            Uint8List.fromList([0x89, 0x50, 0x4E, 0x47]); // PNG header bytes
+        final imageBytes = Uint8List.fromList([
+          0x89,
+          0x50,
+          0x4E,
+          0x47,
+        ]); // PNG header bytes
 
         final result = KittyEncoder.encodePng(imageBytes: imageBytes);
 
@@ -26,8 +30,13 @@ void main() {
       });
 
       test('base64 data is valid', () {
-        final imageBytes =
-            Uint8List.fromList([0x48, 0x65, 0x6C, 0x6C, 0x6F]); // "Hello"
+        final imageBytes = Uint8List.fromList([
+          0x48,
+          0x65,
+          0x6C,
+          0x6C,
+          0x6F,
+        ]); // "Hello"
 
         final result = KittyEncoder.encodePng(imageBytes: imageBytes);
 
@@ -60,8 +69,10 @@ void main() {
       test('includes image ID when provided', () {
         final imageBytes = Uint8List.fromList([1, 2, 3]);
 
-        final result =
-            KittyEncoder.encodePng(imageBytes: imageBytes, imageId: 42);
+        final result = KittyEncoder.encodePng(
+          imageBytes: imageBytes,
+          imageId: 42,
+        );
 
         expect(result, contains('i=42'));
       });
@@ -117,8 +128,10 @@ void main() {
           largeData[i] = i % 256;
         }
 
-        final result =
-            KittyEncoder.encodePng(imageBytes: largeData, imageId: 123);
+        final result = KittyEncoder.encodePng(
+          imageBytes: largeData,
+          imageId: 123,
+        );
 
         // Split into chunks
         final chunks = result.split('\x1b\\');
@@ -157,8 +170,11 @@ void main() {
           if (semicolonIndex >= 0) {
             final base64Part = chunk.substring(semicolonIndex + 1);
             // Non-final chunks should be multiple of 4
-            expect(base64Part.length % 4, equals(0),
-                reason: 'Chunk $i base64 length should be multiple of 4');
+            expect(
+              base64Part.length % 4,
+              equals(0),
+              reason: 'Chunk $i base64 length should be multiple of 4',
+            );
           }
         }
       });
@@ -322,11 +338,7 @@ void main() {
 
       test('returns empty string for zero dimensions', () {
         expect(
-          KittyEncoder.encodeRgb(
-            rgbPixels: Uint8List(0),
-            width: 0,
-            height: 0,
-          ),
+          KittyEncoder.encodeRgb(rgbPixels: Uint8List(0), width: 0, height: 0),
           isEmpty,
         );
       });

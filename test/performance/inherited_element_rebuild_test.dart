@@ -15,10 +15,7 @@ class BuildTracker extends StatelessWidget {
 class MyDataWidget extends InheritedWidget {
   final int value;
 
-  const MyDataWidget({
-    required this.value,
-    required super.child,
-  });
+  const MyDataWidget({required this.value, required super.child});
 
   @override
   bool updateShouldNotify(MyDataWidget old) => value != old.value;

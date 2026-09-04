@@ -65,10 +65,7 @@ class _DebugOverlayDemoState extends State<_DebugOverlayDemo> {
           children: [
             const Text(
               'Debug Overlay Demo',
-              style: TextStyle(
-                color: Colors.cyan,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(color: Colors.cyan, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 1),
             Container(
@@ -138,9 +135,7 @@ class _DebugOverlayDemoState extends State<_DebugOverlayDemo> {
           debugMode
               ? 'Debug mode is ACTIVE - overlay visible'
               : 'Debug mode is OFF - press Ctrl+G',
-          style: TextStyle(
-            color: debugMode ? Colors.green : Colors.gray,
-          ),
+          style: TextStyle(color: debugMode ? Colors.green : Colors.gray),
         ),
       ],
     );

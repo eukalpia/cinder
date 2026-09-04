@@ -187,12 +187,18 @@ void main() {
         '′': 0x2032, // prime
       };
       ambiguous.forEach((char, code) {
-        expect(char.runes.first, equals(code),
-            reason:
-                '$char should be U+${code.toRadixString(16).toUpperCase()}');
-        expect(UnicodeWidth.runeWidth(code), equals(1),
-            reason: '$char (U+${code.toRadixString(16).toUpperCase()}) '
-                'should be single-width');
+        expect(
+          char.runes.first,
+          equals(code),
+          reason: '$char should be U+${code.toRadixString(16).toUpperCase()}',
+        );
+        expect(
+          UnicodeWidth.runeWidth(code),
+          equals(1),
+          reason:
+              '$char (U+${code.toRadixString(16).toUpperCase()}) '
+              'should be single-width',
+        );
       });
     });
   });

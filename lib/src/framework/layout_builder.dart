@@ -1,10 +1,8 @@
 part of 'framework.dart';
 
 /// A signature for the builder function used by [LayoutBuilder].
-typedef LayoutBuilderCallback = Widget Function(
-  BuildContext context,
-  BoxConstraints constraints,
-);
+typedef LayoutBuilderCallback =
+    Widget Function(BuildContext context, BoxConstraints constraints);
 
 /// A widget that defers building its child until layout time.
 ///
@@ -43,7 +41,9 @@ class LayoutBuilder extends RenderObjectWidget {
 
   @override
   void updateRenderObject(
-      BuildContext context, covariant RenderLayoutBuilder renderObject) {
+    BuildContext context,
+    covariant RenderLayoutBuilder renderObject,
+  ) {
     // Nothing to update on the render object itself
   }
 }
@@ -109,11 +109,14 @@ class LayoutBuilderElement extends RenderObjectElement {
       // Use owner to invoke the build
       owner!.buildScope(this, () {
         Widget? builtWidget;
+        _willBuildDependencies();
         try {
           builtWidget = widget.builder(this, constraints);
         } catch (e, stackTrace) {
           // On error, create an error display widget
           builtWidget = ErrorWidget(error: e, stackTrace: stackTrace);
+        } finally {
+          _didBuildDependencies();
         }
         _child = updateChild(_child, builtWidget, null);
       });
@@ -141,7 +144,10 @@ class LayoutBuilderElement extends RenderObjectElement {
 
   @override
   void moveRenderObjectChild(
-      RenderObject child, dynamic oldSlot, dynamic newSlot) {
+    RenderObject child,
+    dynamic oldSlot,
+    dynamic newSlot,
+  ) {
     // SingleChild never moves - slot is always null
     assert(false, 'LayoutBuilderElement should never move children');
   }
@@ -162,7 +168,8 @@ class RenderLayoutBuilder extends RenderObject
 
   /// Updates the layout callback used to build children.
   void updateLayoutCallback(
-      void Function(BoxConstraints constraints)? callback) {
+    void Function(BoxConstraints constraints)? callback,
+  ) {
     _layoutCallback = callback;
   }
 

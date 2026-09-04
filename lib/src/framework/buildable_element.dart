@@ -23,6 +23,7 @@ abstract class BuildableElement extends Element {
 
   @override
   void performRebuild() {
+    _willBuildDependencies();
     assert(() {
       _debugDoingBuild = true;
       return true;
@@ -35,18 +36,21 @@ abstract class BuildableElement extends Element {
       // Handle build errors
       _debugDoingBuild = false;
       built = ErrorWidget(error: e, stackTrace: stack);
-      CinderError.reportError(CinderErrorDetails(
-        exception: e,
-        stack: stack,
-        library: 'cinder framework',
-        context: 'while building $runtimeType',
-      ));
+      CinderError.reportError(
+        CinderErrorDetails(
+          exception: e,
+          stack: stack,
+          library: 'cinder framework',
+          context: 'while building $runtimeType',
+        ),
+      );
     } finally {
       _dirty = false;
       assert(() {
         _debugDoingBuild = false;
         return true;
       }());
+      _didBuildDependencies();
     }
 
     _child = updateChild(_child, built, slot);
@@ -74,10 +78,7 @@ abstract class BuildableElement extends Element {
 /// Uses [RenderTUIErrorBox] to display a red bordered box with the error
 /// message and stack trace, matching the visual style of layout/paint errors.
 class ErrorWidget extends SingleChildRenderObjectWidget {
-  const ErrorWidget({
-    required this.error,
-    required this.stackTrace,
-  });
+  const ErrorWidget({required this.error, required this.stackTrace});
 
   final Object error;
   final StackTrace stackTrace;
@@ -93,7 +94,9 @@ class ErrorWidget extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(
-      BuildContext context, RenderTUIErrorBox renderObject) {
+    BuildContext context,
+    RenderTUIErrorBox renderObject,
+  ) {
     // RenderTUIErrorBox is immutable after creation
   }
 }

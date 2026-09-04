@@ -90,7 +90,8 @@ final class TerminalCapabilities {
     );
 
     final isDumb = term == 'dumb';
-    final isCi = _truthy(environment['CI']) ||
+    final isCi =
+        _truthy(environment['CI']) ||
         _truthy(environment['GITHUB_ACTIONS']) ||
         _truthy(environment['BUILDKITE']) ||
         _truthy(environment['GITLAB_CI']);
@@ -100,7 +101,8 @@ final class TerminalCapabilities {
         !isDumb && (forceInteractive || (!isCi && !isRedirected));
     final isTmux = environment.containsKey('TMUX');
     final isScreen = term.startsWith('screen');
-    final isSsh = environment.containsKey('SSH_CONNECTION') ||
+    final isSsh =
+        environment.containsKey('SSH_CONNECTION') ||
         environment.containsKey('SSH_CLIENT') ||
         environment.containsKey('SSH_TTY');
     final isWezTerm =
@@ -109,14 +111,16 @@ final class TerminalCapabilities {
         term.contains('kitty') || environment.containsKey('KITTY_WINDOW_ID');
     final isGhostty =
         term.contains('ghostty') || termProgram.contains('ghostty');
-    final isITerm = termProgram.contains('iterm') ||
+    final isITerm =
+        termProgram.contains('iterm') ||
         environment.containsKey('ITERM_SESSION_ID');
     final isWindowsTerminal = environment.containsKey('WT_SESSION');
     final isConPty = environment.containsKey('ConEmuPID') || isWindowsTerminal;
     final isVte = environment.containsKey('VTE_VERSION');
     final isXtermLike =
         term.contains('xterm') || isScreen || isTmux || isVte || isConPty;
-    final isModern = isInteractive &&
+    final isModern =
+        isInteractive &&
         (term.isNotEmpty ||
             termProgram.isNotEmpty ||
             isWindowsTerminal ||
@@ -125,9 +129,11 @@ final class TerminalCapabilities {
             isGhostty ||
             isITerm);
 
-    final noColor = environment.containsKey('NO_COLOR') ||
+    final noColor =
+        environment.containsKey('NO_COLOR') ||
         _truthy(environment['CINDER_NO_COLOR']);
-    final trueColor = !noColor &&
+    final trueColor =
+        !noColor &&
         !isDumb &&
         (term.contains('truecolor') ||
             term.contains('24bit') ||
@@ -139,12 +145,14 @@ final class TerminalCapabilities {
             isITerm ||
             isWindowsTerminal);
 
-    final tmuxKittyPassthrough =
-        _truthy(environment['CINDER_TMUX_KITTY_PASSTHROUGH']);
+    final tmuxKittyPassthrough = _truthy(
+      environment['CINDER_TMUX_KITTY_PASSTHROUGH'],
+    );
     final nativeKittyGraphics = isKitty || isWezTerm || isGhostty;
 
     return TerminalCapabilities(
-      supportsKittyGraphics: isInteractive &&
+      supportsKittyGraphics:
+          isInteractive &&
           nativeKittyGraphics &&
           (!isTmux ||
               tmuxKittyPassthrough ||
@@ -156,7 +164,8 @@ final class TerminalCapabilities {
           !noColor && (trueColor || (!isDumb && term.contains('256color'))),
       supportsMouse: isModern,
       supportsBracketedPaste: isModern,
-      supportsFocusEvents: isModern &&
+      supportsFocusEvents:
+          isModern &&
           (isXtermLike ||
               isKitty ||
               isWezTerm ||
@@ -165,24 +174,28 @@ final class TerminalCapabilities {
               isWindowsTerminal),
       supportsKittyKeyboard:
           isInteractive && (isKitty || isWezTerm || isGhostty),
-      supportsModifyOtherKeys: isInteractive &&
+      supportsModifyOtherKeys:
+          isInteractive &&
           !isKitty &&
           (isXtermLike || isITerm || isWindowsTerminal),
-      supportsHyperlinks: isModern &&
+      supportsHyperlinks:
+          isModern &&
           (isXtermLike ||
               isKitty ||
               isWezTerm ||
               isGhostty ||
               isITerm ||
               isWindowsTerminal),
-      supportsOsc52Clipboard: isModern &&
+      supportsOsc52Clipboard:
+          isModern &&
           (isXtermLike ||
               isKitty ||
               isWezTerm ||
               isGhostty ||
               isITerm ||
               isWindowsTerminal),
-      supportsSynchronizedOutput: isInteractive &&
+      supportsSynchronizedOutput:
+          isInteractive &&
           (isKitty || isWezTerm || isGhostty || isITerm || isWindowsTerminal),
       supportsRawMode: isInteractive,
       supportsAlternateScreen: isInteractive,

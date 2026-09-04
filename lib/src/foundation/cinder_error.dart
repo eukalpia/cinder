@@ -60,7 +60,7 @@ class CinderErrorDetails {
 /// Error reporting mechanism for cinder.
 ///
 /// This class provides a global error handler similar to Flutter's
-/// [FlutterError.onError] pattern, allowing users to integrate with
+/// Flutter's `FlutterError.onError` pattern, allowing users to integrate with
 /// crash reporting services like Sentry.
 ///
 /// ## Usage

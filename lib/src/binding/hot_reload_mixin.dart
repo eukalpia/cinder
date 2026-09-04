@@ -20,14 +20,17 @@ mixin HotReloadBinding on CinderBinding {
 
     // Only enable hot reload if we're running with --enable-vm-service
     // This is automatically set when running with `dart run --enable-vm-service`
-    final bool vmServiceEnabled = Platform.executableArguments.any((arg) =>
-        arg.contains('--enable-vm-service') ||
-        arg.contains('--observe') ||
-        arg.contains('--enable-asserts'));
+    final bool vmServiceEnabled = Platform.executableArguments.any(
+      (arg) =>
+          arg.contains('--enable-vm-service') ||
+          arg.contains('--observe') ||
+          arg.contains('--enable-asserts'),
+    );
 
     if (!vmServiceEnabled) {
       print(
-          '[HotReload] VM service not enabled. Run with --enable-vm-service to enable hot reload.');
+        '[HotReload] VM service not enabled. Run with --enable-vm-service to enable hot reload.',
+      );
       return;
     }
 
@@ -38,7 +41,8 @@ mixin HotReloadBinding on CinderBinding {
         if (info.serverUri != null) {
           if (info.serverWebSocketUri != null) {
             print(
-                '[HotReload] DevTools URL: ${info.serverUri}devtools/?uri=${info.serverWebSocketUri}');
+              '[HotReload] DevTools URL: ${info.serverUri}devtools/?uri=${info.serverWebSocketUri}',
+            );
           }
         }
       } catch (e) {
@@ -59,11 +63,13 @@ mixin HotReloadBinding on CinderBinding {
         onAfterReload: (ctx) {
           switch (ctx.result) {
             case HotReloadResult.Failed:
-              CinderError.reportError(CinderErrorDetails(
-                exception: Exception('Compilation error during hot reload'),
-                library: 'cinder hot reload',
-                context: 'during hot reload compilation',
-              ));
+              CinderError.reportError(
+                CinderErrorDetails(
+                  exception: Exception('Compilation error during hot reload'),
+                  library: 'cinder hot reload',
+                  context: 'during hot reload compilation',
+                ),
+              );
             case HotReloadResult.Succeeded:
               // Trigger reassemble after successful reload
               _performReassembleAfterReload();
@@ -89,12 +95,14 @@ mixin HotReloadBinding on CinderBinding {
         await performReassemble();
         print('[HotReload] Application reassembled successfully');
       } catch (e, stack) {
-        CinderError.reportError(CinderErrorDetails(
-          exception: e,
-          stack: stack,
-          library: 'cinder hot reload',
-          context: 'during reassemble',
-        ));
+        CinderError.reportError(
+          CinderErrorDetails(
+            exception: e,
+            stack: stack,
+            library: 'cinder hot reload',
+            context: 'during reassemble',
+          ),
+        );
       }
     });
   }

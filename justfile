@@ -17,92 +17,10 @@ benchmark *ARGS:
 benchmark-save *ARGS:
     dart run benchmark/benchmark.dart --save {{ARGS}}
 
-# Interactive release workflow - updates README, commits, and creates tag
-release:
-    #!/usr/bin/env bash
-    set -euo pipefail
+# Run native, package, formatting, renderer, and publication dry-run checks
+check *ARGS:
+    dart tool/check.dart {{ARGS}}
 
-    # Get the latest tag
-    latest_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
-    echo "Current version: $latest_tag"
-
-    # Parse version numbers (strip 'v' prefix)
-    version=${latest_tag#v}
-    IFS='.' read -r major minor patch <<< "$version"
-
-    # Show options
-    echo ""
-    echo "Select release type:"
-    echo "  1) patch    → v$major.$minor.$((patch + 1))"
-    echo "  2) minor    → v$major.$((minor + 1)).0"
-    echo "  3) major    → v$((major + 1)).0.0"
-    echo "  4) custom   → enter custom version"
-    echo "  5) override → $latest_tag (re-push existing tag)"
-    echo "  6) cancel"
-    echo ""
-
-    read -p "Choice [1-6]: " choice
-
-    case $choice in
-        1) new_version="v$major.$minor.$((patch + 1))" ;;
-        2) new_version="v$major.$((minor + 1)).0" ;;
-        3) new_version="v$((major + 1)).0.0" ;;
-        4)
-            read -p "Enter custom version (e.g., 1.2.3): " custom_ver
-            # Strip 'v' prefix if provided
-            custom_ver=${custom_ver#v}
-            new_version="v$custom_ver"
-            ;;
-        5) new_version="$latest_tag"; override=true ;;
-        6) echo "Cancelled."; exit 0 ;;
-        *) echo "Invalid choice."; exit 1 ;;
-    esac
-
-    echo ""
-
-    # Strip 'v' prefix for version number
-    version_number=${new_version#v}
-
-    if [[ "${override:-false}" == "true" ]]; then
-        read -p "Delete and re-push tag $new_version? [y/N]: " confirm
-        if [[ "$confirm" =~ ^[Yy]$ ]]; then
-            git tag -d "$new_version"
-            git push origin --delete "$new_version"
-            git tag "$new_version"
-            git push origin "$new_version"
-            echo "✓ Re-released $new_version"
-        else
-            echo "Cancelled."
-        fi
-    else
-        read -p "Release $new_version? (updates README, commits, tags, pushes) [y/N]: " confirm
-        if [[ "$confirm" =~ ^[Yy]$ ]]; then
-            # Update version in pubspec.yaml
-            echo "Updating pubspec.yaml..."
-            sed -i '' -E "s/^version: [0-9]+\.[0-9]+\.[0-9]+/version: $version_number/" pubspec.yaml
-
-            # Update version in README.md
-            echo "Updating README.md..."
-            sed -i '' -E "s/in early development \([0-9]+\.[0-9]+\.[0-9]+\)/in early development ($version_number)/" README.md
-
-            # Update version on the landing page
-            echo "Updating landing/index.html..."
-            sed -i '' -E "s/brand-version\">v[0-9]+\.[0-9]+\.[0-9]+/brand-version\">v$version_number/" landing/index.html
-            sed -i '' -E "s/\"softwareVersion\": \"[0-9]+\.[0-9]+\.[0-9]+\"/\"softwareVersion\": \"$version_number\"/" landing/index.html
-
-            # Commit the version bump
-            git add pubspec.yaml README.md landing/index.html
-            git commit -m "chore: bump version to $version_number"
-
-            # Push the commit
-            git push origin main
-
-            # Create and push the tag
-            git tag "$new_version"
-            git push origin "$new_version"
-
-            echo "✓ Released $new_version"
-        else
-            echo "Cancelled."
-        fi
-    fi
+# Validate the release. Version/tag publication is documented in doc/release.md.
+release: check
+    @echo "Validation passed. Follow doc/release.md to publish this exact commit."

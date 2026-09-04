@@ -121,8 +121,9 @@ class PipelineOwner {
 
   void flushPaint() {
     // Sort by depth (deepest first) for paint order
-    final List<RenderObject> dirtyNodes =
-        List<RenderObject>.from(_nodesNeedingPaint);
+    final List<RenderObject> dirtyNodes = List<RenderObject>.from(
+      _nodesNeedingPaint,
+    );
     _nodesNeedingPaint.clear();
 
     // Sort nodes by depth - deeper nodes should be painted first
@@ -149,16 +150,16 @@ class BoxConstraints {
   });
 
   BoxConstraints.tight(Size size)
-      : minWidth = size.width,
-        maxWidth = size.width,
-        minHeight = size.height,
-        maxHeight = size.height;
+    : minWidth = size.width,
+      maxWidth = size.width,
+      minHeight = size.height,
+      maxHeight = size.height;
 
   const BoxConstraints.expand({double? width, double? height})
-      : minWidth = width ?? double.infinity,
-        maxWidth = width ?? double.infinity,
-        minHeight = height ?? double.infinity,
-        maxHeight = height ?? double.infinity;
+    : minWidth = width ?? double.infinity,
+      maxWidth = width ?? double.infinity,
+      minHeight = height ?? double.infinity,
+      maxHeight = height ?? double.infinity;
 
   final double minWidth;
   final double maxWidth;
@@ -175,14 +176,22 @@ class BoxConstraints {
   BoxConstraints deflate(EdgeInsets insets) {
     final horizontal = insets.left + insets.right;
     final vertical = insets.top + insets.bottom;
-    final deflatedMinWidth =
-        (minWidth - horizontal).clamp(0.0, double.infinity);
-    final deflatedMaxWidth =
-        (maxWidth - horizontal).clamp(deflatedMinWidth, double.infinity);
-    final deflatedMinHeight =
-        (minHeight - vertical).clamp(0.0, double.infinity);
-    final deflatedMaxHeight =
-        (maxHeight - vertical).clamp(deflatedMinHeight, double.infinity);
+    final deflatedMinWidth = (minWidth - horizontal).clamp(
+      0.0,
+      double.infinity,
+    );
+    final deflatedMaxWidth = (maxWidth - horizontal).clamp(
+      deflatedMinWidth,
+      double.infinity,
+    );
+    final deflatedMinHeight = (minHeight - vertical).clamp(
+      0.0,
+      double.infinity,
+    );
+    final deflatedMaxHeight = (maxHeight - vertical).clamp(
+      deflatedMinHeight,
+      double.infinity,
+    );
     return BoxConstraints(
       minWidth: deflatedMinWidth,
       maxWidth: deflatedMaxWidth,
@@ -264,16 +273,16 @@ class EdgeInsets {
   });
 
   const EdgeInsets.all(double value)
-      : left = value,
-        top = value,
-        right = value,
-        bottom = value;
+    : left = value,
+      top = value,
+      right = value,
+      bottom = value;
 
   const EdgeInsets.symmetric({double vertical = 0, double horizontal = 0})
-      : left = horizontal,
-        top = vertical,
-        right = horizontal,
-        bottom = vertical;
+    : left = horizontal,
+      top = vertical,
+      right = horizontal,
+      bottom = vertical;
 
   final double left;
   final double top;
@@ -434,17 +443,17 @@ abstract class RenderObject {
   /// The [parentUsesSize] parameter indicates whether the parent depends on
   /// this render object's size for its own layout. This is used for optimization.
   void layout(BoxConstraints constraints, {bool parentUsesSize = false}) {
-    // Always reset error state when layout is called, even if we might skip the actual layout
-    _hasLayoutError = false;
-    _lastError = null;
-    _lastStackTrace = null;
-
     // Skip layout when we're not dirty and constraints haven't changed.
     // Elements that mutate layout-relevant state (LayoutBuilder's builder,
     // ListView's itemBuilder, ParentDataElement's parentData, etc.) must
     // call markNeedsLayout explicitly - do NOT swap this back to
     // `identical()` to compensate for a missing mark elsewhere.
     if (!_needsLayout && constraints == _constraints) return;
+
+    // A cached layout must retain its failure until an actual retry runs.
+    _hasLayoutError = false;
+    _lastError = null;
+    _lastStackTrace = null;
 
     // Getting past the skip above means `_needsLayout || constraints !=
     // _constraints`, so layout always runs from here on.
@@ -674,16 +683,18 @@ abstract class RenderObject {
 
   /// Report an exception that occurred during rendering.
   void _reportException(String method, Object exception, StackTrace stack) {
-    CinderError.reportError(CinderErrorDetails(
-      exception: exception,
-      stack: stack,
-      library: 'cinder rendering',
-      context: 'during $method()',
-      informationCollector: () => [
-        'RenderObject: $runtimeType',
-        if (_constraints != null) 'Constraints: $_constraints',
-      ],
-    ));
+    CinderError.reportError(
+      CinderErrorDetails(
+        exception: exception,
+        stack: stack,
+        library: 'cinder rendering',
+        context: 'during $method()',
+        informationCollector: () => [
+          'RenderObject: $runtimeType',
+          if (_constraints != null) 'Constraints: $_constraints',
+        ],
+      ),
+    );
 
     // Store the error details
     _lastError = exception;
@@ -878,7 +889,9 @@ abstract class RenderObjectWidget extends Widget {
 
   @protected
   void updateRenderObject(
-      BuildContext context, covariant RenderObject renderObject) {}
+    BuildContext context,
+    covariant RenderObject renderObject,
+  ) {}
 }
 
 /// Element for RenderObjectWidget
@@ -918,7 +931,10 @@ abstract class RenderObjectElement extends Element {
     assert(slot == newSlot);
     assert(_ancestorRenderObjectElement == _findAncestorRenderObjectElement());
     _ancestorRenderObjectElement?.moveRenderObjectChild(
-        renderObject, oldSlot, slot);
+      renderObject,
+      oldSlot,
+      slot,
+    );
   }
 
   @override
@@ -936,7 +952,9 @@ abstract class RenderObjectElement extends Element {
     assert(_ancestorRenderObjectElement == null);
     _ancestorRenderObjectElement = _findAncestorRenderObjectElement();
     _ancestorRenderObjectElement?.insertRenderObjectChild(
-        renderObject, newSlot);
+      renderObject,
+      newSlot,
+    );
   }
 
   RenderObjectElement? _findAncestorRenderObjectElement() {
@@ -965,7 +983,10 @@ abstract class RenderObjectElement extends Element {
   /// that element was previously given.
   @protected
   void moveRenderObjectChild(
-      RenderObject child, dynamic oldSlot, dynamic newSlot);
+    RenderObject child,
+    dynamic oldSlot,
+    dynamic newSlot,
+  );
 
   /// Remove the given child from [renderObject].
   ///
@@ -1029,7 +1050,10 @@ class SingleChildRenderObjectElement extends RenderObjectElement {
 
   @override
   void moveRenderObjectChild(
-      RenderObject child, dynamic oldSlot, dynamic newSlot) {
+    RenderObject child,
+    dynamic oldSlot,
+    dynamic newSlot,
+  ) {
     // SingleChildRenderObjectElement never moves children since slot is always null
     assert(false, 'SingleChildRenderObjectElement should never move children');
   }
@@ -1097,8 +1121,9 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
 
     // Otherwise, traverse children to find the last render object
     element.visitChildren((Element child) {
-      final RenderObject? childRenderObject =
-          _findLastRenderObjectDescendant(child);
+      final RenderObject? childRenderObject = _findLastRenderObjectDescendant(
+        child,
+      );
       if (childRenderObject != null) {
         result = childRenderObject;
       }
@@ -1132,7 +1157,10 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
 
   @override
   void moveRenderObjectChild(
-      RenderObject child, dynamic oldSlot, dynamic newSlot) {
+    RenderObject child,
+    dynamic oldSlot,
+    dynamic newSlot,
+  ) {
     final ContainerRenderObjectMixin<RenderObject> renderObject =
         this.renderObject as ContainerRenderObjectMixin<RenderObject>;
 

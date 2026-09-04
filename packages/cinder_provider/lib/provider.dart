@@ -1,4 +1,4 @@
-library provider;
+library;
 
 export 'src/change_notifier_provider.dart'
     show
@@ -36,6 +36,15 @@ export 'src/provider.dart'
         SelectContext,
         WatchContext;
 export 'src/reassemble_handler.dart' show ReassembleHandler;
+export 'src/proxy_provider.dart'
+    show
+        ProxyProvider,
+        ProxyProvider0,
+        ProxyProvider2,
+        ProxyProvider3,
+        ProxyProvider4,
+        ProxyProvider5,
+        ProxyProvider6;
 export 'src/selector.dart'
     show
         Selector,

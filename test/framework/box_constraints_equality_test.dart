@@ -5,32 +5,50 @@ void main() {
   group('BoxConstraints equality', () {
     test('same values are equal', () {
       final c1 = BoxConstraints(
-          minWidth: 10, maxWidth: 100, minHeight: 20, maxHeight: 200);
+        minWidth: 10,
+        maxWidth: 100,
+        minHeight: 20,
+        maxHeight: 200,
+      );
       final c2 = BoxConstraints(
-          minWidth: 10, maxWidth: 100, minHeight: 20, maxHeight: 200);
+        minWidth: 10,
+        maxWidth: 100,
+        minHeight: 20,
+        maxHeight: 200,
+      );
       expect(c1, equals(c2));
       expect(c1.hashCode, equals(c2.hashCode));
     });
 
     test('different values are not equal', () {
       final c1 = BoxConstraints(
-          minWidth: 10, maxWidth: 100, minHeight: 20, maxHeight: 200);
+        minWidth: 10,
+        maxWidth: 100,
+        minHeight: 20,
+        maxHeight: 200,
+      );
       final c2 = BoxConstraints(
-          minWidth: 11, maxWidth: 100, minHeight: 20, maxHeight: 200);
+        minWidth: 11,
+        maxWidth: 100,
+        minHeight: 20,
+        maxHeight: 200,
+      );
       expect(c1, isNot(equals(c2)));
     });
 
     test('constraints with infinity are equal', () {
       final c1 = BoxConstraints(
-          minWidth: 0,
-          maxWidth: double.infinity,
-          minHeight: 0,
-          maxHeight: double.infinity);
+        minWidth: 0,
+        maxWidth: double.infinity,
+        minHeight: 0,
+        maxHeight: double.infinity,
+      );
       final c2 = BoxConstraints(
-          minWidth: 0,
-          maxWidth: double.infinity,
-          minHeight: 0,
-          maxHeight: double.infinity);
+        minWidth: 0,
+        maxWidth: double.infinity,
+        minHeight: 0,
+        maxHeight: double.infinity,
+      );
       expect(c1, equals(c2));
       expect(c1.hashCode, equals(c2.hashCode));
     });
@@ -51,7 +69,11 @@ void main() {
 
     test('same instance is equal to itself', () {
       final c1 = BoxConstraints(
-          minWidth: 10, maxWidth: 100, minHeight: 20, maxHeight: 200);
+        minWidth: 10,
+        maxWidth: 100,
+        minHeight: 20,
+        maxHeight: 200,
+      );
       expect(c1, equals(c1));
     });
 
@@ -64,7 +86,11 @@ void main() {
 
     test('different type is not equal', () {
       final c1 = BoxConstraints(
-          minWidth: 10, maxWidth: 100, minHeight: 20, maxHeight: 200);
+        minWidth: 10,
+        maxWidth: 100,
+        minHeight: 20,
+        maxHeight: 200,
+      );
       expect(c1, isNot(equals('not a BoxConstraints')));
       expect(c1, isNot(equals(null)));
       expect(c1, isNot(equals(42)));
