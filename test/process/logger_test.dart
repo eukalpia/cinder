@@ -118,6 +118,7 @@ void main() {
             'ws://127.0.0.1:${logServer.port}/logs',
           );
           final messages = StreamIterator(ws);
+          Timer? readinessProducer;
           try {
             if (byteBudget > 0) {
               expect(
@@ -129,11 +130,22 @@ void main() {
                 'keep',
               );
             }
-            logServer.log('too large');
+            if (byteBudget == 0) {
+              // The client handshake can finish before the server registers
+              // its subscription. With no replay, offer the message until
+              // receipt establishes readiness instead of sleeping first.
+              readinessProducer = Timer.periodic(
+                const Duration(milliseconds: 10),
+                (_) => logServer.log('too large'),
+              );
+            } else {
+              logServer.log('too large');
+            }
             expect(
               await messages.moveNext().timeout(const Duration(seconds: 2)),
               isTrue,
             );
+            readinessProducer?.cancel();
             expect(
               (jsonDecode(messages.current as String) as Map)['message'],
               'too large',
@@ -152,6 +164,7 @@ void main() {
               byteBudget == 0 ? <String>[] : ['keep'],
             );
           } finally {
+            readinessProducer?.cancel();
             await messages.cancel();
             await ws.close();
           }
