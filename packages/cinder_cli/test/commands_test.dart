@@ -71,6 +71,7 @@ void main() {
   Future<({int exitCode, String output, String errors})> runCli(
     List<String> arguments, {
     String? entrypoint,
+    Duration timeout = const Duration(seconds: 5),
   }) async {
     final kernel = entrypoint == null
         ? cliKernel
@@ -83,7 +84,7 @@ void main() {
     final output = process.stdout.transform(utf8.decoder).join();
     final errors = process.stderr.transform(utf8.decoder).join();
     try {
-      final code = await process.exitCode.timeout(const Duration(seconds: 5));
+      final code = await process.exitCode.timeout(timeout);
       return (exitCode: code, output: await output, errors: await errors);
     } on TimeoutException {
       process.kill(ProcessSignal.sigkill);
@@ -145,6 +146,101 @@ void main() {
     expect('${result.output}${result.errors}', contains('Usage:'));
     expect(result.errors, isNot(contains('Unhandled exception')));
   });
+
+  test('build explains how to specify a missing entry point', () async {
+    final result = await runCli(['build']);
+
+    expect(result.exitCode, 1);
+    expect(result.output, contains('cinder build path/to/entry.dart'));
+    expect(result.errors, isNot(contains('Unhandled exception')));
+  });
+
+  test(
+    'build rejects unsupported cross compilation before creating artifacts',
+    () async {
+      final target = Platform.isWindows ? 'macos' : 'windows';
+      final result = await runCli([
+        'build',
+        '--target-os=$target',
+        '--target-arch=x64',
+      ]);
+
+      expect(result.exitCode, 1);
+      expect(result.output, contains('GitHub Actions runner'));
+      expect(Directory('${project.path}/build').existsSync(), isFalse);
+    },
+  );
+
+  test(
+    'build produces a runnable executable and separate debug symbols',
+    () async {
+      await File('${project.path}/pubspec.yaml').writeAsString(
+        'name: cli_test_project\nenvironment:\n  sdk: ">=3.9.0 <4.0.0"\n',
+      );
+      final script = File('${project.path}/bin/entry with spaces.dart');
+      await script.parent.create(recursive: true);
+      await script.writeAsString(
+        "void main(List<String> args) { print('built: \${args.single}'); }",
+      );
+      final suffix = Platform.isWindows ? '.exe' : '';
+      final executable = File(
+        '${project.path}/output with spaces/hello app$suffix',
+      );
+
+      final result = await runCli([
+        'build',
+        script.path,
+        '--output',
+        executable.path,
+      ], timeout: const Duration(seconds: 60));
+
+      expect(result.exitCode, 0, reason: '${result.output}\n${result.errors}');
+      expect(await executable.exists(), isTrue);
+      final symbols = File(
+        '${executable.parent.path}/symbols/hello app$suffix.debug',
+      );
+      expect(await symbols.length(), greaterThan(0));
+      final app = await Process.run(executable.path, ['argument with spaces']);
+      expect(app.exitCode, 0, reason: app.stderr);
+      expect(app.stdout.toString().trim(), 'built: argument with spaces');
+    },
+    timeout: const Timeout(Duration(seconds: 90)),
+  );
+
+  test(
+    'build forwards compiler failure and honors no-split-debug-info',
+    () async {
+      await File('${project.path}/pubspec.yaml').writeAsString(
+        'name: cli_test_project\nenvironment:\n  sdk: ">=3.9.0 <4.0.0"\n',
+      );
+      final script = File('${project.path}/broken.dart');
+      await script.writeAsString('void main() { syntax error }');
+      final output = '${project.path}/failed/application';
+
+      final result = await runCli([
+        'build',
+        script.path,
+        '--output',
+        output,
+        '--no-split-debug-info',
+      ], timeout: const Duration(seconds: 60));
+      final compiler = await Process.run(Platform.resolvedExecutable, [
+        'compile',
+        'exe',
+        '--output=${project.path}/direct-failure',
+        script.path,
+      ]).timeout(const Duration(seconds: 60));
+
+      expect(compiler.exitCode, isNot(0));
+      expect(
+        result.exitCode,
+        compiler.exitCode,
+        reason: '${result.output}\n${result.errors}',
+      );
+      expect(Directory('${project.path}/failed/symbols').existsSync(), isFalse);
+    },
+    timeout: const Timeout(Duration(seconds: 90)),
+  );
 
   test(
     'run forwards script options and preserves the child exit code',
@@ -233,40 +329,36 @@ Future<void> main() async {
     skip: Platform.isWindows ? 'Unix domain shell requires POSIX' : false,
   );
 
-  test(
-    'log discovery does not resume stopped processes',
-    () async {
-      final server = LogServer();
-      await server.start();
-      addTearDown(server.close);
-      server.log('buffered message');
-      final worker = await Process.start('sleep', ['60']);
-      try {
-        worker.kill(ProcessSignal.sigstop);
-        final metadata = File(getLogPortPathForPid(worker.pid));
-        await metadata.writeAsString('${server.port}');
+  test('log discovery does not resume stopped processes', () async {
+    final server = LogServer();
+    await server.start();
+    addTearDown(server.close);
+    server.log('buffered message');
+    final worker = await Process.start('sleep', ['60']);
+    try {
+      worker.kill(ProcessSignal.sigstop);
+      final metadata = File(getLogPortPathForPid(worker.pid));
+      await metadata.writeAsString('${server.port}');
 
-        final result = await runCli([
-          'logs',
-          '--mode',
-          'get',
-          '--pid',
-          '${worker.pid}',
-        ]);
-        final status = await Process.run('ps', [
-          '-o',
-          'stat=',
-          '-p',
-          '${worker.pid}',
-        ]);
+      final result = await runCli([
+        'logs',
+        '--mode',
+        'get',
+        '--pid',
+        '${worker.pid}',
+      ]);
+      final status = await Process.run('ps', [
+        '-o',
+        'stat=',
+        '-p',
+        '${worker.pid}',
+      ]);
 
-        expect(result.exitCode, 0, reason: result.errors);
-        expect(status.stdout.toString(), contains('T'));
-      } finally {
-        worker.kill(ProcessSignal.sigkill);
-        await worker.exitCode;
-      }
-    },
-    skip: Platform.isWindows ? 'Process suspension requires POSIX' : false,
-  );
+      expect(result.exitCode, 0, reason: result.errors);
+      expect(status.stdout.toString(), contains('T'));
+    } finally {
+      worker.kill(ProcessSignal.sigkill);
+      await worker.exitCode;
+    }
+  }, skip: Platform.isWindows ? 'Process suspension requires POSIX' : false);
 }

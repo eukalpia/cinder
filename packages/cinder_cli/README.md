@@ -13,6 +13,48 @@ dart pub global activate . --source path
 
 ## Commands
 
+### `cinder build [entry.dart]`
+
+Build a self-contained native executable with the installed Dart SDK:
+
+```bash
+cinder build
+cinder build example/task_manager_demo.dart --output build/native/cinder-demo
+cinder build bin/my_app.dart --target-os linux --target-arch x64
+```
+
+Without an entry argument, the command tries `bin/<pubspec-name>.dart`, then
+`bin/main.dart`. Other project layouts require an explicit entry path; the
+command does not generate project files.
+
+| Option | Default |
+| --- | --- |
+| `--target-os macos\|windows\|linux` | Selected Dart SDK's host OS |
+| `--target-arch x64\|arm64\|arm\|riscv64` | Selected Dart SDK's host architecture |
+| `-o, --output FILE` | `build/cinder/<os>-<arch>/<package-name>` (`.exe` on Windows) |
+| `--no-split-debug-info` | Debug symbols are separated unless disabled |
+
+Debug symbols are saved beside the executable in `symbols/<filename>.debug`.
+For example, `--output build/native/cinder-demo.exe` produces
+`build/native/symbols/cinder-demo.exe.debug`. Keep these symbols for diagnosing
+crashes; distribute the executable separately for a smaller download. The
+compiler's exit code is returned to scripts and CI.
+
+macOS and Windows builds require a Dart SDK for the matching OS **and**
+architecture. Use a native machine or GitHub Actions runner for each target.
+Linux supports `arm`, `arm64`, `riscv64`, and `x64` cross-compilation from a
+64-bit macOS, Windows, or Linux SDK; Dart may download and cache target compiler
+components. See [Dart's compilation documentation](https://dart.dev/tools/dart-compile#cross-compilation).
+
+Running a built application does not require Dart. Running `cinder build` does,
+including when the CLI itself is distributed as an AOT executable. The command
+uses its running SDK when available; a standalone CLI finds an SDK through
+`DART_SDK` or `PATH`, including executable version-manager shims and Flutter's
+cached Dart SDK. The selected launcher is checked with `dart --version` before
+compilation. Set `DART_SDK` to the
+SDK directory (not its `bin` directory). Packages with native build hooks need
+Dart's `dart build` workflow; compiler diagnostics are forwarded unchanged.
+
 ### `cinder shell`
 
 Start a cinder shell server that cinder apps can render into. This allows running cinder apps from IDEs with debugger support.

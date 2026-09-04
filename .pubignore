@@ -10,6 +10,7 @@ skills/
 docs/superpowers/
 .cinder-web/
 artifacts/
+benchmark/comparison/
 coverage/
 build/
 pubspec.lock

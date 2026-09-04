@@ -1,0 +1,178 @@
+name: Native distributions
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: ${{ github.event_name != 'release' }}
+
+jobs:
+  build:
+    name: ${{ matrix.os }}-${{ matrix.arch }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-latest
+            os: linux
+            arch: x64
+            extension: ''
+          - runner: ubuntu-24.04-arm
+            os: linux
+            arch: arm64
+            extension: ''
+          - runner: windows-latest
+            os: windows
+            arch: x64
+            extension: '.exe'
+          - runner: macos-15
+            os: macos
+            arch: arm64
+            extension: ''
+          - runner: macos-15-intel
+            os: macos
+            arch: x64
+            extension: ''
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 25
+    defaults:
+      run:
+        shell: bash
+    env:
+      TARGET_OS: ${{ matrix.os }}
+      TARGET_ARCH: ${{ matrix.arch }}
+      EXE_EXTENSION: ${{ matrix.extension }}
+      SOURCE_COMMIT: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: 3.13.3
+          architecture: ${{ matrix.arch }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify archive tooling
+        run: |
+          python -m unittest discover -s tool -p 'test_package_native.py' -v
+          python tool/licenses/dart-3.13.3/verify_sources.py
+      - name: Resolve project and activate its local CLI
+        run: |
+          dart pub get
+          dart pub global activate --source path packages/cinder_cli
+      - name: Build demo through the local Cinder CLI
+        run: >-
+          dart pub global run cinder_cli:cinder_cli build
+          example/task_manager_demo.dart
+          --target-os "$TARGET_OS" --target-arch "$TARGET_ARCH"
+          --output "build/native/cinder-demo$EXE_EXTENSION"
+      - name: Compile standalone CLI with separate debugging information
+        working-directory: packages/cinder_cli
+        run: >-
+          dart compile exe bin/cinder_cli.dart
+          --target-os "$TARGET_OS" --target-arch "$TARGET_ARCH"
+          --output "../../build/native/cinder$EXE_EXTENSION"
+          -S "../../build/native/symbols/cinder$EXE_EXTENSION.debug"
+      - name: Run standalone CLI
+        run: '"./build/native/cinder$EXE_EXTENSION" --help'
+      - name: Exercise demo in a native terminal
+        if: runner.os != 'Windows'
+        run: python tool/terminal_smoke.py ./build/native/cinder-demo
+      - name: Package and verify binaries, notices, and debugging symbols
+        run: >-
+          python tool/package_native.py build
+          --input build/native --output build/packages
+          --target-os "$TARGET_OS" --target-arch "$TARGET_ARCH"
+          --commit "$SOURCE_COMMIT" --dart-version 3.13.3
+      - uses: actions/upload-artifact@v4
+        with:
+          name: native-${{ matrix.os }}-${{ matrix.arch }}
+          path: build/packages/*
+          if-no-files-found: error
+          compression-level: 0
+
+  attach-release:
+    name: Attach verified native distributions
+    needs: build
+    if: github.event_name == 'release' && github.event.action == 'published'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      RELEASE_TAG: ${{ github.event.release.tag_name }}
+      RELEASE_ID: ${{ github.event.release.id }}
+      SOURCE_COMMIT: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: native-*
+          path: build/packages
+          merge-multiple: true
+      - name: Verify downloaded archives belong to the release commit
+        run: python tool/package_native.py verify build/packages --commit "$SOURCE_COMMIT"
+      - name: Attach assets without replacing different published data
+        shell: python
+        run: |
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+          import subprocess
+          import tempfile
+
+          repository = os.environ['GITHUB_REPOSITORY']
+          tag = os.environ['RELEASE_TAG']
+          release_id = os.environ['RELEASE_ID']
+          commit = os.environ['SOURCE_COMMIT']
+          refs = subprocess.check_output([
+              'git', 'ls-remote', '--exit-code', 'origin',
+              f'refs/tags/{tag}', f'refs/tags/{tag}^{{}}',
+          ], text=True).splitlines()
+          targets = dict(line.split(maxsplit=1)[::-1] for line in refs)
+          tagged_commit = targets.get(f'refs/tags/{tag}^{{}}', targets.get(f'refs/tags/{tag}'))
+          if tagged_commit != commit:
+              raise SystemExit('Release tag no longer points to the built commit')
+          release = json.loads(subprocess.check_output([
+              'gh', 'api', f'repos/{repository}/releases/{release_id}',
+          ], text=True))
+          if release['tag_name'] != tag:
+              raise SystemExit('Release event and current release tag differ')
+          existing = {asset['name']: asset for asset in release['assets']}
+          pending = []
+          with tempfile.TemporaryDirectory() as temporary:
+              for path in sorted(Path('build/packages').iterdir()):
+                  if path.name not in existing:
+                      pending.append(str(path))
+                      continue
+                  asset_id = existing[path.name]['id']
+                  downloaded = Path(temporary) / path.name
+                  with downloaded.open('wb') as output:
+                      subprocess.run([
+                          'gh', 'api', f'repos/{repository}/releases/assets/{asset_id}',
+                          '-H', 'Accept: application/octet-stream',
+                      ], stdout=output, check=True)
+                  if hashlib.sha256(path.read_bytes()).digest() != hashlib.sha256(downloaded.read_bytes()).digest():
+                      raise SystemExit(f'Refusing to replace different release asset: {path.name}')
+                  print(f'Already attached with matching checksum: {path.name}')
+          if pending:
+              subprocess.run(['gh', 'release', 'upload', '--repo', repository, '--', tag, *pending], check=True)

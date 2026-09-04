@@ -11,6 +11,18 @@ class UnicodeWidth {
   static int stringWidth(String text) {
     if (text.isEmpty) return 0;
 
+    var printableAscii = true;
+    for (var i = 0; i < text.length; i++) {
+      final code = text.codeUnitAt(i);
+      if (code < 0x20 || code > 0x7e) {
+        printableAscii = false;
+        break;
+      }
+    }
+    if (printableAscii) return text.length;
+
+    // Restart at the beginning: a non-ASCII combining mark or variation
+    // selector can belong to the last ASCII character in the prefix.
     // Use grapheme clusters for accurate width calculation
     int totalWidth = 0;
     for (final grapheme in text.characters) {
@@ -23,6 +35,11 @@ class UnicodeWidth {
   /// Calculate the display width of a single grapheme cluster
   static int graphemeWidth(String grapheme) {
     if (grapheme.isEmpty) return 0;
+
+    if (grapheme.length == 1) {
+      final code = grapheme.codeUnitAt(0);
+      if (code >= 0x20 && code <= 0x7e) return 1;
+    }
 
     // Handle ZWJ sequences (emoji families, professions, etc.)
     if (grapheme.contains('\u200D')) {

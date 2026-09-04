@@ -1,4 +1,5 @@
 import 'package:args/command_runner.dart';
+import 'package:cinder_cli/src/commands/build_command.dart';
 import 'package:cinder_cli/src/commands/logs_command.dart';
 import 'package:cinder_cli/src/commands/run_command.dart';
 import 'package:cinder_cli/src/commands/shell_command.dart';
@@ -9,6 +10,7 @@ class Runner extends CommandRunner<int> {
     addCommand(ShellCommand());
     addCommand(LogsCommand());
     addCommand(RunCommand());
+    addCommand(BuildCommand());
   }
 
   @override

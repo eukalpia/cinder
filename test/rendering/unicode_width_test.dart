@@ -3,6 +3,40 @@ import 'package:test/test.dart';
 
 void main() {
   group('Unicode Width Calculation', () {
+    test('all printable ASCII characters occupy one column', () {
+      final printable = String.fromCharCodes([
+        for (var code = 0x20; code <= 0x7e; code++) code,
+      ]);
+      expect(UnicodeWidth.stringWidth(printable), 95);
+      for (var i = 0; i < printable.length; i++) {
+        expect(UnicodeWidth.graphemeWidth(printable[i]), 1);
+      }
+    });
+
+    test(
+      'ASCII prefixes preserve following grapheme and control semantics',
+      () {
+        final cases = {
+          '': 0,
+          'prefixA\uFE0F': 8,
+          'ABe\u0301': 3,
+          'A界B': 4,
+          'A👨‍👩‍👧‍👦B': 4,
+          'A\tB': 3,
+          'A\u0000B': 2,
+          'A\u007fB': 2,
+          'A\u200dB': 2,
+        };
+        for (final entry in cases.entries) {
+          expect(
+            UnicodeWidth.stringWidth(entry.key),
+            entry.value,
+            reason: entry.key.codeUnits.toString(),
+          );
+        }
+      },
+    );
+
     test('sparkles emoji width', () {
       final sparkles = '✨';
       final sparklesCode = sparkles.runes.first;

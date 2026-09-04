@@ -51,6 +51,14 @@ class TerminalCanvas {
       blendedBgColor = existingCell.style.backgroundColor;
     }
 
+    // Reuse immutable input styles when blending and inheritance changed
+    // nothing. Subclasses keep the existing base-style snapshot behavior.
+    if (style.runtimeType == TextStyle &&
+        blendedColor == style.color &&
+        blendedBgColor == style.backgroundColor) {
+      return style;
+    }
+
     return TextStyle(
       color: blendedColor,
       backgroundColor: blendedBgColor,
@@ -59,6 +67,30 @@ class TerminalCanvas {
       decoration: style.decoration,
       reverse: style.reverse,
     );
+  }
+
+  bool _drawAsciiText(int x, int y, String text, TextStyle? style) {
+    // Check the entire string before writing: a combining mark or variation
+    // selector after an ASCII prefix must stay with its source grapheme.
+    for (var i = 0; i < text.length; i++) {
+      final code = text.codeUnitAt(i);
+      if (code < 0x20 || code > 0x7e) return false;
+    }
+    if (text.isEmpty) return true;
+
+    final cellLeft = area.left.round() + x;
+    final cellY = area.top.round() + y;
+    final effectiveStyle = style ?? const TextStyle();
+    for (var i = 0; i < text.length; i++) {
+      if (x + i >= area.width) break;
+      final cellX = cellLeft + i;
+      final finalStyle = _blendStyle(
+        effectiveStyle,
+        _buffer.getCell(cellX, cellY),
+      );
+      _buffer.writeCell(cellX, cellY, char: text[i], style: finalStyle);
+    }
+    return true;
   }
 
   /// Draw text at the given position
@@ -72,6 +104,8 @@ class TerminalCanvas {
 
     // Replace tab characters with spaces to avoid terminal tab stop behavior
     text = text.replaceAll('\t', ' ');
+
+    if (_drawAsciiText(x, y, text, style)) return;
 
     int currentColumn = x;
 

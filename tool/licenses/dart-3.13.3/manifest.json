@@ -1,0 +1,856 @@
+{
+  "schema_version": 1,
+  "dart_version": "3.13.3",
+  "dart_source_commit": "1d1a730ef918d602aedafc939a4cf5940e7589ab",
+  "dart_deps_url": "https://raw.githubusercontent.com/dart-lang/sdk/1d1a730ef918d602aedafc939a4cf5940e7589ab/DEPS",
+  "dart_deps_sha256": "2a72ea5835ac2099bebd6aa0a5c9858d7f0b4b4015923376919e0788f153a6e0",
+  "bundle_file": "NOTICES",
+  "bundle_sha256": "44bf47a4bad57e161619e4bd69dc7017119ec8780029d36c605aeec21bbc0dbf",
+  "sources": [
+    {
+      "component": "BoringSSL",
+      "revision": "2e508c973d634b3aa51b71db5062bc6b096e5031",
+      "path": "LICENSE",
+      "url": "https://boringssl.googlesource.com/boringssl/+/2e508c973d634b3aa51b71db5062bc6b096e5031/LICENSE?format=TEXT",
+      "sha256": "827c8d8fc207c2392794eef9e00fe246f9f61fdcc132556c275be3dd8c3cd97f",
+      "bytes": 13115,
+      "notice_selection": {
+        "complete_file": true
+      },
+      "notice_sha256": "827c8d8fc207c2392794eef9e00fe246f9f61fdcc132556c275be3dd8c3cd97f",
+      "notice_bytes": 13115
+    },
+    {
+      "component": "ICU and Unicode data",
+      "revision": "a86a32e67b8d1384b33f8fa48c83a6079b86f8cd",
+      "path": "LICENSE",
+      "url": "https://chromium.googlesource.com/chromium/deps/icu/+/a86a32e67b8d1384b33f8fa48c83a6079b86f8cd/LICENSE?format=TEXT",
+      "sha256": "451167c55c0fa447cc2d5632714f5e3c567fe4f1e1badefab2c1333852198aca",
+      "bytes": 26487,
+      "notice_selection": {
+        "complete_file": true
+      },
+      "notice_sha256": "451167c55c0fa447cc2d5632714f5e3c567fe4f1e1badefab2c1333852198aca",
+      "notice_bytes": 26487
+    },
+    {
+      "component": "zlib",
+      "revision": "3008c4b3a06bd65392c31db8846000a21e3d03c5",
+      "path": "LICENSE",
+      "url": "https://chromium.googlesource.com/chromium/src/third_party/zlib/+/3008c4b3a06bd65392c31db8846000a21e3d03c5/LICENSE?format=TEXT",
+      "sha256": "e1cfcc55c325b3f78cf55df9664abaa066e2271dffe8213347d9fccdfbac8f2c",
+      "bytes": 910,
+      "notice_selection": {
+        "complete_file": true
+      },
+      "notice_sha256": "e1cfcc55c325b3f78cf55df9664abaa066e2271dffe8213347d9fccdfbac8f2c",
+      "notice_bytes": 910
+    },
+    {
+      "component": "Chromium BSD terms for zlib optimizations",
+      "revision": "refs/tags/145.0.7632.26",
+      "path": "LICENSE",
+      "url": "https://chromium.googlesource.com/chromium/src/+/refs/tags/145.0.7632.26/LICENSE?format=TEXT",
+      "sha256": "368cca1106be99d39ecd32a38d8305585d802a475effb66380b91ffc9bcf709b",
+      "bytes": 1536,
+      "notice_selection": {
+        "complete_file": true
+      },
+      "notice_sha256": "368cca1106be99d39ecd32a38d8305585d802a475effb66380b91ffc9bcf709b",
+      "notice_bytes": 1536
+    },
+    {
+      "component": "Chromium zlib Adler32 optimization",
+      "revision": "3008c4b3a06bd65392c31db8846000a21e3d03c5",
+      "path": "adler32_simd.c",
+      "url": "https://chromium.googlesource.com/chromium/src/third_party/zlib/+/3008c4b3a06bd65392c31db8846000a21e3d03c5/adler32_simd.c?format=TEXT",
+      "sha256": "cd06682be9a316501331c457ef81bee347c6274c7affc1083a966d742e959646",
+      "bytes": 13909,
+      "notice_selection": {
+        "line_start": 1,
+        "line_end_inclusive": 6
+      },
+      "notice_sha256": "3788cfcd2ec2a4bb291edae68ef27a0fcdf81cbd21d8839ef0d32311ca7aae7c",
+      "notice_bytes": 194
+    },
+    {
+      "component": "Chromium zlib CRC32 optimization",
+      "revision": "3008c4b3a06bd65392c31db8846000a21e3d03c5",
+      "path": "crc32_simd.c",
+      "url": "https://chromium.googlesource.com/chromium/src/third_party/zlib/+/3008c4b3a06bd65392c31db8846000a21e3d03c5/crc32_simd.c?format=TEXT",
+      "sha256": "96551ac987306d6dcc4fda16f3677b996b0368975e3758d26bda282192804e6d",
+      "bytes": 18254,
+      "notice_selection": {
+        "byte_start": 0,
+        "byte_end_exclusive": 192,
+        "append_newline": true
+      },
+      "notice_sha256": "55b223e3f0fdcf0c262d3ff37aeb32ba063d300e53b97d56057bd3a34c8ae989",
+      "notice_bytes": 193
+    },
+    {
+      "component": "Intel zlib CRC folding",
+      "revision": "3008c4b3a06bd65392c31db8846000a21e3d03c5",
+      "path": "crc_folding.c",
+      "url": "https://chromium.googlesource.com/chromium/src/third_party/zlib/+/3008c4b3a06bd65392c31db8846000a21e3d03c5/crc_folding.c?format=TEXT",
+      "sha256": "ec76325b7e4425a86ea0b1dc023ef140ee7f069f1067a587de135307971a1036",
+      "bytes": 16279,
+      "notice_selection": {
+        "byte_start": 0,
+        "byte_end_exclusive": 694,
+        "append_newline": true
+      },
+      "notice_sha256": "b6d3d72e3ecc9d33d5de6d6547f68c577c203d623585adb6455d20216cced592",
+      "notice_bytes": 695
+    },
+    {
+      "component": "ARM and Chromium zlib chunk copy",
+      "revision": "3008c4b3a06bd65392c31db8846000a21e3d03c5",
+      "path": "contrib/optimizations/chunkcopy.h",
+      "url": "https://chromium.googlesource.com/chromium/src/third_party/zlib/+/3008c4b3a06bd65392c31db8846000a21e3d03c5/contrib/optimizations/chunkcopy.h?format=TEXT",
+      "sha256": "f43452bb0710645d1360f552a49359d322326fc7b2fbc607b1574fa203cce65e",
+      "bytes": 17560,
+      "notice_selection": {
+        "byte_start": 0,
+        "byte_end_exclusive": 258,
+        "append_newline": true
+      },
+      "notice_sha256": "ca7047566630aa93a701f06df3817e2b7cfd7f12807281b2e09013b8f9132c70",
+      "notice_bytes": 259
+    },
+    {
+      "component": "Mark Adler and Chromium zlib fast decoder",
+      "revision": "3008c4b3a06bd65392c31db8846000a21e3d03c5",
+      "path": "contrib/optimizations/inffast_chunk.c",
+      "url": "https://chromium.googlesource.com/chromium/src/third_party/zlib/+/3008c4b3a06bd65392c31db8846000a21e3d03c5/contrib/optimizations/inffast_chunk.c?format=TEXT",
+      "sha256": "1d30b2735708b139da9de8198e11cb036115f39e9752bec3d2547bd2e586b767",
+      "bytes": 15832,
+      "notice_selection": {
+        "byte_start": 0,
+        "byte_end_exclusive": 190,
+        "append_newline": true
+      },
+      "notice_sha256": "a76c3d70aed9b52b78196199da23e207ae6a01513ade15f40cfffe172b74b345",
+      "notice_bytes": 191
+    },
+    {
+      "component": "Chromium zlib hash insertion",
+      "revision": "3008c4b3a06bd65392c31db8846000a21e3d03c5",
+      "path": "contrib/optimizations/insert_string.h",
+      "url": "https://chromium.googlesource.com/chromium/src/third_party/zlib/+/3008c4b3a06bd65392c31db8846000a21e3d03c5/contrib/optimizations/insert_string.h?format=TEXT",
+      "sha256": "ff03fe98a4dcaa22022a44340f8fe62f4820c64cd1f326bd710fa5d37f8a2897",
+      "bytes": 2834,
+      "notice_selection": {
+        "byte_start": 0,
+        "byte_end_exclusive": 195,
+        "append_newline": true
+      },
+      "notice_sha256": "b22accd948ac32ff2ae4357d2e6271566e11f2badccdcc9dd36c6b0499e444f3",
+      "notice_bytes": 196
+    },
+    {
+      "component": "Chromium zlib hash sliding",
+      "revision": "3008c4b3a06bd65392c31db8846000a21e3d03c5",
+      "path": "slide_hash_simd.h",
+      "url": "https://chromium.googlesource.com/chromium/src/third_party/zlib/+/3008c4b3a06bd65392c31db8846000a21e3d03c5/slide_hash_simd.h?format=TEXT",
+      "sha256": "0524fd845c79ac31bf7e23436e68aa9eb20d21a849088f4ec3250d460214284c",
+      "bytes": 3685,
+      "notice_selection": {
+        "byte_start": 0,
+        "byte_end_exclusive": 197,
+        "append_newline": true
+      },
+      "notice_sha256": "dfe146342f94e1595214e12a377ff40d383db36dadbc09b8cc071ef354114dc3",
+      "notice_bytes": 198
+    },
+    {
+      "component": "Chromium zlib CPU feature detection",
+      "revision": "3008c4b3a06bd65392c31db8846000a21e3d03c5",
+      "path": "cpu_features.c",
+      "url": "https://chromium.googlesource.com/chromium/src/third_party/zlib/+/3008c4b3a06bd65392c31db8846000a21e3d03c5/cpu_features.c?format=TEXT",
+      "sha256": "c1504072e83f8187aaaf73430ffb2464384b17e544eb2e243f4c3029d555fca7",
+      "bytes": 7236,
+      "notice_selection": {
+        "byte_start": 0,
+        "byte_end_exclusive": 227,
+        "append_newline": true
+      },
+      "notice_sha256": "aca9c8fbe556e770221641d454905105c1c9ab7dac5491ceafa9793323ed72a4",
+      "notice_bytes": 228
+    },
+    {
+      "component": "double-conversion",
+      "revision": "1d1a730ef918d602aedafc939a4cf5940e7589ab",
+      "path": "third_party/double-conversion/LICENSE",
+      "url": "https://raw.githubusercontent.com/dart-lang/sdk/1d1a730ef918d602aedafc939a4cf5940e7589ab/third_party/double-conversion/LICENSE",
+      "sha256": "4af93c12062c58058378de2397dc1c92bbff9ddfb1d583a01c84127557ce97ca",
+      "bytes": 1527,
+      "notice_selection": {
+        "complete_file": true
+      },
+      "notice_sha256": "4af93c12062c58058378de2397dc1c92bbff9ddfb1d583a01c84127557ce97ca",
+      "notice_bytes": 1527
+    },
+    {
+      "component": "Perfetto protozero and base",
+      "revision": "13ce0c9e13b0940d2476cd0cff2301708a9a2e2b",
+      "path": "LICENSE",
+      "url": "https://chromium.googlesource.com/external/github.com/google/perfetto/+/13ce0c9e13b0940d2476cd0cff2301708a9a2e2b/LICENSE?format=TEXT",
+      "sha256": "00564d497642465d7f96d109f38ff144997f0abc04ef167410f6b172ad5e92cd",
+      "bytes": 10689,
+      "notice_selection": {
+        "complete_file": true
+      },
+      "notice_sha256": "00564d497642465d7f96d109f38ff144997f0abc04ef167410f6b172ad5e92cd",
+      "notice_bytes": 10689
+    },
+    {
+      "component": "LLVM libc++",
+      "revision": "bd557f6f764d1e40b62528a13b124ce740624f8f",
+      "path": "LICENSE.TXT",
+      "url": "https://llvm.googlesource.com/llvm-project/libcxx/+/bd557f6f764d1e40b62528a13b124ce740624f8f/LICENSE.TXT?format=TEXT",
+      "sha256": "539dd7aed86e8a4f12cbdd0e6c50c189c7d74847e4fecc64ce2c6ee3a01da38b",
+      "bytes": 16703,
+      "notice_selection": {
+        "complete_file": true
+      },
+      "notice_sha256": "539dd7aed86e8a4f12cbdd0e6c50c189c7d74847e4fecc64ce2c6ee3a01da38b",
+      "notice_bytes": 16703
+    },
+    {
+      "component": "LLVM libc++ contributors",
+      "revision": "bd557f6f764d1e40b62528a13b124ce740624f8f",
+      "path": "CREDITS.TXT",
+      "url": "https://llvm.googlesource.com/llvm-project/libcxx/+/bd557f6f764d1e40b62528a13b124ce740624f8f/CREDITS.TXT?format=TEXT",
+      "sha256": "054e099bf5954c8821b880f5751d2fbf221bf43cf7c57ac1c2c5ff6263d6d9c3",
+      "bytes": 4124,
+      "notice_selection": {
+        "complete_file": true
+      },
+      "notice_sha256": "054e099bf5954c8821b880f5751d2fbf221bf43cf7c57ac1c2c5ff6263d6d9c3",
+      "notice_bytes": 4124
+    },
+    {
+      "component": "LLVM libc++abi",
+      "revision": "a4dda1589d37a7e4b4f7a81ebad01b1083f2e726",
+      "path": "LICENSE.TXT",
+      "url": "https://llvm.googlesource.com/llvm-project/libcxxabi/+/a4dda1589d37a7e4b4f7a81ebad01b1083f2e726/LICENSE.TXT?format=TEXT",
+      "sha256": "e2b35be49f7284a45b7baca8fc7b3ab7440e7902392b2528a457816b5bb2a15c",
+      "bytes": 16706,
+      "notice_selection": {
+        "complete_file": true
+      },
+      "notice_sha256": "e2b35be49f7284a45b7baca8fc7b3ab7440e7902392b2528a457816b5bb2a15c",
+      "notice_bytes": 16706
+    },
+    {
+      "component": "LLVM libc++abi contributors",
+      "revision": "a4dda1589d37a7e4b4f7a81ebad01b1083f2e726",
+      "path": "CREDITS.TXT",
+      "url": "https://llvm.googlesource.com/llvm-project/libcxxabi/+/a4dda1589d37a7e4b4f7a81ebad01b1083f2e726/CREDITS.TXT?format=TEXT",
+      "sha256": "a259fff28a51623f14917dd68f97f3af7804984087ddc1bfd8196d08ebb75b83",
+      "bytes": 1660,
+      "notice_selection": {
+        "complete_file": true
+      },
+      "notice_sha256": "a259fff28a51623f14917dd68f97f3af7804984087ddc1bfd8196d08ebb75b83",
+      "notice_bytes": 1660
+    },
+    {
+      "component": "LLVM compiler-rt",
+      "revision": "deb6854eec93529b2bd30178d400ad2ee7665cd4",
+      "path": "compiler-rt/LICENSE.TXT",
+      "url": "https://raw.githubusercontent.com/llvm/llvm-project/deb6854eec93529b2bd30178d400ad2ee7665cd4/compiler-rt/LICENSE.TXT",
+      "sha256": "1a8f1058753f1ba890de984e48f0242a3a5c29a6a8f2ed9fd813f36985387e8d",
+      "bytes": 16708,
+      "notice_selection": {
+        "complete_file": true
+      },
+      "notice_sha256": "1a8f1058753f1ba890de984e48f0242a3a5c29a6a8f2ed9fd813f36985387e8d",
+      "notice_bytes": 16708
+    },
+    {
+      "component": "LLVM compiler-rt contributors",
+      "revision": "deb6854eec93529b2bd30178d400ad2ee7665cd4",
+      "path": "compiler-rt/CREDITS.TXT",
+      "url": "https://raw.githubusercontent.com/llvm/llvm-project/deb6854eec93529b2bd30178d400ad2ee7665cd4/compiler-rt/CREDITS.TXT",
+      "sha256": "a9901f47a089da41e4690682d00ce4cedaa2baf41fedbe79beee366d43ac2461",
+      "bytes": 1049,
+      "notice_selection": {
+        "complete_file": true
+      },
+      "notice_sha256": "a9901f47a089da41e4690682d00ce4cedaa2baf41fedbe79beee366d43ac2461",
+      "notice_bytes": 1049
+    },
+    {
+      "component": "LLVM libc",
+      "revision": "5af39a19a1ad51ce93972cdab206dcd3ff9b6afa",
+      "path": "LICENSE.TXT",
+      "url": "https://llvm.googlesource.com/llvm-project/libc/+/5af39a19a1ad51ce93972cdab206dcd3ff9b6afa/LICENSE.TXT?format=TEXT",
+      "sha256": "ebcd9bbf783a73d05c53ba4d586b8d5813dcdf3bbec50265860ccc885e606f47",
+      "bytes": 15140,
+      "notice_selection": {
+        "complete_file": true
+      },
+      "notice_sha256": "ebcd9bbf783a73d05c53ba4d586b8d5813dcdf3bbec50265860ccc885e606f47",
+      "notice_bytes": 15140
+    },
+    {
+      "component": "Ryu and Microsoft floating-point conversions in libc++",
+      "revision": "bd557f6f764d1e40b62528a13b124ce740624f8f",
+      "path": "src/ryu/d2s.cpp",
+      "url": "https://llvm.googlesource.com/llvm-project/libcxx/+/bd557f6f764d1e40b62528a13b124ce740624f8f/src/ryu/d2s.cpp?format=TEXT",
+      "sha256": "9dd8a9344dbb140a43840e0494496ae116d4f6e69a8ad63f2e79fead689bc7a2",
+      "bytes": 34960,
+      "notice_selection": {
+        "line_start": 1,
+        "line_end_inclusive": 38
+      },
+      "notice_sha256": "2e911be3944510f762205a041a2723e031650b64822cc3f026a4ab0e19f01dca",
+      "notice_bytes": 1959
+    },
+    {
+      "component": "Crashpad (optional SDK build)",
+      "revision": "d256de317164c0eb362bdd9cbb4d259fe6d086f3",
+      "path": "LICENSE",
+      "url": "https://chromium.googlesource.com/crashpad/crashpad/+/d256de317164c0eb362bdd9cbb4d259fe6d086f3/LICENSE?format=TEXT",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "bytes": 11358,
+      "notice_selection": {
+        "complete_file": true
+      },
+      "notice_sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "notice_bytes": 11358
+    },
+    {
+      "component": "mini-Chromium (optional SDK build)",
+      "revision": "203a01130fac64bfdcc8cab2e1798c7b2c0619bf",
+      "path": "LICENSE",
+      "url": "https://chromium.googlesource.com/chromium/mini_chromium/+/203a01130fac64bfdcc8cab2e1798c7b2c0619bf/LICENSE?format=TEXT",
+      "sha256": "12bbc9942399b4014dac7584f3df08afb966ab92157e21e47e6a05db13c04ae0",
+      "bytes": 1542,
+      "notice_selection": {
+        "complete_file": true
+      },
+      "notice_sha256": "12bbc9942399b4014dac7584f3df08afb966ab92157e21e47e6a05db13c04ae0",
+      "notice_bytes": 1542
+    },
+    {
+      "component": "V8 BSD terms",
+      "revision": "946ada6f5c08b1c0977666ca5462e886a9c194e2",
+      "path": "LICENSE",
+      "url": "https://chromium.googlesource.com/v8/v8/+/946ada6f5c08b1c0977666ca5462e886a9c194e2/LICENSE?format=TEXT",
+      "sha256": "6ab33af8774a0f396ee3aeeb761e3229057682d6f9fa7f572e390c2cb3a6e509",
+      "bytes": 3093,
+      "notice_selection": {
+        "complete_file": true
+      },
+      "notice_sha256": "6ab33af8774a0f396ee3aeeb761e3229057682d6f9fa7f572e390c2cb3a6e509",
+      "notice_bytes": 3093
+    },
+    {
+      "component": "V8 regular-expression source attribution",
+      "revision": "1d1a730ef918d602aedafc939a4cf5940e7589ab",
+      "path": "runtime/vm/regexp/char-predicates-inl.h",
+      "url": "https://raw.githubusercontent.com/dart-lang/sdk/1d1a730ef918d602aedafc939a4cf5940e7589ab/runtime/vm/regexp/char-predicates-inl.h",
+      "sha256": "f6356b1ad68142093aeea14165bca26d2fcabe4feaaf113fa2b67ac811853bab",
+      "bytes": 6132,
+      "notice_selection": {
+        "line_start": 1,
+        "line_end_inclusive": 3
+      },
+      "notice_sha256": "44d1f07e55a2f1de7c4fe1cdee16d16152cf35af6e7b9522c8590c7f389fd0f2",
+      "notice_bytes": 167
+    },
+    {
+      "component": "V8 regular-expression source attribution",
+      "revision": "1d1a730ef918d602aedafc939a4cf5940e7589ab",
+      "path": "runtime/vm/regexp/char-predicates.cc",
+      "url": "https://raw.githubusercontent.com/dart-lang/sdk/1d1a730ef918d602aedafc939a4cf5940e7589ab/runtime/vm/regexp/char-predicates.cc",
+      "sha256": "43200287f95803b018d2eb031e3c695e66218cc9591f3319505326c3a24ff7cb",
+      "bytes": 1234,
+      "notice_selection": {
+        "line_start": 1,
+        "line_end_inclusive": 3
+      },
+      "notice_sha256": "44d1f07e55a2f1de7c4fe1cdee16d16152cf35af6e7b9522c8590c7f389fd0f2",
+      "notice_bytes": 167
+    },
+    {
+      "component": "V8 regular-expression source attribution",
+      "revision": "1d1a730ef918d602aedafc939a4cf5940e7589ab",
+      "path": "runtime/vm/regexp/char-predicates.h",
+      "url": "https://raw.githubusercontent.com/dart-lang/sdk/1d1a730ef918d602aedafc939a4cf5940e7589ab/runtime/vm/regexp/char-predicates.h",
+      "sha256": "1c31340ce6624c6d62d1ff3d60ebe792b00e45cf2da44115a76613c35035d704",
+      "bytes": 2629,
+      "notice_selection": {
+        "line_start": 1,
+        "line_end_inclusive": 3
+      },
+      "notice_sha256": "44d1f07e55a2f1de7c4fe1cdee16d16152cf35af6e7b9522c8590c7f389fd0f2",
+      "notice_bytes": 167
+    },
+    {
+      "component": "V8 regular-expression source attribution",
+      "revision": "1d1a730ef918d602aedafc939a4cf5940e7589ab",
+      "path": "runtime/vm/regexp/flags.h",
+      "url": "https://raw.githubusercontent.com/dart-lang/sdk/1d1a730ef918d602aedafc939a4cf5940e7589ab/runtime/vm/regexp/flags.h",
+      "sha256": "c90d0a8472a5ff2203705e0043a998c3aefd622a62e13719926f3da22304812a",
+      "bytes": 5729,
+      "notice_selection": {
+        "line_start": 1,
+        "line_end_inclusive": 3
+      },
+      "notice_sha256": "c6800e983f7e5d5240d8a23e89d5b61021ff3b7ab8707cff9b2f46064af20829",
+      "notice_bytes": 167
+    },
+    {
+      "component": "V8 regular-expression source attribution",
+      "revision": "1d1a730ef918d602aedafc939a4cf5940e7589ab",
+      "path": "runtime/vm/regexp/gen-regexp-special-case.cc",
+      "url": "https://raw.githubusercontent.com/dart-lang/sdk/1d1a730ef918d602aedafc939a4cf5940e7589ab/runtime/vm/regexp/gen-regexp-special-case.cc",
+      "sha256": "b4fb73a8367b43a08090861c5a694dc1290cea13176d58cc6af8c74476959a62",
+      "bytes": 6044,
+      "notice_selection": {
+        "line_start": 1,
+        "line_end_inclusive": 3
+      },
+      "notice_sha256": "8ef7e21ee8c0a99fcdd8a10ca843a7a0c036b6429b5a50a09e3bb94ddf574528",
+      "notice_bytes": 167
+    },
+    {
+      "component": "V8 regular-expression source attribution",
+      "revision": "1d1a730ef918d602aedafc939a4cf5940e7589ab",
+      "path": "runtime/vm/regexp/label.h",
+      "url": "https://raw.githubusercontent.com/dart-lang/sdk/1d1a730ef918d602aedafc939a4cf5940e7589ab/runtime/vm/regexp/label.h",
+      "sha256": "d7e2b4b5f24b80eea23d52797492d69018149dfec4fa0782cd67dc5e525259b0",
+      "bytes": 3048,
+      "notice_selection": {
+        "line_start": 1,
+        "line_end_inclusive": 3
+      },
+      "notice_sha256": "b477f5f879604740a2da47bdd2a3c42825d51d7dd99f635d252560d4393888a6",
+      "notice_bytes": 167
+    },
+    {
+      "component": "V8 regular-expression source attribution",
+      "revision": "1d1a730ef918d602aedafc939a4cf5940e7589ab",
+      "path": "runtime/vm/regexp/memcopy.h",
+      "url": "https://raw.githubusercontent.com/dart-lang/sdk/1d1a730ef918d602aedafc939a4cf5940e7589ab/runtime/vm/regexp/memcopy.h",
+      "sha256": "334cce965b6424e5631fb64bd29b031f71a6f2fd216a161cde9a3cc6cc4a212e",
+      "bytes": 1831,
+      "notice_selection": {
+        "line_start": 1,
+        "line_end_inclusive": 3
+      },
+      "notice_sha256": "a82229670190fd3981a83377147e48a8e0c3f6ac286f3d49fbbbdb75e518958c",
+      "notice_bytes": 167
+    },
+    {
+      "component": "V8 regular-expression source attribution",
+      "revision": "1d1a730ef918d602aedafc939a4cf5940e7589ab",
+      "path": "runtime/vm/regexp/regexp-ast.cc",
+      "url": "https://raw.githubusercontent.com/dart-lang/sdk/1d1a730ef918d602aedafc939a4cf5940e7589ab/runtime/vm/regexp/regexp-ast.cc",
+      "sha256": "df934a26cfb16ca055f395544af188e08d23cd913666d40d7dc3a38e7d7f2b3c",
+      "bytes": 8362,
+      "notice_selection": {
+        "line_start": 1,
+        "line_end_inclusive": 3
+      },
+      "notice_sha256": "d0fe8c2b924ca44d65d0b83c043ddb54701367cb8b84be2fb1f6f26621efb930",
+      "notice_bytes": 167
+    },
+    {
+      "component": "V8 regular-expression source attribution",
+      "revision": "1d1a730ef918d602aedafc939a4cf5940e7589ab",
+      "path": "runtime/vm/regexp/regexp-ast.h",
+      "url": "https://raw.githubusercontent.com/dart-lang/sdk/1d1a730ef918d602aedafc939a4cf5940e7589ab/runtime/vm/regexp/regexp-ast.h",
+      "sha256": "f4ebaf6b0b012f280d38ac38d175a8eef7d20a9d3c13ba36fd4a6a60d1738e63",
+      "bytes": 27398,
+      "notice_selection": {
+        "line_start": 1,
+        "line_end_inclusive": 3
+      },
+      "notice_sha256": "d0fe8c2b924ca44d65d0b83c043ddb54701367cb8b84be2fb1f6f26621efb930",
+      "notice_bytes": 167
+    },
+    {
+      "component": "V8 regular-expression source attribution",
+      "revision": "1d1a730ef918d602aedafc939a4cf5940e7589ab",
+      "path": "runtime/vm/regexp/regexp-bytecode-generator-inl.h",
+      "url": "https://raw.githubusercontent.com/dart-lang/sdk/1d1a730ef918d602aedafc939a4cf5940e7589ab/runtime/vm/regexp/regexp-bytecode-generator-inl.h",
+      "sha256": "be77a20abc129b44f6806f13ecb1cebd210c6c9f6d50aa48d745faf7e9f44cba",
+      "bytes": 3161,
+      "notice_selection": {
+        "line_start": 1,
+        "line_end_inclusive": 3
+      },
+      "notice_sha256": "9a7695b3df076f3c932baf8345dfe35d248318ac514cc504038eda2613f3839c",
+      "notice_bytes": 172
+    },
+    {
+      "component": "V8 regular-expression source attribution",
+      "revision": "1d1a730ef918d602aedafc939a4cf5940e7589ab",
+      "path": "runtime/vm/regexp/regexp-bytecode-generator.cc",
+      "url": "https://raw.githubusercontent.com/dart-lang/sdk/1d1a730ef918d602aedafc939a4cf5940e7589ab/runtime/vm/regexp/regexp-bytecode-generator.cc",
+      "sha256": "96df9c50269f5e045c4a40ea5443819b2623bf8a0abdfa20a480ba48c277a31d",
+      "bytes": 23902,
+      "notice_selection": {
+        "line_start": 1,
+        "line_end_inclusive": 3
+      },
+      "notice_sha256": "9a7695b3df076f3c932baf8345dfe35d248318ac514cc504038eda2613f3839c",
+      "notice_bytes": 172
+    },
+    {
+      "component": "V8 regular-expression source attribution",
+      "revision": "1d1a730ef918d602aedafc939a4cf5940e7589ab",
+      "path": "runtime/vm/regexp/regexp-bytecode-generator.h",
+      "url": "https://raw.githubusercontent.com/dart-lang/sdk/1d1a730ef918d602aedafc939a4cf5940e7589ab/runtime/vm/regexp/regexp-bytecode-generator.h",
+      "sha256": "ae272f2a9e7341b04b19521bf8b7f20174bc0aa172a119125210b36a584d7268",
+      "bytes": 11772,
+      "notice_selection": {
+        "line_start": 1,
+        "line_end_inclusive": 3
+      },
+      "notice_sha256": "d9ab8d4bbefb13b5b4a980711affb396552c42d28f743daf88151f5746712cd3",
+      "notice_bytes": 167
+    },
+    {
+      "component": "V8 regular-expression source attribution",
+      "revision": "1d1a730ef918d602aedafc939a4cf5940e7589ab",
+      "path": "runtime/vm/regexp/regexp-bytecodes-inl.h",
+      "url": "https://raw.githubusercontent.com/dart-lang/sdk/1d1a730ef918d602aedafc939a4cf5940e7589ab/runtime/vm/regexp/regexp-bytecodes-inl.h",
+      "sha256": "5ea5b443787bfd23eadaeb68f75ff4d94d9e986e8d45ce8bbc5d6f32789ce6e6",
+      "bytes": 14815,
+      "notice_selection": {
+        "line_start": 1,
+        "line_end_inclusive": 3
+      },
+      "notice_sha256": "a82229670190fd3981a83377147e48a8e0c3f6ac286f3d49fbbbdb75e518958c",
+      "notice_bytes": 167
+    },
+    {
+      "component": "V8 regular-expression source attribution",
+      "revision": "1d1a730ef918d602aedafc939a4cf5940e7589ab",
+      "path": "runtime/vm/regexp/regexp-bytecodes.h",
+      "url": "https://raw.githubusercontent.com/dart-lang/sdk/1d1a730ef918d602aedafc939a4cf5940e7589ab/runtime/vm/regexp/regexp-bytecodes.h",
+      "sha256": "f924484060ea6ab5d9794eab4ce428d2c3178251409f8a84815c890727e611e5",
+      "bytes": 22003,
+      "notice_selection": {
+        "line_start": 1,
+        "line_end_inclusive": 3
+      },
+      "notice_sha256": "44d1f07e55a2f1de7c4fe1cdee16d16152cf35af6e7b9522c8590c7f389fd0f2",
+      "notice_bytes": 167
+    },
+    {
+      "component": "V8 regular-expression source attribution",
+      "revision": "1d1a730ef918d602aedafc939a4cf5940e7589ab",
+      "path": "runtime/vm/regexp/regexp-compiler-tonode.cc",
+      "url": "https://raw.githubusercontent.com/dart-lang/sdk/1d1a730ef918d602aedafc939a4cf5940e7589ab/runtime/vm/regexp/regexp-compiler-tonode.cc",
+      "sha256": "56183a77d3a2c9fc5bf8c66c9513555a7a6197a0c8d8c29310e8402e828be109",
+      "bytes": 90069,
+      "notice_selection": {
+        "line_start": 1,
+        "line_end_inclusive": 3
+      },
+      "notice_sha256": "bc855384f8ee6c3f076a5311092c8efdb9444aff07f46771469cdea556e2651e",
+      "notice_bytes": 167
+    },
+    {
+      "component": "V8 regular-expression source attribution",
+      "revision": "1d1a730ef918d602aedafc939a4cf5940e7589ab",
+      "path": "runtime/vm/regexp/regexp-compiler.cc",
+      "url": "https://raw.githubusercontent.com/dart-lang/sdk/1d1a730ef918d602aedafc939a4cf5940e7589ab/runtime/vm/regexp/regexp-compiler.cc",
+      "sha256": "7c570a26e04a74491544c4215187639e662cc5688df0e47e39fdd9601c7a7e3f",
+      "bytes": 169165,
+      "notice_selection": {
+        "line_start": 1,
+        "line_end_inclusive": 3
+      },
+      "notice_sha256": "bc855384f8ee6c3f076a5311092c8efdb9444aff07f46771469cdea556e2651e",
+      "notice_bytes": 167
+    },
+    {
+      "component": "V8 regular-expression source attribution",
+      "revision": "1d1a730ef918d602aedafc939a4cf5940e7589ab",
+      "path": "runtime/vm/regexp/regexp-compiler.h",
+      "url": "https://raw.githubusercontent.com/dart-lang/sdk/1d1a730ef918d602aedafc939a4cf5940e7589ab/runtime/vm/regexp/regexp-compiler.h",
+      "sha256": "58d835932a97a521da76026271cdadc2e93efec8283c35cb02b860fa9b451d39",
+      "bytes": 26880,
+      "notice_selection": {
+        "line_start": 1,
+        "line_end_inclusive": 3
+      },
+      "notice_sha256": "bc855384f8ee6c3f076a5311092c8efdb9444aff07f46771469cdea556e2651e",
+      "notice_bytes": 167
+    },
+    {
+      "component": "V8 regular-expression source attribution",
+      "revision": "1d1a730ef918d602aedafc939a4cf5940e7589ab",
+      "path": "runtime/vm/regexp/regexp-error.cc",
+      "url": "https://raw.githubusercontent.com/dart-lang/sdk/1d1a730ef918d602aedafc939a4cf5940e7589ab/runtime/vm/regexp/regexp-error.cc",
+      "sha256": "b4d5b3f8dbafee50338d20fbccb229ed916c916c132542c5c81b39fc2de100a2",
+      "bytes": 565,
+      "notice_selection": {
+        "line_start": 1,
+        "line_end_inclusive": 3
+      },
+      "notice_sha256": "8ef7e21ee8c0a99fcdd8a10ca843a7a0c036b6429b5a50a09e3bb94ddf574528",
+      "notice_bytes": 167
+    },
+    {
+      "component": "V8 regular-expression source attribution",
+      "revision": "1d1a730ef918d602aedafc939a4cf5940e7589ab",
+      "path": "runtime/vm/regexp/regexp-error.h",
+      "url": "https://raw.githubusercontent.com/dart-lang/sdk/1d1a730ef918d602aedafc939a4cf5940e7589ab/runtime/vm/regexp/regexp-error.h",
+      "sha256": "8aa7ef5bfcccb3640093f8bb7d23236a49d17c28f6ea30d88ef44b1a2d528bee",
+      "bytes": 3598,
+      "notice_selection": {
+        "line_start": 1,
+        "line_end_inclusive": 3
+      },
+      "notice_sha256": "8ef7e21ee8c0a99fcdd8a10ca843a7a0c036b6429b5a50a09e3bb94ddf574528",
+      "notice_bytes": 167
+    },
+    {
+      "component": "V8 regular-expression source attribution",
+      "revision": "1d1a730ef918d602aedafc939a4cf5940e7589ab",
+      "path": "runtime/vm/regexp/regexp-flags.h",
+      "url": "https://raw.githubusercontent.com/dart-lang/sdk/1d1a730ef918d602aedafc939a4cf5940e7589ab/runtime/vm/regexp/regexp-flags.h",
+      "sha256": "04eefde7fc5714c47f0155d8063d967aa458de9754c86c8832b5ba5e583abccf",
+      "bytes": 3107,
+      "notice_selection": {
+        "line_start": 1,
+        "line_end_inclusive": 3
+      },
+      "notice_sha256": "d4886b040f00c7a1ee72b1c95c33d19ace2c092f987f06ff4e949a9316b52f3e",
+      "notice_bytes": 167
+    },
+    {
+      "component": "V8 regular-expression source attribution",
+      "revision": "1d1a730ef918d602aedafc939a4cf5940e7589ab",
+      "path": "runtime/vm/regexp/regexp-interpreter.cc",
+      "url": "https://raw.githubusercontent.com/dart-lang/sdk/1d1a730ef918d602aedafc939a4cf5940e7589ab/runtime/vm/regexp/regexp-interpreter.cc",
+      "sha256": "0711f721e0dd57cd1ccdf8a7ff5654cbdddaaf56944216c023a75575947a7dbc",
+      "bytes": 45345,
+      "notice_selection": {
+        "line_start": 1,
+        "line_end_inclusive": 3
+      },
+      "notice_sha256": "44d1f07e55a2f1de7c4fe1cdee16d16152cf35af6e7b9522c8590c7f389fd0f2",
+      "notice_bytes": 167
+    },
+    {
+      "component": "V8 regular-expression source attribution",
+      "revision": "1d1a730ef918d602aedafc939a4cf5940e7589ab",
+      "path": "runtime/vm/regexp/regexp-interpreter.h",
+      "url": "https://raw.githubusercontent.com/dart-lang/sdk/1d1a730ef918d602aedafc939a4cf5940e7589ab/runtime/vm/regexp/regexp-interpreter.h",
+      "sha256": "87040edfa20c3ff978c1e27e6b77425c65dacd7785b4e193fa069f36ed053993",
+      "bytes": 3438,
+      "notice_selection": {
+        "line_start": 1,
+        "line_end_inclusive": 3
+      },
+      "notice_sha256": "44d1f07e55a2f1de7c4fe1cdee16d16152cf35af6e7b9522c8590c7f389fd0f2",
+      "notice_bytes": 167
+    },
+    {
+      "component": "V8 regular-expression source attribution",
+      "revision": "1d1a730ef918d602aedafc939a4cf5940e7589ab",
+      "path": "runtime/vm/regexp/regexp-macro-assembler.cc",
+      "url": "https://raw.githubusercontent.com/dart-lang/sdk/1d1a730ef918d602aedafc939a4cf5940e7589ab/runtime/vm/regexp/regexp-macro-assembler.cc",
+      "sha256": "f6e54cdc613d8ea542a5388188cd69600815737e2ac446bd01a32e00ddd93e98",
+      "bytes": 23445,
+      "notice_selection": {
+        "line_start": 1,
+        "line_end_inclusive": 3
+      },
+      "notice_sha256": "d9ab8d4bbefb13b5b4a980711affb396552c42d28f743daf88151f5746712cd3",
+      "notice_bytes": 167
+    },
+    {
+      "component": "V8 regular-expression source attribution",
+      "revision": "1d1a730ef918d602aedafc939a4cf5940e7589ab",
+      "path": "runtime/vm/regexp/regexp-macro-assembler.h",
+      "url": "https://raw.githubusercontent.com/dart-lang/sdk/1d1a730ef918d602aedafc939a4cf5940e7589ab/runtime/vm/regexp/regexp-macro-assembler.h",
+      "sha256": "5c4d8bbe6e9a60aed88086dcf01c92706b71613e0ddfeb0193a73599e67dc417",
+      "bytes": 20837,
+      "notice_selection": {
+        "line_start": 1,
+        "line_end_inclusive": 3
+      },
+      "notice_sha256": "d9ab8d4bbefb13b5b4a980711affb396552c42d28f743daf88151f5746712cd3",
+      "notice_bytes": 167
+    },
+    {
+      "component": "V8 regular-expression source attribution",
+      "revision": "1d1a730ef918d602aedafc939a4cf5940e7589ab",
+      "path": "runtime/vm/regexp/regexp-nodes.h",
+      "url": "https://raw.githubusercontent.com/dart-lang/sdk/1d1a730ef918d602aedafc939a4cf5940e7589ab/runtime/vm/regexp/regexp-nodes.h",
+      "sha256": "66f5f9f2effcddf0d8441a3faa7d84a2e49c82a722d77ee9be13e6bf283ab0b4",
+      "bytes": 34936,
+      "notice_selection": {
+        "line_start": 1,
+        "line_end_inclusive": 3
+      },
+      "notice_sha256": "bc855384f8ee6c3f076a5311092c8efdb9444aff07f46771469cdea556e2651e",
+      "notice_bytes": 167
+    },
+    {
+      "component": "V8 regular-expression source attribution",
+      "revision": "1d1a730ef918d602aedafc939a4cf5940e7589ab",
+      "path": "runtime/vm/regexp/regexp-parser.cc",
+      "url": "https://raw.githubusercontent.com/dart-lang/sdk/1d1a730ef918d602aedafc939a4cf5940e7589ab/runtime/vm/regexp/regexp-parser.cc",
+      "sha256": "761dec9e1450a799099fc7a58b3c18449bf8269c5c8aab58330d3dade3702ca4",
+      "bytes": 114012,
+      "notice_selection": {
+        "line_start": 1,
+        "line_end_inclusive": 3
+      },
+      "notice_sha256": "d0fe8c2b924ca44d65d0b83c043ddb54701367cb8b84be2fb1f6f26621efb930",
+      "notice_bytes": 167
+    },
+    {
+      "component": "V8 regular-expression source attribution",
+      "revision": "1d1a730ef918d602aedafc939a4cf5940e7589ab",
+      "path": "runtime/vm/regexp/regexp-parser.h",
+      "url": "https://raw.githubusercontent.com/dart-lang/sdk/1d1a730ef918d602aedafc939a4cf5940e7589ab/runtime/vm/regexp/regexp-parser.h",
+      "sha256": "aca994852718d68402f1319f40d106450dfb30daf2b6fa40b29bad17338846d2",
+      "bytes": 1195,
+      "notice_selection": {
+        "line_start": 1,
+        "line_end_inclusive": 3
+      },
+      "notice_sha256": "d0fe8c2b924ca44d65d0b83c043ddb54701367cb8b84be2fb1f6f26621efb930",
+      "notice_bytes": 167
+    },
+    {
+      "component": "V8 regular-expression source attribution",
+      "revision": "1d1a730ef918d602aedafc939a4cf5940e7589ab",
+      "path": "runtime/vm/regexp/regexp.cc",
+      "url": "https://raw.githubusercontent.com/dart-lang/sdk/1d1a730ef918d602aedafc939a4cf5940e7589ab/runtime/vm/regexp/regexp.cc",
+      "sha256": "190d9072d7f25976ae054bcac67dcf7334a46c1ba6e0723b827515626ee9179c",
+      "bytes": 21242,
+      "notice_selection": {
+        "line_start": 1,
+        "line_end_inclusive": 3
+      },
+      "notice_sha256": "d9ab8d4bbefb13b5b4a980711affb396552c42d28f743daf88151f5746712cd3",
+      "notice_bytes": 167
+    },
+    {
+      "component": "V8 regular-expression source attribution",
+      "revision": "1d1a730ef918d602aedafc939a4cf5940e7589ab",
+      "path": "runtime/vm/regexp/regexp.h",
+      "url": "https://raw.githubusercontent.com/dart-lang/sdk/1d1a730ef918d602aedafc939a4cf5940e7589ab/runtime/vm/regexp/regexp.h",
+      "sha256": "09043f67f7f8ac7b439e5188ba5d378439bf0cfa76814f34deac0b273f4a275a",
+      "bytes": 7897,
+      "notice_selection": {
+        "line_start": 1,
+        "line_end_inclusive": 3
+      },
+      "notice_sha256": "d9ab8d4bbefb13b5b4a980711affb396552c42d28f743daf88151f5746712cd3",
+      "notice_bytes": 167
+    },
+    {
+      "component": "V8 regular-expression source attribution",
+      "revision": "1d1a730ef918d602aedafc939a4cf5940e7589ab",
+      "path": "runtime/vm/regexp/small-vector.h",
+      "url": "https://raw.githubusercontent.com/dart-lang/sdk/1d1a730ef918d602aedafc939a4cf5940e7589ab/runtime/vm/regexp/small-vector.h",
+      "sha256": "c7d26bc05a70b4e9e838fc90b36f4829655a5a3086b814998f03f22edcd148ab",
+      "bytes": 12438,
+      "notice_selection": {
+        "line_start": 1,
+        "line_end_inclusive": 3
+      },
+      "notice_sha256": "b95c8922a25368d819f356b9df840d63e44dcfeadcd81e6bc30dc1315960eaf4",
+      "notice_bytes": 167
+    },
+    {
+      "component": "V8 regular-expression source attribution",
+      "revision": "1d1a730ef918d602aedafc939a4cf5940e7589ab",
+      "path": "runtime/vm/regexp/special-case.cc",
+      "url": "https://raw.githubusercontent.com/dart-lang/sdk/1d1a730ef918d602aedafc939a4cf5940e7589ab/runtime/vm/regexp/special-case.cc",
+      "sha256": "1ee34864a0dd4a13698f364696028505324dec7ba49ea409c3b5ce71b94eeee4",
+      "bytes": 2063,
+      "notice_selection": {
+        "line_start": 1,
+        "line_end_inclusive": 3
+      },
+      "notice_sha256": "c9e6b90186d2ba0a370f09363ca387df0c49bb2507dc1d5575ad92618c1e9fe6",
+      "notice_bytes": 167
+    },
+    {
+      "component": "V8 regular-expression source attribution",
+      "revision": "1d1a730ef918d602aedafc939a4cf5940e7589ab",
+      "path": "runtime/vm/regexp/special-case.h",
+      "url": "https://raw.githubusercontent.com/dart-lang/sdk/1d1a730ef918d602aedafc939a4cf5940e7589ab/runtime/vm/regexp/special-case.h",
+      "sha256": "440ff37a7fadd3f84239e11cc28d0e972364f1420e2328d4af57f92347f79ffd",
+      "bytes": 4767,
+      "notice_selection": {
+        "line_start": 1,
+        "line_end_inclusive": 3
+      },
+      "notice_sha256": "bc855384f8ee6c3f076a5311092c8efdb9444aff07f46771469cdea556e2651e",
+      "notice_bytes": 167
+    },
+    {
+      "component": "V8 regular-expression source attribution",
+      "revision": "1d1a730ef918d602aedafc939a4cf5940e7589ab",
+      "path": "runtime/vm/regexp/vector.h",
+      "url": "https://raw.githubusercontent.com/dart-lang/sdk/1d1a730ef918d602aedafc939a4cf5940e7589ab/runtime/vm/regexp/vector.h",
+      "sha256": "f209d81e161aa97e76c7ea034255905925d911ad99307b2c16c4d375a4f8af24",
+      "bytes": 5821,
+      "notice_selection": {
+        "line_start": 1,
+        "line_end_inclusive": 3
+      },
+      "notice_sha256": "c6800e983f7e5d5240d8a23e89d5b61021ff3b7ab8707cff9b2f46064af20829",
+      "notice_bytes": 167
+    },
+    {
+      "component": "V8 regular-expression source attribution",
+      "revision": "1d1a730ef918d602aedafc939a4cf5940e7589ab",
+      "path": "runtime/vm/regexp/zone-containers.h",
+      "url": "https://raw.githubusercontent.com/dart-lang/sdk/1d1a730ef918d602aedafc939a4cf5940e7589ab/runtime/vm/regexp/zone-containers.h",
+      "sha256": "e1b3e261b0b5440e492469a1ad1d2914af0be350a90d9f644867325e8d711b49",
+      "bytes": 22950,
+      "notice_selection": {
+        "line_start": 1,
+        "line_end_inclusive": 3
+      },
+      "notice_sha256": "c6800e983f7e5d5240d8a23e89d5b61021ff3b7ab8707cff9b2f46064af20829",
+      "notice_bytes": 167
+    },
+    {
+      "component": "V8 regular-expression source attribution",
+      "revision": "1d1a730ef918d602aedafc939a4cf5940e7589ab",
+      "path": "runtime/vm/regexp/zone-list-inl.h",
+      "url": "https://raw.githubusercontent.com/dart-lang/sdk/1d1a730ef918d602aedafc939a4cf5940e7589ab/runtime/vm/regexp/zone-list-inl.h",
+      "sha256": "cb54280fa294dcf1e136f6504e63724ddf97c73ee64dda65742a74190cde1601",
+      "bytes": 4331,
+      "notice_selection": {
+        "line_start": 1,
+        "line_end_inclusive": 3
+      },
+      "notice_sha256": "b477f5f879604740a2da47bdd2a3c42825d51d7dd99f635d252560d4393888a6",
+      "notice_bytes": 167
+    },
+    {
+      "component": "V8 regular-expression source attribution",
+      "revision": "1d1a730ef918d602aedafc939a4cf5940e7589ab",
+      "path": "runtime/vm/regexp/zone-list.h",
+      "url": "https://raw.githubusercontent.com/dart-lang/sdk/1d1a730ef918d602aedafc939a4cf5940e7589ab/runtime/vm/regexp/zone-list.h",
+      "sha256": "402c0ef3f33c34ee17c0f415cae20d6128fc16ee1937467331b529faba0aa799",
+      "bytes": 6804,
+      "notice_selection": {
+        "line_start": 1,
+        "line_end_inclusive": 3
+      },
+      "notice_sha256": "8ef7e21ee8c0a99fcdd8a10ca843a7a0c036b6429b5a50a09e3bb94ddf574528",
+      "notice_bytes": 167
+    }
+  ]
+}

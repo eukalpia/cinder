@@ -106,6 +106,59 @@ void main() {
       await ws.close();
     });
 
+    for (final byteBudget in [0, 8]) {
+      test(
+        'streams oversized messages with $byteBudget history bytes',
+        () async {
+          await logServer.close();
+          logServer = LogServer(maxBufferBytes: byteBudget);
+          await logServer.start();
+          logServer.log('keep');
+          final ws = await WebSocket.connect(
+            'ws://127.0.0.1:${logServer.port}/logs',
+          );
+          final messages = StreamIterator(ws);
+          try {
+            if (byteBudget > 0) {
+              expect(
+                await messages.moveNext().timeout(const Duration(seconds: 2)),
+                isTrue,
+              );
+              expect(
+                (jsonDecode(messages.current as String) as Map)['message'],
+                'keep',
+              );
+            }
+            logServer.log('too large');
+            expect(
+              await messages.moveNext().timeout(const Duration(seconds: 2)),
+              isTrue,
+            );
+            expect(
+              (jsonDecode(messages.current as String) as Map)['message'],
+              'too large',
+            );
+
+            final snapshot = await WebSocket.connect(
+              'ws://127.0.0.1:${logServer.port}/logs?mode=get',
+            );
+            final history = await snapshot.toList().timeout(
+              const Duration(seconds: 2),
+            );
+            expect(
+              history.map(
+                (message) => (jsonDecode(message as String) as Map)['message'],
+              ),
+              byteBudget == 0 ? <String>[] : ['keep'],
+            );
+          } finally {
+            await messages.cancel();
+            await ws.close();
+          }
+        },
+      );
+    }
+
     test('creates log_port file in global directory', () async {
       final portFile = File(getLogPortPath());
       expect(await portFile.exists(), isTrue);
