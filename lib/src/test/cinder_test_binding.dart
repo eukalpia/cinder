@@ -85,22 +85,15 @@ class CinderTestBinding extends CinderBinding with SchedulerBinding {
     Duration duration = const Duration(milliseconds: 100),
     int maxIterations = 20,
   ]) async {
-    int iterations = 0;
-    bool hasChanges = true;
-
-    while (hasChanges && iterations < maxIterations) {
-      final previousFrameCount = _frameCount;
+    for (var iteration = 0; iteration < maxIterations; iteration++) {
       await pump(duration);
-      hasChanges = _frameCount > previousFrameCount || hasScheduledFrame;
-      iterations++;
+      if (!hasScheduledFrame) return;
     }
 
-    if (iterations >= maxIterations) {
-      throw StateError(
-        'pumpAndSettle exceeded maximum iterations ($maxIterations). '
-        'The widget tree may be continuously scheduling frames.',
-      );
-    }
+    throw StateError(
+      'pumpAndSettle exceeded maximum iterations ($maxIterations). '
+      'The widget tree may be continuously scheduling frames.',
+    );
   }
 
   /// Simulate keyboard input

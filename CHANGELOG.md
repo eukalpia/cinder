@@ -7,6 +7,8 @@
 - Preserve layout/paint error isolation and allow recovery through normal widget updates.
 - Correct rich-text ellipsis, narrow truncation, styled explicit lines, and custom navigation keys.
 - Unify native and test modal keyboard dispatch; restore disabled UI regression coverage.
+- Preserve navigator state while asynchronous terminal theme detection completes.
+- Make test-frame settling terminate when the widget tree stops requesting frames.
 - Respect clipboard capabilities and prevent OSC output in redirected/test sessions.
 - Repair Provider/Riverpod subscriptions and CLI log/shutdown behavior.
 - Correct repository URLs, Dart SDK requirements, and package/executable metadata.

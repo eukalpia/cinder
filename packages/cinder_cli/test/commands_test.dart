@@ -9,6 +9,46 @@ void main() {
   final packageDirectory = Directory.current.absolute;
   late Directory project;
   late Directory originalDirectory;
+  late Directory compilationDirectory;
+  late String cliKernel;
+
+  Future<String> compileKernel(String entrypoint, String outputPath) async {
+    final process = await Process.start(Platform.resolvedExecutable, [
+      'compile',
+      'kernel',
+      '--packages=${packageDirectory.path}/.dart_tool/package_config.json',
+      entrypoint,
+      '--output=$outputPath',
+    ], workingDirectory: packageDirectory.path);
+    final output = process.stdout.transform(utf8.decoder).join();
+    final errors = process.stderr.transform(utf8.decoder).join();
+    try {
+      final code = await process.exitCode.timeout(const Duration(seconds: 30));
+      expect(
+        code,
+        0,
+        reason: 'Dart compilation failed: ${await output}\n${await errors}',
+      );
+      return outputPath;
+    } finally {
+      process.kill(ProcessSignal.sigkill);
+      await process.exitCode;
+    }
+  }
+
+  setUpAll(() async {
+    compilationDirectory = await Directory.systemTemp.createTemp(
+      'cinder_cli_kernel_',
+    );
+    // Compile before measuring command completion so cold SDK startup does not
+    // consume the deadline that detects hanging commands.
+    cliKernel = await compileKernel(
+      '${packageDirectory.path}/bin/cinder_cli.dart',
+      '${compilationDirectory.path}/cinder_cli.dill',
+    );
+  });
+
+  tearDownAll(() => compilationDirectory.delete(recursive: true));
 
   setUp(() async {
     originalDirectory = Directory.current;
@@ -32,9 +72,12 @@ void main() {
     List<String> arguments, {
     String? entrypoint,
   }) async {
+    final kernel = entrypoint == null
+        ? cliKernel
+        : await compileKernel(entrypoint, '${project.path}/runner.dill');
     final process = await Process.start(Platform.resolvedExecutable, [
       '--packages=${packageDirectory.path}/.dart_tool/package_config.json',
-      entrypoint ?? '${packageDirectory.path}/bin/cinder_cli.dart',
+      kernel,
       ...arguments,
     ], workingDirectory: project.path);
     final output = process.stdout.transform(utf8.decoder).join();
@@ -83,6 +126,7 @@ void main() {
     final server = LogServer();
     await server.start();
     addTearDown(server.close);
+    server.log('ongoing message');
     final timer = Timer.periodic(const Duration(milliseconds: 10), (_) {
       server.log('ongoing message');
     });
@@ -156,15 +200,18 @@ Future<void> main() async {
     () async {
       final process = await Process.start(Platform.resolvedExecutable, [
         '--packages=${packageDirectory.path}/.dart_tool/package_config.json',
-        '${packageDirectory.path}/bin/cinder_cli.dart',
+        cliKernel,
         'shell',
       ], workingDirectory: project.path);
       final ready = Completer<void>();
-      final output = process.stdout.transform(utf8.decoder).listen((text) {
-        if (text.contains('Press Ctrl+C') && !ready.isCompleted) {
-          ready.complete();
-        }
-      });
+      final output = process.stdout
+          .transform(utf8.decoder)
+          .transform(const LineSplitter())
+          .listen((text) {
+            if (text.contains('Press Ctrl+C') && !ready.isCompleted) {
+              ready.complete();
+            }
+          });
       final errors = process.stderr.transform(utf8.decoder).join();
       try {
         await ready.future.timeout(const Duration(seconds: 5));

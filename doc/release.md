@@ -28,6 +28,7 @@ dart tool/check.dart format package
 dart run benchmark/benchmark.dart --ci
 dart compile exe example/task_manager_demo.dart -o cinder-demo
 python3 tool/terminal_smoke.py ./cinder-demo # Linux/macOS
+dart tool/verify_git_installation.dart <pushed-commit-or-tag>
 ```
 
 Renderer gates require one comparison/run for one damaged cell and one initial

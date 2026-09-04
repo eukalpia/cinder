@@ -33,7 +33,7 @@
 - [x] Reproduce with `dart test --run-skipped test/layout test/input test/components test/regression test/process`: 15 failures.
 - [x] Distinguish invalid fixtures from implementation defects without weakening the intended behavior assertions.
 - [x] Fix failures, add focused edge cases for changed behavior, and remove resolved skips.
-- [ ] Run the complete root suite including skipped tests.
+- [x] Run the complete root suite including skipped tests.
 
 ## Task 3: Validate package installation and CLI
 
@@ -41,7 +41,7 @@
 
 - [x] Correct CLI dependencies and executable metadata; reproduce empty-log one-shot hang through a real WebSocket fixture.
 - [x] Run dependency resolution, strict analysis, tests, and CLI executable smoke checks.
-- [ ] Verify external-consumer installation independently of local dependency overrides.
+- [x] Verify external-consumer installation independently of local dependency overrides.
 
 ## Task 4: Repair browser/documentation delivery
 

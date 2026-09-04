@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cinder/cinder.dart';
 import 'package:test/test.dart';
 
@@ -103,6 +105,47 @@ void main() {
   });
 
   group('CinderApp with Navigator', () {
+    test(
+      'theme detection preserves the navigator and its pushed route',
+      () async {
+        final terminal = _DelayedThemeTerminal();
+        final binding = CinderTestBinding(terminal: terminal);
+        final navigatorKey = GlobalKey<NavigatorState>();
+        try {
+          binding.attachRootWidget(
+            CinderApp(
+              navigatorKey: navigatorKey,
+              routes: {
+                '/': (_) => const Text('Home'),
+                '/detail': (_) => const Text('Detail Screen'),
+              },
+            ),
+          );
+          await binding.pump();
+          final navigator = navigatorKey.currentState!;
+          unawaited(navigator.pushNamed('/detail'));
+          await binding.pump();
+          expect(
+            TerminalState(buffer: binding.lastBuffer!, size: binding.size),
+            containsText('Detail Screen'),
+          );
+
+          terminal.background.complete(const Color.fromRGB(255, 255, 255));
+          await Future<void>.delayed(Duration.zero);
+          await binding.pump();
+
+          expect(navigatorKey.currentState, same(navigator));
+          expect(
+            TerminalState(buffer: binding.lastBuffer!, size: binding.size),
+            containsText('Detail Screen'),
+          );
+          expect(TuiTheme.of(navigator.context).brightness, Brightness.light);
+        } finally {
+          binding.shutdown();
+        }
+      },
+    );
+
     test('creates navigator with home parameter', () async {
       await testCinder('navigator with home', (tester) async {
         await tester.pumpWidget(
@@ -181,4 +224,50 @@ void main() {
       });
     });
   });
+}
+
+class _DelayedThemeTerminal extends Terminal {
+  _DelayedThemeTerminal() : super(_ThemeBackend());
+
+  final background = Completer<Color?>();
+
+  @override
+  Future<Color?> getBackgroundColor({
+    Duration timeout = const Duration(milliseconds: 100),
+  }) => background.future;
+}
+
+class _ThemeBackend extends TerminalBackend {
+  @override
+  void writeRaw(String data) {}
+
+  @override
+  Size getSize() => const Size(80, 24);
+
+  @override
+  bool get supportsSize => true;
+
+  @override
+  Stream<List<int>>? get inputStream => null;
+
+  @override
+  Stream<Size>? get resizeStream => null;
+
+  @override
+  Stream<void>? get shutdownStream => null;
+
+  @override
+  void enableRawMode() {}
+
+  @override
+  void disableRawMode() {}
+
+  @override
+  bool get isAvailable => true;
+
+  @override
+  void requestExit([int exitCode = 0]) {}
+
+  @override
+  void dispose() {}
 }

@@ -82,7 +82,7 @@ Future<void> main(List<String> arguments) async {
         case 'core':
           await run(['pub', 'get']);
           await run(['analyze', '--fatal-infos']);
-          await run(['test', '--reporter', 'expanded']);
+          await run(['test', '--run-skipped', '--reporter', 'expanded']);
         case 'packages':
           for (final package in packages) {
             await run(['pub', 'get'], directory: package.path);

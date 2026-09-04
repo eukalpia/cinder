@@ -66,7 +66,7 @@ pointing at your checkout and its `packages/` directories.
 ```sh
 cd packages/cinder_cli
 dart pub get
-dart run cinder --help
+dart run bin/cinder_cli.dart --help
 ```
 
 The CLI's local core override is for developing this checkout. A GitHub release

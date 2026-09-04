@@ -227,8 +227,9 @@ class _CinderAppState extends State<CinderApp> {
       );
     }
 
-    final effectiveTheme = widget.theme ?? _detectedTheme;
-    if (effectiveTheme == null) return content;
+    // Keep the subtree in the same position while asynchronous detection runs.
+    // Adding these wrappers later would replace the Navigator and child State.
+    final effectiveTheme = widget.theme ?? _detectedTheme ?? TuiThemeData.dark;
 
     content = SizedBox.expand(
       child: ColoredBox(

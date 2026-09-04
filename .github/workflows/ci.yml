@@ -2,8 +2,13 @@ name: CI
 
 on:
   push:
+    branches: [main]
   pull_request:
   workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -40,3 +45,7 @@ jobs:
       - run: dart pub get
       - run: dart tool/check.dart packages
       - run: dart tool/check.dart format package
+      - name: Install Git packages as an external application
+        run: dart tool/verify_git_installation.dart "$CINDER_COMMIT"
+        env:
+          CINDER_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
