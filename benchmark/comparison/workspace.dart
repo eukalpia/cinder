@@ -1,15 +1,40 @@
+/// Immutable application data decoded once before terminal input begins.
+final class WorkspaceRecord {
+  const WorkspaceRecord({
+    required this.id,
+    required this.service,
+    required this.level,
+    required this.score,
+    required this.message,
+  });
+
+  factory WorkspaceRecord.fromJson(Map<String, dynamic> json) =>
+      WorkspaceRecord(
+        id: json['id'] as int,
+        service: json['service'] as String,
+        level: json['level'] as String,
+        score: json['score'] as int,
+        message: json['message'] as String,
+      );
+
+  final int id, score;
+  final String service, level, message;
+}
+
 /// The workspace-v1 application model. Only the visible rows are formatted.
 class Workspace {
   Workspace(Map<String, dynamic> spec)
     : width = spec['width'] as int,
       height = spec['height'] as int,
-      records = (spec['records'] as List).cast<Map<String, dynamic>>() {
+      records = (spec['records'] as List)
+          .map((row) => WorkspaceRecord.fromJson(row as Map<String, dynamic>))
+          .toList() {
     matches = List.of(records);
   }
 
   final int width, height;
-  final List<Map<String, dynamic>> records;
-  late List<Map<String, dynamic>> matches;
+  final List<WorkspaceRecord> records;
+  late List<WorkspaceRecord> matches;
   final selected = <int>{};
   int cursor = 0, top = 0, step = 0;
   String query = '', order = 'id';
@@ -34,8 +59,8 @@ class Workspace {
     matches = records
         .where(
           (row) =>
-              (!errors || row['level'] == 'ERROR') &&
-              '${row['service']} ${row['level']} ${row['message']}'
+              (!errors || row.level == 'ERROR') &&
+              '${row.service} ${row.level} ${row.message}'
                   .toLowerCase()
                   .contains(query),
         )
@@ -43,8 +68,8 @@ class Workspace {
     if (order != 'id') {
       final sign = order == 'score-desc' ? -1 : 1;
       matches.sort((a, b) {
-        final score = sign * (a['score'] as int).compareTo(b['score'] as int);
-        return score == 0 ? (a['id'] as int).compareTo(b['id'] as int) : score;
+        final score = sign * a.score.compareTo(b.score);
+        return score == 0 ? a.id.compareTo(b.id) : score;
       });
     }
     cursor = top = 0;
@@ -66,7 +91,7 @@ class Workspace {
         cursor = matches.length - 1;
       case 'x':
         if (matches.isNotEmpty) {
-          final id = matches[cursor]['id'] as int;
+          final id = matches[cursor].id;
           if (!selected.remove(id)) selected.add(id);
         }
       case 'f':
@@ -80,14 +105,16 @@ class Workspace {
         rebuild();
       case 'a':
         final id = records.length;
-        records.add({
-          'id': id,
-          'service': 'service-${pad(id % 17, 2)}',
-          'level': ['INFO', 'WARN', 'ERROR', 'DEBUG'][id % 4],
-          'score': id * 37 % 10000,
-          'message':
-              'request ${pad(id, 6)} ${id % 97 == 0 ? 'needle' : 'regular'}',
-        });
+        records.add(
+          WorkspaceRecord(
+            id: id,
+            service: 'service-${pad(id % 17, 2)}',
+            level: ['INFO', 'WARN', 'ERROR', 'DEBUG'][id % 4],
+            score: id * 37 % 10000,
+            message:
+                'request ${pad(id, 6)} ${id % 97 == 0 ? 'needle' : 'regular'}',
+          ),
+        );
         rebuild();
     }
     cursor = cursor.clamp(0, matches.isEmpty ? 0 : matches.length - 1);
@@ -114,9 +141,9 @@ class Workspace {
       }
       final row = matches[index];
       rows.add(
-        '${index == cursor ? '>' : ' '}${selected.contains(row['id']) ? '*' : ' '} '
-        '${pad(row['id'] as int, 6)} ${row['service']} ${(row['level'] as String).padRight(5)} '
-        '${pad(row['score'] as int, 4)} ${row['message']}',
+        '${index == cursor ? '>' : ' '}${selected.contains(row.id) ? '*' : ' '} '
+        '${pad(row.id, 6)} ${row.service} ${row.level.padRight(5)} '
+        '${pad(row.score, 4)} ${row.message}',
       );
     }
     rows.addAll([

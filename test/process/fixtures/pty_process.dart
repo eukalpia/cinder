@@ -67,7 +67,12 @@ Future<void> main(List<String> arguments) async {
         stdout.writeln('INPUT:$line');
       }
     case 'fragmented':
-      if (stdin.hasTerminal) stdin.echoMode = false;
+      if (stdin.hasTerminal) {
+        stdin.echoMode = false;
+        // A raw byte releases the output barrier without canonical input's
+        // Enter key moving the Windows console cursor between 'hel' and 'lo'.
+        stdin.lineMode = false;
+      }
       stdout.write('hel');
       await stdout.flush();
       await stdin.first;

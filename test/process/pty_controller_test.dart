@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:cinder/src/process/pty_controller.dart';
+import 'package:cinder/src/third_party/xterm_pure.dart/xterm.dart' as xterm;
 import 'package:test/test.dart';
 
 void main() {
@@ -151,32 +152,40 @@ void main() {
 
   test('buffers complete lines and applies the line limit', () async {
     final exited = Completer<int>();
+    final terminal = xterm.Terminal()..resize(80, 24);
     final controller = controllerFor(
       'lines',
       maxBufferLines: 2,
+      onOutput: terminal.write,
       onExit: exited.complete,
     );
     await controller.start(columns: 80, rows: 24);
     await exited.future.timeout(deadline);
-    expect(controller.outputBuffer, ['second', 'third']);
+    expect(_renderedLines(terminal), ['first', 'second', 'third']);
+    // ConPTY may append title/cursor controls after the last visible line.
+    // Retention limits apply to that raw stream, not to the rendered screen.
+    expect(controller.outputBuffer, hasLength(2));
     controller.clearBuffer();
     expect(controller.outputBuffer, isEmpty);
   });
 
   test('byte-limited history still delivers all output callbacks', () async {
     final exited = Completer<int>();
-    var output = '';
+    final terminal = xterm.Terminal()..resize(80, 24);
     final controller = controllerFor(
       'lines',
       maxBufferBytes: 8,
-      onOutput: (chunk) => output += chunk,
+      onOutput: terminal.write,
       onExit: exited.complete,
     );
     await controller.start(columns: 80, rows: 24);
     await exited.future.timeout(deadline);
-    expect(controller.outputBuffer, ['third']);
-    expect(output, contains('first'));
-    expect(output, contains('second'));
+    expect(_renderedLines(terminal), ['first', 'second', 'third']);
+    expect(controller.outputBuffer, isNotEmpty);
+    expect(
+      utf8.encode(controller.outputBuffer.join('\n')).length,
+      lessThanOrEqualTo(8),
+    );
   });
 
   test(
@@ -423,18 +432,23 @@ void main() {
     () async {
       final partial = Completer<void>();
       final exited = Completer<int>();
+      final terminal = xterm.Terminal()..resize(80, 24);
       final controller = controllerFor(
         'fragmented',
         onOutput: (data) {
-          if (data.contains('hel') && !partial.isCompleted) partial.complete();
+          terminal.write(data);
+          if (terminal.buffer.lines[0].getText() == 'hel' &&
+              !partial.isCompleted) {
+            partial.complete();
+          }
         },
         onExit: exited.complete,
       );
       await controller.start(columns: 80, rows: 24);
       await partial.future.timeout(deadline);
-      controller.write(Platform.isWindows ? 'continue\r' : 'continue\n');
+      controller.write('x');
       await exited.future.timeout(deadline);
-      expect(controller.outputBuffer, ['hello', 'second', '', 'third']);
+      expect(_renderedLines(terminal), ['hello', 'second', '', 'third']);
     },
   );
 
@@ -539,4 +553,16 @@ void main() {
     expect(controller.status, PtyStatus.error);
     expect(controller.pid, isNull);
   });
+}
+
+/// Read the same emulator used by TerminalXterm, preserving internal blank rows.
+List<String> _renderedLines(xterm.Terminal terminal) {
+  final lines = [
+    for (var i = 0; i < terminal.buffer.lines.length; i++)
+      terminal.buffer.lines[i].getText().trimRight(),
+  ];
+  while (lines.isNotEmpty && lines.last.isEmpty) {
+    lines.removeLast();
+  }
+  return lines;
 }

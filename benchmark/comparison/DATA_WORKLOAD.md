@@ -12,6 +12,13 @@ is `" regular"`. Appending creates record `records.length` by the same rule.
 All initial records are supplied in JSON; adapters must not substitute their
 own data generator or precompute the action screens before input.
 
+The Dart adapter decodes these fields once into immutable `WorkspaceRecord`
+objects before readiness. Its matches retain references to those objects;
+appending constructs one new typed record after the action arrives. This changes
+the adapter's data representation, not the contract or framework core. Rebuilds
+still perform the specified scan, lowercase search concatenation, filtering,
+and sorting on each applicable action, without cached search/sort results.
+
 Initial matches are in input order. Cursor, viewport top, and step are zero;
 selection is empty, search is empty, the error filter is off, sort mode is
 `id`, and the event log contains `ready`. Page size is `height - 8`.

@@ -242,10 +242,27 @@ of each framework's native table or list widget. Cinder, Ink, OpenTUI, and
 Textual use their normal text widgets; Ratatui uses `Paragraph`; FTXUI creates
 a `vbox` of visible `text` elements; Bubble Tea returns a View string. The apps
 implement equivalent features and output, while their widget/reconciliation
-work differs. Language collections and sort implementations differ too:
-Rust/C++ keep matching record indexes, JavaScript/Dart/Python keep references,
-and Go copies matching record structs. CPU and RSS include these application
-model and runtime costs; results cannot isolate a universal renderer ranking.
+work differs. The application data representations are explicit:
+
+| Adapter | Resident records | Matching collection |
+| --- | --- | --- |
+| Cinder / Dart | Immutable typed `WorkspaceRecord` objects, decoded from JSON at startup | References to those objects |
+| Ratatui / Rust | Typed `Record` structs in a vector | Record indexes |
+| FTXUI / C++ | Typed `Record` structs in a vector | Record indexes |
+| Bubble Tea / Go | Typed `record` structs in a slice | Copies of matching structs |
+| Ink and OpenTUI / JavaScript | Plain objects decoded from JSON | Object references |
+| Textual / Python | Dictionaries decoded from JSON | Dictionary references |
+
+Dart decodes fields once before readiness rather than retaining JSON maps for
+repeated lookup and casting during actions. This is an adapter/model setup
+change, not a Cinder framework-core optimization. Every rebuild still scans the
+records, constructs and lowercases the same search string, applies the same
+filters, and sorts matches when requested. No search or sort results are cached.
+Selection, append, and viewport formatting retain the same work and semantics.
+The typed model and its freshly compiled data executable have different source
+and artifact identities from earlier Dart map-based data runs; keep those results
+separate. CPU and RSS include application model and runtime costs, so they cannot
+isolate a universal renderer ranking.
 
 Ratatui's normal application loop uses
 [`Terminal.draw` and Crossterm input](https://ratatui.rs/tutorials/counter-app/_multiple-files/event/).
@@ -355,3 +372,10 @@ Run the untimed harness/model regressions with:
 benchmark/comparison/.venv/bin/python -m unittest discover \
   -s benchmark/comparison -p 'test_*.py'
 ```
+
+With Dart on `PATH`, these tests also compare every visible cell, the complete
+selection set, and resident record count against the Python oracle across two
+24-key cycles with 50,000 records. They verify that mutating decoded source maps
+cannot change the Dart model. Set `CINDER_BENCHMARK_DART` to select a specific
+SDK; without Dart that direct parity test is explicitly skipped. The helper
+`workspace_model_probe.dart` is used only by untimed tests, never by an adapter.
