@@ -1,3 +1,4 @@
+mod pacing;
 mod workspace;
 
 use crossterm::{
@@ -5,6 +6,7 @@ use crossterm::{
     execute,
     terminal::{EnterAlternateScreen, LeaveAlternateScreen, disable_raw_mode, enable_raw_mode},
 };
+use pacing::{Action, FrameSchedule};
 use ratatui::{Terminal, backend::CrosstermBackend, widgets::Paragraph};
 use serde::Deserialize;
 use std::{
@@ -36,36 +38,46 @@ fn run(spec: Spec) -> Result<(), Box<dyn Error>> {
     let mut model = (spec.kind == "workspace-v1")
         .then(|| Workspace::new(spec.width, spec.height, spec.records));
     let mut counter = 0;
-    let mut next_frame = Instant::now();
     let interval = Duration::from_secs_f64(1.0 / f64::from(spec.fps));
+    let mut schedule = FrameSchedule::new(interval, Instant::now());
     let result = (|| -> Result<(), Box<dyn Error>> {
         loop {
-            // Ratatui delegates pacing to its application. This public draw
-            // loop caps changed frames, using the normal Crossterm backend.
-            std::thread::sleep(next_frame.saturating_duration_since(Instant::now()));
-            next_frame = Instant::now() + interval;
-            let value = model
-                .as_ref()
-                .map_or_else(|| spec.frames[counter % 2].clone(), Workspace::text);
-            terminal.draw(|frame| frame.render_widget(Paragraph::new(value), frame.area()))?;
-            loop {
-                if let Event::Key(key) = event::read()? {
-                    if key.kind == KeyEventKind::Press {
-                        if let KeyCode::Char(character) = key.code {
-                            if character == 'q' {
-                                return Ok(());
-                            }
-                            let changed = if let Some(model) = model.as_mut() {
-                                model.apply(character)
-                            } else if character == 'n' {
-                                counter += 1;
-                                true
-                            } else {
-                                false
-                            };
-                            if changed {
-                                break;
-                            }
+            match schedule.next_action(Instant::now()) {
+                Action::Draw => {
+                    let value = model
+                        .as_ref()
+                        .map_or_else(|| spec.frames[counter % 2].clone(), Workspace::text);
+                    let started_at = Instant::now();
+                    terminal
+                        .draw(|frame| frame.render_widget(Paragraph::new(value), frame.area()))?;
+                    schedule.drawn(started_at);
+                    continue;
+                }
+                Action::ReadInput(Some(timeout)) => {
+                    // poll returns immediately for queued input. The frame
+                    // deadline caps drawing without capping key processing.
+                    if !event::poll(timeout)? {
+                        continue;
+                    }
+                }
+                Action::ReadInput(None) => {}
+            }
+            if let Event::Key(key) = event::read()? {
+                if key.kind == KeyEventKind::Press {
+                    if let KeyCode::Char(character) = key.code {
+                        if character == 'q' {
+                            return Ok(());
+                        }
+                        let changed = if let Some(model) = model.as_mut() {
+                            model.apply(character)
+                        } else if character == 'n' {
+                            counter += 1;
+                            true
+                        } else {
+                            false
+                        };
+                        if changed {
+                            schedule.changed();
                         }
                     }
                 }

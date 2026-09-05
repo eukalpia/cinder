@@ -17,6 +17,8 @@ def prepare_extended(args, commands, destination, configuration):
     subprocess.run([commands['go'], 'build', '-trimpath', '-o', str(destination / 'bubbletea-data'), './data'],
                    cwd=HERE / 'bubbletea', check=True)
     cargo_target = build / 'rust'
+    subprocess.run([cargo, 'test', '--release', '--locked', '--manifest-path', str(HERE / 'ratatui/Cargo.toml'),
+                    '--target-dir', str(cargo_target)], env=rust_environment, check=True)
     subprocess.run([cargo, 'build', '--release', '--locked', '--manifest-path', str(HERE / 'ratatui/Cargo.toml'),
                     '--target-dir', str(cargo_target)], env=rust_environment, check=True)
     shutil.copy2(cargo_target / 'release/ratatui-comparison', destination / 'ratatui')
@@ -57,8 +59,8 @@ def prepare_extended(args, commands, destination, configuration):
         'ink': {'render': 'React state/Box/Text, incrementalRendering=true', 'pacing': 'Ink maxFps'},
         'opentui': {'render': 'retained TextRenderable.content', 'pacing': 'targetFps and maxFps; native output thread'},
         'bubbletea': {'render': 'Update/View string', 'pacing': 'WithFPS'},
-        'ratatui': {'render': 'Crossterm input, Terminal.draw, Paragraph', 'pacing': 'application draw-loop minimum period; Ratatui has no scheduler'},
-        'ftxui': {'render': 'ScreenInteractive, CatchEvent, Renderer, vbox/text per visible line', 'pacing': 'application minimum period inside public Renderer callback'},
+        'ratatui': {'render': 'Crossterm input, Terminal.draw, Paragraph', 'pacing': 'application draw-start minimum period; poll/read consumes queued keys between draws and coalesces changes'},
+        'ftxui': {'render': 'ScreenInteractive, CatchEvent, Renderer, vbox/text per visible line', 'pacing': 'application waits before public Loop.RunOnceBlocking drains queued tasks and draws; Renderer records next deadline; dispatch remains frame-batched'},
         'textual': {'render': 'App.on_key/Static.update/Rich Text', 'pacing': 'TEXTUAL_FPS environment setting', 'terminal_output': 'stderr'},
     }
     artifacts = [destination / name for name in ['cinder-data', 'bubbletea-data', 'ratatui', 'ftxui']]
@@ -66,7 +68,7 @@ def prepare_extended(args, commands, destination, configuration):
         'cinder_data.dart', 'workspace.dart', 'data_workload.py', 'open_arrival.py', 'prepare_extended.py',
         'javascript/workspace.mjs', 'javascript/data_ink.mjs', 'javascript/data_opentui.ts',
         'bubbletea/data/main.go', 'ratatui/Cargo.toml', 'ratatui/Cargo.lock',
-        'ratatui/src/main.rs', 'ratatui/src/workspace.rs',
+        'ratatui/src/main.rs', 'ratatui/src/pacing.rs', 'ratatui/src/workspace.rs',
         'ftxui/CMakeLists.txt', 'ftxui/main.cpp', 'ftxui/workspace.hpp',
         'textual/adapter.py', 'textual/requirements.in', 'textual/requirements.lock',
     ]]

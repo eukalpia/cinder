@@ -6,6 +6,7 @@
 #include <thread>
 #include <ftxui/component/component.hpp>
 #include <ftxui/component/event.hpp>
+#include <ftxui/component/loop.hpp>
 #include <ftxui/component/screen_interactive.hpp>
 #include <ftxui/dom/elements.hpp>
 
@@ -20,9 +21,7 @@ int main(int argc, char** argv) {
   auto next_frame = std::chrono::steady_clock::now();
   auto interval = std::chrono::duration_cast<std::chrono::steady_clock::duration>(std::chrono::duration<double>(1.0 / spec.at("fps").get<double>()));
   auto renderer = ftxui::Renderer([&] {
-    // FTXUI owns input and output. Its public Renderer callback is rate-limited
-    // by the application because FTXUI exposes no general input FPS setting.
-    std::this_thread::sleep_until(next_frame);
+    // Record the render start; waiting happens before the next input drain.
     next_frame = std::chrono::steady_clock::now() + interval;
     std::vector<std::string> lines;
     if (model) lines = model->Lines();
@@ -41,5 +40,11 @@ int main(int argc, char** argv) {
     if (event == ftxui::Event::Character('n')) { ++counter; return true; }
     return false;
   });
-  screen.Loop(application);
+  ftxui::Loop loop(&screen, application);
+  while (!loop.HasQuitted()) {
+    // The public loop drains pending input before drawing. Wait first so the
+    // frame includes arrivals received during the application frame interval.
+    std::this_thread::sleep_until(next_frame);
+    loop.RunOnceBlocking();
+  }
 }

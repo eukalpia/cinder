@@ -55,7 +55,10 @@ Do not infer a global ranking from selected workloads on one machine.
       search/selection/Unicode, bounded background work and deterministic disposal.
 - [x] Add integration tests for visible work bounds and failure/restart behavior.
 - [x] Provide benchmark/runtime_scale automation and doc/scale-monitor.md.
-- [ ] Run sustained AOT stress and separate diagnostic heap attribution.
+- [x] Run sustained AOT stress and separate diagnostic heap attribution.
+      Preserve distinct source identities: two hours on the original candidate,
+      twenty minutes on 0f20f0c, and sixty seconds on e72fc0c; do not label the
+      older long runs as final-release runs.
 
 ## Integration (root)
 

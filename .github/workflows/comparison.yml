@@ -56,6 +56,8 @@ jobs:
           python benchmark/comparison/prepare.py --extended
           --baseline v1.0.0-rc.2 --output build/comparison
           --cxx /usr/bin/clang++
+      - name: Preserve measured source before running trials
+        run: git archive --format=tar.gz -o build/measured-source.tar.gz HEAD
       - name: Compare data operations and verified terminal output
         run: >-
           python benchmark/comparison/run_matrix.py
@@ -82,13 +84,12 @@ jobs:
           --records 50000 --rounds 3 --warmup 48 --frames 192
           --settle-seconds 6 --arrival-interval-ms 20 --event-deadline-ms 5000
           --output build/arrivals-20ms-results
-      - name: Validate complete trial sets and preserve measured source
+      - name: Validate complete trial sets
         run: |
           python benchmark/comparison/summarize.py build/data-results > build/data-summary.md
           python benchmark/comparison/summarize.py build/grid-results > build/grid-summary.md
           python benchmark/comparison/summarize.py build/arrivals-4ms-results > build/arrivals-4ms-summary.md
           python benchmark/comparison/summarize.py build/arrivals-20ms-results > build/arrivals-20ms-summary.md
-          git archive --format=tar.gz -o build/measured-source.tar.gz HEAD
       - uses: actions/upload-artifact@v4
         if: always()
         with:

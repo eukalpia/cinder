@@ -274,9 +274,29 @@ isolate a universal renderer ranking.
 
 Ratatui's normal application loop uses
 [`Terminal.draw` and Crossterm input](https://ratatui.rs/tutorials/counter-app/_multiple-files/event/).
-Its application caps draw starts at the requested FPS. FTXUI uses
+Its application caps draw starts at the requested FPS, while
+[`Crossterm.poll`](https://docs.rs/crossterm/0.29.0/crossterm/event/fn.poll.html)
+reads queued keys during the time remaining before the next draw. Each input
+updates the full model in order; several changes may share one draw. Earlier
+adapter revisions slept before drawing and read only one changed key per frame,
+which also limited input throughput to the requested FPS. Their fixed-arrival
+latency results describe that application loop and must stay separate from
+results using the corrected adapter; they do not establish Ratatui's scheduling
+limits.
+
+FTXUI uses
 [`ScreenInteractive`, `Renderer`, and `CatchEvent`](https://github.com/ArthurSonzogni/FTXUI/tree/v6.1.9);
-its public Renderer callback applies an application minimum frame period.
+the application waits for its frame deadline before calling the public
+`Loop::RunOnceBlocking`. That operation waits for a task, drains queued tasks,
+and draws. The Renderer callback records the next deadline without sleeping,
+so each draw includes input queued during the wait. Idle operation blocks in
+the normal loop. Earlier adapter revisions slept inside Renderer after the
+input drain; those results retain their separate source identities.
+FTXUI dispatch remains batched at frame boundaries, and native queue draining
+plus synchronous model work can delay presentation under continuous input.
+Moving the wait does not isolate the cause of earlier overload latency. This
+policy differs from Ratatui's deadline-aware input loop and must be considered
+when comparing latency.
 Neither library has an equivalent automatic max-FPS scheduler setting.
 Textual uses [`Static.update`](https://textual.textualize.io/widgets/static/)
 and [`TEXTUAL_FPS`](https://textual.textualize.io/api/constants/).
