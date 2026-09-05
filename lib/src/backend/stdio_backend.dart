@@ -4,13 +4,15 @@ import 'dart:io';
 import 'package:cinder/src/size.dart';
 
 import 'terminal_backend.dart';
+import 'sink_output.dart';
 import 'win32_ansi_stdin.dart';
 
 /// Backend for native terminal I/O via stdin/stdout.
 /// Handles Unix signals (SIGWINCH, SIGINT, SIGTERM) for resize and shutdown.
 /// On Windows, uses polling for resize detection, SIGINT for Ctrl+C,
 /// and Win32AnsiStdin for proper keyboard input (arrow keys, etc.).
-class StdioBackend implements TerminalBackend {
+class StdioBackend implements TerminalBackend, TerminalOutputDrain {
+  final SinkOutput _output = SinkOutput(stdout.nonBlocking);
   StreamController<Size>? _resizeController;
   StreamController<void>? _shutdownController;
   StreamSubscription? _sigwinchSubscription;
@@ -86,8 +88,11 @@ class StdioBackend implements TerminalBackend {
 
   @override
   void writeRaw(String data) {
-    stdout.write(data);
+    if (!_disposed) _output.write(data);
   }
+
+  @override
+  Future<void> drainOutput() => _output.drain();
 
   @override
   Size getSize() {
@@ -167,10 +172,10 @@ class StdioBackend implements TerminalBackend {
     // sequences (disable mouse tracking, leave alternate screen, show cursor,
     // etc.) are actually written to the terminal. Without this, macOS terminals
     // can be left in a bad state (e.g., echo mode off, stuck in alt screen).
-    Future.wait<void>([
-      stdout.flush(),
-      stderr.flush(),
-    ]).then((_) => exit(exitCode)).catchError((_) => exit(exitCode));
+    Future.wait<void>([_output.drain(), stdout.flush(), stderr.flush()])
+        .timeout(const Duration(seconds: 1))
+        .then((_) => exit(exitCode))
+        .catchError((_) => exit(exitCode));
   }
 
   @override

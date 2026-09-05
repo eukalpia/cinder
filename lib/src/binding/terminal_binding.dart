@@ -48,6 +48,7 @@ class TerminalBinding extends CinderBinding
   PipelineOwner get pipelineOwner => _pipelineOwner!;
 
   bool _shouldExit = false;
+  bool _waitingForOutput = false;
 
   /// Whether the binding has been signaled to exit
   bool get shouldExit => _shouldExit;
@@ -58,15 +59,13 @@ class TerminalBinding extends CinderBinding
   final _inputParser = InputParser();
   final _mouseEventController = StreamController<MouseEvent>.broadcast();
   Timer? _escapeResolutionTimer;
+  Timer? _inputDrainTimer;
+  bool _inputPaused = false;
+  final _inputWorkClock = Stopwatch();
 
   /// Delay used to distinguish a standalone Escape key from a split sequence.
   Duration escapeAmbiguityTimeout = const Duration(milliseconds: 25);
 
-  /// Timestamp of last input bytes added to parser (for buffer staleness detection)
-  DateTime? _lastInputTime;
-
-  /// Timeout for stale buffer detection (100ms)
-  static const _bufferStaleTimeout = Duration(milliseconds: 100);
   final _mouseTracker = MouseTracker();
   final _oscEventsController = StreamController<String>.broadcast();
 
@@ -188,6 +187,8 @@ class TerminalBinding extends CinderBinding
   }
 
   /// Stream of keyboard input events (raw strings)
+  /// Chunks contain completed input sequences and exclude OSC responses.
+  /// Their boundaries need not match operating-system read boundaries.
   Stream<String> get input => _inputController.stream;
 
   /// Stream of every normalized input event before widget dispatch.
@@ -261,17 +262,11 @@ class TerminalBinding extends CinderBinding
       }
     }
 
-    _inputSubscription = inputStream.listen((incomingBytes) {
-      var bytes = _processOscSequences(incomingBytes);
+    _inputSubscription = inputStream.listen((bytes) {
       if (bytes.isEmpty) return;
 
-      final now = DateTime.now();
-      if (_lastInputTime != null &&
-          now.difference(_lastInputTime!) > _bufferStaleTimeout) {
-        _inputParser.clear();
-      }
-      _lastInputTime = now;
-
+      // Transport delays do not terminate UTF-8, CSI or bracketed paste.
+      // The parser bounds retained bytes; only a standalone Escape is timed.
       _escapeResolutionTimer?.cancel();
       try {
         _inputParser.addBytes(bytes);
@@ -280,26 +275,93 @@ class TerminalBinding extends CinderBinding
         return;
       }
 
-      InputEvent? event;
-      while ((event = _inputParser.parseNext()) != null) {
-        _dispatchInputEvent(event!);
-      }
-
-      if (_inputParser.hasPendingEscape) {
-        _escapeResolutionTimer = Timer(escapeAmbiguityTimeout, () {
-          final escape = _inputParser.flushPendingEscape();
-          if (escape != null) _dispatchInputEvent(escape);
-        });
-      }
-
-      if (buildOwner.hasDirtyElements) scheduleFrame();
-
-      try {
-        _inputController.add(utf8.decode(bytes));
-      } catch (_) {
-        // Escape sequences and chunked UTF-8 are represented by inputEvents.
-      }
+      _drainInput();
     });
+  }
+
+  void _drainInput() {
+    _inputDrainTimer = null;
+    // Leave time for resize, cancellation, output completion and scheduled frames
+    // when a terminal delivers many keys in one read. Pausing the source prevents
+    // a second parser queue from accumulating while this packet is processed.
+    var processed = 0;
+    var remainingBytes = 16384;
+    var timeBudgetReached = false;
+    // Count synchronous work across packets too: an async stream can deliver
+    // many queued one-key packets through microtasks before any timer runs.
+    _inputWorkClock.start();
+    var completed = false;
+    try {
+      while (!_shouldExit && processed < 256 && remainingBytes > 0) {
+        final before = _inputParser.bufferedByteCount;
+        final event = _inputParser.parseNext(
+          maxSkippedBytes: remainingBytes,
+          onRawInput: _inputController.hasListener ? _publishRawInput : null,
+        );
+        remainingBytes -= before - _inputParser.bufferedByteCount;
+        if (event == null) break;
+        processed++;
+        _dispatchInputEvent(event);
+        // Even a short packet can contain expensive application callbacks. Give
+        // frames and output completion a turn after 8 ms of synchronous work.
+        // An individual callback must still return before we can yield.
+        if (_inputWorkClock.elapsedMicroseconds >= 8000) {
+          timeBudgetReached = true;
+          break;
+        }
+      }
+      completed = true;
+    } finally {
+      _inputWorkClock.stop();
+      timeBudgetReached =
+          timeBudgetReached || _inputWorkClock.elapsedMicroseconds >= 8000;
+      // A failing application callback still propagates to its zone. Restore
+      // queue ownership first so that exception cannot strand a paused source.
+      _finishInputTurn(
+        defer:
+            timeBudgetReached ||
+            ((!completed || processed == 256 || remainingBytes <= 0) &&
+                _inputParser.bufferedByteCount > 0),
+      );
+    }
+  }
+
+  void _finishInputTurn({required bool defer}) {
+    if (_shouldExit) return;
+    if (buildOwner.hasDirtyElements) scheduleFrame();
+    if (defer) {
+      if (!_inputPaused) {
+        _inputSubscription?.pause();
+        _inputPaused = true;
+      }
+      _inputDrainTimer = Timer(Duration.zero, () {
+        _inputWorkClock.reset();
+        _drainInput();
+      });
+      return;
+    }
+    if (_inputPaused) {
+      _inputPaused = false;
+      _inputSubscription?.resume();
+    }
+    if (_inputParser.hasPendingEscape) {
+      _escapeResolutionTimer = Timer(escapeAmbiguityTimeout, () {
+        final escape = _inputParser.flushPendingEscape();
+        if (escape != null && !_shouldExit) {
+          if (_inputController.hasListener) _publishRawInput(const [0x1B]);
+          _dispatchInputEvent(escape);
+        }
+      });
+    }
+  }
+
+  void _publishRawInput(List<int> bytes) {
+    if (_inputController.isClosed) return;
+    try {
+      _inputController.add(utf8.decode(bytes));
+    } on FormatException {
+      // Malformed bytes are represented by normalized input events instead.
+    }
   }
 
   /// Injects a normalized event from an alternate input source such as a web
@@ -307,6 +369,11 @@ class TerminalBinding extends CinderBinding
   void dispatchInputEvent(InputEvent event) => _dispatchInputEvent(event);
 
   void _dispatchInputEvent(InputEvent event) {
+    if (event is TerminalOscInputEvent) {
+      _handleOscSequence(event.content);
+      return;
+    }
+
     if (!_normalizedInputController.isClosed) {
       _normalizedInputController.add(event);
     }
@@ -355,61 +422,6 @@ class TerminalBinding extends CinderBinding
     _routeKeyboardEvent(keyEvent);
   }
 
-  /// Process bytes in shell mode to extract terminal size OSC sequences
-  /// Returns filtered bytes with OSC sequences removed
-  List<int> _processOscSequences(List<int> bytes) {
-    final result = <int>[];
-    int i = 0;
-
-    while (i < bytes.length) {
-      // Check for OSC sequence: ESC ] ... BEL or ESC ] ... ST (ESC \)
-      if (i + 2 < bytes.length && bytes[i] == 0x1b && bytes[i + 1] == 0x5d) {
-        // Found ESC ]
-        int end = i + 2;
-        bool foundTerminator = false;
-
-        // Look for BEL (0x07) or ST (ESC \ = 0x1b 0x5c) terminator
-        while (end < bytes.length) {
-          if (bytes[end] == 0x07) {
-            // Found BEL terminator
-            foundTerminator = true;
-            break;
-          }
-          if (end + 1 < bytes.length &&
-              bytes[end] == 0x1b &&
-              bytes[end + 1] == 0x5c) {
-            // Found ST terminator
-            foundTerminator = true;
-            end++;
-            break;
-          }
-          end++;
-        }
-
-        if (foundTerminator && end < bytes.length) {
-          // Extract OSC content
-          final oscContent = utf8.decode(
-            bytes.sublist(i + 2, end),
-            allowMalformed: true,
-          );
-
-          // Handle OSC sequence based on command number
-          _handleOscSequence(oscContent);
-
-          // Skip this OSC sequence
-          i = end + 1;
-          continue;
-        }
-      }
-
-      // Regular byte, keep it
-      result.add(bytes[i]);
-      i++;
-    }
-
-    return result;
-  }
-
   /// Handle a parsed OSC sequence
   void _handleOscSequence(String oscContent) {
     // Parse command number (everything before first semicolon)
@@ -453,6 +465,10 @@ class TerminalBinding extends CinderBinding
       try {
         final cols = int.parse(parts[0]);
         final rows = int.parse(parts[1]);
+        // Protocol input is not trusted host geometry. Check each dimension
+        // before multiplication so native and web reject the same values.
+        if (cols < 1 || rows < 1 || cols > 4096 || rows > 4096) return;
+        if (cols * rows > 1000000) return;
         final newSize = Size(cols.toDouble(), rows.toDouble());
 
         // Notify backend of size change (it will emit on resizeStream)
@@ -520,6 +536,8 @@ class TerminalBinding extends CinderBinding
     pendingFrameTimer?.cancel();
     _perfLogTimer?.cancel();
     _escapeResolutionTimer?.cancel();
+    _inputDrainTimer?.cancel();
+    _inputParser.clear();
     // stdin cancellation closes its file descriptor immediately on POSIX.
     // Restore input modes while the terminal handle is still available.
     if (capabilities.supportsRawMode) {
@@ -830,6 +848,7 @@ class TerminalBinding extends CinderBinding
 
   @override
   void scheduleFrameImpl() {
+    if (_shouldExit || _waitingForOutput) return;
     // Override scheduler's frame implementation to also wake the event loop.
     // Uses pendingFrameTimer from SchedulerBinding for rate limiting.
 
@@ -862,11 +881,39 @@ class TerminalBinding extends CinderBinding
 
   /// Executes frame and wakes the event loop.
   void _executeFrameAndWakeEventLoop() {
+    // A transient callback may have scheduled this timer before the previous
+    // frame submitted its output. Keep that request pending until it drains.
+    if (_shouldExit || _waitingForOutput) return;
     executeFrame();
 
     // Wake up the event loop after executing the frame
     if (!_eventLoopController.isClosed) {
       _eventLoopController.add(null);
+    }
+  }
+
+  Future<void> _drainFrameOutput(TerminalOutputDrain backend) async {
+    _waitingForOutput = true;
+    try {
+      await backend.drainOutput();
+    } catch (error, stack) {
+      if (!_shouldExit) {
+        try {
+          CinderError.reportError(
+            CinderErrorDetails(
+              exception: error,
+              stack: stack,
+              library: 'terminal output',
+              context: 'while draining a rendered frame',
+            ),
+          );
+        } finally {
+          requestShutdown(1);
+        }
+      }
+    } finally {
+      _waitingForOutput = false;
+      if (!_shouldExit && hasScheduledFrame) scheduleFrameImpl();
     }
   }
 
@@ -1432,6 +1479,11 @@ class TerminalBinding extends CinderBinding
       debugCurrentRepaintColor = debugCurrentRepaintColor.withHue(
         (debugCurrentRepaintColor.hue + 2.0) % 360.0,
       );
+    }
+
+    final backend = terminal.backend;
+    if (backend is TerminalOutputDrain) {
+      unawaited(_drainFrameOutput(backend as TerminalOutputDrain));
     }
   }
 

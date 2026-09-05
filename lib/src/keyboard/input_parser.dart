@@ -3,16 +3,20 @@ import 'logical_key.dart';
 import 'keyboard_event.dart';
 import 'mouse_parser.dart';
 import 'input_event.dart';
+import 'input_byte_buffer.dart';
 
 /// Parses raw terminal input bytes into input events (keyboard and mouse).
 class InputParser {
   InputParser({this.maxBufferedBytes = 1024 * 1024})
-    : assert(maxBufferedBytes > 0, 'maxBufferedBytes must be positive');
+    : _buffer = InputByteBuffer(maxBufferedBytes);
 
   /// Hard limit that prevents malformed or unterminated input sequences from
   /// growing the parser buffer without bound.
   final int maxBufferedBytes;
-  final List<int> _buffer = <int>[];
+  final InputByteBuffer _buffer;
+  int _pasteScanOffset = 6;
+  int _oscScanOffset = 2;
+  void Function(List<int>)? _onRawInput;
 
   int get bufferedByteCount => _buffer.length;
 
@@ -23,7 +27,7 @@ class InputParser {
   void addBytes(List<int> bytes) {
     if (bytes.isEmpty) return;
     if (_buffer.length + bytes.length > maxBufferedBytes) {
-      _buffer.clear();
+      clear();
       throw FormatException(
         'Terminal input exceeded $maxBufferedBytes buffered bytes.',
       );
@@ -42,19 +46,45 @@ class InputParser {
   }
 
   /// Parse the next event from the buffer
-  /// Returns null if no complete event is available
-  InputEvent? parseNext() {
-    if (_buffer.isEmpty) return null;
-
-    // Try to parse the current buffer
-    final result = _parseBufferWithLength();
-
-    if (result != null) {
-      final (event, bytesConsumed) = result;
-      _clearConsumedBytes(event, bytesConsumed);
-      return event;
+  /// Returns null if no complete event is available. With [maxSkippedBytes],
+  /// also yields after consuming that many unknown-sequence bytes; the caller
+  /// can schedule another turn when the pending byte count decreased by the
+  /// budget. Complete sequences are consumed atomically.
+  /// [onRawInput] receives consumed input bytes except OSC terminal responses.
+  /// It is optional to avoid copying bytes when the legacy raw stream is unused.
+  InputEvent? parseNext({
+    int? maxSkippedBytes,
+    void Function(List<int>)? onRawInput,
+  }) {
+    if (maxSkippedBytes != null && maxSkippedBytes <= 0) {
+      throw ArgumentError.value(maxSkippedBytes, 'maxSkippedBytes');
     }
+    _onRawInput = onRawInput;
+    try {
+      return _parseNext(maxSkippedBytes);
+    } finally {
+      _onRawInput = null;
+    }
+  }
 
+  InputEvent? _parseNext(int? maxSkippedBytes) {
+    final initialLength = _buffer.length;
+    while (_buffer.isNotEmpty) {
+      final before = _buffer.length;
+      final result = _parseBufferWithLength();
+      if (result != null) {
+        final (event, bytesConsumed) = result;
+        _clearConsumedBytes(event, bytesConsumed);
+        return event;
+      }
+      // Unknown complete sequences consume bytes without producing an event.
+      // Iterate instead of recursing through an arbitrary number of them.
+      if (_buffer.length == before) return null;
+      if (maxSkippedBytes != null &&
+          initialLength - _buffer.length >= maxSkippedBytes) {
+        return null;
+      }
+    }
     return null;
   }
 
@@ -65,13 +95,23 @@ class InputParser {
   }
 
   void _clearConsumedBytes(InputEvent event, int bytesConsumed) {
+    _pasteScanOffset = 6;
+    _oscScanOffset = 2;
     // Remove the consumed bytes from the buffer
     if (bytesConsumed > 0 && bytesConsumed <= _buffer.length) {
-      _buffer.removeRange(0, bytesConsumed);
+      _consume(bytesConsumed, terminalResponse: event is TerminalOscInputEvent);
     } else {
       // Fallback: clear everything
       _buffer.clear();
     }
+  }
+
+  void _consume(int count, {bool terminalResponse = false}) {
+    final onRawInput = _onRawInput;
+    if (!terminalResponse && onRawInput != null) {
+      onRawInput(_buffer.sublist(0, count));
+    }
+    _buffer.removeRange(0, count);
   }
 
   (InputEvent, int)? _parseBufferWithLength() {
@@ -96,6 +136,11 @@ class InputParser {
           return null;
         }
       }
+    }
+
+    // OSC must share the input parser's packet buffer and paste boundaries.
+    if (first == 0x1B && _buffer.length >= 2 && _buffer[1] == 0x5D) {
+      return _parseOsc();
     }
 
     // Focus reporting: CSI I = focus in, CSI O = focus out.
@@ -132,9 +177,9 @@ class InputParser {
             } else {
               // Skip this unparseable mouse event - don't convert to keyboard event
               // Just consume the bytes to prevent buffer buildup
-              _buffer.removeRange(0, terminatorIndex + 1);
+              _consume(terminatorIndex + 1);
               // Try to parse the next event in the buffer
-              return _parseBufferWithLength();
+              return null;
             }
           } else {
             return null; // Need more bytes
@@ -321,7 +366,7 @@ class InputParser {
     }
 
     // Check for Alt+key combinations (ESC followed by character)
-    if (_buffer.length == 2) {
+    if (_buffer.length >= 2) {
       final second = _buffer[1];
 
       // Alt+letter (lowercase)
@@ -373,6 +418,17 @@ class InputParser {
       return null;
     }
 
+    // Only inspect this sequence, not subsequent events in the input packet.
+    var sequenceLength = 0;
+    for (var index = 2; index < _buffer.length; index++) {
+      final byte = _buffer[index];
+      if (byte >= 0x40 && byte <= 0x7e) {
+        sequenceLength = index + 1;
+        break;
+      }
+    }
+    if (sequenceLength == 0) return null;
+
     // Try kitty keyboard protocol: CSI codepoint ; modifier u
     // Format: \x1b[ <digits> ; <digits> u
     {
@@ -383,12 +439,12 @@ class InputParser {
     // Try xterm modifyOtherKeys: CSI 27 ; modifier ; charcode ~
     // Format: \x1b[ 27 ; <digits> ; <digits> ~
     {
-      final result = _parseModifyOtherKeysSequence();
+      final result = _parseModifyOtherKeysSequence(sequenceLength);
       if (result != null) return result;
     }
 
     // Arrow keys: ESC [ A/B/C/D (3 bytes)
-    if (_buffer.length == 3) {
+    if (sequenceLength == 3) {
       switch (_buffer[2]) {
         case 0x41:
           return (
@@ -450,8 +506,8 @@ class InputParser {
     }
 
     // Modified arrow keys and other sequences (6 bytes: ESC [ 1 ; X Y)
-    if (_buffer.length >= 6) {
-      final sequence = String.fromCharCodes(_buffer);
+    if (sequenceLength == 6) {
+      final sequence = String.fromCharCodes(_buffer.take(sequenceLength));
 
       // Shift+Arrow: ESC [ 1 ; 2 A/B/C/D
       if (sequence.startsWith('\x1B[1;2')) {
@@ -569,8 +625,8 @@ class InputParser {
     }
 
     // Function keys and special keys with ~ terminator
-    if (_buffer.contains(0x7E)) {
-      final sequence = String.fromCharCodes(_buffer);
+    if (_buffer[sequenceLength - 1] == 0x7E) {
+      final sequence = String.fromCharCodes(_buffer.take(sequenceLength));
 
       // Parse sequences like ESC [ 2 ~ (Insert), ESC [ 3 ~ (Delete), etc.
       // ESC [ X ~ = 4 bytes
@@ -687,18 +743,13 @@ class InputParser {
       }
 
       // Sequence complete but unknown - consume the sequence with ~ terminator
-      final tildeIndex = _buffer.indexOf(0x7E);
-      if (tildeIndex != -1) {
-        _buffer.removeRange(0, tildeIndex + 1);
-        // Try to parse the next event in the buffer
-        return _parseKeyboardEvent();
-      }
+      _consume(sequenceLength);
       return null;
     }
 
     // Check if we need more bytes (sequence not complete)
     // CSI sequences typically end with a letter or ~
-    final lastByte = _buffer.last;
+    final lastByte = _buffer[sequenceLength - 1];
     if ((lastByte >= 0x40 && lastByte <= 0x7E) || lastByte == 0x7E) {
       // Sequence is complete but we don't recognize it
       // Find the end of this CSI sequence and consume it to prevent buffer buildup
@@ -714,9 +765,9 @@ class InputParser {
         endIndex++;
       }
       // Consume the invalid CSI sequence
-      _buffer.removeRange(0, endIndex);
+      _consume(endIndex);
       // Try to parse the next event in the buffer
-      return _parseKeyboardEvent();
+      return null;
     }
 
     // Need more bytes
@@ -724,7 +775,7 @@ class InputParser {
   }
 
   (KeyboardEvent, int)? _parseSS3Sequence() {
-    if (_buffer.length != 3) return null;
+    if (_buffer.length < 3) return null;
 
     // F1-F4 use SS3 sequences (all are 3 bytes: ESC O X)
     switch (_buffer[2]) {
@@ -790,7 +841,7 @@ class InputParser {
     // We know buffer starts with ESC[200~ (6 bytes)
     // Look for the end marker ESC[201~
     int endMarkerStart = -1;
-    for (int i = 6; i < _buffer.length - 5; i++) {
+    for (int i = _pasteScanOffset; i < _buffer.length - 5; i++) {
       if (_buffer[i] == 0x1B &&
           _buffer[i + 1] == 0x5B &&
           _buffer[i + 2] == 0x32 &&
@@ -804,6 +855,8 @@ class InputParser {
 
     if (endMarkerStart == -1) {
       // Haven't received the end marker yet, wait for more data
+      _pasteScanOffset = _buffer.length - 5;
+      if (_pasteScanOffset < 6) _pasteScanOffset = 6;
       return null;
     }
 
@@ -815,6 +868,27 @@ class InputParser {
     final totalBytes = endMarkerStart + 6;
 
     return (PasteInputEvent(pasteText), totalBytes);
+  }
+
+  (InputEvent, int)? _parseOsc() {
+    for (var index = _oscScanOffset; index < _buffer.length; index++) {
+      final byte = _buffer[index];
+      final isBel = byte == 0x07;
+      final isSt =
+          byte == 0x1B &&
+          index + 1 < _buffer.length &&
+          _buffer[index + 1] == 0x5C;
+      if (isBel || isSt) {
+        final content = utf8.decode(
+          _buffer.sublist(2, index),
+          allowMalformed: true,
+        );
+        return (TerminalOscInputEvent(content), index + (isBel ? 1 : 2));
+      }
+    }
+    // Revisit a possible ESC at the end of this chunk when ST is split.
+    _oscScanOffset = _buffer.length > 2 ? _buffer.length - 1 : 2;
+    return null;
   }
 
   /// Parse kitty keyboard protocol sequence: CSI codepoint ; modifier u
@@ -883,7 +957,7 @@ class InputParser {
 
   /// Parse xterm modifyOtherKeys sequence: CSI 27 ; modifier ; charcode ~
   /// Example: \x1b[27;2;13~ = Enter with Shift
-  (KeyboardEvent, int)? _parseModifyOtherKeysSequence() {
+  (KeyboardEvent, int)? _parseModifyOtherKeysSequence(int sequenceLength) {
     // Check if buffer starts with ESC [ 27 ;
     if (_buffer.length < 3) return null;
 
@@ -892,7 +966,7 @@ class InputParser {
 
     // Find '~' terminator (0x7E)
     int tildeIndex = -1;
-    for (int i = 2; i < _buffer.length; i++) {
+    for (int i = 2; i < sequenceLength; i++) {
       if (_buffer[i] == 0x7E) {
         tildeIndex = i;
         break;
@@ -987,5 +1061,7 @@ class InputParser {
   /// Clear any buffered input
   void clear() {
     _buffer.clear();
+    _pasteScanOffset = 6;
+    _oscScanOffset = 2;
   }
 }

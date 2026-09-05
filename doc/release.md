@@ -1,6 +1,6 @@
 # Release validation
 
-The current version is **1.0.0-rc.2**. A release candidate makes the tested
+The current version is **1.0.0-rc.3**. A release candidate makes the tested
 implementation available while keeping the stable-release gates explicit.
 A green test suite is evidence for its exercised cases, not a guarantee that
 all terminal emulators, fonts, transports, or applications behave identically.

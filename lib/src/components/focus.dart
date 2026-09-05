@@ -479,6 +479,8 @@ class _FocusState extends State<Focus> {
   }
 
   bool _handleKeyEvent(KeyboardEvent event) {
+    // Focus may change between events in one input batch, before a rebuild.
+    if (!_node.hasPrimaryFocus) return false;
     if (event.logicalKey == LogicalKey.tab) {
       return event.isShiftPressed ? _node.previousFocus() : _node.nextFocus();
     }
@@ -493,7 +495,9 @@ class _FocusState extends State<Focus> {
       node: _node,
       hasPrimaryFocus: _node.hasPrimaryFocus,
       child: Focusable(
-        focused: _node.hasPrimaryFocus,
+        // The handler reads live focus state, including gains and losses that
+        // occurred since this widget was built.
+        focused: true,
         onKeyEvent: _handleKeyEvent,
         child: widget.child,
       ),

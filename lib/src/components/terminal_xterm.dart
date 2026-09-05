@@ -41,6 +41,7 @@ class TerminalXterm extends StatefulWidget {
 
 class _TerminalXtermState extends State<TerminalXterm> {
   late final xterm.Terminal _terminal;
+  late void Function(String) _outputCallback;
   VoidCallback? _controllerListener;
 
   // Terminal dimensions
@@ -98,13 +99,16 @@ class _TerminalXtermState extends State<TerminalXterm> {
   }
 
   void _setupControllerHandler() {
-    // Set up output handler
-    widget.controller.addOutputCallback((data) {
+    final controller = widget.controller;
+    _outputCallback = (data) {
+      // A controller may already be dispatching a snapshot of its callbacks.
+      if (!mounted || !identical(widget.controller, controller)) return;
       _terminal.write(data);
       setState(() {
         // Trigger rebuild when terminal updates
       });
-    });
+    };
+    controller.addOutputCallback(_outputCallback);
   }
 
   void _onControllerChanged() {
@@ -204,6 +208,7 @@ class _TerminalXtermState extends State<TerminalXterm> {
 
   @override
   void dispose() {
+    widget.controller.removeOutputCallback(_outputCallback);
     if (_controllerListener != null) {
       widget.controller.removeListener(_controllerListener!);
     }
@@ -216,6 +221,7 @@ class _TerminalXtermState extends State<TerminalXterm> {
 
     // Handle controller change
     if (oldWidget.controller != widget.controller) {
+      oldWidget.controller.removeOutputCallback(_outputCallback);
       if (_controllerListener != null) {
         oldWidget.controller.removeListener(_controllerListener!);
       }

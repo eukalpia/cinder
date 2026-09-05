@@ -11,6 +11,7 @@ docs/superpowers/
 .cinder-web/
 artifacts/
 benchmark/comparison/
+benchmark/runtime_scale/
 coverage/
 build/
 pubspec.lock

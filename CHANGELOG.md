@@ -1,3 +1,33 @@
+# 1.0.0-rc.3
+
+- Coalesce rendering while native output drains, retain input responsiveness under
+  backpressure, and serialize terminal restoration after pending output.
+- Preserve batched CSI, SS3 and Alt keys, remove recursive unknown-sequence
+  parsing, and consume bounded byte input without shifting each remaining packet.
+- Yield large input bursts to timers and cancellation; apply focus transitions
+  immediately to subsequent keys in the same input packet.
+- Yield after 8 ms of input handling as well as event/byte limits, so expensive
+  application callbacks cannot monopolize a whole buffered key burst.
+- Resume queued input after a handler throws while preserving the original error;
+  reject invalid or excessive shell-protocol resize reports before allocation.
+- Preserve delayed Unicode, escape and paste fragments; parse OSC replies across
+  packets without interpreting pasted control text as terminal responses.
+- Detach terminal emulator output callbacks on controller replacement and unmount.
+- Parse embedded terminal control sequences incrementally with an 8 KiB limit,
+  release consumed chunks, and preserve output from reentrant callbacks.
+- Bound child-controlled repeat work, ignore child window-resize requests, and
+  reject overflowing numeric and incomplete color parameters in the emulator.
+- Add native Unix PTY sizing and Windows ConPTY transport, bounded process output
+  history and pending input, and subprocess lifecycle regressions.
+- Bound slow log-client queues and connection count, serialize replay, and close
+  owned sockets deterministically during log floods or concurrent startup/shutdown.
+- Add a 100,000-record reference monitor with virtualized rows, Unicode search,
+  bounded streaming history, cancellation and repeatable PTY/heap stress tooling.
+- Expand reproducible comparisons with Ratatui, FTXUI and Textual and a shared
+  50,000-record data-operation workload; retain explicit pacing and parity limits.
+- Measure state visibility under independent 4 ms and 20 ms input arrivals,
+  including coalescing, send lateness and exact final-state verification.
+
 # 1.0.0-rc.2
 
 - Stop wrapped text layout after capped visible lines while preserving Unicode and overflow behavior.

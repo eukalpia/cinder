@@ -4,25 +4,31 @@ import 'dart:io';
 import 'package:cinder/src/size.dart';
 
 import 'terminal_backend.dart';
+import 'sink_output.dart';
 
 /// Backend for shell mode - communicates via Unix socket.
 /// Size updates come via OSC 9999 sequences in the input stream.
-class SocketBackend implements TerminalBackend {
+class SocketBackend implements TerminalBackend, TerminalOutputDrain {
   final Socket _socket;
+  final SinkOutput _output;
   Size _size;
   final StreamController<Size> _resizeController =
       StreamController<Size>.broadcast();
   bool _disposed = false;
 
   SocketBackend(this._socket, {Size? initialSize})
-    : _size = initialSize ?? const Size(80, 24);
+    : _output = SinkOutput(_socket),
+      _size = initialSize ?? const Size(80, 24);
 
   @override
   void writeRaw(String data) {
     if (!_disposed) {
-      _socket.write(data);
+      _output.write(data);
     }
   }
+
+  @override
+  Future<void> drainOutput() => _output.drain();
 
   @override
   Size getSize() => _size;
@@ -68,10 +74,18 @@ class SocketBackend implements TerminalBackend {
 
   @override
   void dispose() {
+    if (_disposed) return;
     _disposed = true;
     _resizeController.close();
+    unawaited(_closeOutput());
+  }
+
+  Future<void> _closeOutput() async {
     try {
-      _socket.close();
-    } catch (_) {}
+      await _output.drain().timeout(const Duration(seconds: 1));
+      await _socket.close().timeout(const Duration(seconds: 1));
+    } catch (_) {
+      _socket.destroy();
+    }
   }
 }

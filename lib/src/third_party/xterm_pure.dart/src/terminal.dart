@@ -1,4 +1,4 @@
-import 'dart:math' show max;
+import 'dart:math' show max, min;
 
 import 'base/observable.dart';
 import 'core/buffer/buffer.dart';
@@ -487,7 +487,10 @@ class Terminal with Observable implements TerminalState, EscapeHandler {
       return;
     }
 
-    for (var i = 0; i < count; i++) {
+    // Bound control-to-output expansion to one viewport's character count.
+    // Ordinary REP keeps its wrapping/margin behavior; larger counts truncate.
+    final repetitions = min(count, viewWidth * viewHeight);
+    for (var i = 0; i < repetitions; i++) {
       _buffer.writeChar(_precedingCodepoint);
     }
   }

@@ -1,0 +1,105 @@
+name: Cross-framework comparison
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  compare:
+    name: ${{ matrix.name }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: linux
+            os: ubuntu-24.04
+          - name: macos-arm64
+            os: macos-15
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: 3.13.3
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.20.0
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.0
+      - uses: actions/setup-go@v5
+        with:
+          go-version: 1.27.1
+          cache-dependency-path: benchmark/comparison/bubbletea/go.sum
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Select the Rust compiler
+        run: rustup default 1.98.0
+      - name: Install and verify the comparison driver
+        run: |
+          python -m pip install -r benchmark/comparison/requirements.txt
+          python -m unittest discover -s benchmark/comparison -p 'test_*.py' -v
+      - name: Build all adapters before measurement
+        run: >-
+          python benchmark/comparison/prepare.py --extended
+          --baseline v1.0.0-rc.2 --output build/comparison
+          --cxx /usr/bin/clang++
+      - name: Preserve measured source before running trials
+        run: git archive --format=tar.gz -o build/measured-source.tar.gz HEAD
+      - name: Compare data operations and verified terminal output
+        run: >-
+          python benchmark/comparison/run_matrix.py
+          --commands build/comparison/commands.json --suite data
+          --records 50000 --rounds 3 --warmup 48 --frames 192
+          --settle-seconds 6 --output build/data-results
+      - name: Compare the expanded ASCII matrix
+        run: >-
+          python benchmark/comparison/run_matrix.py
+          --commands build/comparison/commands.json --suite expanded-grid
+          --rounds 3 --warmup 30 --frames 180 --settle-seconds 6
+          --output build/grid-results
+      - name: Measure visibility under independent 4 ms arrivals
+        run: >-
+          python benchmark/comparison/run_matrix.py
+          --commands build/comparison/commands.json --suite data
+          --records 50000 --rounds 3 --warmup 48 --frames 192
+          --settle-seconds 6 --arrival-interval-ms 4 --event-deadline-ms 5000
+          --output build/arrivals-4ms-results
+      - name: Measure visibility under independent 20 ms arrivals
+        run: >-
+          python benchmark/comparison/run_matrix.py
+          --commands build/comparison/commands.json --suite data
+          --records 50000 --rounds 3 --warmup 48 --frames 192
+          --settle-seconds 6 --arrival-interval-ms 20 --event-deadline-ms 5000
+          --output build/arrivals-20ms-results
+      - name: Validate complete trial sets
+        run: |
+          python benchmark/comparison/summarize.py build/data-results > build/data-summary.md
+          python benchmark/comparison/summarize.py build/grid-results > build/grid-summary.md
+          python benchmark/comparison/summarize.py build/arrivals-4ms-results > build/arrivals-4ms-summary.md
+          python benchmark/comparison/summarize.py build/arrivals-20ms-results > build/arrivals-20ms-summary.md
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: comparison-${{ matrix.name }}
+          path: |
+            build/data-results/
+            build/grid-results/
+            build/arrivals-4ms-results/
+            build/arrivals-20ms-results/
+            build/*-summary.md
+            build/measured-source.tar.gz
+            build/comparison/measured-pubspec.lock
+          if-no-files-found: error
