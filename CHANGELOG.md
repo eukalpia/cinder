@@ -6,9 +6,17 @@
   parsing, and consume bounded byte input without shifting each remaining packet.
 - Yield large input bursts to timers and cancellation; apply focus transitions
   immediately to subsequent keys in the same input packet.
+- Yield after 8 ms of input handling as well as event/byte limits, so expensive
+  application callbacks cannot monopolize a whole buffered key burst.
+- Resume queued input after a handler throws while preserving the original error;
+  reject invalid or excessive shell-protocol resize reports before allocation.
 - Preserve delayed Unicode, escape and paste fragments; parse OSC replies across
   packets without interpreting pasted control text as terminal responses.
 - Detach terminal emulator output callbacks on controller replacement and unmount.
+- Parse embedded terminal control sequences incrementally with an 8 KiB limit,
+  release consumed chunks, and preserve output from reentrant callbacks.
+- Bound child-controlled repeat work, ignore child window-resize requests, and
+  reject overflowing numeric and incomplete color parameters in the emulator.
 - Add native Unix PTY sizing and Windows ConPTY transport, bounded process output
   history and pending input, and subprocess lifecycle regressions.
 - Bound slow log-client queues and connection count, serialize replay, and close

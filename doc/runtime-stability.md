@@ -55,6 +55,15 @@ keyboard-protocol input. `TerminalBinding` waits for a short ambiguity window an
 emits Escape only when no continuation arrives. Incomplete input is bounded by a
 hard parser limit so malformed streams cannot grow memory without bound.
 
+Input processing yields to the event loop after 256 events, 16 KiB of consumed
+bytes, or 8 ms of synchronous work. This lets frames, output completion, resize
+and cancellation advance during buffered input bursts. Events stay ordered and
+the source pauses while buffered input awaits its next turn. A single synchronous
+application callback must return before the framework can yield; move longer work
+to cooperative tasks or isolates.
+If a handler throws, the original error still reaches its zone while the binding
+releases or reschedules its input queue so later events can continue.
+
 ## Unicode geometry
 
 `TerminalText` maps between UTF-16 offsets used by Dart strings and terminal

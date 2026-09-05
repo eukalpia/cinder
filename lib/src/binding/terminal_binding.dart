@@ -61,6 +61,7 @@ class TerminalBinding extends CinderBinding
   Timer? _escapeResolutionTimer;
   Timer? _inputDrainTimer;
   bool _inputPaused = false;
+  final _inputWorkClock = Stopwatch();
 
   /// Delay used to distinguish a standalone Escape key from a split sequence.
   Duration escapeAmbiguityTimeout = const Duration(milliseconds: 25);
@@ -285,26 +286,58 @@ class TerminalBinding extends CinderBinding
     // a second parser queue from accumulating while this packet is processed.
     var processed = 0;
     var remainingBytes = 16384;
-    while (!_shouldExit && processed < 256 && remainingBytes > 0) {
-      final before = _inputParser.bufferedByteCount;
-      final event = _inputParser.parseNext(
-        maxSkippedBytes: remainingBytes,
-        onRawInput: _inputController.hasListener ? _publishRawInput : null,
+    var timeBudgetReached = false;
+    // Count synchronous work across packets too: an async stream can deliver
+    // many queued one-key packets through microtasks before any timer runs.
+    _inputWorkClock.start();
+    var completed = false;
+    try {
+      while (!_shouldExit && processed < 256 && remainingBytes > 0) {
+        final before = _inputParser.bufferedByteCount;
+        final event = _inputParser.parseNext(
+          maxSkippedBytes: remainingBytes,
+          onRawInput: _inputController.hasListener ? _publishRawInput : null,
+        );
+        remainingBytes -= before - _inputParser.bufferedByteCount;
+        if (event == null) break;
+        processed++;
+        _dispatchInputEvent(event);
+        // Even a short packet can contain expensive application callbacks. Give
+        // frames and output completion a turn after 8 ms of synchronous work.
+        // An individual callback must still return before we can yield.
+        if (_inputWorkClock.elapsedMicroseconds >= 8000) {
+          timeBudgetReached = true;
+          break;
+        }
+      }
+      completed = true;
+    } finally {
+      _inputWorkClock.stop();
+      timeBudgetReached =
+          timeBudgetReached || _inputWorkClock.elapsedMicroseconds >= 8000;
+      // A failing application callback still propagates to its zone. Restore
+      // queue ownership first so that exception cannot strand a paused source.
+      _finishInputTurn(
+        defer:
+            timeBudgetReached ||
+            ((!completed || processed == 256 || remainingBytes <= 0) &&
+                _inputParser.bufferedByteCount > 0),
       );
-      remainingBytes -= before - _inputParser.bufferedByteCount;
-      if (event == null) break;
-      processed++;
-      _dispatchInputEvent(event);
     }
+  }
+
+  void _finishInputTurn({required bool defer}) {
     if (_shouldExit) return;
     if (buildOwner.hasDirtyElements) scheduleFrame();
-    if ((processed == 256 || remainingBytes <= 0) &&
-        _inputParser.bufferedByteCount > 0) {
+    if (defer) {
       if (!_inputPaused) {
         _inputSubscription?.pause();
         _inputPaused = true;
       }
-      _inputDrainTimer = Timer(Duration.zero, _drainInput);
+      _inputDrainTimer = Timer(Duration.zero, () {
+        _inputWorkClock.reset();
+        _drainInput();
+      });
       return;
     }
     if (_inputPaused) {
@@ -432,6 +465,10 @@ class TerminalBinding extends CinderBinding
       try {
         final cols = int.parse(parts[0]);
         final rows = int.parse(parts[1]);
+        // Protocol input is not trusted host geometry. Check each dimension
+        // before multiplication so native and web reject the same values.
+        if (cols < 1 || rows < 1 || cols > 4096 || rows > 4096) return;
+        if (cols * rows > 1000000) return;
         final newSize = Size(cols.toDouble(), rows.toDouble());
 
         // Notify backend of size change (it will emit on resizeStream)

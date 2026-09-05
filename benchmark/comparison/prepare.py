@@ -64,6 +64,8 @@ def main():
     environment['PATH'] = str(Path(commands['node']).parent) + os.pathsep + environment['PATH']
 
     subprocess.run([commands['dart'], 'pub', 'get'], cwd=ROOT, check=True)
+    measured_lock = destination / 'measured-pubspec.lock'
+    shutil.copyfile(ROOT / 'pubspec.lock', measured_lock)
     subprocess.run([commands['dart'], 'compile', 'exe', str(HERE / 'cinder.dart'),
                     '-o', str(destination / 'cinder-optimized')], cwd=ROOT, check=True)
     with tempfile.TemporaryDirectory(prefix='cinder_baseline_') as temporary:
@@ -84,6 +86,7 @@ def main():
                    cwd=HERE / 'bubbletea', check=True)
     dependencies = json.loads((HERE / 'javascript/package.json').read_text())['dependencies']
     artifacts = [destination / name for name in ['cinder-baseline', 'cinder-optimized', 'bubbletea']]
+    artifacts.append(measured_lock)
     artifacts.extend(HERE / name for name in [
         'cinder.dart', 'javascript/ink.mjs', 'javascript/opentui.ts',
         'javascript/package.json', 'javascript/package-lock.json',
@@ -96,7 +99,7 @@ def main():
         'current_commit': current,
         'current_worktree_dirty': bool(output(['git', 'status', '--porcelain'], cwd=ROOT)),
         'source_sha256': {'baseline_lib': baseline_hash, 'current_lib': source_hash(ROOT / 'lib'),
-                          'dart_lock': hashlib.sha256((ROOT / 'pubspec.lock').read_bytes()).hexdigest(),
+                          'dart_lock': file_hash(measured_lock),
                           'adapter': hashlib.sha256((HERE / 'cinder.dart').read_bytes()).hexdigest()},
         'artifacts_sha256': {str(path): file_hash(path) for path in artifacts},
         'versions': {**{name: output([commands[name], '--version'])

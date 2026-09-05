@@ -593,8 +593,9 @@ Performance claims should always be tied to reproducible workloads, viewport
 sizes, terminals, and benchmark configurations.
 
 The [terminal application comparison](benchmark/comparison/README.md) runs
-Cinder, Ink, OpenTUI, and Bubble Tea through the same PTY and verifies every
-expected text frame. See [resource usage and deployment](doc/resource-usage.md)
+Cinder, Ink, OpenTUI, Bubble Tea, Ratatui, FTXUI, and Textual through the same
+PTY. It verifies text frames and final states under independent input arrivals,
+including coalescing and visibility latency. See [resource usage and deployment](doc/resource-usage.md)
 for memory bounds, disk-I/O interpretation, and compact native distributions.
 
 ## Roadmap

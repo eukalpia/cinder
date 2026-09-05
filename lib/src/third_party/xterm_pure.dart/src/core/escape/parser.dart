@@ -9,15 +9,22 @@ import '../../utils/lookup_table.dart';
 /// [EscapeParser] translates control characters and escape sequences into
 /// function calls that the terminal can handle.
 ///
-/// Design goals:
-///  * Zero object allocation during processing.
-///  * No internal state. Same input will always produce same output.
+/// CSI and OSC are consumed incrementally. A sequence may contain at most
+/// 8192 encoded UTF-8 bytes, including its introducer and terminator. Oversized
+/// sequences are discarded through their final byte / BEL / ST without dispatch.
 class EscapeParser {
   final EscapeHandler handler;
 
   EscapeParser(this.handler);
 
   final _queue = ByteConsumer();
+  bool _processing = false;
+  bool _inEscape = false;
+  _EscHandler? _pendingEscapeHandler;
+
+  static const maxControlSequenceBytes = 8192;
+  int _sequenceBytes = 0;
+  bool _discardSequence = false;
 
   /// Start of sequence or character being processed. Useful for debugging.
   var tokenBegin = 0;
@@ -26,25 +33,42 @@ class EscapeParser {
   int get tokenEnd => _queue.totalConsumed;
 
   void write(String chunk) {
-    _queue.unrefConsumedBlocks();
     _queue.add(chunk);
-    _process();
+    // Callbacks may synchronously write more output. Preserve input order and
+    // finish the active dispatch before interpreting that appended data.
+    if (_processing) return;
+    _processing = true;
+    try {
+      _process();
+    } finally {
+      _processing = false;
+      // Partial sequences retain parsed state, never the original input blocks.
+      _queue.unrefConsumedBlocks();
+    }
   }
 
   void _process() {
     while (_queue.isNotEmpty) {
-      tokenBegin = _queue.totalConsumed;
-      final char = _queue.consume();
-
-      if (char == Ascii.ESC) {
-        final processed = _processEscape();
-        if (!processed) {
-          _queue.rollback(tokenEnd - tokenBegin);
-          return;
+      if (!_inEscape) {
+        tokenBegin = _queue.totalConsumed;
+        final char = _queue.consume();
+        if (char != Ascii.ESC) {
+          _processChar(char);
+          continue;
         }
-      } else {
-        _processChar(char);
+        _inEscape = true;
       }
+      try {
+        if (!_processEscape()) return;
+      } catch (_) {
+        // A completed handler may throw through an application callback. Its
+        // control sequence is consumed; later input starts a fresh token.
+        _inEscape = false;
+        _pendingEscapeHandler = null;
+        rethrow;
+      }
+      _inEscape = false;
+      _pendingEscapeHandler = null;
     }
   }
 
@@ -66,17 +90,16 @@ class EscapeParser {
   /// Processes a sequence of characters that starts with an escape character.
   /// Returns [true] if the sequence was processed, [false] if it was not.
   bool _processEscape() {
-    if (_queue.isEmpty) return false;
-
-    final escapeChar = _queue.consume();
-    final escapeHandler = _escHandlers[escapeChar];
-
-    if (escapeHandler == null) {
-      handler.unkownEscape(escapeChar);
-      return true;
+    if (_pendingEscapeHandler == null) {
+      if (_queue.isEmpty) return false;
+      final escapeChar = _queue.consume();
+      _pendingEscapeHandler = _escHandlers[escapeChar];
+      if (_pendingEscapeHandler == null) {
+        handler.unkownEscape(escapeChar);
+        return true;
+      }
     }
-
-    return escapeHandler();
+    return _pendingEscapeHandler!();
   }
 
   late final _sbcHandlers = FastLookupTable<_SbcHandler>({
@@ -190,81 +213,106 @@ class EscapeParser {
   }
 
   bool _escHandleCSI() {
-    final consumed = _consumeCsi();
-    if (!consumed) return false;
-
-    final csiHandler = _csiHandlers[_csi.finalByte];
-
-    if (csiHandler == null) {
-      handler.unknownCSI(_csi.finalByte);
-    } else {
-      csiHandler();
+    if (!_consumeCsi()) return false;
+    _csiInProgress = false;
+    try {
+      if (!_discardSequence) {
+        final csiHandler = _csiHandlers[_csi.finalByte];
+        if (csiHandler == null) {
+          handler.unknownCSI(_csi.finalByte);
+        } else {
+          csiHandler();
+        }
+      }
+      return true;
+    } finally {
+      _csi.params.clear();
+      _csiParam = 0;
     }
-
-    return true;
   }
 
-  /// The last parsed [_Csi]. This is a mutable singletion by design to reduce
-  /// object allocations.
   final _csi = _Csi(finalByte: 0, params: []);
+  bool _csiInProgress = false;
+  bool _csiAtStart = true;
+  int _csiParam = 0;
+  bool _csiHasParam = false;
 
-  /// Parse a CSI from the head of the queue. Return false if the CSI isn't
-  /// complete. After a CSI is successfully parsed, [_csi] is updated.
-  bool _consumeCsi() {
-    if (_queue.isEmpty) {
-      return false;
+  void _startSequence() {
+    _sequenceBytes = 2; // ESC and the CSI/OSC introducer.
+    _discardSequence = false;
+  }
+
+  void _countSequenceChar(int char) {
+    if (_discardSequence) return;
+    _sequenceBytes += char <= 0x7f
+        ? 1
+        : char <= 0x7ff
+        ? 2
+        : char <= 0xffff
+        ? 3
+        : 4;
+    if (_sequenceBytes > maxControlSequenceBytes) {
+      _discardCurrentSequence();
     }
+  }
 
+  void _discardCurrentSequence() {
+    _discardSequence = true;
     _csi.params.clear();
+    _csiParam = 0;
+    _osc.clear();
+    _oscParam.clear();
+  }
 
-    // test whether the csi is a `CSI ? Ps ...` or `CSI Ps ...`
-    final prefix = _queue.peek();
-    if (prefix >= Ascii.colon && prefix <= Ascii.questionMark) {
-      _csi.prefix = prefix;
-      _queue.consume();
-    } else {
+  bool _consumeCsi() {
+    if (!_csiInProgress) {
+      _csiInProgress = true;
+      _csiAtStart = true;
+      _csi.params.clear();
       _csi.prefix = null;
+      _csiParam = 0;
+      _csiHasParam = false;
+      _startSequence();
     }
-
-    var param = 0;
-    var hasParam = false;
-    while (true) {
-      // The sequence isn't completed, just ignore it.
-      if (_queue.isEmpty) {
-        return false;
-      }
-
+    while (_queue.isNotEmpty) {
       final char = _queue.consume();
-
+      _countSequenceChar(char);
+      final isFinal = char >= Ascii.atSign && char <= Ascii.tilde;
+      if (_discardSequence) {
+        if (isFinal) return true;
+        continue;
+      }
+      if (_csiAtStart) {
+        _csiAtStart = false;
+        if (char >= Ascii.colon && char <= Ascii.questionMark) {
+          _csi.prefix = char;
+          continue;
+        }
+      }
       if (char == Ascii.semicolon) {
-        if (hasParam) {
-          _csi.params.add(param);
-        }
-        param = 0;
+        if (_csiHasParam) _csi.params.add(_csiParam);
+        _csiParam = 0;
         continue;
       }
-
       if (char >= Ascii.num0 && char <= Ascii.num9) {
-        hasParam = true;
-        param *= 10;
-        param += char - Ascii.num0;
-        continue;
-      }
-
-      if (char > Ascii.NULL && char < Ascii.num0) {
-        // intermediates.add(char);
-        continue;
-      }
-
-      if (char >= Ascii.atSign && char <= Ascii.tilde) {
-        if (hasParam) {
-          _csi.params.add(param);
+        final digit = char - Ascii.num0;
+        // Reject before multiplication: native int overflow must not alias a
+        // malformed parameter to a valid command or differ from web behavior.
+        if (_csiParam > (0x7fffffff - digit) ~/ 10) {
+          _discardCurrentSequence();
+          continue;
         }
-
+        _csiHasParam = true;
+        _csiParam = _csiParam * 10 + digit;
+        continue;
+      }
+      if (isFinal) {
+        if (_csiHasParam) _csi.params.add(_csiParam);
         _csi.finalByte = char;
         return true;
       }
     }
+    return false;
   }
 
   late final _csiHandlers = FastLookupTable<_CsiHandler>({
@@ -497,9 +545,11 @@ class EscapeParser {
           handler.setForegroundColor16(NamedColor.white);
           continue;
         case 38:
+          if (i + 1 >= params.length) return;
           final mode = params[i + 1];
           switch (mode) {
             case 2:
+              if (i + 4 >= params.length) return;
               final r = params[i + 2];
               final g = params[i + 3];
               final b = params[i + 4];
@@ -507,6 +557,7 @@ class EscapeParser {
               i += 4;
               break;
             case 5:
+              if (i + 2 >= params.length) return;
               final index = params[i + 2];
               handler.setForegroundColor256(index);
               i += 2;
@@ -542,9 +593,11 @@ class EscapeParser {
           handler.setBackgroundColor16(NamedColor.white);
           continue;
         case 48:
+          if (i + 1 >= params.length) return;
           final mode = params[i + 1];
           switch (mode) {
             case 2:
+              if (i + 4 >= params.length) return;
               final r = params[i + 2];
               final g = params[i + 3];
               final b = params[i + 4];
@@ -552,6 +605,7 @@ class EscapeParser {
               i += 4;
               break;
             case 5:
+              if (i + 2 >= params.length) return;
               final index = params[i + 2];
               handler.setBackgroundColor256(index);
               i += 2;
@@ -672,15 +726,9 @@ class EscapeParser {
       case 5: // Raise Terminal Window
       case 6: // Lower Terminal Window
       case 7: // Refresh/Redraw Terminal Window
-        return;
       case 8: // Set Terminal Window Size (in characters)
-        // This CSI contains 2 more parameters: width and height.
-        if (_csi.params.length != 3) {
-          return;
-        }
-        final rows = _csi.params[1];
-        final cols = _csi.params[2];
-        handler.resize(cols, rows);
+        // The host owns the viewport. Child output must not trigger arbitrary
+        // screen/scrollback allocations; the direct Terminal.resize API remains.
         return;
       // Window handling is currently no in the scope of the package.
       case 9: // Maximize Terminal Window
@@ -1044,84 +1092,79 @@ class EscapeParser {
     }
   }
 
-  /// Parse a OSC sequence from the queue. Returns true if a sequence was
-  /// found and handled.
+  /// Consume OSC payload once, keeping only bounded parsed parameters.
   bool _escHandleOSC() {
-    final consumed = _consumeOsc();
-    if (!consumed) {
-      return false;
-    }
-
-    if (_osc.isEmpty) {
-      return true;
-    }
-
-    // Common OSCs
-    if (_osc.length >= 2) {
-      final ps = _osc[0];
-      final pt = _osc[1];
-
-      switch (ps) {
-        case '0':
-          handler.setTitle(pt);
-          handler.setIconName(pt);
-          return true;
-        case '1':
-          handler.setIconName(pt);
-          return true;
-        case '2':
-          handler.setTitle(pt);
-          return true;
+    if (!_consumeOsc()) return false;
+    _oscInProgress = false;
+    try {
+      if (_discardSequence || _osc.isEmpty) return true;
+      if (_osc.length >= 2) {
+        final ps = _osc[0];
+        final pt = _osc[1];
+        switch (ps) {
+          case '0':
+            handler.setTitle(pt);
+            handler.setIconName(pt);
+            return true;
+          case '1':
+            handler.setIconName(pt);
+            return true;
+          case '2':
+            handler.setTitle(pt);
+            return true;
+        }
       }
+      handler.unknownOSC(_osc[0], _osc.sublist(1));
+      return true;
+    } finally {
+      _osc.clear();
+      _oscParam.clear();
     }
-
-    // Private extensions
-    handler.unknownOSC(_osc[0], _osc.sublist(1));
-
-    return true;
   }
 
   final _osc = <String>[];
+  final _oscParam = StringBuffer();
+  bool _oscInProgress = false;
+  bool _oscEscapePending = false;
 
   bool _consumeOsc() {
-    _osc.clear();
-    final param = StringBuffer();
-
-    while (true) {
-      if (_queue.isEmpty) {
-        return false;
-      }
-
+    if (!_oscInProgress) {
+      _oscInProgress = true;
+      _oscEscapePending = false;
+      _osc.clear();
+      _oscParam.clear();
+      _startSequence();
+    }
+    while (_queue.isNotEmpty) {
       final char = _queue.consume();
-
-      // OSC terminates with BEL
+      _countSequenceChar(char);
+      if (_oscEscapePending) {
+        _oscEscapePending = false;
+        if (char == Ascii.backslash) {
+          if (!_discardSequence) _osc.add(_oscParam.toString());
+          return true;
+        }
+        // Preserve the normal parser's ESC cancellation behavior, but an
+        // oversized string stays discarded until an actual BEL or ST.
+        if (!_discardSequence) return true;
+      }
       if (char == Ascii.BEL) {
-        _osc.add(param.toString());
+        if (!_discardSequence) _osc.add(_oscParam.toString());
         return true;
       }
-
-      /// OSC terminates with ST
       if (char == Ascii.ESC) {
-        if (_queue.isEmpty) {
-          return false;
-        }
-
-        if (_queue.consume() == Ascii.backslash) {
-          _osc.add(param.toString());
-        }
-
-        return true;
-      }
-
-      /// Parse next parameter
-      if (char == Ascii.semicolon) {
-        _osc.add(param.toString());
-        param.clear();
+        _oscEscapePending = true;
         continue;
       }
-
-      param.writeCharCode(char);
+      if (_discardSequence) continue;
+      if (char == Ascii.semicolon) {
+        _osc.add(_oscParam.toString());
+        _oscParam.clear();
+      } else {
+        _oscParam.writeCharCode(char);
+      }
     }
+    return false;
   }
 }
 

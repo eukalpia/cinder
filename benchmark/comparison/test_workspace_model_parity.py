@@ -33,7 +33,8 @@ class DartWorkspaceParityTest(unittest.TestCase):
                 oracle.apply(key)
             cls.expected.append({'text': '\n'.join(oracle.lines()),
                                  'selected': sorted(oracle.selected),
-                                 'record_count': len(oracle.records)})
+                                 'record_count': len(oracle.records),
+                                 'matches': [row['id'] for row in oracle.matches]})
 
     def test_rows_do_not_retain_mutable_json_maps(self):
         self.assertTrue(self.metadata['owns_decoded_rows'])

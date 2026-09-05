@@ -72,6 +72,9 @@ class ByteConsumer {
   /// method, the consumer will not be able to roll back to consumed blocks.
   void unrefConsumedBlocks() {
     _consumed.clear();
+    while (_queue.isNotEmpty && _currentOffset >= _queue.first.length) {
+      _currentOffset -= _queue.removeFirst().length;
+    }
   }
 
   /// Resets the consumer to its initial state.

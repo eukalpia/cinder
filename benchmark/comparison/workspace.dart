@@ -56,20 +56,21 @@ class Workspace {
   String pad(int value, int width) => '$value'.padLeft(width, '0');
 
   void rebuild() {
-    matches = records
-        .where(
-          (row) =>
-              (!errors || row.level == 'ERROR') &&
-              '${row.service} ${row.level} ${row.message}'
-                  .toLowerCase()
-                  .contains(query),
-        )
-        .toList();
+    final nextMatches = <WorkspaceRecord>[];
+    for (final row in records) {
+      if ((!errors || row.level == 'ERROR') &&
+          '${row.service} ${row.level} ${row.message}'.toLowerCase().contains(
+            query,
+          )) {
+        nextMatches.add(row);
+      }
+    }
+    matches = nextMatches;
     if (order != 'id') {
       final sign = order == 'score-desc' ? -1 : 1;
       matches.sort((a, b) {
-        final score = sign * a.score.compareTo(b.score);
-        return score == 0 ? a.id.compareTo(b.id) : score;
+        final score = sign * (a.score - b.score);
+        return score == 0 ? a.id - b.id : score;
       });
     }
     cursor = top = 0;

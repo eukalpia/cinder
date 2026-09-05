@@ -23,6 +23,7 @@ void main(List<String> arguments) {
         'text': model.text(),
         'selected': model.selected.toList()..sort(),
         'record_count': model.records.length,
+        'matches': model.matches.map((row) => row.id).toList(),
       }),
     );
   }

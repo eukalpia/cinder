@@ -67,15 +67,31 @@ an ever-growing frame queue. Low-level application calls that write directly to
 means acceptance by the underlying consumer, not physical screen presentation.
 
 The input parser uses bounded byte storage and consumes prefixes without shifting
-the remaining packet per key. Large packets yield after 256 dispatched events
-or 16 KiB of consumed input, including unsupported escape sequences,
-allowing timers and cancellation to progress. Large consumed paste allocations
+the remaining packet per key. Processing yields after 256 dispatched events,
+16 KiB of consumed input, or 8 ms of synchronous work, including queued small
+packets. A single application callback must still return before yielding.
+This allows frames, output completion, timers and cancellation to progress.
+Large consumed paste allocations
 are released rather than retained indefinitely by an idle parser.
 Transport delays preserve incomplete Unicode, escape sequences and pastes.
 Only a standalone Escape byte uses an ambiguity timeout. OSC responses share
 the same bounded parser, so replies can span packets and pasted OSC text stays
 inside the paste. Terminators follow the
 [xterm control sequence specification](https://invisible-island.net/xterm/ctlseqs/ctlseqs.html).
+Shell-protocol OSC 9999 resize reports require positive dimensions of at most
+4096 columns/rows and at most 1,000,000 total cells before notifying a backend.
+Invalid reports are ignored. This protocol limit does not change host resize APIs.
+
+The embedded `TerminalXterm` emulator has separate bounds: incomplete CSI/OSC
+payloads are limited to 8 KiB of encoded UTF-8 and parsed incrementally; consumed
+chunks are released after each write. Oversized sequences are discarded through
+their terminator. Child window-resize commands are ignored because the containing
+application controls the viewport. A REP command repeats at most the current
+viewport's column count times row count; ordinary wrapping remains enabled.
+These are explicit compatibility limits, documented with the
+[vendored emulator changes](../lib/src/third_party/xterm_pure.dart/CINDER_CHANGES.md).
+They do not bound the caller's current chunk or the rendered scrollback, which
+remains separately controlled by `maxLines` and the host's viewport dimensions.
 
 Use the [scale monitor](scale-monitor.md) for large virtualized collections,
 bounded streaming history, cancellable searches and sustained PTY validation.

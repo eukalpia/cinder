@@ -259,9 +259,17 @@ change, not a Cinder framework-core optimization. Every rebuild still scans the
 records, constructs and lowercases the same search string, applies the same
 filters, and sorts matches when requested. No search or sort results are cached.
 Selection, append, and viewport formatting retain the same work and semantics.
+The Dart rebuild uses an explicit loop and integer subtraction for score/ID
+comparison. A diagnostic JIT profile of the application model identified
+filter iteration and comparison callbacks alongside the required string and
+sorting work. This prompted a model implementation simplification; it does not
+establish a framework speedup or a whole-application CPU breakdown. The loop
+still constructs, lowercases, and searches each eligible row even for an empty
+query, and uses the same library sort and ID tie-break. No results are reused.
 The typed model and its freshly compiled data executable have different source
 and artifact identities from earlier Dart map-based data runs; keep those results
-separate. CPU and RSS include application model and runtime costs, so they cannot
+separate, including results from before the loop/comparator simplification.
+CPU and RSS include application model and runtime costs, so they cannot
 isolate a universal renderer ranking.
 
 Ratatui's normal application loop uses
@@ -374,8 +382,9 @@ benchmark/comparison/.venv/bin/python -m unittest discover \
 ```
 
 With Dart on `PATH`, these tests also compare every visible cell, the complete
-selection set, and resident record count against the Python oracle across two
-24-key cycles with 50,000 records. They verify that mutating decoded source maps
+ordered matching-record ID list, selection set, and resident record count
+against the Python oracle across two 24-key cycles with 50,000 records. They
+verify that mutating decoded source maps
 cannot change the Dart model. Set `CINDER_BENCHMARK_DART` to select a specific
 SDK; without Dart that direct parity test is explicitly skipped. The helper
 `workspace_model_probe.dart` is used only by untimed tests, never by an adapter.

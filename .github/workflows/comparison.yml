@@ -91,4 +91,5 @@ jobs:
             build/arrivals-20ms-results/
             build/*-summary.md
             build/measured-source.tar.gz
+            build/comparison/measured-pubspec.lock
           if-no-files-found: error
