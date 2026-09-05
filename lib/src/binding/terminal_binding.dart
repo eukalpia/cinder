@@ -65,11 +65,6 @@ class TerminalBinding extends CinderBinding
   /// Delay used to distinguish a standalone Escape key from a split sequence.
   Duration escapeAmbiguityTimeout = const Duration(milliseconds: 25);
 
-  /// Timestamp of last input bytes added to parser (for buffer staleness detection)
-  DateTime? _lastInputTime;
-
-  /// Timeout for stale buffer detection (100ms)
-  static const _bufferStaleTimeout = Duration(milliseconds: 100);
   final _mouseTracker = MouseTracker();
   final _oscEventsController = StreamController<String>.broadcast();
 
@@ -191,6 +186,8 @@ class TerminalBinding extends CinderBinding
   }
 
   /// Stream of keyboard input events (raw strings)
+  /// Chunks contain completed input sequences and exclude OSC responses.
+  /// Their boundaries need not match operating-system read boundaries.
   Stream<String> get input => _inputController.stream;
 
   /// Stream of every normalized input event before widget dispatch.
@@ -264,17 +261,11 @@ class TerminalBinding extends CinderBinding
       }
     }
 
-    _inputSubscription = inputStream.listen((incomingBytes) {
-      var bytes = _processOscSequences(incomingBytes);
+    _inputSubscription = inputStream.listen((bytes) {
       if (bytes.isEmpty) return;
 
-      final now = DateTime.now();
-      if (_lastInputTime != null &&
-          now.difference(_lastInputTime!) > _bufferStaleTimeout) {
-        _inputParser.clear();
-      }
-      _lastInputTime = now;
-
+      // Transport delays do not terminate UTF-8, CSI or bracketed paste.
+      // The parser bounds retained bytes; only a standalone Escape is timed.
       _escapeResolutionTimer?.cancel();
       try {
         _inputParser.addBytes(bytes);
@@ -284,14 +275,6 @@ class TerminalBinding extends CinderBinding
       }
 
       _drainInput();
-
-      try {
-        if (!_inputController.isClosed) {
-          _inputController.add(utf8.decode(bytes));
-        }
-      } catch (_) {
-        // Escape sequences and chunked UTF-8 are represented by inputEvents.
-      }
     });
   }
 
@@ -304,7 +287,10 @@ class TerminalBinding extends CinderBinding
     var remainingBytes = 16384;
     while (!_shouldExit && processed < 256 && remainingBytes > 0) {
       final before = _inputParser.bufferedByteCount;
-      final event = _inputParser.parseNext(maxSkippedBytes: remainingBytes);
+      final event = _inputParser.parseNext(
+        maxSkippedBytes: remainingBytes,
+        onRawInput: _inputController.hasListener ? _publishRawInput : null,
+      );
       remainingBytes -= before - _inputParser.bufferedByteCount;
       if (event == null) break;
       processed++;
@@ -328,8 +314,20 @@ class TerminalBinding extends CinderBinding
     if (_inputParser.hasPendingEscape) {
       _escapeResolutionTimer = Timer(escapeAmbiguityTimeout, () {
         final escape = _inputParser.flushPendingEscape();
-        if (escape != null && !_shouldExit) _dispatchInputEvent(escape);
+        if (escape != null && !_shouldExit) {
+          if (_inputController.hasListener) _publishRawInput(const [0x1B]);
+          _dispatchInputEvent(escape);
+        }
       });
+    }
+  }
+
+  void _publishRawInput(List<int> bytes) {
+    if (_inputController.isClosed) return;
+    try {
+      _inputController.add(utf8.decode(bytes));
+    } on FormatException {
+      // Malformed bytes are represented by normalized input events instead.
     }
   }
 
@@ -338,6 +336,11 @@ class TerminalBinding extends CinderBinding
   void dispatchInputEvent(InputEvent event) => _dispatchInputEvent(event);
 
   void _dispatchInputEvent(InputEvent event) {
+    if (event is TerminalOscInputEvent) {
+      _handleOscSequence(event.content);
+      return;
+    }
+
     if (!_normalizedInputController.isClosed) {
       _normalizedInputController.add(event);
     }
@@ -384,61 +387,6 @@ class TerminalBinding extends CinderBinding
       _keyboardEventController.add(keyEvent);
     }
     _routeKeyboardEvent(keyEvent);
-  }
-
-  /// Process bytes in shell mode to extract terminal size OSC sequences
-  /// Returns filtered bytes with OSC sequences removed
-  List<int> _processOscSequences(List<int> bytes) {
-    final result = <int>[];
-    int i = 0;
-
-    while (i < bytes.length) {
-      // Check for OSC sequence: ESC ] ... BEL or ESC ] ... ST (ESC \)
-      if (i + 2 < bytes.length && bytes[i] == 0x1b && bytes[i + 1] == 0x5d) {
-        // Found ESC ]
-        int end = i + 2;
-        bool foundTerminator = false;
-
-        // Look for BEL (0x07) or ST (ESC \ = 0x1b 0x5c) terminator
-        while (end < bytes.length) {
-          if (bytes[end] == 0x07) {
-            // Found BEL terminator
-            foundTerminator = true;
-            break;
-          }
-          if (end + 1 < bytes.length &&
-              bytes[end] == 0x1b &&
-              bytes[end + 1] == 0x5c) {
-            // Found ST terminator
-            foundTerminator = true;
-            end++;
-            break;
-          }
-          end++;
-        }
-
-        if (foundTerminator && end < bytes.length) {
-          // Extract OSC content
-          final oscContent = utf8.decode(
-            bytes.sublist(i + 2, end),
-            allowMalformed: true,
-          );
-
-          // Handle OSC sequence based on command number
-          _handleOscSequence(oscContent);
-
-          // Skip this OSC sequence
-          i = end + 1;
-          continue;
-        }
-      }
-
-      // Regular byte, keep it
-      result.add(bytes[i]);
-      i++;
-    }
-
-    return result;
   }
 
   /// Handle a parsed OSC sequence

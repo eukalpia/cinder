@@ -29,6 +29,24 @@ import psutil
 import pyte
 
 
+class SyncBoundary:
+    """Track split synchronized-output escapes without treating old ends as new."""
+    def __init__(self):
+        self.tail = b''
+        self.active = False
+        self.ends = 0
+
+    def feed(self, chunk):
+        combined = self.tail + chunk
+        for match in re.finditer(rb'\x1b\[\?2026([hl])', combined):
+            if match.group(1) == b'h':
+                self.active = True
+            else:
+                self.active = False
+                self.ends += 1
+        self.tail = combined[-7:]
+
+
 class TerminalScreen(pyte.Screen):
     def __init__(self, width, height, master):
         self.master = master
@@ -173,8 +191,15 @@ def session_host(config_path, state_path, release_path):
     """
     config = json.loads(Path(config_path).read_text())
     state_file = Path(state_path)
-    started = time.perf_counter_ns()
-    child = subprocess.Popen(config['command'])
+    # Startup crosses process boundaries. Python 3.9/macOS perf_counter and
+    # monotonic use different origins in the host and driver processes.
+    started = time.clock_gettime_ns(time.CLOCK_MONOTONIC)
+    # Some frameworks (Textual) intentionally render to stderr. Keep the
+    # application's native descriptor and connect that stream to the same PTY.
+    if config.get('terminal_output') == 'stderr':
+        child = subprocess.Popen(config['command'], stdout=sys.stderr, stderr=sys.stdout)
+    else:
+        child = subprocess.Popen(config['command'])
     state = {'pid': child.pid, 'started_ns': started, 'exit_code': None}
 
     def publish():
@@ -192,8 +217,34 @@ def session_host(config_path, state_path, release_path):
 
 def run(args):
     workload = json.loads(args.workload.read_text())
+    terminal_output = getattr(args, 'terminal_output', 'stdout')
     width, height = workload['width'], workload['height']
-    frames = [frame.split('\n') for frame in workload['frames']]
+    data_suite = workload.get('kind') == 'workspace-v1'
+    arrival_interval_ms = getattr(args, 'arrival_interval_ms', None)
+    event_deadline_ms = getattr(args, 'event_deadline_ms', 5000)
+    open_arrival = arrival_interval_ms is not None
+    run_clock_ns = time.perf_counter_ns
+    if open_arrival:
+        from open_arrival import clock_ns
+        run_clock_ns = clock_ns
+    if open_arrival and (not data_suite or arrival_interval_ms not in (4, 20)):
+        raise ValueError('Fixed arrivals require workspace-v1 and a 4 or 20 ms interval')
+    if not math.isfinite(event_deadline_ms) or event_deadline_ms <= 0:
+        raise ValueError('event-deadline-ms must be finite and positive')
+    keys = ['n'] * (args.warmup + args.frames)
+    if data_suite:
+        from data_workload import Workspace
+        oracle = Workspace(workload)
+        frames = [oracle.lines()]
+        keys = [workload['actions'][index % len(workload['actions'])]
+                for index in range(args.warmup + args.frames)]
+        for key in keys:
+            if not oracle.apply(key):
+                raise ValueError(f'Unknown workspace action: {key}')
+            frames.append(oracle.lines())
+        del oracle
+    else:
+        frames = [frame.split('\n') for frame in workload['frames']]
     if not frames or any(len(frame) != height or
                          any(len(row) != width for row in frame) for frame in frames):
         raise ValueError('Workload dimensions do not match its text states')
@@ -227,21 +278,53 @@ def run(args):
     marker_tail = b''
     sync_ends = 0
     last_read_ns = 0
+    last_read_system_ns = 0
     frame_chunks = []
+    frame_observations = []
+    boundary = SyncBoundary()
+    frame_listener = None
+    sender = None
+    visibility = None
+    visibility_result = None
 
     def read_output(timeout):
-        nonlocal sync_ends, marker_tail, last_read_ns
+        nonlocal sync_ends, marker_tail, last_read_ns, last_read_system_ns
         if not select.select([master], [], [], timeout)[0]:
             return
         try:
             chunk = os.read(master, 1024 * 1024)
         except OSError:
             return
-        last_read_ns = time.perf_counter_ns()
+        last_read_ns = run_clock_ns()
+        last_read_system_ns = (last_read_ns if open_arrival else
+                               time.clock_gettime_ns(time.CLOCK_MONOTONIC))
+        chunk_offset = len(raw)
         raw.extend(chunk)
         if len(raw) > 128 * 1024 * 1024:
             raise AssertionError('Unbounded terminal output')
-        stream.feed(decoder.decode(chunk))
+        if frame_listener is None:
+            boundary.feed(chunk)
+            stream.feed(decoder.decode(chunk))
+        else:
+            # A read can contain several frames. Verify every sync close before
+            # later writes replace that state, including split marker escapes.
+            prefix_length = len(boundary.tail)
+            combined_boundary = boundary.tail + chunk
+            cuts = [match.end() - prefix_length for match in
+                    re.finditer(rb'\x1b\[\?2026l', combined_boundary)]
+            consumed = 0
+            for cut in cuts:
+                segment = chunk[consumed:cut]
+                boundary.feed(segment)
+                stream.feed(decoder.decode(segment))
+                frame_listener(last_read_ns, chunk_offset + cut, True)
+                consumed = cut
+            if consumed < len(chunk):
+                segment = chunk[consumed:]
+                boundary.feed(segment)
+                stream.feed(decoder.decode(segment))
+            if not boundary.active and boundary.ends == 0:
+                frame_listener(last_read_ns, len(raw), False)
         combined = marker_tail + chunk
         sync_ends += combined.count(b'\x1b[?2026l')
         marker_tail = combined[-7:]
@@ -273,7 +356,7 @@ def run(args):
         config_path = Path(directory) / 'command.json'
         state_path = Path(directory) / 'state.json'
         release_path = Path(directory) / 'release'
-        config_path.write_text(json.dumps({'command': command}))
+        config_path.write_text(json.dumps({'command': command, 'terminal_output': terminal_output}))
         process = None
         succeeded = False
         try:
@@ -300,7 +383,8 @@ def run(args):
                 deadline = time.monotonic() + seconds
                 while time.monotonic() < deadline:
                     if screen.display == expected and (
-                            previous_sync is None or sync_ends > previous_sync):
+                            previous_sync is None or sync_ends > previous_sync) and (
+                            not data_suite or not boundary.active):
                         # Timestamp data receipt, before decoding/verification.
                         return last_read_ns
                     if child_exit_code() is not None or process.poll() is not None:
@@ -312,8 +396,8 @@ def run(args):
                                      f'sync markers: {previous_sync}->{sync_ends}; '
                                      f'stderr: {errors_path.read_text()}')
 
-            ready = wait_frame(frames[0], None, 20)
-            startup_ms = (ready - started) / 1e6
+            wait_frame(frames[0], None, 20)
+            startup_ms = (last_read_system_ns - started) / 1e6
             settle_deadline = time.monotonic() + args.settle_seconds
             while time.monotonic() < settle_deadline:
                 if child_exit_code() is not None or process.poll() is not None:
@@ -328,22 +412,79 @@ def run(args):
             measured_bytes = None
             io_start = None
             io_error = None
-            for frame_index in range(1, args.warmup + args.frames + 1):
+            closed_loop_count = args.warmup if open_arrival else args.warmup + args.frames
+            for frame_index in range(1, closed_loop_count + 1):
                 if frame_index == args.warmup + 1:
                     io_start, io_error = io_snapshot(usage)
                     cpu_start = usage.cpu_times()
-                    measured_start = time.perf_counter_ns()
+                    measured_start = run_clock_ns()
                     measured_bytes = len(raw)
                 previous_sync = sync_ends if sync_ends else None
                 frame_start = len(raw)
-                sent = time.perf_counter_ns()
-                os.write(master, b'n')
-                completed = wait_frame(frames[frame_index % len(frames)], previous_sync, 5)
+                sent = run_clock_ns()
+                key = keys[frame_index - 1]
+                os.write(master, key.encode('ascii'))
+                expected = frames[frame_index] if data_suite else frames[frame_index % len(frames)]
+                completed = wait_frame(expected, previous_sync, 5)
+                verified = run_clock_ns()
                 if frame_index > args.warmup:
                     latencies.append((completed - sent) / 1e6)
                     rss_samples.append(usage.memory_info().rss)
                     frame_chunks.append(len(raw) - frame_start)
-            measured_end = time.perf_counter_ns()
+                    frame_observations.append({
+                        'step': frame_index, 'key': key,
+                        'input_sent_ns': sent, 'completing_chunk_received_ns': completed,
+                        'screen_verified_ns': verified,
+                        'rss_sampled_ns': run_clock_ns(),
+                        'terminal_output_start_offset': frame_start, 'terminal_output_end_offset': len(raw),
+                        'sync_ends_before': previous_sync, 'sync_ends_after': sync_ends,
+                        'sync_open_at_completion': boundary.active,
+                    })
+            if open_arrival:
+                from open_arrival import FixedArrivalSender, StateVisibility
+                visibility = StateVisibility(frames, start_step=args.warmup,
+                                             event_count=args.frames, deadline_ms=event_deadline_ms)
+                sender = FixedArrivalSender(master)
+                last_observed_offset = len(raw)
+
+                def observe_state(received, offset, strict):
+                    nonlocal last_observed_offset
+                    if visibility.observe(screen.display, received, None, offset, strict=strict):
+                        rss_samples.append(usage.memory_info().rss)
+                        frame_chunks.append(offset - last_observed_offset)
+                        observation = visibility.observations[-1]
+                        observation.update(terminal_output_start_offset=last_observed_offset,
+                                           rss_sampled_ns=run_clock_ns(),
+                                           sync_ends_after=boundary.ends,
+                                           sync_open_at_completion=boundary.active)
+                        frame_observations.append(observation)
+                        last_observed_offset = offset
+
+                frame_listener = observe_state
+                io_start, io_error = io_snapshot(usage)
+                cpu_start = usage.cpu_times()
+                measured_bytes = len(raw)
+                measured_start = run_clock_ns()
+                sender.start(keys[args.warmup:], first_step=args.warmup + 1,
+                             start_ns=measured_start, interval_ms=arrival_interval_ms,
+                             deadline_ms=event_deadline_ms)
+                delivery_deadline = (measured_start + (args.frames - 1) * round(arrival_interval_ms * 1e6)
+                                     + round(event_deadline_ms * 2e6))
+                while True:
+                    sender.collect(visibility)
+                    visibility.check_deadlines(run_clock_ns())
+                    if (visibility.last_step == visibility.final_step and sender.done and
+                            not boundary.active and screen.display == frames[visibility.final_step]):
+                        visibility_result = visibility.finish()
+                        break
+                    if child_exit_code() is not None or process.poll() is not None:
+                        raise AssertionError(f'Adapter exited before final step {visibility.final_step}: {errors_path.read_text()}')
+                    if run_clock_ns() > delivery_deadline:
+                        raise TimeoutError(f'Missing final state/input trace for step {visibility.final_step}')
+                    read_output(.001)
+                frame_listener = None
+                latencies = visibility_result['state_visibility_latency_ms']['samples']
+            measured_end = run_clock_ns()
             cpu_end = usage.cpu_times()
             io_end, io_end_error = io_snapshot(usage)
             cpu_seconds = (cpu_end.user - cpu_start.user) + (cpu_end.system - cpu_start.system)
@@ -389,6 +530,7 @@ def run(args):
                 'configured_fps': workload['fps'], 'warmup_frames': args.warmup,
                 'settle_seconds': args.settle_seconds,
                 'measured_frames': args.frames, 'startup_ms': startup_ms,
+                'startup_timestamp_clock': 'clock_gettime_ns(CLOCK_MONOTONIC)',
                 'arrival_pattern': 'one native key after preceding verified frame',
                 'boundary': 'PTY input write to observed complete visible grid and available sync end',
                 'wall_seconds': (measured_end - measured_start) / 1e9,
@@ -401,6 +543,11 @@ def run(args):
                 'latency_ms': {'p50': quantile(latencies, .50), 'p95': quantile(latencies, .95),
                                'p99': quantile(latencies, .99), 'samples': latencies},
                 'frame_output_bytes': frame_chunks, 'screen_verified_frames': args.warmup + args.frames + 1,
+                'suite': 'workspace-v1' if data_suite else 'precomputed-grid-rc2',
+                'terminal_output_descriptor': terminal_output,
+                'diagnostic_descriptor': 'stdout' if terminal_output == 'stderr' else 'stderr',
+                'frame_observations': frame_observations,
+                'completion_limit': 'character equality and observed sync close; unsynchronized trailing control bytes may arrive later',
                 'synchronized_output_ends': sync_ends,
                 'stderr_cleanup_hex': stderr_bytes.hex(),
                 'terminal_modes_restored': True,
@@ -411,11 +558,31 @@ def run(args):
                 'host': {'system': platform.platform(), 'machine': platform.machine(),
                          'python': platform.python_version()},
             }
+            if open_arrival:
+                result.update(
+                    arrival_pattern='fixed nominal intervals from an independent sender process',
+                    arrival_interval_ms=arrival_interval_ms,
+                    timestamp_clock='clock_gettime_ns(CLOCK_MONOTONIC), shared across processes',
+                    boundary='actual input send to first observed exact state at or beyond that event step',
+                    latency_kind='state visibility with coalescing; not render duration or pixels',
+                    measured_inputs=result.pop('measured_frames'),
+                    cpu_ms_per_input=result.pop('cpu_ms_per_frame'),
+                    output_bytes_per_input=result.pop('output_bytes_per_frame'),
+                    state_visibility=visibility_result,
+                    screen_verified_frames=args.warmup + 1 + len(visibility.observations),
+                    completion_limit='sync-close boundaries are verified individually; unsynchronized writes can merge within a PTY read, so skipped states are coalesced or unobserved, not proven dropped inputs',
+                    sender={'implementation': 'separate Python process; nonblocking telemetry pipe',
+                            'pid': sender.process.pid, 'executable': sys.executable,
+                            'included_in_application_cpu': False},
+                )
             args.result.write_text(json.dumps(result, indent=2) + '\n')
             succeeded = True
-            print(json.dumps({key: result[key] for key in ['adapter', 'workload',
-                              'cpu_ms_per_frame', 'rss_median_bytes', 'output_bytes_per_frame']}))
+            report_keys = ['adapter', 'workload', 'rss_median_bytes'] + (
+                ['cpu_ms_per_input', 'output_bytes_per_input'] if open_arrival else
+                ['cpu_ms_per_frame', 'output_bytes_per_frame'])
+            print(json.dumps({key: result[key] for key in report_keys}))
         finally:
+            frame_listener = None
             original_error = sys.exc_info()
             diagnostics = {}
             if not succeeded:
@@ -425,12 +592,17 @@ def run(args):
                     'command': command,
                     'session_host_pid': None if process is None else process.pid,
                 }
+                if visibility is not None:
+                    diagnostics['fixed_arrival_inputs'] = visibility.sends
+                    diagnostics['fixed_arrival_observations'] = visibility.observations
                 try:
                     diagnostics['adapter_state'] = json.loads(state_path.read_text())
                     if process is not None:
                         diagnostics['session_host_status'] = psutil.Process(process.pid).status()
                 except (OSError, ValueError, psutil.Error) as error:
                     diagnostics['state_error'] = repr(error)
+            if sender is not None:
+                sender.close()
             cleanup_errors = stop_session_host(process, read_output)
             for descriptor in (master, slave):
                 try:
@@ -459,8 +631,13 @@ if __name__ == '__main__':
     parser.add_argument('--workload', type=Path, required=True)
     parser.add_argument('--result', type=Path, required=True)
     parser.add_argument('--label', required=True)
+    parser.add_argument('--terminal-output', choices=['stdout', 'stderr'], default='stdout')
     parser.add_argument('--frames', type=int, default=180)
     parser.add_argument('--warmup', type=int, default=30)
+    parser.add_argument('--arrival-interval-ms', type=int, choices=[4, 20],
+                        help='workspace-v1 only: fixed arrivals from a separate sender process')
+    parser.add_argument('--event-deadline-ms', type=float, default=5000,
+                        help='hard deadline from actual input send to visible state')
     parser.add_argument('--settle-seconds', type=float, default=6,
                         help='drain capability negotiation after the first frame, before warmup')
     parser.add_argument('command', nargs=argparse.REMAINDER)

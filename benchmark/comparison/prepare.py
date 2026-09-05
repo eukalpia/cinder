@@ -20,7 +20,9 @@ def executable(value):
     found = shutil.which(value)
     if found is None:
         raise ValueError(f'Executable not found: {value}')
-    return str(Path(found).resolve())
+    # rustup selects cargo/rustc from argv[0]; Python venvs also rely on the
+    # invoked path. Dereferencing these symlinks changes the command semantics.
+    return str(Path(found).absolute())
 
 
 def output(command, **kwargs):
@@ -47,6 +49,10 @@ def main():
     parser.add_argument('--output', type=Path, default=HERE / 'bin')
     for name in ['dart', 'node', 'bun', 'go', 'npm']:
         parser.add_argument(f'--{name}', default=name)
+    parser.add_argument('--extended', action='store_true', help='also build Ratatui, FTXUI, Textual and workspace-v1 adapters')
+    for name, default in [('cargo', 'cargo'), ('rustc', 'rustc'), ('cmake', 'cmake'), ('cxx', 'c++'), ('python', sys.executable)]:
+        parser.add_argument(f'--{name}', default=default)
+    parser.add_argument('--build-jobs', type=int, default=4)
     args = parser.parse_args()
     commands = {name: executable(getattr(args, name))
                 for name in ['dart', 'node', 'bun', 'go', 'npm']}
@@ -113,6 +119,9 @@ def main():
             'bubbletea': [str(destination / 'bubbletea')],
         },
     }
+    if args.extended:
+        from prepare_extended import prepare_extended
+        prepare_extended(args, commands, destination, configuration)
     (destination / 'commands.json').write_text(json.dumps(configuration, indent=2) + '\n')
     print(f'Adapters ready. Matrix configuration: {destination / "commands.json"}')
 

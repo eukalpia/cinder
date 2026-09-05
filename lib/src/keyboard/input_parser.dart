@@ -14,6 +14,9 @@ class InputParser {
   /// growing the parser buffer without bound.
   final int maxBufferedBytes;
   final InputByteBuffer _buffer;
+  int _pasteScanOffset = 6;
+  int _oscScanOffset = 2;
+  void Function(List<int>)? _onRawInput;
 
   int get bufferedByteCount => _buffer.length;
 
@@ -24,7 +27,7 @@ class InputParser {
   void addBytes(List<int> bytes) {
     if (bytes.isEmpty) return;
     if (_buffer.length + bytes.length > maxBufferedBytes) {
-      _buffer.clear();
+      clear();
       throw FormatException(
         'Terminal input exceeded $maxBufferedBytes buffered bytes.',
       );
@@ -47,10 +50,24 @@ class InputParser {
   /// also yields after consuming that many unknown-sequence bytes; the caller
   /// can schedule another turn when the pending byte count decreased by the
   /// budget. Complete sequences are consumed atomically.
-  InputEvent? parseNext({int? maxSkippedBytes}) {
+  /// [onRawInput] receives consumed input bytes except OSC terminal responses.
+  /// It is optional to avoid copying bytes when the legacy raw stream is unused.
+  InputEvent? parseNext({
+    int? maxSkippedBytes,
+    void Function(List<int>)? onRawInput,
+  }) {
     if (maxSkippedBytes != null && maxSkippedBytes <= 0) {
       throw ArgumentError.value(maxSkippedBytes, 'maxSkippedBytes');
     }
+    _onRawInput = onRawInput;
+    try {
+      return _parseNext(maxSkippedBytes);
+    } finally {
+      _onRawInput = null;
+    }
+  }
+
+  InputEvent? _parseNext(int? maxSkippedBytes) {
     final initialLength = _buffer.length;
     while (_buffer.isNotEmpty) {
       final before = _buffer.length;
@@ -78,13 +95,23 @@ class InputParser {
   }
 
   void _clearConsumedBytes(InputEvent event, int bytesConsumed) {
+    _pasteScanOffset = 6;
+    _oscScanOffset = 2;
     // Remove the consumed bytes from the buffer
     if (bytesConsumed > 0 && bytesConsumed <= _buffer.length) {
-      _buffer.removeRange(0, bytesConsumed);
+      _consume(bytesConsumed, terminalResponse: event is TerminalOscInputEvent);
     } else {
       // Fallback: clear everything
       _buffer.clear();
     }
+  }
+
+  void _consume(int count, {bool terminalResponse = false}) {
+    final onRawInput = _onRawInput;
+    if (!terminalResponse && onRawInput != null) {
+      onRawInput(_buffer.sublist(0, count));
+    }
+    _buffer.removeRange(0, count);
   }
 
   (InputEvent, int)? _parseBufferWithLength() {
@@ -109,6 +136,11 @@ class InputParser {
           return null;
         }
       }
+    }
+
+    // OSC must share the input parser's packet buffer and paste boundaries.
+    if (first == 0x1B && _buffer.length >= 2 && _buffer[1] == 0x5D) {
+      return _parseOsc();
     }
 
     // Focus reporting: CSI I = focus in, CSI O = focus out.
@@ -145,7 +177,7 @@ class InputParser {
             } else {
               // Skip this unparseable mouse event - don't convert to keyboard event
               // Just consume the bytes to prevent buffer buildup
-              _buffer.removeRange(0, terminatorIndex + 1);
+              _consume(terminatorIndex + 1);
               // Try to parse the next event in the buffer
               return null;
             }
@@ -711,7 +743,7 @@ class InputParser {
       }
 
       // Sequence complete but unknown - consume the sequence with ~ terminator
-      _buffer.removeRange(0, sequenceLength);
+      _consume(sequenceLength);
       return null;
     }
 
@@ -733,7 +765,7 @@ class InputParser {
         endIndex++;
       }
       // Consume the invalid CSI sequence
-      _buffer.removeRange(0, endIndex);
+      _consume(endIndex);
       // Try to parse the next event in the buffer
       return null;
     }
@@ -809,7 +841,7 @@ class InputParser {
     // We know buffer starts with ESC[200~ (6 bytes)
     // Look for the end marker ESC[201~
     int endMarkerStart = -1;
-    for (int i = 6; i < _buffer.length - 5; i++) {
+    for (int i = _pasteScanOffset; i < _buffer.length - 5; i++) {
       if (_buffer[i] == 0x1B &&
           _buffer[i + 1] == 0x5B &&
           _buffer[i + 2] == 0x32 &&
@@ -823,6 +855,8 @@ class InputParser {
 
     if (endMarkerStart == -1) {
       // Haven't received the end marker yet, wait for more data
+      _pasteScanOffset = _buffer.length - 5;
+      if (_pasteScanOffset < 6) _pasteScanOffset = 6;
       return null;
     }
 
@@ -834,6 +868,27 @@ class InputParser {
     final totalBytes = endMarkerStart + 6;
 
     return (PasteInputEvent(pasteText), totalBytes);
+  }
+
+  (InputEvent, int)? _parseOsc() {
+    for (var index = _oscScanOffset; index < _buffer.length; index++) {
+      final byte = _buffer[index];
+      final isBel = byte == 0x07;
+      final isSt =
+          byte == 0x1B &&
+          index + 1 < _buffer.length &&
+          _buffer[index + 1] == 0x5C;
+      if (isBel || isSt) {
+        final content = utf8.decode(
+          _buffer.sublist(2, index),
+          allowMalformed: true,
+        );
+        return (TerminalOscInputEvent(content), index + (isBel ? 1 : 2));
+      }
+    }
+    // Revisit a possible ESC at the end of this chunk when ST is split.
+    _oscScanOffset = _buffer.length > 2 ? _buffer.length - 1 : 2;
+    return null;
   }
 
   /// Parse kitty keyboard protocol sequence: CSI codepoint ; modifier u
@@ -1006,5 +1061,7 @@ class InputParser {
   /// Clear any buffered input
   void clear() {
     _buffer.clear();
+    _pasteScanOffset = 6;
+    _oscScanOffset = 2;
   }
 }

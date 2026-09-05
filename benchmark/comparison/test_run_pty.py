@@ -131,6 +131,16 @@ class TerminalScrollTest(unittest.TestCase):
         self.assertEqual(screen.title, title)
         self.assertEqual(screen.display, self.rows)
 
+    def test_sync_boundary_tracks_open_frame_after_a_closed_frame(self):
+        boundary = driver.SyncBoundary()
+        boundary.feed(b'\x1b[?2026hfirst\x1b[?2026l\x1b[?2026hsecond')
+        self.assertEqual(boundary.ends, 1)
+        self.assertTrue(boundary.active)
+        boundary.feed(b'\x1b[?20')
+        boundary.feed(b'26l')
+        self.assertEqual(boundary.ends, 2)
+        self.assertFalse(boundary.active)
+
 
 @unittest.skipUnless(os.name == 'posix', 'The driver requires a POSIX PTY')
 class DriverLifecycleTest(unittest.TestCase):
@@ -169,6 +179,31 @@ class DriverLifecycleTest(unittest.TestCase):
                     return state
             time.sleep(.005)
         self.fail('Session host did not publish the expected child state')
+
+    def test_session_host_startup_uses_shared_clock_for_legacy_runs(self):
+        command, state, release = self.host_paths(['app'])
+        release.touch()
+        with mock.patch.object(driver.subprocess, 'Popen') as child:
+            child.return_value.pid = 123
+            child.return_value.wait.return_value = 0
+            with mock.patch.object(driver.time, 'perf_counter_ns', return_value=999):
+                with mock.patch.object(driver.time, 'clock_gettime_ns', return_value=123456789):
+                    driver.session_host(command[-3], state, release)
+        self.assertEqual(json.loads(state.read_text())['started_ns'], 123456789)
+
+    def test_legacy_startup_interval_stays_inside_driver_run(self):
+        args = self.fixture_args(
+            'show(frames[0])\nassert os.read(0, 1) == b"n"\nshow(frames[1])\n'
+            'assert os.read(0, 1) == b"q"\n'
+            'termios.tcsetattr(0, termios.TCSANOW, original_modes)\n')
+        before = time.clock_gettime_ns(time.CLOCK_MONOTONIC)
+        with mock.patch('builtins.print'):
+            driver.run(args)
+        after = time.clock_gettime_ns(time.CLOCK_MONOTONIC)
+        result = json.loads(args.result.read_text())
+        self.assertGreaterEqual(result['startup_ms'], 0)
+        self.assertLessEqual(result['startup_ms'], (after - before) / 1e6)
+        self.assertEqual(result['startup_timestamp_clock'], 'clock_gettime_ns(CLOCK_MONOTONIC)')
 
     def test_denied_group_kill_preserves_adapter_failure(self):
         args = self.fixture_args('show(frames[0])\nos.read(0, 1)\nsys.exit(7)\n')
@@ -296,6 +331,55 @@ class DriverLifecycleTest(unittest.TestCase):
             driver.run(args)
         result = json.loads(args.result.read_text())
         self.assertEqual(result['screen_verified_frames'], 3)
+        self.assertTrue(result['terminal_modes_restored'])
+
+    def test_terminal_output_on_stderr_keeps_normal_child_descriptors(self):
+        args = self.fixture_args(
+            'def show(frame):\n'
+            '    os.write(2, ("\\x1b[2J\\x1b[H" + frame.replace("\\n", "\\r\\n")).encode())\n'
+            'show(frames[0])\n'
+            'assert os.read(0, 1) == b"n"\n'
+            'show(frames[1])\n'
+            'assert os.read(0, 1) == b"q"\n'
+            'termios.tcsetattr(0, termios.TCSANOW, original_modes)\n')
+        args.terminal_output = 'stderr'
+        with mock.patch('builtins.print'):
+            driver.run(args)
+        result = json.loads(args.result.read_text())
+        self.assertEqual(result['terminal_output_descriptor'], 'stderr')
+
+    def test_fixed_arrivals_allow_coalescing_and_require_final_state(self):
+        from data_workload import workload
+        spec = workload(100, 12, 60, 100)
+        spec['actions'] = list('jpxk')
+        self.workload.write_text(json.dumps(spec))
+        args = self.fixture_args('')
+        args.frames = 4
+        args.arrival_interval_ms = 4
+        args.event_deadline_ms = 1000
+        Path(args.command[1]).write_text(
+            'import json, os, sys, termios, tty\n'
+            f'sys.path.insert(0, {str(Path(driver.__file__).parent)!r})\n'
+            'from data_workload import Workspace\n'
+            'original_modes = termios.tcgetattr(0)\n'
+            'tty.setraw(0)\n'
+            'model = Workspace(json.load(open(sys.argv[1])))\n'
+            'def show():\n'
+            '    value = "\\r\\n".join(model.lines())\n'
+            '    os.write(1, ("\\x1b[?2026h\\x1b[2J\\x1b[H" + value + "\\x1b[?2026l").encode())\n'
+            'show()\n'
+            'for batch in range(2):\n'
+            '    for item in range(2):\n'
+            '        model.apply(os.read(0, 1).decode())\n'
+            '    show()\n'
+            'assert os.read(0, 1) == b"q"\n'
+            'termios.tcsetattr(0, termios.TCSANOW, original_modes)\n')
+        with mock.patch('builtins.print'):
+            driver.run(args)
+        result = json.loads(args.result.read_text())
+        self.assertEqual(result['state_visibility']['presented_steps'], [2, 4])
+        self.assertEqual(result['state_visibility']['unobserved_intermediate_states'], 2)
+        self.assertTrue(result['state_visibility']['all_inputs_delivered'])
         self.assertTrue(result['terminal_modes_restored'])
 
 

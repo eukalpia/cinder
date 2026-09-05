@@ -67,9 +67,15 @@ an ever-growing frame queue. Low-level application calls that write directly to
 means acceptance by the underlying consumer, not physical screen presentation.
 
 The input parser uses bounded byte storage and consumes prefixes without shifting
-the remaining packet per key. Large packets yield after 256 dispatched events,
+the remaining packet per key. Large packets yield after 256 dispatched events
+or 16 KiB of consumed input, including unsupported escape sequences,
 allowing timers and cancellation to progress. Large consumed paste allocations
 are released rather than retained indefinitely by an idle parser.
+Transport delays preserve incomplete Unicode, escape sequences and pastes.
+Only a standalone Escape byte uses an ambiguity timeout. OSC responses share
+the same bounded parser, so replies can span packets and pasted OSC text stays
+inside the paste. Terminators follow the
+[xterm control sequence specification](https://invisible-island.net/xterm/ctlseqs/ctlseqs.html).
 
 Use the [scale monitor](scale-monitor.md) for large virtualized collections,
 bounded streaming history, cancellable searches and sustained PTY validation.

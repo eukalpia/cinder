@@ -1,6 +1,6 @@
 # Terminal application comparison
 
-These adapters compare persistent terminal applications displaying the same
+The default `rc2` suite compares persistent terminal applications displaying the same
 precomputed text through a real PTY. They measure application CPU, resident
 memory, emitted ANSI bytes, and keyboard-to-output latency with normal frame
 pacing. They do not measure maximum rendering throughput.
@@ -125,6 +125,15 @@ state equivalence check.
 | Bytes/frame | Measured stdout ANSI bytes divided by updates, excluding startup, warmup, and shutdown. It is not SSD traffic. |
 | Latency percentiles | PTY input-to-completing-output observations under this closed-loop, capped arrival pattern. The summary takes the median of each trial's percentile, not a percentile of pooled samples. |
 
+New runs record `startup_timestamp_clock: clock_gettime_ns(CLOCK_MONOTONIC)`.
+Startup spans the session host's application launch and the driver's receipt of
+the initial verified screen, so both timestamps must use a shared clock origin.
+Earlier results without that field used `perf_counter_ns` across processes;
+on Python 3.9/macOS its origins differ and those `startup_ms` values are invalid.
+Published RC2 artifacts remain unchanged. This correction does not change the
+closed-loop measured latency, CPU, or RSS definitions, and startup is not
+included in the comparison summary.
+
 The summary reports medians across independent trials and the full CPU range.
 Keep trial variation visible, especially for tail latency from short runs.
 Resident memory includes shared code and native-library pages and does not
@@ -146,3 +155,203 @@ for both JavaScript adapters and cannot be attributed wholesale to either one.
 Use isolated production installations for per-adapter totals, distinguish
 logical file bytes from allocated disk blocks, and exclude SDKs, build caches,
 source trees, and benchmark results from an application-artifact comparison.
+
+## Expanded comparison and data workflow
+
+The optional suites add Ratatui 0.30.2 with Crossterm 0.29.0, FTXUI 6.1.9, and
+Textual 8.2.8. They are separate experiments from the published RC2 report;
+adding adapters or changing the workload does not revise that report's results.
+`prepare.py --extended` preserves the original five `adapters` commands and
+also writes `extended_adapters` (eight commands including the Cinder baseline)
+and `data_adapters` (seven frameworks, current Cinder only).
+
+Ratatui and all Rust transitive dependencies are locked by `Cargo.lock`, built
+with `cargo build --release --locked`. FTXUI is fetched from the official
+repository at commit `5cfed50702f52d51c1b189b5f97f8beaf5eaa2a6`; its archive
+and nlohmann/json 3.12.0 have SHA-256 checks in `ftxui/CMakeLists.txt`. Textual
+and its Python dependencies are pinned with hashes in
+`textual/requirements.lock` and installed in a separate virtual environment.
+Preparation records actual compiler/interpreter versions, Cargo metadata,
+installed Python packages, build settings, source and executable hashes, and
+compiled-file logical/allocated sizes. These file sizes exclude dynamic system
+libraries and the separate Node, Bun, and Python runtime/dependency trees.
+They are not total installation-footprint comparisons.
+
+Reference additional tools used for correctness validation are Rust/Cargo
+1.98.0, Apple Clang 17.0.0, CMake 4.2.0, and Python 3.9.6. Preparation records
+these tools but does not install or enforce their versions. Supply `--cargo`,
+`--rustc`, `--cmake`, `--cxx`, and `--python` to select others. The Python lock
+was resolved for Python 3.9; all locked packages must support the interpreter
+selected. Build jobs default to four and are configurable with `--build-jobs`.
+
+```sh
+# Build before measuring; the output should be outside saved RC2 evidence.
+benchmark/comparison/.venv/bin/python benchmark/comparison/prepare.py \
+  --extended --baseline v1.0.0-rc.2 --output /tmp/cinder-comparison-build
+
+# Correctness smoke: two complete 24-key action cycles; ignore timing values.
+benchmark/comparison/.venv/bin/python benchmark/comparison/run_matrix.py \
+  --commands /tmp/cinder-comparison-build/commands.json \
+  --suite data --records 50000 --rounds 1 --warmup 0 --frames 48 \
+  --settle-seconds 6 --output /tmp/cinder-data-smoke
+
+# Separate serial trials, after all builds/tests and competing jobs are idle.
+benchmark/comparison/.venv/bin/python benchmark/comparison/run_matrix.py \
+  --commands /tmp/cinder-comparison-build/commands.json \
+  --suite data --records 50000 --rounds 3 --warmup 48 --frames 192 \
+  --settle-seconds 6 --output /tmp/cinder-data-trials
+
+# The original text states with all additional adapters:
+benchmark/comparison/.venv/bin/python benchmark/comparison/run_matrix.py \
+  --commands /tmp/cinder-comparison-build/commands.json \
+  --suite expanded-grid --output /tmp/cinder-expanded-grid-trials
+```
+
+`summarize.py` accepts each of these result directories separately. Never pool
+different suites, record counts, viewport sizes, scheduler settings, or action
+mixes. A four-frame data smoke is insufficient: it does not reach search, sort,
+filter, or append. The 48-frame smoke exercises all operations twice. The suite
+defaults to one real key outstanding at a time. The separate fixed-arrival
+mode below measures overload responsiveness with the same scheduler settings.
+Neither mode measures uncapped rendering throughput.
+
+The `workspace-v1` input contains 50,000 structured records by default, plus a
+deterministic action sequence. It contains no expected screen strings. All
+seven applications retain those records, handle actual `j/k/p/g/G/x/f/e/s/a`
+keys, maintain cursor and selection state, scan data for search and filtering,
+sort matching records, append new records, maintain three recent event-log
+entries, and format only visible table rows. At 120 × 40 the viewport holds 32
+table records, three header rows, a log heading, three log entries, and a key
+legend. Dataset creation and JSON loading happen before readiness; model
+actions and viewport formatting happen after input inside the measured process.
+See [the complete model contract](DATA_WORKLOAD.md).
+Ink's public input callback can deliver several printable keys together; its
+data adapter applies each key in order and requests one React update per batch.
+
+The driver computes its expected screens before starting the application,
+then verifies every visible character after every action. The visible step
+number prevents unchanged/clamped actions from satisfying completion with an
+old screen. Tests additionally assert selection persistence, sorted/filtered
+record contents, bottom-of-data scrolling, appended-record contents, and
+viewport dimensions. Textual shares the Python model with the driver oracle;
+its model correctness therefore also depends on these direct behavioral tests.
+The other languages use independent ports checked against the same oracle.
+
+This is an application workload with a common manual viewport, not a comparison
+of each framework's native table or list widget. Cinder, Ink, OpenTUI, and
+Textual use their normal text widgets; Ratatui uses `Paragraph`; FTXUI creates
+a `vbox` of visible `text` elements; Bubble Tea returns a View string. The apps
+implement equivalent features and output, while their widget/reconciliation
+work differs. Language collections and sort implementations differ too:
+Rust/C++ keep matching record indexes, JavaScript/Dart/Python keep references,
+and Go copies matching record structs. CPU and RSS include these application
+model and runtime costs; results cannot isolate a universal renderer ranking.
+
+Ratatui's normal application loop uses
+[`Terminal.draw` and Crossterm input](https://ratatui.rs/tutorials/counter-app/_multiple-files/event/).
+Its application caps draw starts at the requested FPS. FTXUI uses
+[`ScreenInteractive`, `Renderer`, and `CatchEvent`](https://github.com/ArthurSonzogni/FTXUI/tree/v6.1.9);
+its public Renderer callback applies an application minimum frame period.
+Neither library has an equivalent automatic max-FPS scheduler setting.
+Textual uses [`Static.update`](https://textual.textualize.io/widgets/static/)
+and [`TEXTUAL_FPS`](https://textual.textualize.io/api/constants/).
+The other four retain the documented scheduling configuration above. A common
+upper cap does not mean identical scheduling or input phases. No adapter calls
+a private renderer/flush or bypasses its terminal backend on input.
+
+Textual's official
+[`LinuxDriver` renders to stderr](https://github.com/Textualize/textual/blob/v8.2.8/src/textual/drivers/linux_driver.py).
+For this adapter the driver connects stderr to the same PTY and captures stdout
+as its diagnostic stream; all other adapters use stdout for the PTY. This is
+recorded in `terminal_output_descriptor` and `diagnostic_descriptor`. The
+`.failure.stderr` filename is retained for compatibility and contains that
+diagnostic stream. ANSI bytes refer to the selected terminal-output descriptor.
+Textual emits explicit white-on-black truecolor styles. Character parity still
+does not establish exact attribute or ANSI-encoding parity.
+
+Each measured update records its input key, step, input-write timestamp,
+completing PTY-chunk receipt timestamp, subsequent screen-verification and RSS
+sample timestamps, stream byte offsets, and synchronization-marker counts.
+For `workspace-v1`, completion also rejects a still-open synchronized update,
+including a new open after an older close in the same read chunk. For adapters
+without synchronized output, character equality establishes receipt of the
+visible screen but cannot identify later cursor/style-control bytes. Those
+bytes may belong to the next observed byte interval. A PTY read can coalesce
+writes, and receipt timing includes OS scheduling and driver wakeup. These
+are observable terminal-stream boundaries, not internal render durations,
+terminal-emulator presentation times, or exact frame allocation counters.
+
+## Fixed-arrival state visibility
+
+For the data suite, `--arrival-interval-ms 4` or `20` sends predetermined keys
+at nominal 250 or 50 inputs/second independently of received frames. The seven
+adapters retain their normal APIs and configured 60 FPS caps. An independent
+Python sender process waits until each nominal arrival and writes one ASCII
+key. Its telemetry pipe is nonblocking: slow Python screen decoding cannot
+block input delivery through that pipe. OS scheduling and PTY backpressure can
+still delay actual sends; every event records its nominal arrival, actual write
+start, write completion, and send lateness. All processes use
+`clock_gettime_ns(CLOCK_MONOTONIC)` so timestamp origins agree even on macOS
+with Python 3.9. The sender and driver are excluded from application CPU.
+
+```sh
+# Correctness only; repeat with 20 in a separate empty output directory.
+benchmark/comparison/.venv/bin/python benchmark/comparison/run_matrix.py \
+  --commands /tmp/cinder-comparison-build/commands.json \
+  --suite data --records 50000 --rounds 1 --warmup 24 --frames 48 \
+  --settle-seconds 6 --arrival-interval-ms 4 --event-deadline-ms 5000 \
+  --output /tmp/cinder-arrival-4ms-smoke
+
+# Separate longer trials, only during an otherwise quiet measurement window.
+benchmark/comparison/.venv/bin/python benchmark/comparison/run_matrix.py \
+  --commands /tmp/cinder-comparison-build/commands.json \
+  --suite data --records 50000 --rounds 3 --warmup 48 --frames 192 \
+  --settle-seconds 6 --arrival-interval-ms 4 --event-deadline-ms 5000 \
+  --output /tmp/cinder-arrival-4ms-trials
+```
+
+Readiness, settling, and warmup remain closed loop. Before launch the driver
+precomputes every oracle screen; measured time contains no oracle model updates.
+Every observed synchronized-output close is checked separately, even when one
+PTY read contains multiple frames. Its monotonic step and every visible cell
+must equal the oracle. Without synchronization markers, a complete exact screen
+is recognized after a PTY read; partial reads may continue until a match. Such
+reads can merge application presentations, so the driver cannot count every
+unsynchronized frame or prove when its final cursor/style controls finish.
+
+For input step *i*, **state-visibility latency with coalescing** is the interval
+from its actual input write start to receipt of the first PTY chunk whose
+verified complete screen represents a step at least *i*. The screen verification
+timestamp is recorded separately; the reported latency uses completing-chunk
+receipt, before decoding, as in the closed-loop driver. The same observation
+can cover several input steps. This says the application processed those actions
+by a later visible state; it does not say each intermediate state was presented.
+The final screen must exactly match the final model step and every key must have
+a delivery trace. A mismatch, regressing complete step, missing final state,
+unrestored terminal modes, or an actual-send visibility deadline miss fails the
+trial and preserves diagnostics.
+
+`state_visibility` records every input, observed step, actual-send and nominal
+arrival latency p50/p95/p99, send-lateness p50/p95/p99, nominal deadline misses,
+and `unobserved_intermediate_states`. That last count means application-coalesced
+or driver-unobserved presentations; it is not a count of dropped input events.
+The default 5,000 ms per-event deadline is measured from actual send. The sender
+also fails if a key cannot be delivered within that duration of its nominal
+arrival. Arrival rates are targets; consult actual send lateness before using a
+run as evidence of sustained offered load.
+
+`summarize.py` keeps these trials separate and reports CPU and ANSI bytes per
+delivered input, resident memory sampled after observed states, both latency
+distributions, send lateness, and the unobserved-state percentage. It validates
+all final states and delivery counts before emitting a table. A short smoke
+does not establish reliable tail percentiles. This mode measures responsiveness
+and coalescing under fixed arrivals; async frame phases, public widget/model
+costs, driver observation overhead, and different scheduling policies preclude
+an instantaneous per-frame fairness or general renderer ranking.
+
+Run the untimed harness/model regressions with:
+
+```sh
+benchmark/comparison/.venv/bin/python -m unittest discover \
+  -s benchmark/comparison -p 'test_*.py'
+```

@@ -28,6 +28,12 @@ jobs:
         with:
           sdk: ${{ matrix.sdk }}
       - run: dart tool/check.dart core packages benchmarks
+      - name: Compile native PTY integration fixture and driver
+        run: |
+          dart compile exe test/process/fixtures/pty_process.dart -o pty-fixture.exe
+          dart compile exe test/process/fixtures/pty_native_smoke.dart -o pty-smoke.exe
+      - name: Verify native PTY sizing and resize under AOT
+        run: ./pty-smoke.exe ./pty-fixture.exe
       - name: Compile native reference application
         run: dart compile exe example/task_manager_demo.dart -o cinder-demo.exe
       - name: Exercise a real terminal and restore its modes

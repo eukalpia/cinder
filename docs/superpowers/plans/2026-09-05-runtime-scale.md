@@ -24,35 +24,37 @@ Do not infer a global ranking from selected workloads on one machine.
 
 ## Runtime flow control (root)
 
-- [ ] Add a blocked-output regression backend in test/binding; assert one in-flight
+- [x] Add a blocked-output regression backend in test/binding; assert one in-flight
       output batch, latest-state rendering after drain, responsive input, cleanup.
-- [ ] Add optional TerminalOutputDrain in terminal_backend.dart; implement native
+- [x] Add optional TerminalOutputDrain in terminal_backend.dart; implement native
       stdout/socket draining and scheduler gating in terminal_binding.dart.
-- [ ] Verify errors and completion after shutdown cannot restart the binding.
-- [ ] Replace input prefix shifts with bounded byte storage; verify burst ordering,
+- [x] Verify errors and completion after shutdown cannot restart the binding.
+- [x] Replace input prefix shifts with bounded byte storage; verify burst ordering,
       split Unicode/escape input, parser limits and linear consumption cost.
-- [ ] Measure and fix additional resource retention only after reproduction.
+- [x] Measure and fix additional resource retention only after reproduction.
 
 ## Native process transport (native_pty worker)
 
-- [ ] Reproduce child window size and live resize failures using actual child output.
-- [ ] Implement native Unix PTY / Windows ConPTY with lifecycle and quoting tests.
-- [ ] Bound PtyController partial and complete output storage and eviction cost.
-- [ ] Validate supported SDKs; update transport documentation and notices if needed.
+- [x] Reproduce child window size and live resize failures using actual child output.
+- [x] Implement native Unix PTY / Windows ConPTY with lifecycle and quoting tests.
+- [x] Bound PtyController partial and complete output storage and eviction cost.
+- [x] Validate supported SDKs; update transport documentation and notices if needed.
 
 ## Comparison suite (competitor_suite worker)
 
-- [ ] Add pinned Ratatui, FTXUI, Textual adapters and preparation metadata.
-- [ ] Add shared data-driven state/actions and exact visible-state validation.
-- [ ] Test driver/config validation; correctness-smoke all adapters before timing.
+- [x] Add pinned Ratatui, FTXUI, Textual adapters and preparation metadata.
+- [x] Add shared data-driven state/actions and exact visible-state validation.
+- [x] Test driver/config validation; correctness-smoke all adapters before timing.
+- [x] Add independent 4 ms / 20 ms arrivals with coalesced state visibility,
+      shared clocks, deadlines, exact final-state verification and send lateness.
 - [ ] Prepare clean source binaries, run serial trials, preserve raw output/results.
 
 ## Reference and sustained validation (scale_reference worker)
 
-- [ ] Build example/scale_monitor.dart with large data, virtualized viewport,
+- [x] Build example/scale_monitor.dart with large data, virtualized viewport,
       search/selection/Unicode, bounded background work and deterministic disposal.
-- [ ] Add integration tests for visible work bounds and failure/restart behavior.
-- [ ] Provide benchmark/runtime_scale automation and doc/scale-monitor.md.
+- [x] Add integration tests for visible work bounds and failure/restart behavior.
+- [x] Provide benchmark/runtime_scale automation and doc/scale-monitor.md.
 - [ ] Run sustained AOT stress and separate diagnostic heap attribution.
 
 ## Integration (root)

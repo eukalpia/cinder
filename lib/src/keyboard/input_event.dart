@@ -52,6 +52,13 @@ class TerminalFocusInputEvent extends InputEvent {
   final bool hasFocus;
 }
 
+/// An OSC terminal response, without its introducer and terminator.
+class TerminalOscInputEvent extends InputEvent {
+  const TerminalOscInputEvent(this.content);
+
+  final String content;
+}
+
 /// Lifecycle stage of terminal text composition.
 enum CompositionStage { start, update, commit, end }
 

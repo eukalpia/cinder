@@ -3,13 +3,13 @@ import 'dart:io';
 import 'package:cinder/cinder.dart';
 
 import 'pty_handler.dart';
+import 'pty_output_buffer.dart';
 
 /// A controller for managing a PTY (pseudo-terminal) process.
 ///
 /// This controller follows the same pattern as Flutter's [TextEditingController],
 /// providing a clean separation between the terminal's state management and UI.
-/// Unix uses the system `script` utility; Windows uses redirected process
-/// streams without native ConPTY support.
+/// Uses native PTYs on macOS/Linux and ConPTY on Windows 10 version 1809 or later.
 ///
 /// Example usage:
 /// ```dart
@@ -48,12 +48,19 @@ class PtyController {
   /// Maximum number of lines to buffer.
   final int maxBufferLines;
 
+  /// Maximum UTF-8 bytes to retain, including one byte per completed newline.
+  /// Oversized lines retain their newest complete characters. Output callbacks
+  /// continue receiving all output even when history retention is disabled.
+  final int maxBufferBytes;
+
   // Internal state
   PtyHandler? _ptyHandler;
   StreamSubscription<String>? _outputSubscription;
   StreamSubscription<int>? _exitSubscription;
-  final List<String> _outputBuffer = [];
-  String _partialLine = '';
+  late final _outputBuffer = PtyOutputBuffer(
+    maxLines: maxBufferLines,
+    maxBytes: maxBufferBytes,
+  );
   bool _disposed = false;
   Future<void>? _startFuture;
   Future<void>? _disposeFuture;
@@ -75,11 +82,19 @@ class PtyController {
     void Function(int)? onExit,
     void Function(Object)? onError,
     this.maxBufferLines = 10000,
+    this.maxBufferBytes = 8 * 1024 * 1024,
   }) : command = command ?? _getDefaultShell() {
     if (maxBufferLines < 0) {
       throw ArgumentError.value(
         maxBufferLines,
         'maxBufferLines',
+        'Must not be negative',
+      );
+    }
+    if (maxBufferBytes < 0) {
+      throw ArgumentError.value(
+        maxBufferBytes,
+        'maxBufferBytes',
         'Must not be negative',
       );
     }
@@ -116,10 +131,7 @@ class PtyController {
   int get columns => _columns;
 
   /// Output buffer containing recent terminal output.
-  List<String> get outputBuffer => List.unmodifiable([
-    ..._outputBuffer,
-    if (_partialLine.isNotEmpty) _partialLine,
-  ]);
+  List<String> get outputBuffer => _outputBuffer.lines;
 
   /// Starts the PTY process with the specified dimensions.
   Future<void> start({required int columns, required int rows}) async {
@@ -127,9 +139,7 @@ class PtyController {
     if (_status == PtyStatus.starting || _status == PtyStatus.running) {
       throw StateError('Terminal is already starting or running');
     }
-    if (columns <= 0 || rows <= 0) {
-      throw ArgumentError('Terminal dimensions must be positive');
-    }
+    _validateDimensions(columns, rows);
 
     final settled = Completer<void>();
     _startFuture = settled.future;
@@ -196,6 +206,9 @@ class PtyController {
   }
 
   /// Writes text data to the terminal.
+  ///
+  /// Throws [StateError] if pending input reaches 1 MiB or 256 writes. Retry
+  /// after the child consumes input; queued input is cancelled on disposal.
   void write(String data) {
     if (!isRunning) {
       throw StateError('Terminal is not running');
@@ -204,6 +217,8 @@ class PtyController {
   }
 
   /// Writes raw bytes to the terminal.
+  ///
+  /// Throws [StateError] if pending input reaches 1 MiB or 256 writes.
   void writeBytes(List<int> bytes) {
     if (!isRunning) {
       throw StateError('Terminal is not running');
@@ -211,19 +226,21 @@ class PtyController {
     _ptyHandler?.writeBytes(bytes);
   }
 
-  /// Updates the display dimensions and notifies the terminal transport.
-  ///
-  /// The current script/pipe transport cannot set a live PTY's window size.
+  /// Resizes the operating-system terminal and updates its display dimensions.
   void resize(int columns, int rows) {
     if (!isRunning) return;
+    _validateDimensions(columns, rows);
+    _ptyHandler?.resize(rows, columns);
 
     _columns = columns;
     _rows = rows;
-    _ptyHandler?.resize(rows, columns);
     _notifyListeners();
   }
 
-  /// Kills the terminal process.
+  /// Requests a signal for the terminal process.
+  ///
+  /// Unix signals run asynchronously across terminal job groups. Returns false
+  /// when another signal is pending, except that SIGKILL can queue escalation.
   bool kill([ProcessSignal signal = ProcessSignal.sigterm]) {
     if (!isRunning) return false;
 
@@ -233,28 +250,18 @@ class PtyController {
   /// Clears the output buffer.
   void clearBuffer() {
     _outputBuffer.clear();
-    _partialLine = '';
     _notifyListeners();
   }
 
-  /// Adds output to the buffer, maintaining max size.
   void _addToBuffer(String data) {
-    final lines = (_partialLine + data).split('\n');
-    _partialLine = lines.removeLast();
-    for (final line in lines) {
-      _outputBuffer.add(
-        line.endsWith('\r') ? line.substring(0, line.length - 1) : line,
-      );
-    }
-    while (_outputBuffer.length + (_partialLine.isEmpty ? 0 : 1) >
-        maxBufferLines) {
-      if (_outputBuffer.isNotEmpty) {
-        _outputBuffer.removeAt(0);
-      } else {
-        _partialLine = '';
-      }
-    }
+    _outputBuffer.add(data);
     _notifyListeners();
+  }
+
+  static void _validateDimensions(int columns, int rows) {
+    if (columns <= 0 || rows <= 0 || columns > 32767 || rows > 32767) {
+      throw ArgumentError('Terminal dimensions must be between 1 and 32767');
+    }
   }
 
   /// Restarts the process while retaining callbacks, listeners, and dimensions.

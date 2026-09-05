@@ -63,6 +63,98 @@ void main() {
     await subscription.cancel();
   });
 
+  test('delayed bracketed paste remains one paste event', () async {
+    await nextEvent();
+    final received = <InputEvent>[];
+    final subscription = binding.inputEvents.listen(received.add);
+    backend.input.add(utf8.encode('\x1b[200~hello'));
+    await Future<void>.delayed(const Duration(milliseconds: 150));
+    expect(received, hasLength(0));
+    backend.input.add(utf8.encode('世界\x1b[201~'));
+    await nextEvent();
+    expect(received, hasLength(1));
+    expect(received.single, isA<PasteInputEvent>());
+    expect((received.single as PasteInputEvent).text, 'hello世界');
+    await subscription.cancel();
+  });
+
+  test('legacy input excludes OSC while preserving pasted OSC text', () async {
+    await nextEvent();
+    final raw = <String>[];
+    final subscription = binding.input.listen(raw.add);
+    backend.input.add(utf8.encode('\x1b]11;rgb:ffff/0000/0000\x07x'));
+    await nextEvent();
+    expect(raw.join(), 'x');
+    raw.clear();
+    const paste = '\x1b[200~before\x1b]2;title\x07after\x1b[201~';
+    backend.input.add(utf8.encode(paste));
+    await nextEvent();
+    expect(raw.join(), paste);
+    await subscription.cancel();
+  });
+
+  test('delayed UTF-8 and CSI fragments preserve their events', () async {
+    await nextEvent();
+    final received = <InputEvent>[];
+    final subscription = binding.inputEvents.listen(received.add);
+    final character = utf8.encode('界');
+    backend.input.add(character.sublist(0, 1));
+    await Future<void>.delayed(const Duration(milliseconds: 150));
+    backend.input.add([...character.sublist(1), ...utf8.encode('\x1b[1;')]);
+    await Future<void>.delayed(const Duration(milliseconds: 150));
+    backend.input.add(utf8.encode('5D'));
+    await nextEvent();
+    final keys = received.cast<KeyboardInputEvent>();
+    expect(keys.map((event) => event.event.logicalKey), [
+      LogicalKey.fromCharacter('界'),
+      LogicalKey.arrowLeft,
+    ]);
+    expect(keys.last.event.isControlPressed, isTrue);
+    await subscription.cancel();
+  });
+
+  test(
+    'OSC content inside bracketed paste cannot change the viewport',
+    () async {
+      await nextEvent();
+      final received = <InputEvent>[];
+      final reports = <String>[];
+      final subscription = binding.inputEvents.listen(received.add);
+      final oscSubscription = binding.oscEvents.listen(reports.add);
+      const text = 'before\x1b]9999;99;33\x07after';
+      backend.input.add(utf8.encode('\x1b[200~$text\x1b[201~'));
+      await nextEvent();
+      expect(reports, hasLength(0));
+      expect(binding.terminal.size, const Size(40, 5));
+      expect((received.single as PasteInputEvent).text, text);
+      await subscription.cancel();
+      await oscSubscription.cancel();
+    },
+  );
+
+  test('OSC replies accept every packet split and both terminators', () async {
+    await nextEvent();
+    final keys = <KeyboardEvent>[];
+    final reports = <String>[];
+    final subscription = binding.keyboardEvents.listen(keys.add);
+    final oscSubscription = binding.oscEvents.listen(reports.add);
+    for (final terminator in ['\x07', '\x1b\\']) {
+      final bytes = utf8.encode('\x1b]11;rgb:ffff/0000/0000${terminator}x');
+      for (var split = 0; split <= bytes.length; split++) {
+        keys.clear();
+        reports.clear();
+        backend.input.add(bytes.sublist(0, split));
+        await nextEvent();
+        backend.input.add(bytes.sublist(split));
+        await nextEvent();
+        expect(reports, ['11;rgb:ffff/0000/0000'], reason: 'split $split');
+        expect(keys.map((key) => key.character), ['x'], reason: 'split $split');
+      }
+    }
+    await subscription.cancel();
+    await oscSubscription.cancel();
+  });
+
   test(
     'resize while blocked renders only the latest viewport after drain',
     () async {
