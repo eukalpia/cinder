@@ -21,7 +21,7 @@ integrations — without bringing Flutter or Node.js into your CLI runtime.
 </div>
 
 > [!IMPORTANT]
-> Cinder `1.0.0-rc.2` uses the Widget, Element, and RenderObject architecture
+> Cinder `1.0.0-rc.3` uses the Widget, Element, and RenderObject architecture
 > throughout. Earlier experimental APIs are not supported.
 
 ## Why Cinder?

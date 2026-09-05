@@ -2,6 +2,16 @@ import 'dart:async';
 
 import 'package:cinder/src/size.dart';
 
+/// Optional flow control for backends with asynchronous output.
+///
+/// The binding waits for this future before producing another frame, coalescing
+/// intervening state changes. Completion means the underlying consumer accepted
+/// the bytes; it does not guarantee pixels have appeared on a physical display.
+/// Existing synchronous or embedded backends need not implement this capability.
+abstract interface class TerminalOutputDrain {
+  Future<void> drainOutput();
+}
+
 /// Abstract interface for terminal I/O backends.
 ///
 /// Backends handle platform-specific I/O operations:

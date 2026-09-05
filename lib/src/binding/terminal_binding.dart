@@ -48,6 +48,7 @@ class TerminalBinding extends CinderBinding
   PipelineOwner get pipelineOwner => _pipelineOwner!;
 
   bool _shouldExit = false;
+  bool _waitingForOutput = false;
 
   /// Whether the binding has been signaled to exit
   bool get shouldExit => _shouldExit;
@@ -58,6 +59,8 @@ class TerminalBinding extends CinderBinding
   final _inputParser = InputParser();
   final _mouseEventController = StreamController<MouseEvent>.broadcast();
   Timer? _escapeResolutionTimer;
+  Timer? _inputDrainTimer;
+  bool _inputPaused = false;
 
   /// Delay used to distinguish a standalone Escape key from a split sequence.
   Duration escapeAmbiguityTimeout = const Duration(milliseconds: 25);
@@ -280,26 +283,54 @@ class TerminalBinding extends CinderBinding
         return;
       }
 
-      InputEvent? event;
-      while ((event = _inputParser.parseNext()) != null) {
-        _dispatchInputEvent(event!);
-      }
-
-      if (_inputParser.hasPendingEscape) {
-        _escapeResolutionTimer = Timer(escapeAmbiguityTimeout, () {
-          final escape = _inputParser.flushPendingEscape();
-          if (escape != null) _dispatchInputEvent(escape);
-        });
-      }
-
-      if (buildOwner.hasDirtyElements) scheduleFrame();
+      _drainInput();
 
       try {
-        _inputController.add(utf8.decode(bytes));
+        if (!_inputController.isClosed) {
+          _inputController.add(utf8.decode(bytes));
+        }
       } catch (_) {
         // Escape sequences and chunked UTF-8 are represented by inputEvents.
       }
     });
+  }
+
+  void _drainInput() {
+    _inputDrainTimer = null;
+    // Leave time for resize, cancellation, output completion and scheduled frames
+    // when a terminal delivers many keys in one read. Pausing the source prevents
+    // a second parser queue from accumulating while this packet is processed.
+    var processed = 0;
+    var remainingBytes = 16384;
+    while (!_shouldExit && processed < 256 && remainingBytes > 0) {
+      final before = _inputParser.bufferedByteCount;
+      final event = _inputParser.parseNext(maxSkippedBytes: remainingBytes);
+      remainingBytes -= before - _inputParser.bufferedByteCount;
+      if (event == null) break;
+      processed++;
+      _dispatchInputEvent(event);
+    }
+    if (_shouldExit) return;
+    if (buildOwner.hasDirtyElements) scheduleFrame();
+    if ((processed == 256 || remainingBytes <= 0) &&
+        _inputParser.bufferedByteCount > 0) {
+      if (!_inputPaused) {
+        _inputSubscription?.pause();
+        _inputPaused = true;
+      }
+      _inputDrainTimer = Timer(Duration.zero, _drainInput);
+      return;
+    }
+    if (_inputPaused) {
+      _inputPaused = false;
+      _inputSubscription?.resume();
+    }
+    if (_inputParser.hasPendingEscape) {
+      _escapeResolutionTimer = Timer(escapeAmbiguityTimeout, () {
+        final escape = _inputParser.flushPendingEscape();
+        if (escape != null && !_shouldExit) _dispatchInputEvent(escape);
+      });
+    }
   }
 
   /// Injects a normalized event from an alternate input source such as a web
@@ -520,6 +551,8 @@ class TerminalBinding extends CinderBinding
     pendingFrameTimer?.cancel();
     _perfLogTimer?.cancel();
     _escapeResolutionTimer?.cancel();
+    _inputDrainTimer?.cancel();
+    _inputParser.clear();
     // stdin cancellation closes its file descriptor immediately on POSIX.
     // Restore input modes while the terminal handle is still available.
     if (capabilities.supportsRawMode) {
@@ -830,6 +863,7 @@ class TerminalBinding extends CinderBinding
 
   @override
   void scheduleFrameImpl() {
+    if (_shouldExit || _waitingForOutput) return;
     // Override scheduler's frame implementation to also wake the event loop.
     // Uses pendingFrameTimer from SchedulerBinding for rate limiting.
 
@@ -862,11 +896,39 @@ class TerminalBinding extends CinderBinding
 
   /// Executes frame and wakes the event loop.
   void _executeFrameAndWakeEventLoop() {
+    // A transient callback may have scheduled this timer before the previous
+    // frame submitted its output. Keep that request pending until it drains.
+    if (_shouldExit || _waitingForOutput) return;
     executeFrame();
 
     // Wake up the event loop after executing the frame
     if (!_eventLoopController.isClosed) {
       _eventLoopController.add(null);
+    }
+  }
+
+  Future<void> _drainFrameOutput(TerminalOutputDrain backend) async {
+    _waitingForOutput = true;
+    try {
+      await backend.drainOutput();
+    } catch (error, stack) {
+      if (!_shouldExit) {
+        try {
+          CinderError.reportError(
+            CinderErrorDetails(
+              exception: error,
+              stack: stack,
+              library: 'terminal output',
+              context: 'while draining a rendered frame',
+            ),
+          );
+        } finally {
+          requestShutdown(1);
+        }
+      }
+    } finally {
+      _waitingForOutput = false;
+      if (!_shouldExit && hasScheduledFrame) scheduleFrameImpl();
     }
   }
 
@@ -1432,6 +1494,11 @@ class TerminalBinding extends CinderBinding
       debugCurrentRepaintColor = debugCurrentRepaintColor.withHue(
         (debugCurrentRepaintColor.hue + 2.0) % 360.0,
       );
+    }
+
+    final backend = terminal.backend;
+    if (backend is TerminalOutputDrain) {
+      unawaited(_drainFrameOutput(backend as TerminalOutputDrain));
     }
   }
 

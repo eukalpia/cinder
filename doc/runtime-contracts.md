@@ -21,6 +21,13 @@ The renderer maintains reusable front and back buffers. Dirty spans bound the
 cells considered by differential output. A frame that produces no visual change
 must not emit cursor movement, style changes, or cell data.
 
+Native stdout and socket backends expose `TerminalOutputDrain`. The scheduler
+waits for each asynchronous output batch before producing another frame. State
+changes during that wait coalesce into the next frame; input, resize, and shutdown
+continue. Control writes made during a drain retain their order, including the
+terminal restoration sequence. Custom backends may implement this optional
+capability without changing the `TerminalBackend` interface.
+
 Applications can inspect frame timing through `SchedulerBinding` and configure
 standard diagnostics at the application root:
 

@@ -33,6 +33,18 @@ jobs:
       - name: Exercise a real terminal and restore its modes
         if: runner.os != 'Windows'
         run: python3 tool/terminal_smoke.py ./cinder-demo.exe
+      - name: Validate the large reference workload and output stalls
+        if: runner.os != 'Windows'
+        run: |
+          python3 -m unittest discover -s benchmark/runtime_scale -p 'test_*.py' -v
+          python3 benchmark/runtime_scale/build.py --output build/scale-monitor
+          python3 benchmark/runtime_scale/run_stress.py --seconds 10 --stall-ms 500 --output build/scale-smoke -- ./build/scale-monitor
+      - uses: actions/upload-artifact@v4
+        if: always() && runner.os != 'Windows'
+        with:
+          name: runtime-scale-${{ matrix.os }}-${{ matrix.sdk }}
+          path: build/scale-smoke/
+          if-no-files-found: ignore
 
   package:
     runs-on: ubuntu-latest
