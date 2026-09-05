@@ -229,6 +229,10 @@ class WindowsNativePty implements NativePtyProcess {
           );
           final startup = arena<_StartupInfoEx>();
           startup.ref.info.cb = sizeOf<_StartupInfoEx>();
+          // Suppress Windows' implicit duplication of redirected parent stdio.
+          // Null standard handles let ConPTY create the child's console handles.
+          // https://github.com/microsoft/terminal/discussions/15814
+          startup.ref.info.flags = 0x00000100; // STARTF_USESTDHANDLES
           startup.ref.attributes = attributes;
           final entries =
               normalizeWindowsEnvironment(environment).entries.toList()..sort(

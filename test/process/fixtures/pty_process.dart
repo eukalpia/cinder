@@ -9,6 +9,11 @@ Future<void> main(List<String> arguments) async {
       exitCode = 7;
     case 'lines':
       stdout.write('first\nsecond\nthird\n');
+    case 'stdio':
+      stdout.writeln('STDOUT:${stdout.hasTerminal}');
+      stderr.writeln('STDERR:${stderr.hasTerminal}');
+      await stderr.flush();
+      exitCode = 7;
     case 'environment':
       stdout.writeln('SHELL:${Platform.environment['SHELL']}');
       stdout.writeln('VALUE:${Platform.environment['CINDER_PTY_TEST']}');

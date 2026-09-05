@@ -29,6 +29,8 @@ child killed by SIGTERM reports 15 on macOS and 143 with util-linux. `pid` ident
 the transport process. Normal numeric child exit codes are preserved.
 
 On Windows, `CreatePseudoConsole` and `ResizePseudoConsole` manage the terminal.
+Child startup explicitly requests fresh console standard handles so redirected
+host input/output cannot bypass ConPTY.
 UTF-16 process arguments use Microsoft CRT quoting, and environment overrides
 are case-insensitive. Synchronous pipe writes and `ClosePseudoConsole` run on
 worker isolates while the main isolate drains output. Disposal waits for output

@@ -55,6 +55,20 @@ void main() {
     await controller.dispose();
   });
 
+  test('redirected host captures both child streams through its PTY', () async {
+    final result = await Process.run(Platform.resolvedExecutable, [
+      File('test/process/fixtures/pty_redirected_host.dart').absolute.path,
+      fixture,
+    ]).timeout(const Duration(seconds: 20));
+    expect(result.exitCode, 0, reason: '${result.stderr}');
+    expect(result.stderr, isEmpty);
+    // Any child output leaking into the host's stdout makes this invalid JSON.
+    final report = jsonDecode(result.stdout as String) as Map<String, dynamic>;
+    expect(report['code'], 7);
+    expect(report['output'], contains('STDOUT:true'));
+    expect(report['output'], contains('STDERR:true'));
+  });
+
   test(
     'child sees a native terminal with startup and resized dimensions',
     () async {
@@ -234,7 +248,7 @@ void main() {
     await exited.future.timeout(deadline, onTimeout: () => fail(output));
     final result = await Process.run('/bin/kill', ['-0', '$jobPid']);
     expect(result.exitCode, isNot(0), reason: 'Foreground job survived kill');
-  }, skip: Platform.isWindows);
+  }, testOn: '!windows');
 
   test(
     'a child terminated by a signal reports the system transport status',
@@ -247,7 +261,7 @@ void main() {
         Platform.isMacOS ? 15 : 143,
       );
     },
-    skip: Platform.isWindows,
+    testOn: '!windows',
   );
 
   test('native child retains the default SIGINT disposition', () async {
@@ -263,7 +277,7 @@ void main() {
     await controller.start(columns: 80, rows: 24);
     expect(await exited.future.timeout(deadline), isNonZero);
     expect(output, isNot(contains('SURVIVED')));
-  }, skip: Platform.isWindows);
+  }, testOn: '!windows');
 
   test('caller SHELL does not control the Unix transport bootstrap', () async {
     final exited = Completer<int>();
@@ -280,7 +294,7 @@ void main() {
     expect(await exited.future.timeout(deadline), 0);
     expect(output, contains('SHELL:/bin/false'));
     expect(output, contains('VALUE:literal value'));
-  }, skip: Platform.isWindows);
+  }, testOn: '!windows');
 
   test('natural exit also releases surviving background terminal jobs', () async {
     final exited = Completer<int>();
@@ -313,7 +327,7 @@ void main() {
       isNot(0),
       reason: 'Background job survived natural exit',
     );
-  }, skip: Platform.isWindows);
+  }, testOn: '!windows');
 
   test(
     'bounds concurrent signal requests while retaining kill escalation',
@@ -327,7 +341,7 @@ void main() {
       expect(controller.kill(ProcessSignal.sigkill), isTrue);
       await controller.dispose().timeout(deadline);
     },
-    skip: Platform.isWindows,
+    testOn: '!windows',
   );
 
   test('native launch rejects NULs instead of truncating arguments', () async {
@@ -402,7 +416,7 @@ void main() {
       isNot(0),
       reason: 'PTY descendant survived disposal',
     );
-  }, skip: Platform.isWindows);
+  }, testOn: '!windows');
 
   test(
     'combines partial output chunks into lines and preserves blank lines',
