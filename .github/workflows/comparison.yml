@@ -12,8 +12,17 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  linux:
-    runs-on: ubuntu-24.04
+  compare:
+    name: ${{ matrix.name }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: linux
+            os: ubuntu-24.04
+          - name: macos-arm64
+            os: macos-15
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 50
     steps:
       - uses: actions/checkout@v4
@@ -83,7 +92,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: comparison-linux
+          name: comparison-${{ matrix.name }}
           path: |
             build/data-results/
             build/grid-results/
