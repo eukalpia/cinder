@@ -1,3 +1,16 @@
+# 1.0.0-rc.2
+
+- Stop wrapped text layout after capped visible lines while preserving Unicode and overflow behavior.
+- Avoid temporary rune lists for printable ASCII widths and reuse unchanged immutable canvas styles.
+- Compute paragraph selection offsets once per paint and map only retained styled text.
+- Detect verified full-width row shifts and use terminal scrolling while preserving styles, wide cells, images, and the existing opt-out.
+- Preserve untouched rows when the first partial repaint allocates its back buffer.
+- Bound retained log messages by both 10,000 entries and a default 1 MiB UTF-16 storage budget; oversized messages continue streaming to connected clients.
+- Skip log serialization when no clients are connected.
+- Add reproducible terminal application comparisons with Ink, OpenTUI, and Bubble Tea, including CPU, resident memory, output size, and verified frame contents.
+- Add `cinder build` with native target selection, entry-point discovery, separate debugging symbols, and actionable compiler errors.
+- Build CLI/demo distributions for macOS arm64/x64, Linux arm64/x64, and Windows x64; verify archive checksums, executable modes, source commits, and runtime license inventories before release uploads.
+
 # 1.0.0-rc.1
 
 - Restore deterministic tree, task, resource, render-object, and terminal-backend cleanup.

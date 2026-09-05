@@ -12,6 +12,7 @@ integrations — without bringing Flutter or Node.js into your CLI runtime.
 
 [![CI](https://github.com/eukalpia/cinder/actions/workflows/ci.yml/badge.svg)](https://github.com/eukalpia/cinder/actions/workflows/ci.yml)
 [![Benchmark](https://github.com/eukalpia/cinder/actions/workflows/benchmark.yml/badge.svg)](https://github.com/eukalpia/cinder/actions/workflows/benchmark.yml)
+[![Native builds](https://github.com/eukalpia/cinder/actions/workflows/build.yml/badge.svg)](https://github.com/eukalpia/cinder/actions/workflows/build.yml)
 [![Dart](https://img.shields.io/badge/Dart-%3E%3D3.9-0175C2?logo=dart)](https://dart.dev)
 [![License](https://img.shields.io/badge/license-APACHE2-blue.svg)](LICENSE)
 
@@ -20,7 +21,7 @@ integrations — without bringing Flutter or Node.js into your CLI runtime.
 </div>
 
 > [!IMPORTANT]
-> Cinder `1.0.0-rc.1` uses the Widget, Element, and RenderObject architecture
+> Cinder `1.0.0-rc.2` uses the Widget, Element, and RenderObject architecture
 > throughout. Earlier experimental APIs are not supported.
 
 ## Why Cinder?
@@ -147,6 +148,25 @@ Run the application:
 ```bash
 dart run bin/main.dart
 ```
+
+## Native builds
+
+Install the CLI from a local Cinder checkout, then build from your application's
+directory:
+
+```sh
+dart pub global activate --source path /path/to/cinder/packages/cinder_cli
+cinder build bin/main.dart
+```
+
+The executable goes to `build/cinder/<os>-<arch>/`, with debugging symbols in a
+separate directory. The application runs without a Dart SDK on its destination
+machine. Use macOS, Windows, or Linux for native builds, or select a Linux target
+with `--target-os linux --target-arch arm64`.
+
+The [build guide](doc/building.md) includes a copyable GitHub Actions workflow
+and explains the native CLI/demo archives attached to releases. See
+[resource usage](doc/resource-usage.md) for deployment size and memory budgets.
 
 ## Material and Lucide icons
 
@@ -572,6 +592,11 @@ to damage-only differential rendering.
 Performance claims should always be tied to reproducible workloads, viewport
 sizes, terminals, and benchmark configurations.
 
+The [terminal application comparison](benchmark/comparison/README.md) runs
+Cinder, Ink, OpenTUI, and Bubble Tea through the same PTY and verifies every
+expected text frame. See [resource usage and deployment](doc/resource-usage.md)
+for memory bounds, disk-I/O interpretation, and compact native distributions.
+
 ## Roadmap
 
 - Flutter-style widget vocabulary
@@ -621,4 +646,3 @@ Cinder is distributed under the [Apache License 2.0](LICENSE).
 
 Required upstream attribution is preserved in [`NOTICE.md`](NOTICE.md), the
 license files, and repository history.
-

@@ -37,13 +37,13 @@ class Logger {
 
   /// Add a log message to the server
   void log(String message) {
-    if (_closed) return;
+    if (_closed || _logServer == null) return;
 
     final timestamp = DateTime.now().toIso8601String();
     final entry = '[$timestamp] $message';
 
     // Stream to log server if available
-    _logServer?.log(entry);
+    _logServer.log(entry);
   }
 
   /// Close the logger (no-op, kept for API compatibility)

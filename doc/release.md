@@ -1,14 +1,14 @@
 # Release validation
 
-The current version is **1.0.0-rc.1**. A release candidate makes the tested
+The current version is **1.0.0-rc.2**. A release candidate makes the tested
 implementation available while keeping the stable-release gates explicit.
 A green test suite is evidence for its exercised cases, not a guarantee that
 all terminal emulators, fonts, transports, or applications behave identically.
 
 ## Reproduce the automated checks
 
-Use Dart 3.9 or newer. CI checks Dart 3.9.4 and 3.12.0 on Linux, macOS and Windows.
-The format check uses Dart 3.12.0, matching the repository's formatter.
+Use Dart 3.9 or newer. CI checks Dart 3.9.4 and 3.13.3 on Linux, macOS and Windows.
+The format check uses Dart 3.13.3, matching the repository's formatter.
 
 ```sh
 dart pub get
@@ -89,7 +89,8 @@ than marking them as tested.
    constraints together. Update changelogs and README status; regenerate the
    site's version/compatibility metadata with its normal build.
 2. Run all checks and review the complete diff. Publish the branch and require
-   the CI, Benchmark, and Documentation site workflows to pass for that commit.
+   the CI, Benchmark, Documentation site, Flutter wrapper, and Native distributions
+   workflows to pass for that commit.
 3. Merge only the reviewed commit into `main`; check that remote `main` contains
    it. Create a new annotated tag matching the root version. Never delete or
    force-move an existing release tag.

@@ -1,10 +1,29 @@
 import 'package:cinder/cinder.dart';
 import 'package:cinder/src/components/render_paragraph.dart';
+import 'package:cinder/src/framework/terminal_canvas.dart';
 import 'package:quiver/strings.dart' hide isEmpty, isNotEmpty;
 import 'package:test/test.dart' hide isEmpty, isNotEmpty;
 
 void main() {
   group('RenderParagraph Selection', () {
+    test('selection reads the source once per paint across blank lines', () {
+      final span = _CountingTextSpan('ab\n\ncd\nef');
+      final paragraph = RenderParagraph(text: span)
+        ..layout(BoxConstraints.tight(const Size(8, 4)))
+        ..setSelectionRange(1, 6);
+      final buffer = Buffer(8, 4);
+      final canvas = TerminalCanvas(buffer, const Rect.fromLTWH(0, 0, 8, 4));
+      span.plainTextReads = 0;
+
+      paragraph.paintWithContext(canvas, Offset.zero);
+
+      expect(span.plainTextReads, 1);
+      expect(buffer.getCell(1, 0).style.backgroundColor, Colors.blue);
+      expect(buffer.getCell(0, 2).style.backgroundColor, Colors.blue);
+      expect(buffer.getCell(1, 2).style.backgroundColor, Colors.blue);
+      expect(buffer.getCell(0, 3).style.backgroundColor, isNull);
+    });
+
     test('single RichText selection', () async {
       await testCinder('single rich text selection', (tester) async {
         String? completed;
@@ -444,4 +463,18 @@ void main() {
       });
     });
   });
+}
+
+class _CountingTextSpan extends TextSpan {
+  _CountingTextSpan(String text) : super(text: text);
+
+  int plainTextReads = 0;
+
+  @override
+  String toPlainText({bool includePlaceholderOffsets = true}) {
+    plainTextReads++;
+    return super.toPlainText(
+      includePlaceholderOffsets: includePlaceholderOffsets,
+    );
+  }
 }

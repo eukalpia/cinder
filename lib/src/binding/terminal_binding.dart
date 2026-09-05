@@ -16,6 +16,8 @@ import '../rendering/mouse_hit_test.dart';
 import '../rendering/mouse_tracker.dart';
 import 'hot_reload_mixin.dart';
 
+part '../rendering/vertical_scroll.dart';
+
 /// Terminal UI binding that handles terminal input/output and event loop
 class TerminalBinding extends CinderBinding
     with SchedulerBinding, HotReloadBinding {
@@ -902,11 +904,15 @@ class TerminalBinding extends CinderBinding
     var buffer = _nextBuffer;
     if (previous == null ||
         previous.width != width ||
-        previous.height != height ||
-        buffer == null ||
-        buffer.width != width ||
-        buffer.height != height) {
+        previous.height != height) {
       return _prepareNextBuffer(width, height);
+    }
+    if (buffer == null || buffer.width != width || buffer.height != height) {
+      buffer = buf.Buffer(width, height);
+      _nextBuffer = buffer;
+      // Fresh storage has no retained cells. Seed the complete front frame,
+      // even when that frame records only a small amount of recent damage.
+      buffer.markDirtyRect(0, 0, width, height);
     }
     buffer.synchronizeFrom(previous);
     return buffer;
@@ -962,6 +968,23 @@ class TerminalBinding extends CinderBinding
         previous.height != buffer.height) {
       _renderFull(buffer);
       return;
+    }
+
+    if (enableHardwareScrollRegions && _activeImages.isEmpty) {
+      final lines = _detectVerticalShift(buffer, previous);
+      if (lines != 0) {
+        terminal.write(EscapeCodes.setScrollRegion(0, buffer.height));
+        terminal.moveCursor(0, 0);
+        terminal.write(
+          lines > 0
+              ? EscapeCodes.scrollUp(lines)
+              : EscapeCodes.scrollDown(-lines),
+        );
+        terminal.write(EscapeCodes.resetScrollRegion);
+        // Scrolling changes every row of the physical front buffer. Include
+        // exposed cells in the diff and in the next back-buffer synchronization.
+        previous.scrollRegion(0, buffer.height, lines, markDirty: true);
+      }
     }
 
     // Full buffer diff - compare every cell

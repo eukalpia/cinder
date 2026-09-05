@@ -7,12 +7,12 @@ import 'cinder_paths.dart';
 
 /// A WebSocket-based log server that streams log messages to connected clients.
 ///
-/// This server maintains a circular buffer of recent log entries and streams
+/// This server maintains a bounded buffer of recent log entries and streams
 /// them to WebSocket clients. When a client connects, it receives all buffered
 /// logs first, then receives new logs as they arrive.
 ///
 /// Features:
-/// - **Circular buffer**: Stores last N log entries in memory
+/// - **Bounded history**: Defaults to 10,000 entries and 1 MiB of message storage
 /// - **WebSocket streaming**: Multiple clients can connect simultaneously
 /// - **Port discovery**: Writes port to `~/.cinder/<hash>/log_port.<pid>` for CLI discovery
 /// - **Snapshots**: `/logs?mode=get` sends buffered entries and closes the connection
@@ -29,13 +29,37 @@ import 'cinder_paths.dart';
 /// await server.close();
 /// ```
 class LogServer {
-  LogServer({this.maxBufferSize = 10000});
+  LogServer({this.maxBufferSize = 10000, this.maxBufferBytes = 1024 * 1024}) {
+    if (maxBufferSize < 0) {
+      throw ArgumentError.value(
+        maxBufferSize,
+        'maxBufferSize',
+        'must be non-negative',
+      );
+    }
+    if (maxBufferBytes < 0) {
+      throw ArgumentError.value(
+        maxBufferBytes,
+        'maxBufferBytes',
+        'must be non-negative',
+      );
+    }
+  }
 
   /// Maximum number of log entries to keep in buffer
   final int maxBufferSize;
 
+  /// Upper bound on retained message storage, counting two bytes per UTF-16
+  /// code unit. Entry and queue overhead are separately bounded by
+  /// [maxBufferSize]. This excludes JSON encoding, client output queues, and
+  /// snapshots held by callers. Oversized messages still reach connected
+  /// clients but are omitted from history. Zero disables history without
+  /// disabling streaming.
+  final int maxBufferBytes;
+
   /// Circular buffer of log entries
   final Queue<LogEntry> _buffer = Queue<LogEntry>();
+  int _bufferBytes = 0;
 
   /// Set of connected WebSocket clients
   final Set<WebSocket> _clients = <WebSocket>{};
@@ -144,12 +168,15 @@ class LogServer {
 
     final entry = LogEntry(timestamp: DateTime.now(), message: message);
 
-    // Add to buffer
-    _buffer.add(entry);
-
-    // Enforce max buffer size (drop oldest entries)
-    while (_buffer.length > maxBufferSize) {
-      _buffer.removeFirst();
+    final entryBytes = message.length * 2;
+    if (maxBufferSize > 0 &&
+        maxBufferBytes > 0 &&
+        entryBytes <= maxBufferBytes) {
+      _buffer.add(entry);
+      _bufferBytes += entryBytes;
+      while (_buffer.length > maxBufferSize || _bufferBytes > maxBufferBytes) {
+        _bufferBytes -= _buffer.removeFirst().message.length * 2;
+      }
     }
 
     // Broadcast to all connected clients
@@ -158,6 +185,7 @@ class LogServer {
 
   /// Broadcast a log entry to all connected clients
   void _broadcastEntry(LogEntry entry) {
+    if (_clients.isEmpty) return;
     final json = jsonEncode({
       'timestamp': entry.timestamp.toIso8601String(),
       'message': entry.message,
@@ -236,6 +264,7 @@ class LogServer {
 
     // Clear buffer
     _buffer.clear();
+    _bufferBytes = 0;
   }
 
   /// Get a copy of the current buffer (for debugging/testing)

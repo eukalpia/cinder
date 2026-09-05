@@ -1,0 +1,18 @@
+{
+  "name": "cinder-terminal-comparison-adapters",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "ink": "NODE_ENV=production node ink.mjs",
+    "opentui": "NODE_ENV=production bun opentui.ts"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@opentui/core": "0.5.10",
+    "ink": "7.1.1",
+    "react": "19.2.4"
+  }
+}

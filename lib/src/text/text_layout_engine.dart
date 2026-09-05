@@ -125,39 +125,40 @@ class TextLayoutEngine {
     String text,
     TextLayoutConfig config,
   ) {
-    final List<String> wrappedLines = [];
-    final paragraphs = text.split('\n');
+    final maxLines = config.maxLines;
+    if (maxLines != null) RangeError.checkNotNegative(maxLines, 'maxLines');
+    var finalLines = <String>[];
+    bool didOverflowHeight = false;
+    bool didOverflowWidth = false;
 
-    for (final paragraph in paragraphs) {
-      if (paragraph.isEmpty) {
-        wrappedLines.add('');
-        continue;
+    for (final (line, width) in _wrapText(
+      text,
+      config.maxWidth,
+      lazyWords: maxLines != null && config.maxWidth >= 2,
+    )) {
+      if (width > config.maxWidth) didOverflowWidth = true;
+      if (maxLines != null && finalLines.length == maxLines) {
+        didOverflowHeight = true;
+        // Graphemes occupy at most two cells. Normal-width wrapped lines
+        // cannot overflow horizontally, so hidden lines need no further work.
+        // Narrow viewports still scan for hidden wide graphemes to preserve
+        // didOverflowWidth, including when maxLines is zero.
+        if (config.maxWidth >= 2) break;
+      } else {
+        finalLines.add(line);
       }
-
-      final lines = _wrapParagraph(paragraph, config.maxWidth);
-      wrappedLines.addAll(lines);
     }
 
-    // Apply maxLines constraint
-    List<String> finalLines = wrappedLines;
-    bool didOverflowHeight = false;
-
-    if (config.maxLines != null && wrappedLines.length > config.maxLines!) {
-      didOverflowHeight = true;
-      finalLines = wrappedLines.take(config.maxLines!).toList();
-
-      if (config.overflow == TextOverflow.ellipsis && finalLines.isNotEmpty) {
-        finalLines[finalLines.length - 1] = _addEllipsisToLine(
-          finalLines.last,
-          config.maxWidth,
-        );
-      }
+    if (didOverflowHeight &&
+        config.overflow == TextOverflow.ellipsis &&
+        finalLines.isNotEmpty) {
+      finalLines[finalLines.length - 1] = _addEllipsisToLine(
+        finalLines.last,
+        config.maxWidth,
+      );
     }
 
     // A single wide grapheme can exceed a narrow viewport even after wrapping.
-    final didOverflowWidth = wrappedLines.any(
-      (line) => UnicodeWidth.stringWidth(line) > config.maxWidth,
-    );
     if (config.overflow == TextOverflow.ellipsis && didOverflowWidth) {
       finalLines = finalLines.map((line) {
         return UnicodeWidth.stringWidth(line) > config.maxWidth
@@ -181,10 +182,39 @@ class TextLayoutEngine {
     );
   }
 
-  /// Wrap a single paragraph into multiple lines
-  static List<String> _wrapParagraph(String paragraph, int maxWidth) {
-    final List<String> lines = [];
-    final words = _splitIntoWords(paragraph);
+  /// Visits explicit paragraphs lazily, retaining empty and trailing lines.
+  static Iterable<(String, int)> _wrapText(
+    String text,
+    int maxWidth, {
+    required bool lazyWords,
+  }) sync* {
+    var start = 0;
+    while (true) {
+      final newline = text.indexOf('\n', start);
+      final end = newline < 0 ? text.length : newline;
+      if (start == end) {
+        yield ('', 0);
+      } else {
+        yield* _wrapParagraph(
+          text.substring(start, end),
+          maxWidth,
+          lazyWords: lazyWords,
+        );
+      }
+      if (newline < 0) return;
+      start = newline + 1;
+    }
+  }
+
+  /// Wrap a single paragraph, yielding widths already measured while wrapping.
+  static Iterable<(String, int)> _wrapParagraph(
+    String paragraph,
+    int maxWidth, {
+    required bool lazyWords,
+  }) sync* {
+    final words = lazyWords
+        ? _iterateWords(paragraph)
+        : _splitIntoWords(paragraph);
 
     String currentLine = '';
     int currentLineWidth = 0;
@@ -196,12 +226,15 @@ class TextLayoutEngine {
         // First word on line
         if (wordWidth > maxWidth) {
           // Word is too long - need to break it
-          final brokenWords = _breakLongWord(word, maxWidth);
-          for (int i = 0; i < brokenWords.length - 1; i++) {
-            lines.add(brokenWords[i]);
+          final parts = _breakLongWord(word, maxWidth).iterator;
+          parts.moveNext();
+          var last = parts.current;
+          while (parts.moveNext()) {
+            yield last;
+            last = parts.current;
           }
-          currentLine = brokenWords.last;
-          currentLineWidth = UnicodeWidth.stringWidth(brokenWords.last);
+          currentLine = last.$1;
+          currentLineWidth = last.$2;
         } else {
           currentLine = word;
           currentLineWidth = wordWidth;
@@ -212,16 +245,19 @@ class TextLayoutEngine {
         currentLineWidth += wordWidth;
       } else {
         // Word doesn't fit - start new line
-        lines.add(currentLine);
+        yield (currentLine, currentLineWidth);
 
         if (wordWidth > maxWidth) {
           // Word is too long for a line by itself
-          final brokenWords = _breakLongWord(word, maxWidth);
-          for (int i = 0; i < brokenWords.length - 1; i++) {
-            lines.add(brokenWords[i]);
+          final parts = _breakLongWord(word, maxWidth).iterator;
+          parts.moveNext();
+          var last = parts.current;
+          while (parts.moveNext()) {
+            yield last;
+            last = parts.current;
           }
-          currentLine = brokenWords.last;
-          currentLineWidth = UnicodeWidth.stringWidth(brokenWords.last);
+          currentLine = last.$1;
+          currentLineWidth = last.$2;
         } else {
           currentLine = word;
           currentLineWidth = wordWidth;
@@ -231,21 +267,17 @@ class TextLayoutEngine {
 
     // Add remaining line
     if (currentLine.isNotEmpty) {
-      lines.add(currentLine);
+      yield (currentLine, currentLineWidth);
     }
-
-    return lines;
   }
 
-  /// Split text into words, preserving spaces and considering break opportunities
+  /// Eager splitting avoids iterator overhead when all text must be laid out.
   static List<String> _splitIntoWords(String text) {
-    final List<String> words = [];
-    final StringBuffer currentWord = StringBuffer();
-
-    String? prevGrapheme;
+    final words = <String>[];
+    final currentWord = StringBuffer();
+    String? previous;
     for (final grapheme in text.characters) {
-      // Check for break opportunities
-      if (_canBreakAfter(prevGrapheme, grapheme)) {
+      if (_canBreakAfter(previous, grapheme)) {
         if (currentWord.isNotEmpty) {
           words.add(currentWord.toString());
           currentWord.clear();
@@ -258,14 +290,39 @@ class TextLayoutEngine {
       } else {
         currentWord.write(grapheme);
       }
+      previous = grapheme;
+    }
+    if (currentWord.isNotEmpty) words.add(currentWord.toString());
+    return words;
+  }
+
+  /// Splits only the words needed by a bounded layout, preserving spaces and
+  /// the same break opportunities as the eager path.
+  static Iterable<String> _iterateWords(String text) sync* {
+    final StringBuffer currentWord = StringBuffer();
+
+    String? prevGrapheme;
+    for (final grapheme in text.characters) {
+      // Check for break opportunities
+      if (_canBreakAfter(prevGrapheme, grapheme)) {
+        if (currentWord.isNotEmpty) {
+          yield currentWord.toString();
+          currentWord.clear();
+        }
+        if (grapheme == ' ') {
+          yield ' ';
+        } else {
+          currentWord.write(grapheme);
+        }
+      } else {
+        currentWord.write(grapheme);
+      }
       prevGrapheme = grapheme;
     }
 
     if (currentWord.isNotEmpty) {
-      words.add(currentWord.toString());
+      yield currentWord.toString();
     }
-
-    return words;
   }
 
   /// Check if we can break between two graphemes
@@ -317,8 +374,10 @@ class TextLayoutEngine {
   }
 
   /// Break a long word that doesn't fit on a single line
-  static List<String> _breakLongWord(String word, int maxWidth) {
-    final List<String> parts = [];
+  static Iterable<(String, int)> _breakLongWord(
+    String word,
+    int maxWidth,
+  ) sync* {
     String currentPart = '';
     int currentWidth = 0;
 
@@ -327,7 +386,7 @@ class TextLayoutEngine {
       final graphemeW = UnicodeWidth.graphemeWidth(grapheme);
 
       if (currentWidth + graphemeW > maxWidth && currentPart.isNotEmpty) {
-        parts.add(currentPart);
+        yield (currentPart, currentWidth);
         currentPart = grapheme;
         currentWidth = graphemeW;
       } else {
@@ -337,10 +396,10 @@ class TextLayoutEngine {
     }
 
     if (currentPart.isNotEmpty) {
-      parts.add(currentPart);
+      yield (currentPart, currentWidth);
+    } else if (word.isEmpty) {
+      yield ('', 0);
     }
-
-    return parts.isEmpty ? [''] : parts;
   }
 
   /// Add ellipsis to a line, truncating as needed
@@ -379,15 +438,13 @@ class TextLayoutEngine {
     int maxWidth,
     TextAlign textAlign,
   ) {
-    final lineWidth = UnicodeWidth.stringWidth(line);
-
     switch (textAlign) {
       case TextAlign.left:
         return 0;
       case TextAlign.right:
-        return (maxWidth - lineWidth).toDouble();
+        return (maxWidth - UnicodeWidth.stringWidth(line)).toDouble();
       case TextAlign.center:
-        return (maxWidth - lineWidth) / 2;
+        return (maxWidth - UnicodeWidth.stringWidth(line)) / 2;
       case TextAlign.justify:
         // Justify is handled separately with word spacing
         return 0;
