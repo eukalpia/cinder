@@ -31,6 +31,10 @@
   non-`const` children reorders their render objects too.
 - Keep building the remaining dirty elements, and keep scheduling frames for
   later `setState` calls, after an element's rebuild throws.
+- Report errors thrown while mounting or updating a child instead of discarding
+  them under single-child widgets, and replace the failed child with an
+  `ErrorWidget` without leaving its render objects on screen. `Flex`, `Row` and
+  `Column` are now `MultiChildRenderObjectWidget`s.
 
 # 1.0.0-rc.2
 

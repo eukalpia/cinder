@@ -166,7 +166,14 @@ abstract class Element implements BuildContext {
   @protected
   Element inflateWidget(Widget newWidget, dynamic newSlot) {
     final Element newChild = newWidget.createElement();
-    newChild.mount(this, newSlot);
+    try {
+      newChild.mount(this, newSlot);
+    } catch (_) {
+      // Nothing will own the half-mounted subtree, so take the render
+      // objects it already attached back out of the render tree.
+      newChild.detachRenderObject();
+      rethrow;
+    }
     return newChild;
   }
 
