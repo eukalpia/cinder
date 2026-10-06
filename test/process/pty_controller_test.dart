@@ -255,8 +255,11 @@ void main() {
     addTearDown(() => Process.killPid(jobPid, ProcessSignal.sigkill));
     expect(controller.kill(ProcessSignal.sigkill), isTrue);
     await exited.future.timeout(deadline, onTimeout: () => fail(output));
-    final result = await Process.run('/bin/kill', ['-0', '$jobPid']);
-    expect(result.exitCode, isNot(0), reason: 'Foreground job survived kill');
+    expect(
+      await _exits(jobPid),
+      isTrue,
+      reason: 'Foreground job survived kill',
+    );
   }, testOn: '!windows');
 
   test(
@@ -330,10 +333,9 @@ void main() {
     addTearDown(() => Process.killPid(child, ProcessSignal.sigkill));
     controller.write('release\n');
     expect(await exited.future.timeout(deadline), 7);
-    final result = await Process.run('/bin/kill', ['-0', '$child']);
     expect(
-      result.exitCode,
-      isNot(0),
+      await _exits(child),
+      isTrue,
       reason: 'Background job survived natural exit',
     );
   }, testOn: '!windows');
@@ -419,10 +421,9 @@ void main() {
     );
     addTearDown(() => Process.killPid(descendant, ProcessSignal.sigkill));
     await controller.dispose().timeout(deadline);
-    final result = await Process.run('/bin/kill', ['-0', '$descendant']);
     expect(
-      result.exitCode,
-      isNot(0),
+      await _exits(descendant),
+      isTrue,
       reason: 'PTY descendant survived disposal',
     );
   }, testOn: '!windows');
@@ -565,4 +566,46 @@ List<String> _renderedLines(xterm.Terminal terminal) {
     lines.removeLast();
   }
   return lines;
+}
+
+/// Polls until [pid] stops running; false if it is still running at [timeout].
+///
+/// A killed orphan stays a zombie until its new parent (often PID 1) reaps
+/// it, and `kill -0` still succeeds for zombies, so those count as exited.
+Future<bool> _exits(
+  int pid, {
+  Duration timeout = const Duration(seconds: 5),
+}) async {
+  final elapsed = Stopwatch()..start();
+  while (await _isRunning(pid)) {
+    if (elapsed.elapsed >= timeout) return false;
+    await Future<void>.delayed(const Duration(milliseconds: 50));
+  }
+  return true;
+}
+
+Future<bool> _isRunning(int pid) async {
+  final probe = await Process.run('/bin/kill', ['-0', '$pid']);
+  if (probe.exitCode != 0) return false;
+  final state = await _processState(pid);
+  // An unreadable state is never proof of exit; the next `kill -0` decides.
+  if (state == null) return true;
+  return !state.startsWith('Z') && !state.startsWith('X');
+}
+
+Future<String?> _processState(int pid) async {
+  if (Platform.isLinux) {
+    try {
+      final stat = await File('/proc/$pid/stat').readAsString();
+      // The state follows the parenthesised command name, which may itself
+      // contain spaces or parentheses.
+      final state = stat.substring(stat.lastIndexOf(')') + 1).trimLeft();
+      return state.isEmpty ? null : state;
+    } on FileSystemException {
+      return null;
+    }
+  }
+  final result = await Process.run('ps', ['-o', 'stat=', '-p', '$pid']);
+  final state = (result.stdout as String).trim();
+  return result.exitCode == 0 && state.isNotEmpty ? state : null;
 }
