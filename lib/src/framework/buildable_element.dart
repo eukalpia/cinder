@@ -35,15 +35,7 @@ abstract class BuildableElement extends Element {
     } catch (e, stack) {
       // Handle build errors
       _debugDoingBuild = false;
-      built = ErrorWidget(error: e, stackTrace: stack);
-      CinderError.reportError(
-        CinderErrorDetails(
-          exception: e,
-          stack: stack,
-          library: 'cinder framework',
-          context: 'while building $runtimeType',
-        ),
-      );
+      built = _reportBuildError(e, stack);
     } finally {
       _dirty = false;
       assert(() {
@@ -53,7 +45,32 @@ abstract class BuildableElement extends Element {
       _didBuildDependencies();
     }
 
-    _child = updateChild(_child, built, slot);
+    try {
+      _child = updateChild(_child, built, slot);
+    } catch (e, stack) {
+      // Mounting or updating the child failed (initState, didUpdateWidget,
+      // createRenderObject, ...), possibly halfway through its subtree.
+      // Abandon that subtree rather than updating it again, as Flutter does,
+      // but take its render objects out of the render tree.
+      final ErrorWidget errorWidget = _reportBuildError(e, stack);
+      final Element? failedChild = _child;
+      if (failedChild != null && failedChild._parent == this) {
+        failedChild.detachRenderObject();
+      }
+      _child = updateChild(null, errorWidget, slot);
+    }
+  }
+
+  ErrorWidget _reportBuildError(Object error, StackTrace stack) {
+    CinderError.reportError(
+      CinderErrorDetails(
+        exception: error,
+        stack: stack,
+        library: 'cinder framework',
+        context: 'while building $runtimeType',
+      ),
+    );
+    return ErrorWidget(error: error, stackTrace: stack);
   }
 
   @protected
