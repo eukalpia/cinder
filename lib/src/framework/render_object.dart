@@ -1018,27 +1018,21 @@ class SingleChildRenderObjectElement extends RenderObjectElement {
   @override
   void mount(Element? parent, dynamic newSlot) {
     super.mount(parent, newSlot);
-    // Some single child render objects (like Text) don't have children
-    try {
-      final dynamic comp = widget;
-      final Widget? childWidget = comp.child;
-      _child = updateChild(_child, childWidget, null);
-    } catch (e) {
-      // Widget doesn't have a child property
-    }
+    _child = updateChild(
+      _child,
+      (widget as SingleChildRenderObjectWidget).child,
+      null,
+    );
   }
 
   @override
   void update(Widget newWidget) {
     super.update(newWidget);
-    // Some single child render objects (like Text) don't have children
-    try {
-      final dynamic comp = newWidget;
-      final Widget? childWidget = comp.child;
-      _child = updateChild(_child, childWidget, null);
-    } catch (e) {
-      // Widget doesn't have a child property
-    }
+    _child = updateChild(
+      _child,
+      (widget as SingleChildRenderObjectWidget).child,
+      null,
+    );
   }
 
   @override
@@ -1090,7 +1084,8 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
   @override
   void mount(Element? parent, dynamic newSlot) {
     super.mount(parent, newSlot);
-    final List<Widget> children = (widget as dynamic).children ?? const [];
+    final List<Widget> children =
+        (widget as MultiChildRenderObjectWidget).children;
     Element? previousChild;
     _children = List<Element>.generate(children.length, (index) {
       final slot = IndexedSlot(index, previousChild);
@@ -1104,7 +1099,7 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
   void update(Widget newWidget) {
     super.update(newWidget);
     final List<Widget> newChildren =
-        (newWidget as dynamic).children ?? const [];
+        (widget as MultiChildRenderObjectWidget).children;
     _children = updateChildren(_children, newChildren);
   }
 

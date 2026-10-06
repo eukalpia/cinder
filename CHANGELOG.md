@@ -27,6 +27,14 @@
   50,000-record data-operation workload; retain explicit pacing and parity limits.
 - Measure state visibility under independent 4 ms and 20 ms input arrivals,
   including coalescing, send lateness and exact final-state verification.
+- Move keyed children that are updated in place to their new slots, so reordering
+  non-`const` children reorders their render objects too.
+- Keep building the remaining dirty elements, and keep scheduling frames for
+  later `setState` calls, after an element's rebuild throws.
+- Report errors thrown while mounting or updating a child instead of discarding
+  them under single-child widgets, and replace the failed child with an
+  `ErrorWidget` without leaving its render objects on screen. `Flex`, `Row` and
+  `Column` are now `MultiChildRenderObjectWidget`s.
 
 # 1.0.0-rc.2
 
