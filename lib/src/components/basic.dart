@@ -199,7 +199,7 @@ class Column extends Flex {
 }
 
 /// Display children in a one-dimensional array
-class Flex extends RenderObjectWidget {
+class Flex extends MultiChildRenderObjectWidget {
   const Flex({
     super.key,
     required this.direction,
@@ -209,7 +209,7 @@ class Flex extends RenderObjectWidget {
     this.textDirection,
     this.verticalDirection = VerticalDirection.down,
     this.textBaseline,
-    this.children = const [],
+    super.children,
   });
 
   final Axis direction;
@@ -219,7 +219,6 @@ class Flex extends RenderObjectWidget {
   final TextDirection? textDirection;
   final VerticalDirection verticalDirection;
   final TextBaseline? textBaseline;
-  final List<Widget> children;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
@@ -245,10 +244,6 @@ class Flex extends RenderObjectWidget {
       ..verticalDirection = verticalDirection
       ..textBaseline = textBaseline;
   }
-
-  @override
-  MultiChildRenderObjectElement createElement() =>
-      MultiChildRenderObjectElement(this);
 }
 
 /// Take up remaining space in a flex container
