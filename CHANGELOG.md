@@ -27,6 +27,8 @@
   50,000-record data-operation workload; retain explicit pacing and parity limits.
 - Measure state visibility under independent 4 ms and 20 ms input arrivals,
   including coalescing, send lateness and exact final-state verification.
+- Move keyed children that are updated in place to their new slots, so reordering
+  non-`const` children reorders their render objects too.
 
 # 1.0.0-rc.2
 
