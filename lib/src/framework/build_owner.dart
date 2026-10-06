@@ -54,54 +54,89 @@ class BuildOwner {
 
   /// Builds all dirty elements
   void buildScope(Element context, [VoidCallback? callback]) {
-    if (callback != null) {
-      callback();
+    // Reset the flag even if something throws, or scheduleBuildFor would
+    // never request another frame.
+    try {
+      if (callback != null) {
+        callback();
+      }
+      _flushDirtyElements();
+    } finally {
+      _scheduledFlushDirtyElements = false;
     }
+  }
 
+  void _flushDirtyElements() {
     _dirtyElements.sort((a, b) => a.depth - b.depth);
     _dirtyElementsNeedsResorting = false;
 
-    int dirtyCount = _dirtyElements.length;
-    int index = 0;
+    try {
+      int dirtyCount = _dirtyElements.length;
+      int index = 0;
 
-    while (index < dirtyCount) {
-      final element = _dirtyElements[index];
-      assert(element._inDirtyList);
+      while (index < dirtyCount) {
+        final element = _dirtyElements[index];
+        assert(element._inDirtyList);
 
-      // Skip elements that are no longer active (e.g., removed during animation)
-      if (element._lifecycleState != _ElementLifecycle.active) {
+        // Skip elements that are no longer active (e.g., removed during animation)
+        if (element._lifecycleState != _ElementLifecycle.active) {
+          element._inDirtyList = false;
+          element._dirty = false; // Clear dirty flag since we won't rebuild
+          index += 1;
+          continue;
+        }
+
+        _tryRebuild(element);
         element._inDirtyList = false;
-        element._dirty = false; // Clear dirty flag since we won't rebuild
         index += 1;
-        continue;
-      }
 
-      element.rebuild();
-      element._inDirtyList = false;
-      index += 1;
-
-      if (_dirtyElementsNeedsResorting == true) {
-        _dirtyElements.sort((a, b) => a.depth - b.depth);
-        _dirtyElementsNeedsResorting = false;
-        dirtyCount = _dirtyElements.length;
-        while (index > 0 && _dirtyElements[index - 1].dirty) {
-          index -= 1;
+        if (_dirtyElementsNeedsResorting == true) {
+          _dirtyElements.sort((a, b) => a.depth - b.depth);
+          _dirtyElementsNeedsResorting = false;
+          dirtyCount = _dirtyElements.length;
+          while (index > 0 && _dirtyElements[index - 1].dirty) {
+            index -= 1;
+          }
         }
       }
-    }
 
-    assert(() {
+      assert(() {
+        for (final element in _dirtyElements) {
+          assert(
+            !element.dirty,
+            'Element ${element.runtimeType} is still dirty after building',
+          );
+        }
+        return true;
+      }());
+    } finally {
+      // Elements left in the list are no longer scheduled, so they must be
+      // free to schedule themselves again.
       for (final element in _dirtyElements) {
-        assert(
-          !element.dirty,
-          'Element ${element.runtimeType} is still dirty after building',
-        );
+        element._inDirtyList = false;
       }
-      return true;
-    }());
+      _dirtyElements.clear();
+      _dirtyElementsNeedsResorting = false;
+    }
+  }
 
-    _dirtyElements.clear();
-    _scheduledFlushDirtyElements = false;
+  /// Rebuilds [element], reporting an exception instead of letting it abort
+  /// the rest of the build.
+  void _tryRebuild(Element element) {
+    try {
+      element.rebuild();
+    } catch (e, stack) {
+      // Leave the element clean so a later markNeedsBuild can retry it.
+      element._dirty = false;
+      CinderError.reportError(
+        CinderErrorDetails(
+          exception: e,
+          stack: stack,
+          library: 'cinder framework',
+          context: 'while rebuilding ${element.runtimeType}',
+        ),
+      );
+    }
   }
 
   /// Finalizes the tree and unmounts inactive elements
