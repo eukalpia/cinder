@@ -40,9 +40,11 @@ using native build hooks need Dart's build workflow and their required native
 assets; follow the compiler's diagnostics for those dependencies.
 
 Cinder's normal frame renderer writes to the terminal rather than a frame log
-on disk. The native log server keeps history in memory, streams to connected
-clients, and creates a small discovery file at startup that is removed at
-shutdown. Application code and dependencies can perform additional I/O.
+on disk. When enabled (debug builds, `CINDER_LOG_SERVER=1`, or
+`runApp(enableLogServer: true)`), the native log server keeps history in memory,
+streams to connected clients, and creates a small discovery file at startup that
+is removed at shutdown. Application code and dependencies can perform additional
+I/O.
 
 Log history defaults to at most 10,000 entries and a conservative 1 MiB message
 storage budget, counting two bytes per UTF-16 code unit. The oldest entries are

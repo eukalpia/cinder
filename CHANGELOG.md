@@ -27,6 +27,20 @@
   50,000-record data-operation workload; retain explicit pacing and parity limits.
 - Measure state visibility under independent 4 ms and 20 ms input arrivals,
   including coalescing, send lateness and exact final-state verification.
+- **Breaking**: Start the `cinder logs` server only in debug builds (assertions
+  enabled), with `CINDER_LOG_SERVER=1`, or with `runApp(enableLogServer: true)`.
+  Connections require a random per-run bearer token, published in an owner-only
+  endpoint file, and requests with an `Origin` header are refused.
+- **Breaking**: Install the debug overlay and its `Ctrl+G` shortcut only in debug
+  builds, with `CINDER_DEBUG_OVERLAY=1`, or with
+  `runApp(enableDebugOverlay: true)`; release builds deliver `Ctrl+G` to the
+  application. `TerminalBinding` and `CinderTestBinding` share the
+  `debugOverlayShortcutEnabled` setting, and `CinderApp` installs the overlay
+  itself when `showPerformanceOverlay` is requested.
+- **Breaking**: `SIGTERM` always restores the terminal and exits; widgets can no
+  longer cancel it. `SIGINT` is still delivered as `Ctrl+C` first, then to the
+  new `TerminalBinding.addExitRequestHandler` veto API (`AppExitResponse`).
+  Backends report mandatory termination through `TerminalTerminationSource`.
 
 # 1.0.0-rc.2
 

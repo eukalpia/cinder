@@ -8,13 +8,19 @@ import 'sink_output.dart';
 import 'win32_ansi_stdin.dart';
 
 /// Backend for native terminal I/O via stdin/stdout.
-/// Handles Unix signals (SIGWINCH, SIGINT, SIGTERM) for resize and shutdown.
+/// Handles Unix signals: SIGWINCH for resize, SIGINT as a cancelable
+/// interrupt on [shutdownStream], and SIGTERM as a mandatory request on
+/// [terminationStream].
 /// On Windows, uses polling for resize detection, SIGINT for Ctrl+C,
 /// and Win32AnsiStdin for proper keyboard input (arrow keys, etc.).
-class StdioBackend implements TerminalBackend, TerminalOutputDrain {
+class StdioBackend
+    implements TerminalBackend, TerminalOutputDrain, TerminalTerminationSource {
   final SinkOutput _output = SinkOutput(stdout.nonBlocking);
   StreamController<Size>? _resizeController;
   StreamController<void>? _shutdownController;
+  late final StreamController<void> _terminationController =
+      StreamController<void>.broadcast(onListen: _deliverPendingTermination);
+  bool _terminationPending = false;
   StreamSubscription? _sigwinchSubscription;
   StreamSubscription? _sigintSubscription;
   StreamSubscription? _sigtermSubscription;
@@ -79,11 +85,22 @@ class StdioBackend implements TerminalBackend, TerminalOutputDrain {
         }
       });
       _sigtermSubscription = ProcessSignal.sigterm.watch().listen((_) {
-        if (!_disposed) {
-          _shutdownController?.add(null);
+        if (_disposed) return;
+        // A broadcast stream drops events without listeners. Retain a request
+        // that arrives during startup so it still terminates the app.
+        if (_terminationController.hasListener) {
+          _terminationController.add(null);
+        } else {
+          _terminationPending = true;
         }
       });
     }
+  }
+
+  void _deliverPendingTermination() {
+    if (!_terminationPending) return;
+    _terminationPending = false;
+    _terminationController.add(null);
   }
 
   @override
@@ -122,6 +139,9 @@ class StdioBackend implements TerminalBackend, TerminalOutputDrain {
 
   @override
   Stream<void>? get shutdownStream => _shutdownController?.stream;
+
+  @override
+  Stream<void> get terminationStream => _terminationController.stream;
 
   @override
   void enableRawMode() {
@@ -187,6 +207,7 @@ class StdioBackend implements TerminalBackend, TerminalOutputDrain {
     _sigtermSubscription?.cancel();
     _resizeController?.close();
     _shutdownController?.close();
+    _terminationController.close();
     _win32Stdin?.close();
   }
 }

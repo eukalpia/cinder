@@ -14,7 +14,7 @@ import termios
 import time
 
 
-def exercise(binary, disabled_flags):
+def exercise(binary, disabled_flags, stop_signal):
     master, slave = pty.openpty()
     initial = termios.tcgetattr(slave)
     initial[3] &= ~disabled_flags
@@ -55,7 +55,7 @@ def exercise(binary, disabled_flags):
             os.kill(process.pid, signal.SIGWINCH)
             receive_until(lambda: len(output) > previous_length, 5)
         os.write(master, b'\t\x1b[<0;10;5M\x1b[<0;10;5m')
-        os.kill(process.pid, signal.SIGINT)
+        os.kill(process.pid, stop_signal)
         receive_until(lambda: process.poll() is not None, 10)
         # Drain protocol restoration written just before process exit.
         while select.select([master], [], [], 0)[0]:
@@ -80,5 +80,7 @@ def exercise(binary, disabled_flags):
 if __name__ == '__main__':
     binary = os.path.abspath(sys.argv[1])
     for disabled_flags in [0, termios.ECHO, termios.ECHO | termios.ICANON]:
-        exercise(binary, disabled_flags)
-    print('PTY startup, resize, input, SIGINT, and original terminal modes passed')
+        for stop_signal in [signal.SIGINT, signal.SIGTERM]:
+            exercise(binary, disabled_flags, stop_signal)
+    print('PTY startup, resize, input, SIGINT, SIGTERM, and original terminal '
+          'modes passed')

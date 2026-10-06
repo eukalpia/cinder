@@ -110,6 +110,12 @@ cleanup stages are always attempted. A completed shutdown permits a fresh bindin
 session in the same process, which is required by tests, embedded shells, and
 restartable applications.
 
+Backends that implement `TerminalTerminationSource` report mandatory requests
+(`SIGTERM` on POSIX) separately from cancelable interrupts on `shutdownStream`.
+A termination request always runs this sequence and exits; an interrupt runs it
+only if no widget handles the synthetic `Ctrl+C` and no exit request handler
+returns `AppExitResponse.cancel`.
+
 ## Validation
 
 The stabilization suite covers bounded task history, cancellation semantics,

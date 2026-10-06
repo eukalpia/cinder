@@ -9,6 +9,10 @@ final class CinderDebugOptions {
   });
 
   /// Shows the built-in performance overlay immediately.
+  ///
+  /// This works in release builds too: when `runApp` has not installed a
+  /// `DebugOverlay`, `CinderApp` installs one. It does not enable the `Ctrl+G`
+  /// shortcut.
   final bool showPerformanceOverlay;
 
   /// Highlights repainting render objects.

@@ -117,6 +117,72 @@ Cleanup callbacks run in reverse registration order and continue after an
 individual failure. Task disposal requests cancellation and waits for operations
 to finish their cleanup paths.
 
+## Development tools
+
+Cinder ships two development tools that would expose data or debug UI if they
+were reachable in production. Both are off by default in release builds.
+
+`runApp` enables a tool when its argument (`enableLogServer`,
+`enableDebugOverlay`) is true. When the argument is null, the environment
+variable (`CINDER_LOG_SERVER`, `CINDER_DEBUG_OVERLAY`; `1` enables, `0`
+disables) decides. Otherwise the tool is enabled only when Dart assertions are
+enabled: `dart run --enable-asserts`, IDE debug sessions, and `cinder run`,
+which sets both variables for its child unless they are already set.
+Executables from `dart compile exe`, `dart pub global activate` and plain
+`dart run` start neither tool.
+
+### Log server
+
+The log server captures `print` output and uncaught errors and serves them to
+`cinder logs`. Captured output can contain credentials and personal data, so the
+server:
+
+- listens on `127.0.0.1` only;
+- requires a random 256-bit token, generated for each run, in an
+  `Authorization: Bearer` header. Other requests are refused with 401 before a
+  WebSocket is established and do not consume a client slot;
+- refuses every request that carries an `Origin` header with 403. Browsers send
+  `Origin` on all WebSocket handshakes, so a web page cannot read logs even if
+  it learns the port or uses DNS rebinding;
+- publishes its port and token as JSON in
+  `~/.cinder/<project-hash>/log_port.<pid>`. On Linux and macOS the directory
+  is set to mode `0700` and the file to `0600` before the token is written, and
+  the file is renamed into place. If permissions cannot be restricted, the
+  endpoint is not published. On Windows the file inherits the per-user profile
+  ACL.
+
+Any process running as the same user can still read the endpoint file and
+connect; that is the same trust boundary as the user's home directory and a
+debugger. Do not enable the log server for processes whose output must not be
+visible to the user's other processes. `cinder logs` from an earlier release
+cannot read the endpoint format and ignores port-only files; upgrade the CLI
+together with the framework.
+
+### Debug overlay
+
+The debug overlay shows performance metrics, and while it is enabled `Ctrl+G`
+toggles it before the widget tree sees the key. When it is disabled, `runApp`
+installs neither the `DebugOverlay` nor the shortcut: `Ctrl+G` reaches the
+application, and end users cannot open debug UI. An application can still
+request the overlay explicitly with
+`CinderApp(debug: CinderDebugOptions(showPerformanceOverlay: true))`.
+
+## Termination signals
+
+`SIGTERM` always ends the application. The binding never routes it through the
+widget tree or exit request handlers: it unmounts the tree, restores the
+terminal (alternate screen, raw mode, mouse and keyboard protocols, cursor) and
+exits with code 0. A `SIGTERM` that arrives before the binding starts listening
+is kept and delivered when it does.
+
+`SIGINT` remains cancelable, because terminals turn a `Ctrl+C` keypress into
+`SIGINT`. It is first delivered to the widget tree as a `Ctrl+C` key event, so
+a widget that binds `Ctrl+C` keeps the application running. Otherwise handlers
+registered with `TerminalBinding.addExitRequestHandler` run, and any of them
+can return `AppExitResponse.cancel`. Use `SIGTERM` to stop an application that
+cancels interrupts. `SIGKILL` cannot be handled, so it may leave the terminal in
+raw mode; run `reset` to recover.
+
 ## Testing requirements
 
 Security-sensitive changes should include tests for:
@@ -129,7 +195,10 @@ Security-sensitive changes should include tests for:
 - combining marks, ZWJ emoji, wide CJK graphemes, and variation selectors;
 - bidirectional overrides and isolates;
 - cancellation during I/O, hashing, traversal, and subprocess execution;
-- cleanup after exceptions and repeated cancellation.
+- cleanup after exceptions and repeated cancellation;
+- release-build defaults, authentication and `Origin` rejection for
+  development tools;
+- termination that application code cannot cancel.
 
 Fuzz inputs should be bounded and deterministic in CI. Keep a regression corpus
 for every sequence that previously bypassed sanitization or corrupted terminal

@@ -24,8 +24,9 @@ import 'log_server.dart';
 /// await logServer.close();
 /// ```
 ///
-/// The logger is used automatically by [runApp] to capture print statements
-/// and errors without blocking the TUI.
+/// [runApp] uses a logger to capture print statements and errors without
+/// blocking the TUI when its log server is enabled (debug builds,
+/// `CINDER_LOG_SERVER=1`, or `enableLogServer: true`).
 class Logger {
   Logger({LogServer? logServer}) : _logServer = logServer;
 

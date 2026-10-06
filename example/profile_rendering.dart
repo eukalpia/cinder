@@ -18,7 +18,7 @@ void main() {
     TerminalBinding.instance.startDetailedProfiling();
   });
 
-  runApp(const ProfilingApp());
+  runApp(const ProfilingApp(), enableLogServer: true);
 }
 
 class ProfilingApp extends StatefulWidget {

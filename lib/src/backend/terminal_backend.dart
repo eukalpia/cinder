@@ -12,6 +12,17 @@ abstract interface class TerminalOutputDrain {
   Future<void> drainOutput();
 }
 
+/// Optional capability for backends that receive mandatory termination
+/// requests, such as `SIGTERM` on POSIX.
+///
+/// Unlike [TerminalBackend.shutdownStream], these requests are never routed
+/// through the widget tree and cannot be cancelled: the binding restores the
+/// terminal and exits. A backend should retain a request that arrives before
+/// the binding listens and deliver it to the first listener.
+abstract interface class TerminalTerminationSource {
+  Stream<void> get terminationStream;
+}
+
 /// Abstract interface for terminal I/O backends.
 ///
 /// Backends handle platform-specific I/O operations:
@@ -36,8 +47,13 @@ abstract class TerminalBackend {
   /// Returns null if this backend doesn't support resize detection.
   Stream<Size>? get resizeStream;
 
-  /// Stream that emits when the app should shut down gracefully.
-  /// (e.g., SIGINT/SIGTERM on native, browser tab close on web)
+  /// Stream of interrupt requests that the application may cancel
+  /// (e.g., SIGINT on native, a host shutdown request on web).
+  ///
+  /// The binding first delivers each request to the widget tree as `Ctrl+C`
+  /// and then consults exit request handlers; see
+  /// `TerminalBinding.addExitRequestHandler`. Requests that must not be
+  /// cancelled belong on [TerminalTerminationSource.terminationStream].
   /// Returns null if not supported.
   Stream<void>? get shutdownStream;
 

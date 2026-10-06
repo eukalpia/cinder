@@ -4,15 +4,22 @@ import 'package:cinder/cinder.dart'
     hide StdioBackend, SocketBackend, WebBackend;
 import 'package:cinder/src/backend/web_backend.dart';
 import 'package:cinder/src/backend/terminal.dart' as term;
+import 'package:cinder/src/binding/development_features.dart';
 
 /// Run a TUI application on web platform.
 Future<void> runAppImpl(
   Widget app, {
   bool enableHotReload = true,
   TerminalBackend? backend,
+  bool? enableDebugOverlay,
+  bool? enableLogServer,
 }) async {
-  // Wrap the user's app with DebugOverlay so Ctrl+G toggle works out of the box
-  final wrappedApp = DebugOverlay(child: app);
+  // Browsers have no process environment, and there is no log server on web.
+  final debugOverlay = resolveDevelopmentFeature(
+    explicit: enableDebugOverlay,
+    debugDefault: assertionsEnabled,
+  );
+  final wrappedApp = debugOverlay ? DebugOverlay(child: app) : app;
 
   final effectiveBackend = backend ?? WebBackend();
   final terminal = term.Terminal(effectiveBackend);
@@ -29,13 +36,13 @@ Future<void> runAppImpl(
       supportsTrueColor: true,
       supports256Colors: true,
     ),
+    debugOverlayShortcutEnabled: debugOverlay,
   );
 
   binding.initialize();
   binding.attachRootWidget(wrappedApp);
 
   // Hot reload not supported on web
-  // No log server on web
 
   await binding.runEventLoop();
 }

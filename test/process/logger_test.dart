@@ -68,9 +68,7 @@ void main() {
       logServer.log('Buffered message 2');
 
       // Connect WebSocket client
-      final ws = await WebSocket.connect(
-        'ws://127.0.0.1:${logServer.port}/logs',
-      );
+      final ws = await logServer.endpoint!.connect();
 
       // Collect messages
       final messages = <String>[];
@@ -114,9 +112,7 @@ void main() {
           logServer = LogServer(maxBufferBytes: byteBudget);
           await logServer.start();
           logServer.log('keep');
-          final ws = await WebSocket.connect(
-            'ws://127.0.0.1:${logServer.port}/logs',
-          );
+          final ws = await logServer.endpoint!.connect();
           final messages = StreamIterator(ws);
           Timer? readinessProducer;
           try {
@@ -151,9 +147,7 @@ void main() {
               'too large',
             );
 
-            final snapshot = await WebSocket.connect(
-              'ws://127.0.0.1:${logServer.port}/logs?mode=get',
-            );
+            final snapshot = await logServer.endpoint!.connect(snapshot: true);
             final history = await snapshot.toList().timeout(
               const Duration(seconds: 2),
             );
@@ -176,16 +170,17 @@ void main() {
       final portFile = File(getLogPortPath());
       expect(await portFile.exists(), isTrue);
 
-      final portString = await portFile.readAsString();
-      expect(int.tryParse(portString), equals(logServer.port));
+      final published = LogServerEndpoint.tryParse(
+        await portFile.readAsString(),
+      );
+      expect(published?.port, equals(logServer.port));
+      expect(published?.token, equals(logServer.endpoint!.token));
     });
 
     test('snapshot closes after sending buffered logs', () async {
       logServer.log('first');
       logServer.log('second');
-      final socket = await WebSocket.connect(
-        'ws://127.0.0.1:${logServer.port}/logs?mode=get',
-      );
+      final socket = await logServer.endpoint!.connect(snapshot: true);
       try {
         final messages = await socket.toList().timeout(
           const Duration(seconds: 2),
@@ -202,9 +197,7 @@ void main() {
     });
 
     test('snapshot closes when the log buffer is empty', () async {
-      final socket = await WebSocket.connect(
-        'ws://127.0.0.1:${logServer.port}/logs?mode=get',
-      );
+      final socket = await logServer.endpoint!.connect(snapshot: true);
       try {
         final messages = await socket.toList().timeout(
           const Duration(seconds: 2),

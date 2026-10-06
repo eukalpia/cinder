@@ -15,7 +15,9 @@ class RunCommand extends CliCommand {
   @override
   String get description => '''
 Run a Dart script with --enable-vm-service automatically added.
-This enables VM service for debugging and profiling.
+This enables VM service for debugging and profiling, and turns on the
+debug overlay (Ctrl+G) and the log server read by `cinder logs` unless
+CINDER_DEBUG_OVERLAY or CINDER_LOG_SERVER is already set.
 
 Example: cinder run dart lib/main.dart''';
 
@@ -59,11 +61,16 @@ Usage: cinder run dart <script.dart> [arguments]
     log('Running: ${modifiedArgs.join(' ')}');
     log('');
 
-    // Execute the command
+    // Execute the command. Development tools default to off without Dart
+    // assertions, so opt in unless the caller already chose.
     final process = await Process.start(
       modifiedArgs[0],
       modifiedArgs.sublist(1),
       mode: ProcessStartMode.inheritStdio,
+      environment: {
+        for (final name in const ['CINDER_DEBUG_OVERLAY', 'CINDER_LOG_SERVER'])
+          if (!Platform.environment.containsKey(name)) name: '1',
+      },
     );
 
     final subscriptions = <StreamSubscription<ProcessSignal>>[

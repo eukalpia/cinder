@@ -13,6 +13,10 @@ void main() async {
 /// - Visual feedback showing current state
 /// - Auto-reset timer that clears warning after inactivity
 /// - Using shutdownApp() API for safe exit
+///
+/// Only interrupts can be cancelled this way; SIGTERM always restores the
+/// terminal and exits. To cancel an exit without claiming the Ctrl+C key, use
+/// `TerminalBinding.instance.addExitRequestHandler`.
 class SigintDemo extends StatefulWidget {
   const SigintDemo({super.key});
 

@@ -9,7 +9,7 @@ import 'package:cinder/cinder.dart';
 /// Run with: dart run example/cpu_usage_test.dart
 /// Watch CPU in Activity Monitor to see the impact of each feature.
 void main() {
-  runApp(const CpuUsageTestApp());
+  runApp(const CpuUsageTestApp(), enableLogServer: true);
 }
 
 class CpuUsageTestApp extends StatefulWidget {

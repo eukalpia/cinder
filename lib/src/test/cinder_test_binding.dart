@@ -6,14 +6,20 @@ import 'package:cinder/src/rendering/mouse_hit_test.dart';
 import 'package:cinder/src/rendering/mouse_tracker.dart';
 
 import '../backend/terminal.dart' as term;
+import '../binding/development_features.dart';
 import '../buffer.dart' as buf;
 import '../keyboard/tree_keyboard_dispatch.dart';
 
 /// Test binding for TUI applications that provides controlled frame rendering
 /// and state inspection capabilities for testing.
 class CinderTestBinding extends CinderBinding with SchedulerBinding {
-  CinderTestBinding({term.Terminal? terminal, this.size = const Size(80, 24)})
-    : terminal = terminal ?? _MockTerminal(size) {
+  CinderTestBinding({
+    term.Terminal? terminal,
+    this.size = const Size(80, 24),
+    bool? debugOverlayShortcutEnabled,
+  }) : terminal = terminal ?? _MockTerminal(size),
+       debugOverlayShortcutEnabled =
+           debugOverlayShortcutEnabled ?? assertionsEnabled {
     _instance = this;
     _initializePipelineOwner();
   }
@@ -23,6 +29,16 @@ class CinderTestBinding extends CinderBinding with SchedulerBinding {
 
   final term.Terminal terminal;
   final Size size;
+
+  /// Whether `Ctrl+G` toggles [debugMode] before input reaches the widget
+  /// tree.
+  ///
+  /// Matches [TerminalBinding.debugOverlayShortcutEnabled]: it defaults to
+  /// true only when assertions are enabled, which includes `dart test`. Pass
+  /// false to test an application's own `Ctrl+G` handling as release builds
+  /// deliver it.
+  bool debugOverlayShortcutEnabled;
+
   PipelineOwner? _pipelineOwner;
   PipelineOwner get pipelineOwner => _pipelineOwner!;
 
@@ -202,8 +218,7 @@ class CinderTestBinding extends CinderBinding with SchedulerBinding {
   ///
   /// Returns true if the event was handled by the debug system.
   bool _handleDebugKeyEvent(KeyboardEvent event) {
-    // Ctrl+G: Toggle debug mode
-    if (event.logicalKey == LogicalKey.keyG && event.isControlPressed) {
+    if (debugOverlayShortcutEnabled && isDebugOverlayShortcut(event)) {
       toggleDebugMode();
       return true;
     }

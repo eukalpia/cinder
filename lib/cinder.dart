@@ -6,7 +6,8 @@ export 'src/backend/socket_backend_export.dart';
 export 'src/backend/web_backend_export.dart';
 export 'src/buffer.dart';
 export 'src/style.dart';
-export 'src/shutdown.dart' show shutdownApp;
+export 'src/shutdown.dart'
+    show AppExitResponse, ExitRequestHandler, shutdownApp;
 export 'src/components/progress_bar.dart';
 export 'src/components/icon.dart';
 export 'src/components/repaint_boundary.dart';

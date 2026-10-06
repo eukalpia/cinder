@@ -6,6 +6,7 @@ import 'package:cinder/cinder.dart'
 import 'package:cinder/src/backend/socket_backend.dart';
 import 'package:cinder/src/backend/stdio_backend.dart';
 import 'package:cinder/src/backend/terminal.dart' as term;
+import 'package:cinder/src/binding/development_features.dart';
 
 (File?, bool) _useShellMode() {
   // Check for shell mode
@@ -31,9 +32,21 @@ Future<void> runAppImpl(
   Widget app, {
   bool enableHotReload = true,
   TerminalBackend? backend,
+  bool? enableDebugOverlay,
+  bool? enableLogServer,
 }) async {
-  // Wrap the user's app with DebugOverlay so Ctrl+G toggle works out of the box
-  final wrappedApp = DebugOverlay(child: app);
+  final environment = Platform.environment;
+  final debugOverlay = resolveDevelopmentFeature(
+    explicit: enableDebugOverlay,
+    environmentValue: environment[debugOverlayEnvironmentVariable],
+    debugDefault: assertionsEnabled,
+  );
+  final logServer = resolveDevelopmentFeature(
+    explicit: enableLogServer,
+    environmentValue: environment[logServerEnvironmentVariable],
+    debugDefault: assertionsEnabled,
+  );
+  final wrappedApp = debugOverlay ? DebugOverlay(child: app) : app;
 
   // Determine backend and whether we're in shell mode
   final TerminalBackend effectiveBackend;
@@ -55,26 +68,37 @@ Future<void> runAppImpl(
     isShellMode = false;
   }
 
-  await _runApp(wrappedApp, effectiveBackend, enableHotReload, isShellMode);
+  await _runApp(
+    wrappedApp,
+    effectiveBackend,
+    enableHotReload,
+    isShellMode,
+    debugOverlay: debugOverlay,
+    startLogServer: logServer,
+  );
 }
 
 Future<void> _runApp(
   Widget app,
   TerminalBackend backend,
   bool enableHotReload,
-  bool isShellMode,
-) async {
+  bool isShellMode, {
+  required bool debugOverlay,
+  required bool startLogServer,
+}) async {
   TerminalBinding? binding;
   LogServer? logServer;
   Logger? logger;
 
   try {
-    logServer = LogServer();
-    try {
-      await logServer.start();
-      logger = Logger(logServer: logServer);
-    } catch (e) {
-      stderr.writeln('Failed to start log server: $e');
+    if (startLogServer) {
+      logServer = LogServer();
+      try {
+        await logServer.start();
+        logger = Logger(logServer: logServer);
+      } catch (e) {
+        stderr.writeln('Failed to start log server: $e');
+      }
     }
 
     await runZoned(
@@ -88,7 +112,11 @@ Future<void> _runApp(
           stdoutHasTerminal:
               isShellMode || !usesNativeStdio || stdout.hasTerminal,
         );
-        binding = TerminalBinding(terminal, capabilities: capabilities);
+        binding = TerminalBinding(
+          terminal,
+          capabilities: capabilities,
+          debugOverlayShortcutEnabled: debugOverlay,
+        );
 
         binding!.initialize();
         binding!.attachRootWidget(app);

@@ -63,9 +63,13 @@ Start a cinder shell server that cinder apps can render into. This allows runnin
 
 Stream logs from a running Cinder app via WebSocket. Logs are displayed until you press Ctrl+C or the app exits. Use `cinder logs --mode get` to fetch buffered logs, or `--pid <pid>` to select an instance.
 
+The app must have its log server enabled. It starts automatically in debug builds (Dart assertions enabled, as with `dart run --enable-asserts`, IDE debug sessions, or `cinder run`). Otherwise, set `CINDER_LOG_SERVER=1` or pass `enableLogServer: true` to `runApp`. Release builds don't start it.
+
+The app writes its port and a random access token to `~/.cinder/<project-hash>/log_port.<pid>`, readable only by you. `cinder logs` sends the token with each connection; the server refuses connections without it and any request from a browser. This endpoint format is new, so use a `cinder logs` from the same release as the framework.
+
 ### `cinder run dart <script.dart> [arguments]`
 
-Run a Dart script with VM service support for debugging and profiling. Arguments after `dart` are forwarded to Dart and the script.
+Run a Dart script with VM service support for debugging and profiling. Arguments after `dart` are forwarded to Dart and the script. `cinder run` also sets `CINDER_DEBUG_OVERLAY=1` and `CINDER_LOG_SERVER=1` for the app (unless you set them already), so the Ctrl+G debug overlay and `cinder logs` work.
 
 ## Shell workflow
 
@@ -114,7 +118,8 @@ The app will automatically render into the shell instead of its own stdout.
 ```bash
 # Run app directly - renders to its own terminal
 # print() statements stream to WebSocket logs
-dart run bin/my_app.dart
+cinder run dart bin/my_app.dart
+# (or: dart run --enable-asserts bin/my_app.dart)
 
 # In another terminal, view logs:
 cinder logs
@@ -129,7 +134,8 @@ cinder shell
 # IDE or Terminal 2: Run app with debugger
 # App automatically detects shell and renders there
 # print() statements appear in your IDE/terminal AND in logs!
-dart run bin/my_app.dart
+# IDE debug sessions enable assertions, which turns on the log server.
+dart run --enable-asserts bin/my_app.dart
 
 # Optional Terminal 3: View logs
 cinder logs

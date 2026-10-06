@@ -2,11 +2,14 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:crypto/crypto.dart';
+import 'package:path/path.dart' as p;
 
 import 'cinder_paths.dart';
 import 'log_output_queue.dart';
+import 'owner_only_permissions.dart';
 
 /// A WebSocket-based log server that streams log messages to connected clients.
 ///
@@ -17,9 +20,15 @@ import 'log_output_queue.dart';
 /// Features:
 /// - **Bounded history**: Defaults to 10,000 entries and 1 MiB of message storage
 /// - **WebSocket streaming**: Multiple clients can connect simultaneously
-/// - **Port discovery**: Writes port to `~/.cinder/<hash>/log_port.<pid>` for CLI discovery
+/// - **Authentication**: Clients must present a random per-server bearer token
+/// - **Browser isolation**: Requests carrying an `Origin` header are refused
+/// - **Discovery**: Writes a [LogServerEndpoint] to
+///   `~/.cinder/<hash>/log_port.<pid>`, readable only by the current user
 /// - **Snapshots**: `/logs?mode=get` sends buffered entries and closes the connection
-/// - **Graceful shutdown**: Cleans up connections and port file on close
+/// - **Graceful shutdown**: Cleans up connections and the endpoint file on close
+///
+/// `runApp` starts a log server only in debug builds or when asked to; see
+/// its `enableLogServer` parameter.
 ///
 /// Example:
 /// ```dart
@@ -90,13 +99,23 @@ class LogServer {
   int _openingClients = 0;
   Future<void>? _startFuture;
   Future<void>? _closeFuture;
-  int? _publishedPort;
+  String? _publishedEndpoint;
+
+  /// Secret that every client must present; never logged or sent to clients.
+  final String _token = _generateToken();
 
   /// HTTP server for WebSocket connections
   HttpServer? _server;
 
   /// Port the server is listening on (null if not started)
   int? get port => _server?.port;
+
+  /// Address and credential for connecting to this server, or null before it
+  /// is listening.
+  LogServerEndpoint? get endpoint {
+    final port = this.port;
+    return port == null ? null : LogServerEndpoint(port: port, token: _token);
+  }
 
   /// Whether the server has been closed
   bool _closed = false;
@@ -119,19 +138,9 @@ class LogServer {
       _server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
       if (_closed) return;
 
-      // Handle WebSocket upgrade requests
-      _server!.listen((HttpRequest request) {
-        if (request.uri.path == '/logs') {
-          _handleWebSocketConnection(request);
-        } else {
-          request.response
-            ..statusCode = HttpStatus.notFound
-            ..write('Not found')
-            ..close();
-        }
-      });
+      _server!.listen(_handleRequest);
 
-      // Write port to file for CLI discovery
+      // Publish the endpoint for CLI discovery
       await _writePortFile();
     } catch (e) {
       await _server?.close(force: true);
@@ -139,6 +148,58 @@ class LogServer {
       _server = null;
       rethrow;
     }
+  }
+
+  void _handleRequest(HttpRequest request) {
+    // Browsers attach Origin to every WebSocket handshake, including
+    // cross-site and DNS-rebound pages; `cinder logs` never sends one.
+    if (request.headers['origin'] != null) {
+      _reject(request, HttpStatus.forbidden);
+    } else if (request.uri.path != '/logs') {
+      _reject(request, HttpStatus.notFound);
+    } else if (!_isAuthorized(request)) {
+      _reject(request, HttpStatus.unauthorized);
+    } else {
+      unawaited(_handleWebSocketConnection(request));
+    }
+  }
+
+  bool _isAuthorized(HttpRequest request) {
+    final values = request.headers[HttpHeaders.authorizationHeader];
+    if (values == null || values.length != 1) return false;
+    final credentials = values.single;
+    const scheme = 'bearer ';
+    if (credentials.length <= scheme.length ||
+        credentials.substring(0, scheme.length).toLowerCase() != scheme) {
+      return false;
+    }
+    return _constantTimeEquals(
+      credentials.substring(scheme.length).trim(),
+      _token,
+    );
+  }
+
+  static bool _constantTimeEquals(String a, String b) {
+    if (a.length != b.length) return false;
+    var difference = 0;
+    for (var index = 0; index < a.length; index++) {
+      difference |= a.codeUnitAt(index) ^ b.codeUnitAt(index);
+    }
+    return difference == 0;
+  }
+
+  static void _reject(HttpRequest request, int statusCode) {
+    final response = request.response..statusCode = statusCode;
+    if (statusCode == HttpStatus.unauthorized) {
+      response.headers.set(HttpHeaders.wwwAuthenticateHeader, 'Bearer');
+    }
+    unawaited(response.close().then<void>((_) {}, onError: (Object _) {}));
+  }
+
+  static String _generateToken() {
+    final random = Random.secure();
+    final bytes = List<int>.generate(32, (_) => random.nextInt(256));
+    return base64Url.encode(bytes).replaceAll('=', '');
   }
 
   /// Handle a new WebSocket connection
@@ -251,16 +312,37 @@ class LogServer {
     }
   }
 
-  /// Write port number to global log_port file
+  /// Publish the endpoint in the global log_port file.
+  ///
+  /// The file holds the bearer token, so it is written only into an
+  /// owner-only directory and file, then renamed into place so a reader never
+  /// observes partial contents. If permissions cannot be restricted the
+  /// endpoint is not published; in-process clients can still use [endpoint].
   Future<void> _writePortFile() async {
+    final contents = endpoint!.encode();
+    final path = getLogPortPath();
+    final temporary = File(
+      p.join(p.dirname(path), '.${p.basename(path)}.${_generateToken()}.tmp'),
+    );
+    var created = false;
     try {
       await ensureCinderDirectoryExists();
+      restrictToOwner(getCinderDirectory(), directory: true);
 
-      final portFile = File(getLogPortPath());
-      await portFile.writeAsString('$port');
-      _publishedPort = port;
+      await temporary.create(exclusive: true);
+      created = true;
+      restrictToOwner(temporary.path, directory: false);
+      await temporary.writeAsString(contents, flush: true);
+      await temporary.rename(path);
+      created = false;
+      _publishedEndpoint = contents;
     } catch (e) {
-      stderr.writeln('Warning: Failed to write log_port file: $e');
+      stderr.writeln('Warning: Failed to publish log server endpoint: $e');
+      if (created) {
+        try {
+          await temporary.delete();
+        } catch (_) {}
+      }
     }
   }
 
@@ -290,9 +372,9 @@ class LogServer {
     // Clean up port file
     try {
       final portFile = File(getLogPortPath());
-      if (_publishedPort != null &&
+      if (_publishedEndpoint != null &&
           await portFile.exists() &&
-          await portFile.readAsString() == '$_publishedPort') {
+          await portFile.readAsString() == _publishedEndpoint) {
         await portFile.delete();
       }
     } catch (e) {
@@ -366,6 +448,63 @@ class _LogConnection {
       onClosed(this);
     }
   }
+}
+
+/// Address and credential that a [LogServer] publishes for `cinder logs`.
+///
+/// The endpoint file is readable only by the user who started the
+/// application. Clients present [token] as a bearer credential and must not
+/// send an `Origin` header; [connect] does both.
+final class LogServerEndpoint {
+  const LogServerEndpoint({required this.port, required this.token});
+
+  /// Loopback TCP port of the server.
+  final int port;
+
+  /// Per-server secret required to connect.
+  final String token;
+
+  /// Parses the contents of an endpoint file.
+  ///
+  /// Returns null for malformed files, including the unauthenticated
+  /// port-only format written by earlier releases.
+  static LogServerEndpoint? tryParse(String contents) {
+    final Object? json;
+    try {
+      json = jsonDecode(contents);
+    } on FormatException {
+      return null;
+    }
+    if (json is! Map) return null;
+    final port = json['port'];
+    final token = json['token'];
+    if (port is! int || port <= 0 || port > 65535) return null;
+    if (token is! String || token.isEmpty) return null;
+    return LogServerEndpoint(port: port, token: token);
+  }
+
+  /// Serializes this endpoint in the format read by [tryParse].
+  String encode() => jsonEncode({'port': port, 'token': token});
+
+  /// The WebSocket address for live streaming, or for a [snapshot] that
+  /// closes after sending buffered entries.
+  Uri uri({bool snapshot = false}) => Uri(
+    scheme: 'ws',
+    host: '127.0.0.1',
+    port: port,
+    path: '/logs',
+    queryParameters: snapshot ? const {'mode': 'get'} : null,
+  );
+
+  /// Opens an authenticated connection to the server.
+  Future<WebSocket> connect({bool snapshot = false}) => WebSocket.connect(
+    uri(snapshot: snapshot).toString(),
+    headers: {HttpHeaders.authorizationHeader: 'Bearer $token'},
+  );
+
+  // The token is deliberately omitted so diagnostics cannot leak it.
+  @override
+  String toString() => 'LogServerEndpoint(port: $port)';
 }
 
 /// A log entry with timestamp and message

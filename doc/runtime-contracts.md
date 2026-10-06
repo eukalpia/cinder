@@ -46,6 +46,27 @@ CinderApp(
 Diagnostics are disabled by default and must not change production rendering
 semantics.
 
+## Development tools
+
+The `Ctrl+G` debug overlay and the `cinder logs` server are development tools.
+`runApp` enables each one from its argument (`enableDebugOverlay`,
+`enableLogServer`), then its environment variable (`CINDER_DEBUG_OVERLAY`,
+`CINDER_LOG_SERVER`), and otherwise only when Dart assertions are enabled.
+Release executables therefore deliver `Ctrl+G` to the application, expose no
+debug UI, and open no local port. `TerminalBinding` and `CinderTestBinding`
+share the same `debugOverlayShortcutEnabled` default, so tests observe the
+debug-build behavior unless they pass `false`. See [security.md](security.md)
+for the log server's authentication.
+
+## Termination
+
+`SIGTERM` cannot be cancelled: the binding restores the terminal and exits with
+code 0 without consulting the widget tree. `SIGINT` is first delivered as a
+`Ctrl+C` key event that a widget may handle, then to exit request handlers
+registered with `TerminalBinding.addExitRequestHandler`, which may return
+`AppExitResponse.cancel`. `shutdownApp` and `requestShutdown` exit
+unconditionally.
+
 ## Text and columns
 
 All layout, cursor, selection, clipping, and truncation logic is expressed in

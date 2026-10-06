@@ -32,9 +32,9 @@ void main() {
       final server = LogServer(maxClients: 1);
       await server.start();
       server.log('ready');
-      final url = 'ws://127.0.0.1:${server.port}/logs';
+      final endpoint = server.endpoint!;
       try {
-        final first = await WebSocket.connect(url);
+        final first = await endpoint.connect();
         final messages = StreamIterator(first);
         expect(await messages.moveNext(), isTrue);
         expect(
@@ -42,13 +42,13 @@ void main() {
           'ready',
         );
         await expectLater(
-          WebSocket.connect(url),
+          endpoint.connect(),
           throwsA(isA<WebSocketException>()),
         );
         await messages.cancel();
         await first.close();
         // Receipt of snapshot completion proves the replacement connection closed.
-        final retry = await WebSocket.connect('$url?mode=get');
+        final retry = await endpoint.connect(snapshot: true);
         expect(await retry.toList(), hasLength(1));
       } finally {
         await server.close();
@@ -60,9 +60,7 @@ void main() {
     final server = LogServer(maxPendingClientBytes: 4096);
     await server.start();
     server.log('ready');
-    final client = await WebSocket.connect(
-      'ws://127.0.0.1:${server.port}/logs',
-    );
+    final client = await server.endpoint!.connect();
     final messages = StreamIterator(client);
     await messages.moveNext();
     for (var index = 0; index < 10000; index++) {

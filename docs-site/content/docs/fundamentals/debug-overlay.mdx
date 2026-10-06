@@ -4,13 +4,41 @@ description: Real-time performance debugging and repaint visualization
 icon: bug
 ---
 
-The debug overlay is a built-in developer tool that shows real-time performance metrics and helps you identify rendering issues. It's automatically available in every Cinder app—no setup required.
+The debug overlay is a built-in developer tool that shows real-time performance metrics and helps you identify rendering issues. It's available automatically in debug builds and never in release builds, so end users can't open it.
 
 ## Quick start
 
-Press **Ctrl+G** to toggle the debug overlay. That's it.
+Run your app with Dart assertions enabled, then press **Ctrl+G** to toggle the debug overlay:
+
+```bash
+dart run --enable-asserts bin/my_app.dart
+# or
+cinder run dart bin/my_app.dart
+```
 
 The overlay appears in the top-right corner showing performance metrics. Press Ctrl+G again to hide it.
+
+While the overlay is enabled, Ctrl+G is reserved for it and never reaches your widgets. In release builds (`dart compile exe`, plain `dart run`) the overlay isn't installed and Ctrl+G goes to your app.
+
+## Enabling and disabling
+
+`runApp` decides in this order:
+
+1. The `enableDebugOverlay` argument, if you pass one.
+2. The `CINDER_DEBUG_OVERLAY` environment variable (`1` enables, `0` disables).
+3. Whether Dart assertions are enabled.
+
+```dart
+// Always available, for example in an internal tool:
+runApp(const MyApp(), enableDebugOverlay: true);
+
+// Never available, for example because your app binds Ctrl+G itself:
+runApp(const MyApp(), enableDebugOverlay: false);
+```
+
+To show the overlay from code in any build, use `CinderApp(debug: CinderDebugOptions(showPerformanceOverlay: true))`. This doesn't enable the Ctrl+G shortcut.
+
+In tests, `CinderTester.create(debugOverlayShortcutEnabled: false)` delivers Ctrl+G to your widgets as a release build would.
 
 ## What the overlay shows
 
@@ -41,7 +69,7 @@ Debug mode enables detailed logging that you can view in a separate terminal:
 cinder logs
 ```
 
-This streams logs over WebSocket, so you can see what's happening in your app without cluttering the UI. Logs include:
+This streams logs over WebSocket, so you can see what's happening in your app without cluttering the UI. The log server follows the same rules as the overlay (`enableLogServer`, then `CINDER_LOG_SERVER`, then assertions), so it only runs in debug builds unless you enable it. Connections need a per-run token that only your user account can read. Logs include:
 - Widget lifecycle events
 - Render timing details
 - Frame statistics

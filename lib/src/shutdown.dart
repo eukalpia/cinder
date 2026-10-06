@@ -37,3 +37,17 @@ import 'binding/terminal_binding.dart';
 void shutdownApp([int exitCode = 0]) {
   TerminalBinding.instance.requestShutdown(exitCode);
 }
+
+/// How an application answers an exit request that it may cancel.
+enum AppExitResponse {
+  /// Allow the application to exit.
+  exit,
+
+  /// Keep the application running.
+  cancel,
+}
+
+/// Decides whether a cancelable exit request, such as SIGINT, may proceed.
+///
+/// See [TerminalBinding.addExitRequestHandler].
+typedef ExitRequestHandler = AppExitResponse Function();

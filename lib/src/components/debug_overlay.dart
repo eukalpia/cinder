@@ -9,7 +9,8 @@ import 'package:cinder/cinder.dart';
 /// When debug mode is enabled, the [DebugOverlay] will display performance
 /// metrics and the framework will enable extended logging.
 ///
-/// Debug mode can be toggled at runtime using `Ctrl+G`.
+/// In debug builds, debug mode can be toggled at runtime using `Ctrl+G`; see
+/// [TerminalBinding.debugOverlayShortcutEnabled].
 ///
 /// Example:
 /// ```dart
@@ -82,14 +83,17 @@ void toggleDebugMode() {
 ///
 /// ## Automatic Integration
 ///
-/// **Every cinder app automatically has debug overlay support!**
-/// Just press `Ctrl+G` at any time to toggle the debug overlay.
-/// No manual wrapping required - it's built into [runApp].
+/// In debug builds (Dart assertions enabled, for example
+/// `dart run --enable-asserts` or `cinder run`), [runApp] wraps the
+/// application in a [DebugOverlay] and `Ctrl+G` toggles it. Release builds
+/// install neither, so end users cannot open debug UI and applications
+/// receive `Ctrl+G`. Choose explicitly with `runApp(enableDebugOverlay: ...)`
+/// or the `CINDER_DEBUG_OVERLAY` environment variable.
 ///
 /// ## Debug Key
 ///
-/// The debug key is `Ctrl+G`. This sends a unique control character (0x07)
-/// that is rarely used by applications.
+/// The debug key is `Ctrl+G`. While the shortcut is enabled it is consumed
+/// before the widget tree sees it.
 ///
 /// ## Extended Logging
 ///
@@ -276,6 +280,16 @@ class _DebugOverlayState extends State<DebugOverlay> {
     );
   }
 
+  /// Whether the binding toggles the overlay with `Ctrl+G`.
+  bool get _shortcutEnabled {
+    if (!CinderBinding.hasInstance) return false;
+    return switch (CinderBinding.instance) {
+      final TerminalBinding binding => binding.debugOverlayShortcutEnabled,
+      final CinderTestBinding binding => binding.debugOverlayShortcutEnabled,
+      _ => false,
+    };
+  }
+
   String _formatBytes(int bytes) {
     if (bytes < 1024) return '${bytes}B';
     if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)}KB';
@@ -288,7 +302,9 @@ class _DebugOverlayState extends State<DebugOverlay> {
   String _buildStatsText() {
     final buffer = StringBuffer();
 
-    buffer.writeln('🔧 DEBUG MODE (Ctrl+G to close)');
+    buffer.writeln(
+      _shortcutEnabled ? '🔧 DEBUG MODE (Ctrl+G to close)' : '🔧 DEBUG MODE',
+    );
     buffer.writeln('─' * 36);
 
     if (_lastFrame == null) {

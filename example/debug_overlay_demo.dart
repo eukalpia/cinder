@@ -3,19 +3,23 @@ import 'package:cinder/cinder.dart';
 /// Demonstrates the debug overlay feature in cinder.
 ///
 /// This example shows:
-/// - Press Ctrl+G to toggle the debug overlay (works in ANY cinder app!)
+/// - Press Ctrl+G to toggle the debug overlay
 /// - The overlay shows real-time performance metrics
 /// - Repaint rainbow is enabled when debug mode is active
 /// - Extended logging is sent to `cinder logs`
 ///
-/// Note: Debug overlay is automatically available in all cinder apps.
-/// No manual wrapping required - just press Ctrl+G!
+/// Note: runApp installs the overlay and its Ctrl+G shortcut automatically in
+/// debug builds (`dart run --enable-asserts`, `cinder run`). This demo opts in
+/// explicitly so it also works with a plain `dart run`.
 ///
 /// Run with: dart run example/debug_overlay_demo.dart
 /// View logs with: cinder logs (in another terminal)
 void main() {
-  // No need to wrap with DebugOverlay - it's automatic!
-  runApp(const _DebugOverlayDemo());
+  runApp(
+    const _DebugOverlayDemo(),
+    enableDebugOverlay: true,
+    enableLogServer: true,
+  );
 }
 
 class _DebugOverlayDemo extends StatefulWidget {

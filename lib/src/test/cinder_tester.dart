@@ -19,12 +19,19 @@ class CinderTester {
   /// Enable or disable debug printing after pump
   set debugPrintAfterPump(bool value) => _debugPrintAfterPump = value;
 
-  /// Create a new TUI tester with optional size configuration
+  /// Create a new TUI tester with optional size configuration.
+  ///
+  /// [debugOverlayShortcutEnabled] configures the binding's `Ctrl+G` debug
+  /// shortcut; see [CinderTestBinding.debugOverlayShortcutEnabled].
   static Future<CinderTester> create({
     Size size = const Size(80, 24),
     bool debugPrintAfterPump = false,
+    bool? debugOverlayShortcutEnabled,
   }) async {
-    final binding = CinderTestBinding(size: size);
+    final binding = CinderTestBinding(
+      size: size,
+      debugOverlayShortcutEnabled: debugOverlayShortcutEnabled,
+    );
 
     return CinderTester._(
       binding: binding,
@@ -275,6 +282,7 @@ Future<void> testCinder(
   bool skip = false,
   bool debugPrintAfterPump = false,
   Duration? timeout,
+  bool? debugOverlayShortcutEnabled,
 }) async {
   if (skip) return;
 
@@ -286,6 +294,7 @@ Future<void> testCinder(
   final tester = await CinderTester.create(
     size: size,
     debugPrintAfterPump: debugPrintAfterPump,
+    debugOverlayShortcutEnabled: debugOverlayShortcutEnabled,
   );
 
   try {

@@ -14,6 +14,7 @@ import '../keyboard/tree_keyboard_dispatch.dart';
 import '../rendering/frame_diff.dart';
 import '../rendering/mouse_hit_test.dart';
 import '../rendering/mouse_tracker.dart';
+import 'development_features.dart';
 import 'hot_reload_mixin.dart';
 
 part '../rendering/vertical_scroll.dart';
@@ -21,14 +22,19 @@ part '../rendering/vertical_scroll.dart';
 /// Terminal UI binding that handles terminal input/output and event loop
 class TerminalBinding extends CinderBinding
     with SchedulerBinding, HotReloadBinding {
-  TerminalBinding(this.terminal, {TerminalCapabilities? capabilities})
-    : capabilities =
-          capabilities ??
-          TerminalCapabilities.fromEnvironment(
-            const <String, String>{},
-            stdinHasTerminal: terminal.backend.inputStream != null,
-            stdoutHasTerminal: terminal.backend.isAvailable,
-          ) {
+  TerminalBinding(
+    this.terminal, {
+    TerminalCapabilities? capabilities,
+    bool? debugOverlayShortcutEnabled,
+  }) : capabilities =
+           capabilities ??
+           TerminalCapabilities.fromEnvironment(
+             const <String, String>{},
+             stdinHasTerminal: terminal.backend.inputStream != null,
+             stdoutHasTerminal: terminal.backend.isAvailable,
+           ),
+       debugOverlayShortcutEnabled =
+           debugOverlayShortcutEnabled ?? assertionsEnabled {
     _instance = this;
     _initializePipelineOwner();
   }
@@ -43,6 +49,16 @@ class TerminalBinding extends CinderBinding
 
   /// Global normalized input phases that run before widget-tree dispatch.
   final InputRouter inputRouter = InputRouter();
+
+  /// Whether `Ctrl+G` toggles [debugMode] before input reaches the widget
+  /// tree.
+  ///
+  /// Defaults to true only when Dart assertions are enabled, so release
+  /// executables deliver `Ctrl+G` to the application and end users cannot
+  /// open debug UI. [runApp] sets this from its `enableDebugOverlay` argument.
+  bool debugOverlayShortcutEnabled;
+
+  final List<ExitRequestHandler> _exitRequestHandlers = [];
 
   PipelineOwner? _pipelineOwner;
   PipelineOwner get pipelineOwner => _pipelineOwner!;
@@ -179,6 +195,7 @@ class TerminalBinding extends CinderBinding
   StreamSubscription? _inputSubscription;
   StreamSubscription? _resizeSubscription;
   StreamSubscription? _shutdownSubscription;
+  StreamSubscription? _terminationSubscription;
   Size? _lastKnownSize;
 
   void _initializePipelineOwner() {
@@ -506,30 +523,64 @@ class TerminalBinding extends CinderBinding
   }
 
   void _startSignalHandling() {
-    // Listen to backend's shutdown stream
     final shutdownStream = terminal.backend.shutdownStream;
     if (shutdownStream != null) {
-      _shutdownSubscription = shutdownStream.listen((_) {
-        // Create a synthetic Ctrl+C keyboard event
-        final ctrlCEvent = KeyboardEvent(
-          logicalKey: LogicalKey.keyC,
-          character: null,
-          modifiers: const ModifierKeys(ctrl: true),
-        );
-
-        // Add to keyboard event stream for monitoring
-        _keyboardEventController.add(ctrlCEvent);
-
-        // Route through widget tree - components can intercept by returning true
-        final handled = _routeKeyboardEvent(ctrlCEvent);
-
-        // If no widget handled it, perform default shutdown
-        if (!handled) {
-          _performImmediateShutdown();
-          terminal.backend.requestExit(0);
-        }
-      });
+      _shutdownSubscription = shutdownStream.listen((_) => _handleInterrupt());
     }
+    if (terminal.backend case final TerminalTerminationSource source) {
+      _terminationSubscription = source.terminationStream.listen(
+        (_) => _handleTermination(),
+      );
+    }
+  }
+
+  /// Registers [handler] to decide whether an interrupt may exit the app.
+  ///
+  /// An interrupt (SIGINT, usually from pressing Ctrl+C) is first delivered to
+  /// the widget tree as a `Ctrl+C` key event, because terminals turn that key
+  /// into a signal; a widget that handles the key keeps the app running.
+  /// Otherwise handlers run in registration order until one returns
+  /// [AppExitResponse.cancel]. When none cancels, the binding restores the
+  /// terminal and exits with code 0.
+  ///
+  /// A handler that throws is reported to the current zone and does not
+  /// cancel the exit. Termination requests (SIGTERM) and [requestShutdown]
+  /// never consult handlers.
+  void addExitRequestHandler(ExitRequestHandler handler) {
+    _exitRequestHandlers.add(handler);
+  }
+
+  /// Removes a handler registered with [addExitRequestHandler].
+  void removeExitRequestHandler(ExitRequestHandler handler) {
+    _exitRequestHandlers.remove(handler);
+  }
+
+  void _handleInterrupt() {
+    if (_shouldExit) return;
+    final ctrlCEvent = KeyboardEvent(
+      logicalKey: LogicalKey.keyC,
+      character: null,
+      modifiers: const ModifierKeys(ctrl: true),
+    );
+    if (!_keyboardEventController.isClosed) {
+      _keyboardEventController.add(ctrlCEvent);
+    }
+    if (_routeKeyboardEvent(ctrlCEvent)) return;
+
+    for (final handler in List<ExitRequestHandler>.of(_exitRequestHandlers)) {
+      try {
+        if (handler() == AppExitResponse.cancel) return;
+      } catch (error, stackTrace) {
+        Zone.current.handleUncaughtError(error, stackTrace);
+      }
+    }
+    requestShutdown(0);
+  }
+
+  void _handleTermination() {
+    // Termination is not negotiable: neither widgets nor exit request
+    // handlers are consulted before the terminal is restored.
+    requestShutdown(0);
   }
 
   void _cancelRuntimeResources() {
@@ -550,6 +601,7 @@ class TerminalBinding extends CinderBinding
     unawaited(_inputSubscription?.cancel() ?? Future<void>.value());
     unawaited(_resizeSubscription?.cancel() ?? Future<void>.value());
     unawaited(_shutdownSubscription?.cancel() ?? Future<void>.value());
+    unawaited(_terminationSubscription?.cancel() ?? Future<void>.value());
   }
 
   void _closeRuntimeControllers() {
@@ -649,12 +701,10 @@ class TerminalBinding extends CinderBinding
   /// Handle global debug key combinations.
   ///
   /// Returns true if the event was handled by the debug system.
-  /// Currently handles:
+  /// When [debugOverlayShortcutEnabled], handles:
   /// - Ctrl+G: Toggle debug mode
   bool _handleDebugKeyEvent(KeyboardEvent event) {
-    // Ctrl+G: Toggle debug mode
-    // This sends 0x07 (BEL) which is rarely used by applications
-    if (event.logicalKey == LogicalKey.keyG && event.isControlPressed) {
+    if (debugOverlayShortcutEnabled && isDebugOverlayShortcut(event)) {
       toggleDebugMode();
       // Schedule a frame to update the UI
       scheduleFrame();

@@ -54,8 +54,9 @@ class _LoggerDemoAppState extends State<LoggerDemoApp> {
 }
 
 void main() async {
-  // Run the app with WebSocket-based logging
-  await runApp(LoggerDemoApp());
+  // Run the app with WebSocket-based logging. Release builds disable the log
+  // server unless an application or CINDER_LOG_SERVER=1 enables it.
+  await runApp(LoggerDemoApp(), enableLogServer: true);
 
   // After app exits, show info about how to view logs
   stdout.writeln('\n=== Logger Demo Complete ===');

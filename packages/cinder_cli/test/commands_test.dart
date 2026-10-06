@@ -72,15 +72,21 @@ void main() {
     List<String> arguments, {
     String? entrypoint,
     Duration timeout = const Duration(seconds: 5),
+    Map<String, String>? environment,
   }) async {
     final kernel = entrypoint == null
         ? cliKernel
         : await compileKernel(entrypoint, '${project.path}/runner.dill');
-    final process = await Process.start(Platform.resolvedExecutable, [
-      '--packages=${packageDirectory.path}/.dart_tool/package_config.json',
-      kernel,
-      ...arguments,
-    ], workingDirectory: project.path);
+    final process = await Process.start(
+      Platform.resolvedExecutable,
+      [
+        '--packages=${packageDirectory.path}/.dart_tool/package_config.json',
+        kernel,
+        ...arguments,
+      ],
+      workingDirectory: project.path,
+      environment: environment,
+    );
     final output = process.stdout.transform(utf8.decoder).join();
     final errors = process.stderr.transform(utf8.decoder).join();
     try {
@@ -121,6 +127,39 @@ void main() {
 
     expect(result.exitCode, 0, reason: result.errors);
     expect(result.output, 'first message\nsecond message\n');
+  });
+
+  test('logs refuses an endpoint whose token does not match', () async {
+    final server = LogServer();
+    await server.start();
+    addTearDown(server.close);
+    server.log('secret message');
+    await File(getLogPortPath()).writeAsString(
+      LogServerEndpoint(port: server.port!, token: 'forged').encode(),
+    );
+
+    final result = await runCli(['logs', '--mode', 'get', '--pid', '$pid']);
+
+    expect(result.exitCode, 1);
+    expect(result.output, isNot(contains('secret message')));
+    expect(result.errors, contains('Failed to connect'));
+    expect(result.errors, isNot(contains('forged')));
+  });
+
+  test('logs ignores unauthenticated port-only files', () async {
+    final server = LogServer();
+    await server.start();
+    addTearDown(server.close);
+    server.log('secret message');
+    final portFile = File(getLogPortPath());
+    await portFile.writeAsString('${server.port}');
+
+    final result = await runCli(['logs', '--mode', 'get', '--pid', '$pid']);
+
+    expect(result.exitCode, 1);
+    expect(result.output, isNot(contains('secret message')));
+    expect(result.errors, contains('No cinder app is running'));
+    expect(portFile.existsSync(), isFalse);
   });
 
   test('logs get exits while the application keeps logging', () async {
@@ -267,6 +306,31 @@ void main(List<String> args) {
     },
   );
 
+  test('run enables development tools unless already configured', () async {
+    final script = File('${project.path}/environment_script.dart');
+    await script.writeAsString('''
+import 'dart:io';
+void main() {
+  for (final name in ['CINDER_DEBUG_OVERLAY', 'CINDER_LOG_SERVER']) {
+    print('\$name=\${Platform.environment[name]}');
+  }
+}
+''');
+
+    final defaults = await runCli(['run', 'dart', script.path]);
+    final configured = await runCli(
+      ['run', 'dart', script.path],
+      environment: {'CINDER_LOG_SERVER': '0'},
+    );
+
+    expect(defaults.exitCode, 0, reason: defaults.errors);
+    expect(defaults.output, contains('CINDER_DEBUG_OVERLAY=1'));
+    expect(defaults.output, contains('CINDER_LOG_SERVER=1'));
+    expect(configured.exitCode, 0, reason: configured.errors);
+    expect(configured.output, contains('CINDER_DEBUG_OVERLAY=1'));
+    expect(configured.output, contains('CINDER_LOG_SERVER=0'));
+  });
+
   test('run returns to its caller after the child exits', () async {
     final script = File('${project.path}/exit_script.dart');
     await script.writeAsString(
@@ -338,7 +402,7 @@ Future<void> main() async {
     try {
       worker.kill(ProcessSignal.sigstop);
       final metadata = File(getLogPortPathForPid(worker.pid));
-      await metadata.writeAsString('${server.port}');
+      await metadata.writeAsString(server.endpoint!.encode());
 
       final result = await runCli([
         'logs',

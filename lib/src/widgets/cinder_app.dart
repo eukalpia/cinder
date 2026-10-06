@@ -240,6 +240,13 @@ class _CinderAppState extends State<CinderApp> {
       ),
     );
 
+    // runApp installs the overlay only in debug builds. An explicit request
+    // shows it in any build; toggling the option then remounts the subtree.
+    if (widget.debug.showPerformanceOverlay &&
+        context.findAncestorWidgetOfExactType<DebugOverlay>() == null) {
+      content = DebugOverlay(child: content);
+    }
+
     return TuiTheme(data: effectiveTheme, child: content);
   }
 }

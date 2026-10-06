@@ -28,6 +28,11 @@ class LogsCommand extends CliCommand {
   String get description => '''
 Stream logs from a running cinder app via WebSocket.
 
+The app must have its log server enabled: debug builds (Dart assertions
+enabled, e.g. `dart run --enable-asserts` or `cinder run`) start it
+automatically; otherwise set CINDER_LOG_SERVER=1 or pass
+`enableLogServer: true` to runApp.
+
 Modes:
   listen  - Stream logs continuously in real-time (default). Press Ctrl+C to exit.
   get     - Fetch all buffered logs and exit immediately. Useful for scripts and CI.
@@ -50,28 +55,29 @@ Examples:
   }
 
   /// Discover live cinder instances, cleaning up stale ones.
-  Future<List<({int pid, int port, String path})>> _discoverInstances() async {
+  Future<List<_Instance>> _discoverInstances() async {
     final portFiles = await listLogPortFiles();
-    final liveInstances = <({int pid, int port, String path})>[];
+    final liveInstances = <_Instance>[];
 
     for (final file in portFiles) {
-      // Read port from file
+      // Read the endpoint (port and access token) from the file
       try {
         final portFile = fs.file(file.path);
-        final portString = await portFile.readAsString();
-        final port = int.tryParse(portString.trim());
+        final endpoint = LogServerEndpoint.tryParse(
+          await portFile.readAsString(),
+        );
 
-        if (file.pid > 0 && port != null && port > 0 && port <= 65535) {
+        if (file.pid > 0 && endpoint != null) {
           // Probe the endpoint without signaling (or resuming) its process.
           final probe = await Socket.connect(
             InternetAddress.loopbackIPv4,
-            port,
+            endpoint.port,
             timeout: const Duration(seconds: 1),
           );
           probe.destroy();
-          liveInstances.add((pid: file.pid, port: port, path: file.path));
+          liveInstances.add((pid: file.pid, endpoint: endpoint));
         } else {
-          // Invalid port file, clean it up
+          // Invalid or pre-authentication port file, clean it up
           await _cleanupStalePortFile(file.path);
         }
       } catch (_) {
@@ -84,13 +90,13 @@ Examples:
   }
 
   /// Prompt user to select an instance from multiple running instances.
-  ({int pid, int port})? _selectInstance(
-    List<({int pid, int port, String path})> instances,
-  ) {
+  _Instance? _selectInstance(List<_Instance> instances) {
     stdout.writeln('Multiple cinder instances running:');
     for (var i = 0; i < instances.length; i++) {
       final instance = instances[i];
-      stdout.writeln('  ${i + 1}. PID ${instance.pid} (port ${instance.port})');
+      stdout.writeln(
+        '  ${i + 1}. PID ${instance.pid} (port ${instance.endpoint.port})',
+      );
     }
     stdout.write('Select instance [1-${instances.length}]: ');
 
@@ -103,8 +109,7 @@ Examples:
       return null;
     }
 
-    final selected = instances[selection - 1];
-    return (pid: selected.pid, port: selected.port);
+    return instances[selection - 1];
   }
 
   @override
@@ -127,11 +132,15 @@ Examples:
         stderr.writeln(
           'Error: No cinder app is running (no log_port files found)',
         );
-        stderr.writeln('Make sure a cinder app is running in this directory.');
+        stderr.writeln(
+          'Make sure a cinder app is running in this directory with its log '
+          'server enabled (debug builds, CINDER_LOG_SERVER=1, or '
+          'runApp(enableLogServer: true)).',
+        );
         return 1;
       }
 
-      int port;
+      LogServerEndpoint endpoint;
 
       if (targetPid != null) {
         // User specified a PID, find that instance
@@ -140,31 +149,31 @@ Examples:
           stderr.writeln('Error: No cinder instance found with PID $targetPid');
           stderr.writeln('Running instances:');
           for (final i in instances) {
-            stderr.writeln('  PID ${i.pid} (port ${i.port})');
+            stderr.writeln('  PID ${i.pid} (port ${i.endpoint.port})');
           }
           return 1;
         }
-        port = instance.port;
+        endpoint = instance.endpoint;
       } else if (instances.length == 1) {
         // Single instance, connect directly
-        port = instances.first.port;
+        endpoint = instances.first.endpoint;
       } else {
         // Multiple instances, prompt user to select
         final selected = _selectInstance(instances);
         if (selected == null) {
           return 1;
         }
-        port = selected.port;
+        endpoint = selected.endpoint;
       }
 
-      // Connect to WebSocket
-      final url = 'ws://127.0.0.1:$port/logs${isGetMode ? '?mode=get' : ''}';
+      // Connect to WebSocket; the token travels in a header, never the URL.
+      final url = endpoint.uri(snapshot: isGetMode);
       WebSocket? socket;
 
       try {
-        socket = await WebSocket.connect(
-          url,
-        ).timeout(const Duration(seconds: 5));
+        socket = await endpoint
+            .connect(snapshot: isGetMode)
+            .timeout(const Duration(seconds: 5));
       } catch (e) {
         stderr.writeln('Error: Failed to connect to log server at $url');
         stderr.writeln('The cinder app may have exited. Details: $e');
@@ -198,3 +207,5 @@ Examples:
     return 0;
   }
 }
+
+typedef _Instance = ({int pid, LogServerEndpoint endpoint});
