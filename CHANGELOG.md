@@ -29,6 +29,8 @@
   including coalescing, send lateness and exact final-state verification.
 - Move keyed children that are updated in place to their new slots, so reordering
   non-`const` children reorders their render objects too.
+- Keep building the remaining dirty elements, and keep scheduling frames for
+  later `setState` calls, after an element's rebuild throws.
 
 # 1.0.0-rc.2
 
