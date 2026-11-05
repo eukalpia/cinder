@@ -250,13 +250,18 @@ class _VirtualizedDataTableState<T> extends State<VirtualizedDataTable<T>> {
     final theme = TuiTheme.of(context);
     final selected = index == _selectedIndex;
     final foreground = selected ? theme.onPrimary : theme.onBackground;
+    // Header cells are bordered buttons: one column of border on each side. Rows get the same
+    // inset, so values sit under their labels and adjacent columns never run together.
     final content = Row(
       children: <Widget>[
         for (final column in widget.columns)
-          _cell(
-            column.displayValue(_rows[index]),
-            column,
-            TextStyle(color: foreground),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 1),
+            child: _cell(
+              column.displayValue(_rows[index]),
+              column,
+              TextStyle(color: foreground),
+            ),
           ),
       ],
     );
