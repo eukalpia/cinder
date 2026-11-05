@@ -42,6 +42,38 @@ void main() {
       expect(selected?.name, 'Beta');
     });
   });
+
+  test(
+    'row values line up under their headers and never run together',
+    () async {
+      await testCinder('data table alignment', (tester) async {
+        await tester.pumpWidget(
+          SizedBox(
+            width: 40,
+            height: 6,
+            child: VirtualizedDataTable<_RowData>(
+              rows: const <_RowData>[_RowData('ABCDEFGH', 12345)],
+              columns: const <DataColumn<_RowData>>[
+                DataColumn<_RowData>(label: 'Name', width: 8, value: _name),
+                DataColumn<_RowData>(
+                  label: 'Value',
+                  width: 5,
+                  numeric: true,
+                  value: _value,
+                ),
+              ],
+            ),
+          ),
+        );
+        final lines = tester.terminalState.getText().split('\n');
+        final header = lines.firstWhere((l) => l.contains('Name'));
+        final row = lines.firstWhere((l) => l.contains('ABCDEFGH'));
+        expect(row, isNot(contains('ABCDEFGH12345')));
+        expect(row.indexOf('ABCDEFGH'), header.indexOf('Name'));
+        expect(row.indexOf('12345'), header.indexOf('Value'));
+      });
+    },
+  );
 }
 
 Object? _name(_RowData row) => row.name;
